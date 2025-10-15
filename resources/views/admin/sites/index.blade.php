@@ -3,20 +3,30 @@
 @section('title', 'Admin · Sites')
 
 @section('content')
-<div class="p-6 space-y-6">
-  {{-- Header --}}
-  <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-    <div>
-      <h1 class="text-xl font-semibold text-slate-800">Sites</h1>
-      <p class="text-slate-500 text-sm">Kelola daftar site/ lokasi operasional.</p>
+<div class="space-y-6">
+
+  {{-- Header panel ala bar biru–merah --}}
+  <div class="relative rounded-2xl border border-slate-200 bg-white shadow-sm">
+    <div class="h-2 rounded-t-2xl overflow-hidden">
+      <div class="h-full w-full flex">
+        <div class="h-full bg-blue-600" style="width: 90%"></div>
+        <div class="h-full bg-red-500"  style="width: 10%"></div>
+      </div>
     </div>
-    <div class="flex items-center gap-2">
-      <a href="{{ route('admin.sites.create') }}" class="btn btn-primary inline-flex items-center gap-2">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6"/>
-        </svg>
-        Tambah Site
-      </a>
+
+    <div class="p-6 md:p-7">
+      <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 class="text-2xl md:text-3xl font-semibold tracking-tight text-slate-900">Sites</h1>
+          <p class="text-slate-600 text-sm">Kelola daftar site/ lokasi operasional.</p>
+        </div>
+        <a href="{{ route('admin.sites.create') }}" class="btn btn-primary inline-flex items-center gap-2 self-start sm:self-auto">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6"/>
+          </svg>
+          Tambah Site
+        </a>
+      </div>
     </div>
   </div>
 
@@ -27,14 +37,21 @@
     </div>
   @endif
 
-  {{-- Search (opsional) --}}
-  <form method="GET" class="flex items-center gap-2">
+  {{-- Search / Filter --}}
+  <form method="GET" class="grid grid-cols-1 sm:grid-cols-3 gap-2">
     <input type="text" name="q" value="{{ request('q') }}" placeholder="Cari nama / kode…"
-           class="w-full sm:w-64 rounded-lg border-slate-300 focus:border-blue-500 focus:ring-blue-500 text-sm">
-    <button class="btn btn-secondary">Cari</button>
-    @if(request()->filled('q'))
-      <a href="{{ route('admin.sites.index') }}" class="btn">Reset</a>
-    @endif
+           class="input">
+    <select name="status" class="input">
+      <option value="">Semua Status</option>
+      <option value="active"   @selected(request('status')==='active')>Active</option>
+      <option value="inactive" @selected(request('status')==='inactive')>Inactive</option>
+    </select>
+    <div class="flex gap-2">
+      <button class="btn btn-primary">Cari</button>
+      @if(request()->filled('q') || request()->filled('status'))
+        <a href="{{ route('admin.sites.index') }}" class="btn btn-ghost">Reset</a>
+      @endif
+    </div>
   </form>
 
   {{-- Tabel --}}
@@ -67,8 +84,8 @@
               </td>
               <td class="px-4 py-3">
                 @php $active = (string)($site->status ?? 'active') === 'active'; @endphp
-                <span class="badge {{ $active ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-600' }}">
-                  {{ $active ? 'Active' : 'Inactive' }}
+                <span class="badge {{ $active ? 'badge-green' : 'badge-amber' }}">
+                  {{ $active ? 'ACTIVE' : 'INACTIVE' }}
                 </span>
               </td>
               <td class="px-4 py-3">
@@ -76,10 +93,10 @@
               </td>
               <td class="px-4 py-3">
                 <div class="flex items-center justify-end gap-2">
-                  <a href="{{ route('admin.sites.edit', $site->id) }}" class="btn btn-sm btn-primary">Edit</a>
+                  <a href="{{ route('admin.sites.edit', $site->id) }}" class="btn btn-outline btn-sm">Edit</a>
                   <form action="{{ route('admin.sites.destroy', $site->id) }}" method="POST" onsubmit="return confirm('Hapus site ini?');">
                     @csrf @method('DELETE')
-                    <button class="btn btn-sm btn-danger">Delete</button>
+                    <button class="btn btn-ghost btn-sm">Delete</button>
                   </form>
                 </div>
               </td>
@@ -90,7 +107,7 @@
     </div>
 
     @if(method_exists($sites, 'links'))
-      <div class="mt-4">{{ $sites->links() }}</div>
+      <div class="mt-4">{{ $sites->withQueryString()->links() }}</div>
     @endif
   @else
     {{-- Empty state --}}

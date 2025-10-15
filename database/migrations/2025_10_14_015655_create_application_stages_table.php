@@ -9,7 +9,7 @@ return new class extends Migration {
     Schema::create('application_stages', function (Blueprint $t) {
       $t->uuid('id')->primary();
       $t->foreignUuid('application_id')->constrained('job_applications')->cascadeOnDelete();
-      $t->string('stage_key'); // applied, psychotest, hr_iv, user_iv, final, offer, hired, rejected
+      $t->string('stage_key'); // applied, psychotest, hr_iv, user_iv, final, offer, hired, not_qualified
       $t->enum('status',['pending','passed','failed','no-show','reschedule'])->default('pending');
       $t->decimal('score',8,2)->nullable();
       $t->json('payload')->nullable();

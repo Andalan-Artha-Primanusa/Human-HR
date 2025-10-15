@@ -3,13 +3,35 @@
 namespace App\Http\Controllers;
 
 use App\Models\PsychotestAttempt;
-use App\Models\PsychotestAnswer;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class PsychotestController extends Controller
 {
-    // Pelamar: tampilkan halaman tes
+    // ====== ADMIN: daftar attempt psikotes ======
+    public function index(Request $request)
+    {
+        $q      = (string) $request->query('q', '');
+        $status = (string) $request->query('status', ''); // 'active' | 'finished' (opsional)
+
+        $attempts = PsychotestAttempt::with([
+                'application.user:id,name',
+                'application.job:id,title,site_id',
+                'application.job.site:id,code',
+                'test:id',
+            ])
+            ->when($q, function ($qq) use ($q) {
+                $qq->whereHas('application.user', fn($u) => $u->where('name', 'like', "%{$q}%"))
+                   ->orWhereHas('application.job', fn($j) => $j->where('title', 'like', "%{$q}%"));
+            })
+            ->when($status === 'active', fn($qq) => $qq->where('is_active', true))
+            ->when($status === 'finished', fn($qq) => $qq->where('is_active', false))
+            ->latest()
+            ->paginate(15);
+
+        return view('admin.psychotests.index', compact('attempts', 'q', 'status'));
+    }
+
+    // ====== PELAMAR: tampilkan halaman tes ======
     public function show(PsychotestAttempt $attempt, Request $request)
     {
         abort_unless($attempt->application->user_id === $request->user()->id, 403);
@@ -18,13 +40,13 @@ class PsychotestController extends Controller
         return view('psychotest.show', ['attempt' => $attempt]);
     }
 
-    // Pelamar: submit jawaban
+    // ====== PELAMAR: submit jawaban ======
     public function submit(Request $request, PsychotestAttempt $attempt)
     {
         abort_unless($attempt->application->user_id === $request->user()->id, 403);
 
         $data = $request->validate([
-            'answers'   => 'required|array',          // [question_id => answer_string]
+            'answers' => 'required|array', // [question_id => answer_string]
         ]);
 
         $attempt->load(['test.questions']);
@@ -33,7 +55,7 @@ class PsychotestController extends Controller
         $maxScore = 0.0;
         $score    = 0.0;
 
-        DB::transaction(function() use ($attempt, $questions, $data, &$score, &$maxScore) {
+        \DB::transaction(function() use ($attempt, $questions, $data, &$score, &$maxScore) {
             foreach ($questions as $q) {
                 $userAns = $data['answers'][$q->id] ?? null;
                 $correct = null;
@@ -44,7 +66,7 @@ class PsychotestController extends Controller
                     }
                 }
 
-                PsychotestAnswer::updateOrCreate(
+                \App\Models\PsychotestAnswer::updateOrCreate(
                     ['attempt_id' => $attempt->id, 'question_id' => $q->id],
                     ['answer' => is_scalar($userAns) ? (string)$userAns : null, 'is_correct' => $correct]
                 );
@@ -61,7 +83,7 @@ class PsychotestController extends Controller
                 'is_active'  => false,
             ]);
 
-            // Simpan ke stage psychotest (buat kalau belum ada)
+            // catat / update stage psychotest
             $stage = $attempt->application->stages()
                 ->where('stage_key','psychotest')
                 ->latest()
@@ -79,8 +101,8 @@ class PsychotestController extends Controller
                 ]);
             }
 
-            // Optional auto-move by threshold
-            $cfg = $attempt->test->scoring ?? [];
+            // auto-move by threshold
+            $cfg   = $attempt->test->scoring ?? [];
             $ratio = is_array($cfg) && isset($cfg['pass_ratio']) ? (float)$cfg['pass_ratio'] : 0.6;
             if ($maxScore > 0 && ($score / $maxScore) >= $ratio) {
                 $attempt->application->update(['current_stage' => 'hr_iv']);

@@ -1,113 +1,72 @@
-{{-- resources/views/welcome.blade.php (Corporate • B/W/B/R • Video + Sticky Charts + Right Timeline • FIXED) --}}
+{{-- resources/views/welcome.blade.php --}}
 <!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Andalan Careers — Portal Karier Resmi</title>
+  <title>Human.Careers — Portal Karier Resmi</title>
   @vite(['resources/css/app.css','resources/js/app.js'])
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<!-- Tambah di <head> sekali saja -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<style>
-  /* ===== Global ===== */
-  html, body {
-    font-family: 'Poppins', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial;
-  }
+  {{-- Fonts --}}
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-  /* ===== Dropdown ===== */
-  .dropdown[open] > summary svg { transform: rotate(180deg) }
-  details > summary { list-style: none; }
-  details > summary::-webkit-details-marker { display: none; }
+  <style>
+    html, body { font-family:'Poppins',ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial }
+    .dropdown[open] > summary svg{transform:rotate(180deg)}
+    details > summary{list-style:none}
+    details > summary::-webkit-details-marker{display:none}
 
-  /* ===== Right-aligned timeline ===== */
-  .tl { position: relative; }
-  .tl::after{
-    content:""; position:absolute; right:12px; top:0; bottom:0; width:2px;
-    background: linear-gradient(180deg, rgba(10,10,10,.2), rgba(10,10,10,.05));
-  }
-  .tl-step { position: relative; padding-right:48px; }
-  .tl-dot{
-    --c:#1d4ed8; position:absolute; right:3px; top:.4rem; width:18px; height:18px;
-    border-radius:50%;
-    box-shadow: inset 0 0 0 3px var(--c), 0 0 0 4px #fff;
-    background: transparent;
-  }
-  .tl-dot.dot-green{ --c:#16a34a; }  /* completed */
-  .tl-dot.dot-blue{  --c:#1d4ed8; }  /* current   */
-  .tl-dot.dot-amber{ --c:#f59e0b; }  /* upcoming  */
+    /* Timeline kanan */
+    .tl{position:relative}
+    .tl::after{content:"";position:absolute;right:12px;top:0;bottom:0;width:2px;background:linear-gradient(180deg,rgba(10,10,10,.2),rgba(10,10,10,.05))}
+    .tl-step{position:relative;padding-right:48px}
+    .tl-dot{--c:#1d4ed8;position:absolute;right:3px;top:.4rem;width:18px;height:18px;border-radius:50%;box-shadow: inset 0 0 0 3px var(--c),0 0 0 4px #fff;background:transparent}
+    .tl-dot.dot-green{--c:#16a34a}
+    .tl-dot.dot-blue{ --c:#1d4ed8}
+    .tl-dot.dot-amber{--c:#f59e0b}
 
-  @media (min-width: 1024px){
-    .sticky-right{ position: sticky; top: 6rem; }
-  }
-
-  /* ===== Heading accent biru untuk hero ===== */
-  .heading-accent {
-    position: relative;
-    display: inline-block;
-    line-height: 1.15;
-  }
-  .heading-accent::before{
-    content:"";
-    position:absolute;
-    z-index:-1;
-    inset: 14% -8%;                    /* tebal highlight */
-    background: linear-gradient(90deg, #e0f2fe, #bfdbfe, #93c5fd); /* biru lembut */
-    border-radius: 16px;
-    box-shadow: 0 6px 18px rgba(29,78,216,.12);
-  }
-  @media (max-width: 640px){
-    .heading-accent::before{ inset: 18% -6%; border-radius: 12px; }
-  }
-</style>
+    /* Heading accent */
+    .heading-accent{position:relative;display:inline-block;line-height:1.15}
+    .heading-accent::before{content:"";position:absolute;z-index:-1;inset:14% -8%;background:linear-gradient(90deg,#e0f2fe,#bfdbfe,#93c5fd);border-radius:16px;box-shadow:0 6px 18px rgba(29,78,216,.12)}
+    @media (max-width:640px){.heading-accent::before{inset:18% -6%;border-radius:12px}}
+  </style>
 </head>
 <body class="bg-white text-zinc-900 antialiased">
 @php
+  // ==== Data aman (fallback) ====
   $jobs           = $jobs           ?? collect();
   $myApps         = $myApps         ?? collect();
-  $myAppsSummary  = $myAppsSummary  ?? ['total'=>($myApps->count() ?? 0),'byStatus'=>collect(['SUBMITTED'=>0,'SCREENING'=>0,'INTERVIEW'=>0,'OFFERED'=>0,'HIRED'=>0,'REJECTED'=>0])];
+  $myAppsSummary  = $myAppsSummary  ?? ['total'=>($myApps->count() ?? 0),'byStatus'=>collect()];
   $myAppsProgress = $myAppsProgress ?? collect();
 
-  $byDivision = ($jobs instanceof \Illuminate\Pagination\LengthAwarePaginator ? $jobs->getCollection() : $jobs)
-    ->groupBy('division')->map->count()->sortDesc();
+  // Lowongan per divisi (OPEN jika ada kolom status)
+  $jobsCollection = ($jobs instanceof \Illuminate\Pagination\LengthAwarePaginator) ? $jobs->getCollection() : collect($jobs);
+  $filteredJobs   = $jobsCollection->when(
+                      ($jobsCollection->first()?->getAttributes() ?? null) && array_key_exists('status',$jobsCollection->first()->getAttributes()),
+                      fn($c)=>$c->where('status','open'),
+                      fn($c)=>$c
+                    );
+  $byDivision     = $filteredJobs->groupBy('division')->map->count()->sortDesc();
 
-  $byStatus = collect(['SUBMITTED','SCREENING','INTERVIEW','OFFERED','HIRED','REJECTED'])
-    ->mapWithKeys(fn($k)=>[$k=>(int)($myAppsSummary['byStatus'][$k] ?? 0)]);
-
-  $brandBlue  = '#1d4ed8'; $brandRed = '#dc2626'; $brandBlack = '#0a0a0a'; $brandGray = '#e5e7eb';
-
-  // ===== Timeline data (SAFE) =====
-  $latestApp = (auth()->check() && $myApps->isNotEmpty()) ? $myApps->first() : null;
-
-  $stageLabels = [
-    'SUBMITTED'  => 'Pengajuan Berkas',
-    'SCREENING'  => 'Screening CV',
-    'INTERVIEW'  => 'Wawancara',
-    'OFFERED'    => 'Offering',
-    'HIRED'      => 'Diterima'
-  ];
+  // Timeline: default (guest) aktif di SUBMITTED
+  $stageLabels = ['SUBMITTED'=>'Pengajuan Berkas','SCREENING'=>'Screening CV','INTERVIEW'=>'Wawancara','OFFERED'=>'Offering','HIRED'=>'Diterima'];
   $order = array_keys($stageLabels);
+  $currKey='SUBMITTED'; $not_qualified=false; $currIndex=0; $positionTitle=null;
 
-  // Default jika tidak ada lamaran
-  $currKey   = 'SUBMITTED';
-  $rejected  = false;
-  $currIndex = 0;
-
-  if ($latestApp) {
-      $currKey = strtoupper(
-          $latestApp->overall_status
-          ?? $latestApp->current_stage
-          ?? (($myAppsProgress[$latestApp->id]['current_stage'] ?? 'SUBMITTED'))
-      );
-      $rejected  = ($currKey === 'REJECTED');
-      $currIndex = $rejected ? -1 : (array_search($currKey, $order, true) !== false ? array_search($currKey, $order, true) : 0);
+  if (auth()->check() && $myApps->isNotEmpty()){
+    $latestApp = $myApps->first();
+    $currKey   = strtoupper($latestApp->overall_status ?? $latestApp->current_stage ?? ($myAppsProgress[$latestApp->id]['current_stage'] ?? 'SUBMITTED'));
+    $not_qualified  = ($currKey==='not_qualified');
+    $currIndex = $not_qualified ? -1 : (in_array($currKey,$order,true) ? array_search($currKey,$order,true) : 0);
+    $positionTitle = $latestApp->job->title ?? null;
   }
+
+  $brandBlue='#1d4ed8'; $brandRed='#dc2626'; $brandBlack='#0a0a0a'; $brandGray='#e5e7eb';
 @endphp
 
-{{-- ===== Icons ===== --}}
+{{-- ===== Icons (sprite) ===== --}}
 <svg xmlns="http://www.w3.org/2000/svg" class="hidden">
   <symbol id="i-menu" viewBox="0 0 24 24" fill="none" stroke="currentColor"><g stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></g></symbol>
   <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor"><g stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></g></symbol>
@@ -213,11 +172,11 @@
     <div class="grid lg:grid-cols-2 gap-8 items-center">
       <div>
         <h1 class="text-3xl md:text-4xl font-extrabold" style="color: {{ $brandBlack }}">
-          <span class="heading-accent">Bangun Karier Bersama Andalan</span>
+          <span class="heading-accent">Bangun Karier Bareng Andalan 🚀</span>
         </h1>
 
         <p class="mt-3 max-w-xl text-zinc-600">
-          Temukan peluang terbaik, ajukan lamaran dengan mudah, dan pantau progres seleksi secara transparan.
+          Cari posisi impianmu, apply sekali klik, tracking progres seleksi **real-time**. Simple. Cepat. Gen-Z friendly.
         </p>
 
         <div class="mt-6 flex flex-wrap items-center gap-3">
@@ -230,7 +189,7 @@
             <a href="{{ route('login') }}"
                class="inline-flex items-center gap-2 rounded-xl border px-4 py-2 hover:bg-zinc-50"
                style="border-color: {{ $brandGray }}; color: {{ $brandBlack }};">
-              Masuk untuk Melamar <svg class="w-4 h-4"><use href="#i-arrow-right"/></svg>
+              Masuk dulu yuk <svg class="w-4 h-4"><use href="#i-arrow-right"/></svg>
             </a>
           @endguest
         </div>
@@ -255,6 +214,7 @@
         </div>
       </div>
 
+      {{-- Kartu ringkasan per divisi --}}
       <div class="lg:justify-self-end">
         <div class="rounded-2xl bg-white border p-6 shadow-sm" style="border-color: {{ $brandGray }}">
           <div class="flex items-center gap-3">
@@ -262,50 +222,24 @@
               <svg class="w-6 h-6"><use href="#i-rocket"/></svg>
             </div>
             <div>
-              <p class="text-xs text-zinc-500">Proses seleksi transparan</p>
-              <p class="font-semibold" style="color: {{ $brandBlack }}">Pemantauan status real-time</p>
+              <p class="text-xs text-zinc-500">Lowongan terbuka</p>
+              <p class="font-semibold" style="color: {{ $brandBlack }}">Per Divisi (Open)</p>
             </div>
           </div>
-          @auth
-          <div class="mt-4 flex flex-wrap gap-2 text-[11px]">
-            @php $by = $myAppsSummary['byStatus'] ?? collect(); @endphp
-            @foreach(['SUBMITTED','SCREENING','INTERVIEW','OFFERED','HIRED','REJECTED'] as $s)
-              <span class="px-2 py-1 rounded-full bg-zinc-100 text-zinc-800">
-                {{ ucfirst(strtolower($s)) }}: {{ $by[$s] ?? 0 }}
-              </span>
-            @endforeach
-          </div>
-          @endauth
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
 
-
-{{-- ===== COMPANY OVERVIEW: Video + Sticky Charts ===== --}}
-<section class="bg-white">
-  <div class="max-w-7xl mx-auto px-6 lg:px-8 py-8">
-    <div class="grid lg:grid-cols-3 gap-6">
-      <div class="lg:col-span-2">
-        <div class="rounded-2xl overflow-hidden border" style="border-color: {{ $brandGray }}">
-          <video class="w-full aspect-video bg-black" controls poster="/storage/media/company-poster.jpg">
-            <source src="/storage/media/company.mp4" type="video/mp4">
-            Browser Anda tidak mendukung pemutaran video.
-          </video>
-        </div>
-        <div class="mt-3 text-sm text-zinc-600">Profil perusahaan: budaya, nilai inti, dan lingkungan kerja kolaboratif di Andalan.</div>
-      </div>
-
-      <div class="lg:col-span-1">
-        <div class="sticky-right space-y-6">
-          <div class="rounded-2xl bg-white border p-5" style="border-color: {{ $brandGray }}">
-            <h3 class="font-semibold mb-3" style="color: {{ $brandBlack }}">Distribusi Lowongan per Divisi</h3>
-            <div style="height:260px"><canvas id="chartDivision"></canvas></div>
-          </div>
-          <div class="rounded-2xl bg-white border p-5" style="border-color: {{ $brandGray }}">
-            <h3 class="font-semibold mb-3" style="color: {{ $brandBlack }}">Ringkasan Status Lamaran</h3>
-            <div style="height:260px"><canvas id="chartApplications"></canvas></div>
+          <div class="mt-4">
+            @if($byDivision->isNotEmpty())
+              <ul class="divide-y divide-zinc-100">
+                @foreach($byDivision as $div => $total)
+                  <li class="py-2.5 flex items-center justify-between">
+                    <span class="text-sm text-zinc-700">{{ $div ?: 'Tanpa Divisi' }}</span>
+                    <span class="text-[11px] px-2.5 py-1 rounded-full bg-zinc-100 text-zinc-800">{{ $total }}</span>
+                  </li>
+                @endforeach
+              </ul>
+            @else
+              <div class="text-sm text-zinc-600">Belum ada data divisi.</div>
+            @endif
           </div>
         </div>
       </div>
@@ -313,7 +247,7 @@
   </div>
 </section>
 
-{{-- ===== APPLICATION STAGES (Right Timeline + Photo) ===== --}}
+{{-- ===== TIMELINE (always visible; personalized if login) ===== --}}
 <section class="bg-white">
   <div class="max-w-7xl mx-auto px-6 lg:px-8 pb-2">
     <div class="rounded-2xl border overflow-hidden" style="border-color: {{ $brandGray }}">
@@ -321,84 +255,74 @@
         <div class="relative">
           <img src="/storage/media/office-team.jpg" alt="Tim Andalan" class="w-full h-full object-cover min-h-[260px]">
           <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/50 to-transparent p-4">
-            <p class="text-white text-sm">Lingkungan kerja yang dinamis dan kolaboratif.</p>
+            <p class="text-white text-sm">Lingkungan kerja yang dinamis & kolaboratif.</p>
           </div>
         </div>
 
         <div class="p-6 md:p-8">
           <div class="flex items-center justify-between mb-4">
             <h3 class="font-semibold" style="color: {{ $brandBlack }}">Tahapan Rekrutmen Anda</h3>
-            @auth
-              @if($latestApp)
-                <span class="text-xs text-zinc-500">Posisi: <span class="font-medium text-zinc-700">{{ $latestApp->job->title ?? '—' }}</span></span>
-              @endif
-            @endauth
+            @if($positionTitle)
+              <span class="text-xs text-zinc-500">Posisi: <span class="font-medium text-zinc-700">{{ $positionTitle }}</span></span>
+            @endif
           </div>
 
-          @auth
-            @if($latestApp)
-              <div class="tl space-y-4">
-                @foreach($stageLabels as $key => $label)
-                  @php
-                    $idx = array_search($key, $order, true);
-                    $class = 'dot-amber';
-                    if($rejected){
-                      $class = ($key === 'SUBMITTED') ? 'dot-blue' : 'dot-amber';
-                    } else {
-                      if($idx < $currIndex) $class = 'dot-green';
-                      elseif($idx === $currIndex) $class = 'dot-blue';
-                      else $class = 'dot-amber';
-                    }
-                  @endphp
-                  <div class="tl-step">
-                    <span class="tl-dot {{ $class }}"></span>
-                    <div class="flex items-start justify-between gap-4">
-                      <div>
-                        <p class="text-sm font-medium" style="color: {{ $brandBlack }}">{{ $label }}</p>
-                        <p class="text-xs text-zinc-500">
-                          @switch($class)
-                            @case('dot-green') Selesai @break
-                            @case('dot-blue') Sedang diproses @break
-                            @default Menunggu giliran
-                          @endswitch
-                        </p>
-                      </div>
-                      @if($class==='dot-blue')
-                        <span class="text-[11px] px-2 py-1 rounded-full bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200">Aktif</span>
-                      @elseif($class==='dot-green')
-                        <span class="text-[11px] px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-200">Selesai</span>
-                      @else
-                        <span class="text-[11px] px-2 py-1 rounded-full bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-200">Berikutnya</span>
-                      @endif
-                    </div>
+          {{-- Timeline generator --}}
+          <div class="tl space-y-4">
+            @foreach($stageLabels as $key => $label)
+              @php
+                $idx = array_search($key, $order, true);
+                $class = 'dot-amber';
+                if($not_qualified){ $class = ($key==='SUBMITTED') ? 'dot-blue' : 'dot-amber'; }
+                else { if($idx < $currIndex) $class='dot-green'; elseif($idx===$currIndex) $class='dot-blue'; }
+              @endphp
+              <div class="tl-step">
+                <span class="tl-dot {{ $class }}"></span>
+                <div class="flex items-start justify-between gap-4">
+                  <div>
+                    <p class="text-sm font-medium" style="color: {{ $brandBlack }}">{{ $label }}</p>
+                    <p class="text-xs text-zinc-500">
+                      @switch($class)
+                        @case('dot-green') Selesai @break
+                        @case('dot-blue') Sedang diproses @break
+                        @default Menunggu giliran
+                      @endswitch
+                    </p>
                   </div>
-                @endforeach
-
-                @if($rejected)
-                  <div class="tl-step">
-                    <span class="tl-dot" style="--c:#dc2626"></span>
-                    <div class="flex items-start justify-between gap-4">
-                      <div>
-                        <p class="text-sm font-medium" style="color: {{ $brandBlack }}">Keputusan</p>
-                        <p class="text-xs text-zinc-500">Lamaran tidak melanjutkan proses.</p>
-                      </div>
-                      <span class="text-[11px] px-2 py-1 rounded-full bg-rose-50 text-rose-700 ring-1 ring-inset ring-rose-200">Ditutup</span>
-                    </div>
-                  </div>
-                @endif
+                  @if($class==='dot-blue')
+                    <span class="text-[11px] px-2 py-1 rounded-full bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200">Aktif</span>
+                  @elseif($class==='dot-green')
+                    <span class="text-[11px] px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-200">Selesai</span>
+                  @else
+                    <span class="text-[11px] px-2 py-1 rounded-full bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-200">Berikutnya</span>
+                  @endif
+                </div>
               </div>
-              <div class="mt-5 text-xs text-zinc-500">Status diperbarui otomatis berdasarkan progres seleksi.</div>
-            @else
-              <p class="text-zinc-600">Belum ada data lamaran. Silakan pilih posisi yang tersedia.</p>
+            @endforeach
+
+            @if($not_qualified)
+              <div class="tl-step">
+                <span class="tl-dot" style="--c:#dc2626"></span>
+                <div class="flex items-start justify-between gap-4">
+                  <div>
+                    <p class="text-sm font-medium" style="color: {{ $brandBlack }}">Keputusan</p>
+                    <p class="text-xs text-zinc-500">Lamaran tidak melanjutkan proses.</p>
+                  </div>
+                  <span class="text-[11px] px-2 py-1 rounded-full bg-rose-50 text-rose-700 ring-1 ring-inset ring-rose-200">Ditutup</span>
+                </div>
+              </div>
             @endif
-          @else
-            <p class="text-zinc-600">Masuk untuk melihat tahapan rekrutmen pribadi Anda.</p>
-            <div class="mt-3">
-              <a href="{{ route('login') }}" class="inline-flex items-center gap-2 rounded-lg border px-3 py-2 hover:bg-zinc-50" style="border-color: {{ $brandGray }}; color: {{ $brandBlack }};">
-                Masuk
+          </div>
+
+          <div class="mt-5 text-xs text-zinc-500 flex items-center justify-between">
+            <span>Status diperbarui otomatis berdasarkan progres seleksi.</span>
+            @guest
+              <a href="{{ route('login') }}" class="inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 hover:bg-zinc-50"
+                 style="border-color: {{ $brandGray }}; color: {{ $brandBlack }};">
+                Login biar auto realtime ✨
               </a>
-            </div>
-          @endauth
+            @endguest
+          </div>
         </div>
       </div>
     </div>
@@ -413,7 +337,7 @@
       <h2 class="font-semibold" style="color: {{ $brandBlack }}">Lamaran Saya</h2>
     </div>
     @if($myApps->isEmpty())
-      <div class="p-6 text-zinc-600">Belum ada lamaran. Silakan telusuri daftar lowongan berikut.</div>
+      <div class="p-6 text-zinc-600">Belum ada lamaran. Cek lowongan di bawah, apply sekali klik 😉</div>
     @else
       <div class="p-4 sm:p-6">
         <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -424,14 +348,14 @@
               $badge = match($statusKey) {
                 'SUBMITTED','SCREENING','INTERVIEW' => 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200',
                 'OFFERED','HIRED'                   => 'bg-red-50 text-red-700 ring-1 ring-inset ring-red-200',
-                'REJECTED'                          => 'bg-zinc-100 text-zinc-700 ring-1 ring-inset ring-zinc-200',
+                'not_qualified'                          => 'bg-zinc-100 text-zinc-700 ring-1 ring-inset ring-zinc-200',
                 default                             => 'bg-zinc-50 text-zinc-700 ring-1 ring-inset ring-zinc-200',
               };
-              $pct    = (int)($prog['progress_percent'] ?? 0);
-              $curr   = $prog['current_label']    ?? ucfirst(strtolower($statusKey));
-              $next   = $prog['next_stage_label'] ?? null;
-              $hint   = $prog['hint']             ?? null;
-              $isFinal= (bool)($prog['is_final'] ?? in_array($statusKey, ['HIRED','REJECTED'], true));
+              $pct = (int)($prog['progress_percent'] ?? 0);
+              $curr = $prog['current_label'] ?? ucfirst(strtolower($statusKey));
+              $next = $prog['next_stage_label'] ?? null;
+              $hint = $prog['hint'] ?? null;
+              $isFinal = (bool)($prog['is_final'] ?? in_array($statusKey,['HIRED','not_qualified'],true));
             @endphp
 
             <a href="{{ route('jobs.show', $app->job_id) }}" class="group rounded-xl p-4 border hover:shadow-sm transition bg-white" style="border-color: {{ $brandGray }}">
@@ -460,7 +384,7 @@
                   @if($isFinal)
                     <span class="font-medium text-zinc-600">Status akhir.</span>
                   @elseif($next)
-                    Tahap berikutnya: <span class="font-medium text-zinc-700">{{ $next }}</span>
+                    Next: <span class="font-medium text-zinc-700">{{ $next }}</span>
                   @endif
                   @if($hint)
                     <span class="ml-1 text-zinc-400">• {{ $hint }}</span>
@@ -496,7 +420,7 @@
         <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           @foreach ($jobs as $job)
             @php $excerpt = \Illuminate\Support\Str::limit(strip_tags($job->description ?? ''), 120); @endphp
-            <div class="rounded-xl border bg-white hover:shadow-sm transition" style="border-color: {{ $brandGray }}">
+            <div class="rounded-xl border bg-white hover:shadow-sm transition" style="border-color: {{ $brandGray }};">
               <div class="p-5">
                 <div class="flex items-start gap-3">
                   <div class="p-2.5 rounded-lg text-white" style="background: {{ $brandBlack }}"><svg class="w-5 h-5"><use href="#i-briefcase"/></svg></div>
@@ -536,7 +460,7 @@
         </div>
 
         @if(method_exists($jobs,'withQueryString'))
-        <div class="mt-6">{{ $jobs->withQueryString()->links() }}</div>
+          <div class="mt-6">{{ $jobs->withQueryString()->links() }}</div>
         @endif
       @endif
     </div>
@@ -546,8 +470,8 @@
   <section class="rounded-2xl border p-6 bg-white" style="border-color: {{ $brandGray }}">
     <div class="flex flex-col md:flex-row items-center justify-between gap-4">
       <div class="text-zinc-700">
-        <p class="font-semibold" style="color: {{ $brandBlack }}">Tingkatkan Profil Anda</p>
-        <p class="text-sm text-zinc-600">Perbarui informasi terbaru untuk peluang yang lebih relevan.</p>
+        <p class="font-semibold" style="color: {{ $brandBlack }}">Upgrade Profilmu</p>
+        <p class="text-sm text-zinc-600">Biar HR lebih gampang notice kamu ✨</p>
       </div>
       <div class="flex items-center gap-3">
         @auth
@@ -567,7 +491,7 @@
     <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
       <div>
         <div class="font-extrabold mb-3">HUMAN<span style="color: {{ $brandBlue }}">.</span><span style="color: {{ $brandRed }}">Careers</span></div>
-        <p class="text-sm text-zinc-300">Portal karier resmi Andalan. Kami berkomitmen menghadirkan proses rekrutmen yang transparan, objektif, dan berkelas dunia.</p>
+        <p class="text-sm text-zinc-300">Portal karier resmi Andalan. Transparan, objektif, & kece buat gen-Z.</p>
       </div>
       <div>
         <h4 class="font-semibold mb-3">Tautan Utama</h4>
@@ -601,7 +525,7 @@
       </div>
     </div>
     <div class="mt-10 border-top pt-6 text-sm flex flex-col md:flex-row items-center justify-between gap-3" style="border-top: 1px solid rgba(255,255,255,.15);">
-      <div class="text-zinc-400">© {{ date('Y') }} PT Andalan. Seluruh hak cipta dilindungi.</div>
+      <div class="text-zinc-400">© {{ date('Y') }} PT Andalan. All rights reserved.</div>
       <div class="flex items-center gap-3">
         <span class="w-4 h-4 rounded-full" style="background: {{ $brandBlue }};"></span>
         <span class="w-4 h-4 rounded-full" style="background: {{ $brandRed }};"></span>
@@ -611,52 +535,9 @@
   </div>
 </footer>
 
-{{-- ===== JS: Mobile nav + Charts ===== --}}
+{{-- JS kecil: toggle mobile nav --}}
 <script>
   (function(){const b=document.getElementById('btn-nav'),m=document.getElementById('nav-mobile'); if(b&&m){b.addEventListener('click',()=>m.classList.toggle('hidden'));}})();
-
-  const divisionLabels = {!! json_encode($byDivision->keys()->values()) !!};
-  const divisionValues = {!! json_encode($byDivision->values()->map(fn($v)=>(int)$v)) !!};
-  const statusLabels   = {!! json_encode($byStatus->keys()->values()) !!};
-  const statusValues   = {!! json_encode($byStatus->values()) !!};
-
-  const brandBlue = "{{ $brandBlue }}", brandRed = "{{ $brandRed }}";
-
-  const ctxDiv = document.getElementById('chartDivision');
-  if (ctxDiv && window.Chart) {
-    new Chart(ctxDiv, {
-      type: 'bar',
-      data: {
-        labels: divisionLabels,
-        datasets: [{ label: 'Lowongan', data: divisionValues,
-          backgroundColor: divisionLabels.map((_,i)=> i%2===0 ? brandBlue : brandRed),
-          borderColor: divisionLabels.map((_,i)=> i%2===0 ? brandBlue : brandRed),
-          borderWidth: 1, borderRadius: 6 }]
-      },
-      options: {
-        responsive: true, maintainAspectRatio: false,
-        scales: { y: { beginAtZero: true, grid: { color: '#e5e7eb' } }, x: { grid: { display: false } } },
-        plugins: { legend: { display:false }, tooltip: { enabled:true } }
-      }
-    });
-  }
-
-  const ctxApp = document.getElementById('chartApplications');
-  if (ctxApp && window.Chart) {
-    new Chart(ctxApp, {
-      type: 'doughnut',
-      data: {
-        labels: statusLabels,
-        datasets: [{ data: statusValues,
-          backgroundColor: [brandBlue,'#3b82f6','#1e40af',brandRed,'#ef4444','#d1d5db'],
-          borderColor: '#ffffff', borderWidth: 2 }]
-      },
-      options: {
-        responsive: true, maintainAspectRatio: false, cutout: '60%',
-        plugins: { legend:{ position:'bottom', labels:{ boxWidth:12 }}, tooltip:{ enabled:true } }
-      }
-    });
-  }
 </script>
 </body>
 </html>

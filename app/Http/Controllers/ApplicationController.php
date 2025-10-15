@@ -16,7 +16,11 @@ class ApplicationController extends Controller
      */
     public function index(Request $request)
     {
-        $apps = JobApplication::with(['job', 'stages'])
+        $apps = JobApplication::with([
+                'job:id,title,division,site_id',
+                'job.site:id,code,name',
+                'stages',
+            ])
             ->where('user_id', $request->user()->id)
             ->orderByDesc('created_at')
             ->paginate(12);
@@ -43,13 +47,13 @@ class ApplicationController extends Controller
             $app = JobApplication::create([
                 'job_id'         => $job->id,
                 'user_id'        => $request->user()->id,
-                'current_stage'  => 'applied',
+                'current_stage'  => 'apply',   // konsisten dgn Blade
                 'overall_status' => 'active',
             ]);
 
             ApplicationStage::create([
                 'application_id' => $app->id,
-                'stage_key'      => 'applied',
+                'stage_key'      => 'apply',
                 'status'         => 'pending',
                 'payload'        => ['note' => 'Initial application submitted'],
             ]);
@@ -69,17 +73,23 @@ class ApplicationController extends Controller
         $site  = (string) $request->query('site', '');
 
         $apps = JobApplication::query()
-            ->with(['job:id,title,division,site_code', 'user:id,name'])
+            ->with([
+                'job:id,title,division,site_id',
+                'job.site:id,code,name',
+                'user:id,name',
+            ])
             ->when($q, function ($qq) use ($q) {
                 $qq->where(function ($w) use ($q) {
-                    $w->whereHas('user', fn($u) => $u->where('name', 'like', "%{$q}%"))
-                      ->orWhereHas('job', fn($j) => $j->where('title', 'like', "%{$q}%")
-                                                      ->orWhere('division', 'like', "%{$q}%")
-                                                      ->orWhere('site_code', 'like', "%{$q}%"));
+                    $w->whereHas('user', fn ($u) => $u->where('name', 'like', "%{$q}%"))
+                      ->orWhereHas('job', function ($j) use ($q) {
+                          $j->where('title', 'like', "%{$q}%")
+                            ->orWhere('division', 'like', "%{$q}%")
+                            ->orWhereHas('site', fn ($s) => $s->where('code', 'like', "%{$q}%"));
+                      });
                 });
             })
-            ->when($stage, fn($qq) => $qq->where('current_stage', $stage))
-            ->when($site,  fn($qq) => $qq->whereHas('job', fn($j) => $j->where('site_code', $site)))
+            ->when($stage, fn ($qq) => $qq->where('current_stage', $stage))
+            ->when($site,  fn ($qq) => $qq->whereHas('job.site', fn ($s) => $s->where('code', $site)))
             ->latest()
             ->paginate(15);
 
@@ -88,68 +98,63 @@ class ApplicationController extends Controller
 
     /**
      * Admin: pindahkan stage aplikasi (RESTful, pakai route param {application})
-     * Routes:
-     *  POST admin/applications/{application}/move -> name: admin.applications.move
-     *  Body fields: to (atau to_stage), status, note, score
      */
     public function moveStage(Request $request, JobApplication $application)
     {
         [$to, $status, $note, $score] = $this->validateMove($request);
-
         $this->applyTransition($application, $to, $status, $note, $score);
-
         return back()->with('ok', 'Stage dipindahkan ke: ' . $to);
     }
 
     /**
      * Admin: Kanban board
      * Route: GET admin/applications/board -> name: admin.applications.board
+     *
+     * Blade kamu mengharapkan: $stages (array) & $grouped (map stage => Collection<JobApplication>)
      */
     public function board(Request $request)
     {
-        $columns = [
-            'applied'    => 'Applied',
-            'psychotest' => 'Psikotes',
-            'hr_iv'      => 'HR Interview',
-            'user_iv'    => 'User Interview',
-            'final'      => 'Final',
-            'offer'      => 'Offer',
-            'hired'      => 'Hired',
-            'rejected'   => 'Rejected',
-        ];
-        $stageKeys = array_keys($columns);
+        // urutan kolom yang dipakai Blade
+        $stages = ['apply','psychotest','hr_iv','user_iv','final','offering','diterima','not_qualified'];
 
-        $apps = JobApplication::with(['job:id,title,division,site_code', 'user:id,name'])
-            ->when($request->filled('job_id'), fn($q) => $q->where('job_id', $request->job_id))
-            ->when($request->filled('only'),  fn($q) => $q->whereIn('current_stage', explode(',', $request->only)))
+        // ambil data
+        $apps = JobApplication::with([
+                'job:id,title,division,site_id',
+                'job.site:id,code,name',
+                'user:id,name',
+                'stages', // dipakai untuk score terakhir
+            ])
+            ->when($request->filled('job_id'), fn ($q) => $q->where('job_id', $request->job_id))
+            ->when($request->filled('only'),  fn ($q) => $q->whereIn('current_stage', explode(',', $request->only)))
             ->orderBy('created_at')
             ->get();
 
-        // Siapkan $items per kolom sesuai struktur yang dipakai di Blade
-        $items = [];
-        foreach ($stageKeys as $s) {
-            $items[$s] = $apps->where('current_stage', $s)->map(function (JobApplication $a) {
-                return [
-                    'id'    => $a->id,
-                    'code'  => $a->id,
-                    'title' => $a->job->title ?? '—',
-                    'name'  => $a->user->name ?? '—',
-                    'site'  => $a->job->site_code ?? null,
-                    'url'   => route('jobs.show', $a->job ?? 0),
-                ];
-            })->values()->all();
+        // normalisasi stage lama -> baru (kompatibilitas data)
+        $normalize = function (?string $s): string {
+            return match ($s) {
+                'applied' => 'apply',
+                'offer'   => 'offering',
+                'hired'   => 'diterima',
+                default   => $s ?? 'apply',
+            };
+        };
+
+        // siapkan $grouped: key wajib ada meski kosong
+        $grouped = collect($stages)->mapWithKeys(fn($s) => [$s => collect()]);
+
+        foreach ($apps as $a) {
+            $key = $normalize($a->current_stage);
+            if (!in_array($key, $stages, true)) $key = 'apply';
+            $grouped[$key]->push($a);
         }
 
-        return view('admin.applications.board', [
-            'columns' => $columns,
-            'items'   => $items,
-        ]);
+        return view('admin.applications.board', compact('stages','grouped'));
     }
 
     /**
      * Admin: AJAX pindah stage dari Kanban (tanpa route param)
      * Route: POST admin/applications/board/move -> name: admin.applications.board.move
-     * Body JSON: { id, to, status?, note?, score? }
+     * Body: { id, to | to_stage, status?, note?, score? }
      */
     public function moveStageAjax(Request $request)
     {
@@ -183,7 +188,7 @@ class ApplicationController extends Controller
      */
     protected function validateMove(Request $request): array
     {
-        $allowedStages = ['applied','psychotest','hr_iv','user_iv','final','offer','hired','rejected'];
+        $allowedStages = ['apply','psychotest','hr_iv','user_iv','final','offering','diterima','not_qualified'];
         $allowedStatus = ['pending','passed','failed','no-show','reschedule'];
 
         // Izinkan 'to' atau 'to_stage'
@@ -197,7 +202,7 @@ class ApplicationController extends Controller
             'score'     => ['nullable', 'numeric'],
         ]);
 
-        $to     = $to ?? 'applied';
+        $to     = $to ?? 'apply';
         $status = $validated['status'] ?? 'pending';
         $note   = $validated['note'] ?? null;
         $score  = $validated['score'] ?? null;
@@ -211,7 +216,7 @@ class ApplicationController extends Controller
     protected function applyTransition(JobApplication $application, string $to, string $status = 'pending', ?string $note = null, $score = null): void
     {
         DB::transaction(function () use ($application, $to, $status, $note, $score) {
-            // catat stage baru
+            // catat stage baru (timeline)
             ApplicationStage::create([
                 'application_id' => $application->id,
                 'stage_key'      => $to,
@@ -224,7 +229,7 @@ class ApplicationController extends Controller
             $application->update(['current_stage' => $to]);
 
             // efek samping status keseluruhan + headcount
-            if ($to === 'hired') {
+            if ($to === 'diterima') {
                 $job = $application->job()->with('manpowerRequirement')->first();
                 if ($job && $job->manpowerRequirement) {
                     $job->manpowerRequirement->increment('filled_headcount');
@@ -232,11 +237,10 @@ class ApplicationController extends Controller
                         $job->update(['status' => 'closed']);
                     }
                 }
-                $application->update(['overall_status' => 'hired']);
-            } elseif ($to === 'rejected') {
-                $application->update(['overall_status' => 'rejected']);
+                $application->update(['overall_status' => 'hired']); // tetap pakai 'hired' untuk kompatibilitas status global
+            } elseif ($to === 'not_qualified') {
+                $application->update(['overall_status' => 'not_qualified']);
             } else {
-                // tetap aktif untuk stage lainnya
                 if ($application->overall_status !== 'active') {
                     $application->update(['overall_status' => 'active']);
                 }

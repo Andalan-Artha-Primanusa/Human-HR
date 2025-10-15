@@ -24,7 +24,7 @@ class WelcomeController extends Controller
         $myAppsSummary  = [
             'total'    => 0,
             'byStatus' => collect([
-                'SUBMITTED'=>0,'SCREENING'=>0,'INTERVIEW'=>0,'OFFERED'=>0,'HIRED'=>0,'REJECTED'=>0,
+                'SUBMITTED'=>0,'SCREENING'=>0,'INTERVIEW'=>0,'OFFERED'=>0,'HIRED'=>0,'not_qualified'=>0,
             ]),
         ];
         $myAppsProgress = collect();
@@ -62,7 +62,7 @@ class WelcomeController extends Controller
             'INTERVIEW' => ['step_no'=>3,'label'=>'Interview','hint'=>'Siapkan sesi interview.'],
             'OFFERED'   => ['step_no'=>4,'label'=>'Offering Letter','hint'=>'Cek & konfirmasi penawaran.'],
             'HIRED'     => ['step_no'=>5,'label'=>'Diterima','hint'=>'Selamat! Lanjut onboarding.'],
-            'REJECTED'  => ['step_no'=>0,'label'=>'Tidak Lolos','hint'=>'Tetap semangat—coba lowongan lain.'],
+            'not_qualified'  => ['step_no'=>0,'label'=>'Tidak Lolos','hint'=>'Tetap semangat—coba lowongan lain.'],
         ];
     }
 
@@ -77,7 +77,7 @@ class WelcomeController extends Controller
 
         $total = (int) $counts->sum();
 
-        $keys = ['SUBMITTED','SCREENING','INTERVIEW','OFFERED','HIRED','REJECTED'];
+        $keys = ['SUBMITTED','SCREENING','INTERVIEW','OFFERED','HIRED','not_qualified'];
         $byStatus = collect($keys)->mapWithKeys(fn($k) => [$k => (int) ($counts[$k] ?? 0)]);
 
         return ['total' => $total, 'byStatus' => $byStatus];
@@ -112,10 +112,10 @@ class WelcomeController extends Controller
         $label  = $pipeline[$currentStage]['label'];
         $hint   = $pipeline[$currentStage]['hint'];
 
-        $isRejected = ($app->overall_status === 'REJECTED' || $currentStage === 'REJECTED');
+        $isnot_qualified = ($app->overall_status === 'not_qualified' || $currentStage === 'not_qualified');
         $isHired    = ($app->overall_status === 'HIRED'     || $currentStage === 'HIRED');
 
-        if ($isRejected) {
+        if ($isnot_qualified) {
             $progressPct = 0;
             $nextLabel   = null;
             $isFinal     = true;
@@ -137,7 +137,7 @@ class WelcomeController extends Controller
             'current_label'    => $label,
             'progress_percent' => $progressPct,
             'next_stage_label' => $nextLabel,
-            'is_final'         => $isRejected || $isHired,
+            'is_final'         => $isnot_qualified || $isHired,
             'hint'             => $hint,
             'applied_at'       => optional($app->created_at)?->toDateString(),
         ];

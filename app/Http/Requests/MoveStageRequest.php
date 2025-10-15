@@ -14,7 +14,7 @@ class MoveStageRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'to_stage' => 'required|in:applied,psychotest,hr_iv,user_iv,final,offer,hired,rejected',
+            'to_stage' => 'required|in:applied,psychotest,hr_iv,user_iv,final,offer,hired,not_qualified',
             'status'   => 'nullable|in:pending,passed,failed,no-show,reschedule',
             'note'     => 'nullable|string',
             'score'    => 'nullable|numeric',
