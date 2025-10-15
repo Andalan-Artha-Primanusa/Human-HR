@@ -1,0 +1,51 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+/* === Theme tokens (Blue + Maroon) === */
+:root {
+--primary: #1e3a8a; /* blue (indigo-800) */
+--primary-600: #1d4ed8;
+--primary-500: #2563eb;
+--accent: #7f1d1d; /* maroon */
+--accent-600: #991b1b;
+--ring: 0 0 0 4px rgb(37 99 235 / 0.15);
+}
+
+
+@layer components {
+.container-page { @apply mx-auto max-w-7xl px-4 sm:px-6 lg:px-8; }
+.card { @apply bg-white/80 backdrop-blur rounded-2xl shadow-sm ring-1 ring-slate-200; }
+.card-body { @apply p-5; }
+.btn { @apply inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition shadow-sm; }
+.btn-primary { background: var(--primary); color: #fff; }
+.btn-primary:hover { background: var(--primary-600); }
+.btn-accent { background: var(--accent); color: #fff; }
+.btn-accent:hover { background: var(--accent-600); }
+.btn-outline { @apply border border-slate-300 text-slate-700 bg-white hover:bg-slate-50; }
+.btn-ghost { @apply text-slate-700 hover:bg-slate-100; }
+.badge { @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold; }
+.badge-blue { @apply bg-blue-50 text-blue-700 ring-1 ring-blue-200; }
+.badge-maroon { @apply bg-red-50 text-red-800 ring-1 ring-red-200; }
+.badge-green { @apply bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200; }
+.badge-amber { @apply bg-amber-50 text-amber-800 ring-1 ring-amber-200; }
+.input { @apply block w-full rounded-xl border-slate-300 focus:border-blue-500 focus:ring-blue-500; }
+.label { @apply text-sm font-medium text-slate-700; }
+.nav-link { @apply text-sm font-medium text-slate-700 hover:text-slate-900; }
+.table { @apply w-full text-sm; }
+.th { @apply text-left font-semibold text-slate-600 px-3 py-2; }
+.td { @apply px-3 py-2 border-t border-slate-100; }
+}
+
+
+/* Hero strip */
+.hero {
+background: radial-gradient(1200px 400px at 20% -10%, rgba(37,99,235,.25), transparent 60%),
+radial-gradient(800px 300px at 90% -20%, rgba(153,27,27,.15), transparent 60%),
+linear-gradient(180deg, rgba(255,255,255,.8), rgba(255,255,255,.8));
+}
+
+
+/* Focus ring helper */
+:focus-visible { outline: none; box-shadow: var(--ring); }
