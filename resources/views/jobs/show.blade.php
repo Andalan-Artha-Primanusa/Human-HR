@@ -2,16 +2,16 @@
 @extends('layouts.app', ['title' => $job->title])
 
 @php
-  $BLUE  = '#1d4ed8';   // biru
-  $RED   = '#dc2626';   // merah
-  $BORD  = '#e5e7eb';   // gray-200
+  $BLUE  = '#1d4ed8';
+  $RED   = '#dc2626';
+  $BORD  = '#e5e7eb';
 
   /** @var \App\Models\JobApplication|null $myApp */
   $myApp = auth()->check()
       ? $job->applications()->where('user_id', auth()->id())->with('stages')->latest()->first()
       : null;
 
-  // urutan & label tahapan
+  // urutan & label tahapan (harus sinkron dengan controller)
   $stageOrder = ['applied','psychotest','hr_iv','user_iv','final','offer','hired'];
   $pretty = [
     'applied'    => 'Pengajuan Berkas',
@@ -24,27 +24,42 @@
     'rejected'   => 'Ditolak',
   ];
 
-  $overall = $myApp?->overall_status ?? null;
-  $currKey = strtolower($myApp?->current_stage ?? 'applied');
-  $visited = collect($myApp?->stages ?? [])->pluck('stage_key')->map(fn($v)=>strtolower($v))->all();
+  $overallRaw = $myApp?->overall_status;
+  $overall    = $overallRaw ? strtolower($overallRaw) : 'in_progress';
 
-  $idxNow = array_search($currKey, $stageOrder, true);
-  if ($idxNow === false) $idxNow = 0;
+  // normalisasi current stage supaya pasti ada di stageOrder
+  $currRaw = strtolower($myApp?->current_stage ?? 'applied');
+  $currKey = in_array($currRaw, $stageOrder, true) ? $currRaw : 'applied';
+
+  // visited: ambil dari tabel + pastikan current ikut dihitung
+  $visited = collect($myApp?->stages ?? [])
+      ->pluck('stage_key')
+      ->map(fn($v) => strtolower($v))
+      ->filter(fn($v) => in_array($v, $stageOrder, true))
+      ->unique()
+      ->push($currKey)
+      ->unique()
+      ->values()
+      ->all();
+
+  // prev/next yang valid saja
+  $idxNow  = array_search($currKey, $stageOrder, true);
+  $idxNow  = ($idxNow === false) ? 0 : $idxNow;
   $prevKey = $idxNow > 0 ? $stageOrder[$idxNow-1] : null;
   $nextKey = $idxNow < count($stageOrder)-1 ? $stageOrder[$idxNow+1] : null;
 
-  $progressPct = function() use ($myApp,$stageOrder){
+  // progress %
+  $progressPct = function() use ($myApp,$stageOrder,$overall,$currKey){
     if(!$myApp) return 0;
-    $key = strtolower($myApp->current_stage ?? 'applied');
-    $idx = array_search($key,$stageOrder,true); if($idx===false) $idx=0;
+    $idx = array_search($currKey,$stageOrder,true); if($idx===false) $idx=0;
     $max = max(count($stageOrder)-1,1);
-    if(($myApp->overall_status ?? '')==='rejected'){
+    if($overall==='rejected'){
       return min(100, max(40,(int)round($idx/$max*100)));
     }
     return (int)round($idx/$max*100);
   };
 
-  // cek role admin secara fleksibel (pakai kolom role biasa atau spatie)
+  // cek role admin secara fleksibel (kolom role biasa atau spatie)
   $isAdmin = auth()->check() && (
     (method_exists(auth()->user(), 'hasAnyRole') && auth()->user()->hasAnyRole(['hr','superadmin']))
     || in_array(auth()->user()->role ?? null, ['hr','superadmin'], true)
@@ -163,29 +178,34 @@
 
             {{-- ADMIN CONTROLS: next/prev stage (POST-only) --}}
             @if($myApp && $isAdmin && Route::has('admin.applications.move') && ($overall !== 'rejected'))
+              @php
+                // pastikan tidak pernah kirim "to" kosong
+                $canPrev = filled($prevKey);
+                $canNext = filled($nextKey);
+              @endphp
               <div class="flex items-center gap-2">
                 {{-- Prev --}}
                 <form method="POST"
                       action="{{ route('admin.applications.move', $myApp) }}"
-                      onsubmit="return confirm('Kembalikan tahap ke: {{ $pretty[$prevKey] ?? '—' }} ?')">
+                      onsubmit="return {{ $canPrev ? 'confirm' : '(function(){return false;})' }}('Kembalikan tahap ke: {{ $pretty[$prevKey] ?? '—' }} ?')">
                   @csrf
-                  <input type="hidden" name="to" value="{{ $prevKey }}">
+                  <input type="hidden" name="to" value="{{ $canPrev ? $prevKey : '' }}">
                   <button type="submit" class="rounded-lg border px-2.5 py-1.5 text-slate-900 hover:bg-slate-50 disabled:opacity-40"
-                          style="border-color: {{ $BORD }}" {{ $prevKey ? '' : 'disabled' }}
-                          title="{{ $prevKey ? 'Kembali ke: '.$pretty[$prevKey] : 'Tidak bisa mundur' }}">
+                          style="border-color: {{ $BORD }}" {{ $canPrev ? '' : 'disabled' }}
+                          title="{{ $canPrev ? 'Kembali ke: '.$pretty[$prevKey] : 'Tidak bisa mundur' }}">
                     <svg class="h-4 w-4"><use href="#i-chevron-left"/></svg>
                   </button>
                 </form>
                 {{-- Next --}}
                 <form method="POST"
                       action="{{ route('admin.applications.move', $myApp) }}"
-                      onsubmit="return confirm('Lanjutkan tahap ke: {{ $pretty[$nextKey] ?? '—' }} ?')">
+                      onsubmit="return {{ $canNext ? 'confirm' : '(function(){return false;})' }}('Lanjutkan tahap ke: {{ $pretty[$nextKey] ?? '—' }} ?')">
                   @csrf
-                  <input type="hidden" name="to" value="{{ $nextKey }}">
+                  <input type="hidden" name="to" value="{{ $canNext ? $nextKey : '' }}">
                   <button type="submit" class="rounded-lg border px-2.5 py-1.5 text-white disabled:opacity-40"
                           style="border-color: {{ $BORD }}; background: {{ $BLUE }}"
-                          {{ $nextKey ? '' : 'disabled' }}
-                          title="{{ $nextKey ? 'Lanjut ke: '.$pretty[$nextKey] : 'Sudah tahap terakhir' }}">
+                          {{ $canNext ? '' : 'disabled' }}
+                          title="{{ $canNext ? 'Lanjut ke: '.$pretty[$nextKey] : 'Sudah tahap terakhir' }}">
                     <svg class="h-4 w-4"><use href="#i-chevron-right"/></svg>
                   </button>
                 </form>
@@ -227,7 +247,7 @@
                 <div class="space-y-3">
                   @foreach($stageOrder as $key)
                     @php
-                      $isNow  = $key===$currKey && $overall!=='rejected';
+                      $isNow  = ($key === $currKey) && ($overall!=='rejected');
                       $done   = in_array($key,$visited,true) && !$isNow;
                       $muted  = !$done && !$isNow;
                       $dotBg  = $done ? '#16a34a' : ($isNow ? $BLUE : '#f59e0b');
@@ -255,7 +275,7 @@
                     </div>
                   @endforeach
 
-                  @if(($overall ?? '')==='rejected')
+                  @if($overall==='rejected')
                     <div class="relative pr-12">
                       <span class="absolute right-0 top-1 grid h-4 w-4 place-items-center rounded-full ring-4 ring-white" style="background: {{ $RED }}"></span>
                       <div class="flex items-start justify-between gap-3">
@@ -279,11 +299,15 @@
                 <div class="inline-flex items-center gap-2">
                   <svg class="h-4 w-4 text-slate-500"><use href="#i-brief"/></svg>
                   Status keseluruhan:
-                  <span class="ml-1 rounded-full px-2 py-0.5 text-[11px] font-semibold ring-1 ring-inset
-                    {{ $overall==='hired' ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
-                      : ($overall==='rejected' ? 'bg-slate-100 text-slate-700 ring-slate-200'
-                      : 'bg-blue-50 text-blue-700 ring-blue-200') }}">
-                    {{ strtoupper($overall) }}
+                  @php
+                    $overallText = strtoupper($overall ?? 'IN_PROGRESS');
+                    $overallClass =
+                      $overall==='hired' ? 'bg-emerald-50 text-emerald-700 ring-emerald-200' :
+                      ($overall==='rejected' ? 'bg-slate-100 text-slate-700 ring-slate-200' :
+                      'bg-blue-50 text-blue-700 ring-blue-200');
+                  @endphp
+                  <span class="ml-1 rounded-full px-2 py-0.5 text-[11px] font-semibold ring-1 ring-inset {{ $overallClass }}">
+                    {{ $overallText }}
                   </span>
                 </div>
               </div>

@@ -3,14 +3,15 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
 
-// === Careers Controllers ===
+// === Public / Careers Controllers ===
+use App\Http\Controllers\WelcomeController;
 use App\Http\Controllers\JobController;
 use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\InterviewController;
 use App\Http\Controllers\PsychotestController;
 use App\Http\Controllers\OfferController;
 use App\Http\Controllers\ManpowerDashboardController;
-use App\Http\Controllers\WelcomeController;
+
 // === Admin Controllers ===
 use App\Http\Controllers\Admin\SiteController as AdminSiteController;
 
@@ -18,10 +19,13 @@ use App\Http\Controllers\Admin\SiteController as AdminSiteController;
 |--------------------------------------------------------------------------
 | Public
 |--------------------------------------------------------------------------
+|
+| Halaman landing & daftar/detail lowongan (tanpa login).
+| Pakai whereUuid untuk parameter yang berupa UUID (Laravel mendukung whereUuid()).
+|
 */
 Route::get('/', WelcomeController::class)->name('welcome');
 
-// Daftar & Detail Lowongan (public)
 Route::get('/jobs', [JobController::class, 'index'])->name('jobs.index');
 Route::get('/jobs/{job}', [JobController::class, 'show'])
     ->whereUuid('job')
@@ -31,6 +35,9 @@ Route::get('/jobs/{job}', [JobController::class, 'show'])
 |--------------------------------------------------------------------------
 | Authenticated (semua user yang login)
 |--------------------------------------------------------------------------
+|
+| Area kandidat/pelamar: profil, apply job, daftar lamaran saya, psikotes.
+|
 */
 Route::get('/dashboard', function () {
     return view('dashboard');
@@ -42,66 +49,105 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile',[ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile',[ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // Pelamar: apply & kelola lamaran saya
+    // Apply ke lowongan tertentu (POST-only)
     Route::post('/jobs/{job}/apply', [ApplicationController::class, 'store'])
         ->whereUuid('job')
         ->name('applications.store');
 
-    Route::get('/me/applications', [ApplicationController::class, 'index'])->name('applications.mine');
+    // Daftar lamaran milik user saat ini
+    Route::get('/me/applications', [ApplicationController::class, 'index'])
+        ->name('applications.mine');
 
-    // Pelamar: psikotes
-    Route::get('/me/psychotest/{attempt}',  [PsychotestController::class, 'show'])->name('psychotest.show');
-    Route::post('/me/psychotest/{attempt}', [PsychotestController::class, 'submit'])->name('psychotest.submit');
+    // Psikotes (lihat & submit attempt)
+    Route::get('/me/psychotest/{attempt}',  [PsychotestController::class, 'show'])
+        ->name('psychotest.show');
+    Route::post('/me/psychotest/{attempt}', [PsychotestController::class, 'submit'])
+        ->name('psychotest.submit');
 });
 
 /*
 |--------------------------------------------------------------------------
 | Admin (HR & Superadmin)
-| - butuh spatie/laravel-permission: middleware('role:hr|superadmin')
 |--------------------------------------------------------------------------
+|
+| Semua rute di bawah ini memerlukan login + role hr|superadmin
+| (pakai spatie/laravel-permission middleware('role:hr|superadmin')).
+|
 */
 Route::prefix('admin')
     ->as('admin.')
     ->middleware(['auth', 'role:hr|superadmin'])
     ->group(function () {
 
-        // CRUD Lowongan (versi admin)
-        Route::resource('jobs', JobController::class);
+        /*
+         * CRUD Lowongan (versi admin)
+         * Hindari bentrok dengan rute publik show() di atas – maka di sini kita exclude 'show'
+         */
+        Route::resource('jobs', JobController::class)->except(['show']);
 
-        // Admin: Sites
+        /*
+         * Admin: Sites (Resource penuh)
+         * Controller: App\Http\Controllers\Admin\SiteController
+         * Views yang diharapkan:
+         *   - resources/views/admin/sites/index.blade.php
+         *   - resources/views/admin/sites/create.blade.php
+         *   - resources/views/admin/sites/edit.blade.php
+         *   - resources/views/admin/sites/show.blade.php
+         */
         Route::resource('sites', AdminSiteController::class);
 
-        // Admin: daftar kandidat & Kanban board
-        Route::get('applications',       [ApplicationController::class, 'adminIndex'])->name('applications.index');
-        Route::get('applications/board', [ApplicationController::class, 'board'])->name('applications.board');
+        /*
+         * Admin: daftar kandidat & Kanban board
+         */
+        Route::get('applications',       [ApplicationController::class, 'adminIndex'])
+            ->name('applications.index');
+        Route::get('applications/board', [ApplicationController::class, 'board'])
+            ->name('applications.board');
 
-        // === Perpindahan stage (POST only) ===
+        /*
+         * Perpindahan stage (POST only) – tombol di UI harus submit ke rute ini.
+         * Controller method: ApplicationController@moveStage
+         */
         Route::post('applications/{application}/move', [ApplicationController::class, 'moveStage'])
             ->whereUuid('application')
             ->name('applications.move');
 
-        // --- Legacy GET handler (redirect agar tidak 405) ---
+        /*
+         * Legacy GET handler – kalau masih ada link lama (GET) kita redirect ke index agar tidak 405.
+         */
         Route::get('applications/{application}/move', function () {
             return redirect()
                 ->route('admin.applications.index')
-                ->with('warn', 'Aksi pindah stage harus via POST. Tombol lama di halamanmu masih pakai GET — sudah saya arahkan kembali.');
+                ->with('warn', 'Aksi pindah stage harus via POST. Tombol lama di halamanmu masih pakai GET — sudah diarahkan ulang.');
         })->whereUuid('application');
 
-        // AJAX Kanban (POST JSON)
+        /*
+         * AJAX Kanban (drag & drop) – JSON { application_id, to_stage }
+         * Controller method: ApplicationController@moveStageAjax
+         */
         Route::post('applications/board/move', [ApplicationController::class, 'moveStageAjax'])
             ->name('applications.board.move');
 
-        // ---- Admin: Index pages untuk sidenav (baru) ----
-        Route::get('interviews',  [InterviewController::class,  'index'])->name('interviews.index');
-        Route::get('psychotests', [PsychotestController::class, 'index'])->name('psychotests.index');
-        Route::get('offers',      [OfferController::class,      'index'])->name('offers.index');
+        /*
+         * Index halaman penunjang untuk sidenav admin
+         */
+        Route::get('interviews',  [InterviewController::class,  'index'])
+            ->name('interviews.index');
+        Route::get('psychotests', [PsychotestController::class, 'index'])
+            ->name('psychotests.index');
+        Route::get('offers',      [OfferController::class,      'index'])
+            ->name('offers.index');
 
-        // Admin: jadwal interview (create/store by application)
+        /*
+         * Admin: jadwal interview (create/store by application)
+         */
         Route::post('interviews/{application}', [InterviewController::class, 'store'])
             ->whereUuid('application')
             ->name('interviews.store');
 
-        // Admin: offering letter
+        /*
+         * Admin: offering letter
+         */
         Route::post('offers/{application}', [OfferController::class, 'store'])
             ->whereUuid('application')
             ->name('offers.store');
@@ -110,8 +156,16 @@ Route::prefix('admin')
             ->whereUuid('offer')
             ->name('offers.pdf');
 
-        // Admin: Dashboard Manpower
-        Route::get('dashboard/manpower', ManpowerDashboardController::class)->name('dashboard.manpower');
+        /*
+         * Admin: Dashboard Manpower
+         */
+        Route::get('dashboard/manpower', ManpowerDashboardController::class)
+            ->name('dashboard.manpower');
     });
 
+/*
+|--------------------------------------------------------------------------
+| Auth scaffolding routes (Breeze/Fortify)
+|--------------------------------------------------------------------------
+*/
 require __DIR__.'/auth.php';

@@ -10,9 +10,20 @@ return new class extends Migration {
       $t->uuid('id')->primary();
       $t->string('name');
       $t->unsignedInteger('duration_minutes')->default(30);
-      $t->json('scoring')->nullable();
+
+      // aktif/nonaktifkan test ini (dipakai seeder/controller)
+      $t->boolean('is_active')->default(false);
+      $t->json('scoring')->nullable(); // contoh: {"pass_ratio": 0.6}
+
       $t->timestamps();
+
+      // index bantu
+      $t->index('is_active');
+      $t->index('name');
     });
   }
-  public function down(): void { Schema::dropIfExists('psychotest_tests'); }
+
+  public function down(): void {
+    Schema::dropIfExists('psychotest_tests');
+  }
 };

@@ -1,3 +1,4 @@
+{{-- resources/views/admin/sites/index.blade.php --}}
 @extends('layouts.app')
 
 @section('title', 'Admin · Sites')
@@ -74,7 +75,9 @@
           @foreach($sites as $site)
             <tr class="hover:bg-slate-50/60">
               <td class="px-4 py-3">
-                <div class="font-medium text-slate-800">{{ $site->name ?? '—' }}</div>
+                <div class="font-medium text-slate-800">
+                  <a href="{{ route('admin.sites.show', $site) }}" class="hover:underline">{{ $site->name ?? '—' }}</a>
+                </div>
                 @if(!empty($site->description))
                   <div class="text-xs text-slate-500 line-clamp-1">{{ $site->description }}</div>
                 @endif
@@ -93,10 +96,18 @@
               </td>
               <td class="px-4 py-3">
                 <div class="flex items-center justify-end gap-2">
-                  <a href="{{ route('admin.sites.edit', $site->id) }}" class="btn btn-outline btn-sm">Edit</a>
-                  <form action="{{ route('admin.sites.destroy', $site->id) }}" method="POST" onsubmit="return confirm('Hapus site ini?');">
+                  {{-- VIEW / DETAIL --}}
+                  <a href="{{ route('admin.sites.show', $site) }}" class="btn btn-ghost btn-sm" title="Lihat detail">
+                    View
+                  </a>
+                  {{-- EDIT --}}
+                  <a href="{{ route('admin.sites.edit', $site) }}" class="btn btn-outline btn-sm" title="Ubah">
+                    Edit
+                  </a>
+                  {{-- DELETE --}}
+                  <form action="{{ route('admin.sites.destroy', $site) }}" method="POST" onsubmit="return confirm('Hapus site ini?');">
                     @csrf @method('DELETE')
-                    <button class="btn btn-ghost btn-sm">Delete</button>
+                    <button class="btn btn-ghost btn-sm" title="Hapus">Delete</button>
                   </form>
                 </div>
               </td>
