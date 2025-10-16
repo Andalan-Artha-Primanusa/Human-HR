@@ -15,7 +15,7 @@ class Job extends Model
     use HasFactory, HasUuidPrimaryKey;
 
     /** LEVELS (canonical slug) */
-    public const LEVELS = ['bod','manager','supervisor','spv','staff','non_staff'];
+    public const LEVELS = ['bod', 'manager', 'supervisor', 'spv', 'staff', 'non_staff'];
 
     /** Label Level untuk tampilan */
     public const LEVEL_LABELS = [
@@ -40,8 +40,15 @@ class Job extends Model
     ];
 
     protected $fillable = [
-        'code','title','site_id','division','level','employment_type',
-        'openings','status','description',
+        'code',
+        'title',
+        'site_id',
+        'division',
+        'level',
+        'employment_type',
+        'openings',
+        'status',
+        'description',
     ];
 
     protected $casts = [
@@ -112,11 +119,12 @@ class Job extends Model
      |=====================*/
 
     /** @return BelongsTo<Site, Job> */
-    public function site(): BelongsTo
+    public function site()
     {
-        // eksplisitkan keys biar aman
-        return $this->belongsTo(\App\Models\Site::class, 'site_id', 'id');
+        return $this->belongsTo(\App\Models\Site::class)
+            ->select(['id', 'code', 'name', 'region', 'timezone', 'address']);
     }
+
 
     /** @return HasMany<JobApplication> */
     public function applications(): HasMany
@@ -133,13 +141,19 @@ class Job extends Model
     /* =====================
      | Scopes
      |=====================*/
-    public function scopeOpen($q) { return $q->where('status','open'); }
+    public function scopeOpen($q)
+    {
+        return $q->where('status', 'open');
+    }
 
-    public function scopeAtSite($q, string $siteId) { return $q->where('site_id',$siteId); }
+    public function scopeAtSite($q, string $siteId)
+    {
+        return $q->where('site_id', $siteId);
+    }
 
     public function scopeAtSiteCode($q, string $code)
     {
-        return $q->whereHas('site', fn($qq) => $qq->where('code',$code));
+        return $q->whereHas('site', fn($qq) => $qq->where('code', $code));
     }
 
     public function scopeInDivision($q, ?string $division)
@@ -150,24 +164,31 @@ class Job extends Model
 
     public function scopeSearch($q, ?string $term)
     {
-        if(!$term) return $q;
+        if (!$term) return $q;
         $term = "%{$term}%";
-        return $q->where(fn($qq) =>
-            $qq->where('code','like',$term)
-               ->orWhere('title','like',$term)
-               ->orWhere('description','like',$term)
+        return $q->where(
+            fn($qq) =>
+            $qq->where('code', 'like', $term)
+                ->orWhere('title', 'like', $term)
+                ->orWhere('description', 'like', $term)
         );
     }
 
     /* =====================
      | Backward compat: site_code virtual
      |=====================*/
-    public function getSiteCodeAttribute(): ?string { return $this->site?->code; }
+    public function getSiteCodeAttribute(): ?string
+    {
+        return $this->site?->code;
+    }
 
     public function setSiteCodeAttribute(?string $code): void
     {
-        if(!$code){ $this->site_id = null; return; }
-        $siteId = DB::table('sites')->where('code',$code)->value('id');
+        if (!$code) {
+            $this->site_id = null;
+            return;
+        }
+        $siteId = DB::table('sites')->where('code', $code)->value('id');
         $this->site_id = $siteId ?: $this->site_id;
     }
 }

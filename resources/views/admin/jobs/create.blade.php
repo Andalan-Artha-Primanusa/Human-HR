@@ -148,10 +148,47 @@
         @error('status')<p class="text-xs text-red-600 mt-1">{{ $message }}</p>@enderror
       </div>
 
+      {{-- Description (Rich Text / Trix) --}}
       <div class="md:col-span-2">
         <label class="label">Description</label>
-        <textarea class="input min-h-[160px]" name="description" placeholder="Ringkasan pekerjaan, kualifikasi, benefit, dsb.">{{ old('description') }}</textarea>
-        @error('description')<p class="text-xs text-red-600 mt-1">{{ $message }}</p>@enderror
+
+        {{-- CDN Trix (bold/italic, bullets, numbered list, link, undo/redo) --}}
+        @once
+          <link rel="stylesheet" href="https://unpkg.com/trix@2.0.8/dist/trix.css">
+          <script src="https://unpkg.com/trix@2.0.8/dist/trix.umd.min.js"></script>
+          <style>
+            /* selaraskan dengan kelas .input */
+            trix-editor {
+              border: 1px solid rgb(203 213 225); /* slate-300 */
+              border-radius: .5rem;                /* rounded-lg */
+              padding: .75rem;                     /* p-3 */
+              min-height: 10rem;                   /* ~160px */
+              background: #fff;
+            }
+            trix-toolbar {
+              border: 1px solid rgb(203 213 225);
+              border-radius: .5rem;
+              margin-bottom: .5rem;
+            }
+            trix-toolbar * { font-size: 0.875rem; }
+
+            /* --- Fix: bullet & numbered list terlihat --- */
+            trix-editor ul { list-style: disc; padding-left: 1.25rem; }
+            trix-editor ol { list-style: decimal; padding-left: 1.25rem; }
+            trix-editor li { margin: .25rem 0; }
+          </style>
+        @endonce
+
+        {{-- Hidden input yang dikirim ke server --}}
+        <input id="desc_input" type="hidden" name="description" value="{{ old('description') }}">
+        {{-- Editor yang terhubung ke hidden input --}}
+        <trix-editor input="desc_input"></trix-editor>
+
+        <p class="mt-1 text-xs text-slate-500">
+          Bisa <strong>bold</strong>, <em>italic</em>, bullet &amp; numbered list, dan tautan. Konten akan disimpan sebagai HTML.
+        </p>
+
+        @error('description')<p class="text-xs text-red-600 mt-2">{{ $message }}</p>@enderror
       </div>
     </div>
   </form>

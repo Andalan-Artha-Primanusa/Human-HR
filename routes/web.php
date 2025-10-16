@@ -15,6 +15,9 @@ use App\Http\Controllers\ManpowerDashboardController;
 // === Admin Controllers ===
 use App\Http\Controllers\Admin\SiteController as AdminSiteController;
 
+// === Public Sites Controller (tambahan, untuk user non-admin) ===
+use App\Http\Controllers\SitePublicController;
+
 /*
 |--------------------------------------------------------------------------
 | Public
@@ -30,6 +33,19 @@ Route::get('/jobs', [JobController::class, 'index'])->name('jobs.index');
 Route::get('/jobs/{job}', [JobController::class, 'show'])
     ->whereUuid('job')
     ->name('jobs.show');
+
+/*
+|--------------------------------------------------------------------------
+| Public Sites (READ-ONLY untuk user biasa)
+|--------------------------------------------------------------------------
+|
+| Menampilkan hanya site yang aktif. Detail site non-aktif -> 404.
+|
+*/
+Route::get('/sites', [SitePublicController::class, 'index'])->name('sites.index');
+Route::get('/sites/{site}', [SitePublicController::class, 'show'])
+    ->whereUuid('site')
+    ->name('sites.show');
 
 /*
 |--------------------------------------------------------------------------

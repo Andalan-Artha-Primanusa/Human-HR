@@ -17,7 +17,11 @@ class JobController extends Controller
         $isAdminRoute = $request->routeIs('admin.*');
 
         $jobs = Job::query()
-            ->select(['id','code','title','division','employment_type','openings','site_id','status','description','created_at'])
+            ->select([
+                'id','code','title','division','employment_type','openings',
+                'site_id','status','description','created_at'
+            ])
+            // List cukup butuh code+name; biarkan ringan
             ->with(['site:id,code,name'])
             ->when(!$isAdminRoute, fn($q) => $q->where('status', 'open'))
             ->when($request->filled('division'), fn($q) => $q->where('division', $request->string('division')->toString()))
@@ -58,7 +62,11 @@ class JobController extends Controller
      */
     public function show(Job $job)
     {
-        $job->loadMissing('site:id,code,name');
+        // >>> penting: muat kolom site yang dipakai di Blade (region, timezone, address)
+        $job->loadMissing([
+            'site:id,code,name,region,timezone,address',
+        ])->loadCount('applications'); // opsional untuk footer “Jumlah Pelamar”
+
         return view('jobs.show', compact('job'));
     }
 
@@ -81,7 +89,8 @@ class JobController extends Controller
             'title'           => ['required','string','max:200'],
             'division'        => ['nullable','string','max:100'],
             'level'           => ['nullable','string','max:100'],
-            'employment_type' => ['required', Rule::in(['intern','contract','fulltime'])],
+            // sinkron dengan Blade: tambah parttime & freelance
+            'employment_type' => ['required', Rule::in(['intern','contract','fulltime','parttime','freelance'])],
             'openings'        => ['required','integer','min:1'],
             'status'          => ['required', Rule::in(['draft','open','closed'])],
             'description'     => ['nullable','string'],
@@ -139,7 +148,7 @@ class JobController extends Controller
             'title'           => ['required','string','max:200'],
             'division'        => ['nullable','string','max:100'],
             'level'           => ['nullable','string','max:100'],
-            'employment_type' => ['required', Rule::in(['intern','contract','fulltime'])],
+            'employment_type' => ['required', Rule::in(['intern','contract','fulltime','parttime','freelance'])],
             'openings'        => ['required','integer','min:1'],
             'status'          => ['required', Rule::in(['draft','open','closed'])],
             'description'     => ['nullable','string'],
