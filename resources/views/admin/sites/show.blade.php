@@ -5,7 +5,7 @@
 @section('content')
 <div class="max-w-7xl mx-auto space-y-6">
 
-  {{-- HEADER PANEL: sama seperti index (bar biru–merah) --}}
+  {{-- HEADER: bar biru–merah --}}
   <div class="relative rounded-2xl border border-slate-200 bg-white shadow-sm">
     <div class="h-2 rounded-t-2xl overflow-hidden">
       <div class="h-full w-full flex">
@@ -28,7 +28,7 @@
             <span class="text-slate-400">/</span>
             <span class="text-slate-700 font-medium">{{ $site->code ?? 'Detail' }}</span>
 
-            {{-- chip status kecil biar inline dengan judul --}}
+            {{-- Chip status --}}
             @if($site->is_active)
               <span class="ml-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-green-100 text-green-700">
                 Aktif
@@ -41,7 +41,7 @@
           </div>
         </div>
 
-        {{-- Actions sama gaya dengan index --}}
+        {{-- Actions --}}
         <div class="flex flex-wrap gap-2">
           <a href="{{ route('admin.sites.index') }}"
              class="btn btn-ghost inline-flex items-center gap-2">
@@ -50,6 +50,18 @@
             </svg>
             Kembali
           </a>
+
+          @hasSection('can_toggle') @endif
+          @if(Route::has('admin.sites.toggle'))
+            <form method="POST" action="{{ route('admin.sites.toggle', $site) }}"
+                  onsubmit="return confirm('Ubah status site?');">
+              @csrf @method('PATCH')
+              <button type="submit" class="btn btn-ghost inline-flex items-center gap-2">
+                {{ $site->is_active ? 'Nonaktifkan' : 'Aktifkan' }}
+              </button>
+            </form>
+          @endif
+
           <a href="{{ route('admin.sites.edit', $site) }}"
              class="btn btn-primary inline-flex items-center gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -58,10 +70,11 @@
             </svg>
             Edit
           </a>
+
           <form method="POST" action="{{ route('admin.sites.destroy', $site) }}"
                 onsubmit="return confirm('Hapus site ini? Aksi tidak dapat dibatalkan.');">
             @csrf @method('DELETE')
-            <button type="submit" class="btn btn-ghost inline-flex items-center gap-2">
+            <button type="submit" class="btn btn-ghost inline-flex items-center gap-2 text-red-600">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-width="2" stroke-linecap="round" d="M3 6h18M8 6v12m8-12v12M5 6l1 14a2 2 0 002 2h8a2 2 0 002-2l1-14"/>
               </svg>
@@ -73,13 +86,13 @@
     </div>
   </div>
 
-  {{-- Ringkasan Angka --}}
+  {{-- Ringkasan angka (withCount) --}}
   <section class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
     <div class="p-5 rounded-2xl border border-slate-200 bg-white shadow-sm">
       <div class="text-slate-500 text-sm">Jumlah Jobs</div>
       <div class="mt-1 flex items-end justify-between">
         <div class="text-2xl font-semibold text-slate-800">
-          {{ optional($site->jobs)->count() ?? ($site->jobs_count ?? 0) }}
+          {{ $site->jobs_count ?? 0 }}
         </div>
         <div class="text-xs text-slate-400">relasi: jobs</div>
       </div>
@@ -88,7 +101,7 @@
       <div class="text-slate-500 text-sm">User Terkait</div>
       <div class="mt-1 flex items-end justify-between">
         <div class="text-2xl font-semibold text-slate-800">
-          {{ optional($site->users)->count() ?? ($site->users_count ?? 0) }}
+          {{ $site->users_count ?? 0 }}
         </div>
         <div class="text-xs text-slate-400">relasi: users</div>
       </div>
@@ -97,7 +110,7 @@
       <div class="text-slate-500 text-sm">Config Items</div>
       <div class="mt-1 flex items-end justify-between">
         <div class="text-2xl font-semibold text-slate-800">
-          {{ optional($site->configs)->count() ?? ($site->configs_count ?? 0) }}
+          {{ $site->configs_count ?? 0 }}
         </div>
         <div class="text-xs text-slate-400">relasi: configs</div>
       </div>
@@ -130,19 +143,15 @@
         </div>
       </div>
 
-      @if(!empty($site->region))
       <div>
         <div class="text-slate-500 text-sm">Region</div>
-        <div class="mt-1 text-lg font-medium text-slate-800">{{ $site->region }}</div>
+        <div class="mt-1 text-lg font-medium text-slate-800">{{ $site->region ?: '—' }}</div>
       </div>
-      @endif
 
-      @if(!empty($site->timezone))
       <div>
         <div class="text-slate-500 text-sm">Timezone</div>
-        <div class="mt-1 text-lg font-medium text-slate-800">{{ $site->timezone }}</div>
+        <div class="mt-1 text-lg font-medium text-slate-800">{{ $site->timezone ?: '—' }}</div>
       </div>
-      @endif
 
       @if(!empty($site->address))
       <div class="sm:col-span-2 lg:col-span-3">
@@ -162,7 +171,8 @@
         <h2 class="text-base font-semibold text-slate-800">Catatan</h2>
       </div>
       <div class="p-5">
-        <div class="prose prose-sm max-w-none">{{ $site->notes }}</div>
+        {{-- Jika notes mengandung line-break, biar tetap rapi --}}
+        <div class="text-sm text-slate-800 whitespace-pre-line">{{ $site->notes }}</div>
       </div>
     </div>
     @endif
@@ -173,14 +183,15 @@
         <h2 class="text-base font-semibold text-slate-800">Meta</h2>
       </div>
       <div class="p-5">
-        <pre class="text-xs bg-slate-50 rounded-xl p-4 border border-slate-200 overflow-auto">{{ json_encode($site->meta, JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE) }}</pre>
+        @php $metaArr = is_array($site->meta) ? $site->meta : (json_decode($site->meta ?? '[]', true) ?: []); @endphp
+        <pre class="text-xs bg-slate-50 rounded-xl p-4 border border-slate-200 overflow-auto">{{ json_encode($metaArr, JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES) }}</pre>
       </div>
     </div>
     @endif
   </section>
   @endif
 
-  {{-- Timestamps (footer kecil) --}}
+  {{-- Timestamps --}}
   <div class="text-xs text-slate-500">
     Dibuat: {{ optional($site->created_at)->format('d M Y H:i') ?? '-' }} ·
     Diperbarui: {{ optional($site->updated_at)->format('d M Y H:i') ?? '-' }}

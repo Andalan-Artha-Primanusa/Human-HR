@@ -1,3 +1,4 @@
+{{-- resources/views/admin/applications/kanban.blade.php --}}
 @extends('layouts.app', [ 'title' => 'Admin · Kanban Kandidat' ])
 
 @section('content')
@@ -12,7 +13,6 @@
   </style>
 
   @php
-    // ==== DEFINISI STAGE (URUTAN TUNGGAL) ====
     $stages = [
       'applied'       => 'Applied',
       'psychotest'    => 'Psychotest',
@@ -24,7 +24,6 @@
       'not_qualified' => 'Not Qualified',
     ];
 
-    // Warna header per stage
     $stageColors = [
       'applied'       => 'from-blue-50 to-blue-100 text-blue-800',
       'psychotest'    => 'from-indigo-50 to-indigo-100 text-indigo-800',
@@ -36,7 +35,6 @@
       'not_qualified' => 'from-slate-50 to-slate-100 text-slate-700',
     ];
 
-    // Badge untuk overall_status
     $badgeOverall = [
       'active'         => 'badge-blue',
       'hired'          => 'badge-green',
@@ -65,7 +63,7 @@
           <select name="only" class="input">
             <option value="">Semua Stage</option>
             @foreach(array_keys($stages) as $key)
-              <option value="{{ $key }}" @selected(request('only')===$key)>{{ strtoupper($key) }}</option>
+              <option value="{{ $key }}" @selected(request('only')===$key)>{{ strtoupper(str_replace('_',' ',$key)) }}</option>
             @endforeach
           </select>
           <button class="btn btn-primary">Filter</button>
@@ -74,13 +72,13 @@
     </div>
   </div>
 
-  {{-- ====== SINGLE STRIP KANBAN ====== --}}
+  {{-- Kanban --}}
   <div x-data="kanban()" x-init="init()" class="space-y-4">
     <div class="h-scroll">
       <div class="cols">
         @foreach($stages as $stageKey => $stageLabel)
           @php
-            // $grouped diharapkan: Collection keyed by stageKey => collection of JobApplication
+            /** @var \Illuminate\Support\Collection $items */
             $items = $grouped[$stageKey] ?? collect();
           @endphp
 
@@ -88,59 +86,69 @@
             class="card overflow-hidden min-h-[60vh] flex flex-col"
             @dragover.prevent
             @drop="onDrop($event, '{{ $stageKey }}')"
+            data-stage="{{ $stageKey }}"
           >
             {{-- Header Stage --}}
             <div class="px-4 py-3 stage-header bg-gradient-to-r {{ $stageColors[$stageKey] ?? '' }} border-b border-slate-200 flex items-center justify-between">
               <div class="font-semibold tracking-wide">{{ strtoupper($stageLabel) }}</div>
-              <span class="badge badge-blue">{{ $items->count() }}</span>
+              <span class="badge badge-blue" x-ref="count-{{ $stageKey }}">{{ $items->count() }}</span>
             </div>
 
             {{-- Body Stage --}}
-            <div class="p-3 space-y-3 overflow-auto">
+            <div class="p-3 space-y-3 overflow-auto" x-ref="col-{{ $stageKey }}">
               @if($items->isEmpty())
-                <div class="rounded-xl border border-dashed border-slate-300/70 p-6 text-center text-slate-500 bg-white/70">
+                <div class="empty-{{ $stageKey }} rounded-xl border border-dashed border-slate-300/70 p-6 text-center text-slate-500 bg-white/70">
                   Belum ada kandidat di stage ini
                 </div>
               @endif
 
               @foreach($items as $a)
+                @php
+                  $candidateName = $a->user->name ?? $a->candidate->name ?? $a->name ?? '—';
+                  $jobTitle = $a->job->title ?? '—';
+                  $last = $a->stages->sortByDesc('created_at')->first();
+                  $overall = strtolower($a->overall_status ?? 'active');
+                  $overallClass = $badgeOverall[$overall] ?? 'badge-blue';
+                @endphp
+
                 <article
                   id="card-{{ $a->id }}"
                   draggable="true"
-                  @dragstart="onDragStart('{{ $a->id }}'); $el.classList.add('dragging')"
+                  @dragstart="onDragStart('{{ $a->id }}', '{{ route('admin.applications.move', $a) }}', '{{ csrf_token() }}') ; $el.classList.add('dragging')"
                   @dragend="$el.classList.remove('dragging')"
                   class="card card-hover bg-white"
+                  data-move-url="{{ route('admin.applications.move', $a) }}"
+                  data-schedule-url="{{ route('admin.interviews.store', $a) }}"
+                  data-current-stage="{{ $a->current_stage ?? 'applied' }}"
                 >
                   <div class="card-body py-3">
                     <div class="flex items-start justify-between gap-3">
                       <div class="min-w-0">
-                        <div class="font-medium text-slate-900 truncate">{{ $a->user->name }}</div>
-                        <div class="text-xs text-slate-500 truncate">{{ $a->job->title }}</div>
+                        <div class="font-medium text-slate-900 truncate">{{ $candidateName }}</div>
+                        <div class="text-xs text-slate-500 truncate">{{ $jobTitle }}</div>
                       </div>
                       <div class="text-right shrink-0">
-                        <div class="text-[11px] text-slate-400">{{ $a->created_at->format('d M') }}</div>
+                        <div class="text-[11px] text-slate-400">{{ optional($a->created_at)->format('d M') }}</div>
                       </div>
                     </div>
 
                     <div class="mt-2 flex items-center gap-2 flex-wrap">
-                      @php $last = $a->stages->sortByDesc('created_at')->first(); @endphp
                       @if($last && !is_null($last->score))
                         <span class="badge badge-green">Score {{ number_format($last->score,1) }}</span>
                       @endif
-                      <span class="badge {{ $badgeOverall[$a->overall_status] ?? 'badge-blue' }}">
-                        {{ strtoupper($a->overall_status ?? 'active') }}
-                      </span>
+                      <span class="badge {{ $overallClass }}">{{ strtoupper(str_replace('_',' ',$overall)) }}</span>
                     </div>
 
                     <div class="mt-3 flex items-center justify-end gap-2">
                       @if(in_array($stageKey, ['hr_iv','user_iv']))
                         <button
-                          class="btn btn-primary"
-                          @click="openSchedule({ id: '{{ $a->id }}', name: '{{ addslashes($a->user->name) }}', job: '{{ addslashes($a->job->title) }}' })">
+                          type="button"
+                          class="btn btn-primary btn-sm"
+                          @click="openSchedule($event)">
                           Schedule
                         </button>
                       @endif
-                      <a class="btn btn-outline" target="_blank" href="{{ route('jobs.show', $a->job) }}">Job</a>
+                      <a class="btn btn-outline btn-sm" target="_blank" href="{{ route('jobs.show', $a->job) }}">Job</a>
                     </div>
                   </div>
                 </article>
@@ -148,6 +156,14 @@
             </div>
           </section>
         @endforeach
+      </div>
+    </div>
+
+    {{-- Toast --}}
+    <div x-show="toast.show" x-transition.opacity class="fixed bottom-4 right-4 z-50">
+      <div class="rounded-lg shadow-lg px-4 py-3 text-sm"
+           :class="toast.type==='ok' ? 'bg-green-600 text-white' : 'bg-rose-600 text-white'">
+        <span x-text="toast.msg"></span>
       </div>
     </div>
 
@@ -159,7 +175,7 @@
             <div class="text-sm text-slate-500">Schedule Interview</div>
             <div class="font-semibold text-slate-900" x-text="modal.title"></div>
           </div>
-          <button class="btn btn-ghost" @click="modal.open=false">Close</button>
+          <button type="button" class="btn btn-ghost" @click="modal.open=false">Close</button>
         </div>
         <form method="POST" :action="modal.action" class="card-body grid gap-4" x-ref="form">@csrf
           <div class="grid md:grid-cols-2 gap-4">
@@ -214,28 +230,83 @@
     function kanban(){
       return {
         draggingId: null,
+        draggingEl: null,
+        draggingFrom: null,
+        moveUrl: null,
+        csrf: null,
+        toast: { show:false, msg:'', type:'ok' },
         modal: { open:false, action:'', candidate:'', title:'', mode:'online' },
 
         init(){},
 
-        onDragStart(id){ this.draggingId = id; },
-
-        onDrop(e, toStage){
-          if(!this.draggingId) return;
-          const id = this.draggingId; this.draggingId = null;
-
-          fetch(`/admin/applications/${id}/move`, {
-            method: 'POST',
-            headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept':'application/json' },
-            body: new URLSearchParams({ to_stage: toStage })
-          }).then(()=>{ location.reload(); });
+        showToast(msg, type='ok'){
+          this.toast.msg = msg; this.toast.type = type; this.toast.show = true;
+          setTimeout(()=> this.toast.show=false, 2200);
         },
 
-        openSchedule({id, name, job}){
+        onDragStart(id, url, csrf){
+          this.draggingId = id;
+          this.moveUrl = url;
+          this.csrf = csrf;
+          this.draggingEl = document.getElementById('card-'+id);
+          this.draggingFrom = this.draggingEl?.closest('section')?.dataset?.stage ?? null;
+        },
+
+        onDrop(e, toStage){
+          if(!this.draggingId || !this.moveUrl) return;
+          const card = this.draggingEl;
+          const fromStage = this.draggingFrom;
+          const targetCol = e.currentTarget.querySelector('[x-ref^="col-"]');
+          const empty = e.currentTarget.querySelector('.empty-'+toStage);
+          // Optimistic move
+          if (empty) empty.remove?.();
+          targetCol?.prepend(card);
+          this.updateCounters(fromStage, toStage);
+
+          fetch(this.moveUrl, {
+            method: 'POST',
+            headers: {
+              'X-CSRF-TOKEN': this.csrf,
+              'Accept':'application/json',
+              'Content-Type':'application/x-www-form-urlencoded'
+            },
+            body: new URLSearchParams({ to_stage: toStage })
+          })
+          .then(async (res) => {
+            if(!res.ok){ throw new Error((await res.json())?.message || 'Move failed'); }
+            this.showToast('Dipindahkan ke '+toStage.toUpperCase(), 'ok');
+            card.dataset.currentStage = toStage;
+          })
+          .catch(err => {
+            // rollback
+            const fromCol = document.querySelector(`[data-stage="${fromStage}"] [x-ref^="col-"]`);
+            fromCol?.prepend(card);
+            this.updateCounters(toStage, fromStage);
+            this.showToast(err.message || 'Gagal memindahkan', 'err');
+          })
+          .finally(()=>{
+            this.draggingId = null; this.draggingEl = null; this.moveUrl = null; this.draggingFrom = null;
+          });
+        },
+
+        updateCounters(from, to){
+          if(from){
+            const fromBadge = this.$refs['count-'+from]; if(fromBadge){ fromBadge.textContent = (+fromBadge.textContent - 1); }
+          }
+          if(to){
+            const toBadge = this.$refs['count-'+to]; if(toBadge){ toBadge.textContent = (+toBadge.textContent + 1); }
+          }
+        },
+
+        openSchedule(ev){
+          const card = ev.currentTarget.closest('article');
+          const scheduleUrl = card?.dataset?.scheduleUrl;
+          const title = card?.querySelector('.text-slate-900')?.textContent?.trim() ?? 'Candidate';
+          const job   = card?.querySelector('.text-xs.text-slate-500')?.textContent?.trim() ?? 'Job';
           this.modal.open   = true;
-          this.modal.candidate = name;
-          this.modal.title  = `${name} — ${job}`;
-          this.modal.action = `/admin/interviews/${id}`;
+          this.modal.candidate = title;
+          this.modal.title  = `${title} — ${job}`;
+          this.modal.action = scheduleUrl || '#';
           this.modal.mode   = 'online';
         },
       }

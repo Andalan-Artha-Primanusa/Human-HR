@@ -1,18 +1,36 @@
+{{-- resources/views/admin/sites/create.blade.php --}}
 @extends('layouts.app')
 
 @section('title', 'Admin · Sites · Create')
 
 @section('content')
-<div class="p-6 space-y-6">
-  <div class="flex items-center justify-between">
-    <div>
-      <h1 class="text-xl font-semibold text-slate-800">Tambah Site</h1>
-      <p class="text-slate-500 text-sm">Buat site/lokasi baru.</p>
+<div class="space-y-6">
+  {{-- HEADER: panel biru–merah, 2 tombol --}}
+  <div class="relative rounded-2xl border border-slate-200 bg-white shadow-sm">
+    <div class="h-2 rounded-t-2xl overflow-hidden">
+      <div class="h-full w-full flex">
+        <div class="h-full bg-blue-600" style="width: 90%"></div>
+        <div class="h-full bg-red-500"  style="width: 10%"></div>
+      </div>
     </div>
-    <a href="{{ route('admin.sites.index') }}" class="btn">Kembali</a>
+
+    <div class="p-6 md:p-7">
+      <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 class="text-2xl md:text-3xl font-semibold tracking-tight text-slate-900">Tambah Site</h1>
+          <p class="text-slate-600 text-sm">
+            Buat site/lokasi baru. <span class="font-medium">Status otomatis: ACTIVE</span>.
+          </p>
+        </div>
+        <div class="flex gap-2">
+          <a href="{{ route('admin.sites.index') }}" class="btn btn-ghost">Kembali</a>
+          <button form="siteCreateForm" class="btn btn-primary">Simpan</button>
+        </div>
+      </div>
+    </div>
   </div>
 
-  {{-- Errors --}}
+  {{-- ERROR SUMMARY --}}
   @if ($errors->any())
     <div class="rounded-xl bg-red-50 text-red-700 px-4 py-3 border border-red-200">
       <div class="font-medium">Periksa kembali isian kamu:</div>
@@ -24,44 +42,80 @@
     </div>
   @endif
 
-  <form action="{{ route('admin.sites.store') }}" method="POST" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 space-y-5">
+  {{-- FORM: code, name, region, timezone, address, meta_json, notes --}}
+  <form id="siteCreateForm" action="{{ route('admin.sites.store') }}" method="POST"
+        class="rounded-2xl border border-slate-200 bg-white shadow-sm p-6 space-y-5">
     @csrf
 
+    {{-- Kode & Nama --}}
     <div class="grid sm:grid-cols-2 gap-4">
       <div>
-        <label class="block text-sm font-medium text-slate-700">Nama</label>
+        <label class="block text-sm font-medium text-slate-700">
+          Kode <span class="text-red-500">*</span>
+        </label>
+        <input type="text" name="code" value="{{ old('code') }}" required
+               placeholder="Mis. DBK / SBS (A–Z, 0–9, - _ .)"
+               class="input mt-1">
+        @error('code') <div class="text-xs text-red-600 mt-1">{{ $message }}</div> @enderror
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-slate-700">
+          Nama <span class="text-red-500">*</span>
+        </label>
         <input type="text" name="name" value="{{ old('name') }}" required
-               class="mt-1 w-full rounded-lg border-slate-300 focus:border-blue-500 focus:ring-blue-500">
-        @error('name') <div class="text-sm text-red-600 mt-1">{{ $message }}</div> @enderror
-      </div>
-      <div>
-        <label class="block text-sm font-medium text-slate-700">Kode</label>
-        <input type="text" name="code" value="{{ old('code') }}" placeholder="Mis. DBK / POS / SBS"
-               class="mt-1 w-full rounded-lg border-slate-300 focus:border-blue-500 focus:ring-blue-500">
-        @error('code') <div class="text-sm text-red-600 mt-1">{{ $message }}</div> @enderror
+               placeholder="Nama Site"
+               class="input mt-1">
+        @error('name') <div class="text-xs text-red-600 mt-1">{{ $message }}</div> @enderror
       </div>
     </div>
 
+    {{-- Region & Timezone --}}
     <div class="grid sm:grid-cols-2 gap-4">
       <div>
-        <label class="block text-sm font-medium text-slate-700">Status</label>
-        <select name="status" class="mt-1 w-full rounded-lg border-slate-300 focus:border-blue-500 focus:ring-blue-500">
-          <option value="active" {{ old('status','active') === 'active' ? 'selected' : '' }}>Active</option>
-          <option value="inactive" {{ old('status') === 'inactive' ? 'selected' : '' }}>Inactive</option>
-        </select>
-        @error('status') <div class="text-sm text-red-600 mt-1">{{ $message }}</div> @enderror
+        <label class="block text-sm font-medium text-slate-700">Region (opsional)</label>
+        <input type="text" name="region" value="{{ old('region') }}"
+               placeholder="Mis. Kalimantan Timur"
+               class="input mt-1">
+        @error('region') <div class="text-xs text-red-600 mt-1">{{ $message }}</div> @enderror
       </div>
+
       <div>
-        <label class="block text-sm font-medium text-slate-700">Deskripsi (opsional)</label>
-        <input type="text" name="description" value="{{ old('description') }}"
-               class="mt-1 w-full rounded-lg border-slate-300 focus:border-blue-500 focus:ring-blue-500">
-        @error('description') <div class="text-sm text-red-600 mt-1">{{ $message }}</div> @enderror
+        <label class="block text-sm font-medium text-slate-700">Timezone (opsional)</label>
+        <input type="text" name="timezone" value="{{ old('timezone') }}"
+               placeholder="Mis. Asia/Makassar"
+               class="input mt-1">
+        @error('timezone') <div class="text-xs text-red-600 mt-1">{{ $message }}</div> @enderror
       </div>
     </div>
 
-    <div class="flex items-center justify-end gap-2">
-      <a href="{{ route('admin.sites.index') }}" class="btn">Batal</a>
-      <button class="btn btn-primary">Simpan</button>
+    {{-- Address --}}
+    <div>
+      <label class="block text-sm font-medium text-slate-700">Alamat (opsional)</label>
+      <input type="text" name="address" value="{{ old('address') }}"
+             placeholder="Jl. ..."
+             class="input mt-1">
+      @error('address') <div class="text-xs text-red-600 mt-1">{{ $message }}</div> @enderror
+    </div>
+
+    {{-- Meta JSON & Notes --}}
+    <div class="grid sm:grid-cols-2 gap-4">
+      <div>
+        <label class="block text-sm font-medium text-slate-700">Meta (JSON, opsional)</label>
+        <textarea name="meta_json" rows="6" class="input mt-1 font-mono text-xs"
+          placeholder='{"timezone":"Asia/Makassar","address":"Jl. ..."}'>{{ old('meta_json') }}</textarea>
+        {{-- catatan: controller akan decode meta_json jika valid --}}
+        @if($errors->has('meta'))
+          <div class="text-xs text-red-600 mt-1">{{ $errors->first('meta') }}</div>
+        @endif
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-slate-700">Catatan (opsional)</label>
+        <textarea name="notes" rows="6" class="input mt-1"
+          placeholder="Catatan internal untuk site">{{ old('notes') }}</textarea>
+        @error('notes') <div class="text-xs text-red-600 mt-1">{{ $message }}</div> @enderror
+      </div>
     </div>
   </form>
 </div>

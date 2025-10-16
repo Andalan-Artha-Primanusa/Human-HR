@@ -10,22 +10,27 @@ use Illuminate\Validation\Rule;
 class SiteController extends Controller
 {
     /**
-     * List + pencarian + sort sederhana.
+     * List + pencarian + filter status + sort sederhana.
      */
     public function index(Request $request)
     {
-        $q     = trim((string) $request->get('q'));
-        $sort  = $request->get('sort', 'code');   // code|name|region|created_at
-        $order = $request->get('order', 'asc');   // asc|desc
+        $q      = trim((string) $request->get('q'));
+        $status = $request->get('status');          // 'active' | 'inactive' | null
+        $sort   = $request->get('sort', 'code');    // code|name|region|created_at
+        $order  = $request->get('order', 'asc');    // asc|desc
 
         $sites = Site::query()
-            ->when($q, function ($qq) use ($q) {
+            ->when($q !== '', function ($qq) use ($q) {
                 $qq->where(function ($w) use ($q) {
                     $w->where('code', 'like', "%{$q}%")
                       ->orWhere('name', 'like', "%{$q}%")
-                      ->orWhere('region', 'like', "%{$q}%");
+                      ->orWhere('region', 'like', "%{$q}%")
+                      ->orWhere('timezone', 'like', "%{$q}%")
+                      ->orWhere('address', 'like', "%{$q}%");
                 });
             })
+            ->when($status === 'active', fn($qq) => $qq->where('is_active', true))
+            ->when($status === 'inactive', fn($qq) => $qq->where('is_active', false))
             ->when(in_array($sort, ['code','name','region','created_at'], true), fn($qq) => $qq->orderBy($sort, $order))
             ->paginate(20)
             ->appends($request->query());
@@ -34,7 +39,7 @@ class SiteController extends Controller
             return response()->json($sites);
         }
 
-        return view('admin.sites.index', compact('sites', 'q', 'sort', 'order'));
+        return view('admin.sites.index', compact('sites', 'q', 'sort', 'order', 'status'));
     }
 
     /**
@@ -46,7 +51,7 @@ class SiteController extends Controller
     }
 
     /**
-     * Simpan site baru (is_active dipaksa true).
+     * Simpan site baru (is_active dipaksa true). Redirect -> index.
      */
     public function store(Request $request)
     {
@@ -55,21 +60,23 @@ class SiteController extends Controller
         // Paksa aktif saat dibuat
         $data['is_active'] = true;
 
-        // (opsional) jika form kirim meta_json
+        // meta_json (opsional) -> meta (array)
         if ($request->filled('meta_json')) {
             $decoded = json_decode((string) $request->input('meta_json'), true);
             if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
                 $data['meta'] = $decoded;
+            } else {
+                return back()->withErrors(['meta' => 'Meta JSON tidak valid.'])->withInput();
             }
         }
 
-        $site = Site::create($data);
+        Site::create($data);
 
         if ($request->wantsJson()) {
-            return response()->json($site, 201);
+            return response()->json(['created' => true], 201);
         }
 
-        return redirect()->route('admin.sites.show', $site)->with('success', 'Site created.');
+        return redirect()->route('admin.sites.index')->with('success', 'Site created.');
     }
 
     /**
@@ -87,7 +94,7 @@ class SiteController extends Controller
     }
 
     /**
-     * Form edit (tetap TANPA toggle is_active).
+     * Form edit (TANPA toggle is_active).
      */
     public function edit(Site $site)
     {
@@ -95,17 +102,24 @@ class SiteController extends Controller
     }
 
     /**
-     * Update (tidak ada input is_active).
+     * Update (tidak menerima is_active). Redirect -> index.
      */
     public function update(Request $request, Site $site)
     {
         $data = $this->validatedUpdate($request, $site);
 
-        // (opsional) meta_json
-        if ($request->filled('meta_json')) {
-            $decoded = json_decode((string) $request->input('meta_json'), true);
-            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
-                $data['meta'] = $decoded;
+        // meta_json (opsional) -> meta (array/null)
+        if ($request->has('meta_json')) {
+            $raw = (string) $request->input('meta_json');
+            if ($raw === '') {
+                $data['meta'] = null;
+            } else {
+                $decoded = json_decode($raw, true);
+                if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                    $data['meta'] = $decoded;
+                } else {
+                    return back()->withErrors(['meta' => 'Meta JSON tidak valid.'])->withInput();
+                }
             }
         }
 
@@ -115,10 +129,10 @@ class SiteController extends Controller
         $site->update($data);
 
         if ($request->wantsJson()) {
-            return response()->json($site);
+            return response()->json(['updated' => true]);
         }
 
-        return redirect()->route('admin.sites.show', $site)->with('success', 'Site updated.');
+        return redirect()->route('admin.sites.index')->with('success', 'Site updated.');
     }
 
     /**
@@ -152,21 +166,32 @@ class SiteController extends Controller
     protected function validatedStore(Request $request): array
     {
         return $request->validate([
-            'code'   => ['required','string','max:20','regex:/^[A-Z0-9\-_.]+$/','unique:sites,code'],
-            'name'   => ['required','string','max:150'],
-            'region' => ['nullable','string','max:100'],
-            'meta'   => ['nullable','array'],
+            'code'      => ['required','string','max:20','regex:/^[A-Za-z0-9._-]+$/','unique:sites,code'],
+            'name'      => ['required','string','max:150'],
+            'region'    => ['nullable','string','max:100'],
+            'timezone'  => ['nullable','string','max:64'],
+            'address'   => ['nullable','string','max:255'],
+            'notes'     => ['nullable','string'],
+            'meta'      => ['nullable','array'], // bila ada submit langsung (bukan meta_json)
             // is_active tidak diterima di create (dipaksa true)
+        ], [
+            'code.regex' => 'Kode hanya boleh huruf, angka, titik, strip, dan underscore.',
         ]);
     }
 
     protected function validatedUpdate(Request $request, Site $site): array
     {
         return $request->validate([
-            'code'   => ['required','string','max:20','regex:/^[A-Z0-9\-_.]+$/', Rule::unique('sites','code')->ignore($site->id)],
-            'name'   => ['required','string','max:150'],
-            'region' => ['nullable','string','max:100'],
-            'meta'   => ['nullable','array'],
+            'code'      => ['required','string','max:20','regex:/^[A-Za-z0-9._-]+$/', Rule::unique('sites','code')->ignore($site->id)],
+            'name'      => ['required','string','max:150'],
+            'region'    => ['nullable','string','max:100'],
+            'timezone'  => ['nullable','string','max:64'],
+            'address'   => ['nullable','string','max:255'],
+            'notes'     => ['nullable','string'],
+            'meta'      => ['nullable','array'],
+            // is_active tidak diterima di update standar
+        ], [
+            'code.regex' => 'Kode hanya boleh huruf, angka, titik, strip, dan underscore.',
         ]);
     }
 }

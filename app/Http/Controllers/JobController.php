@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Job;
+use App\Models\Site;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class JobController extends Controller
 {
@@ -15,27 +17,15 @@ class JobController extends Controller
         $isAdminRoute = $request->routeIs('admin.*');
 
         $jobs = Job::query()
-            // pilih kolom inti dari jobs
             ->select(['id','code','title','division','employment_type','openings','site_id','status','description','created_at'])
-            // eager load site (kode/nama)
             ->with(['site:id,code,name'])
-
-            // public hanya tampilkan yang open
             ->when(!$isAdminRoute, fn($q) => $q->where('status', 'open'))
-
-            // filter division (exact; kalau mau LIKE tinggal ubah)
             ->when($request->filled('division'), fn($q) => $q->where('division', $request->string('division')->toString()))
-
-            // filter site via relasi site.code (bukan kolom site_code)
             ->when($request->filled('site'), function ($q) use ($request) {
                 $siteCode = $request->string('site')->toString();
                 $q->whereHas('site', fn($qq) => $qq->where('code', $siteCode));
             })
-
-            // filter tipe kerja
             ->when($request->filled('type'), fn($q) => $q->where('employment_type', $request->string('type')->toString()))
-
-            // search sederhana
             ->when($request->filled('term'), function ($q) use ($request) {
                 $term = '%'.$request->string('term')->toString().'%';
                 $q->where(function ($qq) use ($term) {
@@ -44,8 +34,6 @@ class JobController extends Controller
                        ->orWhere('code', 'like', $term);
                 });
             })
-
-            // sorting
             ->when(
                 $request->string('sort')->toString(),
                 function ($q, $sort) {
@@ -57,7 +45,6 @@ class JobController extends Controller
                 },
                 fn($q) => $q->orderBy('created_at', 'desc')
             )
-
             ->paginate(12)
             ->withQueryString();
 
@@ -71,7 +58,6 @@ class JobController extends Controller
      */
     public function show(Job $job)
     {
-        // pastikan site ikut diload untuk tampilan
         $job->loadMissing('site:id,code,name');
         return view('jobs.show', compact('job'));
     }
@@ -81,47 +67,56 @@ class JobController extends Controller
      */
     public function create()
     {
-        return view('admin.jobs.create');
+        $sites = Site::orderBy('code')->get(['id','code','name']);
+        return view('admin.jobs.create', compact('sites'));
     }
 
     /**
-     * ADMIN STORE
+     * ADMIN STORE -> redirect ke index + JSON response (AJAX)
      */
     public function store(Request $request)
     {
         $data = $request->validate([
-            'code'            => 'required|string|max:50|unique:jobs,code',
-            'title'           => 'required|string|max:200',
-            // form lama mungkin kirim site_code; kita validasi & pakai mutator untuk set site_id
-            'site_code'       => 'nullable|string|max:50',
-            'division'        => 'nullable|string|max:100',
-            'level'           => 'nullable|string|max:100',
-            'employment_type' => 'required|in:intern,contract,fulltime',
-            'openings'        => 'required|integer|min:1',
-            'status'          => 'required|in:draft,open,closed',
-            'description'     => 'nullable|string',
+            'code'            => ['required','string','max:50','unique:jobs,code'],
+            'title'           => ['required','string','max:200'],
+            'division'        => ['nullable','string','max:100'],
+            'level'           => ['nullable','string','max:100'],
+            'employment_type' => ['required', Rule::in(['intern','contract','fulltime'])],
+            'openings'        => ['required','integer','min:1'],
+            'status'          => ['required', Rule::in(['draft','open','closed'])],
+            'description'     => ['nullable','string'],
+            'site_id'         => ['nullable','exists:sites,id','required_without:site_code'],
+            'site_code'       => ['nullable','string','exists:sites,code','required_without:site_id'],
         ]);
 
-        // Ambil & lepas site_code dari mass assignment (karena tidak ada kolomnya)
+        // Normalisasi site
+        $siteId   = $data['site_id'] ?? null;
         $siteCode = $data['site_code'] ?? null;
-        unset($data['site_code']);
+        unset($data['site_id'], $data['site_code']);
+        if (!$siteId && $siteCode) {
+            $siteId = Site::where('code', $siteCode)->value('id');
+        }
+        $data['site_id'] = $siteId;
 
-        // Buat job tanpa site_code
         $job = Job::create($data);
 
-        // Set via mutator (akan mengisi site_id berdasarkan sites.code)
-        if ($siteCode !== null) {
-            $job->site_code = $siteCode; // memakai setSiteCodeAttribute di model
-            $job->save();
+        // optional sinkronisasi manpower
+        if (method_exists($job, 'manpowerRequirement') && !$job->manpowerRequirement) {
+            $job->manpowerRequirement()->create([
+                'budget_headcount' => (int) $data['openings'],
+                'filled_headcount' => 0,
+            ]);
         }
 
-        // optionally: create manpower requirement
-        $job->manpowerRequirement()->create([
-            'budget_headcount' => (int) $data['openings'],
-            'filled_headcount' => 0,
-        ]);
+        if ($request->wantsJson()) {
+            return response()->json([
+                'message'  => 'Job created.',
+                'job'      => $job->loadMissing('site:id,code,name'),
+                'redirect' => route('admin.jobs.index'),
+            ], 201);
+        }
 
-        return redirect()->route('admin.jobs.edit', $job)->with('ok', 'Job created');
+        return redirect()->route('admin.jobs.index')->with('success', 'Job created.');
     }
 
     /**
@@ -130,54 +125,72 @@ class JobController extends Controller
     public function edit(Job $job)
     {
         $job->loadMissing('site:id,code,name');
-        return view('admin.jobs.edit', compact('job'));
+        $sites = Site::orderBy('code')->get(['id','code','name']);
+        return view('admin.jobs.edit', compact('job','sites'));
     }
 
     /**
-     * ADMIN UPDATE
+     * ADMIN UPDATE -> redirect ke index + JSON response (AJAX)
      */
     public function update(Request $request, Job $job)
     {
         $data = $request->validate([
-            'code'            => 'required|string|max:50|unique:jobs,code,' . $job->id . ',id',
-            'title'           => 'required|string|max:200',
-            'site_code'       => 'nullable|string|max:50', // tetap support form lama
-            'division'        => 'nullable|string|max:100',
-            'level'           => 'nullable|string|max:100',
-            'employment_type' => 'required|in:intern,contract,fulltime',
-            'openings'        => 'required|integer|min:1',
-            'status'          => 'required|in:draft,open,closed',
-            'description'     => 'nullable|string',
+            'code'            => ['required','string','max:50', Rule::unique('jobs','code')->ignore($job->id)],
+            'title'           => ['required','string','max:200'],
+            'division'        => ['nullable','string','max:100'],
+            'level'           => ['nullable','string','max:100'],
+            'employment_type' => ['required', Rule::in(['intern','contract','fulltime'])],
+            'openings'        => ['required','integer','min:1'],
+            'status'          => ['required', Rule::in(['draft','open','closed'])],
+            'description'     => ['nullable','string'],
+            'site_id'         => ['nullable','exists:sites,id','required_without:site_code'],
+            'site_code'       => ['nullable','string','exists:sites,code','required_without:site_id'],
         ]);
 
+        $siteId   = $data['site_id'] ?? null;
         $siteCode = $data['site_code'] ?? null;
-        unset($data['site_code']);
+        unset($data['site_id'], $data['site_code']);
 
-        // Update field utama
-        $job->update($data);
-
-        // Sinkronkan site via mutator kalau ada perubahan
-        if ($siteCode !== null) {
-            $job->site_code = $siteCode; // mutator akan set site_id
-            $job->save();
+        if (!$siteId && $siteCode) {
+            $siteId = Site::where('code', $siteCode)->value('id');
+        }
+        if ($siteId) {
+            $data['site_id'] = $siteId;
         }
 
-        // sync manpower budget ke openings (opsional)
-        if ($job->manpowerRequirement) {
+        $job->update($data);
+
+        if (method_exists($job, 'manpowerRequirement') && $job->manpowerRequirement) {
             $job->manpowerRequirement->update([
                 'budget_headcount' => (int) $data['openings'],
             ]);
         }
 
-        return back()->with('ok', 'Job updated');
+        if ($request->wantsJson()) {
+            return response()->json([
+                'message'  => 'Job updated.',
+                'job'      => $job->fresh()->loadMissing('site:id,code,name'),
+                'redirect' => route('admin.jobs.index'),
+            ]);
+        }
+
+        return redirect()->route('admin.jobs.index')->with('success', 'Job updated.');
     }
 
     /**
-     * ADMIN DELETE
+     * ADMIN DELETE (tetap balik ke index, plus JSON opsional)
      */
-    public function destroy(Job $job)
+    public function destroy(Request $request, Job $job)
     {
         $job->delete();
-        return redirect()->route('admin.jobs.index')->with('ok', 'Job deleted');
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'message'  => 'Job deleted.',
+                'redirect' => route('admin.jobs.index'),
+            ]);
+        }
+
+        return redirect()->route('admin.jobs.index')->with('success', 'Job deleted.');
     }
 }

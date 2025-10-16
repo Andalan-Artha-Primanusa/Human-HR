@@ -14,107 +14,160 @@ class Job extends Model
 {
     use HasFactory, HasUuidPrimaryKey;
 
+    /** LEVELS (canonical slug) */
+    public const LEVELS = ['bod','manager','supervisor','spv','staff','non_staff'];
+
+    /** Label Level untuk tampilan */
+    public const LEVEL_LABELS = [
+        'bod'        => 'BOD',
+        'manager'    => 'Manager',
+        'supervisor' => 'Supervisor',
+        'spv'        => 'SPV',
+        'staff'      => 'Staff',
+        'non_staff'  => 'Non staff',
+    ];
+
+    /** DIVISIONS (canonical slug => label) */
+    public const DIVISIONS = [
+        'engineering' => 'Engineering',
+        'hr'          => 'Human Resources',
+        'it'          => 'Information Technology',
+        'finance'     => 'Finance',
+        'marketing'   => 'Marketing',
+        'sales'       => 'Sales',
+        'operations'  => 'Operations',
+        'admin'       => 'Administration',
+    ];
+
     protected $fillable = [
-        'code',
-        'title',
-        'site_id',
-        'division',
-        'level',
-        'employment_type',
-        'openings',
-        'status',
-        'description',
+        'code','title','site_id','division','level','employment_type',
+        'openings','status','description',
     ];
 
     protected $casts = [
         'openings' => 'integer',
     ];
 
-    /** Eager load ringan; hapus jika tidak perlu */
-    // protected $with = ['site'];
+    /* =====================
+     | Normalizer: LEVEL
+     |=====================*/
+    public static function normalizeLevel(?string $raw): ?string
+    {
+        if (!$raw) return null;
+        $s = strtolower(trim($raw));
+        $s = str_replace([' ', ' '], '_', $s); // termasuk NBSP
+        $aliases = [
+            'board_of_directors' => 'bod',
+            'non-staff' => 'non_staff',
+            'nonstaff'  => 'non_staff',
+        ];
+        $s = $aliases[$s] ?? $s;
+        return in_array($s, self::LEVELS, true) ? $s : null;
+    }
+
+    public function setLevelAttribute($value): void
+    {
+        $norm = self::normalizeLevel(is_string($value) ? $value : null);
+        $this->attributes['level'] = $norm ?: null;
+    }
+
+    public function getLevelLabelAttribute(): ?string
+    {
+        $key = $this->attributes['level'] ?? null;
+        return $key ? (self::LEVEL_LABELS[$key] ?? strtoupper($key)) : null;
+    }
 
     /* =====================
-     * Relationships
-     * ===================== */
+     | Normalizer: DIVISION
+     |=====================*/
+    public static function normalizeDivision(?string $raw): ?string
+    {
+        if (!$raw) return null;
+        $s = strtolower(trim($raw));
+        $s = str_replace([' ', ' '], '_', $s); // termasuk NBSP
+        $aliases = [
+            'human_resources'        => 'hr',
+            'people'                 => 'hr',
+            'information_technology' => 'it',
+            'ops'                    => 'operations',
+        ];
+        $s = $aliases[$s] ?? $s;
+        return array_key_exists($s, self::DIVISIONS) ? $s : null;
+    }
+
+    public function setDivisionAttribute($value): void
+    {
+        $norm = self::normalizeDivision(is_string($value) ? $value : null);
+        $this->attributes['division'] = $norm ?: null;
+    }
+
+    public function getDivisionLabelAttribute(): ?string
+    {
+        $key = $this->attributes['division'] ?? null;
+        return $key ? (self::DIVISIONS[$key] ?? strtoupper($key)) : null;
+    }
+
+    /* =====================
+     | Relationships
+     |=====================*/
 
     /** @return BelongsTo<Site, Job> */
     public function site(): BelongsTo
     {
-        return $this->belongsTo(Site::class);
+        // eksplisitkan keys biar aman
+        return $this->belongsTo(\App\Models\Site::class, 'site_id', 'id');
     }
 
     /** @return HasMany<JobApplication> */
     public function applications(): HasMany
     {
-        return $this->hasMany(JobApplication::class);
+        return $this->hasMany(\App\Models\JobApplication::class);
     }
 
     /** @return HasOne<ManpowerRequirement> */
     public function manpowerRequirement(): HasOne
     {
-        return $this->hasOne(ManpowerRequirement::class);
+        return $this->hasOne(\App\Models\ManpowerRequirement::class);
     }
 
     /* =====================
-     * Scopes
-     * ===================== */
+     | Scopes
+     |=====================*/
+    public function scopeOpen($q) { return $q->where('status','open'); }
 
-    public function scopeOpen($q)
-    {
-        return $q->where('status', 'open');
-    }
+    public function scopeAtSite($q, string $siteId) { return $q->where('site_id',$siteId); }
 
-    /** Filter by Site UUID */
-    public function scopeAtSite($q, string $siteId)
-    {
-        return $q->where('site_id', $siteId);
-    }
-
-    /** Filter by Site code (HO/DBK/POS/...) */
     public function scopeAtSiteCode($q, string $code)
     {
-        return $q->whereHas('site', fn ($qq) => $qq->where('code', $code));
+        return $q->whereHas('site', fn($qq) => $qq->where('code',$code));
     }
 
-    /** Filter by division quickly */
     public function scopeInDivision($q, ?string $division)
     {
-        return $division ? $q->where('division', $division) : $q;
+        $norm = self::normalizeDivision($division);
+        return $norm ? $q->where('division', $norm) : $q;
     }
 
-    /** Simple search across title/code/description */
     public function scopeSearch($q, ?string $term)
     {
-        if (!$term) return $q;
+        if(!$term) return $q;
         $term = "%{$term}%";
-        return $q->where(function ($qq) use ($term) {
-            $qq->where('code', 'like', $term)
-               ->orWhere('title', 'like', $term)
-               ->orWhere('description', 'like', $term);
-        });
+        return $q->where(fn($qq) =>
+            $qq->where('code','like',$term)
+               ->orWhere('title','like',$term)
+               ->orWhere('description','like',$term)
+        );
     }
 
     /* =====================
-     * Backward-compat (optional)
-     * ===================== */
+     | Backward compat: site_code virtual
+     |=====================*/
+    public function getSiteCodeAttribute(): ?string { return $this->site?->code; }
 
-    /** Virtual getter: $job->site_code -> kode dari relasi Site */
-    public function getSiteCodeAttribute(): ?string
-    {
-        return $this->site?->code;
-    }
-
-    /**
-     * Virtual setter: $job->site_code = 'DBK';
-     * Berguna kalau masih ada form lama kirim 'site_code' — kita konversi ke site_id.
-     */
     public function setSiteCodeAttribute(?string $code): void
     {
-        if (!$code) {
-            $this->site_id = null;
-            return;
-        }
-        $siteId = DB::table('sites')->where('code', $code)->value('id');
-        $this->site_id = $siteId ?: $this->site_id; // jangan timpa kalau code tidak ketemu
+        if(!$code){ $this->site_id = null; return; }
+        $siteId = DB::table('sites')->where('code',$code)->value('id');
+        $this->site_id = $siteId ?: $this->site_id;
     }
 }

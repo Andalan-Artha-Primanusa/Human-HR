@@ -11,7 +11,7 @@
       ? $job->applications()->where('user_id', auth()->id())->with('stages')->latest()->first()
       : null;
 
-  // urutan & label tahapan (harus sinkron dengan controller)
+  // urutan & label tahapan (sinkron dg controller)
   $stageOrder = ['applied','psychotest','hr_iv','user_iv','final','offer','hired'];
   $pretty = [
     'applied'    => 'Pengajuan Berkas',
@@ -27,28 +27,19 @@
   $overallRaw = $myApp?->overall_status;
   $overall    = $overallRaw ? strtolower($overallRaw) : 'in_progress';
 
-  // normalisasi current stage supaya pasti ada di stageOrder
   $currRaw = strtolower($myApp?->current_stage ?? 'applied');
   $currKey = in_array($currRaw, $stageOrder, true) ? $currRaw : 'applied';
 
-  // visited: ambil dari tabel + pastikan current ikut dihitung
   $visited = collect($myApp?->stages ?? [])
-      ->pluck('stage_key')
-      ->map(fn($v) => strtolower($v))
+      ->pluck('stage_key')->map(fn($v) => strtolower($v))
       ->filter(fn($v) => in_array($v, $stageOrder, true))
-      ->unique()
-      ->push($currKey)
-      ->unique()
-      ->values()
-      ->all();
+      ->unique()->push($currKey)->unique()->values()->all();
 
-  // prev/next yang valid saja
   $idxNow  = array_search($currKey, $stageOrder, true);
   $idxNow  = ($idxNow === false) ? 0 : $idxNow;
   $prevKey = $idxNow > 0 ? $stageOrder[$idxNow-1] : null;
   $nextKey = $idxNow < count($stageOrder)-1 ? $stageOrder[$idxNow+1] : null;
 
-  // progress %
   $progressPct = function() use ($myApp,$stageOrder,$overall,$currKey){
     if(!$myApp) return 0;
     $idx = array_search($currKey,$stageOrder,true); if($idx===false) $idx=0;
@@ -59,37 +50,24 @@
     return (int)round($idx/$max*100);
   };
 
-  // cek role admin secara fleksibel (kolom role biasa atau spatie)
+  // cek role admin (fleksibel, dukung spatie/tanpa spatie)
   $isAdmin = auth()->check() && (
     (method_exists(auth()->user(), 'hasAnyRole') && auth()->user()->hasAnyRole(['hr','superadmin']))
     || in_array(auth()->user()->role ?? null, ['hr','superadmin'], true)
   );
+
+  // helper kecil
+  $employmentPretty = [
+    'fulltime' => 'Fulltime',
+    'contract' => 'Contract',
+    'intern'   => 'Intern',
+  ];
 @endphp
 
 @section('content')
-
-{{-- ===== Icons (inline sekali) ===== --}}
-<svg xmlns="http://www.w3.org/2000/svg" class="hidden">
-  <symbol id="i-brief" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-    <path stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M3 7h18v10a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V7Z"/><path d="M8 7V6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v1" stroke-width="1.8"/>
-  </symbol>
-  <symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-    <circle cx="12" cy="12" r="9" stroke-width="2"/><path d="M12 7v5l3 2" stroke-width="2" stroke-linecap="round"/>
-  </symbol>
-  <symbol id="i-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-    <path d="M12 21s7-4.35 7-10a7 7 0 1 0-14 0c0 5.65 7 10 7 10Z" stroke-width="2"/><circle cx="12" cy="11" r="2.5" stroke-width="2"/>
-  </symbol>
-  <symbol id="i-chevron-left" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-    <polyline points="15 18 9 12 15 6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-  </symbol>
-  <symbol id="i-chevron-right" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-    <polyline points="9 18 15 12 9 6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-  </symbol>
-</svg>
-
 <div class="mx-auto w-full max-w-[1400px] px-4 sm:px-6 lg:px-8 py-6">
 
-  {{-- Header bar --}}
+  {{-- HEADER: bar biru–merah + judul & CTA --}}
   <div class="overflow-hidden rounded-2xl border bg-white shadow-sm" style="border-color: {{ $BORD }}">
     <div class="flex h-2 w-full">
       <div class="flex-1" style="background: {{ $BLUE }}"></div>
@@ -99,23 +77,39 @@
     <div class="p-5 md:p-6">
       <div class="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
         <div class="min-w-0">
-          <h1 class="truncate text-3xl font-semibold text-slate-900">{{ $job->title }}</h1>
+          <h1 class="truncate text-3xl font-semibold text-slate-900">
+            {{ $job->title ?? '—' }}
+          </h1>
           <div class="mt-1 text-sm text-slate-600">
-            {{ $job->division ?? '—' }} · {{ $job->site?->code ?? $job->site_code ?? '—' }}
+            {{ $job->division ?: '—' }} ·
+            {{-- ambil dari relasi site --}}
+            {{ $job->site?->code ? ($job->site->code . ' — ' . ($job->site->name ?? '')) : '—' }}
           </div>
         </div>
 
-        {{-- CTA Apply / State --}}
         <div class="flex items-center gap-2">
+          {{-- status badge --}}
           <span class="rounded-full px-2.5 py-1 text-[11px] font-semibold ring-1 ring-inset
             {{ $job->status==='open' ? 'bg-blue-50 text-blue-700 ring-blue-200' : 'bg-slate-100 text-slate-700 ring-slate-200' }}">
-            STATUS: {{ strtoupper($job->status) }}
+            STATUS: {{ strtoupper($job->status ?? 'draft') }}
           </span>
 
+          {{-- Admin quick actions (opsional) --}}
+          @if($isAdmin)
+            @if(Route::has('admin.jobs.edit'))
+              <a href="{{ route('admin.jobs.edit', $job) }}" class="rounded-lg border px-3 py-2 text-sm hover:bg-slate-50"
+                 style="border-color: {{ $BORD }}">Edit</a>
+            @endif
+            @if(Route::has('admin.applications.index'))
+              <a href="{{ route('admin.applications.index', ['job' => $job->id]) }}" class="rounded-lg border px-3 py-2 text-sm hover:bg-slate-50"
+                 style="border-color: {{ $BORD }}">Kandidat</a>
+            @endif
+          @endif
+
+          {{-- CTA pelamar --}}
           @auth
-            @if($job->status==='open' && !$myApp)
-              <form method="POST" action="{{ route('applications.store',$job) }}">
-                @csrf
+            @if(($job->status ?? 'draft') === 'open' && !$myApp)
+              <form method="POST" action="{{ route('applications.store',$job) }}">@csrf
                 <button class="rounded-lg px-4 py-2 text-sm font-semibold text-white" style="background: {{ $BLUE }}">Lamar Sekarang</button>
               </form>
             @elseif($myApp)
@@ -135,21 +129,21 @@
     </div>
   </div>
 
-  {{-- Main grid --}}
+  {{-- MAIN GRID --}}
   <div class="mt-6 grid gap-6 lg:grid-cols-3">
-    {{-- Left: deskripsi --}}
+    {{-- LEFT: detail & deskripsi --}}
     <div class="lg:col-span-2 rounded-2xl border bg-white shadow-sm" style="border-color: {{ $BORD }}">
       <div class="p-5 md:p-6">
         <div class="grid gap-4 sm:grid-cols-3">
           <div class="rounded-xl border bg-white px-4 py-3" style="border-color: {{ $BORD }}">
             <div class="text-xs text-slate-500">Tipe</div>
             <div class="mt-1 inline-flex items-center rounded bg-blue-700 px-2 py-1 text-[11px] font-semibold text-white">
-              {{ strtoupper($job->employment_type) }}
+              {{ $employmentPretty[$job->employment_type] ?? strtoupper($job->employment_type ?? '—') }}
             </div>
           </div>
           <div class="rounded-xl border bg-white px-4 py-3" style="border-color: {{ $BORD }}">
             <div class="text-xs text-slate-500">Openings</div>
-            <div class="mt-1 text-xl font-semibold text-slate-900">{{ (int) $job->openings }}</div>
+            <div class="mt-1 text-xl font-semibold text-slate-900">{{ (int) ($job->openings ?? 1) }}</div>
           </div>
           <div class="rounded-xl border bg-white px-4 py-3" style="border-color: {{ $BORD }}">
             <div class="text-xs text-slate-500">Lokasi</div>
@@ -164,29 +158,27 @@
 
         <h2 class="text-lg font-semibold text-slate-900">Deskripsi Pekerjaan</h2>
         <div class="prose max-w-none prose-p:my-2 prose-li:my-1 text-slate-800">
-          {!! nl2br(e($job->description)) !!}
+          @if(filled($job->description))
+            {!! nl2br(e($job->description)) !!}
+          @else
+            <p class="text-slate-500">Belum ada deskripsi yang dituliskan.</p>
+          @endif
         </div>
       </div>
     </div>
 
-    {{-- Right: Timeline / Ringkasan Lamaran --}}
+    {{-- RIGHT: timeline / ringkasan lamaran --}}
     <aside>
       <div class="rounded-2xl border bg-white shadow-sm" style="border-color: {{ $BORD }}">
         <div class="p-5 md:p-6">
           <div class="flex items-center justify-between">
             <h3 class="text-base font-semibold text-slate-900">Progres Lamaran Kamu</h3>
 
-            {{-- ADMIN CONTROLS: next/prev stage (POST-only) --}}
+            {{-- ADMIN stage controls (POST-only, hanya jika ada $myApp dan belum rejected) --}}
             @if($myApp && $isAdmin && Route::has('admin.applications.move') && ($overall !== 'rejected'))
-              @php
-                // pastikan tidak pernah kirim "to" kosong
-                $canPrev = filled($prevKey);
-                $canNext = filled($nextKey);
-              @endphp
+              @php $canPrev = filled($prevKey); $canNext = filled($nextKey); @endphp
               <div class="flex items-center gap-2">
-                {{-- Prev --}}
-                <form method="POST"
-                      action="{{ route('admin.applications.move', $myApp) }}"
+                <form method="POST" action="{{ route('admin.applications.move', $myApp) }}"
                       onsubmit="return {{ $canPrev ? 'confirm' : '(function(){return false;})' }}('Kembalikan tahap ke: {{ $pretty[$prevKey] ?? '—' }} ?')">
                   @csrf
                   <input type="hidden" name="to" value="{{ $canPrev ? $prevKey : '' }}">
@@ -196,9 +188,8 @@
                     <svg class="h-4 w-4"><use href="#i-chevron-left"/></svg>
                   </button>
                 </form>
-                {{-- Next --}}
-                <form method="POST"
-                      action="{{ route('admin.applications.move', $myApp) }}"
+
+                <form method="POST" action="{{ route('admin.applications.move', $myApp) }}"
                       onsubmit="return {{ $canNext ? 'confirm' : '(function(){return false;})' }}('Lanjutkan tahap ke: {{ $pretty[$nextKey] ?? '—' }} ?')">
                   @csrf
                   <input type="hidden" name="to" value="{{ $canNext ? $nextKey : '' }}">
@@ -222,7 +213,7 @@
             @if(!$myApp)
               <div class="mt-3 rounded-xl border px-4 py-3 text-sm" style="border-color: {{ $BORD }}">
                 Belum ada lamaran untuk posisi ini.
-                @if($job->status==='open')
+                @if(($job->status ?? 'draft')==='open')
                 <form method="POST" action="{{ route('applications.store',$job) }}" class="mt-3">@csrf
                   <button class="w-full rounded-lg px-3 py-2 text-sm font-semibold text-white" style="background: {{ $BLUE }}">Lamar Sekarang</button>
                 </form>
@@ -241,7 +232,7 @@
                 </div>
               </div>
 
-              {{-- Timeline vertical kanan --}}
+              {{-- Timeline --}}
               <div class="mt-5 relative">
                 <div class="absolute right-3 top-0 bottom-0 w-0.5" style="background:#e6e6e6"></div>
                 <div class="space-y-3">
@@ -290,11 +281,11 @@
                 </div>
               </div>
 
-              {{-- Meta --}}
+              {{-- Meta lamaran --}}
               <div class="mt-5 grid gap-2 text-xs text-slate-600">
                 <div class="inline-flex items-center gap-2">
                   <svg class="h-4 w-4 text-slate-500"><use href="#i-clock"/></svg>
-                  Diajukan: {{ optional($myApp->created_at)->format('d M Y') }}
+                  Diajukan: {{ optional($myApp->created_at)->format('d M Y') ?? '—' }}
                 </div>
                 <div class="inline-flex items-center gap-2">
                   <svg class="h-4 w-4 text-slate-500"><use href="#i-brief"/></svg>

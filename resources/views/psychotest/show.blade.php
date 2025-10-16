@@ -1,4 +1,4 @@
-@extends('layouts.karir', [ 'title' => 'Psikotes' ])
+@extends('layouts.app', [ 'title' => 'Psikotes' ])
 
 
 @section('content')
