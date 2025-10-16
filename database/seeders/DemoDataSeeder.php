@@ -7,6 +7,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
 use App\Models\{
     User,
+    Site,
     Job,
     JobApplication,
     ApplicationStage,
@@ -85,10 +86,13 @@ class DemoDataSeeder extends Seeder
             CandidateProfile::updateOrCreate(
                 ['user_id' => $u->id],
                 [
-                    'full_name' => $u->name,
-                    'phone'     => '081234567890',
-                    'address'   => 'Jakarta',
-                    'extras'    => ['portfolio' => null],
+                    'full_name'      => $u->name,
+                    'phone'          => '081234567890',
+                    // gunakan kolom yang ada pada migration candidate_profiles:
+                    'ktp_address'    => 'Jl. Contoh No.1',
+                    'ktp_city'       => 'Jakarta',
+                    'domicile_city'  => 'Jakarta',
+                    'extras'         => ['portfolio' => null],
                 ]
             );
         }
@@ -133,18 +137,30 @@ class DemoDataSeeder extends Seeder
         ];
 
         $jobs = collect($jobDefs)->map(function ($d) {
+            // pastikan site ada berdasarkan code
+            $site = Site::firstOrCreate(
+                ['code' => $d['site_code']],
+                ['name' => $d['site_code']]
+            );
+
+            // payload Job tanpa site_code; ganti ke site_id
+            $payload = collect($d)->except('site_code')->toArray();
+            $payload['site_id'] = $site->id;
+
             /** @var Job $job */
             $job = Job::updateOrCreate(
                 ['code' => $d['code']],
-                $d
+                $payload
             );
 
-            // manpowerRequirement: satu baris per job
+            // manpowerRequirement: satu baris per job (null-safe untuk filled_headcount)
+            $filled = optional($job->manpowerRequirement)->filled_headcount ?? 0;
+
             $job->manpowerRequirement()->updateOrCreate(
                 ['job_id' => $job->id],
                 [
                     'budget_headcount' => $d['openings'],
-                    'filled_headcount' => $job->manpowerRequirement->filled_headcount ?? 0,
+                    'filled_headcount' => $filled,
                 ]
             );
 
@@ -165,11 +181,11 @@ class DemoDataSeeder extends Seeder
         );
 
         $bank = [
-            ['Q: 2+2=?',                            '1','2','4','5',      '4'],
-            ['Q: Ibu kota Indonesia?',              'Bandung','Jakarta','Medan','Surabaya','Jakarta'],
-            ['Q: Benar/Salah: Air membeku di 0°C',  'true','false', null, null, 'true','truefalse'],
-            ['Q: 5*3=?',                            '8','15','10','12',   '15'],
-            ['Q: Warna bendera: Merah-___',         'Putih','Biru','Hitam','Kuning','Putih'],
+            ['Q: 2+2=?',                           '1','2','4','5',       '4'],
+            ['Q: Ibu kota Indonesia?',             'Bandung','Jakarta','Medan','Surabaya','Jakarta'],
+            ['Q: Benar/Salah: Air membeku di 0°C', 'true','false', null, null, 'true','truefalse'],
+            ['Q: 5*3=?',                           '8','15','10','12',    '15'],
+            ['Q: Warna bendera: Merah-___',        'Putih','Biru','Hitam','Kuning','Putih'],
         ];
 
         foreach ($bank as $i => $row) {
@@ -205,7 +221,6 @@ class DemoDataSeeder extends Seeder
             PsychotestAttempt::updateOrCreate(
                 ['application_id' => $app->id, 'test_id' => $test->id, 'attempt_no' => 1],
                 [
-                    // jika model auto-uuid, tidak perlu set id
                     'user_id'      => $app->user_id,
                     'status'       => 'scored',
                     'started_at'   => now()->subDay(),

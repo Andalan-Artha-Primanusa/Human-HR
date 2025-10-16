@@ -7,6 +7,7 @@ use App\Models\JobApplication;
 use App\Models\ApplicationStage;
 use App\Models\PsychotestAttempt;
 use App\Models\PsychotestTest;
+use App\Models\CandidateProfile; // <= TAMBAH
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -67,17 +68,20 @@ class ApplicationController extends Controller
         return view('applications.mine', compact('apps'));
     }
 
-    /** Pelamar: apply job */
+    /** Pelamar: apply job -> redirect ke wizard profile */
     public function store(Request $request, Job $job)
     {
         abort_if($job->status !== 'open', 403, 'Job is not open');
 
-        $exists = JobApplication::where('job_id', $job->id)
+        $already = JobApplication::where('job_id', $job->id)
             ->where('user_id', $request->user()->id)
             ->exists();
 
-        if ($exists) {
-            return back()->with('warn', 'Kamu sudah melamar posisi ini.');
+        if ($already) {
+            // Sudah pernah melamar: langsung ke wizard untuk lengkapi/cek data
+            return redirect()
+                ->route('candidate.profiles.edit', ['job' => $job->id])
+                ->with('info', 'Kamu sudah melamar. Silakan lengkapi/cek data profil.');
         }
 
         DB::transaction(function () use ($request, $job) {
@@ -91,13 +95,22 @@ class ApplicationController extends Controller
 
             ApplicationStage::create([
                 'application_id' => $app->id,
-                'stage_key'      => 'apply',
+                'stage_key'      => 'apply', // gunakan kunci internal
                 'status'         => 'pending',
                 'payload'        => ['note' => 'Initial application submitted'],
             ]);
+
+            // Pastikan profil kandidat ada (agar form wizard punya record untuk di-update)
+            CandidateProfile::firstOrCreate(
+                ['user_id' => $request->user()->id],
+                ['full_name' => $request->user()->name]
+            );
         });
 
-        return redirect()->route('applications.mine')->with('ok', 'Lamaran terkirim.');
+        // Arahkan ke halaman isi 4 tabel (wizard)
+        return redirect()
+            ->route('candidate.profiles.edit', ['job' => $job->id])
+            ->with('success', 'Lamaran dibuat. Lengkapi data profil & riwayat kamu ya.');
     }
 
     /** Admin: daftar semua aplikasi + filter */
@@ -180,7 +193,7 @@ class ApplicationController extends Controller
     public function moveStageAjax(Request $request)
     {
         $request->validate([
-            'id' => ['required', 'uuid', 'exists:job_applications,id'], // UUID, bukan integer
+            'id' => ['required', 'uuid', 'exists:job_applications,id'],
         ]);
 
         [$to, $status, $note, $score] = $this->validateMove($request);

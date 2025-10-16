@@ -11,11 +11,11 @@ use App\Http\Controllers\InterviewController;
 use App\Http\Controllers\PsychotestController;
 use App\Http\Controllers\OfferController;
 use App\Http\Controllers\ManpowerDashboardController;
-
+use App\Http\Controllers\CandidateProfileController;
 // === Admin Controllers ===
 use App\Http\Controllers\Admin\SiteController as AdminSiteController;
 
-// === Public Sites Controller (tambahan, untuk user non-admin) ===
+// === Public Sites Controller (tambahan, untuk user non-admin)
 use App\Http\Controllers\SitePublicController;
 
 /*
@@ -27,12 +27,22 @@ use App\Http\Controllers\SitePublicController;
 | Pakai whereUuid untuk parameter yang berupa UUID (Laravel mendukung whereUuid()).
 |
 */
+
 Route::get('/', WelcomeController::class)->name('welcome');
 
 Route::get('/jobs', [JobController::class, 'index'])->name('jobs.index');
 Route::get('/jobs/{job}', [JobController::class, 'show'])
     ->whereUuid('job')
     ->name('jobs.show');
+
+Route::middleware('auth')->group(function () {
+    Route::get('/jobs/{job}/apply/profile',  [CandidateProfileController::class, 'edit'])
+        ->whereUuid('job')
+        ->name('candidate.profiles.edit');
+    Route::post('/jobs/{job}/apply/profile', [CandidateProfileController::class, 'update'])
+        ->whereUuid('job')
+        ->name('candidate.profiles.update');
+});
 
 /*
 |--------------------------------------------------------------------------
@@ -62,8 +72,8 @@ Route::get('/dashboard', function () {
 Route::middleware('auth')->group(function () {
     // Profile (default Breeze)
     Route::get('/profile',  [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile',[ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile',[ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     // Apply ke lowongan tertentu (POST-only)
     Route::post('/jobs/{job}/apply', [ApplicationController::class, 'store'])
@@ -121,15 +131,14 @@ Route::prefix('admin')
             ->name('applications.board');
 
         /*
-         * Perpindahan stage (POST only) – tombol di UI harus submit ke rute ini.
-         * Controller method: ApplicationController@moveStage
+         * Perpindahan stage (POST only)
          */
         Route::post('applications/{application}/move', [ApplicationController::class, 'moveStage'])
             ->whereUuid('application')
             ->name('applications.move');
 
         /*
-         * Legacy GET handler – kalau masih ada link lama (GET) kita redirect ke index agar tidak 405.
+         * Legacy GET handler
          */
         Route::get('applications/{application}/move', function () {
             return redirect()
@@ -138,8 +147,7 @@ Route::prefix('admin')
         })->whereUuid('application');
 
         /*
-         * AJAX Kanban (drag & drop) – JSON { application_id, to_stage }
-         * Controller method: ApplicationController@moveStageAjax
+         * AJAX Kanban (drag & drop)
          */
         Route::post('applications/board/move', [ApplicationController::class, 'moveStageAjax'])
             ->name('applications.board.move');
@@ -177,6 +185,18 @@ Route::prefix('admin')
          */
         Route::get('dashboard/manpower', ManpowerDashboardController::class)
             ->name('dashboard.manpower');
+
+        /*
+         * === Admin: Candidate Profiles (READ-ONLY) ===
+         */
+        Route::get('candidates', [CandidateProfileController::class, 'adminIndex'])
+            ->name('candidates.index');
+        Route::get('candidates/{profile}', [CandidateProfileController::class, 'adminShow'])
+            ->whereUuid('profile')
+            ->name('candidates.show');
+        Route::get('candidates/{profile}/cv', [CandidateProfileController::class, 'adminCv'])
+            ->whereUuid('profile')
+            ->name('candidates.cv');
     });
 
 /*
@@ -184,4 +204,4 @@ Route::prefix('admin')
 | Auth scaffolding routes (Breeze/Fortify)
 |--------------------------------------------------------------------------
 */
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

@@ -1,24 +1,58 @@
 {{-- resources/views/layouts/partials/sidenav.blade.php --}}
 @php
-// Props
-$variant = $variant ?? 'desktop'; // 'desktop' | 'mobile'
-$closeOnClick = $closeOnClick ?? false; // only used on mobile
-$closeAttr = $closeOnClick ? ' @click="open=false"' : '';
-$offerQuickId = $offerQuickId ?? null;
+  use Illuminate\Support\Str;
 
-// Active states per-warna
-$activeBlue = fn($p) => request()->routeIs($p) ? 'bg-blue-50 text-blue-700 font-semibold' : '';
-$activeRed = fn($p) => request()->routeIs($p) ? 'bg-red-50 text-red-700 font-semibold' : '';
+  // ===== Props =====
+  $variant      = $variant      ?? 'desktop'; // 'desktop' | 'mobile'
+  $closeOnClick = $closeOnClick ?? false;     // only used on mobile
+  $closeAttr    = $closeOnClick ? ' @click="open=false"' : '';
+  $offerQuickId = $offerQuickId ?? null;
+  $logoUrl      = $logoUrl      ?? asset('images/logo-andalan.svg'); // ganti jika perlu
+  $appName      = config('app.name', 'Careers Portal');
 
-// Link styles
-$linkDeskBlue = 'flex items-center gap-2 px-3 py-2 rounded-lg text-blue-700 hover:bg-blue-50';
-$linkDeskRed = 'flex items-center gap-2 px-3 py-2 rounded-lg text-red-700 hover:bg-red-50';
-$linkMobileBlue = 'block px-3 py-2 rounded-lg text-blue-700 hover:bg-blue-50';
-$linkMobileRed = 'block px-3 py-2 rounded-lg text-red-700 hover:bg-red-50';
+  // ===== Auth context =====
+  /** @var \App\Models\User|null $u */
+  $u = auth()->user();
+  $roleRaw = $u->role ?? 'pelamar';
+  $roleMap = [
+    'superadmin' => 'Super Admin',
+    'admin'      => 'Admin',
+    'hr'         => 'HR',
+    'pelamar'    => 'Pelamar',
+  ];
+  $roleName = $roleMap[$roleRaw] ?? Str::title($roleRaw);
+
+  // Avatar (initials) fallback
+  $initials = '';
+  if ($u && $u->name) {
+      $parts = preg_split('/\s+/', trim($u->name));
+      $initials = mb_strtoupper(mb_substr($parts[0] ?? '', 0, 1) . mb_substr($parts[1] ?? '', 0, 1));
+  }
+
+  // ===== Active state helpers =====
+  $activeBlue = fn($p) => request()->routeIs($p) ? 'bg-blue-50 text-blue-700 font-semibold' : '';
+  $activeRed  = fn($p) => request()->routeIs($p) ? 'bg-red-50 text-red-700 font-semibold' : '';
+
+  // ===== Link styles =====
+  $linkDeskBlue   = 'flex items-center gap-2 px-3 py-2 rounded-lg text-blue-700 hover:bg-blue-50';
+  $linkDeskRed    = 'flex items-center gap-2 px-3 py-2 rounded-lg text-red-700 hover:bg-red-50';
+  $linkMobileBlue = 'block px-3 py-2 rounded-lg text-blue-700 hover:bg-blue-50';
+  $linkMobileRed  = 'block px-3 py-2 rounded-lg text-red-700 hover:bg-red-50';
 @endphp
 
 @if($variant === 'desktop')
 <nav class="p-3 space-y-1 text-sm">
+  {{-- ====== HEADER: LOGO (hapus sublabel "Andalan Group") ====== --}}
+  <div class="mb-3">
+    <a href="{{ url('/') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-50">
+      <img src="{{ $logoUrl }}" alt="Logo" class="w-8 h-8 object-contain" onerror="this.style.display='none'">
+      <div class="leading-tight">
+        <div class="font-semibold text-slate-800">{{ $appName }}</div>
+      </div>
+    </a>
+  </div>
+
+  {{-- ====== GENERAL ====== --}}
   <div class="px-3 pt-3 pb-1 text-xs font-semibold text-blue-600 uppercase section-title">General</div>
 
   <a href="{{ route('jobs.index') }}" class="{{ $linkDeskBlue }} {{ $activeBlue('jobs.*') }}">
@@ -42,18 +76,12 @@ $linkMobileRed = 'block px-3 py-2 rounded-lg text-red-700 hover:bg-red-50';
     </svg>
     <span class="label">Lamaran Saya</span>
   </a>
-
-  <a href="{{ route('profile.edit') }}" class="{{ $linkDeskBlue }} {{ $activeBlue('profile.edit') }}">
-    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6.75a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.5 19.5a7.5 7.5 0 0 1 15 0" />
-    </svg>
-    <span class="label">Profil</span>
-  </a>
   @endauth
 
+  {{-- ====== ADMIN ====== --}}
   @auth
-  @if(in_array(auth()->user()->role ?? 'pelamar', ['hr','superadmin']))
-  <div class="px-3 pt-4 pb-1 text-xs font-semibold text-red-600 uppercase section-title">Personal</div>
+  @if(in_array($roleRaw, ['hr','superadmin','admin']))
+  <div class="px-3 pt-4 pb-1 text-xs font-semibold text-red-600 uppercase section-title">Admin</div>
 
   @if (Route::has('admin.sites.index'))
   <a href="{{ route('admin.sites.index') }}" class="{{ $linkDeskRed }} {{ $activeRed('admin.sites.*') }}">
@@ -70,6 +98,15 @@ $linkMobileRed = 'block px-3 py-2 rounded-lg text-red-700 hover:bg-red-50';
     </svg>
     <span class="label">Jobs</span>
   </a>
+
+  @if (Route::has('admin.candidates.index'))
+  <a href="{{ route('admin.candidates.index') }}" class="{{ $linkDeskRed }} {{ $activeRed('admin.candidates.*') }}">
+    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M15 19a4 4 0 1 0-6 0M12 7a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm6 12v-1a4 4 0 0 0-4-4H10a4 4 0 0 0-4 4v1" />
+    </svg>
+    <span class="label">Candidates</span>
+  </a>
+  @endif
 
   <a href="{{ route('admin.applications.index') }}" class="{{ $linkDeskRed }} {{ $activeRed('admin.applications.index') }}">
     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -131,33 +168,67 @@ $linkMobileRed = 'block px-3 py-2 rounded-lg text-red-700 hover:bg-red-50';
   @endif
   @endauth
 
+  {{-- ====== ACCOUNT (user info di bawah + logout putih) ====== --}}
   <div class="px-3 pt-4 pb-1 text-xs font-semibold text-slate-500 uppercase section-title">Account</div>
+
   @auth
-  <form method="POST" action="{{ route('logout') }}" class="px-3 py-2">
-    @csrf
-    <button class="w-full btn btn-accent !text-white" title="Logout">
-      <span class="inline-flex items-center gap-2 justify-center w-full">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5"
-          fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round"
-            d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3H6.75A2.25 2.25 0 0 0 4.5 5.25v13.5A2.25 2.25 0 0 0 6.75 21H13.5a2.25 2.25 0 0 0 2.25-2.25V15M9.75 12h10.5m0 0-3-3m3 3-3 3" />
-        </svg>
-        <span class="label">Logout</span>
-      </span>
-    </button>
-  </form>
+    {{-- Kartu user (klik = Profil) --}}
+    <a href="{{ route('profile.edit') }}" class="mx-3 mb-2 block rounded-xl border border-slate-200 hover:border-blue-300 hover:bg-blue-50/40 transition">
+      <div class="flex items-center gap-3 px-3 py-2">
+        @if($u && property_exists($u,'profile_photo_url') && $u->profile_photo_url)
+          <img src="{{ $u->profile_photo_url }}" alt="{{ $u->name }}" class="w-9 h-9 rounded-full object-cover">
+        @else
+          <div class="w-9 h-9 rounded-full bg-blue-100 text-blue-700 grid place-content-center font-semibold">
+            {{ $u ? $initials : 'G' }}
+          </div>
+        @endif
+        <div class="min-w-0">
+          <div class="flex items-center gap-2">
+            <div class="font-medium text-slate-800 truncate max-w-[180px]">{{ $u->name }}</div>
+            <span class="text-[10px] px-2 py-0.5 rounded-full bg-red-100 text-red-700">{{ $roleName }}</span>
+          </div>
+          <div class="text-xs text-slate-600 truncate max-w-[220px]">{{ $u->email }}</div>
+        </div>
+      </div>
+    </a>
+
+    {{-- Logout putih --}}
+    <form method="POST" action="{{ route('logout') }}" class="px-3 pb-2">
+      @csrf
+      <button class="w-full rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 px-3 py-2 font-medium shadow-sm" title="Logout">
+        <span class="inline-flex items-center gap-2 justify-center w-full">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3H6.75A2.25 2.25 0 0 0 4.5 5.25v13.5A2.25 2.25 0 0 0 6.75 21H13.5a2.25 2.25 0 0 0 2.25-2.25V15M9.75 12h10.5m0 0-3-3m3 3-3 3" />
+          </svg>
+          <span class="label">Logout</span>
+        </span>
+      </button>
+    </form>
   @else
-  <a href="{{ route('login') }}" class="{{ $linkDeskBlue }} {{ $activeBlue('login') }}">
-    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15V18.75A2.25 2.25 0 0 0 10.5 21h6.75A2.25 2.25 0 0 0 19.5 18.75v-13.5A2.25 2.25 0 0 0 17.25 3H10.5A2.25 2.25 0 0 0 8.25 5.25V9M15 12H3m0 0 3-3m-3 3 3 3" />
-    </svg>
-    <span class="label">Login</span>
-  </a>
+    <div class="px-3 text-xs text-slate-500 mb-1">Belum masuk (login)</div>
+    <a href="{{ route('login') }}" class="{{ $linkDeskBlue }} {{ $activeBlue('login') }} mx-3">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15V18.75A2.25 2.25 0 0 0 10.5 21h6.75A2.25 2.25 0 0 0 19.5 18.75v-13.5A2.25 2.25 0 0 0 17.25 3H10.5A2.25 2.25 0 0 0 8.25 5.25V9M15 12H3m0 0 3-3m-3 3 3 3" />
+      </svg>
+      <span class="label">Login</span>
+    </a>
   @endauth
 </nav>
+
 @else
 {{-- ===================== MOBILE ===================== --}}
 <nav class="space-y-1 text-sm">
+  {{-- ====== HEADER: LOGO (tanpa "Andalan Group") ====== --}}
+  <a href="{{ url('/') }}" {!! $closeAttr !!} class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-50">
+    <img src="{{ $logoUrl }}" alt="Logo" class="w-8 h-8 object-contain" onerror="this.style.display='none'">
+    <div class="leading-tight">
+      <div class="font-semibold text-slate-800">{{ $appName }}</div>
+    </div>
+  </a>
+
+  {{-- ====== GENERAL ====== --}}
+  <div class="px-3 pt-3 pb-1 text-xs font-semibold text-blue-600 uppercase">General</div>
+
   <a href="{{ route('jobs.index') }}" {!! $closeAttr !!} class="{{ $linkMobileBlue }} {{ $activeBlue('jobs.*') }}">
     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 inline-block mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path stroke-linecap="round" stroke-linejoin="round" d="M9 7V6a3 3 0 1 1 6 0v1m-9 4h12m-13 6h14a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2Z" />
@@ -179,15 +250,11 @@ $linkMobileRed = 'block px-3 py-2 rounded-lg text-red-700 hover:bg-red-50';
     </svg>
     Lamaran Saya
   </a>
+  @endauth
 
-  <a href="{{ route('profile.edit') }}" {!! $closeAttr !!} class="{{ $linkMobileBlue }} {{ $activeBlue('profile.edit') }}">
-    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 inline-block mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6.75a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.5 19.5a7.5 7.5 0 0 1 15 0" />
-    </svg>
-    Profil
-  </a>
-
-  @if(in_array(auth()->user()->role ?? 'pelamar', ['hr','superadmin']))
+  {{-- ====== ADMIN ====== --}}
+  @auth
+  @if(in_array($roleRaw, ['hr','superadmin','admin']))
   <div class="px-3 pt-3 pb-1 text-xs font-semibold text-red-600 uppercase">Admin</div>
 
   @if (Route::has('admin.sites.index'))
@@ -206,9 +273,18 @@ $linkMobileRed = 'block px-3 py-2 rounded-lg text-red-700 hover:bg-red-50';
     Jobs
   </a>
 
+  @if (Route::has('admin.candidates.index'))
+  <a href="{{ route('admin.candidates.index') }}" {!! $closeAttr !!} class="{{ $linkMobileRed }} {{ $activeRed('admin.candidates.*') }}">
+    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 inline-block mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M15 19a4 4 0 1 0-6 0M12 7a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm6 12v-1a4 4 0 0 0-4-4H10a4 4 0 0 0-4 4v1" />
+    </svg>
+    Candidates
+  </a>
+  @endif
+
   <a href="{{ route('admin.applications.index') }}" {!! $closeAttr !!} class="{{ $linkMobileRed }} {{ $activeRed('admin.applications.index') }}">
     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 inline-block mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6M9 16h6M9 8h6m-3-5h-1a2 2 0 0 0-2 2H7a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-3a2 2 0 0 0-2-2Z" />
+      <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6M9 16h6M9 8h6m-3-5h-1a2 2 0 0 0-2 2H7a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2Z" />
     </svg>
     Applications
   </a>
@@ -266,28 +342,49 @@ $linkMobileRed = 'block px-3 py-2 rounded-lg text-red-700 hover:bg-red-50';
   @endif
   @endauth
 
+  {{-- ====== ACCOUNT (user info di bawah + logout putih) ====== --}}
   <div class="pt-4 mt-4 border-t border-slate-200">
     @auth
-    <form method="POST" action="{{ route('logout') }}" class="px-3 py-2">
-      @csrf
-      <button class="w-full btn btn-accent !text-white" title="Logout">
-        <span class="inline-flex items-center gap-2 justify-center w-full">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5"
-            fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round"
-              d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3H6.75A2.25 2.25 0 0 0 4.5 5.25v13.5A2.25 2.25 0 0 0 6.75 21H13.5a2.25 2.25 0 0 0 2.25-2.25V15M9.75 12h10.5m0 0-3-3m3 3-3 3" />
-          </svg>
-          <span class="label">Logout</span>
-        </span>
-      </button>
-    </form>
+      {{-- Kartu user (klik = Profil) --}}
+      <a href="{{ route('profile.edit') }}" {!! $closeAttr !!} class="mx-3 mb-2 block rounded-xl border border-slate-200 hover:border-blue-300 hover:bg-blue-50/40 transition">
+        <div class="flex items-center gap-3 px-3 py-2">
+          @if($u && property_exists($u,'profile_photo_url') && $u->profile_photo_url)
+            <img src="{{ $u->profile_photo_url }}" alt="{{ $u->name }}" class="w-9 h-9 rounded-full object-cover">
+          @else
+            <div class="w-9 h-9 rounded-full bg-blue-100 text-blue-700 grid place-content-center font-semibold">
+              {{ $u ? $initials : 'G' }}
+            </div>
+          @endif
+          <div class="min-w-0">
+            <div class="flex items-center gap-2">
+              <div class="font-medium text-slate-800 truncate max-w-[180px]">{{ $u->name }}</div>
+              <span class="text-[10px] px-2 py-0.5 rounded-full bg-red-100 text-red-700">{{ $roleName }}</span>
+            </div>
+            <div class="text-xs text-slate-600 truncate max-w-[240px]">{{ $u->email }}</div>
+          </div>
+        </div>
+      </a>
+
+      {{-- Logout putih --}}
+      <form method="POST" action="{{ route('logout') }}" class="px-3 pb-2">
+        @csrf
+        <button class="w-full rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 px-3 py-2 font-medium shadow-sm" title="Logout">
+          <span class="inline-flex items-center gap-2 justify-center w-full">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3H6.75A2.25 2.25 0 0 0 4.5 5.25v13.5A2.25 2.25 0 0 0 6.75 21H13.5a2.25 2.25 0 0 0 2.25-2.25V15M9.75 12h10.5m0 0-3-3m3 3-3 3" />
+            </svg>
+            <span class="label">Logout</span>
+          </span>
+        </button>
+      </form>
     @else
-    <a href="{{ route('login') }}" class="{{ $linkMobileBlue }} {{ $activeBlue('login') }}">
-      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 inline-block mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15V18.75A2.25 2.25 0 0 0 10.5 21h6.75A2.25 2.25 0 0 0 19.5 18.75v-13.5A2.25 2.25 0 0 0 17.25 3H10.5A2.25 2.25 0 0 0 8.25 5.25V9M15 12H3m0 0 3-3m-3 3 3 3" />
-      </svg>
-      <span class="label">Login</span>
-    </a>
+      <div class="px-3 text-xs text-slate-500 mb-1">Belum masuk (login)</div>
+      <a href="{{ route('login') }}" class="{{ $linkMobileBlue }} {{ $activeBlue('login') }}">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 inline-block mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15V18.75A2.25 2.25 0 0 0 10.5 21h6.75A2.25 2.25 0 0 0 19.5 18.75v-13.5A2.25 2.25 0 0 0 17.25 3H10.5A2.25 2.25 0 0 0 8.25 5.25V9M15 12H3m0 0 3-3m-3 3 3 3" />
+        </svg>
+        <span class="label">Login</span>
+      </a>
     @endauth
   </div>
 </nav>

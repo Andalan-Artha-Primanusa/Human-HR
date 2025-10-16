@@ -11,6 +11,12 @@
       ? $job->applications()->where('user_id', auth()->id())->with('stages')->latest()->first()
       : null;
 
+  // === NEW: profil kandidat yang login ===
+  /** @var \App\Models\CandidateProfile|null $meProfile */
+  $meProfile = auth()->check()
+      ? \App\Models\CandidateProfile::where('user_id', auth()->id())->first()
+      : null;
+
   // urutan & label tahapan (sinkron dg controller)
   $stageOrder = ['applied','psychotest','hr_iv','user_iv','final','offer','hired'];
   $pretty = [
@@ -146,6 +152,17 @@
             @endif
           @endif
 
+          {{-- === NEW: Aksi kandidat: Edit/Lengkapi Profil === --}}
+          @auth
+            @if(Route::has('candidate.profiles.edit'))
+              <a href="{{ route('candidate.profiles.edit', $job) }}"
+                 class="rounded-lg border px-3 py-2 text-sm hover:bg-slate-50"
+                 style="border-color: {{ $BORD }}">
+                {{ $meProfile ? 'Perbarui Profil' : 'Lengkapi Profil' }}
+              </a>
+            @endif
+          @endauth
+
           {{-- CTA pelamar --}}
           @auth
             @if(($job->status ?? 'draft') === 'open' && !$myApp)
@@ -227,13 +244,12 @@
         <h2 class="text-lg font-semibold text-slate-900">Deskripsi Pekerjaan</h2>
         <div class="prose max-w-none text-slate-800">
           <style>
-            /* Pastikan bullet/numbered list tampil rapi */
             .prose ul{list-style:disc;padding-left:1.25rem}
             .prose ol{list-style:decimal;padding-left:1.25rem}
             .prose li{margin:.25rem 0}
           </style>
           @if(filled($job->description))
-            {!! $job->description !!} {{-- HTML dari Trix --}}
+            {!! $job->description !!}
           @else
             <p class="text-slate-500">Belum ada deskripsi yang dituliskan.</p>
           @endif
@@ -479,6 +495,55 @@
         @endif
       @endisset
     </aside>
+
+    {{-- === NEW: Panel ringkasan profil kandidat (di kolom kanan) === --}}
+    @auth
+      <aside class="lg:col-span-1 space-y-6">
+        <div class="rounded-2xl border bg-white shadow-sm p-5 md:p-6" style="border-color: {{ $BORD }}">
+          <div class="flex items-center justify-between">
+            <h3 class="text-base font-semibold text-slate-900">Profil Kandidat Kamu</h3>
+            @if(Route::has('candidate.profiles.edit'))
+              <a href="{{ route('candidate.profiles.edit', $job) }}" class="text-sm text-blue-700 hover:underline">Ubah</a>
+            @endif
+          </div>
+
+          @if($meProfile)
+            <dl class="mt-3 grid grid-cols-3 gap-y-2 text-sm">
+              <dt class="text-slate-500">Nama</dt>
+              <dd class="col-span-2 text-slate-800">{{ $meProfile->full_name ?? auth()->user()->name }}</dd>
+
+              <dt class="text-slate-500">Pendidikan</dt>
+              <dd class="col-span-2 text-slate-800">
+                {{ $meProfile->last_education ?? '—' }}
+                @if($meProfile->education_major) · {{ $meProfile->education_major }} @endif
+              </dd>
+
+              <dt class="text-slate-500">Kontak</dt>
+              <dd class="col-span-2 text-slate-800">{{ $meProfile->phone ?? '—' }} @if($meProfile->email) · {{ $meProfile->email }} @endif</dd>
+            </dl>
+
+            @if($meProfile->cv_path)
+              <div class="mt-3 text-sm">
+                <a class="text-blue-700 hover:underline" href="{{ Storage::disk('public')->url($meProfile->cv_path) }}" target="_blank">Lihat CV</a>
+              </div>
+            @endif
+
+            <div class="mt-4">
+              @if(Route::has('candidate.profiles.edit'))
+                <a href="{{ route('candidate.profiles.edit', $job) }}" class="inline-flex items-center rounded-lg border px-3 py-2 text-sm hover:bg-slate-50" style="border-color: {{ $BORD }}">
+                  Perbarui Profil
+                </a>
+              @endif
+            </div>
+          @else
+            <p class="mt-2 text-sm text-slate-600">Profil kandidat belum diisi.</p>
+            @if(Route::has('candidate.profiles.edit'))
+              <a href="{{ route('candidate.profiles.edit', $job) }}" class="mt-3 inline-flex items-center rounded-lg bg-blue-600 px-3 py-2 text-sm font-semibold text-white">Lengkapi Sekarang</a>
+            @endif
+          @endif
+        </div>
+      </aside>
+    @endauth
   </div>
 
   {{-- FOOTER meta --}}

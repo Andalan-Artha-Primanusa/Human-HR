@@ -1,29 +1,62 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use App\Models\Concerns\HasUuidPrimaryKey;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
 class CandidateProfile extends Model
 {
-    use HasFactory, HasUuidPrimaryKey;
+    use HasUuids;
 
     protected $fillable = [
-        'user_id','full_name','phone','birthdate','address','cv_path','extras'
+        'user_id','full_name','nickname','gender','birthplace','birthdate','age','nik',
+        'phone','whatsapp','email',
+        'last_education','education_major','education_school',
+        'ktp_address','ktp_rt','ktp_rw','ktp_village','ktp_district','ktp_city','ktp_province','ktp_postal_code','ktp_residence_status',
+        'domicile_address','domicile_rt','domicile_rw','domicile_village','domicile_district','domicile_city','domicile_province','domicile_postal_code','domicile_residence_status',
+        'motivation','has_relatives','relatives_detail',
+        'worked_before','worked_before_position','worked_before_duration',
+        'applied_before','applied_before_position',
+        'willing_out_of_town','not_willing_reason',
+        'cv_path','documents','extras',
     ];
 
     protected $casts = [
         'birthdate' => 'date',
-        'extras'    => 'array',
+        'has_relatives' => 'boolean',
+        'worked_before' => 'boolean',
+        'applied_before' => 'boolean',
+        'willing_out_of_town' => 'boolean',
+        'documents' => 'array',
+        'extras' => 'array',
     ];
+      public function user()
+    {
+        // kolom FK: user_id (UUID atau bigint sesuai migrasi kamu)
+        return $this->belongsTo(User::class, 'user_id');
+    }
 
-    /** @return BelongsTo<User,CandidateProfile> */
-    public function user(): BelongsTo { return $this->belongsTo(User::class); }
+    /**
+     * Repeater: trainings
+     */
+    public function trainings()
+    {
+        return $this->hasMany(CandidateTraining::class)->orderBy('order_no');
+    }
 
-    /** @return HasMany<CandidateExperience> */
-    public function experiences(): HasMany { return $this->hasMany(CandidateExperience::class); }
+    /**
+     * Repeater: employments
+     */
+    public function employments()
+    {
+        return $this->hasMany(CandidateEmployment::class)->orderBy('order_no');
+    }
+
+    /**
+     * Repeater: references
+     */
+    public function references()
+    {
+        return $this->hasMany(CandidateReference::class)->orderBy('order_no');
+    }
 }
