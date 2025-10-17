@@ -12,7 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('users', function (Blueprint $t) {
-            $t->uuid('id')->primary(); 
+            $t->uuid('id')->primary();
+            $t->string('id_employe', 50)->nullable()->unique()->comment('Nomor/NIK karyawan'); // <— tambahan
             $t->string('role')->default('pelamar')->index();
             $t->string('name');
             $t->string('email')->unique();

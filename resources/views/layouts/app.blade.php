@@ -44,10 +44,6 @@
   <aside
     id="desktopSidebar"
     class="hidden md:flex md:flex-col border-r border-slate-200 bg-white transition-all duration-200 md:w-64">
-    <div class="h-14 flex items-center gap-2 px-4 border-b border-slate-200">
-      <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-500 via-teal-500 to-sky-500"></div>
-      <div class="font-semibold brand-text">Human.Careers</div>
-    </div>
     <div class="flex-1 overflow-y-auto">
       @include('layouts.sidenav', [
         'variant' => 'desktop',

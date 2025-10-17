@@ -20,6 +20,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role', // pelamar|hr|superadmin
+        'id_employe', // Nomor/NIK karyawan
     ];
 
     /** Hidden */

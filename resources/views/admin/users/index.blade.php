@@ -3,6 +3,12 @@
 @section('title', 'Users')
 
 @section('content')
+@php
+  $hasActive  = \Illuminate\Support\Facades\Schema::hasColumn('users','active');
+  $hasEmpId   = \Illuminate\Support\Facades\Schema::hasColumn('users','id_employe');
+  $hasRoleCol = \Illuminate\Support\Facades\Schema::hasColumn('users','role');
+@endphp
+
 <div class="flex items-center justify-between mb-4">
   <h1 class="text-xl font-semibold text-slate-800">Users</h1>
   <div class="flex items-center gap-2">
@@ -40,7 +46,7 @@
 
 {{-- Filters --}}
 <form method="GET" class="mb-4 grid gap-2 sm:grid-cols-4">
-  <input type="text" name="q" value="{{ $q ?? '' }}" placeholder="Cari name/email"
+  <input type="text" name="q" value="{{ $q ?? '' }}" placeholder="Cari name/email{{ $hasEmpId ? '/ID Karyawan' : '' }}"
          class="px-3 py-2 rounded-lg border border-slate-300 focus:outline-none focus:ring w-full">
   <select name="role" class="px-3 py-2 rounded-lg border border-slate-300 focus:outline-none focus:ring w-full">
     <option value="">— Semua Role —</option>
@@ -64,7 +70,9 @@
   <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3">
     <div class="text-sm text-slate-700">
       <div class="font-medium">Import CSV</div>
-      <div class="text-slate-500">Header: <code>name,email,password(optional),role(optional),active(optional)</code></div>
+      <div class="text-slate-500">
+        Header: <code>name,email,password(optional),role(optional),active(optional){{ $hasEmpId ? ',id_employe(optional)' : '' }}</code>
+      </div>
     </div>
     <input type="file" name="file" accept=".csv,text/csv"
            class="px-3 py-2 rounded-lg border border-slate-300 w-full sm:w-auto">
@@ -83,6 +91,9 @@
       <tr>
         <th class="text-left px-3 py-2">Name</th>
         <th class="text-left px-3 py-2">Email</th>
+        @if($hasEmpId)
+          <th class="text-left px-3 py-2">ID Employe</th>
+        @endif
         <th class="text-left px-3 py-2">Role(s)</th>
         <th class="text-left px-3 py-2">Status</th>
         <th class="text-left px-3 py-2">Created</th>
@@ -94,23 +105,30 @@
         <tr class="border-t">
           <td class="px-3 py-2 font-medium text-slate-800">{{ $user->name }}</td>
           <td class="px-3 py-2 text-slate-700">{{ $user->email }}</td>
+
+          @if($hasEmpId)
+            <td class="px-3 py-2 text-slate-700">
+              {{ $user->id_employe ?? '—' }}
+            </td>
+          @endif
+
           <td class="px-3 py-2">
             @php
               $roleText = '';
-              if (isset($user->role)) {
+              if ($hasRoleCol && isset($user->role)) {
                 $roleText = $user->role;
               } elseif (method_exists($user, 'getRoleNames')) {
                 $roleText = $user->getRoleNames()->implode(', ');
               }
             @endphp
-            <span class="inline-flex px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200">{{ $roleText ?: '—' }}</span>
+            <span class="inline-flex px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200">
+              {{ $roleText ?: '—' }}
+            </span>
           </td>
+
           <td class="px-3 py-2">
-            @php
-              $hasActive = \Illuminate\Support\Facades\Schema::hasColumn('users','active');
-              $isActive = $hasActive ? (bool)$user->active : null;
-            @endphp
             @if($hasActive)
+              @php $isActive = (bool)($user->active ?? false); @endphp
               <span class="inline-flex px-2 py-0.5 rounded {{ $isActive ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-100 text-slate-700 border border-slate-200' }}">
                 {{ $isActive ? 'Active' : 'Inactive' }}
               </span>
@@ -118,7 +136,9 @@
               <span class="text-slate-400">n/a</span>
             @endif
           </td>
+
           <td class="px-3 py-2 text-slate-600">{{ optional($user->created_at)->format('Y-m-d H:i') }}</td>
+
           <td class="px-3 py-2 text-right">
             <a href="{{ route('admin.users.edit', $user) }}"
                class="px-2 py-1 rounded border bg-white hover:bg-slate-50 text-slate-700">Edit</a>
@@ -131,7 +151,7 @@
         </tr>
       @empty
         <tr>
-          <td colspan="6" class="px-3 py-6 text-center text-slate-500">Tidak ada data.</td>
+          <td colspan="{{ 6 + ($hasEmpId ? 1 : 0) }}" class="px-3 py-6 text-center text-slate-500">Tidak ada data.</td>
         </tr>
       @endforelse
     </tbody>
