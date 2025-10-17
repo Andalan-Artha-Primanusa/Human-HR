@@ -13,8 +13,10 @@ use App\Http\Controllers\ManpowerDashboardController;
 use App\Http\Controllers\CandidateProfileController;
 
 // === Admin Controllers (sesuai screenshot)
-use App\Http\Controllers\Admin\SiteController as AdminSiteController;   // Admin/SiteController.php
+use App\Http\Controllers\Admin\SiteController as AdminSiteController;     // Admin/SiteController.php
 use App\Http\Controllers\InterviewController as AdminInterviewController; // root/InterviewController.php (admin)
+use App\Http\Controllers\Admin\UserController;                            // NEW: Kelola Users (akses HR & Superadmin)
+use App\Http\Controllers\Admin\AuditLogController;                        // NEW: Audit Logs (read-only)
 
 // === Public Sites Controller (user non-admin)
 use App\Http\Controllers\SitePublicController;
@@ -181,6 +183,30 @@ Route::prefix('admin')
         Route::get('candidates/{profile}/cv', [CandidateProfileController::class, 'adminCv'])
             ->whereUuid('profile')
             ->name('candidates.cv');
+
+        /*
+        |------------------------------------------------------------------
+        | NEW: System Admin — Users & Audit Logs (untuk migrasi & governance)
+        |------------------------------------------------------------------
+        */
+
+        // Users (HR & Superadmin). Tidak pakai 'show' agar aman.
+        Route::resource('users', UserController::class)->except(['show']);
+
+        // Optional: endpoint migrasi/ekspor-impor users (CSV/Excel/JSON)
+        Route::get('users-export', [UserController::class, 'export'])
+            ->name('users.export');          // GET  /admin/users-export    -> unduh data users
+        Route::post('users-import', [UserController::class, 'import'])
+            ->name('users.import');          // POST /admin/users-import    -> unggah & proses file
+
+        // Audit Logs (read-only)
+        Route::get('audit-logs', [AuditLogController::class, 'index'])
+            ->name('audit_logs.index');      // Listing + filter
+        Route::get('audit-logs/{log}', [AuditLogController::class, 'show'])
+            ->whereUuid('log')
+            ->name('audit_logs.show');       // Detail (diff/context)
+        Route::get('audit-logs-export', [AuditLogController::class, 'export'])
+            ->name('audit_logs.export');     // Ekspor untuk arsip/compliance
     });
 
 /*

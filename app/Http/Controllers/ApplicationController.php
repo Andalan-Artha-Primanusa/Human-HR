@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Job;
+use App\Models\User;
 use App\Models\JobApplication;
 use App\Models\ApplicationStage;
 use App\Models\PsychotestAttempt;
@@ -11,6 +12,8 @@ use App\Models\CandidateProfile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use Illuminate\Notifications\DatabaseNotification;
+use Illuminate\Support\Carbon;
 
 class ApplicationController extends Controller
 {
@@ -262,7 +265,10 @@ class ApplicationController extends Controller
         $attempt = null;
 
         DB::transaction(function () use ($application, $to, $status, $note, $score, &$attempt) {
-            $userId = auth()->id(); // aman untuk admin maupun owner
+            $userId   = auth()->id(); // admin/owner yang mengubah
+            $actor    = auth()->user()?->name ?? 'System';
+            $from     = $application->current_stage; // stage sebelum diperbarui
+            $prevOverall = $application->overall_status;
 
             // timeline: tulis canonical stage_key + actor info
             ApplicationStage::create([
@@ -329,6 +335,60 @@ class ApplicationController extends Controller
                     ]);
                 }
             }
+
+            // =======================
+            // NOTIFIKASI KE PELAMAR
+            // =======================
+            // Catatan: kita buat DatabaseNotification langsung (tanpa class Notification baru).
+            // Ini aman untuk ditampilkan oleh UserNotificationController yang kamu punya.
+            $appReload = $application->fresh(['job:id,title', 'user:id,name']);
+            $jobTitle  = $appReload->job?->title ?? '—';
+            $toPretty  = $this->PRETTY[$to] ?? strtoupper($to);
+            $fromPretty= $from ? ($this->PRETTY[$from] ?? strtoupper($from)) : null;
+
+            $title = 'Perubahan Proses Lamaran';
+            // Pesan disesuaikan untuk kasus akhir
+            if ($appReload->overall_status === 'hired' && $prevOverall !== 'hired') {
+                $body = "Selamat! Status lamaran kamu untuk posisi \"{$jobTitle}\" berubah menjadi DITERIMA.";
+            } elseif ($appReload->overall_status === 'not_qualified' && $prevOverall !== 'not_qualified') {
+                $body = "Maaf, lamaran kamu untuk posisi \"{$jobTitle}\" tidak melanjutkan proses.";
+            } else {
+                $stagePart = $fromPretty ? "{$fromPretty} → {$toPretty}" : $toPretty;
+                $body = "Tahap lamaran kamu untuk posisi \"{$jobTitle}\" diperbarui menjadi: {$stagePart}.";
+            }
+
+            // Link tujuan notif (kandidat melihat progres)
+            $url = route('applications.mine');
+
+            // Insert 1 baris ke tabel notifications
+            DatabaseNotification::create([
+                'id'              => (string) \Illuminate\Support\Str::uuid(),
+                'type'            => 'app:application.stage_changed', // string bebas
+                'notifiable_type' => User::class,
+                'notifiable_id'   => $appReload->user_id,
+                'data'            => [
+                    'title'           => $title,
+                    'body'            => $body,
+                    'job_title'       => $jobTitle,
+                    'application_id'  => $appReload->id,
+                    'job_id'          => $appReload->job_id,
+                    'stage_from'      => $from,
+                    'stage_to'        => $to,
+                    'stage_from_label'=> $fromPretty,
+                    'stage_to_label'  => $toPretty,
+                    'overall_status'  => $appReload->overall_status,
+                    'status_label'    => strtoupper($appReload->overall_status ?? 'ACTIVE'),
+                    'actor_id'        => $userId,
+                    'actor_name'      => $actor,
+                    'note'            => $note,
+                    'score'           => $score,
+                    'when_wib'        => Carbon::now('Asia/Jakarta')->format('d M Y, H:i').' WIB',
+                    'url'             => $url,
+                ],
+                'read_at'         => null,
+                'created_at'      => now(),
+                'updated_at'      => now(),
+            ]);
         });
 
         return $attempt;

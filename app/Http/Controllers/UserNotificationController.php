@@ -14,9 +14,42 @@ class UserNotificationController extends Controller
     public function index(Request $request)
     {
         $user   = $request->user();
+
+        // data utama (html)
         $unread = $user->unreadNotifications()->latest()->get();
         $read   = $user->readNotifications()->latest()->limit(50)->get();
 
+        // === NEW: jika diminta JSON (AJAX polling dari topbar) ===
+        if ($request->wantsJson() || $request->boolean('ajax') || $request->query('format') === 'json') {
+            $unreadCount = $user->unreadNotifications()->count();
+
+            $items = $user->notifications()
+                ->latest()
+                ->limit(10)
+                ->get()
+                ->map(function ($n) {
+                    $data  = (array) ($n->data ?? []);
+                    $title = $data['title'] ?? ($data['message'] ?? 'Notifikasi');
+                    $body  = $data['body']  ?? ($data['excerpt'] ?? null);
+                    $url   = $data['url']   ?? null;
+
+                    return [
+                        'id'         => (string) $n->id,
+                        'title'      => $title,
+                        'body'       => $body,
+                        'url'        => $url,
+                        'created_at' => optional($n->created_at)->diffForHumans(),
+                        'unread'     => is_null($n->read_at),
+                    ];
+                });
+
+            return response()->json([
+                'unread' => $unreadCount,
+                'items'  => $items,
+            ]);
+        }
+
+        // fallback tampilan HTML biasa
         return view('me.notifications.index', compact('unread', 'read'));
     }
 

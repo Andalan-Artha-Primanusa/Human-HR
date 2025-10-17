@@ -159,6 +159,26 @@
   </a>
   @endif
 
+  {{-- NEW: Users (tetap muncul untuk HR/Admin/Super Admin) --}}
+  @if (Route::has('admin.users.index'))
+  <a href="{{ route('admin.users.index') }}" class="{{ $linkDeskRed }} {{ $activeRed('admin.users.*') }}">
+    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M16 14a4 4 0 10-8 0v2a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-2zM12 10a4 4 0 100-8 4 4 0 000 8z" />
+    </svg>
+    <span class="label">Users</span>
+  </a>
+  @endif
+
+  {{-- NEW: Audit Logs (KHUSUS SUPER ADMIN SAJA) --}}
+  @if ($roleRaw === 'superadmin' && Route::has('admin.audit_logs.index'))
+  <a href="{{ route('admin.audit_logs.index') }}" class="{{ $linkDeskRed }} {{ $activeRed('admin.audit_logs.*') }}">
+    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M9 7h11M9 12h11M9 17h11M5 7h.01M5 12h.01M5 17h.01" />
+    </svg>
+    <span class="label">Audit Logs</span>
+  </a>
+  @endif
+
   <a href="{{ route('admin.dashboard.manpower') }}" class="{{ $linkDeskRed }} {{ $activeRed('admin.dashboard.manpower') }}">
     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path stroke-linecap="round" stroke-linejoin="round" d="M3 19.5h18M6 17V9m6 8V5m6 12v-6" />
@@ -208,7 +228,7 @@
     <div class="px-3 text-xs text-slate-500 mb-1">Belum masuk (login)</div>
     <a href="{{ route('login') }}" class="{{ $linkDeskBlue }} {{ $activeBlue('login') }} mx-3">
       <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15V18.75A2.25 2.25 0 0 0 10.5 21h6.75A2.25 2.25 0 0 0 19.5 18.75v-13.5A2.25 2.25 0 0 0 17.25 3H10.5A2.25 2.25 0 0 0 8.25 5.25V9M15 12H3m0 0 3-3m-3 3 3 3" />
+        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15V18.75A2.25 2.25 0 0 0 10.5 21h6.75A2.25 2.25 0 0 0 19.5 18.75v-13.5A2 2 0 0 0 17.25 3H10.5A2.25 2.25 0 0 0 8.25 5.25V9M15 12H3m0 0 3-3m-3 3 3 3" />
       </svg>
       <span class="label">Login</span>
     </a>
@@ -246,7 +266,7 @@
 
   <a href="{{ route('applications.mine') }}" {!! $closeAttr !!} class="{{ $linkMobileBlue }} {{ $activeBlue('applications.mine') }}">
     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 inline-block mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6M9 16h6M9 8h6m-3-5h-1a2 2 0 0 0-2 2H7a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-3a2 2 0 0 0-2-2Z" />
+      <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6M9 16h6M9 8h6m-3-5h-1a2 2 0 0 0-2 2H7a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2Z" />
     </svg>
     Lamaran Saya
   </a>
@@ -333,6 +353,26 @@
   </a>
   @endif
 
+  {{-- NEW: Users (tetap muncul untuk HR/Admin/Super Admin) --}}
+  @if (Route::has('admin.users.index'))
+  <a href="{{ route('admin.users.index') }}" {!! $closeAttr !!} class="{{ $linkMobileRed }} {{ $activeRed('admin.users.*') }}">
+    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 inline-block mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M16 14a4 4 0 10-8 0v2a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-2zM12 10a4 4 0 100-8 4 4 0 000 8z" />
+    </svg>
+    Users
+  </a>
+  @endif
+
+  {{-- NEW: Audit Logs (KHUSUS SUPER ADMIN SAJA) --}}
+  @if ($roleRaw === 'superadmin' && Route::has('admin.audit_logs.index'))
+  <a href="{{ route('admin.audit_logs.index') }}" {!! $closeAttr !!} class="{{ $linkMobileRed }} {{ $activeRed('admin.audit_logs.*') }}">
+    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 inline-block mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M9 7h11M9 12h11M9 17h11M5 7h.01M5 12h.01M5 17h.01" />
+    </svg>
+    Audit Logs
+  </a>
+  @endif
+
   <a href="{{ route('admin.dashboard.manpower') }}" {!! $closeAttr !!} class="{{ $linkMobileRed }} {{ $activeRed('admin.dashboard.manpower') }}">
     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 inline-block mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path stroke-linecap="round" stroke-linejoin="round" d="M3 19.5h18M6 17V9m6 8V5m6 12v-6" />
@@ -381,7 +421,7 @@
       <div class="px-3 text-xs text-slate-500 mb-1">Belum masuk (login)</div>
       <a href="{{ route('login') }}" class="{{ $linkMobileBlue }} {{ $activeBlue('login') }}">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 inline-block mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15V18.75A2.25 2.25 0 0 0 10.5 21h6.75A2.25 2.25 0 0 0 19.5 18.75v-13.5A2.25 2.25 0 0 0 17.25 3H10.5A2.25 2.25 0 0 0 8.25 5.25V9M15 12H3m0 0 3-3m-3 3 3 3" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15V18.75A2.25 2.25 0 0 0 10.5 21h6.75A2.25 2.25 0 0 0 19.5 18.75v-13.5A2 2 0 0 0 17.25 3H10.5A2.25 2.25 0 0 0 8.25 5.25V9M15 12H3m0 0 3-3m-3 3 3 3" />
         </svg>
         <span class="label">Login</span>
       </a>
