@@ -98,7 +98,6 @@
       {{-- Desktop collapse/expand --}}
       <button id="toggleSidebarBtn" class="hidden md:inline-flex p-2 rounded-lg hover:bg-slate-100" aria-label="Toggle sidebar"></button>
       <script>
-        // ganti ikon via CSS background supaya simpel
         (function(btn){
           if(!btn) return;
           btn.innerHTML = `
@@ -112,7 +111,9 @@
       </script>
 
       <div class="font-semibold">@yield('title','Dashboard')</div>
-      <div class="ml-auto"></div>
+
+      {{-- === Right actions (dipisah ke partial) === --}}
+      @include('layouts.partials.topbar-actions')
     </header>
 
     <main class="p-3 md:p-6">@yield('content')</main>
@@ -137,17 +138,16 @@
     try{
       const raw = localStorage.getItem(LS_KEY)
       if(raw) sideMode = JSON.parse(raw)
-    }catch(e){ /* ignore */ }
+    }catch(e){}
 
     const applySideMode = () => {
-      if(window.matchMedia('(min-width: 768px)').matches){ // desktop only
+      if(window.matchMedia('(min-width: 768px)').matches){
         if(sideMode === 'mini'){
           $aside.classList.add('is-mini')
           $aside.classList.remove('md:w-64')
           $aside.classList.add('md:w-20')
           if(iconExpand())  iconExpand().classList.add('hidden')
           if(iconCollapse())iconCollapse().classList.remove('hidden')
-          // swap icons: mini -> show expand icon? (kebalikan dari sebelumnya)
           if(iconExpand() && iconCollapse()){
             iconExpand().classList.remove('hidden')
             iconCollapse().classList.add('hidden')
@@ -187,12 +187,10 @@
     $close  && $close.addEventListener('click', closeDrawer)
     $ovl    && $ovl.addEventListener('click', closeDrawer)
 
-    // ESC to close drawer
     document.addEventListener('keydown', (e) => {
       if(e.key === 'Escape'){ closeDrawer() }
     })
 
-    // show content after JS ready (replace data-cloak)
     $root && $root.removeAttribute('data-cloak')
   })();
 </script>

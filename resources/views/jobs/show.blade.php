@@ -6,12 +6,16 @@
   $RED   = '#dc2626';
   $BORD  = '#e5e7eb';
 
+  // ==== DECODE HELPER (untuk konten yang tersimpan sebagai HTML entities) ====
+  $decode = function ($v) {
+      return is_string($v) ? html_entity_decode($v, ENT_QUOTES | ENT_HTML5, 'UTF-8') : $v;
+  };
+
   /** @var \App\Models\JobApplication|null $myApp */
   $myApp = auth()->check()
       ? $job->applications()->where('user_id', auth()->id())->with('stages')->latest()->first()
       : null;
 
-  // === NEW: profil kandidat yang login ===
   /** @var \App\Models\CandidateProfile|null $meProfile */
   $meProfile = auth()->check()
       ? \App\Models\CandidateProfile::where('user_id', auth()->id())->first()
@@ -152,7 +156,7 @@
             @endif
           @endif
 
-          {{-- === NEW: Aksi kandidat: Edit/Lengkapi Profil === --}}
+          {{-- Aksi kandidat: Edit/Lengkapi Profil --}}
           @auth
             @if(Route::has('candidate.profiles.edit'))
               <a href="{{ route('candidate.profiles.edit', $job) }}"
@@ -239,7 +243,7 @@
         @endif
       </div>
 
-      {{-- Deskripsi (render HTML dari Trix) --}}
+      {{-- Deskripsi (render HTML dari editor) --}}
       <div class="rounded-2xl border bg-white shadow-sm p-5 md:p-6" style="border-color: {{ $BORD }}">
         <h2 class="text-lg font-semibold text-slate-900">Deskripsi Pekerjaan</h2>
         <div class="prose max-w-none text-slate-800">
@@ -249,7 +253,7 @@
             .prose li{margin:.25rem 0}
           </style>
           @if(filled($job->description))
-            {!! $job->description !!}
+            {!! $decode($job->description) !!}
           @else
             <p class="text-slate-500">Belum ada deskripsi yang dituliskan.</p>
           @endif
@@ -261,7 +265,7 @@
       <div class="rounded-2xl border bg-white shadow-sm p-5 md:p-6" style="border-color: {{ $BORD }}">
         <h2 class="text-lg font-semibold text-slate-900">Tanggung Jawab</h2>
         <div class="prose max-w-none text-slate-800">
-          {!! $job->responsibilities !!}
+          {!! $decode($job->responsibilities) !!}
         </div>
       </div>
       @endif
@@ -271,7 +275,7 @@
       <div class="rounded-2xl border bg-white shadow-sm p-5 md:p-6" style="border-color: {{ $BORD }}">
         <h2 class="text-lg font-semibold text-slate-900">Kualifikasi</h2>
         <div class="prose max-w-none text-slate-800">
-          {!! $job->qualifications !!}
+          {!! $decode($job->qualifications) !!}
         </div>
       </div>
       @endif
@@ -281,7 +285,7 @@
       <div class="rounded-2xl border bg-white shadow-sm p-5 md:p-6" style="border-color: {{ $BORD }}">
         <h2 class="text-lg font-semibold text-slate-900">Benefit</h2>
         <div class="prose max-w-none text-slate-800">
-          {!! $job->benefits !!}
+          {!! $decode($job->benefits) !!}
         </div>
       </div>
       @endif
@@ -588,7 +592,7 @@
     '@context' => 'https://schema.org',
     '@type' => 'JobPosting',
     'title' => $job->title,
-    'description' => strip_tags($job->description ?? ''),
+    'description' => strip_tags($decode($job->description ?? '')),
     'datePosted' => optional($job->created_at)->toIso8601String(),
     'validThrough' => $closingAt ? \Illuminate\Support\Carbon::parse($closingAt)->toIso8601String() : null,
     'employmentType' => strtoupper($job->employment_type ?? 'FULL_TIME'),
@@ -600,8 +604,8 @@
       '@type' => 'Place',
       'address' => [
         '@type' => 'PostalAddress',
-        'streetAddress' => $job->site->address ?? null,
-        'addressRegion' => $job->site->region ?? null,
+        'streetAddress' => optional($job->site)->address,
+        'addressRegion' => optional($job->site)->region,
         'addressCountry' => 'ID',
       ],
     ],

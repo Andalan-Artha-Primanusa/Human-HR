@@ -42,7 +42,7 @@
 
 @if($variant === 'desktop')
 <nav class="p-3 space-y-1 text-sm">
-  {{-- ====== HEADER: LOGO (hapus sublabel "Andalan Group") ====== --}}
+  {{-- ====== HEADER: LOGO ====== --}}
   <div class="mb-3">
     <a href="{{ url('/') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-50">
       <img src="{{ $logoUrl }}" alt="Logo" class="w-8 h-8 object-contain" onerror="this.style.display='none'">
@@ -110,7 +110,7 @@
 
   <a href="{{ route('admin.applications.index') }}" class="{{ $linkDeskRed }} {{ $activeRed('admin.applications.index') }}">
     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6M9 16h6M9 8h6m-3-5h-1a2 2 0 0 0-2 2H7a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-3a2 2 0 0 0-2-2Z" />
+      <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6M9 16h6M9 8h6m-3-5h-1a2 2 0 0 0-2 2H7a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2Z" />
     </svg>
     <span class="label">Applications</span>
   </a>
@@ -218,7 +218,7 @@
 @else
 {{-- ===================== MOBILE ===================== --}}
 <nav class="space-y-1 text-sm">
-  {{-- ====== HEADER: LOGO (tanpa "Andalan Group") ====== --}}
+  {{-- ====== HEADER: LOGO ====== --}}
   <a href="{{ url('/') }}" {!! $closeAttr !!} class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-50">
     <img src="{{ $logoUrl }}" alt="Logo" class="w-8 h-8 object-contain" onerror="this.style.display='none'">
     <div class="leading-tight">
@@ -342,7 +342,7 @@
   @endif
   @endauth
 
-  {{-- ====== ACCOUNT (user info di bawah + logout putih) ====== --}}
+  {{-- ====== ACCOUNT ====== --}}
   <div class="pt-4 mt-4 border-t border-slate-200">
     @auth
       {{-- Kartu user (klik = Profil) --}}
