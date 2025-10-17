@@ -7,50 +7,53 @@ use App\Models\JobApplication;
 use App\Models\ApplicationStage;
 use App\Models\PsychotestAttempt;
 use App\Models\PsychotestTest;
-use App\Models\CandidateProfile; // <= TAMBAH
+use App\Models\CandidateProfile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 class ApplicationController extends Controller
 {
-    /** Format stage standar (internal) */
+    /**
+     * === Canonical stage keys (SELARAS DENGAN BLADE/KANBAN) ===
+     * applied, psychotest, hr_iv, user_iv, final, offer, hired, not_qualified
+     */
     protected array $STAGES = [
-        'apply','psychotest','hr_iv','user_iv','final','offering','diterima','not_qualified'
+        'applied','psychotest','hr_iv','user_iv','final','offer','hired','not_qualified',
     ];
 
-    /** Alias/kompatibilitas penamaan stage dari UI lama / Blade lain */
+    /** Alias masuk (kompatibel dgn istilah lama/beragam) -> dipetakan ke canonical */
     protected array $ALIASES_IN = [
-        'applied'        => 'apply',
-        'offer'          => 'offering',
-        'hired'          => 'diterima',
-        'accepted'       => 'diterima',
-        'rejected'       => 'not_qualified',
-        'not-qualified'  => 'not_qualified',
-        'notqualified'   => 'not_qualified',
-        'final_interview'=> 'final',
-        'useriv'         => 'user_iv',
-        'hriv'           => 'hr_iv',
-        'apply'          => 'apply',
-        'psychotest'     => 'psychotest',
-        'hr_iv'          => 'hr_iv',
-        'user_iv'        => 'user_iv',
-        'final'          => 'final',
-        'offering'       => 'offering',
-        'diterima'       => 'diterima',
-        'not_qualified'  => 'not_qualified',
+        // lama -> canonical
+        'apply'           => 'applied',
+        'applied'         => 'applied',
+        'psychotest'      => 'psychotest',
+        'hr_iv'           => 'hr_iv',
+        'hriv'            => 'hr_iv',
+        'user_iv'         => 'user_iv',
+        'useriv'          => 'user_iv',
+        'final'           => 'final',
+        'offering'        => 'offer',
+        'offer'           => 'offer',
+        'diterima'        => 'hired',
+        'hired'           => 'hired',
+        'rejected'        => 'not_qualified',
+        'not_qualified'   => 'not_qualified',
+        'not-qualified'   => 'not_qualified',
+        'notqualified'    => 'not_qualified',
+        'final_interview' => 'final',
     ];
 
     /** Label cantik (opsional) */
     protected array $PRETTY = [
-        'apply'          => 'Pengajuan Berkas',
-        'psychotest'     => 'Psikotes',
-        'hr_iv'          => 'HR Interview',
-        'user_iv'        => 'User Interview',
-        'final'          => 'Final',
-        'offering'       => 'Offering',
-        'diterima'       => 'Diterima',
-        'not_qualified'  => 'Tidak Lolos',
+        'applied'       => 'Pengajuan Berkas',
+        'psychotest'    => 'Psikotes',
+        'hr_iv'         => 'HR Interview',
+        'user_iv'       => 'User Interview',
+        'final'         => 'Final',
+        'offer'         => 'Offering',
+        'hired'         => 'Diterima',
+        'not_qualified' => 'Tidak Lolos',
     ];
 
     /** Pelamar: daftar lamaran saya */
@@ -59,7 +62,8 @@ class ApplicationController extends Controller
         $apps = JobApplication::with([
                 'job:id,title,division,site_id',
                 'job.site:id,code,name',
-                'stages',
+                'stages.actor:id,name',
+                'stages.user:id,name',
             ])
             ->where('user_id', $request->user()->id)
             ->orderByDesc('created_at')
@@ -78,7 +82,6 @@ class ApplicationController extends Controller
             ->exists();
 
         if ($already) {
-            // Sudah pernah melamar: langsung ke wizard untuk lengkapi/cek data
             return redirect()
                 ->route('candidate.profiles.edit', ['job' => $job->id])
                 ->with('info', 'Kamu sudah melamar. Silakan lengkapi/cek data profil.');
@@ -89,25 +92,28 @@ class ApplicationController extends Controller
             $app = JobApplication::create([
                 'job_id'         => $job->id,
                 'user_id'        => $request->user()->id,
-                'current_stage'  => 'apply',
-                'overall_status' => 'active',
+                'current_stage'  => 'applied',     // canonical
+                'overall_status' => 'active',      // SELARAS ENUM DB
             ]);
 
             ApplicationStage::create([
                 'application_id' => $app->id,
-                'stage_key'      => 'apply', // gunakan kunci internal
+                'stage_key'      => 'applied',     // canonical
                 'status'         => 'pending',
+                'score'          => null,
                 'payload'        => ['note' => 'Initial application submitted'],
+                'acted_by'       => $request->user()->id, // untuk “Diubah oleh”
+                'user_id'        => $request->user()->id, // opsional: pembuat awal
+                'notes'          => null,
             ]);
 
-            // Pastikan profil kandidat ada (agar form wizard punya record untuk di-update)
+            // Pastikan profil kandidat ada
             CandidateProfile::firstOrCreate(
                 ['user_id' => $request->user()->id],
                 ['full_name' => $request->user()->name]
             );
         });
 
-        // Arahkan ke halaman isi 4 tabel (wizard)
         return redirect()
             ->route('candidate.profiles.edit', ['job' => $job->id])
             ->with('success', 'Lamaran dibuat. Lengkapi data profil & riwayat kamu ya.');
@@ -127,6 +133,8 @@ class ApplicationController extends Controller
                 'job:id,title,division,site_id',
                 'job.site:id,code,name',
                 'user:id,name',
+                'stages.actor:id,name',
+                'stages.user:id,name',
             ])
             ->when($q, function ($qq) use ($q) {
                 $qq->where(function ($w) use ($q) {
@@ -155,7 +163,8 @@ class ApplicationController extends Controller
                 'job:id,title,division,site_id',
                 'job.site:id,code,name',
                 'user:id,name',
-                'stages',
+                'stages.actor:id,name',
+                'stages.user:id,name',
             ])
             ->when($request->filled('job_id'), fn ($q) => $q->where('job_id', $request->job_id))
             ->when($request->filled('only'),  function ($q) use ($request) {
@@ -171,8 +180,8 @@ class ApplicationController extends Controller
 
         $grouped = collect($stages)->mapWithKeys(fn($s) => [$s => collect()]);
         foreach ($apps as $a) {
-            $key = $this->normalizeStage($a->current_stage) ?: 'apply';
-            if (!in_array($key, $stages, true)) $key = 'apply';
+            $key = $this->normalizeStage($a->current_stage) ?: 'applied';
+            if (!in_array($key, $stages, true)) $key = 'applied';
             $grouped[$key]->push($a);
         }
 
@@ -236,7 +245,7 @@ class ApplicationController extends Controller
             'score'     => ['nullable', 'numeric'],
         ]);
 
-        $to     = $this->normalizeStage($toRaw) ?: 'apply';
+        $to     = $this->normalizeStage($toRaw) ?: 'applied'; // canonical default
         $status = $validated['status'] ?? 'pending';
         $note   = $validated['note']   ?? null;
         $score  = isset($validated['score']) ? (float) $validated['score'] : null;
@@ -253,20 +262,25 @@ class ApplicationController extends Controller
         $attempt = null;
 
         DB::transaction(function () use ($application, $to, $status, $note, $score, &$attempt) {
-            // timeline
+            $userId = auth()->id(); // aman untuk admin maupun owner
+
+            // timeline: tulis canonical stage_key + actor info
             ApplicationStage::create([
                 'application_id' => $application->id,
-                'stage_key'      => $to,
+                'stage_key'      => $to,                 // canonical
                 'status'         => $status ?: 'pending',
                 'score'          => $score,
                 'payload'        => ['note' => $note],
+                'acted_by'       => $userId,            // penting utk “Diubah oleh”
+                'user_id'        => $userId,            // opsional creator
+                'notes'          => $note,
             ]);
 
             // current stage
             $application->update(['current_stage' => $to]);
 
             // overall status & headcount
-            if ($to === 'diterima') {
+            if ($to === 'hired') {
                 $job = $application->job()->with('manpowerRequirement')->first();
                 if ($job && $job->manpowerRequirement) {
                     $job->manpowerRequirement->increment('filled_headcount');
@@ -285,7 +299,6 @@ class ApplicationController extends Controller
 
             // === Khusus Psikotes: 1 lamaran x 1 tes = 1 attempt saja ===
             if ($to === 'psychotest') {
-                // Ambil test aktif atau auto-create
                 $test = PsychotestTest::where('is_active', true)->latest('updated_at')->first();
                 if (!$test) {
                     $test = PsychotestTest::create([
@@ -296,12 +309,10 @@ class ApplicationController extends Controller
                     ]);
                 }
 
-                // Reuse attempt jika sudah ada
                 $attempt = PsychotestAttempt::where('application_id', $application->id)
                     ->where('test_id', $test->id)
                     ->first();
 
-                // Kalau belum ada, buat satu attempt
                 if (!$attempt) {
                     $attempt = PsychotestAttempt::create([
                         'application_id' => $application->id,
@@ -348,16 +359,16 @@ class ApplicationController extends Controller
                 return redirect()->route('admin.interviews.index', ['focus' => $application->id])
                     ->with('ok', 'Stage dipindah ke '.strtoupper($this->PRETTY[$to] ?? $to).'.');
 
-            case 'offering':
+            case 'offer':
                 return redirect()->route('admin.offers.index', ['focus' => $application->id])
                     ->with('ok', 'Stage dipindah ke OFFERING.');
 
-            case 'diterima':
+            case 'hired':
             case 'not_qualified':
                 return redirect()->route('admin.applications.index', ['focus' => $application->id])
                     ->with('ok', 'Stage dipindah ke '.strtoupper($this->PRETTY[$to] ?? $to).'.');
 
-            case 'apply':
+            case 'applied':
             default:
                 return redirect()->back(303)->with('ok', 'Stage dipindah ke: '.strtoupper($this->PRETTY[$to] ?? $to));
         }

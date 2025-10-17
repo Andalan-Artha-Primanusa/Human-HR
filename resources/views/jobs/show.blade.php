@@ -2,6 +2,8 @@
 @extends('layouts.app', ['title' => $job->title])
 
 @php
+  use Illuminate\Support\Carbon;
+
   $BLUE  = '#1d4ed8';
   $RED   = '#dc2626';
   $BORD  = '#e5e7eb';
@@ -13,7 +15,7 @@
 
   /** @var \App\Models\JobApplication|null $myApp */
   $myApp = auth()->check()
-      ? $job->applications()->where('user_id', auth()->id())->with('stages')->latest()->first()
+      ? $job->applications()->where('user_id', auth()->id())->with(['stages','stages.actor','stages.user'])->latest()->first()
       : null;
 
   /** @var \App\Models\CandidateProfile|null $meProfile */
@@ -40,7 +42,14 @@
   $currRaw = strtolower($myApp?->current_stage ?? 'applied');
   $currKey = in_array($currRaw, $stageOrder, true) ? $currRaw : 'applied';
 
-  $visited = collect($myApp?->stages ?? [])
+  // index stage by key untuk akses cepat
+  $stagesColl = collect($myApp?->stages ?? []);
+  $stageMap = $stagesColl->mapWithKeys(function ($s) {
+      $k = strtolower($s->stage_key ?? '');
+      return $k ? [$k => $s] : [];
+  });
+
+  $visited = $stagesColl
       ->pluck('stage_key')->map(fn($v) => strtolower($v))
       ->filter(fn($v) => in_array($v, $stageOrder, true))
       ->unique()->push($currKey)->unique()->values()->all();
@@ -80,6 +89,65 @@
     $num = number_format((float)$n, 0, ',', '.');
     return ($cur ?: 'IDR').' '.$num;
   };
+
+  // ====== WAKTU & AKTOR ======
+  // Tentukan timezone prioritas: pakai timezone site bila ada, fallback ke app.tz
+  $siteTz = optional($job->site)->timezone ?: data_get($job->site, 'meta.timezone');
+  $appTz  = config('app.timezone', 'Asia/Jakarta');
+  $TZ     = $siteTz ?: $appTz;
+
+  // Formatter tanggal lengkap: Kamis, 17 Okt 2025 14:05 WIB (Asia/Jakarta)
+  $formatTs = function ($ts) use ($TZ) {
+    if (!$ts) return null;
+    try {
+      $c = $ts instanceof Carbon ? $ts->copy() : Carbon::parse($ts);
+      $c = $c->setTimezone($TZ);
+      // Bahasa Indonesia sederhana
+      $namaHari = ['Sun'=>'Minggu','Mon'=>'Senin','Tue'=>'Selasa','Wed'=>'Rabu','Thu'=>'Kamis','Fri'=>'Jumat','Sat'=>'Sabtu'][$c->format('D')] ?? $c->format('D');
+      $namaBln  = ['Jan'=>'Jan','Feb'=>'Feb','Mar'=>'Mar','Apr'=>'Apr','May'=>'Mei','Jun'=>'Jun','Jul'=>'Jul','Aug'=>'Agu','Sep'=>'Sep','Oct'=>'Okt','Nov'=>'Nov','Dec'=>'Des'][$c->format('M')] ?? $c->format('M');
+      // WIB/WITA/WIT heuristik
+      $abbr = str_contains($TZ,'Jakarta') ? 'WIB' : (str_contains($TZ,'Makassar') ? 'WITA' : (str_contains($TZ,'Jayapura') ? 'WIT' : $c->format('T')));
+      return sprintf('%s, %02d %s %04d %s (%.2f) %s',
+        $namaHari,
+        (int)$c->format('d'),
+        $namaBln,
+        (int)$c->format('Y'),
+        $c->format('H:i'),
+        // tampilkan zona waktu offset jam, mis. +07 jadi 7.00
+        ((int)$c->format('Z'))/3600,
+        $abbr
+      );
+    } catch (\Throwable $e) {
+      return (string)$ts;
+    }
+  };
+
+  // Resolve nama aktor yang mengubah stage (fleksibel berbagai kolom/relasi)
+  $actorName = function ($stage) {
+    // Prioritas: relasi actor->name, relasi user->name
+    $name = $stage->actor->name ?? $stage->user->name ?? null;
+    if ($name) return $name;
+
+    // Coba dari kolom umum
+    $uid = $stage->acted_by ?? $stage->changed_by ?? $stage->updated_by ?? $stage->user_id ?? null;
+    if ($uid) {
+      try {
+        $u = \App\Models\User::query()->select('name')->find($uid);
+        if ($u && $u->name) return $u->name;
+      } catch (\Throwable $e) {}
+    }
+
+    return 'Sistem/Unknown';
+  };
+
+  // ambil informasi "terakhir diubah" dari stage paling baru atau dari aplikasi
+  $latestStage   = $stagesColl->sortByDesc(fn($s) => $s->updated_at ?? $s->created_at ?? null)->first();
+  $lastChangedAt = $latestStage?->updated_at ?? $myApp?->updated_at;
+
+  // FIX: guard saat $myApp null sebelum method_exists
+  $lastChangedBy = $latestStage
+    ? $actorName($latestStage)
+    : (($myApp && method_exists($myApp, 'updatedBy')) ? ($myApp->updatedBy->name ?? null) : null);
 
   // tanggal penutupan lowongan (opsional)
   $closingAt = $job->closing_at ?? null;
@@ -122,7 +190,7 @@
               <span class="text-slate-300">•</span>
               <span class="inline-flex items-center gap-1">
                 <svg class="h-4 w-4 text-slate-500"><use href="#i-clock"/></svg>
-                Tutup: {{ \Illuminate\Support\Carbon::parse($closingAt)->format('d M Y') }}
+                Tutup: {{ Carbon::parse($closingAt)->timezone($TZ)->format('d M Y, H:i') }} {{ str_contains($TZ,'Jakarta') ? 'WIB' : (str_contains($TZ,'Makassar') ? 'WITA' : (str_contains($TZ,'Jayapura') ? 'WIT' : '')) }}
               </span>
             @endif
           </div>
@@ -374,7 +442,7 @@
                 </div>
               </div>
 
-              {{-- Timeline --}}
+              {{-- Timeline dengan waktu & pengubah --}}
               <div class="mt-5 relative">
                 <div class="absolute right-3 top-0 bottom-0 w-0.5" style="background:#e6e6e6"></div>
                 <div class="space-y-3">
@@ -384,11 +452,26 @@
                       $done   = in_array($key,$visited,true) && !$isNow;
                       $muted  = !$done && !$isNow;
                       $dotBg  = $done ? '#16a34a' : ($isNow ? $BLUE : '#f59e0b');
+
+                      // Cari data stage terkait (kalau ada)
+                      $st = $stageMap[$key] ?? null;
+
+                      // Tentukan waktu tampil:
+                      // - jika "done": pakai updated_at (selesai diproses)
+                      // - jika "isNow": pakai created_at (mulai diproses)
+                      // - jika "belum": null
+                      $ts = $done ? ($st->updated_at ?? $st->created_at ?? null)
+                           : ($isNow ? ($st->created_at ?? null) : null);
+
+                      $waktuTampil = $ts ? $formatTs($ts) : null;
+
+                      // Aktor yang mengubah
+                      $who = $st ? $actorName($st) : null;
                     @endphp
                     <div class="relative pr-12">
                       <span class="absolute right-0 top-1 grid h-4 w-4 place-items-center rounded-full ring-4 ring-white" style="background: {{ $dotBg }}"></span>
                       <div class="flex items-start justify-between gap-3">
-                        <div>
+                        <div class="min-w-0">
                           <div class="text-sm font-medium {{ $muted ? 'text-slate-700' : 'text-slate-900' }}">{{ $pretty[$key] }}</div>
                           <div class="text-xs text-slate-500">
                             @if($done) Selesai
@@ -396,25 +479,67 @@
                             @else Menunggu giliran
                             @endif
                           </div>
+
+                          {{-- Detail waktu & pengubah --}}
+                          @if($waktuTampil || $who)
+                            <div class="mt-1 text-[11px] text-slate-500">
+                              @if($waktuTampil)
+                                <div class="inline-flex items-center gap-1">
+                                  <svg class="h-3.5 w-3.5 text-slate-400"><use href="#i-clock"/></svg>
+                                  <span>Waktu: {{ $waktuTampil }}</span>
+                                </div>
+                              @endif
+                              @if($who)
+                                <div>
+                                  Diubah oleh: <span class="font-medium text-slate-700">{{ $who }}</span>
+                                </div>
+                              @endif
+
+                              {{-- Jika ada last note/remarks pada stage --}}
+                              @if(!empty($st?->notes))
+                                <div class="mt-0.5">
+                                  Catatan: <span class="text-slate-700">{{ $st->notes }}</span>
+                                </div>
+                              @endif
+                            </div>
+                          @endif
                         </div>
                         @if($isNow)
-                          <span class="rounded-full bg-blue-50 px-2 py-1 text-[11px] font-semibold text-blue-700 ring-1 ring-inset ring-blue-200">Aktif</span>
+                          <span class="shrink-0 rounded-full bg-blue-50 px-2 py-1 text-[11px] font-semibold text-blue-700 ring-1 ring-inset ring-blue-200">Aktif</span>
                         @elseif($done)
-                          <span class="rounded-full bg-emerald-50 px-2 py-1 text-[11px] font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-200">Selesai</span>
+                          <span class="shrink-0 rounded-full bg-emerald-50 px-2 py-1 text-[11px] font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-200">Selesai</span>
                         @else
-                          <span class="rounded-full bg-amber-50 px-2 py-1 text-[11px] font-semibold text-amber-700 ring-1 ring-inset ring-amber-200">Berikutnya</span>
+                          <span class="shrink-0 rounded-full bg-amber-50 px-2 py-1 text-[11px] font-semibold text-amber-700 ring-1 ring-inset ring-amber-200">Berikutnya</span>
                         @endif
                       </div>
                     </div>
                   @endforeach
 
                   @if($overall==='rejected')
+                    @php
+                      // tampilkan reject time & who kalau tersedia dari latestStage
+                      $rejectTime = $latestStage ? $formatTs($latestStage->updated_at ?? $latestStage->created_at) : ($myApp ? $formatTs($myApp->updated_at ?? $myApp->created_at) : null);
+                      $rejectBy   = $latestStage ? $actorName($latestStage) : ($lastChangedBy ?? null);
+                    @endphp
                     <div class="relative pr-12">
                       <span class="absolute right-0 top-1 grid h-4 w-4 place-items-center rounded-full ring-4 ring-white" style="background: {{ $RED }}"></span>
                       <div class="flex items-start justify-between gap-3">
-                        <div>
+                        <div class="min-w-0">
                           <div class="text-sm font-medium text-slate-900">Keputusan</div>
                           <div class="text-xs text-slate-500">Lamaran tidak melanjutkan proses.</div>
+                          @if($rejectTime || $rejectBy)
+                            <div class="mt-1 text-[11px] text-slate-500">
+                              @if($rejectTime)
+                                <div class="inline-flex items-center gap-1">
+                                  <svg class="h-3.5 w-3.5 text-slate-400"><use href="#i-clock"/></svg>
+                                  <span>Waktu: {{ $rejectTime }}</span>
+                                </div>
+                              @endif
+                              @if($rejectBy)
+                                <div>Diubah oleh: <span class="font-medium text-slate-700">{{ $rejectBy }}</span></div>
+                              @endif
+                            </div>
+                          @endif
                         </div>
                         <span class="rounded-full bg-slate-100 px-2 py-1 text-[11px] font-semibold text-slate-700 ring-1 ring-inset ring-slate-200">Ditutup</span>
                       </div>
@@ -423,11 +548,11 @@
                 </div>
               </div>
 
-              {{-- Meta lamaran --}}
+              {{-- Meta lamaran (dengan update terakhir & pengubah) --}}
               <div class="mt-5 grid gap-2 text-xs text-slate-600">
                 <div class="inline-flex items-center gap-2">
                   <svg class="h-4 w-4 text-slate-500"><use href="#i-clock"/></svg>
-                  Diajukan: {{ optional($myApp->created_at)->format('d M Y') ?? '—' }}
+                  Diajukan: {{ $myApp?->created_at ? $formatTs($myApp->created_at) : '—' }}
                 </div>
                 <div class="inline-flex items-center gap-2">
                   <svg class="h-4 w-4 text-slate-500"><use href="#i-brief"/></svg>
@@ -443,6 +568,17 @@
                     {{ $overallText }}
                   </span>
                 </div>
+
+                {{-- Baru: informasi perubahan terakhir --}}
+                @if($lastChangedAt)
+                  <div class="inline-flex items-center gap-2">
+                    <svg class="h-4 w-4 text-slate-500"><use href="#i-clock"/></svg>
+                    Terakhir diubah: {{ $formatTs($lastChangedAt) }}
+                    @if($lastChangedBy)
+                      <span>• oleh <span class="font-medium text-slate-700">{{ $lastChangedBy }}</span></span>
+                    @endif
+                  </div>
+                @endif
               </div>
             @endif
           @endguest
@@ -552,9 +688,9 @@
 
   {{-- FOOTER meta --}}
   <div class="mt-6 flex flex-wrap items-center gap-3 text-xs text-slate-500">
-    <span>Diposting: {{ optional($job->created_at)->format('d M Y') ?? '—' }}</span>
+    <span>Diposting: {{ optional($job->created_at)->timezone($TZ)->format('d M Y, H:i') ?? '—' }}</span>
     <span>•</span>
-    <span>Diubah: {{ optional($job->updated_at)->format('d M Y') ?? '—' }}</span>
+    <span>Diubah: {{ optional($job->updated_at)->timezone($TZ)->format('d M Y, H:i') ?? '—' }}</span>
     @if(isset($job->applications_count))
       <span>•</span>
       <span>Jumlah Pelamar: {{ $job->applications_count }}</span>
@@ -594,7 +730,7 @@
     'title' => $job->title,
     'description' => strip_tags($decode($job->description ?? '')),
     'datePosted' => optional($job->created_at)->toIso8601String(),
-    'validThrough' => $closingAt ? \Illuminate\Support\Carbon::parse($closingAt)->toIso8601String() : null,
+    'validThrough' => $closingAt ? Carbon::parse($closingAt)->toIso8601String() : null,
     'employmentType' => strtoupper($job->employment_type ?? 'FULL_TIME'),
     'hiringOrganization' => [
       '@type' => 'Organization',
