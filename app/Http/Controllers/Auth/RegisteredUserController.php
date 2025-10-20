@@ -15,7 +15,7 @@ use Illuminate\View\View;
 class RegisteredUserController extends Controller
 {
     /**
-     * Display the registration view.
+     * Tampilkan halaman register.
      */
     public function create(): View
     {
@@ -23,28 +23,36 @@ class RegisteredUserController extends Controller
     }
 
     /**
-     * Handle an incoming registration request.
+     * Proses registrasi (verifikasi via OTP/Kode, tanpa link).
      *
      * @throws \Illuminate\Validation\ValidationException
      */
     public function store(Request $request): RedirectResponse
     {
         $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+            'name'     => ['required', 'string', 'max:255'],
+            'email'    => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            // 'agree'  => ['accepted'], // jika ada checkbox persetujuan
         ]);
 
+        // Catatan: $request->string(...) mengembalikan Stringable; cast ke string.
         $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
+            'name'       => (string) $request->string('name'),
+            'email'      => (string) $request->string('email'),
+            'password'   => Hash::make((string) $request->string('password')),
+            'role'       => $request->input('role', 'pelamar'),
+            'id_employe' => $request->input('id_employe'),
         ]);
 
+        // Trigger event standar → listener SendEmailVerificationCode akan generate & kirim OTP
         event(new Registered($user));
 
+        // Login user supaya bisa akses form OTP
         Auth::login($user);
 
-        return redirect(route('dashboard', absolute: false));
+        // >>> TANPA verifikasi link. Langsung ke form input kode OTP.
+        return redirect()->route('verification.code.form')
+            ->with('status', 'verification-link-sent'); // opsional: ubah pesan jika mau
     }
 }

@@ -12,14 +12,17 @@ use App\Http\Controllers\OfferController;
 use App\Http\Controllers\ManpowerDashboardController;
 use App\Http\Controllers\CandidateProfileController;
 
-// === Admin Controllers (sesuai screenshot)
-use App\Http\Controllers\Admin\SiteController as AdminSiteController;     // Admin/SiteController.php
-use App\Http\Controllers\InterviewController as AdminInterviewController; // root/InterviewController.php (admin)
-use App\Http\Controllers\Admin\UserController;                            // NEW: Kelola Users (akses HR & Superadmin)
-use App\Http\Controllers\Admin\AuditLogController;                        // NEW: Audit Logs (read-only)
+// === Admin Controllers
+use App\Http\Controllers\Admin\SiteController as AdminSiteController;
+use App\Http\Controllers\InterviewController as AdminInterviewController;
+use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\AuditLogController;
 
-// === Public Sites Controller (user non-admin)
+// === Public Sites Controller
 use App\Http\Controllers\SitePublicController;
+
+// === OTP Verify Code Controller
+use App\Http\Controllers\Auth\VerifyCodeController;
 
 // === NEW: pusat notifikasi & interview milik user
 use App\Http\Controllers\UserNotificationController;
@@ -33,22 +36,12 @@ use App\Http\Controllers\Admin\ManpowerRequirementController;
 | Public
 |--------------------------------------------------------------------------
 */
-
 Route::get('/', WelcomeController::class)->name('welcome');
 
 Route::get('/jobs', [JobController::class, 'index'])->name('jobs.index');
 Route::get('/jobs/{job}', [JobController::class, 'show'])
     ->whereUuid('job')
     ->name('jobs.show');
-
-Route::middleware('auth')->group(function () {
-    Route::get('/jobs/{job}/apply/profile',  [CandidateProfileController::class, 'edit'])
-        ->whereUuid('job')
-        ->name('candidate.profiles.edit');
-    Route::post('/jobs/{job}/apply/profile', [CandidateProfileController::class, 'update'])
-        ->whereUuid('job')
-        ->name('candidate.profiles.update');
-});
 
 /*
 |--------------------------------------------------------------------------
@@ -62,20 +55,54 @@ Route::get('/sites/{site}', [SitePublicController::class, 'show'])
 
 /*
 |--------------------------------------------------------------------------
-| Authenticated (semua user)
+| Email Verification via Kode (OTP) — butuh login (belum perlu verified)
+| - override verification.notice bawaan ke form kode
+| - tambahkan throttle untuk keamanan
 |--------------------------------------------------------------------------
 */
-Route::get('/dashboard', fn() => view('dashboard'))
-    ->middleware(['auth'])
+Route::middleware(['auth'])->group(function () {
+    // Override notice bawaan → redirect ke form OTP
+    Route::get('/email/verify', [VerifyCodeController::class, 'notice'])
+        ->name('verification.notice');
+
+    // Form input kode
+    Route::get('/email/verify/code', [VerifyCodeController::class, 'showForm'])
+        ->name('verification.code.form');
+
+    // Submit kode (dibatasi 6x/menit)
+    Route::post('/email/verify/code', [VerifyCodeController::class, 'verify'])
+        ->middleware('throttle:6,1')
+        ->name('verification.code.verify');
+
+    // Kirim ulang kode (dibatasi 6x/menit; controller juga punya cooldown detik)
+    Route::post('/email/verify/resend', [VerifyCodeController::class, 'resend'])
+        ->middleware('throttle:6,1')
+        ->name('verification.code.resend');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Authenticated (SEMUA wajib verified)
+|--------------------------------------------------------------------------
+*/
+Route::get('/dashboard', fn () => view('dashboard'))
+    ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
     // Profile (Breeze)
     Route::get('/profile',  [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // Apply job (POST only)
+    // Apply job (form profile & submit)
+    Route::get('/jobs/{job}/apply/profile',  [CandidateProfileController::class, 'edit'])
+        ->whereUuid('job')
+        ->name('candidate.profiles.edit');
+    Route::post('/jobs/{job}/apply/profile', [CandidateProfileController::class, 'update'])
+        ->whereUuid('job')
+        ->name('candidate.profiles.update');
+
     Route::post('/jobs/{job}/apply', [ApplicationController::class, 'store'])
         ->whereUuid('job')
         ->name('applications.store');
@@ -117,141 +144,72 @@ Route::middleware('auth')->group(function () {
 
 /*
 |--------------------------------------------------------------------------
-| Admin (HR & Superadmin)
+| Admin (HR & Superadmin) — wajib verified
 |--------------------------------------------------------------------------
 */
 Route::prefix('admin')
     ->as('admin.')
-    ->middleware(['auth', 'role:hr|superadmin'])
+    ->middleware(['auth', 'verified', 'role:hr|superadmin'])
     ->group(function () {
+        // ================= Manpower =================
+        Route::get('manpower',                     [ManpowerRequirementController::class, 'index'])->name('manpower.index');
+        Route::post('manpower/preview',            [ManpowerRequirementController::class, 'preview'])->name('manpower.preview');
+        Route::get('manpower/{job}/edit',          [ManpowerRequirementController::class, 'edit'])->whereUuid('job')->name('manpower.edit'); // <- fix typo
+        Route::put('manpower/{job}',               [ManpowerRequirementController::class, 'update'])->whereUuid('job')->name('manpower.update');
+        Route::delete('manpower/{job}/{manpower}', [ManpowerRequirementController::class, 'destroy'])
+            ->whereUuid(['job', 'manpower'])->name('manpower.destroy');
 
-        // Jobs (resource, tanpa show agar tidak bentrok public show)
+        // ================= Manpower Dashboard =================
+        Route::get('dashboard/manpower', ManpowerDashboardController::class)->name('dashboard.manpower');
+
+        // ================= Jobs (admin) =================
         Route::resource('jobs', JobController::class)->except(['show']);
 
-        // Sites (pakai Admin\SiteController sesuai screenshot)
+        // ================= Sites (admin) =================
         Route::resource('sites', AdminSiteController::class);
 
-        // Kandidat & Kanban
-        Route::get('applications',       [ApplicationController::class, 'adminIndex'])
-            ->name('applications.index');
-        Route::get('applications/board', [ApplicationController::class, 'board'])
-            ->name('applications.board');
+        // ================= Applications / Kanban =================
+        Route::get('applications',       [ApplicationController::class, 'adminIndex'])->name('applications.index');
+        Route::get('applications/board', [ApplicationController::class, 'board'])->name('applications.board');
 
-        // Pindah stage (POST only)
         Route::post('applications/{application}/move', [ApplicationController::class, 'moveStage'])
-            ->whereUuid('application')
-            ->name('applications.move');
+            ->whereUuid('application')->name('applications.move');
 
-        // Legacy GET -> redirect
+        // Legacy GET -> redirect aman
         Route::get('applications/{application}/move', function () {
-            return redirect()
-                ->route('admin.applications.index')
+            return redirect()->route('admin.applications.index')
                 ->with('warn', 'Aksi pindah stage harus via POST. Tombol lama masih pakai GET — diarahkan ulang.');
         })->whereUuid('application');
 
         // AJAX Kanban
-        Route::post('applications/board/move', [ApplicationController::class, 'moveStageAjax'])
-            ->name('applications.board.move');
+        Route::post('applications/board/move', [ApplicationController::class, 'moveStageAjax'])->name('applications.board.move');
 
-        // ===== Admin helper pages =====
-        Route::get('interviews',  [AdminInterviewController::class, 'index'])
-            ->name('interviews.index');
-        Route::get('psychotests', [PsychotestController::class, 'index'])
-            ->name('psychotests.index');
-        Route::get('offers',      [OfferController::class, 'index'])
-            ->name('offers.index');
-
-        // Schedule interview (by application)
+        // ================= Interviews / Psychotest / Offers =================
+        Route::get('interviews',  [AdminInterviewController::class, 'index'])->name('interviews.index');
         Route::post('interviews/{application}', [AdminInterviewController::class, 'store'])
-            ->whereUuid('application')
-            ->name('interviews.store');
+            ->whereUuid('application')->name('interviews.store');
 
-        // Offer letter
+        Route::get('psychotests', [PsychotestController::class, 'index'])->name('psychotests.index');
+
+        Route::get('offers',      [OfferController::class, 'index'])->name('offers.index');
         Route::post('offers/{application}', [OfferController::class, 'store'])
-            ->whereUuid('application')
-            ->name('offers.store');
+            ->whereUuid('application')->name('offers.store');
         Route::get('offers/{offer}/pdf', [OfferController::class, 'pdf'])
-            ->whereUuid('offer')
-            ->name('offers.pdf');
+            ->whereUuid('offer')->name('offers.pdf');
 
-        /*
-|----------------------------------------------------------------------
-| Manpower Dashboard (pakai __invoke di Admin\ManpowerRequirementController)
-|----------------------------------------------------------------------
-*/
-        Route::get('dashboard/manpower', \App\Http\Controllers\Admin\ManpowerRequirementController::class)
-            ->name('dashboard.manpower');
+        // ================= Candidates (read-only admin) =================
+        Route::get('candidates',              [CandidateProfileController::class, 'adminIndex'])->name('candidates.index');
+        Route::get('candidates/{profile}',    [CandidateProfileController::class, 'adminShow'])->whereUuid('profile')->name('candidates.show');
+        Route::get('candidates/{profile}/cv', [CandidateProfileController::class, 'adminCv'])->whereUuid('profile')->name('candidates.cv');
 
-        /*
-|----------------------------------------------------------------------
-| Manpower per Job (assets & ratio) -> sinkron jobs.openings
-|----------------------------------------------------------------------
-*/
-        Route::get('manpower/{job}/edit', [\App\Http\Controllers\Admin\ManpowerRequirementController::class, 'edit'])
-            ->whereUuid('job')
-            ->name('manpower.edit');
-
-        Route::put('manpower/{job}', [\App\Http\Controllers\Admin\ManpowerRequirementController::class, 'update'])
-            ->whereUuid('job')
-            ->name('manpower.update');
-
-        Route::delete('manpower/{job}/{manpower}', [\App\Http\Controllers\Admin\ManpowerRequirementController::class, 'destroy'])
-            ->whereUuid(['job', 'manpower'])
-            ->name('manpower.destroy');
-
-        /* Preview kalkulasi tanpa simpan (dipakai Headcount Estimator) */
-        Route::post('manpower/preview', [\App\Http\Controllers\Admin\ManpowerRequirementController::class, 'preview'])
-            ->name('manpower.preview');
-
-        // Candidate Profiles (read-only)
-        Route::get('candidates', [CandidateProfileController::class, 'adminIndex'])
-            ->name('candidates.index');
-        Route::get('candidates/{profile}', [CandidateProfileController::class, 'adminShow'])
-            ->whereUuid('profile')
-            ->name('candidates.show');
-        Route::get('candidates/{profile}/cv', [CandidateProfileController::class, 'adminCv'])
-            ->whereUuid('profile')
-            ->name('candidates.cv');
-
-        /*
-        |------------------------------------------------------------------
-        | NEW: System Admin — Users & Audit Logs (untuk migrasi & governance)
-        |------------------------------------------------------------------
-        */
-
-        // Users (HR & Superadmin). Tidak pakai 'show' agar aman.
+        // ================= Users & Audit Logs =================
         Route::resource('users', UserController::class)->except(['show']);
+        Route::get('users-export',  [UserController::class, 'export'])->name('users.export');
+        Route::post('users-import', [UserController::class, 'import'])->name('users.import');
 
-        // Optional: endpoint migrasi/ekspor-impor users (CSV/Excel/JSON)
-        Route::get('users-export', [UserController::class, 'export'])
-            ->name('users.export');          // GET  /admin/users-export    -> unduh data users
-        Route::post('users-import', [UserController::class, 'import'])
-            ->name('users.import');          // POST /admin/users-import    -> unggah & proses file
-
-        // Audit Logs (read-only)
-        Route::get('audit-logs', [AuditLogController::class, 'index'])
-            ->name('audit_logs.index');      // Listing + filter
-        Route::get('audit-logs/{log}', [AuditLogController::class, 'show'])
-            ->whereUuid('log')
-            ->name('audit_logs.show');       // Detail (diff/context)
-        Route::get('audit-logs-export', [AuditLogController::class, 'export'])
-            ->name('audit_logs.export');     // Ekspor untuk arsip/compliance
-
-        /*
-        |------------------------------------------------------------------
-        | NEW: Manpower per Job (assets & ratio) -> sinkron jobs.openings
-        |------------------------------------------------------------------
-        */
-        Route::get('manpower/{job}/edit', [ManpowerRequirementController::class, 'edit'])
-            ->whereUuid('job')
-            ->name('manpower.edit');
-        Route::put('manpower/{job}', [ManpowerRequirementController::class, 'update'])
-            ->whereUuid('job')
-            ->name('manpower.update');
-
-        // (Opsional) endpoint JSON sederhana untuk hitung cepat tanpa simpan
-        Route::post('manpower/preview', [ManpowerRequirementController::class, 'preview'])
-            ->name('manpower.preview');
+        Route::get('audit-logs',        [AuditLogController::class, 'index'])->name('audit_logs.index');
+        Route::get('audit-logs/{log}',  [AuditLogController::class, 'show'])->whereUuid('log')->name('audit_logs.show');
+        Route::get('audit-logs-export', [AuditLogController::class, 'export'])->name('audit_logs.export');
     });
 
 /*

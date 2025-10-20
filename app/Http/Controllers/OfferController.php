@@ -9,51 +9,51 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class OfferController extends Controller
 {
-    // Admin: buat draft offer
-    public function store(Request $request, JobApplication $application)
-    {
-        $data = $request->validate([
-            'gross_salary' => 'required|numeric|min:0',
-            'allowance'    => 'nullable|numeric|min:0',
-            'notes'        => 'nullable|string',
-            'html'         => 'nullable|string', // jika kirim HTML custom
-        ]);
+  // Admin: buat draft offer
+  public function store(Request $request, JobApplication $application)
+  {
+    $data = $request->validate([
+      'gross_salary' => 'required|numeric|min:0',
+      'allowance'    => 'nullable|numeric|min:0',
+      'notes'        => 'nullable|string',
+      'html'         => 'nullable|string', // jika kirim HTML custom
+    ]);
 
-        $offer = $application->offer()->create([
-            'status'        => 'draft',
-            'salary'        => [
-                'gross'     => (float)$data['gross_salary'],
-                'allowance' => isset($data['allowance']) ? (float)$data['allowance'] : 0,
-            ],
-            'body_template' => $data['html'] ?? null,
-        ]);
+    $offer = $application->offer()->create([
+      'status'        => 'draft',
+      'salary'        => [
+        'gross'     => (float)$data['gross_salary'],
+        'allowance' => isset($data['allowance']) ? (float)$data['allowance'] : 0,
+      ],
+      'body_template' => $data['html'] ?? null,
+    ]);
 
-        // opsional: ubah stage ke 'offer'
-        $application->update(['current_stage' => 'offer']);
+    // opsional: ubah stage ke 'offer'
+    $application->update(['current_stage' => 'offer']);
 
-        return redirect()->route('admin.applications.index')->with('ok', 'Draft offer dibuat.');
-    }
+    return redirect()->route('admin.applications.index')->with('ok', 'Draft offer dibuat.');
+  }
 
-    public function pdf(Offer $offer)
-    {
-        $offer->load('application.user', 'application.job', 'application.job.site');
+  public function pdf(Offer $offer)
+  {
+    $offer->load('application.user', 'application.job', 'application.job.site');
 
-        if (view()->exists('offers.pdf')) {
-            $html = view('offers.pdf', compact('offer'))->render();
-        } elseif (view()->exists('offers._fallback')) {
-            $html = view('offers._fallback', compact('offer'))->render();
-        } else {
-            $app   = $offer->application;
-            $user  = $app?->user?->name ?? '—';
-            $title = $app?->job?->title ?? '—';
-            $site  = $app?->job?->site?->code ?? '—';
-            $gross = number_format((float)($offer->salary['gross'] ?? 0), 0, ',', '.');
-            $allow = number_format((float)($offer->salary['allowance'] ?? 0), 0, ',', '.');
-            $status = strtoupper($offer->status ?? 'draft');
-            $date = now()->format('d M Y');
+    if (view()->exists('offers.pdf')) {
+      $html = view('offers.pdf', compact('offer'))->render();
+    } elseif (view()->exists('offers._fallback')) {
+      $html = view('offers._fallback', compact('offer'))->render();
+    } else {
+      $app   = $offer->application;
+      $user  = $app?->user?->name ?? '—';
+      $title = $app?->job?->title ?? '—';
+      $site  = $app?->job?->site?->code ?? '—';
+      $gross = number_format((float)($offer->salary['gross'] ?? 0), 0, ',', '.');
+      $allow = number_format((float)($offer->salary['allowance'] ?? 0), 0, ',', '.');
+      $status = strtoupper($offer->status ?? 'draft');
+      $date = now()->format('d M Y');
 
-            // ▼▼▼ TIDAK BOLEH ADA SPASI/TAB SEBELUM <<<'HTML' MAUPUN PENUTUP HTML; ▼▼▼
-            $html = <<<'HTML'
+      // ▼▼▼ TIDAK BOLEH ADA SPASI/TAB SEBELUM <<<'HTML' MAUPUN PENUTUP HTML; ▼▼▼
+      $html = <<<'HTML'
 <!doctype html>
 <html>
 <head>
@@ -104,46 +104,46 @@ class OfferController extends Controller
 </body>
 </html>
 HTML;
-            // ▲▲▲ PENUTUP "HTML;" JUGA HARUS DI KOLOM 0 (NO INDENT) ▲▲▲
+      // ▲▲▲ PENUTUP "HTML;" JUGA HARUS DI KOLOM 0 (NO INDENT) ▲▲▲
 
-            $notesBlock = !empty($offer->body_template)
-                ? '<h2>Notes</h2>' . $offer->body_template
-                : '';
+      $notesBlock = !empty($offer->body_template)
+        ? '<h2>Notes</h2>' . $offer->body_template
+        : '';
 
-            $repl = [
-                '%%USER%%'   => e($user),
-                '%%TITLE%%'  => e($title),
-                '%%SITE%%'   => e($site),
-                '%%ID%%'     => (string) $offer->id,
-                '%%STATUS%%' => e($status),
-                '%%DATE%%'   => e($date),
-                '%%GROSS%%'  => e($gross),
-                '%%ALLOW%%'  => e($allow),
-                '%%NOTES%%'  => $notesBlock,
-            ];
-            $html = strtr($html, $repl);
-        }
-
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadHTML($html);
-        return $pdf->download('OfferingLetter-' . $offer->id . '.pdf');
+      $repl = [
+        '%%USER%%'   => e($user),
+        '%%TITLE%%'  => e($title),
+        '%%SITE%%'   => e($site),
+        '%%ID%%'     => (string) $offer->id,
+        '%%STATUS%%' => e($status),
+        '%%DATE%%'   => e($date),
+        '%%GROSS%%'  => e($gross),
+        '%%ALLOW%%'  => e($allow),
+        '%%NOTES%%'  => $notesBlock,
+      ];
+      $html = strtr($html, $repl);
     }
 
+    $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadHTML($html);
+    return $pdf->download('OfferingLetter-' . $offer->id . '.pdf');
+  }
 
-    public function index(Request $request)
-    {
-        $q      = (string) $request->query('q', '');
-        $status = (string) $request->query('status', '');
 
-        $offers = Offer::query()
-            ->with(['application.user:id,name', 'application.job:id,title,site_id', 'application.job.site:id,code'])
-            ->when($q, function ($qq) use ($q) {
-                $qq->whereHas('application.user', fn($u) => $u->where('name', 'like', "%{$q}%"))
-                    ->orWhereHas('application.job', fn($j) => $j->where('title', 'like', "%{$q}%"));
-            })
-            ->when($status, fn($qq) => $qq->where('status', $status))
-            ->latest()
-            ->paginate(15);
+  public function index(Request $request)
+  {
+    $q      = (string) $request->query('q', '');
+    $status = (string) $request->query('status', '');
 
-        return view('admin.offers.index', compact('offers', 'q', 'status'));
-    }
+    $offers = Offer::query()
+      ->with(['application.user:id,name', 'application.job:id,title,site_id', 'application.job.site:id,code'])
+      ->when($q, function ($qq) use ($q) {
+        $qq->whereHas('application.user', fn($u) => $u->where('name', 'like', "%{$q}%"))
+          ->orWhereHas('application.job', fn($j) => $j->where('title', 'like', "%{$q}%"));
+      })
+      ->when($status, fn($qq) => $qq->where('status', $status))
+      ->latest()
+      ->paginate(15);
+
+    return view('admin.offers.index', compact('offers', 'q', 'status'));
+  }
 }
