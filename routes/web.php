@@ -25,11 +25,15 @@ use App\Http\Controllers\SitePublicController;
 use App\Http\Controllers\UserNotificationController;
 use App\Http\Controllers\MyInterviewController;
 
+// === NEW: Manpower Requirement Controller (sinkron openings)
+use App\Http\Controllers\Admin\ManpowerRequirementController;
+
 /*
 |--------------------------------------------------------------------------
 | Public
 |--------------------------------------------------------------------------
 */
+
 Route::get('/', WelcomeController::class)->name('welcome');
 
 Route::get('/jobs', [JobController::class, 'index'])->name('jobs.index');
@@ -61,7 +65,7 @@ Route::get('/sites/{site}', [SitePublicController::class, 'show'])
 | Authenticated (semua user)
 |--------------------------------------------------------------------------
 */
-Route::get('/dashboard', fn () => view('dashboard'))
+Route::get('/dashboard', fn() => view('dashboard'))
     ->middleware(['auth'])
     ->name('dashboard');
 
@@ -170,9 +174,34 @@ Route::prefix('admin')
             ->whereUuid('offer')
             ->name('offers.pdf');
 
-        // Manpower dashboard
-        Route::get('dashboard/manpower', ManpowerDashboardController::class)
+        /*
+|----------------------------------------------------------------------
+| Manpower Dashboard (pakai __invoke di Admin\ManpowerRequirementController)
+|----------------------------------------------------------------------
+*/
+        Route::get('dashboard/manpower', \App\Http\Controllers\Admin\ManpowerRequirementController::class)
             ->name('dashboard.manpower');
+
+        /*
+|----------------------------------------------------------------------
+| Manpower per Job (assets & ratio) -> sinkron jobs.openings
+|----------------------------------------------------------------------
+*/
+        Route::get('manpower/{job}/edit', [\App\Http\Controllers\Admin\ManpowerRequirementController::class, 'edit'])
+            ->whereUuid('job')
+            ->name('manpower.edit');
+
+        Route::put('manpower/{job}', [\App\Http\Controllers\Admin\ManpowerRequirementController::class, 'update'])
+            ->whereUuid('job')
+            ->name('manpower.update');
+
+        Route::delete('manpower/{job}/{manpower}', [\App\Http\Controllers\Admin\ManpowerRequirementController::class, 'destroy'])
+            ->whereUuid(['job', 'manpower'])
+            ->name('manpower.destroy');
+
+        /* Preview kalkulasi tanpa simpan (dipakai Headcount Estimator) */
+        Route::post('manpower/preview', [\App\Http\Controllers\Admin\ManpowerRequirementController::class, 'preview'])
+            ->name('manpower.preview');
 
         // Candidate Profiles (read-only)
         Route::get('candidates', [CandidateProfileController::class, 'adminIndex'])
@@ -207,6 +236,22 @@ Route::prefix('admin')
             ->name('audit_logs.show');       // Detail (diff/context)
         Route::get('audit-logs-export', [AuditLogController::class, 'export'])
             ->name('audit_logs.export');     // Ekspor untuk arsip/compliance
+
+        /*
+        |------------------------------------------------------------------
+        | NEW: Manpower per Job (assets & ratio) -> sinkron jobs.openings
+        |------------------------------------------------------------------
+        */
+        Route::get('manpower/{job}/edit', [ManpowerRequirementController::class, 'edit'])
+            ->whereUuid('job')
+            ->name('manpower.edit');
+        Route::put('manpower/{job}', [ManpowerRequirementController::class, 'update'])
+            ->whereUuid('job')
+            ->name('manpower.update');
+
+        // (Opsional) endpoint JSON sederhana untuk hitung cepat tanpa simpan
+        Route::post('manpower/preview', [ManpowerRequirementController::class, 'preview'])
+            ->name('manpower.preview');
     });
 
 /*

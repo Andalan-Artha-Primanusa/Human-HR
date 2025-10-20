@@ -16,7 +16,8 @@ use App\Models\{
     PsychotestQuestion,
     PsychotestAttempt,
     Interview,
-    Offer
+    Offer,
+    ManpowerRequirement, // ⬅️ tambahkan
 };
 
 class DemoDataSeeder extends Seeder
@@ -88,7 +89,6 @@ class DemoDataSeeder extends Seeder
                 [
                     'full_name'      => $u->name,
                     'phone'          => '081234567890',
-                    // gunakan kolom yang ada pada migration candidate_profiles:
                     'ktp_address'    => 'Jl. Contoh No.1',
                     'ktp_city'       => 'Jakarta',
                     'domicile_city'  => 'Jakarta',
@@ -98,8 +98,31 @@ class DemoDataSeeder extends Seeder
         }
 
         /* ===============================
-         * JOBS + MANPOWER (upsert by code)
+         * Master Sites (idempotent)
          * =============================== */
+        $sitesByCode = [
+            'HO'  => 'Head Office',
+            'DBK' => 'Site Debukit',
+            'POS' => 'Site Pos',
+        ];
+        $siteMap = [];
+        foreach ($sitesByCode as $code => $name) {
+            $site = Site::updateOrCreate(['code' => $code], ['name' => $name]);
+            $siteMap[$code] = $site;
+        }
+
+        /* ===============================
+         * JOBS + MANPOWER per-site (upsert)
+         * =============================== */
+        // Contoh dataset assets & ratio per site (demo)
+        // Bisa kamu ganti sesuai realita.
+        $manpowerMatrix = [
+            // site_code => [assets_count, ratio]
+            'DBK' => ['assets' => 12, 'ratio' => 2.50],
+            'POS' => ['assets' =>  5, 'ratio' => 2.60],
+            'HO'  => ['assets' =>  3, 'ratio' => 2.50],
+        ];
+
         $jobDefs = [
             [
                 'code'             => 'PLT-ENG-01',
@@ -108,7 +131,7 @@ class DemoDataSeeder extends Seeder
                 'site_code'        => 'DBK',
                 'level'            => 'Staff',
                 'employment_type'  => 'fulltime',
-                'openings'         => 2,
+                'openings'         => 2, // nilai awal (akan direcalc dari manpower per-site)
                 'status'           => 'open',
                 'description'      => 'Support maintenance and reliability.',
             ],
@@ -136,9 +159,32 @@ class DemoDataSeeder extends Seeder
             ],
         ];
 
-        $jobs = collect($jobDefs)->map(function ($d) {
-            // pastikan site ada berdasarkan code
-            $site = Site::firstOrCreate(
+        // Helper: buat / update 1 baris manpower per (job, site)
+        $ensureManpower = function (Job $job, Site $site, int $assets, float $ratio): ManpowerRequirement {
+            // budget dihitung oleh model hook (saving) -> ceil(assets * ratio)
+            /** @var ManpowerRequirement $m */
+            $m = ManpowerRequirement::updateOrCreate(
+                ['job_id' => $job->id, 'site_id' => $site->id],
+                [
+                    'assets_count'    => $assets,
+                    'ratio_per_asset' => $ratio,
+                ]
+            );
+            return $m->fresh();
+        };
+
+        // Helper: hitung ulang total openings (SUM budget semua site)
+        $recalcJobOpenings = function (Job $job): void {
+            $sum = ManpowerRequirement::where('job_id', $job->id)->sum('budget_headcount');
+            // Kalau belum ada baris manpower, fallback ke openings existing
+            if ($sum > 0 && (int) $job->openings !== (int) $sum) {
+                $job->update(['openings' => (int) $sum]);
+            }
+        };
+
+        $jobs = collect($jobDefs)->map(function ($d) use ($siteMap, $manpowerMatrix, $ensureManpower, $recalcJobOpenings) {
+            // Site utama (attached ke job)
+            $site = $siteMap[$d['site_code']] ?? Site::firstOrCreate(
                 ['code' => $d['site_code']],
                 ['name' => $d['site_code']]
             );
@@ -153,18 +199,26 @@ class DemoDataSeeder extends Seeder
                 $payload
             );
 
-            // manpowerRequirement: satu baris per job (null-safe untuk filled_headcount)
-            $filled = optional($job->manpowerRequirement)->filled_headcount ?? 0;
+            // === Manpower per-site (demo):
+            //   1) baris untuk site utama job
+            $mainAssets = $manpowerMatrix[$d['site_code']]['assets'] ?? $d['openings'];
+            $mainRatio  = $manpowerMatrix[$d['site_code']]['ratio']  ?? 2.50;
+            $ensureManpower($job, $site, (int) $mainAssets, (float) $mainRatio);
 
-            $job->manpowerRequirement()->updateOrCreate(
-                ['job_id' => $job->id],
-                [
-                    'budget_headcount' => $d['openings'],
-                    'filled_headcount' => $filled,
-                ]
-            );
+            //   2) (opsional) baris tambahan untuk site lain (supaya kelihatan multi-site)
+            foreach ($manpowerMatrix as $code => $cfg) {
+                if ($code === $d['site_code']) continue; // skip yang utama
+                if (!isset($siteMap[$code])) continue;
+                // Untuk demo: hanya tambahkan bila assets > 0
+                if (($cfg['assets'] ?? 0) > 0) {
+                    $ensureManpower($job, $siteMap[$code], (int) $cfg['assets'], (float) $cfg['ratio']);
+                }
+            }
 
-            return $job;
+            // Recalc openings = SUM budget semua baris manpower untuk job tsb
+            $recalcJobOpenings($job);
+
+            return $job->fresh();
         })->values();
 
         /* ===============================
@@ -257,7 +311,18 @@ class DemoDataSeeder extends Seeder
             );
         };
 
-        $makeApp = function (User $user, Job $job, string $stage) use ($ensureStage, $ensureAttemptScored, $ensureInterview, $ensureOffer) {
+        // Helper: increment filled_headcount spesifik ke site job
+        $incFilledForJobSite = function (Job $job): void {
+            if (!$job->site_id) return;
+            $m = ManpowerRequirement::where('job_id', $job->id)
+                ->where('site_id', $job->site_id)
+                ->first();
+            if ($m) {
+                $m->increment('filled_headcount');
+            }
+        };
+
+        $makeApp = function (User $user, Job $job, string $stage) use ($ensureStage, $ensureAttemptScored, $ensureInterview, $ensureOffer, $incFilledForJobSite) {
             /** @var JobApplication $app */
             $app = JobApplication::updateOrCreate(
                 ['job_id' => $job->id, 'user_id' => $user->id],
@@ -296,10 +361,10 @@ class DemoDataSeeder extends Seeder
                 $ensureStage($app, 'offer', 'pending');
             }
 
-            // hired
+            // hired → increment filled_headcount spesifik site job
             if ($stage === 'hired') {
                 $app->update(['overall_status' => 'hired']);
-                optional($job->manpowerRequirement)->increment('filled_headcount');
+                $incFilledForJobSite($job);
             }
 
             return $app;

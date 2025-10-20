@@ -21,7 +21,6 @@ class JobController extends Controller
                 'id','code','title','division','employment_type','openings',
                 'site_id','status','description','created_at'
             ])
-            // List cukup butuh code+name; biarkan ringan
             ->with(['site:id,code,name'])
             ->when(!$isAdminRoute, fn($q) => $q->where('status', 'open'))
             ->when($request->filled('division'), fn($q) => $q->where('division', $request->string('division')->toString()))
@@ -62,10 +61,9 @@ class JobController extends Controller
      */
     public function show(Job $job)
     {
-        // >>> penting: muat kolom site yang dipakai di Blade (region, timezone, address)
         $job->loadMissing([
             'site:id,code,name,region,timezone,address',
-        ])->loadCount('applications'); // opsional untuk footer “Jumlah Pelamar”
+        ])->loadCount('applications');
 
         return view('jobs.show', compact('job'));
     }
@@ -80,7 +78,7 @@ class JobController extends Controller
     }
 
     /**
-     * ADMIN STORE -> redirect ke index + JSON response (AJAX)
+     * ADMIN STORE -> openings diabaikan; disinkron dari manpower_requirements
      */
     public function store(Request $request)
     {
@@ -89,9 +87,8 @@ class JobController extends Controller
             'title'           => ['required','string','max:200'],
             'division'        => ['nullable','string','max:100'],
             'level'           => ['nullable','string','max:100'],
-            // sinkron dengan Blade: tambah parttime & freelance
             'employment_type' => ['required', Rule::in(['intern','contract','fulltime','parttime','freelance'])],
-            'openings'        => ['required','integer','min:1'],
+            // 'openings'        => ['nullable','integer','min:0'], // <- kalau ada di form, ABAIKAN
             'status'          => ['required', Rule::in(['draft','open','closed'])],
             'description'     => ['nullable','string'],
             'site_id'         => ['nullable','exists:sites,id','required_without:site_code'],
@@ -102,25 +99,28 @@ class JobController extends Controller
         $siteId   = $data['site_id'] ?? null;
         $siteCode = $data['site_code'] ?? null;
         unset($data['site_id'], $data['site_code']);
+
         if (!$siteId && $siteCode) {
             $siteId = Site::where('code', $siteCode)->value('id');
         }
         $data['site_id'] = $siteId;
 
+        // Abaikan openings dari request, set 0 dulu
+        unset($data['openings']);
+        $data['openings'] = 0;
+
         $job = Job::create($data);
 
-        // optional sinkronisasi manpower
-        if (method_exists($job, 'manpowerRequirement') && !$job->manpowerRequirement) {
-            $job->manpowerRequirement()->create([
-                'budget_headcount' => (int) $data['openings'],
-                'filled_headcount' => 0,
-            ]);
+        // Setelah job dibuat, sinkron openings dari akumulasi manpower_requirements (jika ada)
+        $sum = $job->manpowerRequirements()->sum('budget_headcount'); // 0 kalau belum ada baris
+        if ((int)$sum !== (int)$job->openings) {
+            $job->update(['openings' => (int)$sum]);
         }
 
         if ($request->wantsJson()) {
             return response()->json([
-                'message'  => 'Job created.',
-                'job'      => $job->loadMissing('site:id,code,name'),
+                'message'  => 'Job created (openings disinkron dari manpower).',
+                'job'      => $job->fresh()->loadMissing('site:id,code,name'),
                 'redirect' => route('admin.jobs.index'),
             ], 201);
         }
@@ -139,7 +139,7 @@ class JobController extends Controller
     }
 
     /**
-     * ADMIN UPDATE -> redirect ke index + JSON response (AJAX)
+     * ADMIN UPDATE -> openings diabaikan; disinkron dari manpower_requirements
      */
     public function update(Request $request, Job $job)
     {
@@ -149,7 +149,7 @@ class JobController extends Controller
             'division'        => ['nullable','string','max:100'],
             'level'           => ['nullable','string','max:100'],
             'employment_type' => ['required', Rule::in(['intern','contract','fulltime','parttime','freelance'])],
-            'openings'        => ['required','integer','min:1'],
+            // 'openings'        => ['nullable','integer','min:0'], // <- kalau ada di form, ABAIKAN
             'status'          => ['required', Rule::in(['draft','open','closed'])],
             'description'     => ['nullable','string'],
             'site_id'         => ['nullable','exists:sites,id','required_without:site_code'],
@@ -167,17 +167,20 @@ class JobController extends Controller
             $data['site_id'] = $siteId;
         }
 
+        // Abaikan openings dari request
+        unset($data['openings']);
+
         $job->update($data);
 
-        if (method_exists($job, 'manpowerRequirement') && $job->manpowerRequirement) {
-            $job->manpowerRequirement->update([
-                'budget_headcount' => (int) $data['openings'],
-            ]);
+        // Sinkron ulang openings dari akumulasi manpower_requirements
+        $sum = $job->manpowerRequirements()->sum('budget_headcount');
+        if ((int)$sum !== (int)$job->openings) {
+            $job->update(['openings' => (int)$sum]);
         }
 
         if ($request->wantsJson()) {
             return response()->json([
-                'message'  => 'Job updated.',
+                'message'  => 'Job updated (openings disinkron dari manpower).',
                 'job'      => $job->fresh()->loadMissing('site:id,code,name'),
                 'redirect' => route('admin.jobs.index'),
             ]);
@@ -187,7 +190,7 @@ class JobController extends Controller
     }
 
     /**
-     * ADMIN DELETE (tetap balik ke index, plus JSON opsional)
+     * ADMIN DELETE
      */
     public function destroy(Request $request, Job $job)
     {

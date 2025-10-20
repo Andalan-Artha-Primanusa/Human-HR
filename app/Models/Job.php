@@ -191,4 +191,12 @@ class Job extends Model
         $siteId = DB::table('sites')->where('code', $code)->value('id');
         $this->site_id = $siteId ?: $this->site_id;
     }
+    // app/Models/Job.php
+public function manpowerRequirements()
+{
+    return $this->hasMany(\App\Models\ManpowerRequirement::class);
+}
+// (opsional lama) kalau masih ada:
+// public function manpowerRequirement() { return $this->hasOne(...); }
+
 }
