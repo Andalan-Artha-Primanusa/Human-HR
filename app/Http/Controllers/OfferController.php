@@ -9,7 +9,9 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class OfferController extends Controller
 {
-  // Admin: buat draft offer
+  /**
+   * Admin: buat draft offer
+   */
   public function store(Request $request, JobApplication $application)
   {
     $data = $request->validate([
@@ -17,15 +19,17 @@ class OfferController extends Controller
       'allowance'    => 'nullable|numeric|min:0',
       'notes'        => 'nullable|string',
       'html'         => 'nullable|string', // jika kirim HTML custom
+      'meta'         => 'sometimes|array', // meta opsional (doc_no, level, poh, join_date, dll)
     ]);
 
     $offer = $application->offer()->create([
       'status'        => 'draft',
       'salary'        => [
-        'gross'     => (float)$data['gross_salary'],
-        'allowance' => isset($data['allowance']) ? (float)$data['allowance'] : 0,
+        'gross'     => (float) $data['gross_salary'],
+        'allowance' => isset($data['allowance']) ? (float) $data['allowance'] : 0,
       ],
       'body_template' => $data['html'] ?? null,
+      'meta'          => $data['meta'] ?? [],
     ]);
 
     // opsional: ubah stage ke 'offer'
@@ -34,111 +38,83 @@ class OfferController extends Controller
     return redirect()->route('admin.applications.index')->with('ok', 'Draft offer dibuat.');
   }
 
+  /**
+   * Render Offering Letter ke PDF (A4)
+   * - Default: stream (preview di browser)
+   * - ?dl=1   : force download
+   */
   public function pdf(Offer $offer)
   {
     $offer->load('application.user', 'application.job', 'application.job.site');
 
+    // === Render HTML dari Blade (sesuai template foto) ===
     if (view()->exists('offers.pdf')) {
       $html = view('offers.pdf', compact('offer'))->render();
-    } elseif (view()->exists('offers._fallback')) {
-      $html = view('offers._fallback', compact('offer'))->render();
     } else {
-      $app   = $offer->application;
-      $user  = $app?->user?->name ?? '—';
-      $title = $app?->job?->title ?? '—';
-      $site  = $app?->job?->site?->code ?? '—';
-      $gross = number_format((float)($offer->salary['gross'] ?? 0), 0, ',', '.');
-      $allow = number_format((float)($offer->salary['allowance'] ?? 0), 0, ',', '.');
-      $status = strtoupper($offer->status ?? 'draft');
-      $date = now()->format('d M Y');
+      // Fallback sederhana jika view belum ada
+      $app    = $offer->application;
+      $user   = $app?->user?->name ?? '—';
+      $title  = $app?->job?->title ?? '—';
+      $site   = $app?->job?->site?->code ?? '—';
+      $gross  = number_format((float)($offer->salary['gross'] ?? 0), 0, ',', '.');
+      $allow  = number_format((float)($offer->salary['allowance'] ?? 0), 0, ',', '.');
+      $date   = now()->timezone(config('app.timezone','Asia/Jakarta'))->format('d M Y');
 
-      // ▼▼▼ TIDAK BOLEH ADA SPASI/TAB SEBELUM <<<'HTML' MAUPUN PENUTUP HTML; ▼▼▼
       $html = <<<'HTML'
-<!doctype html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <title>Offering Letter</title>
-  <style>
-    * { box-sizing: border-box; }
-    body { font-family: DejaVu Sans, Arial, Helvetica, sans-serif; color:#111; font-size:12px; line-height:1.6; }
-    .wrap { padding: 28px; }
-    h1 { font-size: 20px; margin: 0 0 8px; }
-    h2 { font-size: 14px; margin: 16px 0 6px; }
-    .table { width:100%; border-collapse: collapse; margin-top: 10px; }
-    .table th, .table td { border:1px solid #ddd; padding:8px 10px; }
-    .table th { background:#f5f6f8; text-align:left; }
-    .muted { color:#666; }
-    .sign { margin-top: 40px; }
-  </style>
-</head>
-<body>
-  <div class="wrap">
-    <h1>Offering Letter</h1>
-    <div class="meta">
-      <div><strong>Candidate:</strong> %%USER%%</div>
-      <div><strong>Position:</strong> %%TITLE%% @ %%SITE%%</div>
-      <div><strong>Offer ID:</strong> #%%ID%%</div>
-      <div><strong>Status:</strong> %%STATUS%%</div>
-      <div><strong>Date:</strong> %%DATE%%</div>
-    </div>
-
-    <h2>Compensation</h2>
-    <table class="table">
-      <tr>
-        <th>Gross Salary</th>
-        <td>Rp %%GROSS%%</td>
-      </tr>
-      <tr>
-        <th>Allowance</th>
-        <td>Rp %%ALLOW%%</td>
-      </tr>
-    </table>
-
-    %%NOTES%%
-    <div class="sign">
-      <p class="muted">Regards,</p>
-      <p><strong>Human Resources</strong></p>
-    </div>
-  </div>
-</body>
-</html>
+<!doctype html><html><head><meta charset="utf-8"><title>Offering Letter</title>
+<style>@page{margin:28px}body{font-family:DejaVu Sans,Arial,Helvetica,sans-serif;font-size:12px;color:#111}
+h1{font-size:18px;margin:0 0 8px}.tbl{width:100%;border-collapse:collapse;margin-top:8px}
+.tbl th,.tbl td{border:1px solid #ddd;padding:6px 8px}</style></head><body>
+<h1>Offering Letter</h1>
+<p><strong>Candidate:</strong> %%USER%%<br>
+<strong>Position:</strong> %%TITLE%% @ %%SITE%%<br>
+<strong>Date:</strong> %%DATE%%</p>
+<table class="tbl">
+<tr><th>Gross Salary</th><td>Rp %%GROSS%%</td></tr>
+<tr><th>Allowance</th><td>Rp %%ALLOW%%</td></tr>
+</table>
+</body></html>
 HTML;
-      // ▲▲▲ PENUTUP "HTML;" JUGA HARUS DI KOLOM 0 (NO INDENT) ▲▲▲
-
-      $notesBlock = !empty($offer->body_template)
-        ? '<h2>Notes</h2>' . $offer->body_template
-        : '';
-
-      $repl = [
-        '%%USER%%'   => e($user),
-        '%%TITLE%%'  => e($title),
-        '%%SITE%%'   => e($site),
-        '%%ID%%'     => (string) $offer->id,
-        '%%STATUS%%' => e($status),
-        '%%DATE%%'   => e($date),
-        '%%GROSS%%'  => e($gross),
-        '%%ALLOW%%'  => e($allow),
-        '%%NOTES%%'  => $notesBlock,
-      ];
-      $html = strtr($html, $repl);
+      $html = strtr($html, [
+        '%%USER%%'  => e($user),
+        '%%TITLE%%' => e($title),
+        '%%SITE%%'  => e($site),
+        '%%DATE%%'  => e($date),
+        '%%GROSS%%' => e($gross),
+        '%%ALLOW%%' => e($allow),
+      ]);
     }
 
-    $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadHTML($html);
-    return $pdf->download('OfferingLetter-' . $offer->id . '.pdf');
+    // === Generate PDF ===
+    $pdf = Pdf::loadHTML($html)
+      ->setPaper('a4')         // A4 portrait
+      ->setWarnings(false);
+
+    $filename = 'OfferingLetter-'.$offer->id.'.pdf';
+
+    // ?dl=1 untuk download, selain itu stream preview
+    return request()->boolean('dl')
+      ? $pdf->download($filename)
+      : $pdf->stream($filename);
   }
 
-
+  /**
+   * Listing offers (filter q & status)
+   */
   public function index(Request $request)
   {
     $q      = (string) $request->query('q', '');
     $status = (string) $request->query('status', '');
 
     $offers = Offer::query()
-      ->with(['application.user:id,name', 'application.job:id,title,site_id', 'application.job.site:id,code'])
+      ->with([
+        'application.user:id,name',
+        'application.job:id,title,site_id',
+        'application.job.site:id,code,name',
+      ])
       ->when($q, function ($qq) use ($q) {
         $qq->whereHas('application.user', fn($u) => $u->where('name', 'like', "%{$q}%"))
-          ->orWhereHas('application.job', fn($j) => $j->where('title', 'like', "%{$q}%"));
+           ->orWhereHas('application.job', fn($j) => $j->where('title', 'like', "%{$q}%"));
       })
       ->when($status, fn($qq) => $qq->where('status', $status))
       ->latest()
