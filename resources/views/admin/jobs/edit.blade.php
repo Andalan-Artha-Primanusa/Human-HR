@@ -14,7 +14,7 @@
 @endphp
 
 <div class="space-y-6">
-  {{-- Header: 2 tombol saja --}}
+  {{-- Header --}}
   <div class="relative rounded-2xl border border-slate-200 bg-white shadow-sm">
     <div class="h-2 rounded-t-2xl overflow-hidden">
       <div class="h-full w-full flex">
@@ -44,6 +44,12 @@
     </div>
   </div>
 
+  {{-- Info unik per company --}}
+  <div class="rounded-xl bg-sky-50 text-sky-800 px-4 py-3 border border-sky-200 text-sm">
+    Kode lowongan (<code class="font-mono">code</code>) unik <strong>per company</strong>. Mengganti Company dapat
+    mempengaruhi keunikan kode.
+  </div>
+
   {{-- Error summary --}}
   @if ($errors->any())
     <div class="rounded-xl bg-red-50 text-red-700 px-4 py-3 border border-red-200">
@@ -62,12 +68,14 @@
     @csrf @method('PUT')
 
     <div class="p-5 grid gap-4 md:grid-cols-2">
+      {{-- Code --}}
       <div>
         <label class="label">Code <span class="text-red-500">*</span></label>
         <input class="input" name="code" value="{{ $val('code', $job->code) }}" required>
         @error('code')<p class="text-xs text-red-600 mt-1">{{ $message }}</p>@enderror
       </div>
 
+      {{-- Title --}}
       <div>
         <label class="label">Title <span class="text-red-500">*</span></label>
         <input class="input" name="title" value="{{ $val('title', $job->title) }}" required>
@@ -100,7 +108,31 @@
           @endforelse
         </select>
         @error('site_id')<p class="text-xs text-red-600 mt-1">{{ $message }}</p>@enderror
+        {{-- legacy support via code --}}
         <input type="hidden" name="site_code" value="{{ old('site_code') }}">
+      </div>
+
+      {{-- Company (opsional) --}}
+      <div class="md:col-span-2 grid md:grid-cols-2 gap-4">
+        <div>
+          <label class="label">Company (opsional)</label>
+          @php $companyVal = $val('company_id', $job->company_id); @endphp
+          <select class="input" name="company_id">
+            <option value="">— Tidak ada company —</option>
+            @forelse(($companies ?? []) as $c)
+              <option value="{{ $c->id }}" @selected((string)$companyVal === (string)$c->id)>{{ $c->code }} — {{ $c->name }}</option>
+            @empty
+              <option value="" disabled>Tidak ada data company</option>
+            @endforelse
+          </select>
+          @error('company_id')<p class="text-xs text-red-600 mt-1">{{ $message }}</p>@enderror
+        </div>
+        <div>
+          <label class="label">Company Code (opsional)</label>
+          <input class="input" name="company_code" value="{{ old('company_code') }}" placeholder="mis. ACME">
+          <p class="text-xs text-slate-500 mt-1">Isi salah satu: <code>Company</code> (dropdown) <em>atau</em> <code>Company Code</code>.</p>
+          @error('company_code')<p class="text-xs text-red-600 mt-1">{{ $message }}</p>@enderror
+        </div>
       </div>
 
       {{-- Level --}}
@@ -116,6 +148,7 @@
         @error('level')<p class="text-xs text-red-600 mt-1">{{ $message }}</p>@enderror
       </div>
 
+      {{-- Employment Type --}}
       <div>
         <label class="label">Employment Type <span class="text-red-500">*</span></label>
         @php $et = $val('employment_type', $job->employment_type ?? 'fulltime'); @endphp
@@ -127,12 +160,15 @@
         @error('employment_type')<p class="text-xs text-red-600 mt-1">{{ $message }}</p>@enderror
       </div>
 
+      {{-- Openings (disinkron dari Manpower) --}}
       <div>
         <label class="label">Openings</label>
-        <input class="input" type="number" name="openings" min="1" value="{{ $val('openings', (int) $job->openings) }}">
+        <input class="input" type="number" name="openings" min="1" value="{{ (int) $job->openings }}" disabled>
+        <p class="text-xs text-slate-500 mt-1">Nilai ini disinkron otomatis dari <em>Manpower Requirements</em>.</p>
         @error('openings')<p class="text-xs text-red-600 mt-1">{{ $message }}</p>@enderror
       </div>
 
+      {{-- Status --}}
       <div>
         <label class="label">Status</label>
         @php $st = $val('status', $job->status ?? 'open'); @endphp
@@ -144,6 +180,7 @@
         @error('status')<p class="text-xs text-red-600 mt-1">{{ $message }}</p>@enderror
       </div>
 
+      {{-- Description --}}
       <div class="md:col-span-2">
         <label class="label">Description</label>
         <textarea class="input min-h-[160px]" name="description" placeholder="Ringkasan pekerjaan, kualifikasi, benefit, dsb.">{{ $val('description', $job->description) }}</textarea>

@@ -48,6 +48,11 @@
     </div>
   </div>
 
+  {{-- Info unik per company --}}
+  <div class="rounded-xl bg-sky-50 text-sky-800 px-4 py-3 border border-sky-200 text-sm">
+    Kode lowongan (<code class="font-mono">code</code>) unik <strong>per company</strong>. Kamu boleh kosongkan Company bila job tidak terikat company tertentu.
+  </div>
+
   {{-- Error summary (jika validasi gagal) --}}
   @if ($errors->any())
     <div class="rounded-xl bg-red-50 text-red-700 px-4 py-3 border border-red-200">
@@ -107,6 +112,29 @@
         <input type="hidden" name="site_code" value="{{ old('site_code') }}">
       </div>
 
+      {{-- Company (opsional) --}}
+      <div class="md:col-span-2 grid md:grid-cols-2 gap-4">
+        <div>
+          <label class="label">Company (opsional)</label>
+          <select class="input" name="company_id">
+            <option value="">— Tidak ada company —</option>
+            @forelse(($companies ?? []) as $c)
+              <option value="{{ $c->id }}" @selected(old('company_id') == $c->id)>{{ $c->code }} — {{ $c->name }}</option>
+            @empty
+              <option value="" disabled>Tidak ada data company</option>
+            @endforelse
+          </select>
+          @error('company_id')<p class="text-xs text-red-600 mt-1">{{ $message }}</p>@enderror
+        </div>
+        <div>
+          {{-- legacy support via code (jika kamu kirim company_code dari integrasi lain) --}}
+          <label class="label">Company Code (opsional)</label>
+          <input class="input" name="company_code" value="{{ old('company_code') }}" placeholder="mis. ACME">
+          <p class="text-xs text-slate-500 mt-1">Isi salah satu: <code>Company</code> (dropdown) <em>atau</em> <code>Company Code</code>.</p>
+          @error('company_code')<p class="text-xs text-red-600 mt-1">{{ $message }}</p>@enderror
+        </div>
+      </div>
+
       {{-- Level --}}
       <div>
         <label class="label">Level</label>
@@ -131,9 +159,11 @@
         @error('employment_type')<p class="text-xs text-red-600 mt-1">{{ $message }}</p>@enderror
       </div>
 
+      {{-- Openings (info: akan disinkron oleh Manpower) --}}
       <div>
         <label class="label">Openings</label>
-        <input class="input" type="number" name="openings" min="1" value="{{ old('openings', 1) }}">
+        <input class="input" type="number" name="openings" min="1" value="{{ old('openings', 1) }}" disabled>
+        <p class="text-xs text-slate-500 mt-1">Nilai ini akan disinkron otomatis dari <em>Manpower Requirements</em>.</p>
         @error('openings')<p class="text-xs text-red-600 mt-1">{{ $message }}</p>@enderror
       </div>
 

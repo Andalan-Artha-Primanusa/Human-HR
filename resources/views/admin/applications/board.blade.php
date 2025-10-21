@@ -276,6 +276,9 @@
             if(!res.ok){ throw new Error((await res.json())?.message || 'Move failed'); }
             this.showToast('Dipindahkan ke '+toStage.toUpperCase(), 'ok');
             card.dataset.currentStage = toStage;
+
+            // ======= REFRESH OTOMATIS AGAR STATE SINKRON =======
+            requestAnimationFrame(() => location.reload());
           })
           .catch(err => {
             // rollback

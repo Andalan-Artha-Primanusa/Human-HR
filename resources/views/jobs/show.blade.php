@@ -1,16 +1,20 @@
 {{-- resources/views/jobs/show.blade.php --}}
-@extends('layouts.app', ['title' => $job->title])
+@extends('layouts.app', ['title' => e($job->title)])
 
 @php
   use Illuminate\Support\Carbon;
 
-  $BLUE  = '#1d4ed8';
-  $RED   = '#dc2626';
-  $BORD  = '#e5e7eb';
+  // Palet warna utama
+  $BLUE  = '#1d4ed8'; // Tailwind blue-700
+  $RED   = '#dc2626'; // Tailwind red-600
 
-  // ==== DECODE HELPER (untuk konten yang tersimpan sebagai HTML entities) ====
-  $decode = function ($v) {
-      return is_string($v) ? html_entity_decode($v, ENT_QUOTES | ENT_HTML5, 'UTF-8') : $v;
+  // ==== SANITIZER (whitelist aman untuk konten dari editor) ====
+  // Disarankan pakai HTML Purifier jika tersedia untuk kontrol atribut (mis. <a href>).
+  $sanitize = function ($v) {
+      if (!is_string($v) || trim($v) === '') return null;
+      $decoded = html_entity_decode($v, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+      $allowed = '<p><br><ul><ol><li><strong><em><b><i><u><h2><h3><h4><blockquote><code><pre><a>';
+      return strip_tags($decoded, $allowed);
   };
 
   /** @var \App\Models\JobApplication|null $myApp */
@@ -23,7 +27,7 @@
       ? \App\Models\CandidateProfile::where('user_id', auth()->id())->first()
       : null;
 
-  // urutan & label tahapan (sinkron dg controller)
+  // Tahapan & label
   $stageOrder = ['applied','psychotest','hr_iv','user_iv','final','offer','hired'];
   $pretty = [
     'applied'    => 'Pengajuan Berkas',
@@ -36,28 +40,21 @@
     'rejected'   => 'Ditolak',
   ];
 
-  $overallRaw = $myApp?->overall_status;
-  $overall    = $overallRaw ? strtolower($overallRaw) : 'in_progress';
-
+  // Status keseluruhan & stage saat ini (aman saat $myApp null)
+  $overall = strtolower($myApp?->overall_status ?? 'in_progress');
   $currRaw = strtolower($myApp?->current_stage ?? 'applied');
   $currKey = in_array($currRaw, $stageOrder, true) ? $currRaw : 'applied';
 
-  // index stage by key untuk akses cepat
+  // Koleksi stage
   $stagesColl = collect($myApp?->stages ?? []);
-  $stageMap = $stagesColl->mapWithKeys(function ($s) {
-      $k = strtolower($s->stage_key ?? '');
-      return $k ? [$k => $s] : [];
-  });
+  $stageMap = $stagesColl->mapWithKeys(fn($s) => ($k = strtolower($s->stage_key ?? '')) ? [$k => $s] : []);
+  $visited = $stagesColl->pluck('stage_key')->map(fn($v)=>strtolower($v))
+            ->filter(fn($v)=>in_array($v,$stageOrder,true))->unique()
+            ->push($currKey)->unique()->values()->all();
 
-  $visited = $stagesColl
-      ->pluck('stage_key')->map(fn($v) => strtolower($v))
-      ->filter(fn($v) => in_array($v, $stageOrder, true))
-      ->unique()->push($currKey)->unique()->values()->all();
-
-  $idxNow  = array_search($currKey, $stageOrder, true);
-  $idxNow  = ($idxNow === false) ? 0 : $idxNow;
-  $prevKey = $idxNow > 0 ? $stageOrder[$idxNow-1] : null;
-  $nextKey = $idxNow < count($stageOrder)-1 ? $stageOrder[$idxNow+1] : null;
+  $idxNow  = array_search($currKey, $stageOrder, true); $idxNow = $idxNow===false?0:$idxNow;
+  $prevKey = $idxNow>0 ? $stageOrder[$idxNow-1] : null;
+  $nextKey = $idxNow<count($stageOrder)-1 ? $stageOrder[$idxNow+1] : null;
 
   $progressPct = function() use ($myApp,$stageOrder,$overall,$currKey){
     if(!$myApp) return 0;
@@ -69,10 +66,10 @@
     return (int)round($idx/$max*100);
   };
 
-  // role admin (spatie/tanpa spatie)
+  // Role admin (Spatie / non-Spatie)
   $isAdmin = auth()->check() && (
-    (method_exists(auth()->user(), 'hasAnyRole') && auth()->user()->hasAnyRole(['hr','superadmin']))
-    || in_array(auth()->user()->role ?? null, ['hr','superadmin'], true)
+    (method_exists(auth()->user(), 'hasAnyRole') && auth()->user()->hasAnyRole(['hr','superadmin'])) ||
+    in_array(auth()->user()->role ?? null, ['hr','superadmin'], true)
   );
 
   $employmentPretty = [
@@ -83,90 +80,155 @@
     'freelance'=> 'Freelance',
   ];
 
-  // helper tampilan gaji
+  // Format uang
   $fmtMoney = function($n, $cur = 'IDR') {
     if(!is_numeric($n)) return null;
-    $num = number_format((float)$n, 0, ',', '.');
-    return ($cur ?: 'IDR').' '.$num;
+    return ($cur ?: 'IDR').' '.number_format((float)$n, 0, ',', '.');
   };
 
-  // ====== WAKTU & AKTOR ======
-  // Tentukan timezone prioritas: pakai timezone site bila ada, fallback ke app.tz
+  // Timezone prioritas
   $siteTz = optional($job->site)->timezone ?: data_get($job->site, 'meta.timezone');
-  $appTz  = config('app.timezone', 'Asia/Jakarta');
-  $TZ     = $siteTz ?: $appTz;
+  $TZ     = $siteTz ?: config('app.timezone', 'Asia/Jakarta');
 
-  // Formatter tanggal lengkap: Kamis, 17 Okt 2025 14:05 WIB (Asia/Jakarta)
+  // Formatter tanggal lokal ringkas
   $formatTs = function ($ts) use ($TZ) {
     if (!$ts) return null;
     try {
       $c = $ts instanceof Carbon ? $ts->copy() : Carbon::parse($ts);
       $c = $c->setTimezone($TZ);
-      // Bahasa Indonesia sederhana
       $namaHari = ['Sun'=>'Minggu','Mon'=>'Senin','Tue'=>'Selasa','Wed'=>'Rabu','Thu'=>'Kamis','Fri'=>'Jumat','Sat'=>'Sabtu'][$c->format('D')] ?? $c->format('D');
-      $namaBln  = ['Jan'=>'Jan','Feb'=>'Feb','Mar'=>'Mar','Apr'=>'Apr','May'=>'Mei','Jun'=>'Jun','Jul'=>'Jul','Aug'=>'Agu','Sep'=>'Sep','Oct'=>'Okt','Nov'=>'Nov','Dec'=>'Des'][$c->format('M')] ?? $c->format('M');
-      // WIB/WITA/WIT heuristik
+      $namaBln  = ['Jan'=>'Jan','Feb'=>'Feb','Mar'=>'Mar','Apr'=>'Apr','May'=>'Mei','Jun'=>'Jun','Jul'=>'Jul','Aug'=>'Agu','Sep'=>'Sep','Oct'=>'Okt','Nov'=>'Des'][$c->format('M')] ?? $c->format('M');
       $abbr = str_contains($TZ,'Jakarta') ? 'WIB' : (str_contains($TZ,'Makassar') ? 'WITA' : (str_contains($TZ,'Jayapura') ? 'WIT' : $c->format('T')));
-      return sprintf('%s, %02d %s %04d %s (%.2f) %s',
-        $namaHari,
-        (int)$c->format('d'),
-        $namaBln,
-        (int)$c->format('Y'),
-        $c->format('H:i'),
-        // tampilkan zona waktu offset jam, mis. +07 jadi 7.00
-        ((int)$c->format('Z'))/3600,
-        $abbr
-      );
+      return sprintf('%s, %02d %s %04d, %s %s', $namaHari,(int)$c->format('d'),$namaBln,(int)$c->format('Y'),$c->format('H:i'),$abbr);
     } catch (\Throwable $e) {
       return (string)$ts;
     }
   };
 
-  // Resolve nama aktor yang mengubah stage (fleksibel berbagai kolom/relasi)
+  // Penentu nama actor perubahan stage
   $actorName = function ($stage) {
-    // Prioritas: relasi actor->name, relasi user->name
     $name = $stage->actor->name ?? $stage->user->name ?? null;
     if ($name) return $name;
-
-    // Coba dari kolom umum
     $uid = $stage->acted_by ?? $stage->changed_by ?? $stage->updated_by ?? $stage->user_id ?? null;
     if ($uid) {
-      try {
-        $u = \App\Models\User::query()->select('name')->find($uid);
-        if ($u && $u->name) return $u->name;
-      } catch (\Throwable $e) {}
+      $u = \App\Models\User::query()->select('name')->find($uid);
+      if ($u && $u->name) return $u->name;
     }
-
     return 'Sistem/Unknown';
   };
 
-  // ambil informasi "terakhir diubah" dari stage paling baru atau dari aplikasi
+  // Terakhir diubah
   $latestStage   = $stagesColl->sortByDesc(fn($s) => $s->updated_at ?? $s->created_at ?? null)->first();
   $lastChangedAt = $latestStage?->updated_at ?? $myApp?->updated_at;
+  $lastChangedBy = $latestStage ? $actorName($latestStage)
+                  : (($myApp && method_exists($myApp,'updatedBy')) ? ($myApp->updatedBy->name ?? null) : null);
 
-  // FIX: guard saat $myApp null sebelum method_exists
-  $lastChangedBy = $latestStage
-    ? $actorName($latestStage)
-    : (($myApp && method_exists($myApp, 'updatedBy')) ? ($myApp->updatedBy->name ?? null) : null);
-
-  // tanggal penutupan lowongan (opsional)
   $closingAt = $job->closing_at ?? null;
+
+  // ====== Breadcrumb JSON-LD (SEO) ======
+  $breadcrumbLd = [
+    '@context' => 'https://schema.org',
+    '@type'    => 'BreadcrumbList',
+    'itemListElement' => [
+      [
+        '@type'    => 'ListItem',
+        'position' => 1,
+        'name'     => 'Dashboard',
+        'item'     => route('dashboard'),
+      ],
+      [
+        '@type'    => 'ListItem',
+        'position' => 2,
+        'name'     => 'Jobs',
+        'item'     => route('jobs.index'),
+      ],
+      [
+        '@type'    => 'ListItem',
+        'position' => 3,
+        'name'     => (string) $job->title,
+        'item'     => request()->fullUrl(),
+      ],
+    ],
+  ];
 @endphp
 
 @section('content')
 <div class="mx-auto w-full max-w-[1400px] px-4 sm:px-6 lg:px-8 py-6">
 
-  {{-- BREADCRUMB --}}
-  <nav class="mb-3 text-sm text-slate-500">
-    <a href="{{ route('dashboard') }}" class="hover:text-slate-700">Dashboard</a>
-    <span class="mx-1 text-slate-300">/</span>
-    <a href="{{ route('jobs.index') }}" class="hover:text-slate-700">Jobs</a>
-    <span class="mx-1 text-slate-300">/</span>
-    <span class="text-slate-700">{{ $job->title }}</span>
+  {{-- BREADCRUMB (UI kece, aksesibel, responsif) --}}
+  <nav class="mb-4" aria-label="Breadcrumb">
+    <div class="relative rounded-xl border border-slate-200 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 shadow-sm">
+      {{-- garis aksen tipis merah-biru --}}
+      <div class="h-1 w-full overflow-hidden rounded-t-xl">
+        <div class="h-full w-full" style="background: linear-gradient(90deg, {{ $RED }} 0%, {{ $BLUE }} 100%);"></div>
+      </div>
+
+      {{-- isi breadcrumb (scroll-x jika panjang) --}}
+      <ol class="flex items-center gap-2 px-3 py-2 text-sm text-slate-600 overflow-x-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-slate-200"
+          itemscope itemtype="https://schema.org/BreadcrumbList">
+        {{-- Dashboard --}}
+        <li class="flex items-center gap-2 shrink-0" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+          <a href="{{ route('dashboard') }}" itemprop="item" class="group inline-flex items-center gap-1 rounded-lg px-2 py-1 hover:bg-slate-50">
+            <svg class="h-4 w-4 text-slate-500 group-hover:text-slate-700" aria-hidden="true" viewBox="0 0 24 24" fill="none">
+              <path d="M3 10.5l9-7 9 7V20a2 2 0 0 1-2 2h-4.5a.5.5 0 0 1-.5-.5V15a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v6.5a.5.5 0 0 1-.5.5H5a2 2 0 0 1-2-2v-9.5z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+            </svg>
+            <span class="font-medium text-slate-700 group-hover:text-slate-900" itemprop="name">Dashboard</span>
+          </a>
+          <meta itemprop="position" content="1"/>
+          <span class="text-slate-300">/</span>
+        </li>
+
+        {{-- Jobs --}}
+        <li class="flex items-center gap-2 shrink-0" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+          <a href="{{ route('jobs.index') }}" itemprop="item" class="group inline-flex items-center gap-1 rounded-lg px-2 py-1 hover:bg-slate-50">
+            <svg class="h-4 w-4 text-slate-500 group-hover:text-slate-700" aria-hidden="true" viewBox="0 0 24 24" fill="none">
+              <path d="M3 8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v9a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V8z" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M9 6a3 3 0 0 1 6 0" stroke="currentColor" stroke-width="1.5"/>
+            </svg>
+            <span class="font-medium text-slate-700 group-hover:text-slate-900" itemprop="name">Jobs</span>
+          </a>
+          <meta itemprop="position" content="2"/>
+          <span class="text-slate-300">/</span>
+        </li>
+
+        {{-- Current page --}}
+        <li class="flex items-center gap-2 min-w-0" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem" aria-current="page">
+          <div class="inline-flex items-center gap-1 rounded-lg px-2 py-1 bg-slate-50 ring-1 ring-slate-200">
+            <svg class="h-4 w-4 text-slate-500" aria-hidden="true" viewBox="0 0 24 24" fill="none">
+              <path d="M12 12m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M12 8v4l3 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            <span class="truncate font-semibold text-slate-900" itemprop="name">{{ e($job->title) }}</span>
+          </div>
+          <meta itemprop="item" content="{{ request()->fullUrl() }}"/>
+          <meta itemprop="position" content="3"/>
+        </li>
+
+        {{-- Tambahan trail opsional (mis. Recruiter) --}}
+        @isset($trail)
+          <span class="text-slate-300">/</span>
+          <li class="flex items-center gap-2 shrink-0" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem" aria-current="page">
+            <div class="inline-flex items-center gap-1 rounded-lg px-2 py-1 bg-slate-50 ring-1 ring-slate-200">
+              <span class="font-semibold text-slate-900" itemprop="name">{{ e($trail) }}</span>
+            </div>
+            <meta itemprop="position" content="4"/>
+          </li>
+        @endisset
+      </ol>
+
+      {{-- tombol kecil back (UX) --}}
+      <div class="absolute right-2 top-2">
+        <a href="{{ url()->previous() }}"
+           class="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-white px-2 py-1 text-xs text-slate-600 hover:bg-slate-50">
+          ← Kembali
+        </a>
+      </div>
+    </div>
   </nav>
 
   {{-- HEADER --}}
-  <div class="overflow-hidden rounded-2xl border bg-white shadow-sm" style="border-color: {{ $BORD }}">
+  <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+    {{-- Strip warna merah–biru --}}
     <div class="flex h-2 w-full">
       <div class="flex-1" style="background: {{ $BLUE }}"></div>
       <div class="w-32" style="background: {{ $RED }}"></div>
@@ -175,49 +237,69 @@
     <div class="p-5 md:p-6">
       <div class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
         <div class="min-w-0">
-          <h1 class="truncate text-3xl font-semibold text-slate-900">{{ $job->title ?? '—' }}</h1>
+          <h1 class="truncate text-3xl font-semibold text-slate-900">{{ e($job->title) ?? '—' }}</h1>
+
+          {{-- Baris info utama (divisi / site / tutup) --}}
           <div class="mt-1 flex flex-wrap items-center gap-2 text-sm text-slate-600">
             <span class="inline-flex items-center gap-1">
-              <svg class="h-4 w-4 text-slate-500"><use href="#i-brief"/></svg>
-              {{ $job->division ?: '—' }}
+              <svg class="h-4 w-4 text-slate-500" aria-hidden="true"><use href="#i-brief"/></svg>
+              {{ e($job->division ?: '—') }}
             </span>
             <span class="text-slate-300">•</span>
             <span class="inline-flex items-center gap-1">
-              <svg class="h-4 w-4 text-slate-500"><use href="#i-pin"/></svg>
-              {{ $job->site?->code ? ($job->site->code . ' — ' . ($job->site->name ?? '')) : '—' }}
+              <svg class="h-4 w-4 text-slate-500" aria-hidden="true"><use href="#i-pin"/></svg>
+              {{ e($job->site?->code ? ($job->site->code . ' — ' . ($job->site->name ?? '')) : '—') }}
             </span>
             @if($closingAt)
               <span class="text-slate-300">•</span>
               <span class="inline-flex items-center gap-1">
-                <svg class="h-4 w-4 text-slate-500"><use href="#i-clock"/></svg>
-                Tutup: {{ Carbon::parse($closingAt)->timezone($TZ)->format('d M Y, H:i') }} {{ str_contains($TZ,'Jakarta') ? 'WIB' : (str_contains($TZ,'Makassar') ? 'WITA' : (str_contains($TZ,'Jayapura') ? 'WIT' : '')) }}
+                <svg class="h-4 w-4 text-slate-500" aria-hidden="true"><use href="#i-clock"/></svg>
+                Tutup: {{ e(Carbon::parse($closingAt)->timezone($TZ)->format('d M Y, H:i')) }}
+                {{ str_contains($TZ,'Jakarta') ? 'WIB' : (str_contains($TZ,'Makassar') ? 'WITA' : (str_contains($TZ,'Jayapura') ? 'WIT' : '')) }}
+              </span>
+            @endif
+          </div>
+
+          {{-- META DIPINDAH KE HEADER --}}
+          <div class="mt-2 flex flex-wrap items-center gap-2 text-xs">
+            <span class="rounded-full bg-blue-50 px-2.5 py-1 font-medium text-blue-700 ring-1 ring-inset ring-blue-200">
+              Diposting: {{ e(optional($job->created_at)->timezone($TZ)->format('d M Y, H:i') ?? '—') }}
+            </span>
+            <span class="rounded-full bg-red-50 px-2.5 py-1 font-medium text-red-700 ring-1 ring-inset ring-red-200">
+              Diubah: {{ e(optional($job->updated_at)->timezone($TZ)->format('d M Y, H:i') ?? '—') }}
+            </span>
+            @if(isset($job->applications_count))
+              <span class="rounded-full bg-slate-100 px-2.5 py-1 font-medium text-slate-700 ring-1 ring-inset ring-slate-200">
+                Jumlah Pelamar: {{ (int) $job->applications_count }}
               </span>
             @endif
           </div>
         </div>
 
+        {{-- Kanan: status + aksi --}}
         <div class="flex flex-wrap items-center gap-2">
           <span class="rounded-full px-2.5 py-1 text-[11px] font-semibold ring-1 ring-inset
             {{ $job->status==='open' ? 'bg-blue-50 text-blue-700 ring-blue-200' : 'bg-slate-100 text-slate-700 ring-slate-200' }}">
-            STATUS: {{ strtoupper($job->status ?? 'draft') }}
+            STATUS: {{ strtoupper(e($job->status ?? 'draft')) }}
           </span>
 
           {{-- Admin quick actions --}}
           @if($isAdmin)
             @if(Route::has('admin.jobs.edit'))
-              <a href="{{ route('admin.jobs.edit', $job) }}" class="rounded-lg border px-3 py-2 text-sm hover:bg-slate-50"
-                 style="border-color: {{ $BORD }}">Edit</a>
+              <a href="{{ route('admin.jobs.edit', $job) }}" class="rounded-lg border border-slate-200 px-3 py-2 text-sm hover:bg-slate-50">
+                Edit
+              </a>
             @endif
             @if(Route::has('admin.applications.index'))
-              <a href="{{ route('admin.applications.index', ['job' => $job->id]) }}" class="rounded-lg border px-3 py-2 text-sm hover:bg-slate-50"
-                 style="border-color: {{ $BORD }}">Kandidat</a>
+              <a href="{{ route('admin.applications.index', ['job' => $job->id]) }}" class="rounded-lg border border-slate-200 px-3 py-2 text-sm hover:bg-slate-50">
+                Kandidat
+              </a>
             @endif
             @if(Route::has('admin.jobs.toggle'))
               <form method="POST" action="{{ route('admin.jobs.toggle', $job) }}"
                     onsubmit="return confirm('Ubah status lowongan?');">
                 @csrf @method('PATCH')
-                <button type="submit" class="rounded-lg border px-3 py-2 text-sm hover:bg-slate-50"
-                        style="border-color: {{ $BORD }}">
+                <button type="submit" class="rounded-lg border border-slate-200 px-3 py-2 text-sm hover:bg-slate-50">
                   {{ ($job->status === 'open') ? 'Tutup' : 'Buka' }}
                 </button>
               </form>
@@ -228,8 +310,7 @@
           @auth
             @if(Route::has('candidate.profiles.edit'))
               <a href="{{ route('candidate.profiles.edit', $job) }}"
-                 class="rounded-lg border px-3 py-2 text-sm hover:bg-slate-50"
-                 style="border-color: {{ $BORD }}">
+                 class="rounded-lg border border-slate-200 px-3 py-2 text-sm hover:bg-slate-50">
                 {{ $meProfile ? 'Perbarui Profil' : 'Lengkapi Profil' }}
               </a>
             @endif
@@ -239,19 +320,26 @@
           @auth
             @if(($job->status ?? 'draft') === 'open' && !$myApp)
               <form method="POST" action="{{ route('applications.store',$job) }}">@csrf
-                <button class="rounded-lg px-4 py-2 text-sm font-semibold text-white" style="background: {{ $BLUE }}">Lamar Sekarang</button>
+                <button class="rounded-lg px-4 py-2 text-sm font-semibold text-white"
+                        style="background: linear-gradient(90deg, {{ $BLUE }} 0%, {{ $RED }} 100%);">
+                  Lamar Sekarang
+                </button>
               </form>
             @elseif($myApp)
               <a href="{{ route('applications.mine') }}"
-                 class="rounded-lg px-4 py-2 text-sm font-semibold text-white" style="background: {{ $RED }}">
+                 class="rounded-lg px-4 py-2 text-sm font-semibold text-white"
+                 style="background: {{ $RED }}">
                 Lihat Progres
               </a>
             @else
               <button disabled class="rounded-lg px-4 py-2 text-sm font-semibold text-white opacity-60" style="background: {{ $RED }}">Tutup</button>
             @endif
           @else
-            <a class="rounded-lg px-4 py-2 text-sm font-semibold text-white" style="background: {{ $BLUE }}"
-               href="{{ route('login') }}">Login untuk Melamar</a>
+            <a class="rounded-lg px-4 py-2 text-sm font-semibold text-white"
+               style="background: linear-gradient(90deg, {{ $BLUE }} 0%, {{ $RED }} 100%);"
+               href="{{ route('login') }}">
+              Login untuk Melamar
+            </a>
           @endauth
         </div>
       </div>
@@ -263,30 +351,30 @@
     {{-- LEFT --}}
     <div class="lg:col-span-2 space-y-6">
       {{-- Ringkasan --}}
-      <div class="rounded-2xl border bg-white shadow-sm p-5 md:p-6" style="border-color: {{ $BORD }}">
+      <div class="rounded-2xl border border-slate-200 bg-white shadow-sm p-5 md:p-6">
         <div class="grid gap-4 sm:grid-cols-3">
-          <div class="rounded-xl border bg-white px-4 py-3" style="border-color: {{ $BORD }}">
+          <div class="rounded-xl border border-slate-200 bg-white px-4 py-3">
             <div class="text-xs text-slate-500">Tipe</div>
             <div class="mt-1 inline-flex items-center rounded bg-blue-700 px-2 py-1 text-[11px] font-semibold text-white">
-              {{ $employmentPretty[$job->employment_type] ?? strtoupper($job->employment_type ?? '—') }}
+              {{ e($employmentPretty[$job->employment_type] ?? strtoupper($job->employment_type ?? '—')) }}
             </div>
           </div>
-          <div class="rounded-xl border bg-white px-4 py-3" style="border-color: {{ $BORD }}">
+          <div class="rounded-xl border border-slate-200 bg-white px-4 py-3">
             <div class="text-xs text-slate-500">Openings</div>
             <div class="mt-1 text-xl font-semibold text-slate-900">{{ (int) ($job->openings ?? 1) }}</div>
           </div>
-          <div class="rounded-xl border bg-white px-4 py-3" style="border-color: {{ $BORD }}">
+          <div class="rounded-xl border border-slate-200 bg-white px-4 py-3">
             <div class="text-xs text-slate-500">Lokasi</div>
             <div class="mt-1 inline-flex items-center gap-1 text-slate-800">
-              <svg class="h-4 w-4 text-slate-500"><use href="#i-pin"/></svg>
-              {{ $job->site?->name ?? $job->site?->code ?? '—' }}
+              <svg class="h-4 w-4 text-slate-500" aria-hidden="true"><use href="#i-pin"/></svg>
+              {{ e($job->site?->name ?? $job->site?->code ?? '—') }}
             </div>
           </div>
         </div>
 
         {{-- Gaji (opsional) --}}
         @if($job->salary_min || $job->salary_max || $job->currency)
-          <div class="mt-4 rounded-xl border bg-white px-4 py-3" style="border-color: {{ $BORD }}">
+          <div class="mt-4 rounded-xl border border-slate-200 bg-white px-4 py-3">
             <div class="text-xs text-slate-500">Perkiraan Gaji</div>
             <div class="mt-1 text-slate-900">
               @php
@@ -301,18 +389,18 @@
               @elseif($max)
                 ≤ {{ $max }}
               @else
-                {{ $cur }}
+                {{ e($cur) }}
               @endif
               @if(!empty($job->salary_period))
-                <span class="text-slate-500 text-sm">/ {{ $job->salary_period }}</span>
+                <span class="text-slate-500 text-sm">/ {{ e($job->salary_period) }}</span>
               @endif
             </div>
           </div>
         @endif
       </div>
 
-      {{-- Deskripsi (render HTML dari editor) --}}
-      <div class="rounded-2xl border bg-white shadow-sm p-5 md:p-6" style="border-color: {{ $BORD }}">
+      {{-- Deskripsi (aman) --}}
+      <div class="rounded-2xl border border-slate-200 bg-white shadow-sm p-5 md:p-6">
         <h2 class="text-lg font-semibold text-slate-900">Deskripsi Pekerjaan</h2>
         <div class="prose max-w-none text-slate-800">
           <style>
@@ -321,7 +409,7 @@
             .prose li{margin:.25rem 0}
           </style>
           @if(filled($job->description))
-            {!! $decode($job->description) !!}
+            {!! $sanitize($job->description) !!}
           @else
             <p class="text-slate-500">Belum ada deskripsi yang dituliskan.</p>
           @endif
@@ -330,30 +418,30 @@
 
       {{-- Tanggung Jawab --}}
       @if(filled($job->responsibilities))
-      <div class="rounded-2xl border bg-white shadow-sm p-5 md:p-6" style="border-color: {{ $BORD }}">
+      <div class="rounded-2xl border border-slate-200 bg-white shadow-sm p-5 md:p-6">
         <h2 class="text-lg font-semibold text-slate-900">Tanggung Jawab</h2>
         <div class="prose max-w-none text-slate-800">
-          {!! $decode($job->responsibilities) !!}
+          {!! $sanitize($job->responsibilities) !!}
         </div>
       </div>
       @endif
 
       {{-- Kualifikasi --}}
       @if(filled($job->qualifications))
-      <div class="rounded-2xl border bg-white shadow-sm p-5 md:p-6" style="border-color: {{ $BORD }}">
+      <div class="rounded-2xl border border-slate-200 bg-white shadow-sm p-5 md:p-6">
         <h2 class="text-lg font-semibold text-slate-900">Kualifikasi</h2>
         <div class="prose max-w-none text-slate-800">
-          {!! $decode($job->qualifications) !!}
+          {!! $sanitize($job->qualifications) !!}
         </div>
       </div>
       @endif
 
       {{-- Benefit --}}
       @if(filled($job->benefits))
-      <div class="rounded-2xl border bg-white shadow-sm p-5 md:p-6" style="border-color: {{ $BORD }}">
+      <div class="rounded-2xl border border-slate-200 bg-white shadow-sm p-5 md:p-6">
         <h2 class="text-lg font-semibold text-slate-900">Benefit</h2>
         <div class="prose max-w-none text-slate-800">
-          {!! $decode($job->benefits) !!}
+          {!! $sanitize($job->benefits) !!}
         </div>
       </div>
       @endif
@@ -365,21 +453,21 @@
           ->filter()->unique()->values();
       @endphp
       @if($tags->count())
-        <div class="rounded-2xl border bg-white shadow-sm p-5 md:p-6" style="border-color: {{ $BORD }}">
+        <div class="rounded-2xl border border-slate-200 bg-white shadow-sm p-5 md:p-6">
           <h2 class="text-lg font-semibold text-slate-900">Keahlian</h2>
           <div class="mt-2 flex flex-wrap gap-2">
             @foreach($tags as $t)
-              <span class="rounded-full bg-slate-100 px-2 py-1 text-[11px] font-semibold text-slate-700 ring-1 ring-inset ring-slate-200">{{ $t }}</span>
+              <span class="rounded-full bg-slate-100 px-2 py-1 text-[11px] font-semibold text-slate-700 ring-1 ring-inset ring-slate-200">{{ e($t) }}</span>
             @endforeach
           </div>
         </div>
       @endif
     </div>
 
-    {{-- RIGHT: timeline / ringkasan & site --}}
+    {{-- RIGHT: Progress / Site / Profil Kandidat --}}
     <aside class="space-y-6">
       {{-- Progres Lamaran --}}
-      <div class="rounded-2xl border bg-white shadow-sm" style="border-color: {{ $BORD }}">
+      <div class="rounded-2xl border border-slate-200 bg-white shadow-sm">
         <div class="p-5 md:p-6">
           <div class="flex items-center justify-between">
             <h3 class="text-base font-semibold text-slate-900">Progres Lamaran Kamu</h3>
@@ -391,23 +479,23 @@
                 <form method="POST" action="{{ route('admin.applications.move', $myApp) }}"
                       onsubmit="return {{ $canPrev ? 'confirm' : '(function(){return false;})' }}('Kembalikan tahap ke: {{ $pretty[$prevKey] ?? '—' }} ?')">
                   @csrf
-                  <input type="hidden" name="to" value="{{ $canPrev ? $prevKey : '' }}">
-                  <button type="submit" class="rounded-lg border px-2.5 py-1.5 text-slate-900 hover:bg-slate-50 disabled:opacity-40"
-                          style="border-color: {{ $BORD }}" {{ $canPrev ? '' : 'disabled' }}
-                          title="{{ $canPrev ? 'Kembali ke: '.$pretty[$prevKey] : 'Tidak bisa mundur' }}">
-                    <svg class="h-4 w-4"><use href="#i-chevron-left"/></svg>
+                  <input type="hidden" name="to" value="{{ $canPrev ? e($prevKey) : '' }}">
+                  <button type="submit" class="rounded-lg border border-slate-200 px-2.5 py-1.5 text-slate-900 hover:bg-slate-50 disabled:opacity-40"
+                          {{ $canPrev ? '' : 'disabled' }}
+                          title="{{ $canPrev ? 'Kembali ke: '.($pretty[$prevKey] ?? '—') : 'Tidak bisa mundur' }}">
+                    <svg class="h-4 w-4" aria-hidden="true"><use href="#i-chevron-left"/></svg>
                   </button>
                 </form>
 
                 <form method="POST" action="{{ route('admin.applications.move', $myApp) }}"
                       onsubmit="return {{ $canNext ? 'confirm' : '(function(){return false;})' }}('Lanjutkan tahap ke: {{ $pretty[$nextKey] ?? '—' }} ?')">
                   @csrf
-                  <input type="hidden" name="to" value="{{ $canNext ? $nextKey : '' }}">
-                  <button type="submit" class="rounded-lg border px-2.5 py-1.5 text-white disabled:opacity-40"
-                          style="border-color: {{ $BORD }}; background: {{ $BLUE }}"
+                  <input type="hidden" name="to" value="{{ $canNext ? e($nextKey) : '' }}">
+                  <button type="submit" class="rounded-lg border border-slate-200 px-2.5 py-1.5 text-white disabled:opacity-40"
+                          style="background: {{ $BLUE }}"
                           {{ $canNext ? '' : 'disabled' }}
-                          title="{{ $canNext ? 'Lanjut ke: '.$pretty[$nextKey] : 'Sudah tahap terakhir' }}">
-                    <svg class="h-4 w-4"><use href="#i-chevron-right"/></svg>
+                          title="{{ $canNext ? 'Lanjut ke: '.($pretty[$nextKey] ?? '—') : 'Sudah tahap terakhir' }}">
+                    <svg class="h-4 w-4" aria-hidden="true"><use href="#i-chevron-right"/></svg>
                   </button>
                 </form>
               </div>
@@ -416,16 +504,19 @@
 
           @guest
             <p class="mt-2 text-sm text-slate-600">Masuk untuk melihat timeline lamaran pribadi.</p>
-            <a href="{{ route('login') }}" class="mt-3 inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm text-slate-900 hover:bg-slate-50" style="border-color: {{ $BORD }}">
+            <a href="{{ route('login') }}" class="mt-3 inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 hover:bg-slate-50">
               Login
             </a>
           @else
             @if(!$myApp)
-              <div class="mt-3 rounded-xl border px-4 py-3 text-sm" style="border-color: {{ $BORD }}">
+              <div class="mt-3 rounded-xl border border-slate-200 px-4 py-3 text-sm">
                 Belum ada lamaran untuk posisi ini.
                 @if(($job->status ?? 'draft')==='open')
                 <form method="POST" action="{{ route('applications.store',$job) }}" class="mt-3">@csrf
-                  <button class="w-full rounded-lg px-3 py-2 text-sm font-semibold text-white" style="background: {{ $BLUE }}">Lamar Sekarang</button>
+                  <button class="w-full rounded-lg px-3 py-2 text-sm font-semibold text-white"
+                          style="background: linear-gradient(90deg, {{ $BLUE }} 0%, {{ $RED }} 100%);">
+                    Lamar Sekarang
+                  </button>
                 </form>
                 @endif
               </div>
@@ -442,9 +533,9 @@
                 </div>
               </div>
 
-              {{-- Timeline dengan waktu & pengubah --}}
+              {{-- Timeline --}}
               <div class="mt-5 relative">
-                <div class="absolute right-3 top-0 bottom-0 w-0.5" style="background:#e6e6e6"></div>
+                <div class="absolute right-3 top-0 bottom-0 w-0.5 bg-slate-200"></div>
                 <div class="space-y-3">
                   @foreach($stageOrder as $key)
                     @php
@@ -453,26 +544,18 @@
                       $muted  = !$done && !$isNow;
                       $dotBg  = $done ? '#16a34a' : ($isNow ? $BLUE : '#f59e0b');
 
-                      // Cari data stage terkait (kalau ada)
                       $st = $stageMap[$key] ?? null;
-
-                      // Tentukan waktu tampil:
-                      // - jika "done": pakai updated_at (selesai diproses)
-                      // - jika "isNow": pakai created_at (mulai diproses)
-                      // - jika "belum": null
                       $ts = $done ? ($st->updated_at ?? $st->created_at ?? null)
                            : ($isNow ? ($st->created_at ?? null) : null);
 
                       $waktuTampil = $ts ? $formatTs($ts) : null;
-
-                      // Aktor yang mengubah
                       $who = $st ? $actorName($st) : null;
                     @endphp
                     <div class="relative pr-12">
                       <span class="absolute right-0 top-1 grid h-4 w-4 place-items-center rounded-full ring-4 ring-white" style="background: {{ $dotBg }}"></span>
                       <div class="flex items-start justify-between gap-3">
                         <div class="min-w-0">
-                          <div class="text-sm font-medium {{ $muted ? 'text-slate-700' : 'text-slate-900' }}">{{ $pretty[$key] }}</div>
+                          <div class="text-sm font-medium {{ $muted ? 'text-slate-700' : 'text-slate-900' }}">{{ e($pretty[$key]) }}</div>
                           <div class="text-xs text-slate-500">
                             @if($done) Selesai
                             @elseif($isNow) Sedang diproses
@@ -480,26 +563,19 @@
                             @endif
                           </div>
 
-                          {{-- Detail waktu & pengubah --}}
                           @if($waktuTampil || $who)
                             <div class="mt-1 text-[11px] text-slate-500">
                               @if($waktuTampil)
                                 <div class="inline-flex items-center gap-1">
-                                  <svg class="h-3.5 w-3.5 text-slate-400"><use href="#i-clock"/></svg>
-                                  <span>Waktu: {{ $waktuTampil }}</span>
+                                  <svg class="h-3.5 w-3.5 text-slate-400" aria-hidden="true"><use href="#i-clock"/></svg>
+                                  <span>Waktu: {{ e($waktuTampil) }}</span>
                                 </div>
                               @endif
                               @if($who)
-                                <div>
-                                  Diubah oleh: <span class="font-medium text-slate-700">{{ $who }}</span>
-                                </div>
+                                <div>Diubah oleh: <span class="font-medium text-slate-700">{{ e($who) }}</span></div>
                               @endif
-
-                              {{-- Jika ada last note/remarks pada stage --}}
                               @if(!empty($st?->notes))
-                                <div class="mt-0.5">
-                                  Catatan: <span class="text-slate-700">{{ $st->notes }}</span>
-                                </div>
+                                <div class="mt-0.5">Catatan: <span class="text-slate-700">{{ e($st->notes) }}</span></div>
                               @endif
                             </div>
                           @endif
@@ -517,7 +593,6 @@
 
                   @if($overall==='rejected')
                     @php
-                      // tampilkan reject time & who kalau tersedia dari latestStage
                       $rejectTime = $latestStage ? $formatTs($latestStage->updated_at ?? $latestStage->created_at) : ($myApp ? $formatTs($myApp->updated_at ?? $myApp->created_at) : null);
                       $rejectBy   = $latestStage ? $actorName($latestStage) : ($lastChangedBy ?? null);
                     @endphp
@@ -531,12 +606,12 @@
                             <div class="mt-1 text-[11px] text-slate-500">
                               @if($rejectTime)
                                 <div class="inline-flex items-center gap-1">
-                                  <svg class="h-3.5 w-3.5 text-slate-400"><use href="#i-clock"/></svg>
-                                  <span>Waktu: {{ $rejectTime }}</span>
+                                  <svg class="h-3.5 w-3.5 text-slate-400" aria-hidden="true"><use href="#i-clock"/></svg>
+                                  <span>Waktu: {{ e($rejectTime) }}</span>
                                 </div>
                               @endif
                               @if($rejectBy)
-                                <div>Diubah oleh: <span class="font-medium text-slate-700">{{ $rejectBy }}</span></div>
+                                <div>Diubah oleh: <span class="font-medium text-slate-700">{{ e($rejectBy) }}</span></div>
                               @endif
                             </div>
                           @endif
@@ -548,14 +623,14 @@
                 </div>
               </div>
 
-              {{-- Meta lamaran (dengan update terakhir & pengubah) --}}
+              {{-- Meta lamaran --}}
               <div class="mt-5 grid gap-2 text-xs text-slate-600">
                 <div class="inline-flex items-center gap-2">
-                  <svg class="h-4 w-4 text-slate-500"><use href="#i-clock"/></svg>
-                  Diajukan: {{ $myApp?->created_at ? $formatTs($myApp->created_at) : '—' }}
+                  <svg class="h-4 w-4 text-slate-500" aria-hidden="true"><use href="#i-clock"/></svg>
+                  Diajukan: {{ $myApp?->created_at ? e($formatTs($myApp->created_at)) : '—' }}
                 </div>
                 <div class="inline-flex items-center gap-2">
-                  <svg class="h-4 w-4 text-slate-500"><use href="#i-brief"/></svg>
+                  <svg class="h-4 w-4 text-slate-500" aria-hidden="true"><use href="#i-brief"/></svg>
                   Status keseluruhan:
                   @php
                     $overallText = strtoupper($overall ?? 'IN_PROGRESS');
@@ -565,17 +640,16 @@
                       'bg-blue-50 text-blue-700 ring-blue-200');
                   @endphp
                   <span class="ml-1 rounded-full px-2 py-0.5 text-[11px] font-semibold ring-1 ring-inset {{ $overallClass }}">
-                    {{ $overallText }}
+                    {{ e($overallText) }}
                   </span>
                 </div>
 
-                {{-- Baru: informasi perubahan terakhir --}}
                 @if($lastChangedAt)
                   <div class="inline-flex items-center gap-2">
-                    <svg class="h-4 w-4 text-slate-500"><use href="#i-clock"/></svg>
-                    Terakhir diubah: {{ $formatTs($lastChangedAt) }}
+                    <svg class="h-4 w-4 text-slate-500" aria-hidden="true"><use href="#i-clock"/></svg>
+                    Terakhir diubah: {{ e($formatTs($lastChangedAt)) }}
                     @if($lastChangedBy)
-                      <span>• oleh <span class="font-medium text-slate-700">{{ $lastChangedBy }}</span></span>
+                      <span>• oleh <span class="font-medium text-slate-700">{{ e($lastChangedBy) }}</span></span>
                     @endif
                   </div>
                 @endif
@@ -585,8 +659,8 @@
         </div>
       </div>
 
-      {{-- Tentang Site (link publik) --}}
-      <div class="rounded-2xl border bg-white shadow-sm p-5 md:p-6" style="border-color: {{ $BORD }}">
+      {{-- Tentang Site --}}
+      <div class="rounded-2xl border border-slate-200 bg-white shadow-sm p-5 md:p-6">
         <h3 class="text-base font-semibold text-slate-900">Tentang Site</h3>
         @if($job->site)
           @php
@@ -595,12 +669,12 @@
             $addr = $s->address ?: data_get($s->meta, 'address');
           @endphp
           <dl class="mt-3 grid grid-cols-3 gap-y-2 text-sm">
-            <dt class="text-slate-500">Kode</dt><dd class="col-span-2 text-slate-800">{{ $s->code }}</dd>
-            <dt class="text-slate-500">Nama</dt><dd class="col-span-2 text-slate-800">{{ $s->name }}</dd>
-            <dt class="text-slate-500">Region</dt><dd class="col-span-2 text-slate-800">{{ $s->region ?: '—' }}</dd>
-            <dt class="text-slate-500">Timezone</dt><dd class="col-span-2 text-slate-800">{{ $tz ?: '—' }}</dd>
+            <dt class="text-slate-500">Kode</dt><dd class="col-span-2 text-slate-800">{{ e($s->code) }}</dd>
+            <dt class="text-slate-500">Nama</dt><dd class="col-span-2 text-slate-800">{{ e($s->name) }}</dd>
+            <dt class="text-slate-500">Region</dt><dd class="col-span-2 text-slate-800">{{ e($s->region ?: '—') }}</dd>
+            <dt class="text-slate-500">Timezone</dt><dd class="col-span-2 text-slate-800">{{ e($tz ?: '—') }}</dd>
             @if($addr)
-              <dt class="text-slate-500">Alamat</dt><dd class="col-span-2 text-slate-800">{{ $addr }}</dd>
+              <dt class="text-slate-500">Alamat</dt><dd class="col-span-2 text-slate-800">{{ e($addr) }}</dd>
             @endif
           </dl>
           <div class="mt-3 flex items-center gap-3">
@@ -615,17 +689,68 @@
         @endif
       </div>
 
+      {{-- PROFIL KANDIDAT (di bawah Site) --}}
+      @auth
+      <div class="rounded-2xl border border-slate-200 bg-white shadow-sm p-5 md:p-6">
+        <div class="flex items-center justify-between">
+          <h3 class="text-base font-semibold text-slate-900">Profil Kandidat Kamu</h3>
+          @if(Route::has('candidate.profiles.edit'))
+            <a href="{{ route('candidate.profiles.edit', $job) }}" class="text-sm text-blue-700 hover:underline">Ubah</a>
+          @endif
+        </div>
+
+        @if($meProfile)
+          <dl class="mt-3 grid grid-cols-3 gap-y-2 text-sm">
+            <dt class="text-slate-500">Nama</dt>
+            <dd class="col-span-2 text-slate-800">{{ e($meProfile->full_name ?? auth()->user()->name) }}</dd>
+
+            <dt class="text-slate-500">Pendidikan</dt>
+            <dd class="col-span-2 text-slate-800">
+              {{ e($meProfile->last_education ?? '—') }}
+              @if($meProfile->education_major) · {{ e($meProfile->education_major) }} @endif
+            </dd>
+
+            <dt class="text-slate-500">Kontak</dt>
+            <dd class="col-span-2 text-slate-800">
+              {{ e($meProfile->phone ?? '—') }} @if($meProfile->email) · {{ e($meProfile->email) }} @endif
+            </dd>
+          </dl>
+
+          @if($meProfile->cv_path)
+            <div class="mt-3 text-sm">
+              <a class="text-blue-700 hover:underline" href="{{ Storage::disk('public')->url($meProfile->cv_path) }}" target="_blank" rel="noopener">Lihat CV</a>
+            </div>
+          @endif
+
+          <div class="mt-4">
+            @if(Route::has('candidate.profiles.edit'))
+              <a href="{{ route('candidate.profiles.edit', $job) }}" class="inline-flex items-center rounded-lg border border-slate-200 px-3 py-2 text-sm hover:bg-slate-50">
+                Perbarui Profil
+              </a>
+            @endif
+          </div>
+        @else
+          <p class="mt-2 text-sm text-slate-600">Profil kandidat belum diisi.</p>
+          @if(Route::has('candidate.profiles.edit'))
+            <a href="{{ route('candidate.profiles.edit', $job) }}" class="mt-3 inline-flex items-center rounded-lg bg-blue-600 px-3 py-2 text-sm font-semibold text-white">
+              Lengkapi Sekarang
+            </a>
+          @endif
+        @endif
+      </div>
+      @endauth
+
       {{-- (Opsional) Jobs serupa --}}
       @isset($relatedJobs)
         @if($relatedJobs->count())
-          <div class="rounded-2xl border bg-white shadow-sm p-5 md:p-6" style="border-color: {{ $BORD }}">
+          <div class="rounded-2xl border border-slate-200 bg-white shadow-sm p-5 md:p-6">
             <h3 class="text-base font-semibold text-slate-900">Lowongan Serupa</h3>
             <ul class="mt-3 space-y-2">
               @foreach($relatedJobs as $r)
                 <li class="flex items-center justify-between gap-3">
                   <div class="min-w-0">
-                    <a href="{{ route('jobs.show', $r) }}" class="font-medium text-slate-900 hover:underline truncate">{{ $r->title }}</a>
-                    <div class="text-xs text-slate-500">{{ $r->division ?: '—' }} · {{ $r->site?->code ?: '—' }}</div>
+                    <a href="{{ route('jobs.show', $r) }}" class="font-medium text-slate-900 hover:underline truncate">{{ e($r->title) }}</a>
+                    <div class="text-xs text-slate-500">{{ e($r->division ?: '—') }} · {{ e($r->site?->code ?: '—') }}</div>
                   </div>
                   <a href="{{ route('jobs.show', $r) }}" class="text-sm text-blue-700 hover:underline shrink-0">Lihat</a>
                 </li>
@@ -635,66 +760,6 @@
         @endif
       @endisset
     </aside>
-
-    {{-- === NEW: Panel ringkasan profil kandidat (di kolom kanan) === --}}
-    @auth
-      <aside class="lg:col-span-1 space-y-6">
-        <div class="rounded-2xl border bg-white shadow-sm p-5 md:p-6" style="border-color: {{ $BORD }}">
-          <div class="flex items-center justify-between">
-            <h3 class="text-base font-semibold text-slate-900">Profil Kandidat Kamu</h3>
-            @if(Route::has('candidate.profiles.edit'))
-              <a href="{{ route('candidate.profiles.edit', $job) }}" class="text-sm text-blue-700 hover:underline">Ubah</a>
-            @endif
-          </div>
-
-          @if($meProfile)
-            <dl class="mt-3 grid grid-cols-3 gap-y-2 text-sm">
-              <dt class="text-slate-500">Nama</dt>
-              <dd class="col-span-2 text-slate-800">{{ $meProfile->full_name ?? auth()->user()->name }}</dd>
-
-              <dt class="text-slate-500">Pendidikan</dt>
-              <dd class="col-span-2 text-slate-800">
-                {{ $meProfile->last_education ?? '—' }}
-                @if($meProfile->education_major) · {{ $meProfile->education_major }} @endif
-              </dd>
-
-              <dt class="text-slate-500">Kontak</dt>
-              <dd class="col-span-2 text-slate-800">{{ $meProfile->phone ?? '—' }} @if($meProfile->email) · {{ $meProfile->email }} @endif</dd>
-            </dl>
-
-            @if($meProfile->cv_path)
-              <div class="mt-3 text-sm">
-                <a class="text-blue-700 hover:underline" href="{{ Storage::disk('public')->url($meProfile->cv_path) }}" target="_blank">Lihat CV</a>
-              </div>
-            @endif
-
-            <div class="mt-4">
-              @if(Route::has('candidate.profiles.edit'))
-                <a href="{{ route('candidate.profiles.edit', $job) }}" class="inline-flex items-center rounded-lg border px-3 py-2 text-sm hover:bg-slate-50" style="border-color: {{ $BORD }}">
-                  Perbarui Profil
-                </a>
-              @endif
-            </div>
-          @else
-            <p class="mt-2 text-sm text-slate-600">Profil kandidat belum diisi.</p>
-            @if(Route::has('candidate.profiles.edit'))
-              <a href="{{ route('candidate.profiles.edit', $job) }}" class="mt-3 inline-flex items-center rounded-lg bg-blue-600 px-3 py-2 text-sm font-semibold text-white">Lengkapi Sekarang</a>
-            @endif
-          @endif
-        </div>
-      </aside>
-    @endauth
-  </div>
-
-  {{-- FOOTER meta --}}
-  <div class="mt-6 flex flex-wrap items-center gap-3 text-xs text-slate-500">
-    <span>Diposting: {{ optional($job->created_at)->timezone($TZ)->format('d M Y, H:i') ?? '—' }}</span>
-    <span>•</span>
-    <span>Diubah: {{ optional($job->updated_at)->timezone($TZ)->format('d M Y, H:i') ?? '—' }}</span>
-    @if(isset($job->applications_count))
-      <span>•</span>
-      <span>Jumlah Pelamar: {{ $job->applications_count }}</span>
-    @endif
   </div>
 </div>
 
@@ -722,19 +787,22 @@
 </svg>
 @endonce
 
-{{-- JSON-LD JobPosting --}}
+{{-- JSON-LD Breadcrumbs (SEO) --}}
+<script type="application/ld+json">{!! json_encode($breadcrumbLd, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES) !!}</script>
+
+{{-- JSON-LD JobPosting (aman & minimal) --}}
 @php
   $jobLd = [
     '@context' => 'https://schema.org',
     '@type' => 'JobPosting',
-    'title' => $job->title,
-    'description' => strip_tags($decode($job->description ?? '')),
+    'title' => (string) $job->title,
+    'description' => strip_tags($sanitize($job->description ?? '') ?? ''),
     'datePosted' => optional($job->created_at)->toIso8601String(),
     'validThrough' => $closingAt ? Carbon::parse($closingAt)->toIso8601String() : null,
     'employmentType' => strtoupper($job->employment_type ?? 'FULL_TIME'),
     'hiringOrganization' => [
       '@type' => 'Organization',
-      'name' => config('app.name'),
+      'name' => (string) config('app.name'),
     ],
     'jobLocation' => [
       '@type' => 'Place',

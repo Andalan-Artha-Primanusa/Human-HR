@@ -1,3 +1,4 @@
+// database/migrations/2025_10_21_000000_create_candidate_trainings_table.php
 <?php
 
 use Illuminate\Database\Migrations\Migration;

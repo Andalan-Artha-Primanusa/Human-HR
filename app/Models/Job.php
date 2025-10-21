@@ -40,6 +40,7 @@ class Job extends Model
     ];
 
     protected $fillable = [
+        'company_id',
         'code',
         'title',
         'site_id',
@@ -119,12 +120,18 @@ class Job extends Model
      |=====================*/
 
     /** @return BelongsTo<Site, Job> */
-    public function site()
+    public function site(): BelongsTo
     {
-        return $this->belongsTo(\App\Models\Site::class)
+        return $this->belongsTo(Site::class)
             ->select(['id', 'code', 'name', 'region', 'timezone', 'address']);
     }
 
+    /** @return BelongsTo<Company, Job> */
+    public function company(): BelongsTo
+    {
+        return $this->belongsTo(Company::class)
+            ->select(['id', 'code', 'name']);
+    }
 
     /** @return HasMany<JobApplication> */
     public function applications(): HasMany
@@ -132,7 +139,13 @@ class Job extends Model
         return $this->hasMany(\App\Models\JobApplication::class);
     }
 
-    /** @return HasOne<ManpowerRequirement> */
+    /** Banyak MR per Job (yang dipakai untuk sync openings) */
+    public function manpowerRequirements(): HasMany
+    {
+        return $this->hasMany(\App\Models\ManpowerRequirement::class);
+    }
+
+    /** Back-compat: satu MR (kalau masih ada tempat lain yang panggil) */
     public function manpowerRequirement(): HasOne
     {
         return $this->hasOne(\App\Models\ManpowerRequirement::class);
@@ -156,6 +169,21 @@ class Job extends Model
         return $q->whereHas('site', fn($qq) => $qq->where('code', $code));
     }
 
+    /** Filter by company_id (nullable company_id akan difilter dengan whereNull jika $companyId === null) */
+    public function scopeAtCompany($q, ?string $companyId)
+    {
+        if ($companyId === null) {
+            return $q->whereNull('company_id');
+        }
+        return $q->where('company_id', $companyId);
+    }
+
+    /** Filter by company.code */
+    public function scopeAtCompanyCode($q, string $code)
+    {
+        return $q->whereHas('company', fn($qq) => $qq->where('code', $code));
+    }
+
     public function scopeInDivision($q, ?string $division)
     {
         $norm = self::normalizeDivision($division);
@@ -166,16 +194,15 @@ class Job extends Model
     {
         if (!$term) return $q;
         $term = "%{$term}%";
-        return $q->where(
-            fn($qq) =>
+        return $q->where(function ($qq) use ($term) {
             $qq->where('code', 'like', $term)
-                ->orWhere('title', 'like', $term)
-                ->orWhere('description', 'like', $term)
-        );
+               ->orWhere('title', 'like', $term)
+               ->orWhere('description', 'like', $term);
+        });
     }
 
     /* =====================
-     | Backward compat: site_code virtual
+     | Virtual attrs: site_code & company_code
      |=====================*/
     public function getSiteCodeAttribute(): ?string
     {
@@ -191,12 +218,19 @@ class Job extends Model
         $siteId = DB::table('sites')->where('code', $code)->value('id');
         $this->site_id = $siteId ?: $this->site_id;
     }
-    // app/Models/Job.php
-public function manpowerRequirements()
-{
-    return $this->hasMany(\App\Models\ManpowerRequirement::class);
-}
-// (opsional lama) kalau masih ada:
-// public function manpowerRequirement() { return $this->hasOne(...); }
 
+    public function getCompanyCodeAttribute(): ?string
+    {
+        return $this->company?->code;
+    }
+
+    public function setCompanyCodeAttribute(?string $code): void
+    {
+        if (!$code) {
+            $this->company_id = null;
+            return;
+        }
+        $companyId = DB::table('companies')->where('code', $code)->value('id');
+        $this->company_id = $companyId ?: $this->company_id;
+    }
 }

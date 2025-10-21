@@ -1,4 +1,3 @@
-{{-- resources/views/admin/jobs/index.blade.php --}}
 @extends('layouts.app', [ 'title' => 'Admin · Jobs' ])
 
 @section('content')
@@ -28,27 +27,41 @@
   </div>
 
   {{-- TOOLBAR FILTER --}}
-  <form method="GET" class="mb-4 grid grid-cols-1 md:grid-cols-4 gap-2 md:gap-3">
+  <form method="GET" class="mb-4 grid grid-cols-1 md:grid-cols-5 gap-2 md:gap-3">
+    {{-- term (cocok dengan controller) --}}
     <input
-      name="q"
-      value="{{ request('q') }}"
+      name="term"
+      value="{{ request('term') }}"
       placeholder="Cari code / title / division…"
       class="input md:col-span-2"
       autocomplete="off"
     >
+
+    {{-- site by code --}}
     <select name="site" class="input">
       <option value="">All Sites</option>
       @foreach(($sites ?? []) as $code => $name)
         <option value="{{ $code }}" @selected(request('site')===$code)>{{ $code }} — {{ $name }}</option>
       @endforeach
     </select>
+
+    {{-- company by code --}}
+    <select name="company" class="input">
+      <option value="">All Companies</option>
+      @foreach(($companies ?? []) as $code => $name)
+        <option value="{{ $code }}" @selected(request('company')===$code)>{{ $code }} — {{ $name }}</option>
+      @endforeach
+    </select>
+
+    {{-- status (opsional: hanya berfungsi jika controllernya memfilter status) --}}
+    @php $statuses = ['' => 'All Status', 'open'=>'Open', 'draft'=>'Draft', 'closed'=>'Closed']; @endphp
     <select name="status" class="input">
-      @php $statuses = ['' => 'All Status', 'open'=>'Open', 'draft'=>'Draft', 'closed'=>'Closed']; @endphp
       @foreach($statuses as $val => $label)
         <option value="{{ $val }}" @selected(request('status')===$val)>{{ $label }}</option>
       @endforeach
     </select>
-    <div class="md:col-span-4 flex gap-2">
+
+    <div class="md:col-span-5 flex gap-2">
       <button class="btn btn-primary inline-flex items-center gap-2">
         <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
           <circle cx="11" cy="11" r="7" stroke-width="2"/><path stroke-width="2" stroke-linecap="round" d="M21 21l-3.5-3.5"/>
@@ -63,12 +76,13 @@
   <div class="rounded-2xl border border-slate-200 bg-white shadow-sm">
     <div class="p-0 overflow-x-auto">
       @if($jobs->count())
-        <table class="min-w-[840px] w-full text-sm">
+        <table class="min-w-[980px] w-full text-sm">
           <thead class="bg-slate-50 text-slate-600">
             <tr>
               <th class="px-4 py-3 text-left w-28">Code</th>
               <th class="px-4 py-3 text-left">Title</th>
               <th class="px-4 py-3 text-left w-44">Division</th>
+              <th class="px-4 py-3 text-left w-32">Company</th>
               <th class="px-4 py-3 text-left w-28">Site</th>
               <th class="px-4 py-3 text-center w-28">Openings</th>
               <th class="px-4 py-3 text-center w-28">Status</th>
@@ -103,6 +117,15 @@
 
                 <td class="px-4 py-3">
                   <span class="text-slate-800">{{ $job->division ?: '—' }}</span>
+                </td>
+
+                <td class="px-4 py-3">
+                  @if($job->company)
+                    <span class="font-mono text-slate-700">{{ $job->company->code }}</span>
+                    <div class="text-xs text-slate-500 truncate">{{ $job->company->name }}</div>
+                  @else
+                    <span class="text-slate-400">—</span>
+                  @endif
                 </td>
 
                 <td class="px-4 py-3">

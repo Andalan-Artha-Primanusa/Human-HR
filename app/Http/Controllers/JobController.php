@@ -4,56 +4,119 @@ namespace App\Http\Controllers;
 
 use App\Models\Job;
 use App\Models\Site;
+use App\Models\Company;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 class JobController extends Controller
 {
+    public function __construct()
+    {
+        // Policy untuk admin resource; index/show/create/store dikelola via middleware/route group
+        $this->authorizeResource(Job::class, 'job', [
+            'except' => ['index','show','create','store'],
+        ]);
+    }
+
     /**
-     * PUBLIC & ADMIN LIST
+     * PUBLIC & ADMIN LIST (aman + cepat)
      */
     public function index(Request $request)
     {
         $isAdminRoute = $request->routeIs('admin.*');
 
-        $jobs = Job::query()
-            ->select([
-                'id','code','title','division','employment_type','openings',
-                'site_id','status','description','created_at'
-            ])
-            ->with(['site:id,code,name'])
-            ->when(!$isAdminRoute, fn($q) => $q->where('status', 'open'))
-            ->when($request->filled('division'), fn($q) => $q->where('division', $request->string('division')->toString()))
-            ->when($request->filled('site'), function ($q) use ($request) {
-                $siteCode = $request->string('site')->toString();
-                $q->whereHas('site', fn($qq) => $qq->where('code', $siteCode));
-            })
-            ->when($request->filled('type'), fn($q) => $q->where('employment_type', $request->string('type')->toString()))
-            ->when($request->filled('term'), function ($q) use ($request) {
-                $term = '%'.$request->string('term')->toString().'%';
-                $q->where(function ($qq) use ($term) {
-                    $qq->where('title', 'like', $term)
-                       ->orWhere('description', 'like', $term)
-                       ->orWhere('code', 'like', $term);
-                });
-            })
-            ->when(
-                $request->string('sort')->toString(),
-                function ($q, $sort) {
-                    return match ($sort) {
-                        'oldest' => $q->orderBy('created_at', 'asc'),
-                        'title'  => $q->orderBy('title'),
-                        default  => $q->orderBy('created_at', 'desc'),
-                    };
-                },
-                fn($q) => $q->orderBy('created_at', 'desc')
-            )
-            ->paginate(12)
-            ->withQueryString();
+        // 1) Validasi & normalisasi query params (whitelist)
+        $data = $request->validate([
+            'division'   => ['nullable','string','max:100'],
+            'site'       => ['nullable','string','max:50'], // site code
+            'company'    => ['nullable','string','max:50'], // company code
+            'company_id' => ['nullable','uuid','exists:companies,id'],
+            'type'       => ['nullable', Rule::in(['intern','contract','fulltime'])], // disamakan dgn enum migration
+            'term'       => ['nullable','string','max:200'],
+            'sort'       => ['nullable', Rule::in(['latest','oldest','title'])],
+            'page'       => ['nullable','integer','min:1'],
+            'per_page'   => ['nullable','integer','min:1','max:50'],
+        ]);
+
+        $perPage = $data['per_page'] ?? 12;
+        $sort    = $data['sort'] ?? 'latest';
+
+        // 2) Query dasar (kolom minimal + eager load ketat)
+        $baseQuery = Job::query()
+            ->select(['id','code','title','division','employment_type','openings','site_id','company_id','status','created_at'])
+            ->with([
+                'site:id,code,name',
+                'company:id,code,name',
+            ]);
+
+        if (!$isAdminRoute) {
+            $baseQuery->where('status', 'open');
+        }
+
+        if (!empty($data['division'])) {
+            $baseQuery->where('division', $data['division']);
+        }
+
+        if (!empty($data['site'])) {
+            $siteCode = $data['site'];
+            $baseQuery->whereHas('site', fn($q) => $q->where('code', $siteCode));
+        }
+
+        // Filter by company_id atau company code
+        if (!empty($data['company_id'])) {
+            $baseQuery->where('company_id', $data['company_id']);
+        } elseif (!empty($data['company'])) {
+            $companyCode = $data['company'];
+            $baseQuery->whereHas('company', fn($q) => $q->where('code', $companyCode));
+        }
+
+        if (!empty($data['type'])) {
+            $baseQuery->where('employment_type', $data['type']);
+        }
+
+        if (!empty($data['term'])) {
+            $term = trim($data['term']);
+            $like = '%'.$term.'%';
+            $baseQuery->where(function ($q) use ($like) {
+                $q->where('title', 'like', $like)
+                  ->orWhere('description', 'like', $like)
+                  ->orWhere('code', 'like', $like);
+            });
+        }
+
+        // 3) Sorting
+        match ($sort) {
+            'oldest' => $baseQuery->orderBy('created_at', 'asc'),
+            'title'  => $baseQuery->orderBy('title')->orderByDesc('created_at'),
+            default  => $baseQuery->orderBy('created_at', 'desc'), // latest
+        };
+
+        // 4) Micro-cache untuk publik
+        if (!$isAdminRoute) {
+            $cacheKey = 'jobs.public.'.md5(json_encode([
+                'division'   => $data['division'] ?? null,
+                'site'       => $data['site'] ?? null,
+                'company'    => $data['company'] ?? null,
+                'company_id' => $data['company_id'] ?? null,
+                'type'       => $data['type'] ?? null,
+                'term'       => $data['term'] ?? null,
+                'sort'       => $sort,
+                'page'       => $data['page'] ?? 1,
+                'per_page'   => $perPage,
+            ]));
+
+            $jobs = Cache::remember($cacheKey, now()->addSeconds(30), function () use ($baseQuery, $perPage) {
+                return $baseQuery->paginate($perPage)->withQueryString();
+            });
+        } else {
+            $jobs = $baseQuery->paginate($perPage)->withQueryString();
+        }
 
         $view = $isAdminRoute ? 'admin.jobs.index' : 'jobs.index';
-
-        return view($view, ['jobs' => $jobs]);
+        return view($view, compact('jobs'));
     }
 
     /**
@@ -63,6 +126,7 @@ class JobController extends Controller
     {
         $job->loadMissing([
             'site:id,code,name,region,timezone,address',
+            'company:id,code,name',
         ])->loadCount('applications');
 
         return view('jobs.show', compact('job'));
@@ -73,54 +137,69 @@ class JobController extends Controller
      */
     public function create()
     {
-        $sites = Site::orderBy('code')->get(['id','code','name']);
-        return view('admin.jobs.create', compact('sites'));
+        $sitesQuery = Site::query()->select(['id','code','name'])->orderBy('code');
+        if (method_exists($this, 'restrictSitesForUser')) {
+            $sitesQuery = $this->restrictSitesForUser($sitesQuery, Auth::user());
+        }
+        $sites = $sitesQuery->get();
+
+        // (opsional) kalau mau dropdown company
+        $companies = Company::query()->select(['id','code','name'])->orderBy('code')->get();
+
+        return view('admin.jobs.create', compact('sites','companies'));
     }
 
     /**
-     * ADMIN STORE -> openings diabaikan; disinkron dari manpower_requirements
+     * ADMIN STORE -> openings disinkron dari manpower_requirements
      */
     public function store(Request $request)
     {
-        $data = $request->validate([
-            'code'            => ['required','string','max:50','unique:jobs,code'],
+        $payload = $request->validate([
+            'code'            => ['required','string','max:50'],
             'title'           => ['required','string','max:200'],
             'division'        => ['nullable','string','max:100'],
             'level'           => ['nullable','string','max:100'],
-            'employment_type' => ['required', Rule::in(['intern','contract','fulltime','parttime','freelance'])],
-            // 'openings'        => ['nullable','integer','min:0'], // <- kalau ada di form, ABAIKAN
+            'employment_type' => ['required', Rule::in(['intern','contract','fulltime'])], // disamakan enum DB
             'status'          => ['required', Rule::in(['draft','open','closed'])],
             'description'     => ['nullable','string'],
-            'site_id'         => ['nullable','exists:sites,id','required_without:site_code'],
+
+            'site_id'         => ['nullable','uuid','exists:sites,id','required_without:site_code'],
             'site_code'       => ['nullable','string','exists:sites,code','required_without:site_id'],
+
+            'company_id'      => ['nullable','uuid','exists:companies,id','prohibits:company_code'],
+            'company_code'    => ['nullable','string','exists:companies,code','prohibits:company_id'],
         ]);
 
-        // Normalisasi site
-        $siteId   = $data['site_id'] ?? null;
-        $siteCode = $data['site_code'] ?? null;
-        unset($data['site_id'], $data['site_code']);
+        $siteId    = $this->resolveSiteId($payload['site_id'] ?? null, $payload['site_code'] ?? null);
+        $companyId = $this->resolveCompanyId($payload['company_id'] ?? null, $payload['company_code'] ?? null);
 
-        if (!$siteId && $siteCode) {
-            $siteId = Site::where('code', $siteCode)->value('id');
-        }
-        $data['site_id'] = $siteId;
+        // Validasi: code unik per company
+        $this->validateUniqueJobCodePerCompany($payload['code'], $companyId);
 
-        // Abaikan openings dari request, set 0 dulu
-        unset($data['openings']);
-        $data['openings'] = 0;
+        $this->checkUserCanUseSite($siteId);
 
-        $job = Job::create($data);
+        $job = DB::transaction(function () use ($payload, $siteId, $companyId) {
+            unset($payload['site_id'], $payload['site_code'], $payload['company_id'], $payload['company_code']);
 
-        // Setelah job dibuat, sinkron openings dari akumulasi manpower_requirements (jika ada)
-        $sum = $job->manpowerRequirements()->sum('budget_headcount'); // 0 kalau belum ada baris
-        if ((int)$sum !== (int)$job->openings) {
-            $job->update(['openings' => (int)$sum]);
-        }
+            $payload['site_id']    = $siteId;
+            $payload['company_id'] = $companyId; // boleh null
+            $payload['openings']   = 0;          // disinkron dari manpower
+
+            /** @var Job $job */
+            $job = Job::create($payload);
+
+            $sum = (int) $job->manpowerRequirements()->sum('budget_headcount');
+            if ($sum !== (int) $job->openings) {
+                $job->update(['openings' => $sum]);
+            }
+
+            return $job->fresh()->loadMissing('site:id,code,name','company:id,code,name');
+        });
 
         if ($request->wantsJson()) {
             return response()->json([
                 'message'  => 'Job created (openings disinkron dari manpower).',
-                'job'      => $job->fresh()->loadMissing('site:id,code,name'),
+                'job'      => $job,
                 'redirect' => route('admin.jobs.index'),
             ], 201);
         }
@@ -133,55 +212,71 @@ class JobController extends Controller
      */
     public function edit(Job $job)
     {
-        $job->loadMissing('site:id,code,name');
-        $sites = Site::orderBy('code')->get(['id','code','name']);
-        return view('admin.jobs.edit', compact('job','sites'));
+        $job->loadMissing('site:id,code,name','company:id,code,name');
+
+        $sitesQuery = Site::query()->select(['id','code','name'])->orderBy('code');
+        if (method_exists($this, 'restrictSitesForUser')) {
+            $sitesQuery = $this->restrictSitesForUser($sitesQuery, Auth::user());
+        }
+        $sites = $sitesQuery->get();
+
+        $companies = Company::query()->select(['id','code','name'])->orderBy('code')->get();
+
+        return view('admin.jobs.edit', compact('job','sites','companies'));
     }
 
     /**
-     * ADMIN UPDATE -> openings diabaikan; disinkron dari manpower_requirements
+     * ADMIN UPDATE -> openings disinkron dari manpower_requirements
      */
     public function update(Request $request, Job $job)
     {
-        $data = $request->validate([
-            'code'            => ['required','string','max:50', Rule::unique('jobs','code')->ignore($job->id)],
+        $payload = $request->validate([
+            'code'            => ['required','string','max:50'],
             'title'           => ['required','string','max:200'],
             'division'        => ['nullable','string','max:100'],
             'level'           => ['nullable','string','max:100'],
-            'employment_type' => ['required', Rule::in(['intern','contract','fulltime','parttime','freelance'])],
-            // 'openings'        => ['nullable','integer','min:0'], // <- kalau ada di form, ABAIKAN
+            'employment_type' => ['required', Rule::in(['intern','contract','fulltime'])],
             'status'          => ['required', Rule::in(['draft','open','closed'])],
             'description'     => ['nullable','string'],
-            'site_id'         => ['nullable','exists:sites,id','required_without:site_code'],
+
+            'site_id'         => ['nullable','uuid','exists:sites,id','required_without:site_code'],
             'site_code'       => ['nullable','string','exists:sites,code','required_without:site_id'],
+
+            'company_id'      => ['nullable','uuid','exists:companies,id','prohibits:company_code'],
+            'company_code'    => ['nullable','string','exists:companies,code','prohibits:company_id'],
         ]);
 
-        $siteId   = $data['site_id'] ?? null;
-        $siteCode = $data['site_code'] ?? null;
-        unset($data['site_id'], $data['site_code']);
+        $siteId    = $this->resolveSiteId($payload['site_id'] ?? null, $payload['site_code'] ?? null);
+        $companyId = $this->resolveCompanyId($payload['company_id'] ?? null, $payload['company_code'] ?? null);
 
-        if (!$siteId && $siteCode) {
-            $siteId = Site::where('code', $siteCode)->value('id');
-        }
+        // Validasi: code unik per company (abaikan baris saat ini)
+        $this->validateUniqueJobCodePerCompany($payload['code'], $companyId, $job->id);
+
         if ($siteId) {
-            $data['site_id'] = $siteId;
+            $this->checkUserCanUseSite($siteId);
         }
 
-        // Abaikan openings dari request
-        unset($data['openings']);
+        DB::transaction(function () use ($payload, $job, $siteId, $companyId) {
+            unset($payload['site_id'], $payload['site_code'], $payload['openings'], $payload['company_id'], $payload['company_code']);
 
-        $job->update($data);
+            if ($siteId) {
+                $payload['site_id'] = $siteId;
+            }
+            // company_id bisa diubah/di-null-kan
+            $payload['company_id'] = $companyId;
 
-        // Sinkron ulang openings dari akumulasi manpower_requirements
-        $sum = $job->manpowerRequirements()->sum('budget_headcount');
-        if ((int)$sum !== (int)$job->openings) {
-            $job->update(['openings' => (int)$sum]);
-        }
+            $job->update($payload);
 
-        if ($request->wantsJson()) {
+            $sum = (int) $job->manpowerRequirements()->sum('budget_headcount');
+            if ($sum !== (int) $job->openings) {
+                $job->update(['openings' => $sum]);
+            }
+        });
+
+        if (request()->wantsJson()) {
             return response()->json([
                 'message'  => 'Job updated (openings disinkron dari manpower).',
-                'job'      => $job->fresh()->loadMissing('site:id,code,name'),
+                'job'      => $job->fresh()->loadMissing('site:id,code,name','company:id,code,name'),
                 'redirect' => route('admin.jobs.index'),
             ]);
         }
@@ -204,5 +299,66 @@ class JobController extends Controller
         }
 
         return redirect()->route('admin.jobs.index')->with('success', 'Job deleted.');
+    }
+
+    // =====================
+    // Helpers (aman & rapi)
+    // =====================
+
+    private function resolveSiteId(?string $siteId, ?string $siteCode): string
+    {
+        if ($siteId) return $siteId;
+
+        if ($siteCode) {
+            $found = Site::where('code', $siteCode)->value('id');
+            abort_unless($found, 422, 'Site code tidak valid.');
+            return (string) $found;
+        }
+
+        abort(422, 'Site harus diisi via site_id atau site_code.');
+    }
+
+    /** company_id opsional (boleh null). Jika ada company_code, di-resolve; jika keduanya null → return null. */
+    private function resolveCompanyId(?string $companyId, ?string $companyCode): ?string
+    {
+        if ($companyId) return $companyId;
+
+        if ($companyCode) {
+            $found = Company::where('code', $companyCode)->value('id');
+            abort_unless($found, 422, 'Company code tidak valid.');
+            return (string) $found;
+        }
+
+        return null; // jobs boleh tanpa company
+    }
+
+    /** Enforce unik (company_id, code). Jika $companyId null → unik untuk company_id NULL saja (ikut perilaku DB). */
+    private function validateUniqueJobCodePerCompany(string $code, ?string $companyId, ?string $ignoreJobId = null): void
+    {
+        $exists = Job::query()
+            ->when($ignoreJobId, fn($q) => $q->where('id', '!=', $ignoreJobId))
+            ->where('code', $code)
+            ->where(function ($q) use ($companyId) {
+                if (is_null($companyId)) {
+                    $q->whereNull('company_id');
+                } else {
+                    $q->where('company_id', $companyId);
+                }
+            })
+            ->exists();
+
+        abort_if($exists, 422, 'Kode lowongan sudah dipakai pada company tersebut.');
+    }
+
+    private function checkUserCanUseSite(string $siteId): void
+    {
+        // Jika punya relasi user->sites:
+        // abort_if(!Auth::user()->sites()->whereKey($siteId)->exists(), 403, 'Tidak berwenang memilih site ini.');
+    }
+
+    private function restrictSitesForUser($sitesQuery, $user)
+    {
+        // return $sitesQuery->whereIn('id', $user->sites()->pluck('sites.id'));
+        return $sitesQuery;
     }
 }

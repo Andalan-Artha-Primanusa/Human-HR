@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 
 class ApplicationController extends Controller
 {
@@ -25,38 +26,23 @@ class ApplicationController extends Controller
         'applied','psychotest','hr_iv','user_iv','final','offer','hired','not_qualified',
     ];
 
-    /** Alias masuk (kompatibel dgn istilah lama/beragam) -> dipetakan ke canonical */
+    /** Alias masuk -> canonical */
     protected array $ALIASES_IN = [
-        // lama -> canonical
-        'apply'           => 'applied',
-        'applied'         => 'applied',
-        'psychotest'      => 'psychotest',
-        'hr_iv'           => 'hr_iv',
-        'hriv'            => 'hr_iv',
-        'user_iv'         => 'user_iv',
-        'useriv'          => 'user_iv',
-        'final'           => 'final',
-        'offering'        => 'offer',
-        'offer'           => 'offer',
-        'diterima'        => 'hired',
-        'hired'           => 'hired',
-        'rejected'        => 'not_qualified',
-        'not_qualified'   => 'not_qualified',
-        'not-qualified'   => 'not_qualified',
-        'notqualified'    => 'not_qualified',
-        'final_interview' => 'final',
+        'apply' => 'applied','applied' => 'applied',
+        'psychotest' => 'psychotest',
+        'hr_iv' => 'hr_iv','hriv'=>'hr_iv',
+        'user_iv'=>'user_iv','useriv'=>'user_iv',
+        'final'=>'final','final_interview'=>'final',
+        'offering'=>'offer','offer'=>'offer',
+        'diterima'=>'hired','hired'=>'hired',
+        'rejected'=>'not_qualified','not_qualified'=>'not_qualified','not-qualified'=>'not_qualified','notqualified'=>'not_qualified',
     ];
 
     /** Label cantik (opsional) */
     protected array $PRETTY = [
-        'applied'       => 'Pengajuan Berkas',
-        'psychotest'    => 'Psikotes',
-        'hr_iv'         => 'HR Interview',
-        'user_iv'       => 'User Interview',
-        'final'         => 'Final',
-        'offer'         => 'Offering',
-        'hired'         => 'Diterima',
-        'not_qualified' => 'Tidak Lolos',
+        'applied'=>'Pengajuan Berkas','psychotest'=>'Psikotes',
+        'hr_iv'=>'HR Interview','user_iv'=>'User Interview',
+        'final'=>'Final','offer'=>'Offering','hired'=>'Diterima','not_qualified'=>'Tidak Lolos',
     ];
 
     /** Pelamar: daftar lamaran saya */
@@ -95,22 +81,21 @@ class ApplicationController extends Controller
             $app = JobApplication::create([
                 'job_id'         => $job->id,
                 'user_id'        => $request->user()->id,
-                'current_stage'  => 'applied',     // canonical
-                'overall_status' => 'active',      // SELARAS ENUM DB
+                'current_stage'  => 'applied',
+                'overall_status' => 'active',
             ]);
 
             ApplicationStage::create([
                 'application_id' => $app->id,
-                'stage_key'      => 'applied',     // canonical
+                'stage_key'      => 'applied',
                 'status'         => 'pending',
                 'score'          => null,
                 'payload'        => ['note' => 'Initial application submitted'],
-                'acted_by'       => $request->user()->id, // untuk “Diubah oleh”
-                'user_id'        => $request->user()->id, // opsional: pembuat awal
+                'acted_by'       => $request->user()->id,
+                'user_id'        => $request->user()->id,
                 'notes'          => null,
             ]);
 
-            // Pastikan profil kandidat ada
             CandidateProfile::firstOrCreate(
                 ['user_id' => $request->user()->id],
                 ['full_name' => $request->user()->name]
@@ -195,9 +180,7 @@ class ApplicationController extends Controller
     public function moveStage(Request $request, JobApplication $application)
     {
         [$to, $status, $note, $score] = $this->validateMove($request);
-
         $attempt = $this->applyTransition($application, $to, $status, $note, $score);
-
         return $this->redirectAfterMove($request, $application, $to, $attempt);
     }
 
@@ -248,7 +231,7 @@ class ApplicationController extends Controller
             'score'     => ['nullable', 'numeric'],
         ]);
 
-        $to     = $this->normalizeStage($toRaw) ?: 'applied'; // canonical default
+        $to     = $this->normalizeStage($toRaw) ?: 'applied';
         $status = $validated['status'] ?? 'pending';
         $note   = $validated['note']   ?? null;
         $score  = isset($validated['score']) ? (float) $validated['score'] : null;
@@ -265,20 +248,20 @@ class ApplicationController extends Controller
         $attempt = null;
 
         DB::transaction(function () use ($application, $to, $status, $note, $score, &$attempt) {
-            $userId   = auth()->id(); // admin/owner yang mengubah
+            $userId   = auth()->id();
             $actor    = auth()->user()?->name ?? 'System';
-            $from     = $application->current_stage; // stage sebelum diperbarui
+            $from     = $application->current_stage;
             $prevOverall = $application->overall_status;
 
-            // timeline: tulis canonical stage_key + actor info
+            // timeline
             ApplicationStage::create([
                 'application_id' => $application->id,
-                'stage_key'      => $to,                 // canonical
+                'stage_key'      => $to,
                 'status'         => $status ?: 'pending',
                 'score'          => $score,
                 'payload'        => ['note' => $note],
-                'acted_by'       => $userId,            // penting utk “Diubah oleh”
-                'user_id'        => $userId,            // opsional creator
+                'acted_by'       => $userId,
+                'user_id'        => $userId,
                 'notes'          => $note,
             ]);
 
@@ -287,7 +270,7 @@ class ApplicationController extends Controller
 
             // overall status & headcount
             if ($to === 'hired') {
-                $job = $application->job()->with('manpowerRequirement')->first();
+                $job = $application->job()->with('manpowerRequirement','site:id,code','company:id,code')->first();
                 if ($job && $job->manpowerRequirement) {
                     $job->manpowerRequirement->increment('filled_headcount');
                     if ($job->manpowerRequirement->filled_headcount >= $job->manpowerRequirement->budget_headcount) {
@@ -295,6 +278,22 @@ class ApplicationController extends Controller
                     }
                 }
                 $application->update(['overall_status' => 'hired']);
+
+                // === AUTO-GENERATE users.id_employe (sekali saja) ===
+                $user = User::find($application->user_id);
+                if ($user && empty($user->id_employe)) {
+                    // GUNAKAN Algoritma 1; ganti ke 2 jika ingin kebalikannya
+                    $nik = $this->makeNik($job, 1);
+
+                    // retry sederhana jika kebetulan tabrakan
+                    $tries = 0;
+                    while (User::where('id_employe', $nik)->exists() && $tries < 5) {
+                        $nik = $this->makeNik($job, 1);
+                        $tries++;
+                    }
+
+                    $user->forceFill(['id_employe' => $nik])->save();
+                }
             } elseif ($to === 'not_qualified') {
                 $application->update(['overall_status' => 'not_qualified']);
             } else {
@@ -303,7 +302,7 @@ class ApplicationController extends Controller
                 }
             }
 
-            // === Khusus Psikotes: 1 lamaran x 1 tes = 1 attempt saja ===
+            // Psikotes (auto attempt)
             if ($to === 'psychotest') {
                 $test = PsychotestTest::where('is_active', true)->latest('updated_at')->first();
                 if (!$test) {
@@ -336,18 +335,13 @@ class ApplicationController extends Controller
                 }
             }
 
-            // =======================
-            // NOTIFIKASI KE PELAMAR
-            // =======================
-            // Catatan: kita buat DatabaseNotification langsung (tanpa class Notification baru).
-            // Ini aman untuk ditampilkan oleh UserNotificationController yang kamu punya.
+            // Notifikasi ke pelamar
             $appReload = $application->fresh(['job:id,title', 'user:id,name']);
             $jobTitle  = $appReload->job?->title ?? '—';
             $toPretty  = $this->PRETTY[$to] ?? strtoupper($to);
             $fromPretty= $from ? ($this->PRETTY[$from] ?? strtoupper($from)) : null;
 
             $title = 'Perubahan Proses Lamaran';
-            // Pesan disesuaikan untuk kasus akhir
             if ($appReload->overall_status === 'hired' && $prevOverall !== 'hired') {
                 $body = "Selamat! Status lamaran kamu untuk posisi \"{$jobTitle}\" berubah menjadi DITERIMA.";
             } elseif ($appReload->overall_status === 'not_qualified' && $prevOverall !== 'not_qualified') {
@@ -357,13 +351,11 @@ class ApplicationController extends Controller
                 $body = "Tahap lamaran kamu untuk posisi \"{$jobTitle}\" diperbarui menjadi: {$stagePart}.";
             }
 
-            // Link tujuan notif (kandidat melihat progres)
             $url = route('applications.mine');
 
-            // Insert 1 baris ke tabel notifications
             DatabaseNotification::create([
-                'id'              => (string) \Illuminate\Support\Str::uuid(),
-                'type'            => 'app:application.stage_changed', // string bebas
+                'id'              => (string) Str::uuid(),
+                'type'            => 'app:application.stage_changed',
                 'notifiable_type' => User::class,
                 'notifiable_id'   => $appReload->user_id,
                 'data'            => [
@@ -394,7 +386,7 @@ class ApplicationController extends Controller
         return $attempt;
     }
 
-    /** Redirect pintar setelah perpindahan stage (SEMUA stage) */
+    /** Redirect pintar setelah perpindahan stage */
     protected function redirectAfterMove(Request $request, JobApplication $application, string $to, $attempt = null)
     {
         $isAdmin = $request->user()
@@ -432,5 +424,68 @@ class ApplicationController extends Controller
             default:
                 return redirect()->back(303)->with('ok', 'Stage dipindah ke: '.strtoupper($this->PRETTY[$to] ?? $to));
         }
+    }
+
+    /* ========================== UTIL: NIK ========================== */
+
+    /**
+     * Buat NIK sesuai skema:
+     *  - Algoritma 1: {CompanyLetter}{SiteNumber}{YY}{MM}{SEQ4}
+     *  - Algoritma 2: {SiteNumber}{CompanyLetter}{YY}{MM}{SEQ4}
+     * - SEQ diambil dari database, direset per tahun berjalan (YY).
+     */
+    protected function makeNik(Job $job, int $algo = 1): string
+    {
+        // 1) Kode perusahaan (1 huruf)
+        $companyLetter = strtoupper(substr((string)($job->company?->code ?? ''), 0, 1)) ?: 'X';
+
+        // 2) Kode site (angka) — ambil dari kolom yang tersedia di tabel sites
+        $site = $job->site;
+        $siteNumber =
+            (string)($site->nik_code
+                ?? $site->code_site
+                ?? $site->nik_number
+                ?? $site->code_number
+                ?? '0');
+
+        // 3) Tahun & bulan masuk = saat di-HIRED
+        $yy = now()->format('y');
+        $mm = now()->format('m');
+
+        // 4) Dapatkan nomor urut (reset per tahun); cari max seq dari semua NIK yang YY-nya sama.
+        //    Posisi YY selalu di karakter ke-3..4 untuk kedua algoritma.
+        $candidates = User::query()
+            ->whereRaw('LENGTH(id_employe) >= 9')                 // minimal panjang wajar
+            ->whereRaw('SUBSTRING(id_employe,3,2) = ?', [$yy])    // filter by YY
+            ->pluck('id_employe');
+
+        $maxSeq = 0;
+        foreach ($candidates as $nik) {
+            // match kedua algoritma (huruf/angka di posisi 1-2), lalu YYMM + 4 digit di akhir
+            if (preg_match('/^[A-Z]\d\d{2}\d{2}\d{4}$/', $nik) || preg_match('/^\d[A-Z]\d{2}\d{2}\d{4}$/', $nik)) {
+                $seq = (int) substr($nik, -4);
+                if ($seq > $maxSeq) $maxSeq = $seq;
+            }
+        }
+        $nextSeq = str_pad((string)($maxSeq + 1), 4, '0', STR_PAD_LEFT);
+
+        // 5) Susun NIK
+        if ($algo === 2) {
+            return "{$siteNumber}{$companyLetter}{$yy}{$mm}{$nextSeq}";
+        }
+        // default Algoritma 1
+        return "{$companyLetter}{$siteNumber}{$yy}{$mm}{$nextSeq}";
+    }
+
+    /**
+     * (Opsional) Generator lama — tidak dipakai lagi.
+     * Dibiarkan bila masih ada referensi lama.
+     */
+    protected function makeEmployeeCode(string $prefix): string
+    {
+        $prefix = strtoupper(preg_replace('/[^A-Z0-9]/i', '', $prefix)) ?: 'EMP';
+        $period = now()->format('ym'); // YYMM
+        $rand   = strtoupper(Str::random(5));
+        return "{$prefix}-{$period}-{$rand}";
     }
 }
