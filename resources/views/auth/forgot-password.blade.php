@@ -63,6 +63,13 @@
           </div>
         @endif
 
+        {{-- Error global (mis. throttle) --}}
+        @if ($errors->any())
+          <div class="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-800" role="alert" aria-live="assertive">
+            {{ $errors->first() }}
+          </div>
+        @endif
+
         <div class="relative">
           {{-- Ring luar animasi --}}
           <div class="absolute -inset-[2px] rounded-2xl bg-[conic-gradient(var(--tw-gradient-stops))] from-blue-500 via-teal-400 to-emerald-400 animate-[spin-slow_8s_linear_infinite] opacity-20"></div>
@@ -70,6 +77,9 @@
           <div class="relative rounded-2xl bg-white/80 p-6 shadow-xl ring-1 ring-slate-200/80 backdrop-blur">
             <form id="forgotForm" method="POST" action="{{ route('password.email') }}" class="space-y-5" novalidate>
               @csrf
+
+              {{-- Honeypot sederhana untuk bot --}}
+              <input type="text" name="hp_url" tabindex="-1" autocomplete="off" class="hidden" aria-hidden="true">
 
               {{-- Email --}}
               <div>
@@ -90,13 +100,14 @@
 
               {{-- Submit --}}
               <button id="submitBtn" type="submit"
-                class="group w-full inline-flex justify-center items-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-teal-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:from-blue-700 hover:to-teal-700 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed transition">
-                <svg id="spinner" class="hidden h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                class="group w-full inline-flex justify-center items-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-teal-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:from-blue-700 hover:to-teal-700 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed transition"
+                aria-busy="false">
+                <svg id="spinner" class="hidden h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"></circle>
                   <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 0 1 8-8v3a5 5 0 0 0-5 5H4z"></path>
                 </svg>
                 <span>Kirim Tautan Reset</span>
-                <svg class="h-4 w-4 opacity-80 transition group-hover:translate-x-0.5" viewBox="0 0 24 24" fill="currentColor">
+                <svg class="h-4 w-4 opacity-80 transition group-hover:translate-x-0.5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                   <path d="M13.172 12 8.222 7.05l1.414-1.414L16 12l-6.364 6.364-1.414-1.414z"/>
                 </svg>
               </button>
@@ -137,7 +148,14 @@
       const email = document.getElementById('email');
 
       form?.addEventListener('submit', function () {
+        // Honeypot quick check (jika terisi, jangan kirim)
+        const hp = form.querySelector('input[name="hp_url"]');
+        if (hp && hp.value) {
+          event?.preventDefault();
+          return false;
+        }
         btn?.setAttribute('disabled','disabled');
+        btn?.setAttribute('aria-busy','true');
         spinner?.classList.remove('hidden');
       }, { once: true });
 

@@ -30,7 +30,8 @@ use App\Http\Controllers\MyInterviewController;
 
 // === NEW: Manpower Requirement Controller (sinkron openings)
 use App\Http\Controllers\Admin\ManpowerRequirementController;
-
+use App\Http\Controllers\Auth\PasswordResetLinkController;
+use App\Http\Controllers\Auth\NewPasswordController;
 /*
 |--------------------------------------------------------------------------
 | Public
@@ -211,6 +212,20 @@ Route::prefix('admin')
         Route::get('audit-logs/{log}',  [AuditLogController::class, 'show'])->whereUuid('log')->name('audit_logs.show');
         Route::get('audit-logs-export', [AuditLogController::class, 'export'])->name('audit_logs.export');
     });
+// === Reset Password (guest only) ===
+Route::middleware('guest')->group(function () {
+    Route::get('/forgot-password', [PasswordResetLinkController::class, 'create'])
+        ->name('password.request');
+    Route::post('/forgot-password', [PasswordResetLinkController::class, 'store'])
+        ->name('password.email');
+
+    Route::get('/reset-password/{token}', [NewPasswordController::class, 'create'])
+        ->name('password.reset');
+
+    // INI YANG DIPAKAI FORM RESET
+    Route::post('/reset-password', [NewPasswordController::class, 'store'])
+        ->name('password.store');
+});
 
 /*
 |--------------------------------------------------------------------------
