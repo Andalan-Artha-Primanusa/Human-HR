@@ -34,7 +34,7 @@ $deptIcons = [
 'HSE' => ['icon'=>'i-hse', 'bg'=>'bg-cyan-50', 'fg'=>'text-cyan-700', 'ring'=>'ring-cyan-200'],
 'GA' => ['icon'=>'i-ga', 'bg'=>'bg-fuchsia-50', 'fg'=>'text-fuchsia-700', 'ring'=>'ring-fuchsia-200'],
 'Legal' => ['icon'=>'i-legal', 'bg'=>'bg-violet-50', 'fg'=>'text-violet-700', 'ring'=>'ring-violet-200'],
-'Marketing' => ['icon'=>'i-marketing', 'bg'=>'bg-orange-50', 'fg'=>'text-orange-700', 'ring'=>'ring-orange-200'],
+'Marketing'=> ['icon'=>'i-marketing','bg'=>'bg-orange-50', 'fg'=>'text-orange-700', 'ring'=>'ring-orange-200'],
 'Sales' => ['icon'=>'i-sales', 'bg'=>'bg-teal-50', 'fg'=>'text-teal-700', 'ring'=>'ring-teal-200'],
 'R&D' => ['icon'=>'i-rnd', 'bg'=>'bg-rose-50', 'fg'=>'text-rose-700', 'ring'=>'ring-rose-200'],
 ];
@@ -128,6 +128,14 @@ return [
   <symbol id="i-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor">
     <path d="M6 9l6 6 6-6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
   </symbol>
+  {{-- chevrons untuk pagination --}}
+  <symbol id="i-chevron-left" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+    <path d="M15 19l-7-7 7-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+  </symbol>
+  <symbol id="i-chevron-right" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+    <path d="M9 5l7 7-7 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+  </symbol>
+
   {{-- department --}}
   <symbol id="i-hr" viewBox="0 0 24 24" fill="none" stroke="currentColor">
     <circle cx="8" cy="8" r="3" stroke-width="1.8" />
@@ -179,7 +187,7 @@ return [
 </svg>
 @endonce
 
-<div class="mx-auto w-full max-w-[1320px] px-4 md:px-6 lg:px-8">
+<div class="mx-auto w-full max-w-[1480px] px-4 md:px-6 lg:px-8">
   {{-- ===== Header: biru + aksen merah (tanpa gradient) ===== --}}
   <section class="mb-4 rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
     <div class="bg-blue-700 text-white">
@@ -188,61 +196,67 @@ return [
           <h1 class="text-xl font-semibold">Pekerjaan yang direkomendasikan untuk kamu</h1>
           <p class="text-sm text-blue-100">Berdasarkan profil dan lamaran kamu</p>
         </div>
-{{-- Search (merah) + tombol Filter DI LUAR input --}}
-<div class="w-full md:w-[560px] flex items-stretch gap-2">
-  {{-- FORM SEARCH --}}
-  <form method="GET" action="{{ route('jobs.index') }}" role="search" aria-label="Pencarian Lowongan" class="flex-1">
-    <label for="job-search" class="sr-only">Cari lowongan</label>
-    <div class="relative">
-      {{-- ikon search kiri --}}
-      <svg class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/90" aria-hidden="true">
-        <use href="#i-search" />
-      </svg>
+        {{-- Search (merah) + tombol Filter DI LUAR input --}}
+        <div class="w-full md:w-[680px] flex items-stretch gap-2">
+          {{-- FORM SEARCH --}}
+          <form method="GET" action="{{ route('jobs.index') }}" role="search" aria-label="Pencarian Lowongan" class="flex-1">
+            <label for="job-search" class="sr-only">Cari lowongan</label>
+            <div class="relative">
+              {{-- ikon search kiri --}}
+              <svg class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/90" aria-hidden="true">
+                <use href="#i-search" />
+              </svg>
 
-      <input
-        id="job-search"
-        name="term"
-        value="{{ e($qTerm) }}"
-        placeholder="Cari judul, divisi, site, atau company…"
-        class="w-full rounded-xl border border-white/30 bg-white/95 py-2.5 pl-9 pr-28 text-sm text-slate-900 placeholder-slate-500 outline-none
-               focus:ring-2 focus:ring-red-300 focus:border-red-400"
-        autocomplete="off"
-      />
+              <input
+                id="job-search"
+                name="term"
+                value="{{ e($qTerm) }}"
+                placeholder="Cari judul, divisi, site, atau company…"
+                class="w-full rounded-xl border border-white/30 bg-white/95 py-2.5 pl-9 pr-28 text-sm text-slate-900 placeholder-slate-500 outline-none
+                       focus:ring-2 focus:ring-red-300 focus:border-red-400"
+                autocomplete="off" />
 
-      {{-- tombol submit + clear di dalam area input (kanan) --}}
-      <div class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
-        @if($qTerm)
-          <a href="{{ $rm('term') }}"
-             class="rounded-md border border-white/30 bg-white/0 p-1.5 hover:bg-white/10"
-             aria-label="Hapus kata kunci">
-            <svg class="h-4 w-4 text-white"><use href="#i-x" /></svg>
-          </a>
-        @endif
-        <button type="submit"
-          class="inline-flex items-center gap-1 rounded-lg bg-red-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300">
-          <svg class="h-4 w-4"><use href="#i-search" /></svg>
-          <span>Cari</span>
-        </button>
-      </div>
-    </div>
+              {{-- tombol submit + clear di dalam area input (kanan) --}}
+              <div class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
+                @if($qTerm)
+                <a href="{{ $rm('term') }}"
+                  class="rounded-md border border-white/30 bg-white/0 p-1.5 hover:bg-white/10"
+                  aria-label="Hapus kata kunci">
+                  <svg class="h-4 w-4 text-white">
+                    <use href="#i-x" />
+                  </svg>
+                </a>
+                @endif
+                <button type="submit"
+                  class="inline-flex items-center gap-1 rounded-lg bg-red-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300">
+                  <svg class="h-4 w-4">
+                    <use href="#i-search" />
+                  </svg>
+                  <span>Cari</span>
+                </button>
+              </div>
+            </div>
 
-    {{-- keep params --}}
-    @foreach(['division','site','company','sort'] as $keep)
-      @if(!empty($keepParams[$keep]))
-        <input type="hidden" name="{{ $keep }}" value="{{ e($keepParams[$keep]) }}">
-      @endif
-    @endforeach
-  </form>
+            {{-- keep params --}}
+            @foreach(['division','site','company','sort'] as $keep)
+            @if(!empty($keepParams[$keep]))
+            <input type="hidden" name="{{ $keep }}" value="{{ e($keepParams[$keep]) }}">
+            @endif
+            @endforeach
+          </form>
 
-  {{-- TOMBOL FILTER DI LUAR (merah) --}}
-  <button id="btn-filter" type="button"
-    class="shrink-0 inline-flex items-center gap-1 rounded-xl border border-red-300 bg-red-600/10 px-4 py-2 text-sm font-semibold text-white hover:bg-red-600/20 focus:outline-none focus:ring-2 focus:ring-red-300"
-    aria-expanded="false" aria-controls="filter-panel">
-    <svg class="h-4 w-4"><use href="#i-filter" /></svg>
-    <span>Filter</span>
-  </button>
-</div>
-
+          {{-- TOMBOL FILTER DI LUAR (merah) --}}
+          {{-- TOMBOL FILTER (samakan dengan tombol Cari: merah solid) --}}
+          <button id="btn-filter" type="button"
+            class="shrink-0 inline-flex items-center gap-1 rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white
+         hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300"
+            aria-expanded="false" aria-controls="filter-panel">
+            <svg class="h-4 w-4 text-white">
+              <use href="#i-filter" />
+            </svg>
+            <span>Filter</span>
+          </button>
+        </div>
       </div>
       <div class="h-1 w-full bg-red-600"></div>
     </div>
@@ -259,7 +273,7 @@ return [
           <input name="site" value="{{ e($qSite) }}" placeholder="DBK / POS / SBS" class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-600" />
         </div>
         <div class="md:col-span-2">
-          <label class="mb-1 block text-xs font-semibold text-slate-700 uppercase">Company (Code)</label>
+          <label class="mb-1 block text-xs font-semibold text-slate-700 uppercase">Company</label>
           <input name="company" value="{{ e($qCompany) }}" placeholder="ANDALAN / AGR" class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-600" />
         </div>
         <div class="md:col-span-3">
@@ -287,7 +301,7 @@ return [
           const top = d.getBoundingClientRect().top + window.scrollY - 80;
           window.scrollTo({top, behavior: pr ? 'auto' : 'smooth'}); }
       }"
-    class="grid gap-4 md:grid-cols-[420px,1fr]">
+    class="grid gap-4 md:grid-cols-[520px,1fr]">
 
     {{-- LEFT LIST --}}
     <aside class="rounded-2xl border border-slate-200 bg-white shadow-sm md:sticky md:top-4 md:self-start">
@@ -321,7 +335,7 @@ return [
       </div>
 
       {{-- List items --}}
-      <ul class="divide-y divide-slate-200 max-h-[70vh] overflow-y-auto">
+      <ul class="divide-y divide-slate-200 max-h-[78vh] overflow-y-auto">
         @foreach($jobs as $idx => $job)
         @php
         $typeRaw = $job->employment_type ?? '';
@@ -386,9 +400,7 @@ return [
                   <p class="truncate text-[15px] font-semibold text-slate-900">{{ e($title) }}</p>
                   <div class="shrink-0 flex items-center gap-2">
                     @if($code)
-                    <span class="inline-flex items-center rounded border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-medium text-slate-700">
-                      {{ e($code) }}
-                    </span>
+                    <span class="inline-flex items-center rounded border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-medium text-slate-700">{{ e($code) }}</span>
                     @endif
                     <span class="inline-flex h-6 items-center rounded px-2 text-[11px] font-semibold text-white {{ $badgeClr }}">
                       {{ e($type) }}
@@ -398,16 +410,14 @@ return [
 
                 {{-- META (icons-only, 2 kolom) --}}
                 <div class="mt-1.5 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1.5 text-[12px]">
-                  {{-- Company --}}
                   <div class="flex items-center gap-1.5" title="Company">
                     <svg class="h-4 w-4 text-slate-600">
                       <use href="#i-briefcase" />
                     </svg>
                     <span class="sr-only">Company:</span>
-                    <span class="truncate max-w-[200px] text-slate-800">{{ e($companyId) }}</span>
+                    <span class="truncate max-w-[200px] text-slate-800"> {{ e($job->company->name ?? $job->company->nama ?? '—') }}</span>
                   </div>
 
-                  {{-- Site (nama) --}}
                   <div class="flex items-center gap-1.5" title="Site">
                     <svg class="h-4 w-4 text-slate-600">
                       <use href="#i-map" />
@@ -416,7 +426,6 @@ return [
                     <span class="truncate max-w-[200px] text-slate-800">{{ e($siteLabel) }}</span>
                   </div>
 
-                  {{-- Division --}}
                   <div class="flex items-center gap-1.5" title="Division">
                     <svg class="h-4 w-4 text-slate-600">
                       <use href="#i-hr" />
@@ -425,7 +434,6 @@ return [
                     <span class="truncate max-w-[200px] text-slate-800">{{ e($division ?: '—') }}</span>
                   </div>
 
-                  {{-- Level --}}
                   <div class="flex items-center gap-1.5" title="Level">
                     <svg class="h-4 w-4 text-slate-600">
                       <use href="#i-clock" />
@@ -434,7 +442,6 @@ return [
                     <span class="truncate max-w-[200px] text-slate-800">{{ e($level ?: '—') }}</span>
                   </div>
 
-                  {{-- Openings --}}
                   <div class="flex items-center gap-1.5" title="Openings">
                     <svg class="h-4 w-4 text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
                       <path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
@@ -446,7 +453,6 @@ return [
                     <span class="text-slate-800">{{ $openings }}</span>
                   </div>
 
-                  {{-- Status: pill rounded seragam --}}
                   <div class="flex items-center gap-1.5" title="Status">
                     <span class="sr-only">Status:</span>
                     @if(\Illuminate\Support\Str::lower((string)$status) === 'open')
@@ -473,7 +479,7 @@ return [
                 </div>
                 @endif
 
-                {{-- footer kecil: only who + created_at --}}
+                {{-- footer kecil --}}
                 <div class="mt-2 flex items-center justify-between">
                   <span class="text-[10.5px] text-slate-500">
                     @if(($who['creator'] ?? null) || ($who['updater'] ?? null))
@@ -548,7 +554,6 @@ return [
       $skills = $extractSkills($job);
       $who = $auditWho($job);
 
-      // Site label (nama > code > fallback)
       $siteLabel = $job->site->name
       ?? $job->site_name
       ?? $job->getAttribute('site_name')
@@ -557,7 +562,6 @@ return [
       ?? $job->getAttribute('site_code')
       ?? '—';
 
-      // Keywords: robust (array / JSON / string)
       $kwRaw = $job->getAttribute('keywords');
       if (is_array($kwRaw)) {
       $kwList = $kwRaw;
@@ -603,7 +607,6 @@ return [
                 </span>
                 @endif
               </div>
-
             </div>
 
             <div class="flex shrink-0 items-center gap-2">
@@ -631,7 +634,10 @@ return [
               </svg>
               <div class="truncate">
                 <p class="text-[11px] uppercase tracking-wide text-slate-500">Perusahaan</p>
-                <p class="truncate text-sm font-medium text-slate-800">{{ e($job->company_id ?? '—') }}</p>
+                <p class="truncate text-sm font-medium text-slate-800">
+  {{ e($job->company->code ?? $job->company->code ?? '—') }}
+</p>
+
               </div>
             </div>
             <div class="flex items-center gap-2">
@@ -645,7 +651,7 @@ return [
             </div>
           </div>
 
-          {{-- SKILLS (DINAIKKAN) --}}
+          {{-- SKILLS --}}
           <div class="mt-5">
             <div class="mb-1 flex items-center gap-2 text-sm font-semibold text-slate-900">
               <svg class="h-4 w-4 text-slate-600">
@@ -660,9 +666,7 @@ return [
               @foreach($skills as $sk)
               @php $isOdd = $loop->iteration % 2 === 1; @endphp
               <span class="rounded-full border px-2.5 py-1 text-xs shadow-sm
-                        {{ $isOdd
-                            ? 'border-blue-200 bg-blue-50 text-blue-700'
-                            : 'border-rose-200 bg-rose-50 text-rose-700' }}">
+                            {{ $isOdd ? 'border-blue-200 bg-blue-50 text-blue-700' : 'border-rose-200 bg-rose-50 text-rose-700' }}">
                 {{ e($sk) }}
               </span>
               @endforeach
@@ -670,7 +674,7 @@ return [
             @endif
           </div>
 
-          {{-- KEYWORDS: chip hijau --}}
+          {{-- KEYWORDS --}}
           <div class="mt-3">
             <div class="mb-1 text-sm font-semibold text-slate-900">Keywords</div>
             @if(empty($kwList))
@@ -756,35 +760,126 @@ return [
     </div>
   </section>
 
-  {{-- Pagination ringkas --}}
+  {{-- ===== Pagination kapsul (footer) ===== --}}
   @php
   $perPage = method_exists($jobs,'perPage') ? (int) $jobs->perPage() : max(1, (int) ($jobs->count() ?: 1));
   $current = method_exists($jobs,'currentPage') ? (int) $jobs->currentPage() : 1;
+  $last = method_exists($jobs,'lastPage') ? (int) $jobs->lastPage() : 1;
+  $total = method_exists($jobs,'total') ? (int) $jobs->total() : (int) $jobs->count();
   $from = ($current - 1) * $perPage + 1;
   $to = min($current * $perPage, $total);
-  @endphp
-  <nav class="mt-4 rounded-2xl border border-slate-200 bg-white p-3 md:p-4 shadow-sm" aria-label="Navigasi halaman">
-    <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between text-sm">
-      <div class="text-slate-700">Menampilkan <span class="font-semibold text-slate-900">{{ $from }}–{{ $to }}</span> dari <span class="font-semibold text-slate-900">{{ $total }}</span></div>
-      <div class="select-none">{{ $jobs->onEachSide(1)->links() }}</div>
-    </div>
-  </nav>
-  @else
-  {{-- Empty state --}}
-  <section class="rounded-2xl border border-slate-200 bg-white p-10 text-center shadow-sm">
-    <div class="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-full border border-slate-200">
-      <svg class="h-5 w-5 text-slate-500">
-        <use href="#i-filter" />
-      </svg>
-    </div>
-    <h3 class="text-lg font-semibold text-slate-900">Belum ada hasil</h3>
-    <p class="mt-1 text-sm text-slate-600">Coba ubah filter atau reset untuk melihat semua lowongan.</p>
-    <div class="mt-4 flex items-center justify-center gap-2">
-      <a href="{{ $resetUrl }}" class="rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800">Reset Filter</a>
-      <button id="btn-filter-empty" class="rounded-lg border border-slate-200 px-4 py-2 text-sm text-slate-900 hover:bg-slate-50">Buka Filter</button>
-    </div>
-  </section>
-  @endif
+
+  // window halaman
+  $pages = [];
+  if ($last <= 7) {
+    $pages=range(1, $last);
+    } else {
+    $pages=[1];
+    $left=max(2, $current - 1);
+    $right=min($last - 1, $current + 1);
+    if ($left> 2) $pages[] = '...';
+    for ($i = $left; $i <= $right; $i++) $pages[]=$i;
+      if ($right < $last - 1) $pages[]='...' ;
+      $pages[]=$last;
+      }
+
+      $pageUrl=function (int $p) use ($jobs) {
+      return method_exists($jobs,'url') ? $jobs->url($p) : request()->fullUrlWithQuery(['page'=>$p]);
+      };
+      @endphp
+
+      <section class="mt-4 rounded-2xl border border-slate-200 bg-white p-3 md:p-4 shadow-sm">
+        <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between text-sm">
+          <div class="text-slate-700">
+            Menampilkan <span class="font-semibold text-slate-900">{{ $from }}–{{ $to }}</span>
+            dari <span class="font-semibold text-slate-900">{{ $total }}</span>
+          </div>
+
+          <div class="hidden md:block text-slate-700">
+            Showing <span class="font-semibold text-slate-900">{{ $from }}</span>
+            to <span class="font-semibold text-slate-900">{{ $to }}</span>
+            of <span class="font-semibold text-slate-900">{{ $total }}</span> results
+          </div>
+
+          <nav class="md:ml-auto" aria-label="Pagination">
+            <ul class="inline-flex items-stretch overflow-hidden rounded-xl border border-slate-200 bg-white select-none">
+              {{-- Prev --}}
+              <li>
+                @if($current > 1)
+                <a href="{{ $pageUrl($current - 1) }}"
+                  class="grid place-items-center px-2.5 h-9 hover:bg-slate-50 focus:outline-none focus:ring-2"
+                  style="--tw-ring-color:#1d4ed8" aria-label="Sebelumnya">
+                  <svg class="h-4 w-4 text-slate-700">
+                    <use href="#i-chevron-left" />
+                  </svg>
+                </a>
+                @else
+                <span class="grid place-items-center px-2.5 h-9 opacity-40 cursor-not-allowed" aria-hidden="true">
+                  <svg class="h-4 w-4 text-slate-700">
+                    <use href="#i-chevron-left" />
+                  </svg>
+                </span>
+                @endif
+              </li>
+
+              {{-- Numbers --}}
+              @foreach($pages as $p)
+              @if($p === '...')
+              <li class="grid place-items-center px-3 h-9 text-slate-500">…</li>
+              @else
+              @php $isCur = ((int)$p === $current); @endphp
+              <li class="grid place-items-center h-9">
+                @if($isCur)
+                <span class="px-3 h-full inline-flex items-center font-semibold text-slate-900 bg-slate-100 border-l border-slate-200">{{ $p }}</span>
+                @else
+                <a href="{{ $pageUrl((int)$p) }}"
+                  class="px-3 h-full inline-flex items-center text-slate-700 hover:bg-slate-50 border-l border-slate-200 focus:outline-none focus:ring-2"
+                  style="--tw-ring-color:#1d4ed8" aria-label="Halaman {{ $p }}">
+                  {{ $p }}
+                </a>
+                @endif
+              </li>
+              @endif
+              @endforeach
+
+              {{-- Next --}}
+              <li class="border-l border-slate-200">
+                @if($current < $last)
+                  <a href="{{ $pageUrl($current + 1) }}"
+                  class="grid place-items-center px-2.5 h-9 hover:bg-slate-50 focus:outline-none focus:ring-2"
+                  style="--tw-ring-color:#1d4ed8" aria-label="Berikutnya">
+                  <svg class="h-4 w-4 text-slate-700">
+                    <use href="#i-chevron-right" />
+                  </svg>
+                  </a>
+                  @else
+                  <span class="grid place-items-center px-2.5 h-9 opacity-40 cursor-not-allowed" aria-hidden="true">
+                    <svg class="h-4 w-4 text-slate-700">
+                      <use href="#i-chevron-right" />
+                    </svg>
+                  </span>
+                  @endif
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </section>
+      @else
+      {{-- Empty state --}}
+      <section class="rounded-2xl border border-slate-200 bg-white p-10 text-center shadow-sm">
+        <div class="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-full border border-slate-200">
+          <svg class="h-5 w-5 text-slate-500">
+            <use href="#i-filter" />
+          </svg>
+        </div>
+        <h3 class="text-lg font-semibold text-slate-900">Belum ada hasil</h3>
+        <p class="mt-1 text-sm text-slate-600">Coba ubah filter atau reset untuk melihat semua lowongan.</p>
+        <div class="mt-4 flex items-center justify-center gap-2">
+          <a href="{{ $resetUrl }}" class="rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800">Reset Filter</a>
+          <button id="btn-filter-empty" class="rounded-lg border border-slate-200 px-4 py-2 text-sm text-slate-900 hover:bg-slate-50">Buka Filter</button>
+        </div>
+      </section>
+      @endif
 </div>
 
 @push('scripts')

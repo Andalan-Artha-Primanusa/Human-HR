@@ -1,34 +1,49 @@
 {{-- resources/views/admin/dashboard/manpower.blade.php --}}
 @extends('layouts.app', [ 'title' => 'Admin · Manpower Dashboard' ])
 
+@php
+  // THEME
+  $BLUE = '#1d4ed8'; // blue-700
+  $RED  = '#dc2626'; // red-600
+  $BORD = '#e5e7eb'; // slate-200
+@endphp
+
 @section('content')
-  {{-- ===== Header ===== --}}
-  <div class="relative rounded-2xl border border-slate-200 bg-white shadow-sm/50 mb-6 overflow-hidden">
-    <div class="h-2">
-      <div class="h-full w-full flex">
-        <div class="h-full bg-blue-600" style="width:90%"></div>
-        <div class="h-full bg-red-500"  style="width:10%"></div>
-      </div>
-    </div>
-    <div class="p-6 md:p-8">
-      <div class="flex items-start justify-between gap-4">
-        <div>
-          <h1 class="text-2xl md:text-3xl font-semibold tracking-tight text-slate-900">Manpower Dashboard</h1>
-          <p class="mt-1 text-sm text-slate-600">Ringkasan lowongan, kandidat aktif, headcount, dan pipeline.</p>
+@once
+  {{-- Sprite ikon kecil jika butuh (contoh panah) --}}
+  <svg xmlns="http://www.w3.org/2000/svg" class="hidden" aria-hidden="true" focusable="false">
+    <symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+      <path d="M5 12h14M13 5l7 7-7 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+  </svg>
+@endonce
+
+<div class="mx-auto w-full max-w-[1440px] px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+  {{-- HEADER dua-tone (biru/merah), konsisten dengan halaman lain --}}
+  <section class="relative rounded-2xl border bg-white shadow-sm" style="border-color: {{ $BORD }}">
+    <div class="relative h-20 sm:h-24 rounded-t-2xl overflow-hidden">
+      <div class="absolute inset-0 rounded-t-2xl" style="background: {{ $BLUE }}"></div>
+      <div class="absolute inset-y-0 right-0 rounded-tr-2xl w-24 sm:w-36" style="background: {{ $RED }}"></div>
+
+      <div class="relative h-full px-5 md:px-6 flex items-center">
+        <div class="min-w-0">
+          <h1 class="text-2xl md:text-3xl font-semibold tracking-tight text-white">Manpower Dashboard</h1>
+          <p class="text-sm text-white/90">Ringkasan lowongan, kandidat aktif, headcount, dan pipeline.</p>
         </div>
+
         <a href="{{ route('admin.jobs.index') }}"
-           class="hidden sm:inline-flex items-center gap-2 rounded-xl border border-slate-200 px-3.5 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 active:bg-slate-100">
+           class="ml-auto hidden sm:inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-offset-2"
+           style="--tw-ring-color: {{ $BLUE }}">
           Kelola Jobs
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="m9 5 7 7-7 7"/>
-          </svg>
+          <svg class="h-4 w-4" style="color: {{ $BLUE }}"><use href="#i-arrow"/></svg>
         </a>
       </div>
     </div>
-  </div>
+  </section>
 
-  {{-- ===== KPI Cards ===== --}}
-  <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4 mb-6">
+  {{-- KPI Cards --}}
+  <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
     @php
       $kpis = [
         ['label'=>'Open Jobs','value'=>number_format($openJobs),'icon'=>'M9 7V6a3 3 0 1 1 6 0v1m-9 4h12m-13 6h14a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2Z','bg'=>'bg-blue-50','fg'=>'text-blue-600'],
@@ -39,27 +54,26 @@
     @endphp
 
     @foreach ($kpis as $k)
-      <div class="card transition-shadow hover:shadow-md">
-        <div class="card-body">
-          <div class="flex items-center justify-between">
-            <div>
-              <div class="text-slate-600 text-sm">{{ $k['label'] }}</div>
-              <div class="text-2xl font-semibold tracking-tight text-slate-900 mt-1">{{ $k['value'] }}</div>
-            </div>
-            <div class="w-10 h-10 rounded-xl {{ $k['bg'] }} {{ $k['fg'] }} grid place-content-center ring-1 ring-inset ring-black/5">
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" d="{{ $k['icon'] }}"/>
-              </svg>
-            </div>
+      <div class="rounded-2xl border bg-white p-4 shadow-sm transition-shadow hover:shadow-md" style="border-color: {{ $BORD }}">
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="text-slate-600 text-sm">{{ $k['label'] }}</div>
+            <div class="text-2xl font-semibold tracking-tight text-slate-900 mt-1">{{ $k['value'] }}</div>
+          </div>
+          <div class="w-10 h-10 rounded-xl {{ $k['bg'] }} {{ $k['fg'] }} grid place-content-center ring-1 ring-inset ring-black/5">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="{{ $k['icon'] }}"/>
+            </svg>
           </div>
         </div>
       </div>
     @endforeach
-  </div>
+  </section>
 
-  {{-- ===== Pipeline by Stage ===== --}}
-  <div class="card">
-    <div class="card-body">
+  {{-- Pipeline by Stage --}}
+  @php $hasData = is_array($byStage ?? null) && count($byStage ?? []) > 0; @endphp
+  <section class="rounded-2xl border bg-white shadow-sm" style="border-color: {{ $BORD }}">
+    <div class="p-4 md:p-5">
       <div class="flex items-center justify-between mb-4">
         <h2 class="font-semibold text-slate-900">Pipeline by Stage</h2>
         <div class="hidden md:flex items-center gap-3 text-xs text-slate-500">
@@ -69,20 +83,18 @@
         </div>
       </div>
 
-      @php $hasData = is_array($byStage ?? null) && count($byStage ?? []) > 0; @endphp
-
       @if($hasData)
         <div class="relative h-[260px]">
           <canvas id="byStageChart" class="!h-[260px]"></canvas>
         </div>
       @else
-        <div class="rounded-xl border border-dashed border-slate-300 p-10 text-center bg-white/50">
+        <div class="rounded-xl border border-dashed p-10 text-center bg-white/50" style="border-color: {{ $BORD }}">
           <div class="text-slate-700 font-medium">Belum ada data pipeline.</div>
           <div class="text-slate-500 text-sm mt-1">Tambahkan aplikasi atau buka lowongan untuk melihat grafik.</div>
         </div>
       @endif
     </div>
-  </div>
+  </section>
 
   @if($hasData)
     <script>
@@ -118,4 +130,5 @@
       });
     </script>
   @endif
+</div>
 @endsection

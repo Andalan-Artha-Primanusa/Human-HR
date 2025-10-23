@@ -17,6 +17,30 @@
       return strip_tags($decoded, $allowed);
   };
 
+  // ==== NORMALIZER TIMEZONE agar selalu IANA valid ====
+  $normalizeTz = function (?string $tz) {
+      $tz = trim((string) $tz);
+      if ($tz === '' || $tz === 'Asia') return 'Asia/Jakarta'; // fallback umum data lama
+      $map = [
+          'WIB' => 'Asia/Jakarta',
+          'WITA'=> 'Asia/Makassar',
+          'WIT' => 'Asia/Jayapura',
+          'Jakarta' => 'Asia/Jakarta',
+          'Makassar'=> 'Asia/Makassar',
+          'Jayapura'=> 'Asia/Jayapura',
+      ];
+      if (isset($map[$tz])) return $map[$tz];
+      static $iana; $iana ??= timezone_identifiers_list();
+      return in_array($tz, $iana, true) ? $tz : 'Asia/Jakarta';
+  };
+
+  // Abreviasi WIB/WITA/WIT untuk tampilan
+  $abbrTz = function (string $tz) {
+      return str_ends_with($tz, 'Jakarta') ? 'WIB'
+           : (str_ends_with($tz, 'Makassar') ? 'WITA'
+           : (str_ends_with($tz, 'Jayapura') ? 'WIT' : ''));
+  };
+
   /** @var \App\Models\JobApplication|null $myApp */
   $myApp = auth()->check()
       ? $job->applications()->where('user_id', auth()->id())->with(['stages','stages.actor','stages.user'])->latest()->first()
@@ -96,9 +120,9 @@
     return ($cur ?: 'IDR').' '.number_format((float)$n, 0, ',', '.');
   };
 
-  // Timezone prioritas
-  $siteTz = optional($job->site)->timezone ?: data_get($job->site, 'meta.timezone');
-  $TZ     = $siteTz ?: config('app.timezone', 'Asia/Jakarta');
+  // Timezone prioritas (dinormalisasi agar selalu IANA valid)
+  $siteTzRaw = optional($job->site)->timezone ?: data_get($job->site, 'meta.timezone');
+  $TZ        = $normalizeTz($siteTzRaw ?: config('app.timezone', 'Asia/Jakarta'));
 
   // Formatter tanggal lokal ringkas
   $formatTs = function ($ts) use ($TZ) {
@@ -233,7 +257,7 @@
         <li class="flex items-center gap-2 shrink-0" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
           <a href="{{ route('jobs.index') }}" itemprop="item" class="group inline-flex items-center gap-1 rounded-lg px-2 py-1 hover:bg-slate-50">
             <svg class="h-4 w-4 text-slate-500 group-hover:text-slate-700" aria-hidden="true" viewBox="0 0 24 24" fill="none">
-              <path d="M3 8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v9a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V8z" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M3 8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v9a3 3 0  0 1-3 3H6a3 3 0 0 1-3-3V8z" stroke="currentColor" stroke-width="1.5"/>
               <path d="M9 6a3 3 0 0 1 6 0" stroke="currentColor" stroke-width="1.5"/>
             </svg>
             <span class="font-medium text-slate-700 group-hover:text-slate-900" itemprop="name">Jobs</span>
@@ -315,7 +339,7 @@
               <span class="inline-flex items-center gap-1">
                 <svg class="h-4 w-4 text-slate-500" aria-hidden="true"><use href="#i-clock"/></svg>
                 Tutup: {{ e(Carbon::parse($closingAt)->timezone($TZ)->format('d M Y, H:i')) }}
-                {{ str_contains($TZ,'Jakarta') ? 'WIB' : (str_contains($TZ,'Makassar') ? 'WITA' : (str_contains($TZ,'Jayapura') ? 'WIT' : '')) }}
+                {{ $abbrTz($TZ) }}
               </span>
             @endif
           </div>
@@ -544,7 +568,7 @@
             <dd class="col-span-2 text-slate-800">
               @if($closingAt)
                 {{ e(Carbon::parse($closingAt)->timezone($TZ)->format('d M Y, H:i')) }}
-                {{ str_contains($TZ,'Jakarta') ? 'WIB' : (str_contains($TZ,'Makassar') ? 'WITA' : (str_contains($TZ,'Jayapura') ? 'WIT' : '')) }}
+                {{ $abbrTz($TZ) }}
                 @if($countdownText) <span class="ml-2 rounded bg-amber-50 px-1.5 py-0.5 text-[11px] font-semibold text-amber-700 ring-1 ring-amber-200">{{ e($countdownText) }}</span>@endif
               @else
                 —
@@ -848,8 +872,9 @@
         @if($job->site)
           @php
             $s = $job->site;
-            $tz = $s->timezone ?: data_get($s->meta, 'timezone');
-            $addr = $s->address ?: data_get($s->meta, 'address');
+            $tzRaw = $s->timezone ?: data_get($s->meta, 'timezone');
+            $tz    = $normalizeTz($tzRaw);
+            $addr  = $s->address ?: data_get($s->meta, 'address');
           @endphp
           <dl class="mt-3 grid grid-cols-3 gap-y-2 text-sm">
             <dt class="text-slate-500">Kode</dt><dd class="col-span-2 text-slate-800">{{ e($s->code) }}</dd>
