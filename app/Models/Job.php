@@ -8,6 +8,7 @@ use App\Models\Concerns\HasUuidPrimaryKey;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Casts\Attribute; // <-- penting
 use Illuminate\Support\Facades\DB;
 
 class Job extends Model
@@ -40,20 +41,15 @@ class Job extends Model
     ];
 
     protected $fillable = [
-        'company_id',
-        'code',
-        'title',
-        'site_id',
-        'division',
-        'level',
-        'employment_type',
-        'openings',
-        'status',
-        'description',
+        'company_id','code','title','site_id','division','level',
+        'employment_type','openings','status','description',
+        'skills','keywords','created_by','updated_by',
     ];
 
     protected $casts = [
         'openings' => 'integer',
+        'skills'   => 'array',
+        // HAPUS cast keywords => array (biar kita kontrol via accessor+mutator)
     ];
 
     /* =====================
@@ -63,7 +59,7 @@ class Job extends Model
     {
         if (!$raw) return null;
         $s = strtolower(trim($raw));
-        $s = str_replace([' ', ' '], '_', $s); // termasuk NBSP
+        $s = str_replace([" ", "\xC2\xA0"], '_', $s);
         $aliases = [
             'board_of_directors' => 'bod',
             'non-staff' => 'non_staff',
@@ -92,7 +88,7 @@ class Job extends Model
     {
         if (!$raw) return null;
         $s = strtolower(trim($raw));
-        $s = str_replace([' ', ' '], '_', $s); // termasuk NBSP
+        $s = str_replace([" ", "\xC2\xA0"], '_', $s);
         $aliases = [
             'human_resources'        => 'hr',
             'people'                 => 'hr',
@@ -116,6 +112,73 @@ class Job extends Model
     }
 
     /* =====================
+     | Normalizer: SKILLS
+     |=====================*/
+    public function setSkillsAttribute($value): void
+    {
+        $arr = [];
+        if (is_array($value)) {
+            $arr = $value;
+        } elseif (is_string($value)) {
+            $trim = trim($value);
+            if ($trim !== '') {
+                $decoded = json_decode($trim, true);
+                if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                    $arr = $decoded;
+                } else {
+                    $arr = preg_split('/\s*[,;|]\s*/', $trim) ?: [];
+                }
+            }
+        }
+
+        $arr = collect($arr)
+            ->map(fn($v) => is_string($v) ? trim($v) : (is_array($v) ? ($v['name'] ?? $v['label'] ?? '') : ''))
+            ->filter()->unique()->values()->all();
+
+        $this->attributes['skills'] = json_encode($arr, JSON_UNESCAPED_UNICODE);
+    }
+
+    /* =====================
+     | KEYWORDS: accessor + mutator
+     |=====================*/
+    private static function normalizeKeywords(mixed $value): array
+    {
+        if (is_array($value)) {
+            $arr = $value;
+        } elseif (is_string($value)) {
+            $s = trim($value);
+            if ($s === '') return [];
+            $decoded = json_decode($s, true);
+            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                $arr = $decoded;
+            } else {
+                $arr = preg_split('/\s*[,;|]\s*/', $s) ?: [];
+            }
+        } else {
+            $arr = [];
+        }
+
+        return collect($arr)
+            ->map(fn($v) => is_string($v) ? trim($v) : (is_array($v) ? ($v['name'] ?? $v['label'] ?? '') : ''))
+            ->filter()->unique()->values()->all();
+    }
+
+    /** Selalu simpan sebagai JSON array; baca sebagai array */
+    protected function keywords(): Attribute
+    {
+        return Attribute::make(
+            get: fn($value) => self::normalizeKeywords($value),
+            set: fn($value) => ['keywords' => json_encode(self::normalizeKeywords($value), JSON_UNESCAPED_UNICODE)],
+        );
+    }
+
+    /** Helper buat Blade */
+    public function getKeywordsTextAttribute(): string
+    {
+        return implode(', ', $this->keywords ?? []);
+    }
+
+    /* =====================
      | Relationships
      |=====================*/
 
@@ -133,19 +196,26 @@ class Job extends Model
             ->select(['id', 'code', 'name']);
     }
 
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by')->select(['id','name','email']);
+    }
+    public function updater(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'updated_by')->select(['id','name','email']);
+    }
+
     /** @return HasMany<JobApplication> */
     public function applications(): HasMany
     {
         return $this->hasMany(\App\Models\JobApplication::class);
     }
 
-    /** Banyak MR per Job (yang dipakai untuk sync openings) */
     public function manpowerRequirements(): HasMany
     {
         return $this->hasMany(\App\Models\ManpowerRequirement::class);
     }
 
-    /** Back-compat: satu MR (kalau masih ada tempat lain yang panggil) */
     public function manpowerRequirement(): HasOne
     {
         return $this->hasOne(\App\Models\ManpowerRequirement::class);
@@ -169,7 +239,6 @@ class Job extends Model
         return $q->whereHas('site', fn($qq) => $qq->where('code', $code));
     }
 
-    /** Filter by company_id (nullable company_id akan difilter dengan whereNull jika $companyId === null) */
     public function scopeAtCompany($q, ?string $companyId)
     {
         if ($companyId === null) {
@@ -178,7 +247,6 @@ class Job extends Model
         return $q->where('company_id', $companyId);
     }
 
-    /** Filter by company.code */
     public function scopeAtCompanyCode($q, string $code)
     {
         return $q->whereHas('company', fn($qq) => $qq->where('code', $code));
@@ -193,11 +261,27 @@ class Job extends Model
     public function scopeSearch($q, ?string $term)
     {
         if (!$term) return $q;
-        $term = "%{$term}%";
-        return $q->where(function ($qq) use ($term) {
-            $qq->where('code', 'like', $term)
-               ->orWhere('title', 'like', $term)
-               ->orWhere('description', 'like', $term);
+        $like = "%{$term}%";
+
+        return $q->where(function ($qq) use ($like, $term) {
+            $qq->where('code', 'like', $like)
+               ->orWhere('title', 'like', $like)
+               ->orWhere('description', 'like', $like);
+
+            // Keywords (JSON array)
+            try {
+                $qq->orWhereJsonContains('keywords', $term);
+            } catch (\Throwable $e) {
+                // fallback kalau engine tidak support json_contains
+                $qq->orWhere('keywords', 'like', $like);
+            }
+
+            // Skills JSON (opsional)
+            try {
+                $qq->orWhereJsonContains('skills', $term);
+            } catch (\Throwable $e) {
+                // ignore
+            }
         });
     }
 

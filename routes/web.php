@@ -38,16 +38,17 @@ use App\Http\Controllers\Auth\NewPasswordController;
 | Global route parameter patterns (UUID)
 |--------------------------------------------------------------------------
 */
-Route::pattern('company', '[0-9a-fA-F-]{36}');
-Route::pattern('job',     '[0-9a-fA-F-]{36}');
-Route::pattern('site',    '[0-9a-fA-F-]{36}');
-Route::pattern('offer',   '[0-9a-fA-F-]{36}');
-Route::pattern('profile', '[0-9a-fA-F-]{36}');
-Route::pattern('log',     '[0-9a-fA-F-]{36}');
-Route::pattern('manpower','[0-9a-fA-F-]{36}');
-Route::pattern('application','[0-9a-fA-F-]{36}');
-Route::pattern('interview','[0-9a-fA-F-]{36}');
-Route::pattern('attempt',  '[0-9a-fA-F-]{36}');
+Route::pattern('company',     '[0-9a-fA-F-]{36}');
+Route::pattern('job',         '[0-9a-fA-F-]{36}');
+Route::pattern('site',        '[0-9a-fA-F-]{36}');
+Route::pattern('offer',       '[0-9a-fA-F-]{36}');
+Route::pattern('profile',     '[0-9a-fA-F-]{36}');
+Route::pattern('log',         '[0-9a-fA-F-]{36}');
+Route::pattern('manpower',    '[0-9a-fA-F-]{36}');
+Route::pattern('application', '[0-9a-fA-F-]{36}');
+Route::pattern('interview',   '[0-9a-fA-F-]{36}');
+Route::pattern('attempt',     '[0-9a-fA-F-]{36}');
+Route::pattern('notification','[0-9a-fA-F-]{36}'); // << tambah: id notifikasi
 
 /*
 |--------------------------------------------------------------------------
@@ -123,7 +124,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/me/psychotest/{attempt}', [PsychotestController::class, 'submit'])
         ->name('psychotest.submit');
 
-    // ===== User Notifications =====
+
+Route::middleware(['auth'])->group(function () {
     Route::get('/me/notifications', [UserNotificationController::class, 'index'])
         ->name('me.notifications.index');
     Route::post('/me/notifications/read-all', [UserNotificationController::class, 'markAllRead'])
@@ -132,7 +134,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('me.notifications.read');
     Route::delete('/me/notifications/{notification}', [UserNotificationController::class, 'destroy'])
         ->name('me.notifications.destroy');
-
+});
     // ===== My Interviews (user) =====
     Route::get('/me/interviews', [MyInterviewController::class, 'index'])
         ->name('me.interviews.index');
@@ -169,7 +171,6 @@ Route::prefix('admin')
         Route::resource('sites', AdminSiteController::class);
 
         // ================= Companies (admin) =================
-        // menghasilkan: admin.companies.index/create/store/show/edit/update/destroy
         Route::resource('companies', CompanyController::class);
 
         // ================= Applications / Kanban =================

@@ -18,7 +18,7 @@
   $roleMap = ['superadmin'=>'Super Admin','admin'=>'Admin','hr'=>'HR','pelamar'=>'Pelamar'];
   $roleName = $roleMap[$roleRaw] ?? Str::title($roleRaw);
 
-  // ===== Email verified check (support default + fallback fields) =====
+  // ===== Email verified check =====
   $isVerified = false;
   if ($u) {
     $isVerified = method_exists($u, 'hasVerifiedEmail')
@@ -26,41 +26,52 @@
       : (bool) (($u->email_verified_at ?? null) ?: ($u->verified ?? false));
   }
 
-  // ===== Avatar initials (defensive) =====
+  // ===== Avatar initials =====
   $initials = '';
   if ($u && ($u->name ?? null)) {
     $parts = preg_split('/\s+/', trim((string) $u->name));
     $initials = mb_strtoupper(mb_substr($parts[0] ?? '', 0, 1) . mb_substr($parts[1] ?? '', 0, 1));
   }
 
-  // ===== Base class helpers =====
+  // ===== Base class helpers (tanpa gradient, tone biru/merah) =====
   $activeBlue = fn($p) => request()->routeIs($p)
-      ? 'border-blue-600 bg-blue-50 text-slate-900 font-semibold ring-1 ring-black/5'
+      ? 'border-blue-600 bg-blue-100/80 text-slate-900 font-semibold ring-1 ring-blue-600/10'
       : 'border-transparent text-blue-800';
   $activeRed = fn($p) => request()->routeIs($p)
-      ? 'border-red-600 bg-red-50 text-slate-900 font-semibold ring-1 ring-black/5'
+      ? 'border-red-600 bg-red-100/80 text-slate-900 font-semibold ring-1 ring-red-600/10'
       : 'border-transparent text-red-800';
 
-  $baseLink = 'flex items-center gap-3 px-3 py-2 rounded-lg border-l-4 transition hover:bg-slate-50 hover:ring-1 hover:ring-black/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/20';
-  $linkDeskBlue   = $baseLink;
-  $linkDeskRed    = $baseLink;
-  $linkMobileBlue = $baseLink;
-  $linkMobileRed  = $baseLink;
+  $baseLink = 'flex items-center gap-3 px-3 py-2 rounded-lg border-l-4 transition
+               hover:ring-1 focus:outline-none hover:ring-black/5 focus-visible:ring-2 focus-visible:ring-slate-900/20';
 
-  $iconBlue = 'inline-grid place-content-center w-7 h-7 rounded-md bg-blue-100 text-blue-700 ring-1 ring-black/5';
-  $iconRed  = 'inline-grid place-content-center w-7 h-7 rounded-md bg-red-100  text-red-700  ring-1 ring-black/5';
+  $linkDeskBlue   = $baseLink.' hover:bg-blue-100/60';
+  $linkDeskRed    = $baseLink.' hover:bg-red-100/60';
+  $linkMobileBlue = $baseLink.' hover:bg-blue-100/60';
+  $linkMobileRed  = $baseLink.' hover:bg-red-100/60';
+
+  $iconBlue = 'inline-grid place-content-center w-7 h-7 rounded-md bg-blue-100 text-blue-700 ring-1 ring-blue-700/10';
+  $iconRed  = 'inline-grid place-content-center w-7 h-7 rounded-md bg-red-100  text-red-700  ring-1 ring-red-700/10';
 
   $sectionTitle = 'px-3 pt-4 pb-1 text-[11px] tracking-wide font-semibold uppercase text-slate-700';
 
-  // ===== When not verified: visually dim links but keep clickable (go to verification) =====
-  $lockVisual = !$isVerified ? 'opacity-70' : '';
+  // ===== Dim saat belum verifikasi (tetap clickable) =====
+  $lockVisual = !$isVerified ? 'opacity-85' : '';
 
-  // ===== Route helper: if not verified, force to verification notice (GET) =====
+  // ===== Route helper: paksa ke notice verifikasi jika belum verified =====
   $verifyNoticeUrl = Route::has('verification.notice') ? route('verification.notice') : url('/email/verify');
   $href = function(string $routeName, array $params = []) use ($isVerified, $verifyNoticeUrl) {
     if (!$isVerified) return $verifyNoticeUrl;
     return Route::has($routeName) ? route($routeName, $params) : url('/');
   };
+
+  // ===== Group boxes (berwarna, no gradient, TANPA putih) =====
+  // ganti inset shadow putih => nuansa warna masing-masing
+  $groupBoxBlue = 'mx-2 mt-1 rounded-xl border border-blue-200 bg-blue-50 p-1.5 shadow-[inset_0_1px_0_rgba(59,130,246,.18)]';
+  $groupBoxRed  = 'mx-2 mt-1 rounded-xl border border-red-200  bg-red-50  p-1.5 shadow-[inset_0_1px_0_rgba(239,68,68,.18)]';
+
+  // ===== Kartu akun & tombol (hindari putih di bg) =====
+  $accountCard = 'rounded-xl border border-blue-200 bg-blue-50 hover:bg-blue-100/60 hover:ring-1 hover:ring-blue-900/10 transition';
+  $logoutBtn   = 'w-full rounded-lg bg-red-600 text-white hover:bg-red-700 px-3 py-2 font-medium shadow-sm hover:shadow transition';
 @endphp
 
 {{-- ====== MINI MODE FIX (desktop sidebar compact) ====== --}}
@@ -77,17 +88,18 @@
 
 @if($variant === 'desktop')
 <nav class="p-3 space-y-1 text-sm text-slate-900 flex flex-col min-h-full">
-  {{-- LOGO --}}
-  <div class="mb-4">
-    <a href="{{ url('/') }}"
-       class="flex w-full items-center justify-center px-3 py-2 rounded-lg hover:bg-slate-50 hover:ring-1 hover:ring-black/5">
-      <img
-        src="{{ $logoUrl }}" alt="Logo"
-        class="w-14 h-14 object-contain"
-        loading="lazy" decoding="async" referrerpolicy="no-referrer"
-        onerror="this.style.display='none'">
-    </a>
-  </div>
+  {{-- LOGO (hover biru, bukan putih) --}}
+<div class="mb-4">
+  <a href="{{ url('/') }}"
+     class="flex w-full items-center justify-center px-3 py-4 rounded-lg hover:bg-blue-50 hover:ring-1 hover:ring-blue-900/10 min-h-[96px]">
+    <img
+      src="{{ $logoUrl }}" alt="Logo Andalan"
+      class="h-16 md:h-20 lg:h-24 w-auto max-w-[220px] md:max-w-[260px] lg:max-w-[300px] object-contain"
+      loading="lazy" decoding="async" referrerpolicy="no-referrer"
+      onerror="this.style.display='none'">
+  </a>
+</div>
+
 
   {{-- ACCOUNT --}}
   <div class="{{ $sectionTitle }}">
@@ -96,26 +108,25 @@
   </div>
 
   @auth
-    <a href="{{ $href('profile.edit') }}" class="account-card mx-3 mb-2 block rounded-xl border border-slate-200 hover:bg-slate-50 hover:ring-1 hover:ring-black/5 transition {{ $lockVisual }}">
+    <a href="{{ $href('profile.edit') }}" class="account-card mx-3 mb-2 block {{ $accountCard }} {{ $lockVisual }}">
       <div class="flex items-center gap-3 px-3 py-2">
         @if(($u->profile_photo_url ?? null))
-          <img src="{{ $u->profile_photo_url }}" alt="{{ e($u->name) }}" class="w-9 h-9 rounded-full object-cover ring-1 ring-black/5" loading="lazy" decoding="async">
+          <img src="{{ $u->profile_photo_url }}" alt="{{ e($u->name) }}" class="w-9 h-9 rounded-full object-cover ring-1 ring-blue-900/10" loading="lazy" decoding="async">
         @else
-          <div class="w-9 h-9 rounded-full bg-blue-100 text-blue-700 grid place-content-center font-semibold ring-1 ring-black/5">
+          <div class="w-9 h-9 rounded-full bg-blue-100 text-blue-700 grid place-content-center font-semibold ring-1 ring-blue-700/10">
             {{ $u ? e($initials) : 'G' }}
           </div>
         @endif
         <div class="account-info min-w-0">
-          <div class="text-xs text-slate-600 truncate max-w-[220px]">{{ e($u->email) }}</div>
+          <div class="text-xs text-slate-700 truncate max-w-[220px]">{{ e($u->email) }}</div>
           <div class="font-medium text-slate-900 truncate max-w-[180px]">{{ e($u->name) }}</div>
-          <div class="mt-0.5 inline-flex items-center text:[10px] text-[10px] px-2 py-0.5 rounded-full {{ $isVerified ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700' }} ring-1 ring-black/5">
+          <div class="mt-0.5 inline-flex items-center text-[10px] px-2 py-0.5 rounded-full {{ $isVerified ? 'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-700/10' : 'bg-red-100 text-red-700 ring-1 ring-red-700/10' }}">
             {{ $isVerified ? 'Verified' : 'Belum Terverifikasi' }}
           </div>
         </div>
       </div>
     </a>
 
-    {{-- Verification call-to-action (safe fallback if routes missing) --}}
     @if(!$isVerified)
       <div class="mx-3 mb-2 rounded-lg border border-red-200 bg-red-50 p-3">
         <div class="text-[12px] text-red-800 mb-2">Akun belum terverifikasi. Selesaikan verifikasi untuk akses menu.</div>
@@ -123,7 +134,6 @@
           <form method="POST" action="{{ route('verification.send') }}">
             @csrf
             <button class="inline-flex items-center gap-2 rounded-md bg-red-600 text-white px-3 py-1.5 text-xs font-semibold hover:bg-red-700">
-              {{-- send email again --}}
               <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M16 12H8m0 0l3-3m-3 3 3 3M21 12a9 9 0 11-18 0 9 9 0 0118 0Z"/>
               </svg>
@@ -154,7 +164,7 @@
     <span class="align-middle text-blue-700">General</span>
   </div>
 
-  <div class="{{ $lockVisual }}">
+  <div class="{{ $groupBoxBlue }} {{ $lockVisual }}">
     <a href="{{ $href('jobs.index') }}" class="{{ $linkDeskBlue }} {{ $activeBlue('jobs.*') }}">
       <span class="{{ $iconBlue }}">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
@@ -186,7 +196,7 @@
   </div>
 
   {{-- Divider --}}
-  <div class="my-2 border-t border-slate-200"></div>
+  <div class="my-2 border-t border-blue-100"></div>
 
   {{-- ADMIN --}}
   @auth
@@ -196,12 +206,11 @@
       <span class="align-middle text-red-700">Admin</span>
     </div>
 
-    <div class="{{ $lockVisual }}">
-      {{-- Companies (NEW) --}}
+    <div class="{{ $groupBoxRed }} {{ $lockVisual }}">
+      {{-- Companies --}}
       @if (Route::has('admin.companies.index'))
-        <a href="{{ $href('admin.companies.index') }}" class="{{ $linkDeskRed }} {{ $activeRed('admin.admin.companies.') }}">
+        <a href="{{ $href('admin.companies.index') }}" class="{{ $linkDeskRed }} {{ $activeRed('admin.companies.*') }}">
           <span class="{{ $iconRed }}">
-            {{-- office-building --}}
             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" d="M3 21h18M5 21V5a2 2 0 012-2h10a2 2 0 012 2v16M9 8h.01M9 12h.01M9 16h.01M12 8h.01M12 12h.01M12 16h.01M15 8h.01M15 12h.01M15 16h.01"/>
             </svg>
@@ -264,7 +273,7 @@
           <span class="{{ $iconRed }}">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" d="M2.5 12.75A6.25 6.25 0 018.75 6.5h6.5A6.25 6.25 0 0121.5 12.75v.25a4.75 4.75 0 01-4.75 4.75h-3L9 21.5l.75-3.75H8.75A4.75 4.75 0 014 13v-.25Z"/>
-            </svg>
+          </svg>
           </span>
           <span class="label">Interviews</span>
         </a>
@@ -341,13 +350,13 @@
   {{-- Spacer --}}
   <div class="flex-1"></div>
 
-  {{-- LOGOUT (sticky bottom) --}}
+  {{-- LOGOUT (sticky bottom, merah) --}}
   @auth
     <form method="POST" action="{{ route('logout') }}" class="px-3 pb-2 pt-2">
       @csrf
-      <button class="btn w-full rounded-lg border border-slate-200 bg-white text-slate-800 hover:bg-slate-50 px-3 py-2 font-medium shadow-sm hover:shadow transition" title="Logout">
+      <button class="btn {{ $logoutBtn }}" title="Logout">
         <span class="inline-flex items-center gap-2 justify-center w-full">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-white/90" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3H6.75A2.25 2.25 0 004.5 5.25v13.5A2.25 2.25 0 006.75 21H13.5a2.25 2.25 0 002.25-2.25V15M9.75 12h10.5m0 0-3-3m3 3-3 3"/>
           </svg>
           <span class="label">Logout</span>
@@ -360,8 +369,8 @@
 @else
 {{-- ===================== MOBILE ===================== --}}
 <nav class="space-y-1 text-sm text-slate-900 flex flex-col min-h-full">
-  {{-- LOGO --}}
-  <a href="{{ url('/') }}" {!! $closeAttr !!} class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-50 hover:ring-1 hover:ring-black/5">
+  {{-- LOGO (hover biru) --}}
+  <a href="{{ url('/') }}" {!! $closeAttr !!} class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-blue-50 hover:ring-1 hover:ring-blue-900/10">
     <img src="{{ $logoUrl }}" alt="Logo" class="w-8 h-8 object-contain" loading="lazy" decoding="async" referrerpolicy="no-referrer"
          onerror="this.style.display='none'">
     <div class="leading-tight">
@@ -377,19 +386,19 @@
   </div>
 
   @auth
-    <a href="{{ $href('profile.edit') }}" {!! $closeAttr !!} class="account-card mx-3 mb-2 block rounded-xl border border-slate-200 hover:bg-slate-50 hover:ring-1 hover:ring-black/5 transition {{ $lockVisual }}">
+    <a href="{{ $href('profile.edit') }}" {!! $closeAttr !!} class="account-card mx-3 mb-2 block {{ $accountCard }} {{ $lockVisual }}">
       <div class="flex items-center gap-3 px-3 py-2">
         @if(($u->profile_photo_url ?? null))
-          <img src="{{ $u->profile_photo_url }}" alt="{{ e($u->name) }}" class="w-9 h-9 rounded-full object-cover ring-1 ring-black/5" loading="lazy" decoding="async">
+          <img src="{{ $u->profile_photo_url }}" alt="{{ e($u->name) }}" class="w-9 h-9 rounded-full object-cover ring-1 ring-blue-900/10" loading="lazy" decoding="async">
         @else
-          <div class="w-9 h-9 rounded-full bg-blue-100 text-blue-700 grid place-content-center font-semibold ring-1 ring-black/5">
+          <div class="w-9 h-9 rounded-full bg-blue-100 text-blue-700 grid place-content-center font-semibold ring-1 ring-blue-700/10">
             {{ $u ? e($initials) : 'G' }}
           </div>
         @endif
         <div class="account-info min-w-0">
-          <div class="text-xs text-slate-600 truncate max-w-[240px]">{{ e($u->email) }}</div>
+          <div class="text-xs text-slate-700 truncate max-w-[240px]">{{ e($u->email) }}</div>
           <div class="font-medium text-slate-900 truncate max-w-[180px]">{{ e($u->name) }}</div>
-          <div class="mt-0.5 inline-flex items-center text-[10px] px-2 py-0.5 rounded-full {{ $isVerified ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700' }} ring-1 ring-black/5">
+          <div class="mt-0.5 inline-flex items-center text-[10px] px-2 py-0.5 rounded-full {{ $isVerified ? 'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-700/10' : 'bg-red-100 text-red-700 ring-1 ring-red-700/10' }}">
             {{ $isVerified ? 'Verified' : 'Belum Terverifikasi' }}
           </div>
         </div>
@@ -433,7 +442,7 @@
     <span class="align-middle text-blue-700">General</span>
   </div>
 
-  <div class="{{ $lockVisual }}">
+  <div class="{{ $groupBoxBlue }} {{ $lockVisual }}">
     <a href="{{ $href('jobs.index') }}" {!! $closeAttr !!} class="{{ $linkMobileBlue }} {{ $activeBlue('jobs.*') }}">
       <span class="{{ $iconBlue }}">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
@@ -465,7 +474,7 @@
   </div>
 
   {{-- Divider --}}
-  <div class="my-2 border-t border-slate-200"></div>
+  <div class="my-2 border-t border-blue-100"></div>
 
   {{-- ADMIN --}}
   @auth
@@ -475,12 +484,10 @@
       <span class="align-middle text-red-700">Admin</span>
     </div>
 
-    <div class="{{ $lockVisual }}">
-      {{-- Companies (NEW) --}}
+    <div class="{{ $groupBoxRed }} {{ $lockVisual }}">
       @if (Route::has('admin.companies.index'))
-        <a href="{{ $href('admin.companies.index') }}" {!! $closeAttr !!} class="{{ $linkMobileRed }} {{ $activeRed('admin.admin.companies.') }}">
+        <a href="{{ $href('admin.companies.index') }}" {!! $closeAttr !!} class="{{ $linkMobileRed }} {{ $activeRed('admin.companies.*') }}">
           <span class="{{ $iconRed }}">
-            {{-- office-building --}}
             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" d="M3 21h18M5 21V5a2 2 0 012-2h10a2 2 0 012 2v16M9 8h.01M9 12h.01M9 16h.01M12 8h.01M12 12h.01M12 16h.01M15 8h.01M15 12h.01M15 16h.01"/>
             </svg>
@@ -543,7 +550,7 @@
           <span class="{{ $iconRed }}">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" d="M2.5 12.75A6.25 6.25 0 018.75 6.5h6.5A6.25 6.25 0 0121.5 12.75v.25a4.75 4.75 0 01-4.75 4.75h-3L9 21.5l.75-3.75H8.75A4.75 4.75 0 014 13v-.25Z"/>
-            </svg>
+          </svg>
           </span>
           <span>Interviews</span>
         </a>
@@ -620,13 +627,13 @@
   {{-- Spacer --}}
   <div class="flex-1"></div>
 
-  {{-- LOGOUT --}}
+  {{-- LOGOUT (merah) --}}
   @auth
     <form method="POST" action="{{ route('logout') }}" class="px-3 pb-2 pt-2">
       @csrf
-      <button class="btn w-full rounded-lg border border-slate-200 bg-white text-slate-900 hover:bg-slate-50 px-3 py-2 font-medium shadow-sm transition" title="Logout">
+      <button class="btn {{ $logoutBtn }}" title="Logout">
         <span class="inline-flex items-center gap-2 justify-center w-full">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-slate-800" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-white/90" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3H6.75A2.25 2.25 0 004.5 5.25v13.5A2.25 2.25 0 006.75 21H13.5a2.25 2.25 0 002.25-2.25V15M9.75 12h10.5m0 0-3-3m3 3-3 3"/>
           </svg>
           <span class="label">Logout</span>

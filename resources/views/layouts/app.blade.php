@@ -4,11 +4,14 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
   <title>@yield('title', config('app.name'))</title>
 
   @vite(['resources/css/app.css','resources/js/app.js'])
+  @stack('head')
 
   <style>
+    /* Cloak: sembunyikan sampai JS siap */
     [data-cloak]{display:none!important}
 
     /* ==== MINI MODE (desktop) ==== */
@@ -56,16 +59,15 @@
   {{-- ===== Mobile Drawer (< md) ===== --}}
   <div class="md:hidden">
     {{-- Overlay --}}
-    <div id="drawerOverlay" class="drawer-overlay fixed inset-0 bg-black/40 z-40"></div>
+    <div id="drawerOverlay" class="drawer-overlay fixed inset-0 bg-black/40 z-40" aria-hidden="true"></div>
 
     {{-- Panel --}}
     <aside
       id="mobileDrawer"
-      class="drawer-panel transition-base fixed inset-y-0 left-0 z-50 w-72 max-w-[80vw] bg-white border-r border-slate-200 shadow-xl flex flex-col">
+      class="drawer-panel transition-base fixed inset-y-0 left-0 z-50 w-72 max-w-[80vw] bg-white border-r border-slate-200 shadow-xl flex flex-col"
+      role="dialog" aria-modal="true" aria-label="Menu">
       <div class="h-14 flex items-center justify-between px-4 border-b border-slate-200">
         <div class="flex items-center gap-2">
-          <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-500 via-teal-500 to-sky-500"></div>
-          <div class="font-semibold">Human.Careers</div>
         </div>
         <button id="drawerCloseBtn" class="p-2 rounded-lg hover:bg-slate-100" aria-label="Tutup menu">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
@@ -84,7 +86,6 @@
   {{-- ===== Main ===== --}}
   <div class="flex-1 flex flex-col min-w-0">
     <header class="h-14 sticky top-0 z-30 bg-white border-b border-slate-200 flex items-center px-3 md:px-5 gap-2">
-      {{-- Burger (mobile) --}}
       <button id="drawerOpenBtn" class="md:hidden p-2 rounded-lg hover:bg-slate-100" aria-label="Buka menu">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5"/>
@@ -92,23 +93,18 @@
       </button>
 
       {{-- Desktop collapse/expand --}}
-      <button id="toggleSidebarBtn" class="hidden md:inline-flex p-2 rounded-lg hover:bg-slate-100" aria-label="Toggle sidebar"></button>
-      <script>
-        (function(btn){
-          if(!btn) return;
-          btn.innerHTML = `
-            <svg id="iconExpand" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M4 12h16M4 6h10M4 18h10"/>
-            </svg>
-            <svg id="iconCollapse" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4m10 6H4m10-12H4"/>
-            </svg>`;
-        })(document.getElementById('toggleSidebarBtn'));
-      </script>
+      <button id="toggleSidebarBtn" class="hidden md:inline-flex p-2 rounded-lg hover:bg-slate-100" aria-label="Ubah ukuran sidebar" aria-pressed="false">
+        <svg id="iconExpand" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 12h16M4 6h10M4 18h10"/>
+        </svg>
+        <svg id="iconCollapse" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4m10 6H4m10-12H4"/>
+        </svg>
+      </button>
 
       <div class="font-semibold">@yield('title','Dashboard')</div>
 
-      {{-- === Right actions (dipisah ke partial) === --}}
+      {{-- Right actions (dipisah ke partial) --}}
       @include('layouts.partials.topbar-actions')
     </header>
 
@@ -118,77 +114,100 @@
 
 <script>
   (function(){
-    const $root   = document.getElementById('appRoot')
-    const $aside  = document.getElementById('desktopSidebar')
-    const $btnTog = document.getElementById('toggleSidebarBtn')
-    const $burger = document.getElementById('drawerOpenBtn')
-    const $close  = document.getElementById('drawerCloseBtn')
-    const $panel  = document.getElementById('mobileDrawer')
-    const $ovl    = document.getElementById('drawerOverlay')
-    const iconExpand  = () => document.getElementById('iconExpand')
-    const iconCollapse= () => document.getElementById('iconCollapse')
+    const $doc    = document;
+    const $root   = $doc.getElementById('appRoot');
+    const $aside  = $doc.getElementById('desktopSidebar');
+    const $btnTog = $doc.getElementById('toggleSidebarBtn');
+    const $burger = $doc.getElementById('drawerOpenBtn');
+    const $close  = $doc.getElementById('drawerCloseBtn');
+    const $panel  = $doc.getElementById('mobileDrawer');
+    const $ovl    = $doc.getElementById('drawerOverlay');
+    const $iconExpand   = $doc.getElementById('iconExpand');
+    const $iconCollapse = $doc.getElementById('iconCollapse');
+
+    const prefersReduced = () =>
+      window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     // --- Side mode (mini/full) persist ---
-    const LS_KEY = 'ac.sideMode'
-    let sideMode = 'full'
+    const LS_KEY = 'ac.sideMode';
+    let sideMode = 'full';
     try{
-      const raw = localStorage.getItem(LS_KEY)
-      if(raw) sideMode = JSON.parse(raw)
-    }catch(e){}
+      const raw = localStorage.getItem(LS_KEY);
+      if(raw) sideMode = JSON.parse(raw);
+    }catch(e){/* ignore */}
 
-    const applySideMode = () => {
-      if(window.matchMedia('(min-width: 768px)').matches){
-        if(sideMode === 'mini'){
-          $aside.classList.add('is-mini')
-          $aside.classList.remove('md:w-64')
-          $aside.classList.add('md:w-20')
-          if(iconExpand())  iconExpand().classList.add('hidden')
-          if(iconCollapse())iconCollapse().classList.remove('hidden')
-          if(iconExpand() && iconCollapse()){
-            iconExpand().classList.remove('hidden')
-            iconCollapse().classList.add('hidden')
-          }
-        } else {
-          $aside.classList.remove('is-mini')
-          $aside.classList.add('md:w-64')
-          $aside.classList.remove('md:w-20')
-          if(iconExpand() && iconCollapse()){
-            iconExpand().classList.add('hidden')
-            iconCollapse().classList.remove('hidden')
-          }
-        }
+    function applySideMode(){
+      if(!$aside) return;
+      const isDesktop = window.matchMedia('(min-width: 768px)').matches;
+      if(!isDesktop) return;
+
+      if(sideMode === 'mini'){
+        $aside.classList.add('is-mini');
+        $aside.classList.remove('md:w-64');
+        $aside.classList.add('md:w-20');
+        if($iconExpand)  $iconExpand.classList.remove('hidden');   // tampilkan ikon expand
+        if($iconCollapse)$iconCollapse.classList.add('hidden');    // sembunyikan ikon collapse
+        if($btnTog) $btnTog.setAttribute('aria-pressed','true');
+      }else{
+        $aside.classList.remove('is-mini');
+        $aside.classList.add('md:w-64');
+        $aside.classList.remove('md:w-20');
+        if($iconExpand)  $iconExpand.classList.add('hidden');
+        if($iconCollapse)$iconCollapse.classList.remove('hidden');
+        if($btnTog) $btnTog.setAttribute('aria-pressed','false');
       }
-      try{ localStorage.setItem(LS_KEY, JSON.stringify(sideMode)) }catch(e){}
+      try{ localStorage.setItem(LS_KEY, JSON.stringify(sideMode)); }catch(e){}
     }
-    applySideMode()
+
+    applySideMode();
 
     if($btnTog){
       $btnTog.addEventListener('click', () => {
-        sideMode = (sideMode === 'mini' ? 'full' : 'mini')
-        applySideMode()
-      })
+        sideMode = (sideMode === 'mini') ? 'full' : 'mini';
+        applySideMode();
+      }, { passive:true });
     }
 
     // --- Drawer open/close (mobile) ---
-    const openDrawer  = () => {
-      document.documentElement.classList.add('drawer-open')
-      document.body.classList.add('no-scroll')
+    function openDrawer(){
+      $doc.documentElement.classList.add('drawer-open');
+      document.body.classList.add('no-scroll');
+      if($panel) $panel.setAttribute('aria-hidden','false');
     }
-    const closeDrawer = () => {
-      document.documentElement.classList.remove('drawer-open')
-      document.body.classList.remove('no-scroll')
+    function closeDrawer(){
+      $doc.documentElement.classList.remove('drawer-open');
+      document.body.classList.remove('no-scroll');
+      if($panel) $panel.setAttribute('aria-hidden','true');
     }
 
-    $burger && $burger.addEventListener('click', openDrawer)
-    $close  && $close.addEventListener('click', closeDrawer)
-    $ovl    && $ovl.addEventListener('click', closeDrawer)
+    $burger && $burger.addEventListener('click', openDrawer, { passive:true });
+    $close  && $close.addEventListener('click', closeDrawer, { passive:true });
+    $ovl    && $ovl.addEventListener('click', closeDrawer, { passive:true });
 
-    document.addEventListener('keydown', (e) => {
-      if(e.key === 'Escape'){ closeDrawer() }
-    })
+    $doc.addEventListener('keydown', (e) => {
+      if(e.key === 'Escape'){ closeDrawer(); }
+    });
 
-    $root && $root.removeAttribute('data-cloak')
+    // Lepas cloak
+    $root && $root.removeAttribute('data-cloak');
   })();
 </script>
+
+{{-- Hanya jalankan polling notifikasi saat user login, agar halaman publik tidak 401 --}}
+@auth
+  @push('scripts')
+  <script>
+    (function(){
+      const url = @json(route('me.notifications.index', ['format'=>'json']));
+      fetch(url, { headers: { 'X-Requested-With':'XMLHttpRequest' } })
+        .then(r => (r.ok ? r.json() : null))
+        .then(json => {  })
+        .catch(() => { /* jangan ganggu UI di halaman publik */ });
+    })();
+  </script>
+  @endpush
+@endauth
+
+@stack('scripts')
 </body>
 </html>

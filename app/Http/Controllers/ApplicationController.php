@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Job;
 use App\Models\User;
+use App\Models\Offer; // +++
 use App\Models\JobApplication;
 use App\Models\ApplicationStage;
 use App\Models\PsychotestAttempt;
@@ -11,6 +12,7 @@ use App\Models\PsychotestTest;
 use App\Models\CandidateProfile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage; // +++ untuk hapus file
 use Illuminate\Validation\Rule;
 use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Support\Carbon;
@@ -44,6 +46,9 @@ class ApplicationController extends Controller
         'hr_iv'=>'HR Interview','user_iv'=>'User Interview',
         'final'=>'Final','offer'=>'Offering','hired'=>'Diterima','not_qualified'=>'Tidak Lolos',
     ];
+
+    /** Offer yang baru dibuat (untuk redirect ke PDF) */
+    protected ?Offer $offerJustCreated = null; // +++
 
     /** Pelamar: daftar lamaran saya */
     public function index(Request $request)
@@ -215,6 +220,54 @@ class ApplicationController extends Controller
         return $this->ALIASES_IN[$key] ?? (in_array($key, $this->STAGES, true) ? $key : null);
     }
 
+    /** Urutan stage sebagai indeks numerik */
+    protected function stageIndex(string $s): int
+    {
+        $idx = array_search($s, $this->STAGES, true);
+        return $idx === false ? 0 : $idx;
+    }
+
+    /** Apakah perpindahan ini mundur ke sebelum 'offer'? */
+    protected function isBackwardBeforeOffer(string $from, string $to): bool
+    {
+        $offerIdx = $this->stageIndex('offer');
+        return $this->stageIndex($to) < $offerIdx && $this->stageIndex($from) >= $offerIdx;
+    }
+
+    /** Hapus Offer + file PDF (jika ada tersimpan) */
+    protected function purgeOffer(JobApplication $application): void
+    {
+        /** @var Offer|null $offer */
+        $offer = $application->offer()->first();
+        if (!$offer) return;
+
+        $this->purgeOfferFiles($offer);
+        $offer->delete();
+    }
+
+    /** Hapus file-file fisik Offer jika ada (file_path atau meta[pdf_path]) */
+    protected function purgeOfferFiles(Offer $offer): void
+    {
+        $paths = [];
+
+        // skema 1: kolom langsung
+        if (!empty($offer->file_path)) {
+            $paths[] = $offer->file_path;
+        }
+        // skema 2: di meta
+        $meta = is_array($offer->meta ?? null) ? $offer->meta : [];
+        if (!empty($meta['pdf_path'])) {
+            $paths[] = $meta['pdf_path'];
+        }
+
+        foreach ($paths as $p) {
+            // asumsikan disk 'public'; ganti jika perlu
+            if (Storage::disk('public')->exists($p)) {
+                Storage::disk('public')->delete($p);
+            }
+        }
+    }
+
     /** @return array{string,string,?string,?float} */
     protected function validateMove(Request $request): array
     {
@@ -253,6 +306,12 @@ class ApplicationController extends Controller
             $from     = $application->current_stage;
             $prevOverall = $application->overall_status;
 
+            // === Jika mundur ke sebelum 'offer', hapus Offer + file ===
+            if ($this->isBackwardBeforeOffer($from, $to)) {
+                $this->purgeOffer($application);
+                $this->offerJustCreated = null; // reset
+            }
+
             // timeline
             ApplicationStage::create([
                 'application_id' => $application->id,
@@ -267,6 +326,32 @@ class ApplicationController extends Controller
 
             // current stage
             $application->update(['current_stage' => $to]);
+
+            // === OFFER: buat 1x jika masuk ke 'offer' atau 'hired' (idempotent) ===
+            if (in_array($to, ['offer', 'hired'], true)) {
+                /** @var \App\Models\Offer|null $existing */
+                $existing = $application->offer()->first();
+
+                if (!$existing) {
+                    // (opsional) prefill dari job
+                    $job   = $application->job()->with(['site:id,code'])->first();
+                    $gross = (float) ($job->default_gross     ?? 0);
+                    $allow = (float) ($job->default_allowance ?? 0);
+
+                    $existing = $application->offer()->create([
+                        'status'        => 'draft',
+                        'salary'        => ['gross' => $gross, 'allowance' => $allow],
+                        'body_template' => null, // gunakan Blade offers.pdf
+                        'meta'          => [
+                            'job_title' => $job?->title,
+                            'site_code' => $job?->site?->code,
+                        ],
+                    ]);
+                }
+
+                // simpan untuk redirect setelah transaksi
+                $this->offerJustCreated = $existing;
+            }
 
             // overall status & headcount
             if ($to === 'hired') {
@@ -411,11 +496,26 @@ class ApplicationController extends Controller
                 return redirect()->route('admin.interviews.index', ['focus' => $application->id])
                     ->with('ok', 'Stage dipindah ke '.strtoupper($this->PRETTY[$to] ?? $to).'.');
 
-            case 'offer':
+            case 'offer': {
+                $offer = $this->offerJustCreated ?: $application->offer()->first();
+                if ($offer) {
+                    return redirect()->route('admin.offers.pdf', $offer)
+                        ->with('ok', 'Stage dipindah ke OFFERING. Menampilkan Offering Letter.');
+                }
                 return redirect()->route('admin.offers.index', ['focus' => $application->id])
                     ->with('ok', 'Stage dipindah ke OFFERING.');
+            }
 
-            case 'hired':
+            case 'hired': {
+                $offer = $this->offerJustCreated ?: $application->offer()->first();
+                if ($offer) {
+                    return redirect()->route('admin.offers.pdf', $offer)
+                        ->with('ok', 'DITERIMA. Menampilkan Offering Letter.');
+                }
+                return redirect()->route('admin.applications.index', ['focus' => $application->id])
+                    ->with('ok', 'Stage dipindah ke DITERIMA.');
+            }
+
             case 'not_qualified':
                 return redirect()->route('admin.applications.index', ['focus' => $application->id])
                     ->with('ok', 'Stage dipindah ke '.strtoupper($this->PRETTY[$to] ?? $to).'.');

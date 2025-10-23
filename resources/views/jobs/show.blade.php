@@ -80,6 +80,16 @@
     'freelance'=> 'Freelance',
   ];
 
+  // ===== Extra Pretty Maps =====
+  $levelLabels = [
+    'bod'        => 'BOD',
+    'manager'    => 'Manager',
+    'supervisor' => 'Supervisor',
+    'spv'        => 'SPV',
+    'staff'      => 'Staff',
+    'non_staff'  => 'Non Staff',
+  ];
+
   // Format uang
   $fmtMoney = function($n, $cur = 'IDR') {
     if(!is_numeric($n)) return null;
@@ -124,6 +134,47 @@
                   : (($myApp && method_exists($myApp,'updatedBy')) ? ($myApp->updatedBy->name ?? null) : null);
 
   $closingAt = $job->closing_at ?? null;
+
+  // CreatedBy / UpdatedBy (nama user dari id job)
+  $createdByName = null;
+  $updatedByName = null;
+  try {
+    if (!empty($job->created_by)) {
+      $u = \App\Models\User::query()->select('name')->find($job->created_by);
+      $createdByName = $u?->name;
+    }
+    if (!empty($job->updated_by)) {
+      $u2 = \App\Models\User::query()->select('name')->find($job->updated_by);
+      $updatedByName = $u2?->name;
+    }
+  } catch (\Throwable $e) {}
+
+  // Normalisasi keywords & skills (bisa string CSV / array)
+  $keywords = collect(
+      is_array($job->keywords ?? null) ? $job->keywords
+        : (is_string($job->keywords ?? null) ? preg_split('/\s*,\s*/', (string)$job->keywords, -1, PREG_SPLIT_NO_EMPTY) : [])
+    )->filter()->unique()->values();
+
+  $skills = collect(
+      is_array($job->skills ?? null) ? $job->skills
+        : (is_string($job->skills ?? null) ? preg_split('/\s*,\s*/', (string)$job->skills, -1, PREG_SPLIT_NO_EMPTY) : [])
+    )->filter()->unique()->values();
+
+  // Hitung sisa hari/jam menuju closing (countdown ringkas)
+  $closingAtCarbon = $closingAt ? Carbon::parse($closingAt)->timezone($TZ) : null;
+  $countdownText = null;
+  if ($closingAtCarbon) {
+    $now = Carbon::now($TZ);
+    if ($closingAtCarbon->isPast()) {
+      $countdownText = 'Ditutup';
+    } else {
+      $diffDays = $now->diffInDays($closingAtCarbon);
+      $diffHours = $now->copy()->addDays($diffDays)->diffInHours($closingAtCarbon);
+      $countdownText = $diffDays > 0
+        ? $diffDays.' hari lagi'
+        : ($diffHours > 0 ? $diffHours.' jam lagi' : 'Kurang dari 1 jam');
+    }
+  }
 
   // ====== Breadcrumb JSON-LD (SEO) ======
   $breadcrumbLd = [
@@ -223,6 +274,15 @@
           ← Kembali
         </a>
       </div>
+
+      {{-- (Opsional) Salin tautan cepat --}}
+      <div class="absolute right-2 top-11 md:top-2 md:right-24">
+        <button type="button"
+                onclick="navigator.clipboard?.writeText('{{ e(request()->fullUrl()) }}'); this.innerText='Tautan Disalin'; setTimeout(()=>this.innerText='Salin Tautan',1500)"
+                class="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-white px-2 py-1 text-xs text-slate-600 hover:bg-slate-50">
+          Salin Tautan
+        </button>
+      </div>
     </div>
   </nav>
 
@@ -271,6 +331,11 @@
             @if(isset($job->applications_count))
               <span class="rounded-full bg-slate-100 px-2.5 py-1 font-medium text-slate-700 ring-1 ring-inset ring-slate-200">
                 Jumlah Pelamar: {{ (int) $job->applications_count }}
+              </span>
+            @endif
+            @if($countdownText)
+              <span class="rounded-full bg-amber-50 px-2.5 py-1 font-medium text-amber-700 ring-1 ring-inset ring-amber-200">
+                Tutup: {{ e($countdownText) }}
               </span>
             @endif
           </div>
@@ -399,6 +464,96 @@
         @endif
       </div>
 
+      {{-- Informasi Lengkap --}}
+      <div class="rounded-2xl border border-slate-200 bg-white shadow-sm p-5 md:p-6">
+        <h2 class="text-lg font-semibold text-slate-900">Informasi Lengkap</h2>
+
+        <dl class="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3 text-sm">
+          <div class="grid grid-cols-3 gap-2">
+            <dt class="text-slate-500">Kode Lowongan</dt>
+            <dd class="col-span-2 text-slate-800">{{ e($job->code ?? '—') }}</dd>
+          </div>
+
+          <div class="grid grid-cols-3 gap-2">
+            <dt class="text-slate-500">Perusahaan</dt>
+            <dd class="col-span-2 text-slate-800">
+              @if($job->company)
+                {{ e(($job->company->code ?? '')) }}{{ $job->company->code?' — ':'' }}{{ e(($job->company->name ?? '')) }}
+              @else
+                —
+              @endif
+            </dd>
+          </div>
+
+          <div class="grid grid-cols-3 gap-2">
+            <dt class="text-slate-500">Level</dt>
+            <dd class="col-span-2 text-slate-800">{{ e($levelLabels[strtolower((string)$job->level)] ?? (ucwords(str_replace('_',' ',(string)$job->level)) ?: '—')) }}</dd>
+          </div>
+
+          <div class="grid grid-cols-3 gap-2">
+            <dt class="text-slate-500">Status</dt>
+            <dd class="col-span-2">
+              <span class="rounded-full px-2.5 py-1 text-[11px] font-semibold ring-1 ring-inset
+                {{ $job->status==='open' ? 'bg-emerald-50 text-emerald-700 ring-emerald-200' : 'bg-slate-100 text-slate-700 ring-slate-200' }}">
+                {{ strtoupper(e($job->status ?? 'draft')) }}
+              </span>
+            </dd>
+          </div>
+
+          <div class="grid grid-cols-3 gap-2">
+            <dt class="text-slate-500">Lokasi (Site)</dt>
+            <dd class="col-span-2 text-slate-800">
+              @if($job->site)
+                {{ e($job->site->code ?? '—') }}{{ ($job->site->code && $job->site->name)?' — ':'' }}{{ e($job->site->name ?? '') }}
+              @else
+                —
+              @endif
+            </dd>
+          </div>
+
+          <div class="grid grid-cols-3 gap-2">
+            <dt class="text-slate-500">Tipe Pekerjaan</dt>
+            <dd class="col-span-2 text-slate-800">
+              {{ e($employmentPretty[$job->employment_type] ?? strtoupper($job->employment_type ?? '—')) }}
+            </dd>
+          </div>
+
+          <div class="grid grid-cols-3 gap-2">
+            <dt class="text-slate-500">Openings</dt>
+            <dd class="col-span-2 text-slate-800">{{ (int) ($job->openings ?? 1) }}</dd>
+          </div>
+
+          <div class="grid grid-cols-3 gap-2">
+            <dt class="text-slate-500">Diposting</dt>
+            <dd class="col-span-2 text-slate-800">
+              {{ e(optional($job->created_at)->timezone($TZ)->format('d M Y, H:i') ?? '—') }}
+              @if($createdByName) · oleh <span class="font-medium">{{ e($createdByName) }}</span>@endif
+            </dd>
+          </div>
+
+          <div class="grid grid-cols-3 gap-2">
+            <dt class="text-slate-500">Diubah</dt>
+            <dd class="col-span-2 text-slate-800">
+              {{ e(optional($job->updated_at)->timezone($TZ)->format('d M Y, H:i') ?? '—') }}
+              @if($updatedByName) · oleh <span class="font-medium">{{ e($updatedByName) }}</span>@endif
+            </dd>
+          </div>
+
+          <div class="grid grid-cols-3 gap-2">
+            <dt class="text-slate-500">Tutup</dt>
+            <dd class="col-span-2 text-slate-800">
+              @if($closingAt)
+                {{ e(Carbon::parse($closingAt)->timezone($TZ)->format('d M Y, H:i')) }}
+                {{ str_contains($TZ,'Jakarta') ? 'WIB' : (str_contains($TZ,'Makassar') ? 'WITA' : (str_contains($TZ,'Jayapura') ? 'WIT' : '')) }}
+                @if($countdownText) <span class="ml-2 rounded bg-amber-50 px-1.5 py-0.5 text-[11px] font-semibold text-amber-700 ring-1 ring-amber-200">{{ e($countdownText) }}</span>@endif
+              @else
+                —
+              @endif
+            </dd>
+          </div>
+        </dl>
+      </div>
+
       {{-- Deskripsi (aman) --}}
       <div class="rounded-2xl border border-slate-200 bg-white shadow-sm p-5 md:p-6">
         <h2 class="text-lg font-semibold text-slate-900">Deskripsi Pekerjaan</h2>
@@ -446,21 +601,49 @@
       </div>
       @endif
 
-      {{-- Skill / Tags --}}
+      {{-- Kata Kunci & Keahlian --}}
       @php
         $tags = collect($job->tags ?? [])
           ->when(is_string($job->tags ?? null), fn($c) => collect(preg_split('/\s*,\s*/', $job->tags, -1, PREG_SPLIT_NO_EMPTY)))
           ->filter()->unique()->values();
       @endphp
-      @if($tags->count())
-        <div class="rounded-2xl border border-slate-200 bg-white shadow-sm p-5 md:p-6">
-          <h2 class="text-lg font-semibold text-slate-900">Keahlian</h2>
-          <div class="mt-2 flex flex-wrap gap-2">
-            @foreach($tags as $t)
-              <span class="rounded-full bg-slate-100 px-2 py-1 text-[11px] font-semibold text-slate-700 ring-1 ring-inset ring-slate-200">{{ e($t) }}</span>
-            @endforeach
+      @if($keywords->count() || $skills->count() || $tags->count())
+      <div class="rounded-2xl border border-slate-200 bg-white shadow-sm p-5 md:p-6">
+        <h2 class="text-lg font-semibold text-slate-900">Kata Kunci & Keahlian</h2>
+
+        @if($keywords->count())
+          <div class="mt-2">
+            <div class="text-xs text-slate-500 mb-1">Keywords</div>
+            <div class="flex flex-wrap gap-2">
+              @foreach($keywords as $kw)
+                <span class="rounded-full bg-slate-100 px-2 py-1 text-[11px] font-semibold text-slate-700 ring-1 ring-inset ring-slate-200">{{ e($kw) }}</span>
+              @endforeach
+            </div>
           </div>
-        </div>
+        @endif
+
+        @if($skills->count())
+          <div class="mt-3">
+            <div class="text-xs text-slate-500 mb-1">Skills</div>
+            <div class="flex flex-wrap gap-2">
+              @foreach($skills as $sk)
+                <span class="rounded-full bg-blue-50 px-2 py-1 text-[11px] font-semibold text-blue-700 ring-1 ring-inset ring-blue-200">{{ e($sk) }}</span>
+              @endforeach
+            </div>
+          </div>
+        @endif
+
+        @if($tags->count())
+          <div class="mt-3">
+            <div class="text-xs text-slate-500 mb-1">Tags</div>
+            <div class="flex flex-wrap gap-2">
+              @foreach($tags as $t)
+                <span class="rounded-full bg-slate-100 px-2 py-1 text-[11px] font-semibold text-slate-700 ring-1 ring-inset ring-slate-200">{{ e($t) }}</span>
+              @endforeach
+            </div>
+          </div>
+        @endif
+      </div>
       @endif
     </div>
 

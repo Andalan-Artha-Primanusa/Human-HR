@@ -20,7 +20,7 @@
       }
   }
 
-  // ====== Upcoming Interviews (punya user) - initial (opsional, polling bisa ditambah belakangan) ======
+  // ====== Upcoming Interviews (punya user) - initial ======
   $interviewUpcoming = 0;
   $interviewItems    = collect();
   if ($u && Schema::hasTable('interviews') && Schema::hasTable('job_applications')) {
@@ -59,6 +59,11 @@
           return (string) $dt;
       }
   }
+
+  // URL JSON notifikasi untuk JS (kalau route tersedia)
+  $notifJsonUrl = (Route::has('me.notifications.index') && $u)
+      ? route('me.notifications.index', ['format' => 'json'])
+      : null;
 @endphp
 
 <div class="ml-auto flex items-center gap-1 md:gap-2 relative">
@@ -109,9 +114,7 @@
                     <div class="font-medium text-slate-800 truncate">{{ $iv->title ?? 'Interview' }}</div>
                     <div class="text-xs text-slate-600 mt-0.5">
                       {{ ac_dt($iv->start_at) }}
-                      @if($iv->mode)
-                        • {{ Str::title($iv->mode) }}
-                      @endif
+                      @if($iv->mode) • {{ Str::title($iv->mode) }} @endif
                     </div>
                     @if($iv->location)
                       <div class="text-xs text-slate-600 truncate">Lokasi: {{ $iv->location }}</div>
@@ -146,7 +149,6 @@
         <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 18.75a2.25 2.25 0 1 1-4.5 0m9-4.5v-3a6.75 6.75 0 1 0-13.5 0v3l-1.5 1.5v1.5h16.5v-1.5l-1.5-1.5z" />
         </svg>
-        {{-- badge unread (NEW: pakai id agar bisa diupdate JS) --}}
         <span id="notif-badge"
               class="absolute -top-0.5 -right-0.5 text-[10px] px-1.5 py-0.5 rounded-full bg-red-500 text-white {{ $notifUnread>0 ? '' : 'hidden' }}">
           {{ $notifUnread }}
@@ -163,7 +165,6 @@
           </span>
         </div>
 
-        {{-- list notifikasi (NEW: beri id agar bisa diupdate JS) --}}
         <div id="notif-empty"
              class="p-4 text-sm text-slate-500 {{ $notifItems->isEmpty() ? '' : 'hidden' }}">Belum ada notifikasi.</div>
 
@@ -226,7 +227,7 @@
   @endauth
 </div>
 
-{{-- === Tiny JS: toggle dropdown, close on outside/ESC + POLLING NOTIF === --}}
+{{-- === Tiny JS: toggle dropdown, close on outside/ESC === --}}
 <script>
   (function(){
     const panels = document.querySelectorAll('.dropdown-panel');
@@ -242,8 +243,8 @@
       btn.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
 
       // refresh ketika panel notifikasi dibuka
-      if (id === 'dd-notifs' && willOpen) {
-        refreshNotifications();
+      if (id === 'dd-notifs' && willOpen && window.refreshNotifications) {
+        window.refreshNotifications();
       }
     };
     const closeAll = () => {
@@ -275,25 +276,44 @@
     // optional: close on resize/scroll
     window.addEventListener('resize', closeAll);
     window.addEventListener('scroll', () => closeAll(), { passive: true });
+  })();
+</script>
 
-    // =======================
-    // POLLING NOTIFICATIONS
-    // =======================
-    const notifUrl = "{{ route('me.notifications.index') }}"; // endpoint yang sama
+@auth
+{{-- === POLLING NOTIF: hanya dimuat saat login === --}}
+<script>
+  (function(){
+    const notifUrl = @json($notifJsonUrl); // sudah ?format=json dari server
+    if (!notifUrl) return; // safety
+
     const badgeEl  = document.getElementById('notif-badge');
     const chipEl   = document.getElementById('notif-chip');
     const listEl   = document.getElementById('notif-list');
     const emptyEl  = document.getElementById('notif-empty');
 
-    async function refreshNotifications(){
-      try {
-        const res = await fetch(notifUrl + '?format=json', {
-          headers: { 'Accept': 'application/json' },
-          credentials: 'same-origin',
-        });
-        if(!res.ok) return;
-        const data = await res.json();
+    let timer = null;
+    let stopped = false;
 
+    async function refreshNotifications(){
+      if (stopped) return;
+      try {
+        const res = await fetch(notifUrl, {
+          headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+          },
+          credentials: 'same-origin'
+        });
+
+        if (res.status === 401) {
+          // sesi tidak valid / guest: hentikan polling
+          stopped = true;
+          if (timer) clearInterval(timer);
+          return;
+        }
+        if (!res.ok) return;
+
+        const data = await res.json();
         const unread = Number(data.unread || 0);
 
         // badge
@@ -309,7 +329,7 @@
         }
 
         // list
-        if (!listEl || !emptyEl) return;
+        if (!(listEl && emptyEl)) return;
 
         const items = Array.isArray(data.items) ? data.items : [];
         if (items.length === 0) {
@@ -348,18 +368,25 @@
             </li>`;
         }).join('');
       } catch(e) {
-        // silent
+        // optional: stop/backoff supaya konsol tetap bersih
+        stopped = true;
+        if (timer) clearInterval(timer);
       }
     }
 
-    // helper aman untuk text
     function escapeHtml(s){
       return (s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
     }
 
-    // jalankan polling tiap 15 detik
-    setInterval(refreshNotifications, 15000);
-    // first boot sedikit ditunda agar tidak mengganggu LCP
-    setTimeout(refreshNotifications, 2000);
+    // expose ke global untuk dipanggil saat panel dibuka
+    window.refreshNotifications = refreshNotifications;
+
+    // jadwalkan polling (tiap 15 detik) + refresh saat tab aktif lagi
+    setTimeout(refreshNotifications, 2000); // tunda awal agar tidak ganggu LCP
+    timer = setInterval(refreshNotifications, 15000);
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) refreshNotifications();
+    });
   })();
 </script>
+@endauth
