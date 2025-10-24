@@ -19,7 +19,27 @@
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"></noscript>
 
   {{-- Vite Assets (module = non-blocking) --}}
-  @vite(['resources/css/app.css','resources/js/app.js'])
+  @php
+  $manifestFile = public_path('build/manifest.json');
+  $manifest = is_file($manifestFile) ? json_decode(file_get_contents($manifestFile), true) : [];
+
+  // entry utama sesuai vite.config (umumnya resources/js/app.js)
+  $entry = $manifest['resources/js/app.js'] ?? null;
+@endphp
+
+@if($entry)
+  {{-- CSS yang dibundel --}}
+  @foreach(($entry['css'] ?? []) as $css)
+    <link rel="stylesheet" href="{{ asset('build/'.$css) }}">
+  @endforeach
+
+  {{-- JS (module) --}}
+  <script type="module" src="{{ asset('build/'.$entry['file']) }}"></script>
+@else
+  {{-- Fallback aman kalau manifest belum ada/terupload --}}
+  <link rel="stylesheet" href="{{ asset('build/assets/app.css') }}">
+  <script type="module" src="{{ asset('build/assets/app.js') }}"></script>
+@endif
 
   {{-- SEO Meta --}}
   <meta name="description" content="Portal karier resmi Andalan. Lowongan terverifikasi, proses seleksi transparan, dan pembaruan status waktu nyata. Satu akun untuk seluruh lokasi kerja Andalan.">

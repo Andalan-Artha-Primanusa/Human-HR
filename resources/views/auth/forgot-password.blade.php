@@ -6,7 +6,27 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Lupa Password • Human.Careers</title>
   <meta name="csrf-token" content="{{ csrf_token() }}">
-  @vite(['resources/css/app.css','resources/js/app.js'])
+  @php
+  $manifestFile = public_path('build/manifest.json');
+  $manifest = is_file($manifestFile) ? json_decode(file_get_contents($manifestFile), true) : [];
+
+  // entry utama sesuai vite.config (umumnya resources/js/app.js)
+  $entry = $manifest['resources/js/app.js'] ?? null;
+@endphp
+
+@if($entry)
+  {{-- CSS yang dibundel --}}
+  @foreach(($entry['css'] ?? []) as $css)
+    <link rel="stylesheet" href="{{ asset('build/'.$css) }}">
+  @endforeach
+
+  {{-- JS (module) --}}
+  <script type="module" src="{{ asset('build/'.$entry['file']) }}"></script>
+@else
+  {{-- Fallback aman kalau manifest belum ada/terupload --}}
+  <link rel="stylesheet" href="{{ asset('build/assets/app.css') }}">
+  <script type="module" src="{{ asset('build/assets/app.js') }}"></script>
+@endif
   <style>
     [x-cloak]{display:none!important}
     .bg-dots{
