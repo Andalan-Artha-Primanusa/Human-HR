@@ -9,7 +9,6 @@
   $RED   = '#dc2626'; // Tailwind red-600
 
   // ==== SANITIZER (whitelist aman untuk konten dari editor) ====
-  // Disarankan pakai HTML Purifier jika tersedia untuk kontrol atribut (mis. <a href>).
   $sanitize = function ($v) {
       if (!is_string($v) || trim($v) === '') return null;
       $decoded = html_entity_decode($v, ENT_QUOTES | ENT_HTML5, 'UTF-8');
@@ -20,14 +19,10 @@
   // ==== NORMALIZER TIMEZONE agar selalu IANA valid ====
   $normalizeTz = function (?string $tz) {
       $tz = trim((string) $tz);
-      if ($tz === '' || $tz === 'Asia') return 'Asia/Jakarta'; // fallback umum data lama
+      if ($tz === '' || $tz === 'Asia') return 'Asia/Jakarta';
       $map = [
-          'WIB' => 'Asia/Jakarta',
-          'WITA'=> 'Asia/Makassar',
-          'WIT' => 'Asia/Jayapura',
-          'Jakarta' => 'Asia/Jakarta',
-          'Makassar'=> 'Asia/Makassar',
-          'Jayapura'=> 'Asia/Jayapura',
+          'WIB' => 'Asia/Jakarta', 'WITA'=> 'Asia/Makassar', 'WIT' => 'Asia/Jayapura',
+          'Jakarta' => 'Asia/Jakarta','Makassar'=> 'Asia/Makassar','Jayapura'=> 'Asia/Jayapura',
       ];
       if (isset($map[$tz])) return $map[$tz];
       static $iana; $iana ??= timezone_identifiers_list();
@@ -35,11 +30,7 @@
   };
 
   // Abreviasi WIB/WITA/WIT untuk tampilan
-  $abbrTz = function (string $tz) {
-      return str_ends_with($tz, 'Jakarta') ? 'WIB'
-           : (str_ends_with($tz, 'Makassar') ? 'WITA'
-           : (str_ends_with($tz, 'Jayapura') ? 'WIT' : ''));
-  };
+  $abbrTz = fn (string $tz) => (str_ends_with($tz,'Jakarta') ? 'WIB' : (str_ends_with($tz,'Makassar') ? 'WITA' : (str_ends_with($tz,'Jayapura') ? 'WIT' : '')));
 
   /** @var \App\Models\JobApplication|null $myApp */
   $myApp = auth()->check()
@@ -51,20 +42,25 @@
       ? \App\Models\CandidateProfile::where('user_id', auth()->id())->first()
       : null;
 
-  // Tahapan & label
-  $stageOrder = ['applied','psychotest','hr_iv','user_iv','final','offer','hired'];
+  // ==== Tahapan & label (FLOW BARU) ====
+  $stageOrder = ['applied','screening','psychotest','hr_iv','user_iv','user_trainer_iv','offer','mcu','mobilisasi','ground_test','hired','not_qualified'];
   $pretty = [
-    'applied'    => 'Pengajuan Berkas',
-    'psychotest' => 'Psikotes',
-    'hr_iv'      => 'HR Interview',
-    'user_iv'    => 'User Interview',
-    'final'      => 'Final',
-    'offer'      => 'Offering',
-    'hired'      => 'Diterima',
-    'rejected'   => 'Ditolak',
+    'applied'          => 'Pengajuan Berkas',
+    'screening'        => 'Screening Berkas',
+    'psychotest'       => 'Psikotes',
+    'hr_iv'            => 'HR Interview',
+    'user_iv'          => 'User Interview',
+    'user_trainer_iv'  => 'User/Trainer Interview',
+    'offer'            => 'Offering (OL)',
+    'mcu'              => 'MCU',
+    'mobilisasi'       => 'Mobilisasi',
+    'ground_test'      => 'Ground Test',
+    'hired'            => 'Diterima',
+    'not_qualified'    => 'Tidak Lolos',
+    'rejected'         => 'Tidak Lolos',
   ];
 
-  // Status keseluruhan & stage saat ini (aman saat $myApp null)
+  // Status & stage saat ini
   $overall = strtolower($myApp?->overall_status ?? 'in_progress');
   $currRaw = strtolower($myApp?->current_stage ?? 'applied');
   $currKey = in_array($currRaw, $stageOrder, true) ? $currRaw : 'applied';
@@ -84,34 +80,25 @@
     if(!$myApp) return 0;
     $idx = array_search($currKey,$stageOrder,true); if($idx===false) $idx=0;
     $max = max(count($stageOrder)-1,1);
-    if($overall==='rejected'){
+    if(in_array($overall,['rejected','not_qualified'],true)){
       return min(100, max(40,(int)round($idx/$max*100)));
     }
     return (int)round($idx/$max*100);
   };
 
-  // Role admin (Spatie / non-Spatie)
+  // Role admin
   $isAdmin = auth()->check() && (
     (method_exists(auth()->user(), 'hasAnyRole') && auth()->user()->hasAnyRole(['hr','superadmin'])) ||
     in_array(auth()->user()->role ?? null, ['hr','superadmin'], true)
   );
 
   $employmentPretty = [
-    'fulltime' => 'Fulltime',
-    'contract' => 'Contract',
-    'intern'   => 'Intern',
-    'parttime' => 'Part-time',
-    'freelance'=> 'Freelance',
+    'fulltime' => 'Fulltime','contract' => 'Contract','intern' => 'Intern','parttime' => 'Part-time','freelance'=> 'Freelance',
   ];
 
-  // ===== Extra Pretty Maps =====
+  // Labels level
   $levelLabels = [
-    'bod'        => 'BOD',
-    'manager'    => 'Manager',
-    'supervisor' => 'Supervisor',
-    'spv'        => 'SPV',
-    'staff'      => 'Staff',
-    'non_staff'  => 'Non Staff',
+    'bod'=>'BOD','manager'=>'Manager','supervisor'=>'Supervisor','spv'=>'SPV','staff'=>'Staff','non_staff'=>'Non Staff',
   ];
 
   // Format uang
@@ -120,7 +107,7 @@
     return ($cur ?: 'IDR').' '.number_format((float)$n, 0, ',', '.');
   };
 
-  // Timezone prioritas (dinormalisasi agar selalu IANA valid)
+  // Timezone prioritas
   $siteTzRaw = optional($job->site)->timezone ?: data_get($job->site, 'meta.timezone');
   $TZ        = $normalizeTz($siteTzRaw ?: config('app.timezone', 'Asia/Jakarta'));
 
@@ -134,9 +121,7 @@
       $namaBln  = ['Jan'=>'Jan','Feb'=>'Feb','Mar'=>'Mar','Apr'=>'Apr','May'=>'Mei','Jun'=>'Jun','Jul'=>'Jul','Aug'=>'Agu','Sep'=>'Sep','Oct'=>'Okt','Nov'=>'Des'][$c->format('M')] ?? $c->format('M');
       $abbr = str_contains($TZ,'Jakarta') ? 'WIB' : (str_contains($TZ,'Makassar') ? 'WITA' : (str_contains($TZ,'Jayapura') ? 'WIT' : $c->format('T')));
       return sprintf('%s, %02d %s %04d, %s %s', $namaHari,(int)$c->format('d'),$namaBln,(int)$c->format('Y'),$c->format('H:i'),$abbr);
-    } catch (\Throwable $e) {
-      return (string)$ts;
-    }
+    } catch (\Throwable $e) { return (string)$ts; }
   };
 
   // Penentu nama actor perubahan stage
@@ -159,9 +144,8 @@
 
   $closingAt = $job->closing_at ?? null;
 
-  // CreatedBy / UpdatedBy (nama user dari id job)
-  $createdByName = null;
-  $updatedByName = null;
+  // CreatedBy / UpdatedBy
+  $createdByName = $updatedByName = null;
   try {
     if (!empty($job->created_by)) {
       $u = \App\Models\User::query()->select('name')->find($job->created_by);
@@ -173,56 +157,30 @@
     }
   } catch (\Throwable $e) {}
 
-  // Normalisasi keywords & skills (bisa string CSV / array)
-  $keywords = collect(
-      is_array($job->keywords ?? null) ? $job->keywords
-        : (is_string($job->keywords ?? null) ? preg_split('/\s*,\s*/', (string)$job->keywords, -1, PREG_SPLIT_NO_EMPTY) : [])
-    )->filter()->unique()->values();
+  // Keywords / skills
+  $keywords = collect(is_array($job->keywords ?? null) ? $job->keywords : (is_string($job->keywords ?? null) ? preg_split('/\s*,\s*/', (string)$job->keywords, -1, PREG_SPLIT_NO_EMPTY) : []))->filter()->unique()->values();
+  $skills   = collect(is_array($job->skills ?? null) ? $job->skills   : (is_string($job->skills ?? null)   ? preg_split('/\s*,\s*/', (string)$job->skills,   -1, PREG_SPLIT_NO_EMPTY) : []))->filter()->unique()->values();
 
-  $skills = collect(
-      is_array($job->skills ?? null) ? $job->skills
-        : (is_string($job->skills ?? null) ? preg_split('/\s*,\s*/', (string)$job->skills, -1, PREG_SPLIT_NO_EMPTY) : [])
-    )->filter()->unique()->values();
-
-  // Hitung sisa hari/jam menuju closing (countdown ringkas)
+  // Countdown closing
   $closingAtCarbon = $closingAt ? Carbon::parse($closingAt)->timezone($TZ) : null;
   $countdownText = null;
   if ($closingAtCarbon) {
     $now = Carbon::now($TZ);
-    if ($closingAtCarbon->isPast()) {
-      $countdownText = 'Ditutup';
-    } else {
+    if ($closingAtCarbon->isPast()) { $countdownText = 'Ditutup'; }
+    else {
       $diffDays = $now->diffInDays($closingAtCarbon);
       $diffHours = $now->copy()->addDays($diffDays)->diffInHours($closingAtCarbon);
-      $countdownText = $diffDays > 0
-        ? $diffDays.' hari lagi'
-        : ($diffHours > 0 ? $diffHours.' jam lagi' : 'Kurang dari 1 jam');
+      $countdownText = $diffDays > 0 ? $diffDays.' hari lagi' : ($diffHours > 0 ? $diffHours.' jam lagi' : 'Kurang dari 1 jam');
     }
   }
 
   // ====== Breadcrumb JSON-LD (SEO) ======
   $breadcrumbLd = [
-    '@context' => 'https://schema.org',
-    '@type'    => 'BreadcrumbList',
+    '@context' => 'https://schema.org','@type' => 'BreadcrumbList',
     'itemListElement' => [
-      [
-        '@type'    => 'ListItem',
-        'position' => 1,
-        'name'     => 'Dashboard',
-        'item'     => route('dashboard'),
-      ],
-      [
-        '@type'    => 'ListItem',
-        'position' => 2,
-        'name'     => 'Jobs',
-        'item'     => route('jobs.index'),
-      ],
-      [
-        '@type'    => 'ListItem',
-        'position' => 3,
-        'name'     => (string) $job->title,
-        'item'     => request()->fullUrl(),
-      ],
+      ['@type'=>'ListItem','position'=>1,'name'=>'Dashboard','item'=>route('dashboard')],
+      ['@type'=>'ListItem','position'=>2,'name'=>'Jobs','item'=>route('jobs.index')],
+      ['@type'=>'ListItem','position'=>3,'name'=>(string)$job->title,'item'=>request()->fullUrl()],
     ],
   ];
 @endphp
@@ -230,77 +188,34 @@
 @section('content')
 <div class="mx-auto w-full max-w-[1400px] px-4 sm:px-6 lg:px-8 py-6">
 
-  {{-- BREADCRUMB (UI kece, aksesibel, responsif) --}}
+  {{-- BREADCRUMB --}}
   <nav class="mb-4" aria-label="Breadcrumb">
     <div class="relative rounded-xl border border-slate-200 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 shadow-sm">
-      {{-- garis aksen tipis merah-biru --}}
-      <div class="h-1 w-full overflow-hidden rounded-t-xl">
-        <div class="h-full w-full" style="background: linear-gradient(90deg, {{ $RED }} 0%, {{ $BLUE }} 100%);"></div>
-      </div>
-
-      {{-- isi breadcrumb (scroll-x jika panjang) --}}
-      <ol class="flex items-center gap-2 px-3 py-2 text-sm text-slate-600 overflow-x-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-slate-200"
-          itemscope itemtype="https://schema.org/BreadcrumbList">
-        {{-- Dashboard --}}
+      <div class="h-1 w-full overflow-hidden rounded-t-xl"><div class="h-full w-full" style="background: linear-gradient(90deg, {{ $RED }} 0%, {{ $BLUE }} 100%);"></div></div>
+      <ol class="flex items-center gap-2 px-3 py-2 text-sm text-slate-600 overflow-x-auto" itemscope itemtype="https://schema.org/BreadcrumbList">
         <li class="flex items-center gap-2 shrink-0" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
           <a href="{{ route('dashboard') }}" itemprop="item" class="group inline-flex items-center gap-1 rounded-lg px-2 py-1 hover:bg-slate-50">
-            <svg class="h-4 w-4 text-slate-500 group-hover:text-slate-700" aria-hidden="true" viewBox="0 0 24 24" fill="none">
-              <path d="M3 10.5l9-7 9 7V20a2 2 0 0 1-2 2h-4.5a.5.5 0 0 1-.5-.5V15a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v6.5a.5.5 0 0 1-.5.5H5a2 2 0 0 1-2-2v-9.5z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
-            </svg>
+            <svg class="h-4 w-4 text-slate-500 group-hover:text-slate-700" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 10.5l9-7 9 7V20a2 2 0 0 1-2 2h-4.5a.5.5 0 0 1-.5-.5V15a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v6.5a.5.5 0 0 1-.5.5H5a2 2 0 0 1-2-2v-9.5z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
             <span class="font-medium text-slate-700 group-hover:text-slate-900" itemprop="name">Dashboard</span>
-          </a>
-          <meta itemprop="position" content="1"/>
-          <span class="text-slate-300">/</span>
+          </a><meta itemprop="position" content="1"/><span class="text-slate-300">/</span>
         </li>
-
-        {{-- Jobs --}}
         <li class="flex items-center gap-2 shrink-0" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
           <a href="{{ route('jobs.index') }}" itemprop="item" class="group inline-flex items-center gap-1 rounded-lg px-2 py-1 hover:bg-slate-50">
-            <svg class="h-4 w-4 text-slate-500 group-hover:text-slate-700" aria-hidden="true" viewBox="0 0 24 24" fill="none">
-              <path d="M3 8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v9a3 3 0  0 1-3 3H6a3 3 0 0 1-3-3V8z" stroke="currentColor" stroke-width="1.5"/>
-              <path d="M9 6a3 3 0 0 1 6 0" stroke="currentColor" stroke-width="1.5"/>
-            </svg>
+            <svg class="h-4 w-4 text-slate-500 group-hover:text-slate-700" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v9a3 3 0  0 1-3 3H6a3 3 0 0 1-3-3V8z" stroke="currentColor" stroke-width="1.5"/><path d="M9 6a3 3 0 0 1 6 0" stroke="currentColor" stroke-width="1.5"/></svg>
             <span class="font-medium text-slate-700 group-hover:text-slate-900" itemprop="name">Jobs</span>
-          </a>
-          <meta itemprop="position" content="2"/>
-          <span class="text-slate-300">/</span>
+          </a><meta itemprop="position" content="2"/><span class="text-slate-300">/</span>
         </li>
-
-        {{-- Current page --}}
         <li class="flex items-center gap-2 min-w-0" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem" aria-current="page">
           <div class="inline-flex items-center gap-1 rounded-lg px-2 py-1 bg-slate-50 ring-1 ring-slate-200">
-            <svg class="h-4 w-4 text-slate-500" aria-hidden="true" viewBox="0 0 24 24" fill="none">
-              <path d="M12 12m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" stroke="currentColor" stroke-width="1.5"/>
-              <path d="M12 8v4l3 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-            </svg>
+            <svg class="h-4 w-4 text-slate-500" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 12m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" stroke="currentColor" stroke-width="1.5"/><path d="M12 8v4l3 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
             <span class="truncate font-semibold text-slate-900" itemprop="name">{{ e($job->title) }}</span>
           </div>
-          <meta itemprop="item" content="{{ request()->fullUrl() }}"/>
-          <meta itemprop="position" content="3"/>
+          <meta itemprop="item" content="{{ request()->fullUrl() }}"/><meta itemprop="position" content="3"/>
         </li>
-
-        {{-- Tambahan trail opsional (mis. Recruiter) --}}
-        @isset($trail)
-          <span class="text-slate-300">/</span>
-          <li class="flex items-center gap-2 shrink-0" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem" aria-current="page">
-            <div class="inline-flex items-center gap-1 rounded-lg px-2 py-1 bg-slate-50 ring-1 ring-slate-200">
-              <span class="font-semibold text-slate-900" itemprop="name">{{ e($trail) }}</span>
-            </div>
-            <meta itemprop="position" content="4"/>
-          </li>
-        @endisset
       </ol>
 
-      {{-- tombol kecil back (UX) --}}
-      <div class="absolute right-2 top-2">
-        <a href="{{ url()->previous() }}"
-           class="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-white px-2 py-1 text-xs text-slate-600 hover:bg-slate-50">
-          ← Kembali
-        </a>
-      </div>
-
-      {{-- (Opsional) Salin tautan cepat --}}
-      <div class="absolute right-2 top-11 md:top-2 md:right-24">
+      <div class="absolute right-2 top-2 flex gap-2">
+        <a href="{{ url()->previous() }}" class="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-white px-2 py-1 text-xs text-slate-600 hover:bg-slate-50">← Kembali</a>
         <button type="button"
                 onclick="navigator.clipboard?.writeText('{{ e(request()->fullUrl()) }}'); this.innerText='Tautan Disalin'; setTimeout(()=>this.innerText='Salin Tautan',1500)"
                 class="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-white px-2 py-1 text-xs text-slate-600 hover:bg-slate-50">
@@ -312,18 +227,13 @@
 
   {{-- HEADER --}}
   <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-    {{-- Strip warna merah–biru --}}
-    <div class="flex h-2 w-full">
-      <div class="flex-1" style="background: {{ $BLUE }}"></div>
-      <div class="w-32" style="background: {{ $RED }}"></div>
-    </div>
+    <div class="flex h-2 w-full"><div class="flex-1" style="background: {{ $BLUE }}"></div><div class="w-32" style="background: {{ $RED }}"></div></div>
 
     <div class="p-5 md:p-6">
       <div class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
         <div class="min-w-0">
           <h1 class="truncate text-3xl font-semibold text-slate-900">{{ e($job->title) ?? '—' }}</h1>
 
-          {{-- Baris info utama (divisi / site / tutup) --}}
           <div class="mt-1 flex flex-wrap items-center gap-2 text-sm text-slate-600">
             <span class="inline-flex items-center gap-1">
               <svg class="h-4 w-4 text-slate-500" aria-hidden="true"><use href="#i-brief"/></svg>
@@ -338,13 +248,11 @@
               <span class="text-slate-300">•</span>
               <span class="inline-flex items-center gap-1">
                 <svg class="h-4 w-4 text-slate-500" aria-hidden="true"><use href="#i-clock"/></svg>
-                Tutup: {{ e(Carbon::parse($closingAt)->timezone($TZ)->format('d M Y, H:i')) }}
-                {{ $abbrTz($TZ) }}
+                Tutup: {{ e(Carbon::parse($closingAt)->timezone($TZ)->format('d M Y, H:i')) }} {{ $abbrTz($TZ) }}
               </span>
             @endif
           </div>
 
-          {{-- META DIPINDAH KE HEADER --}}
           <div class="mt-2 flex flex-wrap items-center gap-2 text-xs">
             <span class="rounded-full bg-blue-50 px-2.5 py-1 font-medium text-blue-700 ring-1 ring-inset ring-blue-200">
               Diposting: {{ e(optional($job->created_at)->timezone($TZ)->format('d M Y, H:i') ?? '—') }}
@@ -365,28 +273,17 @@
           </div>
         </div>
 
-        {{-- Kanan: status + aksi --}}
+        {{-- CTA kandidat + admin quick actions --}}
         <div class="flex flex-wrap items-center gap-2">
-          <span class="rounded-full px-2.5 py-1 text-[11px] font-semibold ring-1 ring-inset
-            {{ $job->status==='open' ? 'bg-blue-50 text-blue-700 ring-blue-200' : 'bg-slate-100 text-slate-700 ring-slate-200' }}">
-            STATUS: {{ strtoupper(e($job->status ?? 'draft')) }}
-          </span>
-
-          {{-- Admin quick actions --}}
           @if($isAdmin)
             @if(Route::has('admin.jobs.edit'))
-              <a href="{{ route('admin.jobs.edit', $job) }}" class="rounded-lg border border-slate-200 px-3 py-2 text-sm hover:bg-slate-50">
-                Edit
-              </a>
+              <a href="{{ route('admin.jobs.edit', $job) }}" class="rounded-lg border border-slate-200 px-3 py-2 text-sm hover:bg-slate-50">Edit</a>
             @endif
             @if(Route::has('admin.applications.index'))
-              <a href="{{ route('admin.applications.index', ['job' => $job->id]) }}" class="rounded-lg border border-slate-200 px-3 py-2 text-sm hover:bg-slate-50">
-                Kandidat
-              </a>
+              <a href="{{ route('admin.applications.index', ['job' => $job->id]) }}" class="rounded-lg border border-slate-200 px-3 py-2 text-sm hover:bg-slate-50">Kandidat</a>
             @endif
             @if(Route::has('admin.jobs.toggle'))
-              <form method="POST" action="{{ route('admin.jobs.toggle', $job) }}"
-                    onsubmit="return confirm('Ubah status lowongan?');">
+              <form method="POST" action="{{ route('admin.jobs.toggle', $job) }}" onsubmit="return confirm('Ubah status lowongan?');">
                 @csrf @method('PATCH')
                 <button type="submit" class="rounded-lg border border-slate-200 px-3 py-2 text-sm hover:bg-slate-50">
                   {{ ($job->status === 'open') ? 'Tutup' : 'Buka' }}
@@ -395,17 +292,6 @@
             @endif
           @endif
 
-          {{-- Aksi kandidat: Edit/Lengkapi Profil --}}
-          @auth
-            @if(Route::has('candidate.profiles.edit'))
-              <a href="{{ route('candidate.profiles.edit', $job) }}"
-                 class="rounded-lg border border-slate-200 px-3 py-2 text-sm hover:bg-slate-50">
-                {{ $meProfile ? 'Perbarui Profil' : 'Lengkapi Profil' }}
-              </a>
-            @endif
-          @endauth
-
-          {{-- CTA pelamar --}}
           @auth
             @if(($job->status ?? 'draft') === 'open' && !$myApp)
               <form method="POST" action="{{ route('applications.store',$job) }}">@csrf
@@ -488,7 +374,7 @@
         @endif
       </div>
 
-      {{-- Informasi Lengkap --}}
+      {{-- ===== INFORMASI LENGKAP (ini yang kemarin hilang) ===== --}}
       <div class="rounded-2xl border border-slate-200 bg-white shadow-sm p-5 md:p-6">
         <h2 class="text-lg font-semibold text-slate-900">Informasi Lengkap</h2>
 
@@ -504,7 +390,7 @@
               @if($job->company)
                 {{ e(($job->company->code ?? '')) }}{{ $job->company->code?' — ':'' }}{{ e(($job->company->name ?? '')) }}
               @else
-                —
+                — 
               @endif
             </dd>
           </div>
@@ -530,7 +416,7 @@
               @if($job->site)
                 {{ e($job->site->code ?? '—') }}{{ ($job->site->code && $job->site->name)?' — ':'' }}{{ e($job->site->name ?? '') }}
               @else
-                —
+                — 
               @endif
             </dd>
           </div>
@@ -567,26 +453,31 @@
             <dt class="text-slate-500">Tutup</dt>
             <dd class="col-span-2 text-slate-800">
               @if($closingAt)
-                {{ e(Carbon::parse($closingAt)->timezone($TZ)->format('d M Y, H:i')) }}
-                {{ $abbrTz($TZ) }}
+                {{ e(Carbon::parse($closingAt)->timezone($TZ)->format('d M Y, H:i')) }} {{ $abbrTz($TZ) }}
                 @if($countdownText) <span class="ml-2 rounded bg-amber-50 px-1.5 py-0.5 text-[11px] font-semibold text-amber-700 ring-1 ring-amber-200">{{ e($countdownText) }}</span>@endif
               @else
-                —
+                — 
               @endif
             </dd>
           </div>
         </dl>
       </div>
 
-      {{-- Deskripsi (aman) --}}
+      {{-- ===== Kualifikasi ===== --}}
+      @if(filled($job->qualifications))
+      <div class="rounded-2xl border border-slate-200 bg-white shadow-sm p-5 md:p-6">
+        <h2 class="text-lg font-semibold text-slate-900">Kualifikasi</h2>
+        <div class="prose max-w-none text-slate-800">
+          {!! $sanitize($job->qualifications) !!}
+        </div>
+      </div>
+      @endif
+
+      {{-- Deskripsi Pekerjaan --}}
       <div class="rounded-2xl border border-slate-200 bg-white shadow-sm p-5 md:p-6">
         <h2 class="text-lg font-semibold text-slate-900">Deskripsi Pekerjaan</h2>
         <div class="prose max-w-none text-slate-800">
-          <style>
-            .prose ul{list-style:disc;padding-left:1.25rem}
-            .prose ol{list-style:decimal;padding-left:1.25rem}
-            .prose li{margin:.25rem 0}
-          </style>
+          <style>.prose ul{list-style:disc;padding-left:1.25rem}.prose ol{list-style:decimal;padding-left:1.25rem}.prose li{margin:.25rem 0}</style>
           @if(filled($job->description))
             {!! $sanitize($job->description) !!}
           @else
@@ -605,16 +496,6 @@
       </div>
       @endif
 
-      {{-- Kualifikasi --}}
-      @if(filled($job->qualifications))
-      <div class="rounded-2xl border border-slate-200 bg-white shadow-sm p-5 md:p-6">
-        <h2 class="text-lg font-semibold text-slate-900">Kualifikasi</h2>
-        <div class="prose max-w-none text-slate-800">
-          {!! $sanitize($job->qualifications) !!}
-        </div>
-      </div>
-      @endif
-
       {{-- Benefit --}}
       @if(filled($job->benefits))
       <div class="rounded-2xl border border-slate-200 bg-white shadow-sm p-5 md:p-6">
@@ -627,9 +508,7 @@
 
       {{-- Kata Kunci & Keahlian --}}
       @php
-        $tags = collect($job->tags ?? [])
-          ->when(is_string($job->tags ?? null), fn($c) => collect(preg_split('/\s*,\s*/', $job->tags, -1, PREG_SPLIT_NO_EMPTY)))
-          ->filter()->unique()->values();
+        $tags = collect($job->tags ?? [])->when(is_string($job->tags ?? null), fn($c) => collect(preg_split('/\s*,\s*/', $job->tags, -1, PREG_SPLIT_NO_EMPTY)))->filter()->unique()->values();
       @endphp
       @if($keywords->count() || $skills->count() || $tags->count())
       <div class="rounded-2xl border border-slate-200 bg-white shadow-sm p-5 md:p-6">
@@ -671,7 +550,7 @@
       @endif
     </div>
 
-    {{-- RIGHT: Progress / Site / Profil Kandidat --}}
+    {{-- RIGHT: Progres / Site / Profil Kandidat --}}
     <aside class="space-y-6">
       {{-- Progres Lamaran --}}
       <div class="rounded-2xl border border-slate-200 bg-white shadow-sm">
@@ -679,8 +558,7 @@
           <div class="flex items-center justify-between">
             <h3 class="text-base font-semibold text-slate-900">Progres Lamaran Kamu</h3>
 
-            {{-- ADMIN stage controls --}}
-            @if($myApp && $isAdmin && Route::has('admin.applications.move') && ($overall !== 'rejected'))
+            @if($myApp && $isAdmin && Route::has('admin.applications.move') && (!in_array($overall,['rejected','not_qualified'],true)))
               @php $canPrev = filled($prevKey); $canNext = filled($nextKey); @endphp
               <div class="flex items-center gap-2">
                 <form method="POST" action="{{ route('admin.applications.move', $myApp) }}"
@@ -728,41 +606,36 @@
                 @endif
               </div>
             @else
-              {{-- Progress bar --}}
               @php $pct = $progressPct(); @endphp
               <div class="mt-3">
-                <div class="flex items-center justify-between text-xs text-slate-600">
-                  <span>Progress</span><span>{{ $pct }}%</span>
-                </div>
+                <div class="flex items-center justify-between text-xs text-slate-600"><span>Progress</span><span>{{ $pct }}%</span></div>
                 <div class="mt-1 h-2 w-full overflow-hidden rounded-full bg-slate-100">
-                  <div class="h-full rounded-full"
-                       style="width: {{ $pct }}%; background: {{ ($overall==='rejected') ? $RED : $BLUE }}"></div>
+                  <div class="h-full rounded-full" style="width: {{ $pct }}%; background: {{ in_array($overall,['rejected','not_qualified'],true) ? $RED : $BLUE }}"></div>
                 </div>
               </div>
 
-              {{-- Timeline --}}
               <div class="mt-5 relative">
                 <div class="absolute right-3 top-0 bottom-0 w-0.5 bg-slate-200"></div>
                 <div class="space-y-3">
                   @foreach($stageOrder as $key)
                     @php
-                      $isNow  = ($key === $currKey) && ($overall!=='rejected');
+                      $isNow  = ($key === $currKey) && !in_array($overall,['rejected','not_qualified'],true);
                       $done   = in_array($key,$visited,true) && !$isNow;
                       $muted  = !$done && !$isNow;
                       $dotBg  = $done ? '#16a34a' : ($isNow ? $BLUE : '#f59e0b');
 
                       $st = $stageMap[$key] ?? null;
-                      $ts = $done ? ($st->updated_at ?? $st->created_at ?? null)
-                           : ($isNow ? ($st->created_at ?? null) : null);
+                      $ts = $done ? ($st->updated_at ?? $st->created_at ?? null) : ($isNow ? ($st->created_at ?? null) : null);
 
                       $waktuTampil = $ts ? $formatTs($ts) : null;
                       $who = $st ? $actorName($st) : null;
+                      $label = $pretty[$key] ?? strtoupper(str_replace('_',' ',$key));
                     @endphp
                     <div class="relative pr-12">
                       <span class="absolute right-0 top-1 grid h-4 w-4 place-items-center rounded-full ring-4 ring-white" style="background: {{ $dotBg }}"></span>
                       <div class="flex items-start justify-between gap-3">
                         <div class="min-w-0">
-                          <div class="text-sm font-medium {{ $muted ? 'text-slate-700' : 'text-slate-900' }}">{{ e($pretty[$key]) }}</div>
+                          <div class="text-sm font-medium {{ $muted ? 'text-slate-700' : 'text-slate-900' }}">{{ e($label) }}</div>
                           <div class="text-xs text-slate-500">
                             @if($done) Selesai
                             @elseif($isNow) Sedang diproses
@@ -770,7 +643,7 @@
                             @endif
                           </div>
 
-                          @if($waktuTampil || $who)
+                          @if($waktuTampil || $who || !empty($st?->notes))
                             <div class="mt-1 text-[11px] text-slate-500">
                               @if($waktuTampil)
                                 <div class="inline-flex items-center gap-1">
@@ -798,7 +671,7 @@
                     </div>
                   @endforeach
 
-                  @if($overall==='rejected')
+                  @if(in_array($overall,['rejected','not_qualified'],true))
                     @php
                       $rejectTime = $latestStage ? $formatTs($latestStage->updated_at ?? $latestStage->created_at) : ($myApp ? $formatTs($myApp->updated_at ?? $myApp->created_at) : null);
                       $rejectBy   = $latestStage ? $actorName($latestStage) : ($lastChangedBy ?? null);
@@ -830,7 +703,6 @@
                 </div>
               </div>
 
-              {{-- Meta lamaran --}}
               <div class="mt-5 grid gap-2 text-xs text-slate-600">
                 <div class="inline-flex items-center gap-2">
                   <svg class="h-4 w-4 text-slate-500" aria-hidden="true"><use href="#i-clock"/></svg>
@@ -842,9 +714,9 @@
                   @php
                     $overallText = strtoupper($overall ?? 'IN_PROGRESS');
                     $overallClass =
-                      $overall==='hired' ? 'bg-emerald-50 text-emerald-700 ring-emerald-200' :
-                      ($overall==='rejected' ? 'bg-slate-100 text-slate-700 ring-slate-200' :
-                      'bg-blue-50 text-blue-700 ring-blue-200');
+                      ($overall==='hired' ? 'bg-emerald-50 text-emerald-700 ring-emerald-200' :
+                      (in_array($overall,['rejected','not_qualified'],true) ? 'bg-slate-100 text-slate-700 ring-slate-200' :
+                      'bg-blue-50 text-blue-700 ring-blue-200'));
                   @endphp
                   <span class="ml-1 rounded-full px-2 py-0.5 text-[11px] font-semibold ring-1 ring-inset {{ $overallClass }}">
                     {{ e($overallText) }}
@@ -881,9 +753,7 @@
             <dt class="text-slate-500">Nama</dt><dd class="col-span-2 text-slate-800">{{ e($s->name) }}</dd>
             <dt class="text-slate-500">Region</dt><dd class="col-span-2 text-slate-800">{{ e($s->region ?: '—') }}</dd>
             <dt class="text-slate-500">Timezone</dt><dd class="col-span-2 text-slate-800">{{ e($tz ?: '—') }}</dd>
-            @if($addr)
-              <dt class="text-slate-500">Alamat</dt><dd class="col-span-2 text-slate-800">{{ e($addr) }}</dd>
-            @endif
+            @if($addr)<dt class="text-slate-500">Alamat</dt><dd class="col-span-2 text-slate-800">{{ e($addr) }}</dd>@endif
           </dl>
           <div class="mt-3 flex items-center gap-3">
             <a href="{{ route('sites.show', $s) }}" class="text-sm text-blue-700 hover:underline">Lihat detail site</a>
@@ -897,7 +767,7 @@
         @endif
       </div>
 
-      {{-- PROFIL KANDIDAT (di bawah Site) --}}
+      {{-- PROFIL KANDIDAT --}}
       @auth
       <div class="rounded-2xl border border-slate-200 bg-white shadow-sm p-5 md:p-6">
         <div class="flex items-center justify-between">
@@ -948,7 +818,6 @@
       </div>
       @endauth
 
-      {{-- (Opsional) Jobs serupa --}}
       @isset($relatedJobs)
         @if($relatedJobs->count())
           <div class="rounded-2xl border border-slate-200 bg-white shadow-sm p-5 md:p-6">
@@ -983,8 +852,8 @@
     <path stroke-width="2" stroke-linecap="round" d="M12 7v5l3 2"/>
   </symbol>
   <symbol id="i-brief" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-    <path stroke-width="2" d="M3 8a2 2 0 012-2h14a2 2 0 012 2v9a3 3 0 01-3 3H6a3 3 0 01-3-3V8z"/>
-    <path stroke-width="2" d="M9 6a3 3 0 013-3h0a3 3 0 013 3v0"/>
+    <path stroke-width="2" d="M3 8a2 2 0 012-2h14a2 2 0 012 2v9a3 3 0 01-3 3H6a3 3 0 0 1-3-3V8z"/>
+    <path stroke-width="2" d="M9 6a3 3 0 0 1 3-3h0a3 3 0 0 1 3 3v0"/>
   </symbol>
   <symbol id="i-chevron-left" viewBox="0 0 24 24" fill="none" stroke="currentColor">
     <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
@@ -995,43 +864,28 @@
 </svg>
 @endonce
 
-{{-- JSON-LD Breadcrumbs (SEO) --}}
+{{-- JSON-LD Breadcrumbs --}}
 <script type="application/ld+json">{!! json_encode($breadcrumbLd, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES) !!}</script>
 
-{{-- JSON-LD JobPosting (aman & minimal) --}}
+{{-- JSON-LD JobPosting --}}
 @php
   $jobLd = [
-    '@context' => 'https://schema.org',
-    '@type' => 'JobPosting',
+    '@context' => 'https://schema.org','@type' => 'JobPosting',
     'title' => (string) $job->title,
     'description' => strip_tags($sanitize($job->description ?? '') ?? ''),
     'datePosted' => optional($job->created_at)->toIso8601String(),
     'validThrough' => $closingAt ? Carbon::parse($closingAt)->toIso8601String() : null,
     'employmentType' => strtoupper($job->employment_type ?? 'FULL_TIME'),
-    'hiringOrganization' => [
-      '@type' => 'Organization',
-      'name' => (string) config('app.name'),
-    ],
+    'hiringOrganization' => ['@type'=>'Organization','name'=>(string) config('app.name')],
     'jobLocation' => [
-      '@type' => 'Place',
-      'address' => [
-        '@type' => 'PostalAddress',
-        'streetAddress' => optional($job->site)->address,
-        'addressRegion' => optional($job->site)->region,
-        'addressCountry' => 'ID',
-      ],
+      '@type'=>'Place',
+      'address' => ['@type'=>'PostalAddress','streetAddress'=>optional($job->site)->address,'addressRegion'=>optional($job->site)->region,'addressCountry'=>'ID'],
     ],
   ];
   if($job->salary_min || $job->salary_max) {
     $jobLd['baseSalary'] = [
-      '@type' => 'MonetaryAmount',
-      'currency' => $job->currency ?: 'IDR',
-      'value' => [
-        '@type' => 'QuantitativeValue',
-        'minValue' => $job->salary_min ?: null,
-        'maxValue' => $job->salary_max ?: null,
-        'unitText' => $job->salary_period ?: 'MONTH',
-      ],
+      '@type'=>'MonetaryAmount','currency'=>$job->currency ?: 'IDR',
+      'value'=>['@type'=>'QuantitativeValue','minValue'=>$job->salary_min ?: null,'maxValue'=>$job->salary_max ?: null,'unitText'=>$job->salary_period ?: 'MONTH'],
     ];
   }
 @endphp

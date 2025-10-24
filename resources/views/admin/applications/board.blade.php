@@ -13,26 +13,36 @@
   </style>
 
   @php
+    // === Stage sesuai flow HO & Site (disatukan)
     $stages = [
-      'applied'       => 'Applied',
-      'psychotest'    => 'Psychotest',
-      'hr_iv'         => 'HR Interview',
-      'user_iv'       => 'User Interview',
-      'final'         => 'Final',
-      'offer'         => 'Offer',
-      'hired'         => 'Hired',
-      'not_qualified' => 'Not Qualified',
+      'applied'          => 'Applied',
+      'screening'        => 'Screening CV/Berkas Lamaran',
+      'psychotest'       => 'Psikotest',
+      'hr_iv'            => 'HR Interview',
+      'user_iv'          => 'User Interview',
+      'user_trainer_iv'  => 'User/Trainer Interview',
+      'offer'            => 'OL',
+      'mcu'              => 'MCU',
+      'mobilisasi'       => 'Mobilisasi',
+      'ground_test'      => 'Ground Test',
+      'hired'            => 'Hired',
+      'not_qualified'    => 'Not Lolos',
     ];
 
+    // Warna header tiap kolom
     $stageColors = [
-      'applied'       => 'from-blue-50 to-blue-100 text-blue-800',
-      'psychotest'    => 'from-indigo-50 to-indigo-100 text-indigo-800',
-      'hr_iv'         => 'from-amber-50 to-amber-100 text-amber-800',
-      'user_iv'       => 'from-emerald-50 to-emerald-100 text-emerald-800',
-      'final'         => 'from-purple-50 to-purple-100 text-purple-800',
-      'offer'         => 'from-pink-50 to-pink-100 text-pink-800',
-      'hired'         => 'from-green-50 to-green-100 text-green-800',
-      'not_qualified' => 'from-slate-50 to-slate-100 text-slate-700',
+      'applied'          => 'from-blue-50 to-blue-100 text-blue-800',
+      'screening'        => 'from-sky-50 to-sky-100 text-sky-800',
+      'psychotest'       => 'from-indigo-50 to-indigo-100 text-indigo-800',
+      'hr_iv'            => 'from-amber-50 to-amber-100 text-amber-800',
+      'user_iv'          => 'from-emerald-50 to-emerald-100 text-emerald-800',
+      'user_trainer_iv'  => 'from-lime-50 to-lime-100 text-lime-800',
+      'offer'            => 'from-pink-50 to-pink-100 text-pink-800',
+      'mcu'              => 'from-cyan-50 to-cyan-100 text-cyan-800',
+      'mobilisasi'       => 'from-orange-50 to-orange-100 text-orange-800',
+      'ground_test'      => 'from-purple-50 to-purple-100 text-purple-800',
+      'hired'            => 'from-green-50 to-green-100 text-green-800',
+      'not_qualified'    => 'from-slate-50 to-slate-100 text-slate-700',
     ];
 
     $badgeOverall = [
@@ -42,7 +52,7 @@
     ];
   @endphp
 
-  {{-- Header panel ala bar biru–merah --}}
+  {{-- Header panel --}}
   <div class="relative rounded-2xl border border-slate-200 bg-white shadow-sm mb-5">
     <div class="h-2 rounded-t-2xl overflow-hidden">
       <div class="h-full w-full flex">
@@ -54,7 +64,9 @@
       <div class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>
           <h1 class="text-2xl md:text-3xl font-semibold tracking-tight text-slate-900">Kanban Kandidat</h1>
-          <p class="text-sm text-slate-600">Drag & drop kartu antar stage. Klik <b>Schedule</b> untuk kirim undangan interview (ICS).</p>
+          <p class="text-sm text-slate-600">
+            Drag & drop kartu antar stage. Klik <b>Schedule</b> untuk kirim undangan interview (ICS).
+          </p>
         </div>
 
         {{-- Filter ringkas --}}
@@ -140,7 +152,7 @@
                     </div>
 
                     <div class="mt-3 flex items-center justify-end gap-2">
-                      @if(in_array($stageKey, ['hr_iv','user_iv']))
+                      @if(in_array($stageKey, ['hr_iv','user_iv','user_trainer_iv']))
                         <button
                           type="button"
                           class="btn btn-primary btn-sm"

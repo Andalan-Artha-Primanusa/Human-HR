@@ -111,9 +111,9 @@
   {{-- TABEL --}}
   @php /** @var \Illuminate\Contracts\Pagination\LengthAwarePaginator|\Illuminate\Support\Collection $sites */ @endphp
   @if(isset($sites) && $sites->count())
-    <div class="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
+    <div class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
       <table class="min-w-full text-sm">
-        <thead class="bg-slate-50 text-slate-600">
+        <thead class="bg-slate-800 text-white">
           <tr>
             <th class="px-4 py-3 text-left">Nama</th>
             <th class="px-4 py-3 text-left">Kode</th>

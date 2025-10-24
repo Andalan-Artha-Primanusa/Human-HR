@@ -22,29 +22,79 @@ class ApplicationController extends Controller
 {
     /**
      * === Canonical stage keys (SELARAS DENGAN BLADE/KANBAN) ===
-     * applied, psychotest, hr_iv, user_iv, final, offer, hired, not_qualified
+     * HO:   Applied → Screening → Psikotest → HR Interview → User Interview → OL → Hired
+     * Site: (Staff) sama, ditambah MCU → Mobilisasi sebelum Hired
+     *       (Non-Staff Equipment/Non-Equipment) tanpa Psikotest, tambah User/Trainer Interview + Ground Test
+     *
+     * Kolom Kanban disatukan agar bisa menampung semua jalur: 
+     * applied, screening, psychotest, hr_iv, user_iv, user_trainer_iv, offer(OL), mcu, mobilisasi, ground_test, hired, not_qualified
      */
     protected array $STAGES = [
-        'applied','psychotest','hr_iv','user_iv','final','offer','hired','not_qualified',
+        'applied',
+        'screening',
+        'psychotest',
+        'hr_iv',
+        'user_iv',
+        'user_trainer_iv',
+        'offer',        // tampil sebagai "OL"
+        'mcu',
+        'mobilisasi',
+        'ground_test',
+        'hired',
+        'not_qualified',
     ];
 
-    /** Alias masuk -> canonical */
+    /** Alias masuk -> canonical (biar input bebas, key-nya konsisten) */
     protected array $ALIASES_IN = [
+        // dasar
         'apply' => 'applied','applied' => 'applied',
-        'psychotest' => 'psychotest',
-        'hr_iv' => 'hr_iv','hriv'=>'hr_iv',
-        'user_iv'=>'user_iv','useriv'=>'user_iv',
-        'final'=>'final','final_interview'=>'final',
-        'offering'=>'offer','offer'=>'offer',
+
+        // screening / seleksi berkas
+        'screening' => 'screening',
+        'screening_cv' => 'screening','screening-berkas' => 'screening',
+        'screening_berkas' => 'screening','seleksi_berkas' => 'screening',
+
+        // psikotes
+        'psychotest' => 'psychotest','psikotest' => 'psychotest',
+
+        // interview
+        'hr_iv' => 'hr_iv','hriv'=>'hr_iv','hr-interview' => 'hr_iv',
+        'user_iv'=>'user_iv','useriv'=>'user_iv','user-interview' => 'user_iv',
+        'user_trainer_iv' => 'user_trainer_iv','user-trainer' => 'user_trainer_iv',
+        'trainer_iv' => 'user_trainer_iv','trainer-interview' => 'user_trainer_iv',
+
+        // offering letter
+        'offering'=>'offer','offer'=>'offer','ol' => 'offer',
+
+        // medis & mobilisasi
+        'mcu' => 'mcu','medical_checkup' => 'mcu',
+        'mobilisasi' => 'mobilisasi','mobilization' => 'mobilisasi',
+
+        // ground test
+        'ground_test' => 'ground_test','ground-test' => 'ground_test',
+
+        // hasil akhir
         'diterima'=>'hired','hired'=>'hired',
         'rejected'=>'not_qualified','not_qualified'=>'not_qualified','not-qualified'=>'not_qualified','notqualified'=>'not_qualified',
+
+        // kompat lama (tidak tampil sebagai kolom, tapi masih diterima)
+        'final'=>'user_iv','final_interview'=>'user_iv',
     ];
 
-    /** Label cantik (opsional) */
+    /** Label cantik (untuk UI) */
     protected array $PRETTY = [
-        'applied'=>'Pengajuan Berkas','psychotest'=>'Psikotes',
-        'hr_iv'=>'HR Interview','user_iv'=>'User Interview',
-        'final'=>'Final','offer'=>'Offering','hired'=>'Diterima','not_qualified'=>'Tidak Lolos',
+        'applied'         => 'Applied',
+        'screening'       => 'Screening CV/Berkas Lamaran',
+        'psychotest'      => 'Psikotest',
+        'hr_iv'           => 'HR Interview',
+        'user_iv'         => 'User Interview',
+        'user_trainer_iv' => 'User/Trainer Interview',
+        'offer'           => 'OL',
+        'mcu'             => 'MCU',
+        'mobilisasi'      => 'Mobilisasi',
+        'ground_test'     => 'Ground Test',
+        'hired'           => 'Hired',
+        'not_qualified'   => 'Tidak Lolos',
     ];
 
     /** Offer yang baru dibuat (untuk redirect ke PDF) */
@@ -224,14 +274,19 @@ class ApplicationController extends Controller
     protected function stageIndex(string $s): int
     {
         $idx = array_search($s, $this->STAGES, true);
-        return $idx === false ? 0 : $idx;
+        return $idx === false ? -1 : $idx;
     }
 
     /** Apakah perpindahan ini mundur ke sebelum 'offer'? */
     protected function isBackwardBeforeOffer(string $from, string $to): bool
     {
         $offerIdx = $this->stageIndex('offer');
-        return $this->stageIndex($to) < $offerIdx && $this->stageIndex($from) >= $offerIdx;
+        $fromIdx  = $this->stageIndex($from);
+        $toIdx    = $this->stageIndex($to);
+        if ($offerIdx < 0) return false;
+        if ($fromIdx < 0)  return false;
+        if ($toIdx   < 0)  return false;
+        return $toIdx < $offerIdx && $fromIdx >= $offerIdx;
     }
 
     /** Hapus Offer + file PDF (jika ada tersimpan) */
@@ -271,14 +326,14 @@ class ApplicationController extends Controller
     /** @return array{string,string,?string,?float} */
     protected function validateMove(Request $request): array
     {
-        $allowedStages = $this->STAGES;
+        $allowedStages = array_unique(array_merge($this->STAGES, array_values($this->ALIASES_IN)));
         $allowedStatus = ['pending','passed','failed','no-show','reschedule'];
 
         $toRaw = $request->input('to') ?? $request->input('to_stage');
 
         $validated = $request->validate([
-            'to'        => ['nullable', Rule::in(array_unique(array_merge($allowedStages, array_keys($this->ALIASES_IN))))],
-            'to_stage'  => ['nullable', Rule::in(array_unique(array_merge($allowedStages, array_keys($this->ALIASES_IN))))],
+            'to'        => ['nullable', Rule::in($allowedStages)],
+            'to_stage'  => ['nullable', Rule::in($allowedStages)],
             'status'    => ['nullable', Rule::in($allowedStatus)],
             'note'      => ['nullable', 'string'],
             'score'     => ['nullable', 'numeric'],
@@ -488,11 +543,11 @@ class ApplicationController extends Controller
                         ->with('ok', 'Silakan mulai Psikotes.');
                 }
                 return redirect()->route('admin.psychotests.index', ['focus' => $application->id])
-                    ->with('ok', 'Stage dipindah ke PSIKOTES.');
+                    ->with('ok', 'Stage dipindah ke PSIKOTEST.');
 
             case 'hr_iv':
             case 'user_iv':
-            case 'final':
+            case 'user_trainer_iv':
                 return redirect()->route('admin.interviews.index', ['focus' => $application->id])
                     ->with('ok', 'Stage dipindah ke '.strtoupper($this->PRETTY[$to] ?? $to).'.');
 
@@ -500,11 +555,17 @@ class ApplicationController extends Controller
                 $offer = $this->offerJustCreated ?: $application->offer()->first();
                 if ($offer) {
                     return redirect()->route('admin.offers.pdf', $offer)
-                        ->with('ok', 'Stage dipindah ke OFFERING. Menampilkan Offering Letter.');
+                        ->with('ok', 'Stage dipindah ke OL. Menampilkan Offering Letter.');
                 }
                 return redirect()->route('admin.offers.index', ['focus' => $application->id])
-                    ->with('ok', 'Stage dipindah ke OFFERING.');
+                    ->with('ok', 'Stage dipindah ke OL.');
             }
+
+            case 'mcu':
+            case 'mobilisasi':
+            case 'ground_test':
+                return redirect()->route('admin.applications.index', ['focus' => $application->id])
+                    ->with('ok', 'Stage dipindah ke '.strtoupper($this->PRETTY[$to] ?? $to).'.');
 
             case 'hired': {
                 $offer = $this->offerJustCreated ?: $application->offer()->first();
@@ -521,6 +582,7 @@ class ApplicationController extends Controller
                     ->with('ok', 'Stage dipindah ke '.strtoupper($this->PRETTY[$to] ?? $to).'.');
 
             case 'applied':
+            case 'screening':
             default:
                 return redirect()->back(303)->with('ok', 'Stage dipindah ke: '.strtoupper($this->PRETTY[$to] ?? $to));
         }

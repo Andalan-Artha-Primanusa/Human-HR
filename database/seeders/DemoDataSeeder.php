@@ -17,7 +17,7 @@ use App\Models\{
     PsychotestAttempt,
     Interview,
     Offer,
-    ManpowerRequirement, // ⬅️ gunakan model budget_headcount
+    ManpowerRequirement, // budget_headcount dihitung di model
 };
 
 class DemoDataSeeder extends Seeder
@@ -27,69 +27,64 @@ class DemoDataSeeder extends Seeder
         /* ===============================
          * USERS (idempotent by email)
          * =============================== */
-        $super = User::updateOrCreate(
-            ['email' => 'admin@local.test'],
-            [
-                'name'              => 'Super Admin',
-                'email_verified_at' => now(),
-                'password'          => Hash::make('password123'),
-                'role'              => 'superadmin',
-                'remember_token'    => Str::random(10),
-            ]
-        );
+        $staff = [
+            ['email' => 'admin@local.test', 'name' => 'Super Admin', 'role' => 'superadmin', 'password' => 'password123'],
+            ['email' => 'hr@demo.test',     'name' => 'HR User',     'role' => 'hr',         'password' => 'password'],
+            ['email' => 'hr2@demo.test',    'name' => 'HR Senior',   'role' => 'hr',         'password' => 'password'],
+        ];
 
-        $hr = User::updateOrCreate(
-            ['email' => 'hr@demo.test'],
-            [
-                'name'              => 'HR User',
-                'email_verified_at' => now(),
-                'password'          => Hash::make('password'),
-                'role'              => 'hr',
-                'remember_token'    => Str::random(10),
-            ]
-        );
+        $candidates = [
+            ['email' => 'andi@demo.test',  'name' => 'Andi Pelamar'],
+            ['email' => 'bela@demo.test',  'name' => 'Bela Pelamar'],
+            ['email' => 'cici@demo.test',  'name' => 'Cici Pelamar'],
+            ['email' => 'dodi@demo.test',  'name' => 'Dodi Pelamar'],
+            ['email' => 'eko@demo.test',   'name' => 'Eko Pelamar'],
+            ['email' => 'fira@demo.test',  'name' => 'Fira Pelamar'],
+            ['email' => 'gina@demo.test',  'name' => 'Gina Pelamar'],
+            ['email' => 'hadi@demo.test',  'name' => 'Hadi Pelamar'],
+            ['email' => 'intan@demo.test', 'name' => 'Intan Pelamar'],
+            ['email' => 'joni@demo.test',  'name' => 'Joni Pelamar'],
+        ];
 
-        $c1 = User::updateOrCreate(
-            ['email' => 'andi@demo.test'],
-            [
-                'name'              => 'Andi Pelamar',
-                'email_verified_at' => now(),
-                'password'          => Hash::make('password'),
-                'role'              => 'pelamar',
-                'remember_token'    => Str::random(10),
-            ]
-        );
-        $c2 = User::updateOrCreate(
-            ['email' => 'bela@demo.test'],
-            [
-                'name'              => 'Bela Pelamar',
-                'email_verified_at' => now(),
-                'password'          => Hash::make('password'),
-                'role'              => 'pelamar',
-                'remember_token'    => Str::random(10),
-            ]
-        );
-        $c3 = User::updateOrCreate(
-            ['email' => 'cici@demo.test'],
-            [
-                'name'              => 'Cici Pelamar',
-                'email_verified_at' => now(),
-                'password'          => Hash::make('password'),
-                'role'              => 'pelamar',
-                'remember_token'    => Str::random(10),
-            ]
-        );
+        $users = [];
+
+        foreach ($staff as $s) {
+            $users[$s['email']] = User::updateOrCreate(
+                ['email' => $s['email']],
+                [
+                    'name'              => $s['name'],
+                    'email_verified_at' => now(),
+                    'password'          => Hash::make($s['password']),
+                    'role'              => $s['role'],
+                    'remember_token'    => Str::random(10),
+                ]
+            );
+        }
+
+        foreach ($candidates as $c) {
+            $users[$c['email']] = User::updateOrCreate(
+                ['email' => $c['email']],
+                [
+                    'name'              => $c['name'],
+                    'email_verified_at' => now(),
+                    'password'          => Hash::make('password'),
+                    'role'              => 'pelamar',
+                    'remember_token'    => Str::random(10),
+                ]
+            );
+        }
 
         /* ===============================
          * CANDIDATE PROFILES (upsert)
          * =============================== */
-        foreach ([$c1, $c2, $c3] as $u) {
+        foreach ($candidates as $c) {
+            $u = $users[$c['email']];
             CandidateProfile::updateOrCreate(
                 ['user_id' => $u->id],
                 [
                     'full_name'      => $u->name,
                     'phone'          => '081234567890',
-                    'ktp_address'    => 'Jl. Contoh No.1',
+                    'ktp_address'    => 'Jl. Contoh No. 1',
                     'ktp_city'       => 'Jakarta',
                     'domicile_city'  => 'Jakarta',
                     'extras'         => ['portfolio' => null],
@@ -104,469 +99,250 @@ class DemoDataSeeder extends Seeder
             'HO'  => 'Head Office',
             'DBK' => 'Site Debukit',
             'POS' => 'Site Pos',
-            'SBS' => 'Site Sabas', // ⬅️ ditambah
+            'SBS' => 'Site Sabas',
+            'MKS' => 'Site Makassar',
         ];
         $siteMap = [];
         foreach ($sitesByCode as $code => $name) {
-            $site = Site::updateOrCreate(['code' => $code], ['name' => $name]);
-            $siteMap[$code] = $site;
+            $siteMap[$code] = Site::updateOrCreate(['code' => $code], ['name' => $name]);
         }
 
         /* ===============================
          * JOBS + MANPOWER per-site (upsert)
-         * Deskripsi HTML lengkap + skills + keywords
          * =============================== */
         $manpowerMatrix = [
-            // site_code => [assets_count, ratio]
+            // site_code => assets, ratio
             'DBK' => ['assets' => 12, 'ratio' => 2.50],
             'POS' => ['assets' =>  5, 'ratio' => 2.60],
             'HO'  => ['assets' =>  3, 'ratio' => 2.50],
             'SBS' => ['assets' =>  7, 'ratio' => 2.40],
+            'MKS' => ['assets' =>  6, 'ratio' => 2.30],
         ];
 
-        // Helper deskripsi HTML (ringkas, rapi)
+        // Helper deskripsi HTML rapi
         $desc = fn(array $d) => sprintf(
             '<div>
                <p class="mb-2">%s</p>
                <h4 class="mt-3 mb-1"><strong>Tanggung Jawab</strong></h4>
-               <ul>
-                 %s
-               </ul>
+               <ul>%s</ul>
                <h4 class="mt-3 mb-1"><strong>Kualifikasi</strong></h4>
-               <ul>
-                 %s
-               </ul>
+               <ul>%s</ul>
                <h4 class="mt-3 mb-1"><strong>Benefit</strong></h4>
-               <ul>
-                 %s
-               </ul>
+               <ul>%s</ul>
              </div>',
             e($d['intro']),
-            collect($d['resp'])->map(fn($li) => '<li>'.e($li).'</li>')->implode(''),
-            collect($d['reqs'])->map(fn($li) => '<li>'.e($li).'</li>')->implode(''),
-            collect($d['benefit'])->map(fn($li) => '<li>'.e($li).'</li>')->implode('')
+            collect($d['resp'])->map(fn($li) => '<li>' . e($li) . '</li>')->implode(''),
+            collect($d['reqs'])->map(fn($li) => '<li>' . e($li) . '</li>')->implode(''),
+            collect($d['benefit'])->map(fn($li) => '<li>' . e($li) . '</li>')->implode('')
         );
 
+        // ====== Banyak lowongan
         $jobDefs = [
-            // ===== Existing (diperkaya) =====
+            // Plant & Maintenance
             [
-                'code'             => 'PLT-ENG-01',
-                'title'            => 'Plant Engineer',
-                'division'         => 'Plant',
-                'site_code'        => 'DBK',
-                'level'            => 'Staff',
-                'employment_type'  => 'fulltime',
-                'openings'         => 2, // akan di-recalc
-                'status'           => 'open',
-                'skills'           => ['CMMS', 'Preventive Maintenance', 'Root Cause Analysis', 'Reliability'],
-                'keywords'         => 'maintenance,routes,plant,engineer,cmms,rca',
-                'description'      => $desc([
-                    'intro'   => 'Bertanggung jawab pada pemeliharaan peralatan plant untuk mencapai availability & reliability target.',
-                    'resp'    => [
-                        'Menyusun jadwal preventive & predictive maintenance.',
-                        'Koordinasi perbaikan breakdown & root cause analysis (RCA).',
-                        'Update master data aset & history di CMMS.',
-                        'Kolaborasi dengan HSE terkait perizinan pekerjaan dan safety lockout/tagout.',
-                    ],
-                    'reqs'    => [
-                        'Min. S1 Teknik (Mesin/Elektro/Industri) atau setara.',
-                        'Pengalaman 1–3 tahun di area plant/maintenance.',
-                        'Mahir membaca P&ID, manual teknis, dan SOP.',
-                        'Mampu menggunakan CMMS & basic MS Office.',
-                    ],
-                    'benefit' => [
-                        'Asuransi kesehatan dasar + rawat jalan.',
-                        'Mess/akomodasi site (bila penempatan site).',
-                        'Kesempatan pelatihan teknis & sertifikasi.',
-                    ],
+                'code' => 'PLT-ENG-01',
+                'title' => 'Plant Engineer',
+                'division' => 'Plant',
+                'site_code' => 'DBK',
+                'level' => 'Staff',
+                'employment_type' => 'fulltime',
+                'openings' => 2,
+                'status' => 'open',
+                'skills' => ['CMMS', 'Preventive Maintenance', 'Root Cause Analysis', 'Reliability'],
+                'keywords' => 'maintenance,routes,plant,engineer,cmms,rca',
+                'description' => $desc([
+                    'intro' => 'Bertanggung jawab pemeliharaan peralatan plant untuk availability & reliability target.',
+                    'resp' => ['Jadwal preventive & predictive maintenance', 'Koordinasi breakdown & RCA', 'Update histori CMMS', 'Kolaborasi HSE perizinan kerja'],
+                    'reqs' => ['S1 Teknik Mesin/Elektro/Industri', '1–3 tahun di maintenance/plant', 'Baca P&ID, manual, SOP', 'CMMS & MS Office'],
+                    'benefit' => ['Asuransi kesehatan', 'Mess site', 'Pelatihan & sertifikasi'],
                 ]),
             ],
             [
-                'code'             => 'SCM-BUY-01',
-                'title'            => 'Buyer',
-                'division'         => 'SCM',
-                'site_code'        => 'POS',
-                'level'            => 'Officer',
-                'employment_type'  => 'contract',
-                'openings'         => 1,
-                'status'           => 'open',
-                'skills'           => ['Procurement', 'Vendor Management', 'PO/PR', 'Negotiation'],
-                'keywords'         => 'buyer,scm,purchasing,procurement,pr,po,vendor',
-                'description'      => $desc([
-                    'intro'   => 'Menangani proses pembelian (PR–PO) untuk memastikan ketersediaan barang/jasa tepat mutu, biaya, dan waktu.',
-                    'resp'    => [
-                        'Review PR & mengeksekusi RFQ ke vendor terpilih.',
-                        'Negosiasi harga, kualitas, SLA, dan syarat pembayaran.',
-                        'Pembuatan PO & tindak lanjut pengiriman.',
-                        'Evaluasi vendor & perbarui master data vendor.',
-                    ],
-                    'reqs'    => [
-                        'Min. D3/S1 semua jurusan.',
-                        'Pengalaman 1–2 tahun di pembelian/SCM diutamakan.',
-                        'Komunikatif, teliti, dan negosiator yang baik.',
-                    ],
-                    'benefit' => [
-                        'BPJS & tunjangan transport.',
-                        'Kesempatan rotasi lintas site.',
-                    ],
+                'code' => 'PLT-MECH-01',
+                'title' => 'Mechanic',
+                'division' => 'Plant',
+                'site_code' => 'DBK',
+                'level' => 'Staff',
+                'employment_type' => 'fulltime',
+                'openings' => 3,
+                'status' => 'open',
+                'skills' => ['Engine', 'Hydraulic', 'Welding'],
+                'keywords' => 'mechanic,plant,maintenance,engine',
+                'description' => $desc([
+                    'intro' => 'Melakukan perbaikan dan perawatan unit mekanikal.',
+                    'resp' => ['Troubleshooting', 'Overhaul ringan', 'Perawatan berkala'],
+                    'reqs' => ['SMK/D3 Mesin', 'Pengalaman 1 tahun'],
+                    'benefit' => ['Asuransi', 'Mess', 'Uang lembur'],
                 ]),
             ],
             [
-                'code'             => 'HR-RECR-01',
-                'title'            => 'Recruiter',
-                'division'         => 'HR',
-                'site_code'        => 'HO',
-                'level'            => 'Staff',
-                'employment_type'  => 'fulltime',
-                'openings'         => 1,
-                'status'           => 'open',
-                'skills'           => ['Sourcing', 'Interviewing', 'ATS', 'Candidate Experience'],
-                'keywords'         => 'recruiter,hr,hiring,interview,ats,sourcing',
-                'description'      => $desc([
-                    'intro'   => 'End-to-end recruitment: mulai dari sourcing hingga offering, memastikan candidate experience yang baik.',
-                    'resp'    => [
-                        'Sourcing kandidat dari job board & referral.',
-                        'Screening CV & interview awal (HR interview).',
-                        'Koordinasi psikotes & user interview.',
-                        'Menyusun offering & follow-up onboarding.',
-                    ],
-                    'reqs'    => [
-                        'Min. S1 Psikologi/Manajemen/SDM.',
-                        'Memahami teknik interview & penilaian kompetensi.',
-                        'Terbiasa menggunakan ATS atau spreadsheet tracking.',
-                    ],
-                    'benefit' => [
-                        'Asuransi kesehatan & tunjangan komunikasi.',
-                        'Hybrid WFO/WFH (sesuai kebijakan).',
-                    ],
+                'code' => 'ELEC-TECH-01',
+                'title' => 'Electrical Technician',
+                'division' => 'Plant',
+                'site_code' => 'SBS',
+                'level' => 'Staff',
+                'employment_type' => 'fulltime',
+                'openings' => 2,
+                'status' => 'open',
+                'skills' => ['PLC', 'Troubleshooting', 'Panel'],
+                'keywords' => 'electrical,plc,panel,troubleshoot',
+                'description' => $desc([
+                    'intro' => 'Menangani sistem kelistrikan dan PLC.',
+                    'resp' => ['Perbaikan panel', 'Cek sensor/actuator', 'Update wiring'],
+                    'reqs' => ['D3 Elektro', 'Baca diagram kelistrikan'],
+                    'benefit' => ['Asuransi', 'Mess', 'Pelatihan'],
                 ]),
             ],
 
-            // ===== Paket INTERN (lengkap division + site) =====
+            // SCM & Warehouse
             [
-                'code'             => 'IT-INT-01',
-                'title'            => 'IT Support Intern',
-                'division'         => 'IT',
-                'site_code'        => 'HO',
-                'level'            => 'Intern',
-                'employment_type'  => 'intern',
-                'openings'         => 1,
-                'status'           => 'open',
-                'skills'           => ['Helpdesk', 'Asset Tagging', 'Troubleshooting', 'Windows'],
-                'keywords'         => 'intern,it support,helpdesk,tagging,troubleshooting',
-                'description'      => $desc([
-                    'intro'   => 'Mendukung aktivitas helpdesk, penandaan aset, dan troubleshooting endpoint.',
-                    'resp'    => [
-                        'Menangani tiket harian (hardware/software).',
-                        'Asset tagging & update inventory.',
-                        'Install/konfigurasi aplikasi standar perusahaan.',
-                    ],
-                    'reqs'    => [
-                        'Mahasiswa aktif/semester akhir TI/SI/Ilkom.',
-                        'Paham OS Windows & dasar jaringan.',
-                    ],
-                    'benefit' => [
-                        'Uang saku & sertifikat magang.',
-                        'Akses pembelajaran internal (KB/Docs).',
-                    ],
+                'code' => 'SCM-BUY-01',
+                'title' => 'Buyer',
+                'division' => 'SCM',
+                'site_code' => 'POS',
+                'level' => 'Officer',
+                'employment_type' => 'contract',
+                'openings' => 1,
+                'status' => 'open',
+                'skills' => ['Procurement', 'Vendor Management', 'PO/PR', 'Negotiation'],
+                'keywords' => 'buyer,scm,purchasing,procurement,pr,po,vendor',
+                'description' => $desc([
+                    'intro' => 'Mengelola PR–PO untuk ketersediaan barang/jasa.',
+                    'resp' => ['RFQ & negosiasi', 'Terbitkan PO & follow-up', 'Evaluasi vendor'],
+                    'reqs' => ['D3/S1', 'Pengalaman 1–2 tahun'],
+                    'benefit' => ['BPJS', 'Transport'],
                 ]),
             ],
             [
-                'code'             => 'HR-INT-01',
-                'title'            => 'HR Intern',
-                'division'         => 'HR',
-                'site_code'        => 'HO',
-                'level'            => 'Intern',
-                'employment_type'  => 'intern',
-                'openings'         => 2,
-                'status'           => 'open',
-                'skills'           => ['Coordination', 'Data Entry', 'Communication'],
-                'keywords'         => 'intern,hr,recruitment,data entry,coordination',
-                'description'      => $desc([
-                    'intro'   => 'Mendukung koordinasi rekrutmen & entri data HRIS.',
-                    'resp'    => [
-                        'Jadwalkan interview & follow up kandidat.',
-                        'Input data kandidat/pegawai ke HRIS.',
-                        'Dokumentasi administrasi HR.',
-                    ],
-                    'reqs'    => [
-                        'Mahasiswa Psikologi/Manajemen/SDM.',
-                        'Rapi & teliti, komunikatif.',
-                    ],
-                    'benefit' => [
-                        'Uang saku & sertifikat magang.',
-                        'Exposure proses HR end-to-end.',
-                    ],
+                'code' => 'WH-ADM-01',
+                'title' => 'Warehouse Admin',
+                'division' => 'SCM',
+                'site_code' => 'POS',
+                'level' => 'Staff',
+                'employment_type' => 'fulltime',
+                'openings' => 2,
+                'status' => 'open',
+                'skills' => ['Inventory', 'FIFO', 'Documentation'],
+                'keywords' => 'warehouse,inventory,admin,fifo',
+                'description' => $desc([
+                    'intro' => 'Administrasi gudang & inventory.',
+                    'resp' => ['Penerimaan barang', 'Stok opname', 'Dokumentasi keluar masuk'],
+                    'reqs' => ['SMK/D3', 'Teliti & rapi'],
+                    'benefit' => ['BPJS', 'Uang makan'],
+                ]),
+            ],
+
+            // HR & Office
+            [
+                'code' => 'HR-RECR-01',
+                'title' => 'Recruiter',
+                'division' => 'HR',
+                'site_code' => 'HO',
+                'level' => 'Staff',
+                'employment_type' => 'fulltime',
+                'openings' => 1,
+                'status' => 'open',
+                'skills' => ['Sourcing', 'Interviewing', 'ATS', 'Candidate Experience'],
+                'keywords' => 'recruiter,hr,hiring,interview,ats,sourcing',
+                'description' => $desc([
+                    'intro' => 'End-to-end recruitment dengan candidate experience yang baik.',
+                    'resp' => ['Sourcing', 'Screening CV', 'Koordinasi tes & interview', 'Offering'],
+                    'reqs' => ['S1 Psikologi/Manajemen/SDM', 'Familiar ATS'],
+                    'benefit' => ['Asuransi', 'Hybrid'],
                 ]),
             ],
             [
-                'code'             => 'FIN-INT-01',
-                'title'            => 'Finance Intern',
-                'division'         => 'Finance',
-                'site_code'        => 'HO',
-                'level'            => 'Intern',
-                'employment_type'  => 'intern',
-                'openings'         => 1,
-                'status'           => 'open',
-                'skills'           => ['Budgeting', 'Reporting', 'Spreadsheet'],
-                'keywords'         => 'intern,finance,budget,reporting,excel',
-                'description'      => $desc([
-                    'intro'   => 'Mendukung budgeting & reporting dasar.',
-                    'resp'    => [
-                        'Entri & rekonsiliasi data transaksi.',
-                        'Membantu laporan rutin bulanan.',
-                    ],
-                    'reqs'    => [
-                        'Mahasiswa Akuntansi/Keuangan.',
-                        'Menguasai spreadsheet (formula dasar).',
-                    ],
-                    'benefit' => [
-                        'Uang saku.',
-                        'Mentoring dari tim Finance.',
-                    ],
+                'code' => 'IT-INT-01',
+                'title' => 'IT Support Intern',
+                'division' => 'IT',
+                'site_code' => 'HO',
+                'level' => 'Intern',
+                'employment_type' => 'intern',
+                'openings' => 1,
+                'status' => 'open',
+                'skills' => ['Helpdesk', 'Asset Tagging', 'Troubleshooting', 'Windows'],
+                'keywords' => 'intern,it support,helpdesk,tagging,troubleshooting',
+                'description' => $desc([
+                    'intro' => 'Mendukung helpdesk & inventory aset.',
+                    'resp' => ['Tiket harian', 'Asset tagging', 'Install aplikasi'],
+                    'reqs' => ['Mahasiswa TI/SI/Ilkom', 'Dasar jaringan'],
+                    'benefit' => ['Uang saku', 'Sertifikat'],
+                ]),
+            ],
+
+            // HSE & QA
+            [
+                'code' => 'HSE-OFF-01',
+                'title' => 'HSE Officer',
+                'division' => 'HSE',
+                'site_code' => 'DBK',
+                'level' => 'Staff',
+                'employment_type' => 'fulltime',
+                'openings' => 1,
+                'status' => 'open',
+                'skills' => ['Safety Audit', 'PPE', 'Incident Report'],
+                'keywords' => 'hse,safety,audit,ppe',
+                'description' => $desc([
+                    'intro' => 'Menjaga kepatuhan K3 di area kerja.',
+                    'resp' => ['Safety walk', 'Inspeksi PPE', 'Laporan insiden'],
+                    'reqs' => ['D3/S1 K3/Teknik', 'Paham peraturan K3'],
+                    'benefit' => ['Asuransi', 'Mess'],
                 ]),
             ],
             [
-                'code'             => 'QA-INT-01',
-                'title'            => 'QA Intern',
-                'division'         => 'QA',
-                'site_code'        => 'SBS',
-                'level'            => 'Intern',
-                'employment_type'  => 'intern',
-                'openings'         => 1,
-                'status'           => 'open',
-                'skills'           => ['Inspection', 'Documentation', '5S'],
-                'keywords'         => 'intern,qa,inspection,documentation,quality',
-                'description'      => $desc([
-                    'intro'   => 'Mendukung inline inspection & dokumentasi mutu.',
-                    'resp'    => [
-                        'Sampling & pencatatan hasil pemeriksaan.',
-                        'Bantu perbaikan dokumen SOP/IK.',
-                    ],
-                    'reqs'    => [
-                        'Mahasiswa Teknik/Industri.',
-                        'Teliti & rapi.',
-                    ],
-                    'benefit' => [
-                        'Uang saku.',
-                        'Pengenalan sistem mutu di site.',
-                    ],
+                'code' => 'QA-TECH-01',
+                'title' => 'QA Technician',
+                'division' => 'QA',
+                'site_code' => 'SBS',
+                'level' => 'Staff',
+                'employment_type' => 'fulltime',
+                'openings' => 1,
+                'status' => 'open',
+                'skills' => ['Sampling', '5S', 'Documentation'],
+                'keywords' => 'qa,sampling,5s,doc',
+                'description' => $desc([
+                    'intro' => 'Mendukung inline inspection dan dokumentasi mutu.',
+                    'resp' => ['Sampling', 'Pencatatan hasil', 'Perbaikan dokumen SOP/IK'],
+                    'reqs' => ['D3/S1 Teknik/Industri', 'Teliti & rapi'],
+                    'benefit' => ['Asuransi', 'Uang makan'],
+                ]),
+            ],
+
+            // Operations
+            [
+                'code' => 'OPS-DRV-01',
+                'title' => 'Driver Operasional',
+                'division' => 'Operations',
+                'site_code' => 'MKS',
+                'level' => 'Non Staff',
+                'employment_type' => 'fulltime',
+                'openings' => 4,
+                'status' => 'open',
+                'skills' => ['Defensive Driving', 'Logbook'],
+                'keywords' => 'driver,operational,logbook',
+                'description' => $desc([
+                    'intro' => 'Mengemudi untuk kebutuhan operasional site.',
+                    'resp' => ['Antar-jemput personel', 'Perawatan kendaraan ringan', 'Isi logbook'],
+                    'reqs' => ['SIM A aktif', 'Pengalaman 1 tahun'],
+                    'benefit' => ['Asuransi', 'Uang makan', 'Uang lembur'],
                 ]),
             ],
             [
-                'code'             => 'PLT-INT-01',
-                'title'            => 'Plant Intern',
-                'division'         => 'Plant',
-                'site_code'        => 'DBK',
-                'level'            => 'Intern',
-                'employment_type'  => 'intern',
-                'openings'         => 2,
-                'status'           => 'open',
-                'skills'           => ['Maintenance Basics', 'Safety', 'CMMS'],
-                'keywords'         => 'intern,plant,maintenance,cmms,safety',
-                'description'      => $desc([
-                    'intro'   => 'Belajar rutin pemeliharaan & dasar reliability.',
-                    'resp'    => [
-                        'Mendampingi preventive maintenance.',
-                        'Update data aset di CMMS.',
-                    ],
-                    'reqs'    => [
-                        'Mahasiswa Teknik Mesin/Elektro.',
-                        'Tertib keselamatan kerja.',
-                    ],
-                    'benefit' => [
-                        'Uang saku & mess (jika perlu).',
-                        'Rotasi exposure unit alat.',
-                    ],
-                ]),
-            ],
-            [
-                'code'             => 'SCM-INT-01',
-                'title'            => 'Supply Chain Intern',
-                'division'         => 'SCM',
-                'site_code'        => 'POS',
-                'level'            => 'Intern',
-                'employment_type'  => 'intern',
-                'openings'         => 2,
-                'status'           => 'open',
-                'skills'           => ['Inventory', 'Purchasing', 'Documentation'],
-                'keywords'         => 'intern,scm,inventory,purchasing,stock',
-                'description'      => $desc([
-                    'intro'   => 'Mendukung purchasing & monitoring inventory.',
-                    'resp'    => [
-                        'Update status PR/PO.',
-                        'Cek & input stok barang.',
-                    ],
-                    'reqs'    => [
-                        'Mahasiswa Manajemen/Logistik.',
-                        'Rapi administrasi & komunikatif.',
-                    ],
-                    'benefit' => [
-                        'Uang saku.',
-                        'Belajar alur SCM end-to-end.',
-                    ],
-                ]),
-            ],
-            [
-                'code'             => 'MKT-INT-01',
-                'title'            => 'Marketing Intern',
-                'division'         => 'Marketing',
-                'site_code'        => 'HO',
-                'level'            => 'Intern',
-                'employment_type'  => 'intern',
-                'openings'         => 1,
-                'status'           => 'open',
-                'skills'           => ['Content', 'Copywriting', 'Analytics'],
-                'keywords'         => 'intern,marketing,content,copywriting,analytics',
-                'description'      => $desc([
-                    'intro'   => 'Bantu pembuatan konten & pelacakan campaign.',
-                    'resp'    => [
-                        'Membuat materi konten dasar.',
-                        'Rekap performa sederhana (view/click).',
-                    ],
-                    'reqs'    => [
-                        'Mahasiswa Komunikasi/Manajemen.',
-                        'Mampu menulis & presentasi ringkas.',
-                    ],
-                    'benefit' => [
-                        'Uang saku.',
-                        'Portofolio kampanye nyata.',
-                    ],
-                ]),
-            ],
-            [
-                'code'             => 'LEG-INT-01',
-                'title'            => 'Legal Intern',
-                'division'         => 'Legal',
-                'site_code'        => 'HO',
-                'level'            => 'Intern',
-                'employment_type'  => 'intern',
-                'openings'         => 1,
-                'status'           => 'open',
-                'skills'           => ['Contract Review', 'Filing', 'Research'],
-                'keywords'         => 'intern,legal,contract,filing,research',
-                'description'      => $desc([
-                    'intro'   => 'Mendukung review kontrak & kearsipan dokumen.',
-                    'resp'    => [
-                        'Kompilasi & filing dokumen legal.',
-                        'Riset regulasi sederhana.',
-                    ],
-                    'reqs'    => [
-                        'Mahasiswa Hukum.',
-                        'Rapi administrasi & detail oriented.',
-                    ],
-                    'benefit' => [
-                        'Uang saku.',
-                        'Eksposur dokumen kontrak riil.',
-                    ],
-                ]),
-            ],
-            [
-                'code'             => 'GA-INT-01',
-                'title'            => 'General Affairs Intern',
-                'division'         => 'GA',
-                'site_code'        => 'POS',
-                'level'            => 'Intern',
-                'employment_type'  => 'intern',
-                'openings'         => 1,
-                'status'           => 'open',
-                'skills'           => ['Office Admin', 'Vendor Follow-up', 'Documentation'],
-                'keywords'         => 'intern,ga,admin,vendor,office',
-                'description'      => $desc([
-                    'intro'   => 'Mendukung administrasi kantor & follow-up dokumen vendor.',
-                    'resp'    => [
-                        'Arsip dokumen & surat-menyurat.',
-                        'Follow up kebutuhan operasional.',
-                    ],
-                    'reqs'    => [
-                        'Mahasiswa semua jurusan.',
-                        'Komunikatif & rapi administrasi.',
-                    ],
-                    'benefit' => [
-                        'Uang saku.',
-                        'Pengalaman operasional harian.',
-                    ],
-                ]),
-            ],
-            [
-                'code'             => 'RND-INT-01',
-                'title'            => 'R&D Intern',
-                'division'         => 'R&D',
-                'site_code'        => 'SBS',
-                'level'            => 'Intern',
-                'employment_type'  => 'intern',
-                'openings'         => 1,
-                'status'           => 'open',
-                'skills'           => ['Experiment', 'Lab Notes', 'Data Entry'],
-                'keywords'         => 'intern,rd,lab,experiment,data',
-                'description'      => $desc([
-                    'intro'   => 'Mendukung eksperimen & pencatatan lab.',
-                    'resp'    => [
-                        'Menyiapkan alat & bahan dasar.',
-                        'Mencatat hasil uji sederhana.',
-                    ],
-                    'reqs'    => [
-                        'Mahasiswa Sains/Teknik.',
-                        'Rapi & teliti.',
-                    ],
-                    'benefit' => [
-                        'Uang saku.',
-                        'Paparan metode eksperimen.',
-                    ],
-                ]),
-            ],
-            [
-                'code'             => 'SALES-INT-01',
-                'title'            => 'Sales Intern',
-                'division'         => 'Sales',
-                'site_code'        => 'HO',
-                'level'            => 'Intern',
-                'employment_type'  => 'intern',
-                'openings'         => 2,
-                'status'           => 'open',
-                'skills'           => ['CRM', 'Prospecting', 'Communication'],
-                'keywords'         => 'intern,sales,crm,prospect,lead',
-                'description'      => $desc([
-                    'intro'   => 'Mendukung kurasi lead & update CRM.',
-                    'resp'    => [
-                        'Riset prospek & input CRM.',
-                        'Follow up jadwal meeting tim.',
-                    ],
-                    'reqs'    => [
-                        'Mahasiswa Manajemen/Pemasaran.',
-                        'Komunikasi lisan & tulisan baik.',
-                    ],
-                    'benefit' => [
-                        'Uang saku.',
-                        'Belajar siklus sales.',
-                    ],
-                ]),
-            ],
-            [
-                'code'             => 'HSE-INT-01',
-                'title'            => 'HSE Intern',
-                'division'         => 'HSE',
-                'site_code'        => 'DBK',
-                'level'            => 'Intern',
-                'employment_type'  => 'intern',
-                'openings'         => 1,
-                'status'           => 'open',
-                'skills'           => ['Safety Walk', 'PPE Check', 'Reporting'],
-                'keywords'         => 'intern,hse,safety,inspection,ppe',
-                'description'      => $desc([
-                    'intro'   => 'Mendukung safety walk-through & pemeriksaan PPE.',
-                    'resp'    => [
-                        'Checklist PPE & housekeeping.',
-                        'Bantu input laporan hazard/incident.',
-                    ],
-                    'reqs'    => [
-                        'Mahasiswa K3/Tehnik.',
-                        'Memahami dasar K3.',
-                    ],
-                    'benefit' => [
-                        'Uang saku.',
-                        'Paparan sistem HSE di site.',
-                    ],
+                'code' => 'OPS-OPR-01',
+                'title' => 'Operator Alat Berat',
+                'division' => 'Operations',
+                'site_code' => 'DBK',
+                'level' => 'Non Staff',
+                'employment_type' => 'fulltime',
+                'openings' => 5,
+                'status' => 'open',
+                'skills' => ['Excavator', 'Loader', 'Safety'],
+                'keywords' => 'operator,alat berat,excavator',
+                'description' => $desc([
+                    'intro' => 'Mengoperasikan alat berat sesuai SOP & K3.',
+                    'resp' => ['Operasikan unit', 'Periksa harian (P2H)', 'Lapor abnormal'],
+                    'reqs' => ['Sertifikat operator', 'Pengalaman 1 tahun'],
+                    'benefit' => ['Asuransi', 'Mess', 'Insentif'],
                 ]),
             ],
         ];
@@ -578,7 +354,7 @@ class DemoDataSeeder extends Seeder
                 ['job_id' => $job->id, 'site_id' => $site->id],
                 [
                     'assets_count'    => $assets,
-                    'ratio_per_asset' => $ratio, // budget_headcount dihitung di model hook (saving)
+                    'ratio_per_asset' => $ratio, // budget_headcount via model hook
                 ]
             );
             return $m->fresh();
@@ -592,30 +368,22 @@ class DemoDataSeeder extends Seeder
             }
         };
 
-        // Upsert jobs + manpower
+        // Upsert jobs + manpower (termasuk multi-site demo)
         $jobs = collect($jobDefs)->map(function ($d) use ($siteMap, $manpowerMatrix, $ensureManpower, $recalcJobOpenings) {
-            // Site utama
-            $site = $siteMap[$d['site_code']] ?? Site::firstOrCreate(
-                ['code' => $d['site_code']],
-                ['name' => $d['site_code']]
-            );
+            $site = $siteMap[$d['site_code']] ?? Site::firstOrCreate(['code' => $d['site_code']], ['name' => $d['site_code']]);
 
-            // payload Job tanpa site_code; ganti ke site_id
             $payload = collect($d)->except('site_code')->toArray();
             $payload['site_id'] = $site->id;
 
             /** @var Job $job */
-            $job = Job::updateOrCreate(
-                ['code' => $d['code']],
-                $payload
-            );
+            $job = Job::updateOrCreate(['code' => $d['code']], $payload);
 
-            // Manpower baris utama
+            // baris utama
             $mainAssets = $manpowerMatrix[$d['site_code']]['assets'] ?? $d['openings'];
             $mainRatio  = $manpowerMatrix[$d['site_code']]['ratio']  ?? 2.50;
             $ensureManpower($job, $site, (int) $mainAssets, (float) $mainRatio);
 
-            // Manpower baris tambahan (multi-site demo)
+            // baris tambahan untuk contoh multi-site
             foreach ($manpowerMatrix as $code => $cfg) {
                 if ($code === $d['site_code']) continue;
                 if (!isset($siteMap[$code])) continue;
@@ -624,11 +392,10 @@ class DemoDataSeeder extends Seeder
                 }
             }
 
-            // Recalc openings
             $recalcJobOpenings($job);
 
             return $job->fresh();
-        })->values();
+        })->keyBy('code');
 
         /* ===============================
          * PSYCHOTEST master (upsert)
@@ -644,21 +411,21 @@ class DemoDataSeeder extends Seeder
         );
 
         $bank = [
-            ['Q: 2+2=?',                           '1','2','4','5',       '4'],
-            ['Q: Ibu kota Indonesia?',             'Bandung','Jakarta','Medan','Surabaya','Jakarta'],
-            ['Q: Benar/Salah: Air membeku di 0°C', 'true','false', null, null, 'true','truefalse'],
-            ['Q: 5*3=?',                           '8','15','10','12',    '15'],
-            ['Q: Warna bendera: Merah-___',        'Putih','Biru','Hitam','Kuning','Putih'],
+            ['Q: 2+2=?',                           '1', '2', '4', '5',       '4'],
+            ['Q: Ibu kota Indonesia?',             'Bandung', 'Jakarta', 'Medan', 'Surabaya', 'Jakarta'],
+            ['Q: Benar/Salah: Air membeku di 0°C', 'true', 'false', null, null, 'true', 'truefalse'],
+            ['Q: 5*3=?',                           '8', '15', '10', '12',    '15'],
+            ['Q: Warna bendera: Merah-___',        'Putih', 'Biru', 'Hitam', 'Kuning', 'Putih'],
         ];
 
         foreach ($bank as $i => $row) {
-            [$q,$a,$b,$c,$d,$key,$type] = array_pad($row, 7, 'mcq');
+            [$q, $a, $b, $c, $d, $key, $type] = array_pad($row, 7, 'mcq');
             PsychotestQuestion::updateOrCreate(
                 ['test_id' => $test->id, 'order_no' => $i],
                 [
                     'type'       => $type === 'truefalse' ? 'truefalse' : 'mcq',
                     'question'   => $q,
-                    'options'    => $type === 'truefalse' ? null : [$a,$b,$c,$d],
+                    'options'    => $type === 'truefalse' ? null : [$a, $b, $c, $d],
                     'answer_key' => $key,
                     'weight'     => 1,
                 ]
@@ -666,9 +433,14 @@ class DemoDataSeeder extends Seeder
         }
 
         /* ===============================
-         * Helper bikin APP + artefak (upsert)
+         * HELPERS: artefak proses lengkap
          * =============================== */
         $ensureStage = function (JobApplication $app, string $key, string $status = 'pending', ?float $score = null, array $payload = []) {
+            // status harus salah satu dari enum: pending|passed|failed|no-show|reschedule
+            if (!in_array($status, ['pending', 'passed', 'failed', 'no-show', 'reschedule'], true)) {
+                $status = 'passed'; // fallback aman
+            }
+
             if (!ApplicationStage::where('application_id', $app->id)->where('stage_key', $key)->exists()) {
                 ApplicationStage::create([
                     'application_id' => $app->id,
@@ -677,6 +449,10 @@ class DemoDataSeeder extends Seeder
                     'score'          => $score,
                     'payload'        => $payload,
                 ]);
+            } else {
+                ApplicationStage::where('application_id', $app->id)
+                    ->where('stage_key', $key)
+                    ->update(['status' => $status, 'score' => $score, 'payload' => $payload]);
             }
         };
 
@@ -686,35 +462,36 @@ class DemoDataSeeder extends Seeder
                 [
                     'user_id'      => $app->user_id,
                     'status'       => 'scored',
-                    'started_at'   => now()->subDay(),
-                    'finished_at'  => now()->subDay(),
-                    'submitted_at' => now()->subDay(),
+                    'started_at'   => now()->subDays(3),
+                    'finished_at'  => now()->subDays(3)->addMinutes(18),
+                    'submitted_at' => now()->subDays(3)->addMinutes(18),
                     'expires_at'   => now()->addDays(7),
-                    'score'        => 3,
+                    'score'        => 4,
                     'is_active'    => false,
                     'meta'         => ['max_score' => 5],
                 ]
             );
         };
 
-        $ensureInterview = function (JobApplication $app) {
+        $ensureInterview = function (JobApplication $app, string $title, string $mode = 'online', ?string $link = null, ?string $location = null, int $addDays = 1) {
             Interview::updateOrCreate(
-                ['application_id' => $app->id, 'title' => 'HR Interview'],
+                ['application_id' => $app->id, 'title' => $title],
                 [
-                    'mode'         => 'online',
-                    'meeting_link' => 'https://meet.google.com/demo-hr',
-                    'start_at'     => now()->addDay()->setTime(9, 0),
-                    'end_at'       => now()->addDay()->setTime(10, 0),
+                    'mode'         => $mode,
+                    'meeting_link' => $link,
+                    'location'     => $location,
+                    'start_at'     => now()->addDays($addDays)->setTime(9, 0),
+                    'end_at'       => now()->addDays($addDays)->setTime(10, 0),
                     'panel'        => [['name' => 'HR User', 'email' => 'hr@demo.test']],
                 ]
             );
         };
 
-        $ensureOffer = function (JobApplication $app) {
+        $ensureOffer = function (JobApplication $app, string $status = 'accepted') {
             Offer::updateOrCreate(
                 ['application_id' => $app->id],
                 [
-                    'status' => 'draft',
+                    'status' => $status, // bebas (bukan enum di tabel stages)
                     'salary' => ['gross' => 8_000_000, 'allowance' => 1_000_000],
                 ]
             );
@@ -731,59 +508,170 @@ class DemoDataSeeder extends Seeder
             }
         };
 
-        $makeApp = function (User $user, Job $job, string $stage) use ($ensureStage, $ensureAttemptScored, $ensureInterview, $ensureOffer, $incFilledForJobSite) {
+        /* ===============================
+         * SATU PROGRES LAMARAN (FULL FLOW)
+         * =============================== */
+        $seedFullJourney = function (User $user, Job $job) use (
+            $ensureStage,
+            $ensureAttemptScored,
+            $ensureInterview,
+            $ensureOffer,
+            $incFilledForJobSite
+        ) {
             /** @var JobApplication $app */
             $app = JobApplication::updateOrCreate(
                 ['job_id' => $job->id, 'user_id' => $user->id],
                 [
-                    'current_stage'  => $stage,
-                    'overall_status' => $stage === 'hired' ? 'hired' : 'active',
+                    'current_stage'  => 'hired',
+                    'overall_status' => 'hired',
                 ]
             );
 
-            // stage awal (applied)
-            $ensureStage($app, 'applied', 'pending');
+            // 1. applied
+            $ensureStage($app, 'applied', 'passed');
 
-            // psikotes (historis)
-            if (in_array($stage, ['psychotest','hr_iv','user_iv','final','offer','hired'], true)) {
-                $ensureAttemptScored($app);
-                $ensureStage($app, 'psychotest', 'passed', 3, ['max_score' => 5]);
-            }
+            // 2. screening
+            $ensureStage($app, 'screening', 'passed', null, ['notes' => 'CV OK']);
 
-            // hr interview
-            if (in_array($stage, ['hr_iv','user_iv','final','offer','hired'], true)) {
-                $ensureInterview($app);
-                $ensureStage($app, 'hr_iv', 'pending');
-            }
+            // 3. psychotest
+            $ensureAttemptScored($app);
+            $ensureStage($app, 'psychotest', 'passed', 4, ['max_score' => 5]);
 
-            // user interview & final
-            if (in_array($stage, ['user_iv','final','offer','hired'], true)) {
-                $ensureStage($app, 'user_iv', 'pending');
-            }
-            if (in_array($stage, ['final','offer','hired'], true)) {
-                $ensureStage($app, 'final', 'pending');
-            }
+            // 4. HR interview
+            $ensureInterview($app, 'HR Interview', 'online', 'https://meet.google.com/demo-hr', null, 1);
+            $ensureStage($app, 'hr_iv', 'passed', null, ['result' => 'Fit cultural']);
 
-            // offer
-            if (in_array($stage, ['offer','hired'], true)) {
-                $ensureOffer($app);
-                $ensureStage($app, 'offer', 'pending');
-            }
+            // 5. User interview
+            $ensureInterview($app, 'User Interview', 'onsite', null, 'R. User 1', 2);
+            $ensureStage($app, 'user_iv', 'passed', null, ['result' => 'Teknis OK']);
 
-            // hired → increment filled_headcount spesifik site job
-            if ($stage === 'hired') {
-                $app->update(['overall_status' => 'hired']);
-                $incFilledForJobSite($job);
-            }
+            // 6. User/Trainer interview
+            $ensureInterview($app, 'User/Trainer Interview', 'online', 'https://meet.google.com/demo-trainer', null, 3);
+            $ensureStage($app, 'user_trainer_iv', 'passed');
 
-            return $app;
+            // 7. Offer (diterima)
+            $ensureOffer($app, 'accepted');
+            $ensureStage($app, 'offer', 'passed');
+
+            // 8. MCU
+            $ensureStage($app, 'mcu', 'passed', null, ['provider' => 'Klinik Demo']);
+
+            // 9. Mobilisasi
+            $ensureStage($app, 'mobilisasi', 'passed', null, ['transport' => 'PO-TRF-001']);
+
+            // 10. Ground Test
+            $ensureStage($app, 'ground_test', 'passed', null, ['unit' => 'Komatsu-01']);
+
+            // 11. Hired (final)
+            $ensureStage($app, 'hired', 'passed');
+            $app->update(['current_stage' => 'hired', 'overall_status' => 'hired']);
+
+            // update KPI manpower utk site utama job
+            $incFilledForJobSite($job);
+
+            return $app->fresh();
         };
 
         /* ===============================
-         * Seed sample apps (idempotent)
+         * SEED BERBAGAI LAMARAN (banyak user)
          * =============================== */
-        $makeApp($c1, $jobs[0], 'psychotest');
-        $makeApp($c2, $jobs[1], 'hr_iv');
-        $makeApp($c3, $jobs[2], 'offer');
+        // referensi job cepat
+        $J = fn($code) => $jobs[$code];
+
+        // Full journey → Hired
+        $seedFullJourney($users['andi@demo.test'],  $J('PLT-ENG-01'));
+
+        // Aktif berhenti di user_iv
+        $bela = JobApplication::updateOrCreate(
+            ['job_id' => $J('SCM-BUY-01')->id, 'user_id' => $users['bela@demo.test']->id],
+            ['current_stage' => 'user_iv', 'overall_status' => 'active']
+        );
+        $ensureStage($bela, 'applied', 'passed');
+        $ensureStage($bela, 'screening', 'passed');
+        $ensureAttemptScored($bela);
+        $ensureStage($bela, 'psychotest', 'passed', 4, ['max_score' => 5]);
+        $ensureInterview($bela, 'HR Interview', 'online', 'https://meet.google.com/demo-hr', null, 1);
+        $ensureStage($bela, 'hr_iv', 'passed');
+        $ensureInterview($bela, 'User Interview', 'onsite', null, 'R. User POS', 2);
+        $ensureStage($bela, 'user_iv', 'pending');
+
+        // Aktif berhenti di offer
+        $cici = JobApplication::updateOrCreate(
+            ['job_id' => $J('HR-RECR-01')->id, 'user_id' => $users['cici@demo.test']->id],
+            ['current_stage' => 'offer', 'overall_status' => 'active']
+        );
+        $ensureStage($cici, 'applied', 'passed');
+        $ensureStage($cici, 'screening', 'passed');
+        $ensureAttemptScored($cici);
+        $ensureStage($cici, 'psychotest', 'passed', 4, ['max_score' => 5]);
+        $ensureInterview($cici, 'HR Interview', 'online', 'https://meet.google.com/demo-hr', null, 1);
+        $ensureStage($cici, 'hr_iv', 'passed');
+        $ensureInterview($cici, 'User Interview', 'online', 'https://meet.google.com/demo-user', null, 2);
+        $ensureStage($cici, 'user_iv', 'passed');
+        $ensureOffer($cici, 'draft');
+        $ensureStage($cici, 'offer', 'pending');
+
+        // Beragam stage untuk user lain (contoh singkat)
+        $pairs = [
+            ['dodi@demo.test',  'PLT-MECH-01', 'psychotest'],
+            ['eko@demo.test',   'ELEC-TECH-01', 'hr_iv'],
+            ['fira@demo.test',  'WH-ADM-01',  'applied'],
+            ['gina@demo.test',  'HSE-OFF-01', 'final'],
+            ['hadi@demo.test',  'OPS-DRV-01', 'mobilisasi'],
+            ['intan@demo.test', 'OPS-OPR-01', 'ground_test'],
+            ['joni@demo.test',  'PLT-ENG-01', 'user_trainer_iv'],
+        ];
+
+        foreach ($pairs as [$email, $jobCode, $stage]) {
+            $u = $users[$email];
+            $job = $J($jobCode);
+
+            $app = JobApplication::updateOrCreate(
+                ['job_id' => $job->id, 'user_id' => $u->id],
+                ['current_stage' => $stage, 'overall_status' => 'active']
+            );
+
+            // minimal rantai sesuai stage saat ini
+            $ensureStage($app, 'applied', 'passed');
+            $ensureStage($app, 'screening', 'passed');
+
+            if (in_array($stage, ['psychotest', 'hr_iv', 'user_iv', 'user_trainer_iv', 'final', 'offer', 'mcu', 'mobilisasi', 'ground_test', 'hired'], true)) {
+                $ensureAttemptScored($app);
+                $ensureStage($app, 'psychotest', 'passed', 3.5, ['max_score' => 5]);
+            }
+            if (in_array($stage, ['hr_iv', 'user_iv', 'user_trainer_iv', 'final', 'offer', 'mcu', 'mobilisasi', 'ground_test', 'hired'], true)) {
+                $ensureInterview($app, 'HR Interview', 'online', 'https://meet.google.com/hr-iv', null, 1);
+                $ensureStage($app, 'hr_iv', 'passed');
+            }
+            if (in_array($stage, ['user_iv', 'user_trainer_iv', 'final', 'offer', 'mcu', 'mobilisasi', 'ground_test', 'hired'], true)) {
+                $ensureInterview($app, 'User Interview', 'onsite', null, 'R. User', 2);
+                $ensureStage($app, 'user_iv', 'passed');
+            }
+            if (in_array($stage, ['user_trainer_iv', 'final', 'offer', 'mcu', 'mobilisasi', 'ground_test', 'hired'], true)) {
+                $ensureInterview($app, 'User/Trainer Interview', 'online', 'https://meet.google.com/trainer', null, 3);
+                $ensureStage($app, 'user_trainer_iv', 'passed');
+            }
+            if (in_array($stage, ['final', 'offer', 'mcu', 'mobilisasi', 'ground_test', 'hired'], true)) {
+                $ensureStage($app, 'final', 'passed');
+            }
+            if (in_array($stage, ['offer', 'mcu', 'mobilisasi', 'ground_test', 'hired'], true)) {
+                $ensureOffer($app, 'draft');
+                $ensureStage($app, 'offer', 'pending');
+            }
+            if (in_array($stage, ['mcu', 'mobilisasi', 'ground_test', 'hired'], true)) {
+                $ensureStage($app, 'mcu', 'passed', null, ['provider' => 'Klinik Demo']);
+            }
+            if (in_array($stage, ['mobilisasi', 'ground_test', 'hired'], true)) {
+                $ensureStage($app, 'mobilisasi', 'passed');
+            }
+            if (in_array($stage, ['ground_test', 'hired'], true)) {
+                $ensureStage($app, 'ground_test', 'passed');
+            }
+            if ($stage === 'hired') {
+                $ensureStage($app, 'hired', 'passed');
+                $app->update(['overall_status' => 'hired']);
+                $incFilledForJobSite($job);
+            }
+        }
     }
 }

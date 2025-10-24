@@ -118,11 +118,11 @@
   </section>
 
   {{-- TABEL --}}
-  <section class="rounded-2xl border border-slate-200 bg-white shadow-sm">
+  <section class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
     <div class="p-0 overflow-x-auto">
       @if($jobs->count())
         <table class="min-w-[980px] w-full text-sm">
-          <thead class="bg-slate-50 text-slate-600">
+          <thead class="bg-slate-800 text-white">
             <tr>
               <th class="px-4 py-3 text-left w-28">Code</th>
               <th class="px-4 py-3 text-left">Title</th>

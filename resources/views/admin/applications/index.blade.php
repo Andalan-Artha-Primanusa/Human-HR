@@ -32,8 +32,7 @@
   {{-- CSS kecil untuk header 2-tone yang fleksibel --}}
   <style>
     .twotone {
-      /* lebar strip merah (mobile) */
-      --red-w: 84px;
+      --red-w: 84px; /* lebar strip merah (mobile) */
       background:
         linear-gradient(
           to right,
@@ -43,11 +42,46 @@
           {{ $RED }} 100%
         );
     }
-    @media (min-width: 640px) { /* sm: */
-      .twotone { --red-w: 144px; }
-    }
+    @media (min-width: 640px) { .twotone { --red-w: 144px; } }
   </style>
 @endonce
+
+@php
+  // === Pretty labels (selaras controller)
+  $PRETTY = [
+    'applied'         => 'Applied',
+    'screening'       => 'Screening CV/Berkas Lamaran',
+    'psychotest'      => 'Psikotest',
+    'hr_iv'           => 'HR Interview',
+    'user_iv'         => 'User Interview',
+    'user_trainer_iv' => 'User/Trainer Interview',
+    'offer'           => 'OL',
+    'mcu'             => 'MCU',
+    'mobilisasi'      => 'Mobilisasi',
+    'ground_test'     => 'Ground Test',
+    'hired'           => 'Hired',
+    'not_qualified'   => 'Not Lolos',
+  ];
+
+  // === Options filter stage
+  $stageOptions = ['' => 'Semua Stage'] + $PRETTY;
+
+  // === Badge mapping
+  $stageBadgeMap = [
+    'applied'         => 'badge-blue',
+    'screening'       => 'badge-sky',
+    'psychotest'      => 'badge-indigo',
+    'hr_iv'           => 'badge-amber',
+    'user_iv'         => 'badge-emerald',
+    'user_trainer_iv' => 'badge-lime',
+    'offer'           => 'badge-pink',
+    'mcu'             => 'badge-cyan',
+    'mobilisasi'      => 'badge-orange',
+    'ground_test'     => 'badge-purple',
+    'hired'           => 'badge-green',
+    'not_qualified'   => 'badge-rose',
+  ];
+@endphp
 
 <div class="mx-auto w-full max-w-[1440px] px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
@@ -64,15 +98,13 @@
            class="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-slate-900
                   focus:outline-none focus:ring-2 focus:ring-offset-2 w-full sm:w-auto justify-center"
            style="--tw-ring-color: {{ $BLUE }}">
-          <svg class="w-4 h-4" style="color: {{ $BLUE }}">
-            <use href="#i-search"/>
-          </svg>
+          <svg class="w-4 h-4" style="color: {{ $BLUE }}"><use href="#i-search"/></svg>
           Cari Lowongan
         </a>
       </div>
     </div>
 
-    {{-- ===== FILTER: rapi di mobile, tanpa -mt ===== --}}
+    {{-- ===== FILTER ===== --}}
     <form method="GET"
           class="mt-4 grid grid-cols-1 gap-2 md:grid-cols-5 px-3 py-3 md:px-4 md:py-4"
           style="border-top:1px solid {{ $BORD }}">
@@ -84,14 +116,8 @@
              autocomplete="off" />
 
       {{-- stage --}}
-      @php
-        $stageOptions = [
-          ''=>'Semua Stage','applied'=>'Applied','psychotest'=>'Psychotest','hr_iv'=>'HR Interview',
-          'user_iv'=>'User Interview','final'=>'Final','offer'=>'Offer','hired'=>'Hired','not_qualified'=>'Not Qualified',
-        ];
-      @endphp
       <select name="stage" class="input">
-        @foreach($stageOptions as $k=>$v)
+        @foreach($stageOptions as $k => $v)
           <option value="{{ $k }}" @selected(request('stage')===$k)>{{ $v }}</option>
         @endforeach
       </select>
@@ -134,96 +160,112 @@
   </section>
 
   {{-- ===== TABEL ===== --}}
-  <section class="rounded-2xl border bg-white shadow-sm" style="border-color: {{ $BORD }}">
+  <section class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden" style="border-color: {{ $BORD }}">
     <div class="overflow-x-auto">
       @if($apps->count())
-        <table class="min-w-[960px] w-full text-sm">
-          <thead class="bg-slate-50 text-slate-600">
-            <tr>
-              <th class="px-4 py-3 text-left">Kandidat</th>
-              <th class="px-4 py-3 text-left">Posisi</th>
-              <th class="px-4 py-3 text-left w-40">Divisi</th>
-              <th class="px-4 py-3 text-left w-24">Site</th>
-              <th class="px-4 py-3 text-center w-32">Stage</th>
-              <th class="px-4 py-3 text-center w-28">Overall</th>
-              <th class="px-4 py-3 text-left w-28">Dibuat</th>
-              <th class="px-4 py-3 text-right w-[320px]">Aksi</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-slate-100">
-            @foreach($apps as $app)
-              @php
-                $stage = $app->current_stage ?? 'applied';
-                $stageBadge = match($stage){
-                  'applied'=>'badge-blue','psychotest'=>'badge-indigo','hr_iv'=>'badge-amber','user_iv'=>'badge-emerald',
-                  'final'=>'badge-purple','offer'=>'badge-pink','hired'=>'badge-green','not_qualified'=>'badge-rose',
-                  default=>'badge-slate'
-                };
-                $overall = strtolower($app->overall_status ?? 'active');
-                $overallBadge = match($overall){
-                  'hired'=>'badge-green','not_qualified'=>'badge-rose','inactive'=>'badge-slate', default=>'badge-blue'
-                };
-                $candidate = $app->candidate->name ?? ($app->user->name ?? ($app->name ?? '—'));
-              @endphp
-              <tr class="align-top hover:bg-slate-50/60">
-                <td class="px-4 py-3">
-                  <div class="font-medium text-slate-900">{{ e($candidate) }}</div>
-                  @if(!empty($app->candidate?->email))
-                    <div class="text-xs text-slate-500">{{ e($app->candidate->email) }}</div>
-                  @endif
-                </td>
-                <td class="px-4 py-3">
-                  <div class="font-medium text-slate-800">{{ e($app->job->title ?? '—') }}</div>
-                  <div class="mt-0.5 text-xs text-slate-500">
-                    @if(!empty($app->job?->employment_type))
-                      <span class="inline-flex px-1.5 py-0.5 rounded border border-slate-200 bg-slate-50">
-                        {{ ucfirst($app->job->employment_type) }}
-                      </span>
-                    @endif
-                    @if(!empty($app->job?->code))
-                      <span class="inline-flex px-1.5 py-0.5 rounded border border-slate-200 bg-slate-50">#{{ $app->job->code }}</span>
-                    @endif
-                  </div>
-                </td>
-                <td class="px-4 py-3">{{ e($app->job->division ?? '—') }}</td>
-                <td class="px-4 py-3">
-                  <span class="font-mono text-slate-700">{{ e($app->job->site->code ?? $app->job->site_code ?? '—') }}</span>
-                </td>
-                <td class="px-4 py-3 text-center">
-                  <span class="badge {{ $stageBadge }}">{{ strtoupper(str_replace('_',' ',$stage)) }}</span>
-                </td>
-                <td class="px-4 py-3 text-center">
-                  <span class="badge {{ $overallBadge }}">{{ strtoupper(str_replace('_',' ',$overall)) }}</span>
-                </td>
-                <td class="px-4 py-3">{{ optional($app->created_at)->format('d M Y') }}</td>
-                <td class="px-4 py-3">
-                  <div class="flex justify-end gap-2">
-                    <a class="btn btn-outline btn-sm inline-flex items-center gap-1.5"
-                       target="_blank" href="{{ route('jobs.show', $app->job ?? 0) }}">
-                      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-width="2" d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/>
-                        <circle cx="12" cy="12" r="3" stroke-width="2"/>
-                      </svg>
-                      Lihat Job
-                    </a>
-                    <form action="{{ route('admin.applications.move', $app) }}" method="POST" class="inline-flex items-center gap-2">
-                      @csrf
-                      <select name="to" class="input !h-8 !py-1 !px-2 text-xs">
-                        @foreach(['applied','psychotest','hr_iv','user_iv','final','offer','hired','not_qualified'] as $opt)
-                          <option value="{{ $opt }}" @selected($opt===$stage)>{{ ucwords(str_replace('_',' ',$opt)) }}</option>
-                        @endforeach
-                      </select>
-                      <button class="btn btn-primary btn-sm inline-flex items-center gap-1.5">
-                        <svg class="w-4 h-4"><use href="#i-arrow"/></svg>
-                        Pindah
-                      </button>
-                    </form>
-                  </div>
-                </td>
-              </tr>
-            @endforeach
-          </tbody>
-        </table>
+<table class="min-w-[960px] w-full text-sm">
+  <thead class="bg-slate-800 text-white">
+    <tr>
+      <th class="px-4 py-3 text-left font-semibold">Kandidat</th>
+      <th class="px-4 py-3 text-left font-semibold">Posisi</th>
+      <th class="px-4 py-3 text-left w-40 font-semibold">Divisi</th>
+      <th class="px-4 py-3 text-left w-24 font-semibold">Site</th>
+      <th class="px-4 py-3 text-center w-40 font-semibold">Stage</th>
+      <th class="px-4 py-3 text-center w-28 font-semibold">Overall</th>
+      <th class="px-4 py-3 text-left w-28 font-semibold">Dibuat</th>
+      <th class="px-4 py-3 text-right w-[360px] font-semibold">Aksi</th>
+    </tr>
+  </thead>
+
+  <tbody class="divide-y divide-slate-100 text-black">
+    @foreach($apps as $app)
+      @php
+        $stageKey   = $app->current_stage ?? 'applied';
+        $stageLabel = $PRETTY[$stageKey] ?? strtoupper(str_replace('_',' ',$stageKey));
+        $stageBadge = $stageBadgeMap[$stageKey] ?? 'badge-slate';
+
+        $overall = strtolower($app->overall_status ?? 'active');
+        $overallBadge = match($overall){
+          'hired' => 'badge-green',
+          'not_qualified' => 'badge-rose',
+          'inactive' => 'badge-slate',
+          default => 'badge-blue'
+        };
+
+        $candidate = $app->candidate->name ?? ($app->user->name ?? ($app->name ?? '—'));
+      @endphp
+
+      <tr class="align-top hover:bg-slate-50/60">
+        <td class="px-4 py-3">
+          <div class="font-medium text-black">{{ e($candidate) }}</div>
+          @if(!empty($app->candidate?->email))
+            <div class="text-xs text-black">{{ e($app->candidate->email) }}</div>
+          @endif
+        </td>
+
+        <td class="px-4 py-3">
+          <div class="font-medium text-black">{{ e($app->job->title ?? '—') }}</div>
+          <div class="mt-0.5 text-xs text-black">
+            @if(!empty($app->job?->employment_type))
+              <span class="inline-flex px-1.5 py-0.5 rounded border border-slate-200 bg-slate-50">
+                {{ ucfirst($app->job->employment_type) }}
+              </span>
+            @endif
+            @if(!empty($app->job?->code))
+              <span class="inline-flex px-1.5 py-0.5 rounded border border-slate-200 bg-slate-50">
+                #{{ $app->job->code }}
+              </span>
+            @endif
+          </div>
+        </td>
+
+        <td class="px-4 py-3 text-black">{{ e($app->job->division ?? '—') }}</td>
+
+        <td class="px-4 py-3">
+          <span class="font-mono text-black">{{ e($app->job->site->code ?? $app->job->site_code ?? '—') }}</span>
+        </td>
+
+        <td class="px-4 py-3 text-center">
+          <span class="badge {{ $stageBadge }}">{{ $stageLabel }}</span>
+        </td>
+
+        <td class="px-4 py-3 text-center">
+          <span class="badge {{ $overallBadge }}">{{ strtoupper(str_replace('_',' ',$overall)) }}</span>
+        </td>
+
+        <td class="px-4 py-3 text-black">{{ optional($app->created_at)->format('d M Y') }}</td>
+
+        <td class="px-4 py-3">
+          <div class="flex justify-end gap-2">
+            <a class="btn btn-outline btn-sm inline-flex items-center gap-1.5"
+               target="_blank" href="{{ route('jobs.show', $app->job ?? 0) }}">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path stroke-linecap="round" stroke-width="2" d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/>
+                <circle cx="12" cy="12" r="3" stroke-width="2"/>
+              </svg>
+              Lihat Job
+            </a>
+
+            {{-- Dropdown pindah stage (pakai key baru) --}}
+            <form action="{{ route('admin.applications.move', $app) }}" method="POST" class="inline-flex items-center gap-2">
+              @csrf
+              <select name="to" class="input !h-8 !py-1 !px-2 text-xs">
+                @foreach(array_keys($PRETTY) as $opt)
+                  <option value="{{ $opt }}" @selected($opt===$stageKey)>{{ $PRETTY[$opt] }}</option>
+                @endforeach
+              </select>
+              <button class="btn btn-primary btn-sm inline-flex items-center gap-1.5">
+                <svg class="w-4 h-4"><use href="#i-arrow"/></svg>
+                Pindah
+              </button>
+            </form>
+          </div>
+        </td>
+      </tr>
+    @endforeach
+  </tbody>
+</table>
+
       @else
         {{-- EMPTY STATE --}}
         <div class="py-16 grid place-content-center text-center">
