@@ -112,65 +112,68 @@
     @endforelse
   </section>
 
-  {{-- PAGINATION (kapsul) --}}
-  @php
-    $perPage = max(1, (int) $items->perPage());
-    $current = (int) $items->currentPage();
-    $last    = (int) $items->lastPage();
-    $total   = (int) $items->total();
-    $from    = ($current - 1) * $perPage + 1;
-    $to      = min($current * $perPage, $total);
+{{-- PAGINATION (mendukung Cursor & LengthAware) --}}
+@php
+  $isCursor = $items instanceof \Illuminate\Pagination\CursorPaginator;
+  $isLength = $items instanceof \Illuminate\Pagination\LengthAwarePaginator;
 
-    // window halaman
-    $pages = [];
-    if ($last <= 7) {
-      $pages = range(1, $last);
-    } else {
-      $pages = [1];
-      $left = max(2, $current - 1);
-      $right = min($last - 1, $current + 1);
-      if ($left > 2) $pages[] = '...';
-      for ($i = $left; $i <= $right; $i++) $pages[] = $i;
-      if ($right < $last - 1) $pages[] = '...';
-      $pages[] = $last;
-    }
+  // Range tampil
+  $from  = $isLength ? ($items->firstItem() ?? 0) : ($items->count() ? 1 : 0);
+  $to    = $isLength ? ($items->lastItem()  ?? 0) : $items->count();
+  $total = $isLength ? $items->total() : null; // cursor tidak punya total
 
-    // url dengan query saat ini
-    $pageUrl = function (int $p) use ($items) {
-      return $items->appends(request()->except('page'))->url($p);
-    };
-  @endphp
+  // URL prev/next (dua-duanya ada)
+  $prevUrl = $items->previousPageUrl();
+  $nextUrl = $items->nextPageUrl();
 
-  <section class="rounded-2xl border border-slate-200 bg-white p-3 md:p-4 shadow-sm">
-    <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between text-sm">
-      <div class="text-slate-700">
-        Menampilkan <span class="font-semibold text-slate-900">{{ $from }}–{{ $to }}</span>
+  // Nomor halaman hanya untuk LengthAware
+  if ($isLength) {
+      $current = $items->currentPage();
+      $last    = $items->lastPage();
+
+      $pages = [];
+      if ($last <= 7) {
+        $pages = range(1, $last);
+      } else {
+        $pages = [1];
+        $left  = max(2, $current - 1);
+        $right = min($last - 1, $current + 1);
+        if ($left > 2) $pages[] = '...';
+        for ($i = $left; $i <= $right; $i++) $pages[] = $i;
+        if ($right < $last - 1) $pages[] = '...';
+        $pages[] = $last;
+      }
+      $pageUrl = fn (int $p) => $items->url($p);
+  }
+@endphp
+
+<section class="rounded-2xl border border-slate-200 bg-white p-3 md:p-4 shadow-sm">
+  <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between text-sm">
+    <div class="text-slate-700">
+      Menampilkan <span class="font-semibold text-slate-900">{{ $from }}–{{ $to }}</span>
+      @if($isLength)
         dari <span class="font-semibold text-slate-900">{{ $total }}</span>
-      </div>
-      <div class="hidden md:block text-slate-700">
-        Showing <span class="font-semibold text-slate-900">{{ $from }}</span>
-        to <span class="font-semibold text-slate-900">{{ $to }}</span>
-        of <span class="font-semibold text-slate-900">{{ $total }}</span> results
-      </div>
+      @endif
+    </div>
 
-      <nav class="ml-auto" aria-label="Pagination">
-        <ul class="inline-flex items-stretch overflow-hidden rounded-xl border border-slate-200 bg-white">
-          {{-- Prev --}}
-          <li>
-            @if($current > 1)
-              <a href="{{ $pageUrl($current - 1) }}"
-                 class="grid place-items-center px-2.5 h-9 hover:bg-slate-50 focus:outline-none focus:ring-2"
-                 style="--tw-ring-color: {{ $BLUE }}" aria-label="Previous">
-                <svg class="h-4 w-4 text-slate-700"><use href="#i-chevron-left"/></svg>
-              </a>
-            @else
-              <span class="grid place-items-center px-2.5 h-9 opacity-40 cursor-not-allowed" aria-hidden="true">
-                <svg class="h-4 w-4 text-slate-700"><use href="#i-chevron-left"/></svg>
-              </span>
-            @endif
-          </li>
+    <nav class="ml-auto" aria-label="Pagination">
+      <ul class="inline-flex items-stretch overflow-hidden rounded-xl border border-slate-200 bg-white">
+        {{-- Prev --}}
+        <li>
+          @if($prevUrl)
+            <a href="{{ $prevUrl }}" class="grid place-items-center px-2.5 h-9 hover:bg-slate-50 focus:outline-none focus:ring-2"
+               style="--tw-ring-color: {{ $BLUE }}" aria-label="Previous">
+              <svg class="h-4 w-4 text-slate-700"><use href="#i-chevron-left"/></svg>
+            </a>
+          @else
+            <span class="grid place-items-center px-2.5 h-9 opacity-40 cursor-not-allowed" aria-hidden="true">
+              <svg class="h-4 w-4 text-slate-700"><use href="#i-chevron-left"/></svg>
+            </span>
+          @endif
+        </li>
 
-          {{-- Pages --}}
+        {{-- Nomor halaman (hanya LengthAware) --}}
+        @if($isLength)
           @foreach($pages as $p)
             @if($p === '...')
               <li class="grid place-items-center px-3 h-9 text-slate-500 select-none">…</li>
@@ -187,24 +190,25 @@
               </li>
             @endif
           @endforeach
+        @endif
 
-          {{-- Next --}}
-          <li class="border-l border-slate-200">
-            @if($current < $last)
-              <a href="{{ $pageUrl($current + 1) }}"
-                 class="grid place-items-center px-2.5 h-9 hover:bg-slate-50 focus:outline-none focus:ring-2"
-                 style="--tw-ring-color: {{ $BLUE }}" aria-label="Next">
-                <svg class="h-4 w-4 text-slate-700"><use href="#i-chevron-right"/></svg>
-              </a>
-            @else
-              <span class="grid place-items-center px-2.5 h-9 opacity-40 cursor-not-allowed" aria-hidden="true">
-                <svg class="h-4 w-4 text-slate-700"><use href="#i-chevron-right"/></svg>
-              </span>
-            @endif
-          </li>
-        </ul>
-      </nav>
-    </div>
-  </section>
+        {{-- Next --}}
+        <li class="border-l border-slate-200">
+          @if($nextUrl)
+            <a href="{{ $nextUrl }}" class="grid place-items-center px-2.5 h-9 hover:bg-slate-50 focus:outline-none focus:ring-2"
+               style="--tw-ring-color: {{ $BLUE }}" aria-label="Next">
+              <svg class="h-4 w-4 text-slate-700"><use href="#i-chevron-right"/></svg>
+            </a>
+          @else
+            <span class="grid place-items-center px-2.5 h-9 opacity-40 cursor-not-allowed" aria-hidden="true">
+              <svg class="h-4 w-4 text-slate-700"><use href="#i-chevron-right"/></svg>
+            </span>
+          @endif
+        </li>
+      </ul>
+    </nav>
+  </div>
+</section>
+
 </div>
 @endsection

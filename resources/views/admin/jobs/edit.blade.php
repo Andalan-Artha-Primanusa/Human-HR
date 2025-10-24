@@ -14,7 +14,14 @@
     'engineering'=>'Engineering','hr'=>'Human Resources','it'=>'Information Technology','finance'=>'Finance',
     'marketing'=>'Marketing','sales'=>'Sales','operations'=>'Operations','admin'=>'Administration',
   ];
+
+  // Helpers
   $val = fn($key, $fallback = null) => old($key, $fallback);
+  $toStr = function ($v) {
+      if (is_array($v)) return implode(', ', array_map('strval', array_filter($v, fn($x)=>$x!==null && $x!=='')));
+      if (is_object($v)) return json_encode($v, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
+      return (string) ($v ?? '');
+  };
 @endphp
 
 @section('content')
@@ -52,7 +59,7 @@
 
   {{-- Info unik per company --}}
   <div class="rounded-xl bg-sky-50 text-sky-800 px-4 py-3 border text-sm" style="border-color: {{ $BORD }}">
-    Kode lowongan (<code class="font-mono">code</code>) unik <strong>per company</strong>. Mengganti Company dapat
+    Kode lowongan (<code class="font-mono">code</code>) unik <strong>per company</strong>. Mengubah Company dapat
     mempengaruhi keunikan kode.
   </div>
 
@@ -71,14 +78,14 @@
   {{-- FORM utama --}}
   <form id="jobEditForm" class="rounded-2xl border bg-white shadow-sm overflow-hidden"
         style="border-color: {{ $BORD }}"
-        method="POST" action="{{ route('admin.jobs.update', $job) }}">
+        method="POST" action="{{ route('admin.jobs.update', $job) }}" novalidate>
     @csrf @method('PUT')
 
     <div class="p-5 grid gap-4 md:grid-cols-2">
       {{-- Code --}}
       <div>
         <label class="label">Code <span class="text-rose-600">*</span></label>
-        <input class="input" name="code" value="{{ $val('code', $job->code) }}" required
+        <input class="input" name="code" value="{{ $toStr($val('code', $job->code)) }}" required maxlength="50"
                style="--tw-ring-color: {{ $BLUE }}">
         @error('code')<p class="text-xs text-rose-600 mt-1">{{ $message }}</p>@enderror
       </div>
@@ -86,7 +93,7 @@
       {{-- Title --}}
       <div>
         <label class="label">Title <span class="text-rose-600">*</span></label>
-        <input class="input" name="title" value="{{ $val('title', $job->title) }}" required
+        <input class="input" name="title" value="{{ $toStr($val('title', $job->title)) }}" required maxlength="200"
                style="--tw-ring-color: {{ $BLUE }}">
         @error('title')<p class="text-xs text-rose-600 mt-1">{{ $message }}</p>@enderror
       </div>
@@ -108,17 +115,32 @@
       <div>
         <label class="label">Site <span class="text-rose-600">*</span></label>
         @php $siteVal = $val('site_id', $job->site_id); @endphp
-        <select class="input" name="site_id" required style="--tw-ring-color: {{ $BLUE }}">
+        <select class="input" name="site_id" id="site_id" required style="--tw-ring-color: {{ $BLUE }}">
           <option value="">— Pilih Site —</option>
-          @forelse($sites as $s)
-            <option value="{{ $s->id }}" @selected((string)$siteVal === (string)$s->id)>{{ $s->code }} — {{ $s->name }}</option>
+          @forelse($sites as $site)
+            <option value="{{ $site->id }}" data-code="{{ $site->code }}"
+              @selected((string)$siteVal === (string)$site->id)>{{ $site->code }} — {{ $site->name }}</option>
           @empty
             <option value="" disabled>Tidak ada data site</option>
           @endforelse
         </select>
-        @error('site_id')<p class="text-xs text-rose-600 mt-1">{{ $message }}</p>@enderror
         {{-- legacy support via code --}}
-        <input type="hidden" name="site_code" value="{{ old('site_code') }}">
+        <input type="hidden" name="site_code" id="site_code" value="{{ $toStr(old('site_code')) }}">
+        <p class="text-xs text-slate-500 mt-1">Bisa pilih via dropdown (site_id) atau kirim <code>site_code</code>.</p>
+        @error('site_id')<p class="text-xs text-rose-600 mt-1">{{ $message }}</p>@enderror
+        @error('site_code')<p class="text-xs text-rose-600 mt-1">{{ $message }}</p>@enderror
+      </div>
+
+      {{-- Employment Type --}}
+      <div>
+        <label class="label">Employment Type <span class="text-rose-600">*</span></label>
+        @php $et = $val('employment_type', $job->employment_type ?? 'fulltime'); @endphp
+        <select class="input" name="employment_type" required style="--tw-ring-color: {{ $BLUE }}">
+          <option value="fulltime" @selected($et==='fulltime')>Fulltime</option>
+          <option value="contract" @selected($et==='contract')>Contract</option>
+          <option value="intern"   @selected($et==='intern')>Intern</option>
+        </select>
+        @error('employment_type')<p class="text-xs text-rose-600 mt-1">{{ $message }}</p>@enderror
       </div>
 
       {{-- Company (opsional) + Company Code --}}
@@ -126,10 +148,11 @@
         <div>
           <label class="label">Company (opsional)</label>
           @php $companyVal = $val('company_id', $job->company_id); @endphp
-          <select class="input" name="company_id" style="--tw-ring-color: {{ $BLUE }}">
+          <select class="input" name="company_id" id="company_id" style="--tw-ring-color: {{ $BLUE }}">
             <option value="">— Tidak ada company —</option>
-            @forelse(($companies ?? []) as $c)
-              <option value="{{ $c->id }}" @selected((string)$companyVal === (string)$c->id)>{{ $c->code }} — {{ $c->name }}</option>
+            @forelse(($companies ?? []) as $company)
+              <option value="{{ $company->id }}" data-code="{{ $company->code }}"
+                @selected((string)$companyVal === (string)$company->id)>{{ $company->code }} — {{ $company->name }}</option>
             @empty
               <option value="" disabled>Tidak ada data company</option>
             @endforelse
@@ -138,7 +161,8 @@
         </div>
         <div>
           <label class="label">Company Code (opsional)</label>
-          <input class="input" name="company_code" value="{{ old('company_code') }}" placeholder="mis. ACME"
+          <input class="input" name="company_code" id="company_code"
+                 value="{{ $toStr(old('company_code')) }}" maxlength="50" placeholder="mis. ACME"
                  style="--tw-ring-color: {{ $BLUE }}">
           <p class="text-xs text-slate-500 mt-1">Isi salah satu: <code>Company</code> (dropdown) <em>atau</em> <code>Company Code</code>.</p>
           @error('company_code')<p class="text-xs text-rose-600 mt-1">{{ $message }}</p>@enderror
@@ -158,25 +182,12 @@
         @error('level')<p class="text-xs text-rose-600 mt-1">{{ $message }}</p>@enderror
       </div>
 
-      {{-- Employment Type --}}
-      <div>
-        <label class="label">Employment Type <span class="text-rose-600">*</span></label>
-        @php $et = $val('employment_type', $job->employment_type ?? 'fulltime'); @endphp
-        <select class="input" name="employment_type" required style="--tw-ring-color: {{ $BLUE }}">
-          <option value="fulltime" @selected($et==='fulltime')>Fulltime</option>
-          <option value="contract" @selected($et==='contract')>Contract</option>
-          <option value="intern"   @selected($et==='intern')>Intern</option>
-        </select>
-        @error('employment_type')<p class="text-xs text-rose-600 mt-1">{{ $message }}</p>@enderror
-      </div>
-
       {{-- Openings (info) --}}
       <div>
         <label class="label">Openings</label>
-        <input class="input" type="number" name="openings" min="1" value="{{ (int) $job->openings }}" disabled
+        <input class="input" type="number" min="0" value="{{ (int) $job->openings }}" disabled
                style="--tw-ring-color: {{ $BLUE }}">
         <p class="text-xs text-slate-500 mt-1">Nilai ini disinkron otomatis dari <em>Manpower Requirements</em>.</p>
-        @error('openings')<p class="text-xs text-rose-600 mt-1">{{ $message }}</p>@enderror
       </div>
 
       {{-- Status --}}
@@ -191,7 +202,34 @@
         @error('status')<p class="text-xs text-rose-600 mt-1">{{ $message }}</p>@enderror
       </div>
 
-      {{-- Description (pakai Trix biar sama dengan Create) --}}
+      {{-- Keywords --}}
+      <div class="md:col-span-2">
+        <label class="label">Keywords (SEO internal)</label>
+        <input class="input" name="keywords" id="keywords" maxlength="500"
+               value="{{ $toStr($val('keywords', $job->keywords)) }}"
+               placeholder="contoh: excavator, operator alat berat, tambang"
+               style="--tw-ring-color: {{ $BLUE }}">
+        <div class="mt-1 flex items-center justify-between text-xs text-slate-500">
+          <span>Pisahkan dengan koma untuk memudahkan pencarian.</span>
+          <span id="kw_count">0/500</span>
+        </div>
+        @error('keywords')<p class="text-xs text-rose-600 mt-1">{{ $message }}</p>@enderror
+      </div>
+
+      {{-- Skills --}}
+      <div class="md:col-span-2">
+        <label class="label">Skills</label>
+        @php
+          $skillsDisplay = is_array($job->skills) ? implode(', ', $job->skills) : ($job->skills ?? '');
+        @endphp
+        <textarea class="input min-h-[84px]" name="skills" id="skills"
+                  placeholder="Ketik skill, pisahkan dengan koma atau Enter. Contoh: Excavator A40, SIM B2 Umum, Basic Safety"
+                  style="--tw-ring-color: {{ $BLUE }}">{{ $toStr($val('skills', $skillsDisplay)) }}</textarea>
+        <p class="text-xs text-slate-500 mt-1">Boleh diisi: <em>comma-separated</em> atau satu skill per baris. Akan dinormalkan.</p>
+        @error('skills')<p class="text-xs text-rose-600 mt-1">{{ $message }}</p>@enderror
+      </div>
+
+      {{-- Description (Trix, set via JS supaya aman jika old() array) --}}
       <div class="md:col-span-2">
         <label class="label">Description</label>
 
@@ -201,16 +239,9 @@
           <style>
             trix-editor{
               border:1px solid {{ $BORD }};
-              border-radius:.5rem;
-              padding:.75rem;
-              min-height:10rem;
-              background:#fff;
+              border-radius:.5rem; padding:.75rem; min-height:10rem; background:#fff;
             }
-            trix-toolbar{
-              border:1px solid {{ $BORD }};
-              border-radius:.5rem;
-              margin-bottom:.5rem;
-            }
+            trix-toolbar{ border:1px solid {{ $BORD }}; border-radius:.5rem; margin-bottom:.5rem; }
             trix-toolbar *{ font-size:.875rem }
             trix-editor ul{ list-style:disc; padding-left:1.25rem }
             trix-editor ol{ list-style:decimal; padding-left:1.25rem }
@@ -218,8 +249,7 @@
           </style>
         @endonce
 
-        {{-- Hidden input untuk kirim HTML description --}}
-        <input id="desc_input" type="hidden" name="description" value='@json($val("description", $job->description), JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)'>
+        <input id="desc_input" type="hidden" name="description">
         <trix-editor input="desc_input"></trix-editor>
 
         <p class="mt-1 text-xs text-slate-500">
@@ -230,4 +260,69 @@
     </div>
   </form>
 </div>
+
+{{-- Helpers & UX scripts --}}
+<script>
+(function(){
+  const siteSel  = document.getElementById('site_id');
+  const siteCode = document.getElementById('site_code');
+  const compSel  = document.getElementById('company_id');
+  const compCode = document.getElementById('company_code');
+  const kw       = document.getElementById('keywords');
+  const skills   = document.getElementById('skills');
+  const form     = document.getElementById('jobEditForm');
+  const kwCount  = document.getElementById('kw_count');
+
+  // Keywords counter
+  if (kw && kwCount) {
+    const updateKw = () => kwCount.textContent = (kw.value?.length||0) + '/500';
+    kw.addEventListener('input', updateKw); updateKw();
+  }
+
+  // site_code sinkron dari opsi site (pakai data-code)
+  function syncSiteCode(){
+    const opt  = siteSel?.options[siteSel.selectedIndex];
+    const code = opt?.getAttribute?.('data-code') || '';
+    siteCode.value = code;
+  }
+  siteSel?.addEventListener('change', syncSiteCode);
+  syncSiteCode();
+
+  // company_id ↔ company_code (Rule: prohibits)
+  function toggleCompanyInputs(){
+    const hasDropdown = !!compSel?.value;
+    const hasManual   = !!compCode?.value.trim();
+
+    if (hasDropdown) {
+      compCode.value = '';
+      compCode.setAttribute('disabled', 'disabled');
+      compCode.classList.add('bg-slate-50','cursor-not-allowed');
+    } else {
+      compCode.removeAttribute('disabled');
+      compCode.classList.remove('bg-slate-50','cursor-not-allowed');
+    }
+    if (hasManual) compSel.value = '';
+  }
+  compSel?.addEventListener('change', toggleCompanyInputs);
+  compCode?.addEventListener('input', toggleCompanyInputs);
+  toggleCompanyInputs();
+
+  // Normalize skills on submit: comma/newline → "a, b, c"
+  form?.addEventListener('submit', function(){
+    if (skills && skills.value.trim().length){
+      let raw = skills.value.split(/[\n,]/g).map(s => s.trim()).filter(Boolean);
+      skills.value = raw.join(', ');
+    }
+  }, {passive:true});
+
+  // Inisialisasi description (aman terhadap array/object)
+  const hidden = document.getElementById('desc_input');
+  try{
+    const initialDesc = @json(old('description', $job->description ?? ''));
+    hidden.value = (typeof initialDesc === 'string') ? initialDesc : JSON.stringify(initialDesc);
+  }catch(_){
+    hidden.value = '';
+  }
+})();
+</script>
 @endsection

@@ -1,37 +1,55 @@
 <?php
+
 namespace App\Http\Controllers\Admin;
+
 use App\Http\Controllers\Controller;
 use App\Models\Site;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Str;
 
 class SiteController extends Controller
 {
     /**
-     * List + pencarian + filter status + sort sederhana.
+     * List + pencarian + filter status + sort (ORM-only, cepat & aman).
      */
     public function index(Request $request)
     {
-        $q      = trim((string) $request->get('q'));
-        $status = $request->get('status');          // 'active' | 'inactive' | null
-        $sort   = $request->get('sort', 'code');    // code|name|region|created_at
-        $order  = $request->get('order', 'asc');    // asc|desc
+        // === Ambil & sanitasi input ===
+        $qRaw   = (string) $request->get('q', '');
+        // buang karakter kontrol & batasi panjang (hindari LIKE liar)
+        $q      = Str::limit(preg_replace('/[\x00-\x1F\x7F]/u', '', trim($qRaw)) ?? '', 120, '');
 
+        $status = $request->get('status'); // 'active' | 'inactive' | null
+        $sort   = (string) $request->get('sort', 'code');       // code|name|region|created_at
+        $order  = strtolower((string) $request->get('order', 'asc')); // asc|desc
+
+        // Whitelist kolom sort & arah
+        $sortable = ['code','name','region','created_at'];
+        if (! in_array($sort, $sortable, true)) {
+            $sort = 'code';
+        }
+        $order = $order === 'desc' ? 'desc' : 'asc';
+
+        // === Query: pilih kolom minimal + filter aman + cursor paginate ===
         $sites = Site::query()
+            ->select(['id','code','name','region','timezone','is_active','created_at'])
             ->when($q !== '', function ($qq) use ($q) {
-                $qq->where(function ($w) use ($q) {
-                    $w->where('code', 'like', "%{$q}%")
-                      ->orWhere('name', 'like', "%{$q}%")
-                      ->orWhere('region', 'like', "%{$q}%")
-                      ->orWhere('timezone', 'like', "%{$q}%")
-                      ->orWhere('address', 'like', "%{$q}%");
+                $like = '%'.$q.'%';
+                $qq->where(function ($w) use ($like) {
+                    $w->where('code', 'like', $like)
+                      ->orWhere('name', 'like', $like)
+                      ->orWhere('region', 'like', $like)
+                      ->orWhere('timezone', 'like', $like)
+                      ->orWhere('address', 'like', $like);
                 });
             })
             ->when($status === 'active', fn($qq) => $qq->where('is_active', true))
             ->when($status === 'inactive', fn($qq) => $qq->where('is_active', false))
-            ->when(in_array($sort, ['code','name','region','created_at'], true), fn($qq) => $qq->orderBy($sort, $order))
-            ->paginate(20)
-            ->appends($request->query());
+            ->when(true, fn($qq) => $qq->orderBy($sort, $order))
+            // cursorPaginate lebih hemat di dataset besar
+            ->cursorPaginate(20)
+            ->withQueryString();
 
         if ($request->wantsJson()) {
             return response()->json($sites);
@@ -78,7 +96,7 @@ class SiteController extends Controller
     }
 
     /**
-     * Detail site.
+     * Detail site (muat count secukupnya).
      */
     public function show(Site $site)
     {

@@ -7,54 +7,73 @@ use App\Models\JobApplication;
 use App\Models\Site;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Str;
 
 class WelcomeController extends Controller
 {
     /**
      * Landing page: jobs + ringkasan lamaran + daftar site sederhana + jumlah divisi (open).
+     * - ORM hemat kolom & eager load ketat
+     * - Micro-cache untuk data publik (sites & agregasi)
+     * - Aman untuk user guest maupun login
      */
     public function __invoke(Request $request)
     {
-        // Jobs terbaru (public)
-        $jobs = Job::query()
+        // ===== Jobs terbaru (public only, kolom minimal) =====
+        $jobsQuery = Job::query()
+            ->select(['id','title','site_id','created_at','status'])
             ->with(['site:id,code,name'])
-            ->latest()
-            ->paginate(9, ['*'], 'jobs_page');
+            ->orderByDesc('created_at');
 
-        // === Lokasi site (sederhana: ikon + nama) ===
-        $sitesSimple = $this->loadSitesSimple()
-            ->map(function (Site $s) {
-                return [
-                    'id'   => $s->id,
-                    'name' => $s->name ?: ($s->code ?: 'Tanpa Nama'),
-                    'dot'  => $this->colorFromString($s->code ?: $s->name ?: (string)$s->id),
-                ];
-            });
+        // Tampilkan hanya yang "open" bila kolom status ada
+        if (\Schema::hasColumn('jobs', 'status')) {
+            $jobsQuery->where('status', 'open');
+        }
 
-        // === Jumlah divisi (open only, global) ===
-        $byDivision = $this->countOpenByDivision();
+        $jobs = $jobsQuery->paginate(9, ['*'], 'jobs_page')->withQueryString();
 
-        // Default: guest
+        // ===== Lokasi site (ikon + nama) – micro-cache 5 menit =====
+        $sitesSimple = Cache::remember('welcome.sites_simple', 300, function () {
+            return $this->loadSitesSimple()
+                ->map(function (Site $s) {
+                    $name = $s->name ?: ($s->code ?: 'Tanpa Nama');
+                    $seed = $s->code ?: $name ?: (string) $s->id;
+                    return [
+                        'id'   => $s->id,
+                        'name' => $name,
+                        'dot'  => $this->colorFromString($seed),
+                    ];
+                });
+        });
+
+        // ===== Jumlah divisi (open only) – micro-cache 1 menit =====
+        $byDivision = Cache::remember('welcome.open_by_division', 60, fn () => $this->countOpenByDivision());
+
+        // ===== Default untuk guest =====
         $myApps         = collect();
-        $myAppsSummary  = ['total' => 0, 'byStatus' => collect([
-            'SUBMITTED'=>0,'SCREENING'=>0,'INTERVIEW'=>0,'OFFERED'=>0,'HIRED'=>0,'not_qualified'=>0,
-        ])];
+        $myAppsSummary  = [
+            'total'    => 0,
+            'byStatus' => collect(['SUBMITTED'=>0,'SCREENING'=>0,'INTERVIEW'=>0,'OFFERED'=>0,'HIRED'=>0,'not_qualified'=>0]),
+        ];
         $myAppsProgress = collect();
 
-        // Only if authenticated
+        // ===== Untuk user login: ambil lamaran terakhir + ringkasan =====
         if ($userId = auth()->id()) {
-            $myApps = JobApplication::with([
+            $myApps = JobApplication::query()
+                ->select(['id','job_id','user_id','current_stage','overall_status','created_at'])
+                ->with([
                     'job:id,title,site_id,division,level',
                     'job.site:id,code,name',
-                    'stages' => fn($q) => $q->orderBy('created_at', 'asc'),
+                    'stages' => fn ($q) => $q->select(['id','application_id','stage_key','created_at'])->orderBy('created_at', 'asc'),
                 ])
                 ->where('user_id', $userId)
-                ->latest()
-                ->take(6)
+                ->orderByDesc('created_at')
+                ->limit(6)
                 ->get();
 
-            $myAppsSummary = $this->buildSummary($userId);
-            $myAppsProgress = $myApps->map(fn($app) => $this->decorateProgress($app))
+            $myAppsSummary  = $this->buildSummary($userId);
+            $myAppsProgress = $myApps->map(fn ($app) => $this->decorateProgress($app))
                                      ->keyBy('application_id');
         }
 
@@ -81,15 +100,17 @@ class WelcomeController extends Controller
     protected function countOpenByDivision(): Collection
     {
         $q = Job::query();
-        if (\Schema::hasColumn('jobs','status')) {
+
+        if (\Schema::hasColumn('jobs', 'status')) {
             $q->where('status', 'open');
         }
 
-        return $q->selectRaw('COALESCE(NULLIF(division, \'\'), \'Tanpa Divisi\') as div_name, COUNT(*) as total')
+        // Gunakan COALESCE + NULLIF agar NULL/'' -> "Tanpa Divisi"
+        return $q->selectRaw("COALESCE(NULLIF(division, ''), 'Tanpa Divisi') AS div_name, COUNT(*) AS total")
                  ->groupBy('div_name')
                  ->orderByDesc('total')
                  ->get()
-                 ->pluck('total','div_name');
+                 ->pluck('total', 'div_name');
     }
 
     /** Warna HSL konsisten dari string (untuk ikon dot). */
@@ -100,7 +121,7 @@ class WelcomeController extends Controller
         return "hsl($h, {$sat}%, {$lum}%)";
     }
 
-    /** ====== Progress Lamaran (tetap sama) ====== */
+    /* ===================== Progress Lamaran ===================== */
 
     protected function stagePipeline(): array
     {
@@ -114,18 +135,40 @@ class WelcomeController extends Controller
         ];
     }
 
+    /**
+     * Ringkasan status lamaran user.
+     * - Normalisasi key dari DB (lowercase seperti 'hired','not_qualified') ke pipeline uppercase.
+     */
     protected function buildSummary(string|int $userId): array
     {
         $counts = JobApplication::query()
-            ->selectRaw('overall_status, COUNT(*) as total')
+            ->selectRaw('LOWER(COALESCE(overall_status, "submitted")) as k, COUNT(*) as total')
             ->where('user_id', $userId)
-            ->groupBy('overall_status')
-            ->pluck('total', 'overall_status');
+            ->groupBy('k')
+            ->pluck('total', 'k');
 
-        $total = (int) $counts->sum();
-        $keys  = ['SUBMITTED','SCREENING','INTERVIEW','OFFERED','HIRED','not_qualified'];
-        $byStatus = collect($keys)->mapWithKeys(fn($k) => [$k => (int)($counts[$k] ?? 0)]);
-        return ['total' => $total, 'byStatus' => $byStatus];
+        // Mapping DB -> pipeline
+        $map = [
+            'submitted'      => 'SUBMITTED',
+            'active'         => 'SCREENING',      // asumsi: "active" = sedang proses → tampilkan sebagai SCREENING
+            'screening'      => 'SCREENING',
+            'interview'      => 'INTERVIEW',
+            'offer'          => 'OFFERED',
+            'offered'        => 'OFFERED',
+            'hired'          => 'HIRED',
+            'not_qualified'  => 'not_qualified',
+        ];
+
+        $bucket = ['SUBMITTED'=>0,'SCREENING'=>0,'INTERVIEW'=>0,'OFFERED'=>0,'HIRED'=>0,'not_qualified'=>0];
+        foreach ($counts as $k => $v) {
+            $norm = $map[$k] ?? 'SUBMITTED';
+            $bucket[$norm] += (int) $v;
+        }
+
+        return [
+            'total'    => array_sum($bucket),
+            'byStatus' => collect($bucket),
+        ];
     }
 
     protected function decorateProgress(JobApplication $app): array
@@ -134,6 +177,7 @@ class WelcomeController extends Controller
         $totalSteps = 5;
 
         $currentStage = null;
+
         if ($app->relationLoaded('stages') && $app->stages->count() > 0) {
             $currentStage = strtoupper((string) $app->stages->last()->stage_key);
         }
@@ -151,8 +195,8 @@ class WelcomeController extends Controller
         $label  = $pipeline[$currentStage]['label'];
         $hint   = $pipeline[$currentStage]['hint'];
 
-        $isNQ = ($app->overall_status === 'not_qualified' || $currentStage === 'not_qualified');
-        $isH  = ($app->overall_status === 'HIRED' || $currentStage === 'HIRED');
+        $isNQ = (strtolower((string) $app->overall_status) === 'not_qualified' || $currentStage === 'not_qualified');
+        $isH  = (strtolower((string) $app->overall_status) === 'hired' || $currentStage === 'HIRED');
 
         if ($isNQ) {
             $progressPct = 0;   $nextLabel = null; $isFinal = true;
@@ -180,11 +224,14 @@ class WelcomeController extends Controller
 
     protected function nextStageLabel(string $currentStage): ?string
     {
-        $order = ['SUBMITTED','SCREENING','INTERVIEW','OFFERED','HIRED'];
+        $order    = ['SUBMITTED','SCREENING','INTERVIEW','OFFERED','HIRED'];
         $pipeline = $this->stagePipeline();
+
         $idx = array_search($currentStage, $order, true);
         if ($idx === false) return $pipeline['SUBMITTED']['label'];
+
         $next = $order[$idx + 1] ?? null;
         return $next ? $pipeline[$next]['label'] : null;
     }
 }
+    

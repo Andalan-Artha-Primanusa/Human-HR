@@ -4,7 +4,8 @@
     "type": "module",
     "scripts": {
         "build": "vite build",
-        "dev": "vite"
+        "dev": "vite",
+        "test": "php vendor/bin/pest"
     },
     "devDependencies": {
         "@tailwindcss/forms": "^0.5.2",

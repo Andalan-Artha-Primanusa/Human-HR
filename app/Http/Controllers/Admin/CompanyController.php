@@ -8,6 +8,9 @@ use App\Http\Requests\Admin\Company\UpdateCompanyRequest;
 use App\Models\Company;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class CompanyController extends Controller
@@ -18,16 +21,45 @@ class CompanyController extends Controller
         // $this->authorizeResource(Company::class, 'company');
     }
 
+    /**
+     * List: ORM-only, hemat kolom, adaptif FULLTEXT (fallback LIKE), cursor paginate.
+     */
     public function index(Request $request): View
     {
-        $q = trim((string) $request->query('q',''));
+        // Sanitize pencarian
+        $qRaw   = (string) $request->query('q', '');
+        $qClean = trim(preg_replace('/[^\pL\pN\s\-\_\.]/u', '', $qRaw) ?? '');
+        $q      = Str::limit($qClean, 80, '');
         $status = $request->query('status');
 
+        // Deteksi dukungan FULLTEXT (cache 1 hari)
+        $hasFulltext = Cache::remember('companies:has_fulltext', 86400, function () {
+            try {
+                $rows = DB::select("SHOW INDEX FROM companies");
+                foreach ($rows as $r) {
+                    $type = $r->Index_type ?? ($r->Index_type ?? null);
+                    if ($type === 'FULLTEXT') return true;
+                }
+            } catch (\Throwable $e) { /* fallback */ }
+            return false;
+        });
+
         $items = Company::query()
-            ->when($status, fn($qq) => $qq->where('status',$status))
-            ->search($q)
+            ->select(['id','name','code','status','created_at'])
+            ->when($status, fn($q2) => $q2->where('status', $status))
+            ->when($q !== '', function ($q2) use ($q, $hasFulltext) {
+                if ($hasFulltext) {
+                    return $q2->whereRaw("MATCH(name, code, alias) AGAINST (? IN NATURAL LANGUAGE MODE)", [$q]);
+                }
+                $like = '%'.$q.'%';
+                return $q2->where(function ($w) use ($like) {
+                    $w->where('name','like',$like)
+                      ->orWhere('code','like',$like)
+                      ->orWhere('alias','like',$like);
+                });
+            })
             ->orderBy('name')
-            ->paginate(12)
+            ->cursorPaginate(20)
             ->withQueryString();
 
         return view('admin.companies.index', compact('items','q','status'));
@@ -41,9 +73,10 @@ class CompanyController extends Controller
 
     public function store(StoreCompanyRequest $request): RedirectResponse
     {
-        Company::create($request->validated());
+        DB::transaction(function () use ($request) {
+            Company::create($request->validated());
+        });
 
-        // Langsung balik ke index
         return redirect()
             ->route('admin.companies.index')
             ->with('ok', 'Company created.');
@@ -51,6 +84,7 @@ class CompanyController extends Controller
 
     public function show(Company $company): View
     {
+        // Eager secukupnya untuk metrik/relasi yang ditampilkan
         $record = $company->loadCount('jobs');
         return view('admin.companies.show', compact('record'));
     }
@@ -63,9 +97,10 @@ class CompanyController extends Controller
 
     public function update(UpdateCompanyRequest $request, Company $company): RedirectResponse
     {
-        $company->update($request->validated());
+        DB::transaction(function () use ($request, $company) {
+            $company->update($request->validated());
+        });
 
-        // Langsung balik ke index
         return redirect()
             ->route('admin.companies.index')
             ->with('ok', 'Company updated.');
@@ -73,7 +108,9 @@ class CompanyController extends Controller
 
     public function destroy(Company $company): RedirectResponse
     {
-        $company->delete();
+        DB::transaction(function () use ($company) {
+            $company->delete();
+        });
 
         return redirect()
             ->route('admin.companies.index')
