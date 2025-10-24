@@ -6,26 +6,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Masuk • Human.Careers</title>
   <meta name="csrf-token" content="{{ csrf_token() }}">
-  @php
-  $manifestFile = public_path('build/manifest.json');
-  $manifest = is_file($manifestFile) ? json_decode(file_get_contents($manifestFile), true) : [];
-
-  // entry utama sesuai vite.config (umumnya resources/js/app.js)
+  {{-- === Vite build tanpa @vite (baca manifest.json) === --}}
+@php
+  $manifestPath = public_path('build/manifest.json');
+  $manifest = is_file($manifestPath) ? json_decode(file_get_contents($manifestPath), true) : [];
+  // Ganti key di bawah kalau entry kamu beda (mis. resources/ts/app.ts)
   $entry = $manifest['resources/js/app.js'] ?? null;
 @endphp
 
 @if($entry)
-  {{-- CSS yang dibundel --}}
   @foreach(($entry['css'] ?? []) as $css)
     <link rel="stylesheet" href="{{ asset('build/'.$css) }}">
   @endforeach
-
-  {{-- JS (module) --}}
   <script type="module" src="{{ asset('build/'.$entry['file']) }}"></script>
 @else
-  {{-- Fallback aman kalau manifest belum ada/terupload --}}
-  <link rel="stylesheet" href="{{ asset('build/assets/app.css') }}">
-  <script type="module" src="{{ asset('build/assets/app.js') }}"></script>
+  {{-- Fallback opsional: boleh dihapus kalau tidak diperlukan --}}
+  {{-- <link rel="stylesheet" href="{{ asset('build/assets/app.css') }}"> --}}
+  {{-- <script type="module" src="{{ asset('build/assets/app.js') }}"></script> --}}
 @endif
   <style>
     [x-cloak]{display:none!important}
