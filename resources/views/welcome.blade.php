@@ -20,23 +20,7 @@
 
   {{-- Vite Assets (module = non-blocking) --}}
   {{-- === Vite build tanpa @vite (baca manifest.json) === --}}
-@php
-  $manifestPath = public_path('build/manifest.json');
-  $manifest = is_file($manifestPath) ? json_decode(file_get_contents($manifestPath), true) : [];
-  // Ganti key di bawah kalau entry kamu beda (mis. resources/ts/app.ts)
-  $entry = $manifest['resources/js/app.js'] ?? null;
-@endphp
 
-@if($entry)
-  @foreach(($entry['css'] ?? []) as $css)
-    <link rel="stylesheet" href="{{ asset('build/'.$css) }}">
-  @endforeach
-  <script type="module" src="{{ asset('build/'.$entry['file']) }}"></script>
-@else
-  {{-- Fallback opsional: boleh dihapus kalau tidak diperlukan --}}
-  {{-- <link rel="stylesheet" href="{{ asset('build/assets/app.css') }}"> --}}
-  {{-- <script type="module" src="{{ asset('build/assets/app.js') }}"></script> --}}
-@endif
 
   {{-- SEO Meta --}}
   <meta name="description" content="Portal karier resmi Andalan. Lowongan terverifikasi, proses seleksi transparan, dan pembaruan status waktu nyata. Satu akun untuk seluruh lokasi kerja Andalan.">
