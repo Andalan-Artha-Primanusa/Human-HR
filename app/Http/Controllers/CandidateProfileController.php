@@ -31,18 +31,18 @@ class CandidateProfileController extends Controller
 
         // Ambil ONLY kolom yang dipakai view (hemat)
         $trainings = $profile->trainings()->orderBy('order_no')
-            ->get(['title','institution','period_start','period_end'])
+            ->get(['title', 'institution', 'period_start', 'period_end'])
             ->toArray();
 
         $employments = $profile->employments()->orderBy('order_no')
-            ->get(['company','position_start','position_end','period_start','period_end','reason_for_leaving','job_description'])
+            ->get(['company', 'position_start', 'position_end', 'period_start', 'period_end', 'reason_for_leaving', 'job_description'])
             ->toArray();
 
         $references = $profile->references()->orderBy('order_no')
-            ->get(['name','job_title','company','contact'])
+            ->get(['name', 'job_title', 'company', 'contact'])
             ->toArray();
 
-        return view('candidates.profile_wizard', compact('job','profile','trainings','employments','references'));
+        return view('candidates.profile_wizard', compact('job', 'profile', 'trainings', 'employments', 'references'));
     }
 
     /**
@@ -61,11 +61,11 @@ class CandidateProfileController extends Controller
         // ===== VALIDASI UTAMA =====
         $validated = $request->validate([
             'full_name'         => 'bail|required|string|max:190',
-            'gender'            => ['bail','required', Rule::in(['male','female'])],
+            'gender'            => ['bail', 'required', Rule::in(['male', 'female'])],
             'age'               => 'bail|required|integer|between:15,80',
             'birthplace'        => 'bail|required|string|max:190',
             'birthdate'         => 'bail|required|date',
-            'nik'               => ['bail','required','digits:16'],
+            'nik'               => ['bail', 'required', 'digits:16'],
             'email'             => 'bail|required|email:rfc,dns',
             'phone'             => 'bail|required|string|max:50',
             'whatsapp'          => 'nullable|string|max:50',
@@ -82,7 +82,7 @@ class CandidateProfileController extends Controller
             'ktp_postal_code'   => 'bail|required|string|max:20',
             'ktp_rt'            => 'nullable|string|max:10',
             'ktp_rw'            => 'nullable|string|max:10',
-            'ktp_residence_status' => ['nullable', Rule::in(['OWN','RENT','DORM','FAMILY','COMPANY','OTHER'])],
+            'ktp_residence_status' => ['nullable', Rule::in(['OWN', 'RENT', 'DORM', 'FAMILY', 'COMPANY', 'OTHER'])],
 
             'domicile_address'     => 'bail|required|string',
             'domicile_village'     => 'bail|required|string|max:190',
@@ -92,7 +92,7 @@ class CandidateProfileController extends Controller
             'domicile_postal_code' => 'bail|required|string|max:20',
             'domicile_rt'          => 'nullable|string|max:10',
             'domicile_rw'          => 'nullable|string|max:10',
-            'domicile_residence_status' => ['nullable', Rule::in(['OWN','RENT','DORM','FAMILY','COMPANY','OTHER'])],
+            'domicile_residence_status' => ['nullable', Rule::in(['OWN', 'RENT', 'DORM', 'FAMILY', 'COMPANY', 'OTHER'])],
 
             'motivation'             => 'nullable|string',
             'has_relatives'          => 'nullable|boolean',
@@ -101,7 +101,7 @@ class CandidateProfileController extends Controller
             'worked_before_position' => 'nullable|string|max:190',
             'worked_before_duration' => 'nullable|string|max:190',
             'applied_before'         => 'nullable|boolean',
-            'applied_before_position'=> 'nullable|string|max:190',
+            'applied_before_position' => 'nullable|string|max:190',
             'willing_out_of_town'    => 'nullable|boolean',
             'not_willing_reason'     => 'nullable|string|max:255',
 
@@ -131,6 +131,17 @@ class CandidateProfileController extends Controller
             'references.*.job_title'   => 'required|string|max:190',
             'references.*.company'     => 'required|string|max:190',
             'references.*.contact'     => 'required|string|max:190',
+
+            // === Gaji & Kesiapan Kerja ===
+            'current_salary'       => 'nullable|numeric|min:0|max:999999999999.99',
+            'expected_salary'      => 'nullable|numeric|min:0|max:999999999999.99',
+            'expected_facilities'  => 'nullable|string',
+            'available_start_date' => 'nullable|date|after_or_equal:today',
+            'work_motivation'      => 'nullable|string',
+
+            // === Kesehatan ===
+            'medical_history'      => 'nullable|string',
+            'last_medical_checkup' => 'nullable|string|max:255'
         ]);
 
         // ===== VALIDASI MANUAL RANGE TANGGAL DI REPEATER =====
@@ -140,14 +151,14 @@ class CandidateProfileController extends Controller
             $start = $t['period_start'] ?? null;
             $end   = $t['period_end']   ?? null;
             if ($start && $end && $end < $start) {
-                $errors["trainings.$i.period_end"] = "Tanggal selesai pelatihan #".($i+1)." harus >= tanggal mulai.";
+                $errors["trainings.$i.period_end"] = "Tanggal selesai pelatihan #" . ($i + 1) . " harus >= tanggal mulai.";
             }
         }
         foreach ((array) $request->input('employments', []) as $i => $e) {
             $start = $e['period_start'] ?? null;
             $end   = $e['period_end']   ?? null;
             if ($start && $end && $end < $start) {
-                $errors["employments.$i.period_end"] = "Tanggal selesai pekerjaan #".($i+1)." harus >= tanggal mulai.";
+                $errors["employments.$i.period_end"] = "Tanggal selesai pekerjaan #" . ($i + 1) . " harus >= tanggal mulai.";
             }
         }
         if (!empty($errors)) {
@@ -215,7 +226,15 @@ class CandidateProfileController extends Controller
                 'applied_before_position' => $request->input('applied_before_position'),
                 'willing_out_of_town'     => $request->boolean('willing_out_of_town'),
                 'not_willing_reason'      => $request->input('not_willing_reason'),
-            ]);
+
+                'current_salary'       => $validated['current_salary'] ?? null,
+    'expected_salary'      => $validated['expected_salary'] ?? null,
+    'expected_facilities'  => $validated['expected_facilities'] ?? null,
+    'available_start_date' => $validated['available_start_date'] ?? null,
+    'work_motivation'      => $validated['work_motivation'] ?? null,
+    'medical_history'      => $validated['medical_history'] ?? null,
+    'last_medical_checkup' => $validated['last_medical_checkup'] ?? null,            ]);
+
 
             // Upload aman
             $userFolder = 'candidates/u_' . $user->id;
@@ -324,21 +343,21 @@ class CandidateProfileController extends Controller
         $q = trim((string) $request->query('q', ''));
 
         $profiles = CandidateProfile::query()
-            ->select(['id','user_id','full_name','email','phone','nik','updated_at'])
-            ->withCount(['trainings','employments','references'])
+            ->select(['id', 'user_id', 'full_name', 'email', 'phone', 'nik', 'updated_at'])
+            ->withCount(['trainings', 'employments', 'references'])
             ->when($q !== '', function ($w) use ($q) {
                 $w->where(function ($s) use ($q) {
                     $s->where('full_name', 'like', "%{$q}%")
-                      ->orWhere('email', 'like', "%{$q}%")
-                      ->orWhere('phone', 'like', "%{$q}%")
-                      ->orWhere('nik', 'like', "%{$q}%");
+                        ->orWhere('email', 'like', "%{$q}%")
+                        ->orWhere('phone', 'like', "%{$q}%")
+                        ->orWhere('nik', 'like', "%{$q}%");
                 });
             })
             ->orderByDesc('updated_at')
             ->paginate(20)
             ->withQueryString();
 
-        return view('admin.candidates.index', compact('profiles','q'));
+        return view('admin.candidates.index', compact('profiles', 'q'));
     }
 
     /**
@@ -347,9 +366,9 @@ class CandidateProfileController extends Controller
     public function adminShow(CandidateProfile $profile)
     {
         $profile->load([
-            'trainings'   => fn($q) => $q->orderBy('order_no')->select(['id','candidate_profile_id','order_no','title','institution','period_start','period_end']),
-            'employments' => fn($q) => $q->orderBy('order_no')->select(['id','candidate_profile_id','order_no','company','position_start','position_end','period_start','period_end','reason_for_leaving','job_description']),
-            'references'  => fn($q) => $q->orderBy('order_no')->select(['id','candidate_profile_id','order_no','name','job_title','company','contact']),
+            'trainings'   => fn($q) => $q->orderBy('order_no')->select(['id', 'candidate_profile_id', 'order_no', 'title', 'institution', 'period_start', 'period_end']),
+            'employments' => fn($q) => $q->orderBy('order_no')->select(['id', 'candidate_profile_id', 'order_no', 'company', 'position_start', 'position_end', 'period_start', 'period_end', 'reason_for_leaving', 'job_description']),
+            'references'  => fn($q) => $q->orderBy('order_no')->select(['id', 'candidate_profile_id', 'order_no', 'name', 'job_title', 'company', 'contact']),
             'user:id,name,email',
         ]);
 
@@ -388,7 +407,7 @@ class CandidateProfileController extends Controller
     protected function safeOriginalName(string $name): string
     {
         // Hilangkan path traversal & karakter aneh
-        $name = Str::of($name)->replace(['\\','/'], '')->toString();
+        $name = Str::of($name)->replace(['\\', '/'], '')->toString();
 
         $ext  = pathinfo($name, PATHINFO_EXTENSION);
         $base = pathinfo($name, PATHINFO_FILENAME);

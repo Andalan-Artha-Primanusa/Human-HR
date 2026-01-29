@@ -349,7 +349,101 @@
 
       {{-- STEP 3 --}}
       <section x-show="step===3" x-cloak class="space-y-6">
-        <div class="card rounded-2xl bg-white p-5 shadow-sm" x-data="{ items: $store.form.references }">
+        <div class="card rounded-2xl bg-white p-5 shadow-sm">
+  <h2 class="flex items-center gap-2 text-lg font-semibold">
+    <svg class="h-5 w-5 text-brand-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-3.314 0-6 2.239-6 5v5h12v-5c0-2.761-2.686-5-6-5z"/>
+      <path stroke-linecap="round" stroke-linejoin="round" d="M12 4a4 4 0 110 8 4 4 0 010-8z"/>
+    </svg>
+    Informasi Tambahan
+  </h2>
+
+  <div class="mt-4 grid gap-4 sm:grid-cols-2">
+
+    {{-- Gaji Saat Ini --}}
+    <div>
+      <label class="text-sm text-slate-600">Gaji Saat Ini</label>
+      <input
+        type="number"
+        name="current_salary"
+        step="0.01"
+        class="mt-1 w-full rounded-lg border px-3 py-2"
+        placeholder="Contoh: 5000000"
+        value="{{ old('current_salary', $profile->current_salary) }}"
+      >
+    </div>
+
+    {{-- Gaji Diharapkan --}}
+    <div>
+      <label class="text-sm text-slate-600">Gaji Yang Diharapkan</label>
+      <input
+        type="number"
+        name="expected_salary"
+        step="0.01"
+        class="mt-1 w-full rounded-lg border px-3 py-2"
+        placeholder="Contoh: 7000000"
+        value="{{ old('expected_salary', $profile->expected_salary) }}"
+      >
+    </div>
+
+    {{-- Fasilitas --}}
+    <div class="sm:col-span-2">
+      <label class="text-sm text-slate-600">Fasilitas Yang Diharapkan</label>
+      <textarea
+        name="expected_facilities"
+        rows="3"
+        class="mt-1 w-full rounded-lg border px-3 py-2"
+        placeholder="Mess, transport, asuransi, dll"
+      >{{ old('expected_facilities', $profile->expected_facilities) }}</textarea>
+    </div>
+
+    {{-- Tanggal Siap Bekerja --}}
+    <div>
+      <label class="text-sm text-slate-600">Tanggal Siap Mulai Bekerja</label>
+      <input
+        type="date"
+        name="available_start_date"
+        class="mt-1 w-full rounded-lg border px-3 py-2"
+        value="{{ old('available_start_date', optional($profile->available_start_date)->format('Y-m-d')) }}"
+      >
+    </div>
+
+    {{-- Motivasi Kerja --}}
+    <div class="sm:col-span-2">
+      <label class="text-sm text-slate-600">Motivasi Kerja di Andalan Group</label>
+      <textarea
+        name="work_motivation"
+        rows="4"
+        class="mt-1 w-full rounded-lg border px-3 py-2"
+      >{{ old('work_motivation', $profile->work_motivation) }}</textarea>
+    </div>
+
+    {{-- Riwayat Kesehatan --}}
+    <div class="sm:col-span-2">
+      <label class="text-sm text-slate-600">Riwayat Penyakit / Operasi</label>
+      <textarea
+        name="medical_history"
+        rows="3"
+        class="mt-1 w-full rounded-lg border px-3 py-2"
+      >{{ old('medical_history', $profile->medical_history) }}</textarea>
+    </div>
+
+    {{-- Medical Checkup --}}
+    <div class="sm:col-span-2">
+      <label class="text-sm text-slate-600">Pemeriksaan Kesehatan Terakhir</label>
+      <input
+        type="text"
+        name="last_medical_checkup"
+        class="mt-1 w-full rounded-lg border px-3 py-2"
+        placeholder="Contoh: Jan 2024 - RS Siloam"
+        value="{{ old('last_medical_checkup', $profile->last_medical_checkup) }}"
+      >
+    </div>
+
+  </div>
+</div>
+
+      <div class="card rounded-2xl bg-white p-5 shadow-sm" x-data="{ items: $store.form.references }">
           <div class="flex items-center justify-between">
             <h2 class="flex items-center gap-2 text-lg font-semibold">
               <svg class="h-5 w-5 text-brand-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a4 4 0 00-4-4h-1M9 20H4v-2a4 4 0 014-4h1M12 12a5 5 0 100-10 5 5 0 000 10z"/></svg>

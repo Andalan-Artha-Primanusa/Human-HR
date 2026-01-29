@@ -2,6 +2,7 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
+  @vite(['resources/css/app.css', 'resources/js/app.js'])
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Masuk • Human.Careers</title>
@@ -88,12 +89,6 @@
           <div class="relative rounded-2xl bg-white/80 p-6 shadow-xl ring-1 ring-slate-200/80 backdrop-blur" id="loginCard">
             <form id="loginForm" method="POST" action="{{ route('login') }}" class="space-y-5" novalidate>
               @csrf
-
-              {{-- Honeypot --}}
-              <div class="hidden" aria-hidden="true">
-                <label for="company" class="sr-only">Company</label>
-                <input type="text" id="company" name="company" tabindex="-1" autocomplete="off">
-              </div>
 
               {{-- Email --}}
               <div>

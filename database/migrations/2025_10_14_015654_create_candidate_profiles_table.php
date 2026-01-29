@@ -5,7 +5,8 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
-  public function up(): void {
+  public function up(): void
+  {
     Schema::create('candidate_profiles', function (Blueprint $t) {
       $t->uuid('id')->primary();
       $t->foreignUuid('user_id')->constrained('users')->cascadeOnDelete();
@@ -14,7 +15,7 @@ return new class extends Migration {
       // === Identitas & Kontak ===
       $t->string('full_name');                         // Nama Lengkap (KTP)
       $t->string('nickname')->nullable();              // Nama Panggilan
-      $t->enum('gender', ['male','female'])->nullable(); // Jenis Kelamin
+      $t->enum('gender', ['male', 'female'])->nullable(); // Jenis Kelamin
       $t->string('birthplace')->nullable();            // Tempat Lahir
       $t->date('birthdate')->nullable();               // Tanggal Lahir
       $t->unsignedTinyInteger('age')->nullable()->comment('Opsional; snapshot usia saat isi form (redundan dgn birthdate)');
@@ -26,7 +27,17 @@ return new class extends Migration {
 
       // === Pendidikan Formal Terakhir ===
       $t->enum('last_education', [
-        'SD','SMP','SMA_SMK','D1','D2','D3','D4','S1','S2','S3','LAINNYA'
+        'SD',
+        'SMP',
+        'SMA_SMK',
+        'D1',
+        'D2',
+        'D3',
+        'D4',
+        'S1',
+        'S2',
+        'S3',
+        'LAINNYA'
       ])->nullable();
       $t->string('education_major')->nullable();       // Jurusan
       $t->string('education_school')->nullable();      // Nama Sekolah/Kampus
@@ -40,7 +51,7 @@ return new class extends Migration {
       $t->string('ktp_city', 100)->nullable();         // Kab/Kota
       $t->string('ktp_province', 100)->nullable();     // Provinsi
       $t->string('ktp_postal_code', 10)->nullable();   // Kode Pos
-      $t->enum('ktp_residence_status', ['OWN','RENT','DORM','FAMILY','COMPANY','OTHER'])
+      $t->enum('ktp_residence_status', ['OWN', 'RENT', 'DORM', 'FAMILY', 'COMPANY', 'OTHER'])
         ->nullable()->comment('Status Tempat Tinggal KTP: OWN=Milik, RENT=Sewa, DORM=Kost, FAMILY=Ortu/Klg, COMPANY=Dinas, OTHER=Lainnya');
 
       // === Alamat Domisili ===
@@ -52,7 +63,7 @@ return new class extends Migration {
       $t->string('domicile_city', 100)->nullable();
       $t->string('domicile_province', 100)->nullable();
       $t->string('domicile_postal_code', 10)->nullable();
-      $t->enum('domicile_residence_status', ['OWN','RENT','DORM','FAMILY','COMPANY','OTHER'])
+      $t->enum('domicile_residence_status', ['OWN', 'RENT', 'DORM', 'FAMILY', 'COMPANY', 'OTHER'])
         ->nullable()->comment('Status Tempat Tinggal Domisili');
 
       // === Pernyataan Pribadi & Riwayat di Perusahaan ===
@@ -65,7 +76,7 @@ return new class extends Migration {
       $t->string('worked_before_duration')->nullable(); // Lama bekerja (teks)
 
       $t->boolean('applied_before')->nullable();        // Pernah melamar ke ABN?
-      $t->string('applied_before_position')->nullable();// Posisi yang pernah dilamar
+      $t->string('applied_before_position')->nullable(); // Posisi yang pernah dilamar
 
       $t->boolean('willing_out_of_town')->nullable();   // Bersedia di luar kota?
       $t->text('not_willing_reason')->nullable();       // Alasan jika tidak bersedia
@@ -73,6 +84,7 @@ return new class extends Migration {
       // === Berkas ===
       $t->string('cv_path')->nullable();                // CV
       $t->json('documents')->nullable()->comment('KTP, KK, NPWP, Ijazah, Surat pengalaman, dll (array path/metadata)');
+      $t->string('status_pernikahan')->nullable();                // CV
 
       // === Lain-lain ===
       $t->json('extras')->nullable();                   // Fleksibel untuk field tambahan
@@ -80,12 +92,43 @@ return new class extends Migration {
 
       // Index opsional untuk pencarian
       $t->index(['last_education']);
-      $t->index(['ktp_city','ktp_province']);
-      $t->index(['domicile_city','domicile_province']);
+      $t->index(['ktp_city', 'ktp_province']);
+      $t->index(['domicile_city', 'domicile_province']);
+
+      $t->decimal('current_salary', 15, 2)
+        ->nullable()
+        ->comment('Gaji saat ini');
+
+      $t->decimal('expected_salary', 15, 2)
+        ->nullable()
+        ->comment('Gaji yang diharapkan');
+
+      // === Harapan & Kesiapan Kerja ===
+      $t->text('expected_facilities')
+        ->nullable()
+        ->comment('Fasilitas yang diharapkan');
+
+      $t->date('available_start_date')
+        ->nullable()
+        ->comment('Tanggal siap mulai bekerja');
+
+      $t->text('work_motivation')
+        ->nullable()
+        ->comment('Motivasi kerja di Andalan Group');
+
+      // === Kesehatan ===
+      $t->text('medical_history')
+        ->nullable()
+        ->comment('Riwayat penyakit, operasi, atau cacat fisik');
+
+      $t->string('last_medical_checkup')
+        ->nullable()
+        ->comment('Pemeriksaan kesehatan terakhir (kapan & di mana)');
     });
   }
 
-  public function down(): void {
+  public function down(): void
+  {
     Schema::dropIfExists('candidate_profiles');
   }
 };
