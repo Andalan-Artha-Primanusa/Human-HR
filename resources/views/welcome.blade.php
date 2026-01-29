@@ -754,7 +754,7 @@
               <div class="tl-step"><span class="tl-dot amber" aria-hidden="true"></span>
                 <div class="flex items-start justify-between gap-4">
                   <div>
-                    <p class="text-sm font-medium" style="color: {{ $brandBlack }}">2) Penyaringan Kurikulum Vitae</p>
+                    <p class="text-sm font-medium" style="color: {{ $brandBlack }}">2) Penyaringan CV</p>
                     <p class="text-xs text-zinc-500">Penilaian kesesuaian awal berdasarkan kebutuhan jabatan dan lokasi kerja.</p>
                   </div>
                   <span class="text-[11px] px-2 py-1 rounded-full bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-200">Proses</span>
