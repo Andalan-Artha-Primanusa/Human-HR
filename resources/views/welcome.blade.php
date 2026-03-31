@@ -841,9 +841,11 @@
           <div class="rounded-xl border bg-white card-hover" style="border-color: {{ $brandGray }};">
             <div class="p-5">
               <div class="flex items-start gap-3">
-                <div class="p-2.5 rounded-lg text-white" style="background: {{ $brandBlack }}"><svg class="w-5 h-5" aria-hidden="true">
+                <div class="p-2.5 rounded-lg text-white" style="background: #a77d52;">
+                  <svg class="w-5 h-5" aria-hidden="true">
                     <use href="#i-briefcase" />
-                  </svg></div>
+                  </svg>
+                </div>
                 <div class="min-w-0">
                   <a href="{{ route('jobs.show', $job) }}" class="block font-semibold hover:opacity-80" style="color: {{ $brandBlack }}">{{ $job->title }}</a>
                   <p class="text-[11px] text-zinc-500 mt-0.5">{{ $job->site?->code ?? $job->site?->name ?? '—' }} • Diposting {{ optional($job->created_at)->diffForHumans() }}</p>
@@ -894,7 +896,7 @@
 
         {{-- BRAND --}}
         <div>
-          <img src="{{ asset('assets/ddd.png') }}"
+          <img src="{{ asset('assets/dddd.png') }}"
             alt="Logo Human Careers"
             class="h-32 md:h-40 w-auto object-contain">
 
