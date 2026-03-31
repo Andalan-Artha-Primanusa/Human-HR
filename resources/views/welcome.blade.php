@@ -922,107 +922,137 @@
   </div>
 </section>
 
-  {{-- FOOTER --}}
-  <footer style="background: {{ $brandBlack }};">
-    <div class="max-w-7xl mx-auto px-6 lg:px-8 py-14 text-white">
+<footer style="background: {{ $brandBlack }};">
+  <div class="max-w-7xl mx-auto px-6 lg:px-8 py-14 text-white">
 
-      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-10">
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-10">
 
-        {{-- BRAND --}}
-        <div>
-          <img src="{{ asset('assets/dddd.png') }}"
-            alt="Logo Human Careers"
-            class="h-32 md:h-40 w-auto object-contain">
+      {{-- BRAND --}}
+      <div>
+        <img src="{{ asset('assets/dddd.png') }}"
+          alt="Logo Human Careers"
+          class="h-32 md:h-40 w-auto object-contain mb-3">
 
-          <p class="text-sm text-zinc-300 leading-relaxed">
-            Portal karier resmi PT Andalan Artha Primanusa.
-            Transparan, profesional, dan terpercaya untuk seluruh pencari kerja.
-          </p>
-
-        </div>
-
-        {{-- MENU --}}
-        <div>
-          <h4 class="font-semibold mb-3">Navigasi</h4>
-          <ul class="space-y-2 text-sm text-zinc-300">
-            <li><a href="{{ route('jobs.index') }}" class="hover:text-white">Lowongan</a></li>
-            @auth
-            <li><a href="{{ route('applications.mine') }}" class="hover:text-white">Lamaran Saya</a></li>
-            <li><a href="{{ route('profile.edit') }}" class="hover:text-white">Profil</a></li>
-            @else
-            <li><a href="{{ route('login') }}" class="hover:text-white">Masuk</a></li>
-            <li><a href="{{ route('register') }}" class="hover:text-white">Daftar</a></li>
-            @endauth
-          </ul>
-        </div>
-
-        {{-- COMPANY --}}
-        <div>
-          <h4 class="font-semibold mb-3">Perusahaan</h4>
-          <ul class="space-y-2 text-sm text-zinc-300">
-            <li><a href="#" class="hover:text-white">Tentang Kami</a></li>
-            <li><a href="#" class="hover:text-white">Kebijakan Privasi</a></li>
-            <li><a href="#" class="hover:text-white">Syarat & Ketentuan</a></li>
-            <li><a href="#" class="hover:text-white">Etika Rekrutmen</a></li>
-          </ul>
-        </div>
-
-        {{-- CONTACT --}}
-        <div>
-          <h4 class="font-semibold mb-3">Kontak</h4>
-
-          <p class="text-sm text-zinc-300 mb-2">
-            Email: <a href="mailto:hr@andalan.co.id" class="underline hover:text-white">hr@andalan.co.id</a>
-          </p>
-
-          <p class="text-sm text-zinc-300 leading-relaxed">
-            PT Andalan Artha Primanusa - Tanah Andalan<br>
-            Jl. Plaju No.11, Kebon Melati,<br>
-            Tanah Abang, Jakarta Pusat 10230,<br>
-            DKI Jakarta, Indonesia
-          </p>
-
-          {{-- SOCIAL --}}
-          <div class="mt-4 flex gap-3">
-
-            <a href="#" class="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition">
-              <svg class="w-5 h-5">
-                <use href="#i-instagram" />
-              </svg>
-            </a>
-
-            <a href="#" class="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition">
-              <svg class="w-5 h-5">
-                <use href="#i-linkedin" />
-              </svg>
-            </a>
-
-            <a href="#" class="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition">
-              <svg class="w-5 h-5">
-                <use href="#i-youtube" />
-              </svg>
-            </a>
-
-          </div>
-        </div>
-
+        <p class="text-sm text-zinc-300 leading-relaxed">
+          Portal karier resmi PT Andalan Artha Primanusa.
+          Transparan, profesional, dan terpercaya untuk seluruh pencari kerja.
+        </p>
       </div>
 
-      {{-- COPYRIGHT --}}
-      <div class="mt-12 pt-6 text-sm flex flex-col md:flex-row items-center justify-between gap-4 border-t border-white/20">
+      {{-- MENU --}}
+      <div>
+        <h4 class="font-semibold mb-3">Navigasi</h4>
+        <ul class="space-y-2 text-sm text-zinc-300">
+          <li><a href="{{ route('jobs.index') }}" class="hover:text-white">Lowongan</a></li>
+          @auth
+          <li><a href="{{ route('applications.mine') }}" class="hover:text-white">Lamaran Saya</a></li>
+          <li><a href="{{ route('profile.edit') }}" class="hover:text-white">Profil</a></li>
+          @else
+          <li><a href="{{ route('login') }}" class="hover:text-white">Masuk</a></li>
+          <li><a href="{{ route('register') }}" class="hover:text-white">Daftar</a></li>
+          @endauth
+        </ul>
+      </div>
 
-        <div class="text-zinc-400 text-center md:text-left">
-          © 2026 PT Andalan Artha Primanusa Tbk. Seluruh Hak Dilindungi
+      {{-- COMPANY --}}
+      <div>
+        <h4 class="font-semibold mb-3">Perusahaan</h4>
+        <ul class="space-y-2 text-sm text-zinc-300">
+          <li><a href="#" class="hover:text-white">Tentang Kami</a></li>
+          <li><a href="#" class="hover:text-white">Kebijakan Privasi</a></li>
+          <li><a href="#" class="hover:text-white">Syarat & Ketentuan</a></li>
+          <li><a href="#" class="hover:text-white">Etika Rekrutmen</a></li>
+        </ul>
+      </div>
+
+      {{-- CONTACT --}}
+      <div>
+        <h4 class="font-semibold mb-3">Kontak</h4>
+
+        <p class="text-sm text-zinc-300 mb-2">
+          Email: 
+          <a href="mailto:hr@andalan.co.id" class="underline hover:text-white">
+            hr@andalan.co.id
+          </a>
+        </p>
+
+        <p class="text-sm text-zinc-300 leading-relaxed">
+          PT Andalan Artha Primanusa - Tanah Andalan<br>
+          Jl. Plaju No.11, Kebon Melati,<br>
+          Tanah Abang, Jakarta Pusat 10230,<br>
+          DKI Jakarta, Indonesia
+        </p>
+
+        {{-- SOCIAL + WEBSITE --}}
+        <div class="mt-4 flex gap-3">
+
+          {{-- WEBSITE (ICON ONLY) --}}
+          <a href="https://andalan.co.id"
+             target="_blank"
+             class="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition"
+             title="Website Perusahaan">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5"
+                 fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M21 12A9 9 0 113 12a9 9 0 0118 0z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M3 12h18M12 3c2.5 2.5 2.5 15 0 18M12 3c-2.5 2.5-2.5 15 0 18"/>
+            </svg>
+          </a>
+
+          {{-- INSTAGRAM --}}
+          <a href="https://instagram.com/USERNAME_KAMU"
+             target="_blank"
+             class="p-2 rounded-lg bg-white/10 hover:bg-pink-500 transition"
+             title="Instagram">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="currentColor"
+                 viewBox="0 0 24 24">
+              <path d="M7.75 2C4.57 2 2 4.57 2 7.75v8.5C2 19.43 4.57 22 7.75 22h8.5c3.18 0 5.75-2.57 5.75-5.75v-8.5C22 4.57 19.43 2 16.25 2h-8.5zm4.25 5.5a4.75 4.75 0 110 9.5 4.75 4.75 0 010-9.5zm6-1.25a1.25 1.25 0 11-2.5 0 1.25 1.25 0 012.5 0z"/>
+            </svg>
+          </a>
+
+          {{-- LINKEDIN --}}
+          <a href="https://linkedin.com/company/USERNAME_KAMU"
+             target="_blank"
+             class="p-2 rounded-lg bg-white/10 hover:bg-blue-600 transition"
+             title="LinkedIn">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="currentColor"
+                 viewBox="0 0 24 24">
+              <path d="M4.98 3.5C4.98 4.88 3.86 6 2.49 6 1.12 6 0 4.88 0 3.5S1.12 1 2.49 1c1.37 0 2.49 1.12 2.49 2.5zM0 8h5v16H0V8zm7.5 0h4.7v2.2h.07c.65-1.23 2.25-2.5 4.63-2.5 4.95 0 5.86 3.25 5.86 7.48V24h-5v-7.9c0-1.88-.03-4.3-2.62-4.3-2.63 0-3.03 2.05-3.03 4.16V24h-5V8z"/>
+            </svg>
+          </a>
+
+          {{-- TIKTOK --}}
+          <a href="https://tiktok.com/@USERNAME_KAMU"
+             target="_blank"
+             class="p-2 rounded-lg bg-white/10 hover:bg-black transition"
+             title="TikTok">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="currentColor"
+                 viewBox="0 0 24 24">
+              <path d="M12 2h3a5 5 0 005 5v3a8 8 0 01-5-1.5v7.5a6 6 0 11-6-6h1v3h-1a3 3 0 103 3V2z"/>
+            </svg>
+          </a>
+
         </div>
-
-        <div class="text-zinc-500 text-xs">
-          Powered by Human Careers System Andalan
-        </div>
-
       </div>
 
     </div>
-  </footer>
+
+    {{-- COPYRIGHT --}}
+    <div class="mt-12 pt-6 text-sm flex flex-col md:flex-row items-center justify-between gap-4 border-t border-white/20">
+
+      <div class="text-zinc-400 text-center md:text-left">
+        © 2026 PT Andalan Artha Primanusa Tbk. Seluruh Hak Dilindungi
+      </div>
+
+      <div class="text-zinc-500 text-xs">
+        Powered by Human Careers System Andalan
+      </div>
+
+    </div>
+
+  </div>
+</footer>
 
 
   {{-- JSON-LD (inline small; server-side renders once) --}}
