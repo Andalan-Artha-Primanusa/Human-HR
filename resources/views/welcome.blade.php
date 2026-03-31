@@ -605,288 +605,322 @@
 
 
 
-  {{-- SITES & DIVISIONS --}}
-  <section class="bg-white border-b" style="border-color: {{ $brandGray }}" aria-label="Lokasi & Divisi">
-    <div class="max-w-7xl mx-auto px-6 lg:px-8 py-8">
-      <div class="grid md:grid-cols-2 gap-6">
+{{-- SITES & DIVISIONS --}}
+@php
+  $primary  = '#a77d52';
+  $bgMain   = '#f5efe8';
+  $bgChip   = '#ede5dc';
+  $textSoft = '#6b4f3a';
+@endphp
 
-        {{-- Sites marquee --}}
-        <div>
-          <div class="flex items-center justify-between mb-3">
-            <h2 class="font-semibold" style="color: {{ $brandBlack }}">Lokasi Site</h2>
-          </div>
+<section class="border-b"
+         style="border-color: {{ $brandGray }}; background: {{ $bgMain }}"
+         aria-label="Lokasi & Divisi">
 
-          @php
-          $sitesCol = ($sitesSimple instanceof \Illuminate\Support\Collection) ? $sitesSimple : collect($sitesSimple ?? []);
-          $sitesNorm = $sitesCol
-          ->filter(fn($s) => !empty($s['name']))
-          ->map(function($s){
+  <div class="max-w-7xl mx-auto px-6 lg:px-8 py-8">
+
+    {{-- HEADER --}}
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="font-semibold text-lg"
+          style="color: {{ $brandBlack }}">
+        Lokasi Site
+      </h2>
+    </div>
+
+    @php
+      $sitesCol = ($sitesSimple instanceof \Illuminate\Support\Collection) ? $sitesSimple : collect($sitesSimple ?? []);
+      $sitesNorm = $sitesCol
+        ->filter(fn($s) => !empty($s['name']))
+        ->map(function($s){
           $name = (string)($s['name'] ?? '—');
-          $dot = preg_match('/^#([0-9a-f]{3}|[0-9a-f]{6})$/i', (string)($s['dot'] ?? '')) ? $s['dot'] : '#1d4ed8';
+          $dot = preg_match('/^#([0-9a-f]{3}|[0-9a-f]{6})$/i', (string)($s['dot'] ?? '')) ? $s['dot'] : '#a77d52';
           $param = $s['code'] ?? $s['id'] ?? $name;
           return ['name'=>$name,'dot'=>$dot,'param'=>$param];
-          })->values();
-          $sitesDup = $sitesNorm->concat($sitesNorm);
-          @endphp
+        })->values();
 
-          @if($sitesNorm->isNotEmpty())
-          <div class="marquee" role="region" aria-label="Daftar lokasi site berjalan">
-            <div class="marquee__track">
-              @foreach($sitesDup as $s)
-              <div class="shrink-0">
-                <a href="{{ route('jobs.index', ['site' => $s['param']]) }}"
-                  class="chip inline-flex items-center gap-2 px-3 py-2 rounded-xl border bg-white"
-                  style="border-color: {{ $brandGray }}"
-                  aria-label="Lihat lowongan site {{ $s['name'] }}">
-                  <span class="inline-block w-2.5 h-2.5 rounded-full" style="background: {{ $s['dot'] }}"></span>
-                  <span class="text-sm text-zinc-700 whitespace-nowrap">{{ $s['name'] }}</span>
-                </a>
-              </div>
-              @endforeach
-            </div>
-          </div>
-          <noscript>
-            <ul class="chips mt-3" role="list">
-              @foreach($sitesNorm as $s)
-              <li>
-                <a href="{{ route('jobs.index', ['site' => $s['param']]) }}" class="chip-pill" aria-label="Lihat lowongan site {{ $s['name'] }}">
-                  <span class="inline-block w-2.5 h-2.5 rounded-full" style="background: {{ $s['dot'] }}"></span>
-                  <span class="text-sm text-zinc-700">{{ $s['name'] }}</span>
-                </a>
-              </li>
-              @endforeach
-            </ul>
-          </noscript>
-          @else
-          <p class="text-sm text-zinc-600">Belum ada data site.</p>
-          @endif
-        </div>
-      </div>
-    </div>
-  </section>
+      $sitesDup = $sitesNorm->concat($sitesNorm);
+    @endphp
 
-  {{-- TIMELINE & PHOTO --}}
-  <section class="bg-white">
-    <div class="max-w-7xl mx-auto px-6 lg:px-8 pb-2">
-      <div class="rounded-2xl border overflow-hidden" style="border-color: {{ $brandGray }}">
-        <div class="grid md:grid-cols-2">
-          <div class="relative">
-            <img src="{{ asset('assets/foto1.png') }}" alt="Tim Andalan"
-              class="w-full h-full object-cover min-h-[260px]" width="1200" height="800" loading="lazy" decoding="async">
-            <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/55 to-transparent p-4">
-              <p class="text-white text-sm">Lingkungan kerja kolaboratif dengan budaya keselamatan dan pembelajaran berkelanjutan.</p>
-            </div>
-          </div>
-          <div class="p-6 md:p-8">
-            <div class="flex items-center justify-between mb-4">
-              <h3 class="font-semibold" style="color: {{ $brandBlack }}">Tahapan Rekrutmen</h3>
-              <span class="inline-flex items-center gap-1 text-[11px] px-2 py-1 rounded-full bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200">
-                <svg class="w-3.5 h-3.5" aria-hidden="true">
-                  <use href="#i-bolt" />
-                </svg> Pembaruan Waktu Nyata
-              </span>
-            </div>
-            <div class="tl space-y-4" aria-label="Tahapan rekrutmen">
-              <div class="tl-step"><span class="tl-dot blue" aria-hidden="true"></span>
-                <div class="flex items-start justify-between gap-4">
-                  <div>
-                    <p class="text-sm font-medium" style="color: {{ $brandBlack }}">1) Pengajuan Lamaran</p>
-                    <p class="text-xs text-zinc-500">Buat akun, lengkapi profil, dan ajukan lamaran pada posisi yang relevan.</p>
-                  </div>
-                  <span class="text-[11px] px-2 py-1 rounded-full bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200">Mulai</span>
-                </div>
-              </div>
-              <div class="tl-step"><span class="tl-dot amber" aria-hidden="true"></span>
-                <div class="flex items-start justify-between gap-4">
-                  <div>
-                    <p class="text-sm font-medium" style="color: {{ $brandBlack }}">2) Penyaringan CV</p>
-                    <p class="text-xs text-zinc-500">Penilaian kesesuaian awal berdasarkan kebutuhan jabatan dan lokasi kerja.</p>
-                  </div>
-                  <span class="text-[11px] px-2 py-1 rounded-full bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-200">Proses</span>
-                </div>
-              </div>
-              <div class="tl-step"><span class="tl-dot amber" aria-hidden="true"></span>
-                <div class="flex items-start justify-between gap-4">
-                  <div>
-                    <p class="text-sm font-medium" style="color: {{ $brandBlack }}">3) Wawancara/Asesmen</p>
-                    <p class="text-xs text-zinc-500">Wawancara HR/User; untuk jabatan tertentu disertai psikotes atau studi kasus.</p>
-                  </div>
-                  <span class="text-[11px] px-2 py-1 rounded-full bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-200">Proses</span>
-                </div>
-              </div>
-              <div class="tl-step"><span class="tl-dot green" aria-hidden="true"></span>
-                <div class="flex items-start justify-between gap-4">
-                  <div>
-                    <p class="text-sm font-medium" style="color: {{ $brandBlack }}">4) Penawaran Kerja</p>
-                    <p class="text-xs text-zinc-500">Kandidat terpilih menerima surat penawaran kerja resmi dari Andalan.</p>
-                  </div>
-                  <span class="text-[11px] px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-200">Lulus</span>
-                </div>
-              </div>
-              <div class="tl-step"><span class="tl-dot green" aria-hidden="true"></span>
-                <div class="flex items-start justify-between gap-4">
-                  <div>
-                    <p class="text-sm font-medium" style="color: {{ $brandBlack }}">5) Onboarding</p>
-                    <p class="text-xs text-zinc-500">Pengurusan dokumen, orientasi, dan penugasan awal secara terstruktur.</p>
-                  </div>
-                  <span class="text-[11px] px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-200">Selesai</span>
-                </div>
-              </div>
-            </div>
-            <div class="mt-5 text-xs text-zinc-500 flex items-center justify-between">
-              <span>Status diperbarui otomatis melalui portal. Anda fokus persiapan—kami urus prosesnya.</span>
-              <span class="inline-flex items-center gap-1 text-zinc-600"><svg class="w-3.5 h-3.5" aria-hidden="true">
-                  <use href="#i-shield" />
-                </svg> Data pribadi terlindungi.</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
+    @if($sitesNorm->isNotEmpty())
 
-  {{-- MY APPLICATIONS --}}
-  @auth
-  <section class="max-w-7xl mx-auto px-6 lg:px-8 py-10">
-    <div class="rounded-2xl bg-white border" style="border-color: {{ $brandGray }}">
-      <div class="p-6 border-b flex items-center justify-between" style="border-color: {{ $brandGray }}">
-        <h2 class="font-semibold" style="color: {{ $brandBlack }}">Lamaran Saya</h2>
-        <a href="{{ route('applications.mine') }}" class="text-sm hover:opacity-80" style="color: {{ $brandBlue }}">Lihat semua</a>
-      </div>
+    {{-- MARQUEE --}}
+    <div class="marquee" role="region" aria-label="Daftar lokasi site berjalan">
+      <div class="marquee__track">
 
-      @if($myApps->isEmpty())
-      <div class="p-6 text-zinc-600">Belum ada lamaran. Telusuri lowongan di bawah, lalu ajukan lamaran.</div>
-      @else
-      <div class="p-4 sm:p-6">
-        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          @foreach($myApps as $app)
-          @php
-          $prog = $myAppsProgress[$app->id] ?? null;
-          $statusKey = strtoupper($app->overall_status ?? $app->current_stage ?? ($prog['current_stage'] ?? 'SUBMITTED'));
-          $badge = match($statusKey){
-          'SUBMITTED','SCREENING','INTERVIEW' => 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200',
-          'OFFERED','HIRED' => 'bg-red-50 text-red-700 ring-1 ring-inset ring-red-200',
-          'not_qualified' => 'bg-zinc-100 text-zinc-700 ring-1 ring-inset ring-zinc-200',
-          default => 'bg-zinc-50 text-zinc-700 ring-1 ring-inset ring-zinc-200',
-          };
-          $pct = (int)($prog['progress_percent'] ?? 0);
-          $curr = $prog['current_label'] ?? ucfirst(strtolower($statusKey));
-          $next = $prog['next_stage_label'] ?? null;
-          $hint = $prog['hint'] ?? null;
-          $isFinal = (bool)($prog['is_final'] ?? in_array($statusKey,['HIRED','not_qualified'],true));
-          @endphp
-          <a href="{{ route('jobs.show', $app->job_id) }}" class="group rounded-xl p-4 border hover:shadow-sm transition bg-white card-hover" style="border-color: {{ $brandGray }}">
-            <div class="flex items-start justify-between gap-3">
-              <div class="min-w-0">
-                <p class="text-xs text-zinc-500">Posisi</p>
-                <h3 class="font-semibold truncate" style="color: {{ $brandBlack }}">
-                  {{ $app->job->title ?? '—' }}
-                  @if($app->job?->site?->code)
-                  <span class="ml-1 text-xs text-zinc-400">• {{ $app->job->site->code }}</span>
-                  @endif
-                </h3>
-              </div>
-              <span class="text-[11px] px-2 py-1 rounded-full {{ $badge }}">{{ $statusKey }}</span>
-            </div>
+        @foreach($sitesDup as $s)
+        <div class="shrink-0">
 
-            <div class="mt-3">
-              <div class="flex justify-between text-xs text-zinc-500">
-                <span>Saat ini: <span class="font-medium text-zinc-700">{{ $curr }}</span></span>
-                <span>{{ $pct }}%</span>
-              </div>
-              <div class="mt-1 h-2 w-full rounded-full bg-zinc-100 overflow-hidden">
-                <div class="h-full rounded-full" style="width: {{ $pct }}%; background: linear-gradient(90deg, {{ $brandBlue }}, {{ $brandRed }} );"></div>
-              </div>
-              <div class="mt-1.5 text-xs text-zinc-500">
-                @if($isFinal)
-                <span class="font-medium text-zinc-600">Status akhir.</span>
-                @elseif($next)
-                Langkah berikut: <span class="font-medium text-zinc-700">{{ $next }}</span>
-                @endif
-                @if($hint)
-                <span class="ml-1 text-zinc-400">• {{ $hint }}</span>
-                @endif
-              </div>
-            </div>
+          <a href="{{ route('jobs.index', ['site' => $s['param']]) }}"
+             class="inline-flex items-center gap-2 px-4 py-2 rounded-full border transition-all duration-200 hover:shadow-md hover:-translate-y-[1px]"
+             style="
+               border-color: {{ $brandGray }};
+               background: {{ $bgChip }};
+               color: {{ $textSoft }};
+             "
+             aria-label="Lihat lowongan site {{ $s['name'] }}">
 
-            <div class="mt-3 flex items-center justify-between text-xs text-zinc-500">
-              <span>Diajukan: {{ optional($app->created_at)->format('d M Y') }}</span>
-              <span class="inline-flex items-center gap-1 text-zinc-700 group-hover:gap-2 transition">Detail <svg class="w-3.5 h-3.5" aria-hidden="true">
-                  <use href="#i-arrow-right" />
-                </svg></span>
-            </div>
+            {{-- DOT --}}
+            <span class="inline-block w-2.5 h-2.5 rounded-full"
+                  style="background: {{ $s['dot'] }}"></span>
+
+            {{-- TEXT --}}
+            <span class="text-sm whitespace-nowrap">
+              {{ $s['name'] }}
+            </span>
+
           </a>
-          @endforeach
+
         </div>
+        @endforeach
+
       </div>
+    </div>
+
+    {{-- FALLBACK --}}
+    <noscript>
+      <ul class="flex flex-wrap gap-2 mt-3" role="list">
+        @foreach($sitesNorm as $s)
+        <li>
+          <a href="{{ route('jobs.index', ['site' => $s['param']]) }}"
+             class="inline-flex items-center gap-2 px-4 py-2 rounded-full border"
+             style="
+               border-color: {{ $brandGray }};
+               background: {{ $bgChip }};
+               color: {{ $textSoft }};
+             ">
+
+            <span class="inline-block w-2.5 h-2.5 rounded-full"
+                  style="background: {{ $s['dot'] }}"></span>
+
+            <span class="text-sm">
+              {{ $s['name'] }}
+            </span>
+
+          </a>
+        </li>
+        @endforeach
+      </ul>
+    </noscript>
+
+    @else
+      <p class="text-sm" style="color: {{ $textSoft }}">
+        Belum ada data site.
+      </p>
+    @endif
+
+  </div>
+</section>
+  
+  <section class="bg-white py-8">
+    <div class="max-w-7xl mx-auto px-6">
+
+      <div class="border rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition duration-300">
+
+        <div class="grid md:grid-cols-2">
+
+          <!-- IMAGE -->
+          <div class="relative">
+            <img src="{{ asset('assets/foto1.png') }}"
+              class="w-full h-full object-cover min-h-[280px]"
+              alt="Tim">
+
+            <!-- Gradient Overlay -->
+            <div class="absolute bottom-0 w-full bg-gradient-to-t from-black/70 to-transparent text-white text-xs p-4">
+              Lingkungan kerja kolaboratif & aman.
+            </div>
+          </div>
+
+          <!-- CONTENT -->
+          <div class="p-6 md:p-8 space-y-5">
+
+            <!-- TITLE -->
+            <h3 class="font-bold text-lg md:text-xl text-gray-800">
+              Tahapan Rekrutmen
+            </h3>
+
+            <!-- STEPS -->
+            <div class="space-y-3">
+
+              <!-- STEP 1 -->
+              <div class="flex items-center gap-3 text-sm hover:bg-gray-50 p-2 rounded-lg transition">
+                <div class="w-7 h-7 flex items-center justify-center rounded-full bg-[#a77d52] text-white text-xs font-semibold">
+                  1
+                </div>
+                <span class="text-gray-700">Pengajuan Lamaran</span>
+              </div>
+
+              <!-- STEP 2 -->
+              <div class="flex items-center gap-3 text-sm hover:bg-gray-50 p-2 rounded-lg transition">
+                <div class="w-7 h-7 flex items-center justify-center rounded-full bg-[#a77d52] text-white text-xs font-semibold">
+                  2
+                </div>
+                <span class="text-gray-700">Penyaringan CV</span>
+              </div>
+
+              <!-- STEP 3 -->
+              <div class="flex items-center gap-3 text-sm hover:bg-gray-50 p-2 rounded-lg transition">
+                <div class="w-7 h-7 flex items-center justify-center rounded-full bg-[#a77d52] text-white text-xs font-semibold">
+                  3
+                </div>
+                <span class="text-gray-700">Wawancara / Tes</span>
+              </div>
+
+              <!-- STEP 4 -->
+              <div class="flex items-center gap-3 text-sm hover:bg-gray-50 p-2 rounded-lg transition">
+                <div class="w-7 h-7 flex items-center justify-center rounded-full bg-[#a77d52] text-white text-xs font-semibold">
+                  4
+                </div>
+                <span class="text-gray-700">Penawaran Kerja</span>
+              </div>
+
+              <!-- STEP 5 -->
+              <div class="flex items-center gap-3 text-sm hover:bg-gray-50 p-2 rounded-lg transition">
+                <div class="w-7 h-7 flex items-center justify-center rounded-full bg-[#a77d52] text-white text-xs font-semibold">
+                  5
+                </div>
+                <span class="text-gray-700">Onboarding</span>
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+{{-- LATEST JOBS --}}
+@php
+  $primary   = '#a77d52';  // warna utama
+  $bgMain    = '#f5efe8';  // cream utama
+  $bgCard    = '#ede5dc';  // card soft
+  $textSoft  = '#6b4f3a';  // teks coklat
+@endphp
+
+<section class="max-w-7xl mx-auto px-6 lg:px-8 py-10">
+  <div class="rounded-2xl border shadow-sm"
+       style="border-color: {{ $brandGray }}; background: {{ $bgMain }}">
+    
+    {{-- HEADER --}}
+    <div class="p-6 border-b flex items-center justify-between"
+         style="border-color: {{ $brandGray }}">
+      <h2 class="font-semibold" style="color: {{ $brandBlack }}">
+        Lowongan Terbaru
+      </h2>
+
+      <a href="{{ route('jobs.index') }}"
+         class="text-sm font-medium hover:opacity-80"
+         style="color: {{ $primary }}">
+        Lihat semua
+      </a>
+    </div>
+
+    <div class="p-5">
+      @if(method_exists($jobs,'count') ? $jobs->count() === 0 : ($jobs->isEmpty() ?? true))
+        <p style="color: {{ $textSoft }}">Belum ada lowongan saat ini.</p>
+      @else
+
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        @foreach ($jobs as $job)
+        @php 
+          $excerpt = \Illuminate\Support\Str::limit(strip_tags($job->description ?? ''), 120); 
+        @endphp
+
+        <div class="rounded-xl border card-hover"
+             style="border-color: {{ $brandGray }}; background: {{ $bgCard }}">
+          
+          <div class="p-5">
+
+            {{-- HEADER CARD --}}
+            <div class="flex items-start gap-3">
+              <div class="p-2.5 rounded-lg text-white"
+                   style="background: {{ $primary }}">
+                <svg class="w-5 h-5" aria-hidden="true">
+                  <use href="#i-briefcase" />
+                </svg>
+              </div>
+
+              <div class="min-w-0">
+                <a href="{{ route('jobs.show', $job) }}"
+                   class="block font-semibold hover:opacity-80"
+                   style="color: {{ $brandBlack }}">
+                   {{ $job->title }}
+                </a>
+
+                <p class="text-[11px] mt-0.5"
+                   style="color: {{ $textSoft }}">
+                  {{ $job->site?->code ?? $job->site?->name ?? '—' }} • 
+                  Diposting {{ optional($job->created_at)->diffForHumans() }}
+                </p>
+              </div>
+            </div>
+
+            {{-- DESKRIPSI --}}
+            @if(!empty($excerpt))
+              <p class="text-sm mt-3 line-clamp-2"
+                 style="color: {{ $textSoft }}">
+                {{ $excerpt }}
+              </p>
+            @endif
+
+            {{-- ACTION --}}
+            <div class="mt-4 flex items-center justify-between">
+
+              {{-- DETAIL --}}
+              <a href="{{ route('jobs.show', $job) }}"
+                 class="inline-flex items-center gap-1.5 text-sm font-medium hover:opacity-80"
+                 style="color: {{ $primary }}">
+                 Detail
+                 <svg class="w-4 h-4" aria-hidden="true">
+                   <use href="#i-arrow-right" />
+                 </svg>
+              </a>
+
+              @auth
+              {{-- BUTTON LAMAR --}}
+              <form action="{{ route('applications.store', $job) }}" method="POST"
+                    onsubmit="return confirm('Lamar posisi ini?')">
+                @csrf
+                <button type="submit"
+                        class="inline-flex items-center gap-1.5 text-sm font-semibold px-3 py-1.5 rounded-lg text-white hover:opacity-90"
+                        style="background: {{ $primary }}">
+                  <svg class="w-4 h-4" aria-hidden="true">
+                    <use href="#i-apply" />
+                  </svg>
+                  Lamar
+                </button>
+              </form>
+              @else
+              {{-- LOGIN --}}
+              <a href="{{ route('login') }}?intended={{ urlencode(route('jobs.show',$job)) }}"
+                 class="inline-flex items-center gap-1.5 text-sm font-semibold px-3 py-1.5 rounded-lg text-white hover:opacity-90"
+                 style="background: {{ $primary }}">
+                 <svg class="w-4 h-4" aria-hidden="true">
+                   <use href="#i-user" />
+                 </svg>
+                 Masuk
+              </a>
+              @endauth
+
+            </div>
+          </div>
+        </div>
+        @endforeach
+      </div>
+
+      {{-- PAGINATION --}}
+      @if(method_exists($jobs,'withQueryString'))
+        <div class="mt-6">
+          {{ $jobs->withQueryString()->links() }}
+        </div>
+      @endif
+
       @endif
     </div>
-  </section>
-  @endauth
-
-  {{-- LATEST JOBS --}}
-  <section class="max-w-7xl mx-auto px-6 lg:px-8 py-10">
-    <div class="rounded-2xl bg-white border" style="border-color: {{ $brandGray }}">
-      <div class="p-6 border-b flex items-center justify-between" style="border-color: {{ $brandGray }}">
-        <h2 class="font-semibold" style="color: {{ $brandBlack }}">Lowongan Terbaru</h2>
-        <a href="{{ route('jobs.index') }}" class="text-sm font-medium hover:opacity-80" style="color: {{ $brandRed }}">Lihat semua</a>
-      </div>
-      <div class="p-5">
-        @if(method_exists($jobs,'count') ? $jobs->count() === 0 : ($jobs->isEmpty() ?? true))
-        <p class="text-zinc-600">Belum ada lowongan saat ini.</p>
-        @else
-        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          @foreach ($jobs as $job)
-          @php $excerpt = \Illuminate\Support\Str::limit(strip_tags($job->description ?? ''), 120); @endphp
-          <div class="rounded-xl border bg-white card-hover" style="border-color: {{ $brandGray }};">
-            <div class="p-5">
-              <div class="flex items-start gap-3">
-                <div class="p-2.5 rounded-lg text-white" style="background: #a77d52;">
-                  <svg class="w-5 h-5" aria-hidden="true">
-                    <use href="#i-briefcase" />
-                  </svg>
-                </div>
-                <div class="min-w-0">
-                  <a href="{{ route('jobs.show', $job) }}" class="block font-semibold hover:opacity-80" style="color: {{ $brandBlack }}">{{ $job->title }}</a>
-                  <p class="text-[11px] text-zinc-500 mt-0.5">{{ $job->site?->code ?? $job->site?->name ?? '—' }} • Diposting {{ optional($job->created_at)->diffForHumans() }}</p>
-                </div>
-              </div>
-              @if(!empty($excerpt))
-              <p class="text-sm text-zinc-600 mt-3 line-clamp-2">{{ $excerpt }}</p>
-              @endif
-              <div class="mt-4 flex items-center justify-between">
-                <a href="{{ route('jobs.show', $job) }}" class="inline-flex items-center gap-1.5 text-sm font-medium hover:opacity-80" style="color: {{ $brandBlue }}">Detail <svg class="w-4 h-4" aria-hidden="true">
-                    <use href="#i-arrow-right" />
-                  </svg></a>
-                @auth
-                <form action="{{ route('applications.store', $job) }}" method="POST" onsubmit="return confirm('Lamar posisi ini?')">
-                  @csrf
-                  <button type="submit" class="inline-flex items-center gap-1.5 text-sm font-semibold px-3 py-1.5 rounded-lg text-white hover:opacity-90" style="background: {{ $brandRed }};">
-                    <svg class="w-4 h-4" aria-hidden="true">
-                      <use href="#i-apply" />
-                    </svg> Lamar
-                  </button>
-                </form>
-                @else
-                <a href="{{ route('login') }}?intended={{ urlencode(route('jobs.show',$job)) }}" class="inline-flex items-center gap-1.5 text-sm font-semibold px-3 py-1.5 rounded-lg text-white hover:opacity-90" style="background: {{ $brandBlack }};">
-                  <svg class="w-4 h-4" aria-hidden="true">
-                    <use href="#i-user" />
-                  </svg> Masuk untuk Melamar
-                </a>
-                @endauth
-              </div>
-            </div>
-          </div>
-          @endforeach
-        </div>
-
-        @if(method_exists($jobs,'withQueryString'))
-        <div class="mt-6">{{ $jobs->withQueryString()->links() }}</div>
-        @endif
-        @endif
-      </div>
-    </div>
-  </section>
+  </div>
+</section>
 
   {{-- FOOTER --}}
   <footer style="background: {{ $brandBlack }};">

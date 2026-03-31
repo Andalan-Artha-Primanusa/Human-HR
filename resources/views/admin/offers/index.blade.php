@@ -2,11 +2,12 @@
 @extends('layouts.app', [ 'title' => 'Admin · Offers' ])
 
 @php
-  $BLUE = '#1d4ed8'; // blue-700
-  $RED  = '#dc2626'; // red-600
-  $BORD = '#e5e7eb'; // slate-200
-  $DARK = '#0f172a'; // gelap untuk tombol
+  $BLUE = '#a77d52'; // 🔥 ganti dari biru ke coklat
+  $RED  = '#a77d52'; // 🔥 samakan biar konsisten
+  $BORD = '#e5e7eb';
+  $DARK = '#a77d52'; // 🔥 tombol ikut tema
 @endphp
+
 
 @section('content')
 @once
@@ -49,54 +50,65 @@
       ];
     @endphp
 
-    {{-- FILTER FORM (punya jarak, bukan nempel) --}}
-    <form method="GET"
-          class="mt-3 md:mt-4 grid grid-cols-2 md:grid-cols-[1fr_auto_auto] gap-2 md:gap-3 rounded-xl border bg-white px-3 py-3 md:px-4 md:py-4 shadow-sm"
-          role="search" aria-label="Filter Offers" style="border-color: {{ $BORD }}">
-      <div class="col-span-2 md:col-span-1">
-        <label class="sr-only" for="q">Cari</label>
-        <div class="relative">
-          <input id="q" name="q" value="{{ e($q) }}"
-                 class="w-full rounded-lg border border-slate-200 px-3 py-2 pl-9 text-sm focus:outline-none focus:ring-2"
-                 style="--tw-ring-color: {{ $BLUE }}" placeholder="Cari kandidat / job…" autocomplete="off">
-          <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
-            {{-- ikon kecil input (pakai stroke currentColor aman di background putih) --}}
-            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/>
-              <path d="M21 21l-3.5-3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-            </svg>
-          </span>
-        </div>
-      </div>
+{{-- FILTER FORM --}}
+<form method="GET"
+      class="mt-3 md:mt-4 grid grid-cols-2 md:grid-cols-[1fr_auto_auto] gap-2 md:gap-3 rounded-xl border bg-white px-3 py-3 md:px-4 md:py-4 shadow-sm"
+      role="search" aria-label="Filter Offers"
+      style="border-color: {{ $BORD }}">
 
-      <select name="status"
-              class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2"
-              style="--tw-ring-color: {{ $BLUE }}">
-        @foreach($opts as $k => $v)
-          <option value="{{ $k }}" @selected($selStatus===$k)>{{ $v }}</option>
-        @endforeach
-      </select>
+  {{-- SEARCH --}}
+  <div class="col-span-2 md:col-span-1">
+    <label class="sr-only" for="q">Cari</label>
+    <div class="relative">
+      <input id="q" name="q" value="{{ e($q) }}"
+             class="w-full md:max-w-md rounded-lg border border-slate-200 px-3 py-2 pl-9 text-sm focus:outline-none focus:ring-2"
+             style="--tw-ring-color: {{ $BLUE }}"
+             placeholder="Cari kandidat..."
+             autocomplete="off">
 
-      {{-- Tombol Filter: gelap + ikon putih inline (tanpa currentColor) --}}
-      <button type="submit"
-              class="inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-white
-                     hover:opacity-95 focus:outline-none focus:ring-2 focus:ring-offset-2 md:shrink-0"
-              style="background-color: {{ $DARK }}; border:1px solid {{ $DARK }}; --tw-ring-color: {{ $BLUE }};"
-              aria-label="Filter">
-        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <circle cx="11" cy="11" r="7" stroke="#ffffff" stroke-width="2"/>
-          <path d="M21 21l-3.5-3.5" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+      {{-- ICON --}}
+      <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none">
+          <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/>
+          <path d="M21 21l-3.5-3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
         </svg>
-        <span>Filter</span>
-      </button>
+      </span>
+    </div>
+  </div>
 
-      @if(request()->filled('q') || request()->filled('status'))
-        <a href="{{ route('admin.offers.index') }}"
-           class="rounded-lg border border-slate-200 px-4 py-2 text-sm hover:bg-slate-50 text-slate-900">
-          Reset
-        </a>
-      @endif
-    </form>
+  {{-- STATUS --}}
+ <select name="status"
+        class="w-full md:w-[180px] rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2"
+        style="--tw-ring-color: {{ $BLUE }}">
+    @foreach($opts as $k => $v)
+      <option value="{{ $k }}" @selected($selStatus===$k)>{{ $v }}</option>
+    @endforeach
+  </select>
+
+  {{-- BUTTON FILTER --}}
+  <button type="submit"
+          class="inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-white
+                 hover:opacity-95 focus:outline-none focus:ring-2 focus:ring-offset-2 md:shrink-0"
+          style="background-color: {{ $DARK }}; border:1px solid {{ $DARK }}; --tw-ring-color: {{ $BLUE }};"
+          aria-label="Filter">
+
+    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none">
+      <circle cx="11" cy="11" r="7" stroke="#ffffff" stroke-width="2"/>
+      <path d="M21 21l-3.5-3.5" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+
+    <span>Filter</span>
+  </button>
+
+  {{-- RESET --}}
+  @if(request()->filled('q') || request()->filled('status'))
+    <a href="{{ route('admin.offers.index') }}"
+       class="rounded-lg border border-slate-200 px-4 py-2 text-sm hover:bg-slate-50 text-slate-900">
+      Reset
+    </a>
+  @endif
+
+</form>
   </section>
 
   {{-- FLASH --}}
@@ -107,99 +119,144 @@
     <div class="rounded-xl bg-red-50 text-red-700 px-4 py-3 border border-red-200">{{ session('error') }}</div>
   @endif
 
-  {{-- TABEL --}}
-  <section class="rounded-2xl border bg-white shadow-sm" style="border-color: {{ $BORD }}">
-    <div class="overflow-x-auto">
-      @if(($offers->count() ?? 0) > 0)
-        <table class="min-w-[980px] w-full text-sm">
-          <thead class="bg-slate-50 text-slate-600">
-            <tr>
-              <th class="px-4 py-3 text-left">Kandidat</th>
-              <th class="px-4 py-3 text-left">Posisi</th>
-              <th class="px-4 py-3 text-left w-24">Site</th>
-              <th class="px-4 py-3 text-center w-32">Gross</th>
-              <th class="px-4 py-3 text-center w-36">Allowance</th>
-              <th class="px-4 py-3 text-center w-28">Status</th>
-              <th class="px-4 py-3 text-left w-32">Dibuat</th>
-              <th class="px-4 py-3 text-right w-40">Aksi</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-slate-100">
-            @foreach($offers as $offer)
-              @php
-                $app    = $offer->application;
-                $user   = $app?->user?->name ?? $app?->candidate?->name ?? ($offer->candidate_name ?? '—');
-                $email  = $app?->candidate?->email ?? null;
-                $title  = $app?->job?->title ?? '—';
-                $site   = $app?->job?->site?->code ?? $app?->job?->site_code ?? '—';
-                $grossV = (float) (\Illuminate\Support\Arr::get($offer->salary, 'gross', 0));
-                $allowV = (float) (\Illuminate\Support\Arr::get($offer->salary, 'allowance', 0));
-                $gross  = number_format($grossV, 0, ',', '.');
-                $allow  = number_format($allowV, 0, ',', '.');
+{{-- TABEL --}}
+@php
+  $PRIMARY = '#a77d52';
+@endphp
 
-                $badge = match($offer->status){
-                  'accepted' => 'badge-green',
-                  'rejected' => 'badge-rose',
-                  'sent'     => 'badge-blue',
-                  default    => 'badge-amber',
-                };
-              @endphp
-              <tr class="align-top hover:bg-slate-50/60">
-                <td class="px-4 py-3">
-                  <div class="font-medium text-slate-900">{{ e($user) }}</div>
-                  @if($email)
-                    <div class="text-xs text-slate-500">{{ e($email) }}</div>
+<section class="rounded-2xl border bg-white shadow-md" style="border-color: {{ $BORD }}">
+  <div class="overflow-x-auto">
+    @if(($offers->count() ?? 0) > 0)
+      <table class="min-w-[980px] w-full text-sm">
+        
+        {{-- HEADER --}}
+        <thead class="bg-gradient-to-r from-[#f8f5f2] to-white text-[#6b4f3a]">
+          <tr>
+            <th class="px-4 py-3 text-left">Kandidat</th>
+            <th class="px-4 py-3 text-left">Posisi</th>
+            <th class="px-4 py-3 text-left w-24">Site</th>
+            <th class="px-4 py-3 text-center w-32">Gross</th>
+            <th class="px-4 py-3 text-center w-36">Allowance</th>
+            <th class="px-4 py-3 text-center w-28">Status</th>
+            <th class="px-4 py-3 text-left w-32">Dibuat</th>
+            <th class="px-4 py-3 text-right w-40">Aksi</th>
+          </tr>
+        </thead>
+
+        {{-- BODY --}}
+        <tbody class="divide-y divide-slate-100">
+          @foreach($offers as $offer)
+            @php
+              $app    = $offer->application;
+              $user   = $app?->user?->name ?? $app?->candidate?->name ?? ($offer->candidate_name ?? '—');
+              $email  = $app?->candidate?->email ?? null;
+              $title  = $app?->job?->title ?? '—';
+              $site   = $app?->job?->site?->code ?? $app?->job?->site_code ?? '—';
+              $grossV = (float) (\Illuminate\Support\Arr::get($offer->salary, 'gross', 0));
+              $allowV = (float) (\Illuminate\Support\Arr::get($offer->salary, 'allowance', 0));
+              $gross  = number_format($grossV, 0, ',', '.');
+              $allow  = number_format($allowV, 0, ',', '.');
+
+              $badge = match($offer->status){
+                'accepted' => 'bg-green-50 text-green-700',
+                'rejected' => 'bg-rose-50 text-rose-700',
+                'sent'     => 'bg-blue-50 text-blue-700',
+                default    => 'bg-amber-50 text-amber-700',
+              };
+            @endphp
+
+            <tr class="align-top hover:bg-[#f8f5f2] transition group">
+              
+              {{-- KANDIDAT --}}
+              <td class="px-4 py-3">
+                <div class="font-semibold text-slate-900">{{ e($user) }}</div>
+                @if($email)
+                  <div class="text-xs text-slate-500">{{ e($email) }}</div>
+                @endif
+              </td>
+
+              {{-- POSISI --}}
+              <td class="px-4 py-3">
+                <div class="text-slate-800 font-medium">{{ e($title) }}</div>
+                @if(!empty($app?->job?->code))
+                  <div class="mt-0.5 text-xs text-slate-500">#{{ e($app->job->code) }}</div>
+                @endif
+              </td>
+
+              {{-- SITE --}}
+              <td class="px-4 py-3">
+                <span class="font-mono text-slate-700 bg-slate-100 px-2 py-1 rounded-md">
+                  {{ e($site) }}
+                </span>
+              </td>
+
+              {{-- GROSS --}}
+              <td class="px-4 py-3 text-center font-semibold text-[#a77d52]">
+                Rp {{ $gross }}
+              </td>
+
+              {{-- ALLOWANCE --}}
+              <td class="px-4 py-3 text-center font-semibold text-slate-700">
+                Rp {{ $allow }}
+              </td>
+
+              {{-- STATUS --}}
+              <td class="px-4 py-3 text-center">
+                <span class="px-2.5 py-1 rounded-full text-xs font-semibold {{ $badge }}">
+                  {{ strtoupper($offer->status ?? 'draft') }}
+                </span>
+              </td>
+
+              {{-- TANGGAL --}}
+              <td class="px-4 py-3 text-slate-600">
+                {{ optional($offer->created_at)->format('d M Y') ?? '—' }}
+              </td>
+
+              {{-- AKSI --}}
+              <td class="px-4 py-3">
+                <div class="flex justify-end gap-2 opacity-80 group-hover:opacity-100 transition">
+                  
+                  @if(Route::has('admin.offers.pdf'))
+                    <a 
+                      href="{{ route('admin.offers.pdf', $offer) }}"
+                      class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 
+                      hover:border-[{{ $PRIMARY }}] hover:text-[{{ $PRIMARY }}] 
+                      transition text-sm"
+                    >
+                      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+                          stroke="currentColor" stroke-width="2"/>
+                        <path d="M14 2v6h6" stroke="currentColor" stroke-width="2"/>
+                      </svg>
+                      PDF
+                    </a>
                   @endif
-                </td>
-                <td class="px-4 py-3">
-                  <div class="text-slate-800">{{ e($title) }}</div>
-                  @if(!empty($app?->job?->code))
-                    <div class="mt-0.5 text-xs text-slate-500">#{{ e($app->job->code) }}</div>
-                  @endif
-                </td>
-                <td class="px-4 py-3">
-                  <span class="font-mono text-slate-700">{{ e($site) }}</span>
-                </td>
-                <td class="px-4 py-3 text-center">Rp {{ $gross }}</td>
-                <td class="px-4 py-3 text-center">Rp {{ $allow }}</td>
-                <td class="px-4 py-3 text-center">
-                  <span class="badge {{ $badge }}">{{ strtoupper($offer->status ?? 'draft') }}</span>
-                </td>
-                <td class="px-4 py-3">
-                  {{ optional($offer->created_at)->format('d M Y') ?? '—' }}
-                </td>
-                <td class="px-4 py-3">
-                  <div class="flex justify-end gap-2">
-                    @if(Route::has('admin.offers.pdf'))
-                      <a class="btn btn-outline btn-sm inline-flex items-center gap-1.5" href="{{ route('admin.offers.pdf', $offer) }}">
-                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                          <path d="M14 2v6h6" stroke="currentColor" stroke-width="2"/>
-                        </svg>
-                        PDF
-                      </a>
-                    @endif
-                    {{-- Tambahkan aksi lain (Detail/Edit) jika route tersedia --}}
-                  </div>
-                </td>
-              </tr>
-            @endforeach
-          </tbody>
-        </table>
-      @else
-        {{-- EMPTY STATE --}}
-        <div class="py-16 grid place-content-center text-center">
-          <div class="mx-auto w-12 h-12 rounded-2xl bg-slate-100 grid place-content-center text-slate-400 mb-3">
-            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 7.5 13.5 1.5H7A2.5 2.5 0 0 0 4.5 4v16A2.5 2.5 0 0 0 7 22.5h10A2.5 2.5 0 0 0 19.5 20V7.5Z"/>
-            </svg>
-          </div>
-          <div class="text-slate-700 font-medium">Belum ada offer.</div>
-          <div class="text-slate-500 text-sm mt-1">Coba ubah filter atau buat offer baru.</div>
+
+                </div>
+              </td>
+
+            </tr>
+          @endforeach
+        </tbody>
+      </table>
+
+    @else
+
+      {{-- EMPTY STATE --}}
+      <div class="py-16 grid place-content-center text-center">
+        <div class="mx-auto w-12 h-12 rounded-2xl bg-[#f8f5f2] grid place-content-center text-[#a77d52] mb-3">
+          <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M19.5 7.5 13.5 1.5H7A2.5 2.5 0 0 0 4.5 4v16A2.5 2.5 0 0 0 7 22.5h10A2.5 2.5 0 0 0 19.5 20V7.5Z"/>
+          </svg>
         </div>
-      @endif
-    </div>
-  </section>
+        <div class="text-slate-700 font-medium">Belum ada offer.</div>
+        <div class="text-slate-500 text-sm mt-1">Coba ubah filter atau buat offer baru.</div>
+      </div>
+
+    @endif
+  </div>
+</section>
 
   {{-- PAGINATION (kapsul custom) --}}
   @php
