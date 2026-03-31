@@ -43,7 +43,7 @@
         <form action="{{ route('me.interviews.confirm', $iv->id) }}" method="POST">
           @csrf
           <input type="hidden" name="note" value="">
-          <button class="px-3 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700">Konfirmasi Hadir</button>
+          <button class="px-3 py-2 rounded-md bg-blue-600 text-white hover:bg-[#a77d52]">Konfirmasi Hadir</button>
         </form>
       @endif
 

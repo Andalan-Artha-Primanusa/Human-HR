@@ -158,7 +158,7 @@ $logoutBtn   = 'w-full rounded-lg bg-red-600 hover:bg-red-700 px-3 py-2 font-med
 
   {{-- GENERAL --}}
   <div class="{{ $sectionTitle }} text-center">
-    <span class="inline-block w-1.5 h-1.5 rounded-sm bg-blue-700 align-middle mr-2"></span>
+    <span class="inline-block w-1.5 h-1.5 rounded-sm bg-[#a77d52] align-middle mr-2"></span>
     <span class="align-middle text-blue-700">General</span>
   </div>
 
@@ -353,7 +353,7 @@ $logoutBtn   = 'w-full rounded-lg bg-red-600 hover:bg-red-700 px-3 py-2 font-med
   @endauth
 
   <div class="{{ $sectionTitle }} text-center">
-    <span class="inline-block w-1.5 h-1.5 rounded-sm bg-blue-700 align-middle mr-2"></span>
+    <span class="inline-block w-1.5 h-1.5 rounded-sm bg-[#a77d52] align-middle mr-2"></span>
     <span class="align-middle text-blue-700">General</span>
   </div>
 

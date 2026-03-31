@@ -70,7 +70,7 @@
 
   <div class="flex items-center gap-2">
     <a href="{{ route('admin.users.index') }}" class="px-3 py-2 rounded-lg border bg-white hover:bg-slate-50">Cancel</a>
-    <button class="px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white">Update</button>
+    <button class="px-3 py-2 rounded-lg bg-blue-600 hover:bg-[#a77d52] text-white">Update</button>
   </div>
 </form>
 @endsection

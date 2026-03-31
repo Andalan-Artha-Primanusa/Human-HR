@@ -330,7 +330,7 @@
         <div class="grid gap-4 sm:grid-cols-3">
           <div class="rounded-xl border border-slate-200 bg-white px-4 py-3">
             <div class="text-xs text-slate-500">Tipe</div>
-            <div class="mt-1 inline-flex items-center rounded bg-blue-700 px-2 py-1 text-[11px] font-semibold text-white">
+            <div class="mt-1 inline-flex items-center rounded bg-[#a77d52] px-2 py-1 text-[11px] font-semibold text-white">
               {{ e($employmentPretty[$job->employment_type] ?? strtoupper($job->employment_type ?? '—')) }}
             </div>
           </div>

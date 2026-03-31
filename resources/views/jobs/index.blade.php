@@ -190,76 +190,88 @@ return [
 <div class="mx-auto w-full max-w-[1480px] px-4 md:px-6 lg:px-8">
   {{-- ===== Header: biru + aksen merah (tanpa gradient) ===== --}}
   <section class="mb-4 rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-    <div class="bg-blue-700 text-white">
-      <div class="p-4 md:p-5 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <div class="min-w-0">
-          <h1 class="text-xl font-semibold">Pekerjaan yang direkomendasikan untuk kamu</h1>
-          <p class="text-sm text-blue-100">Berdasarkan profil dan lamaran kamu</p>
-        </div>
-        {{-- Search (merah) + tombol Filter DI LUAR input --}}
-        <div class="w-full md:w-[680px] flex items-stretch gap-2">
-          {{-- FORM SEARCH --}}
-          <form method="GET" action="{{ route('jobs.index') }}" role="search" aria-label="Pencarian Lowongan" class="flex-1">
-            <label for="job-search" class="sr-only">Cari lowongan</label>
-            <div class="relative">
-              {{-- ikon search kiri --}}
-              <svg class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/90" aria-hidden="true">
+    <div style="background: #a77d52;" class="text-white">
+  <div class="p-4 md:p-5 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+    
+    <div class="min-w-0">
+      <h1 class="text-xl font-semibold">Pekerjaan yang direkomendasikan untuk kamu</h1>
+      <p class="text-sm text-white/80">Berdasarkan profil dan lamaran kamu</p>
+    </div>
+
+    {{-- SEARCH --}}
+    <div class="w-full md:w-[680px] flex items-stretch gap-2">
+
+      {{-- FORM --}}
+      <form method="GET" action="{{ route('jobs.index') }}" role="search" class="flex-1">
+        <label for="job-search" class="sr-only">Cari lowongan</label>
+
+        <div class="relative">
+          
+          {{-- ICON --}}
+          <svg class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500">
+            <use href="#i-search" />
+          </svg>
+
+          <input
+            id="job-search"
+            name="term"
+            value="{{ e($qTerm) }}"
+            placeholder="Cari judul, divisi, site, atau company…"
+            class="w-full rounded-xl border border-white/30 bg-white py-2.5 pl-9 pr-28 text-sm text-slate-900 placeholder-slate-400 outline-none
+                   focus:ring-2 focus:ring-[#a77d52] focus:border-[#a77d52]"
+            autocomplete="off" />
+
+          {{-- BUTTON INSIDE --}}
+          <div class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
+            
+            @if($qTerm)
+            <a href="{{ $rm('term') }}"
+              class="rounded-md border border-slate-200 bg-white p-1.5 hover:bg-slate-100">
+              <svg class="h-4 w-4 text-slate-600">
+                <use href="#i-x" />
+              </svg>
+            </a>
+            @endif
+
+            <button type="submit"
+              class="inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm font-semibold text-white
+                     hover:opacity-90 focus:outline-none focus:ring-2"
+              style="background: #a77d52;">
+              <svg class="h-4 w-4">
                 <use href="#i-search" />
               </svg>
+              <span>Cari</span>
+            </button>
 
-              <input
-                id="job-search"
-                name="term"
-                value="{{ e($qTerm) }}"
-                placeholder="Cari judul, divisi, site, atau company…"
-                class="w-full rounded-xl border border-white/30 bg-white/95 py-2.5 pl-9 pr-28 text-sm text-slate-900 placeholder-slate-500 outline-none
-                       focus:ring-2 focus:ring-red-300 focus:border-red-400"
-                autocomplete="off" />
-
-              {{-- tombol submit + clear di dalam area input (kanan) --}}
-              <div class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
-                @if($qTerm)
-                <a href="{{ $rm('term') }}"
-                  class="rounded-md border border-white/30 bg-white/0 p-1.5 hover:bg-white/10"
-                  aria-label="Hapus kata kunci">
-                  <svg class="h-4 w-4 text-white">
-                    <use href="#i-x" />
-                  </svg>
-                </a>
-                @endif
-                <button type="submit"
-                  class="inline-flex items-center gap-1 rounded-lg bg-red-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300">
-                  <svg class="h-4 w-4">
-                    <use href="#i-search" />
-                  </svg>
-                  <span>Cari</span>
-                </button>
-              </div>
-            </div>
-
-            {{-- keep params --}}
-            @foreach(['division','site','company','sort'] as $keep)
-            @if(!empty($keepParams[$keep]))
-            <input type="hidden" name="{{ $keep }}" value="{{ e($keepParams[$keep]) }}">
-            @endif
-            @endforeach
-          </form>
-
-          {{-- TOMBOL FILTER DI LUAR (merah) --}}
-          {{-- TOMBOL FILTER (samakan dengan tombol Cari: merah solid) --}}
-          <button id="btn-filter" type="button"
-            class="shrink-0 inline-flex items-center gap-1 rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white
-         hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300"
-            aria-expanded="false" aria-controls="filter-panel">
-            <svg class="h-4 w-4 text-white">
-              <use href="#i-filter" />
-            </svg>
-            <span>Filter</span>
-          </button>
+          </div>
         </div>
-      </div>
-      <div class="h-1 w-full bg-red-600"></div>
+
+        {{-- KEEP PARAMS --}}
+        @foreach(['division','site','company','sort'] as $keep)
+        @if(!empty($keepParams[$keep]))
+        <input type="hidden" name="{{ $keep }}" value="{{ e($keepParams[$keep]) }}">
+        @endif
+        @endforeach
+
+      </form>
+
+      {{-- FILTER BUTTON --}}
+      <button id="btn-filter" type="button"
+        class="shrink-0 inline-flex items-center gap-1 rounded-xl px-4 py-2 text-sm font-semibold text-white
+               hover:opacity-90 focus:outline-none focus:ring-2"
+        style="background: #a77d52;">
+        <svg class="h-4 w-4">
+          <use href="#i-filter" />
+        </svg>
+        <span>Filter</span>
+      </button>
+
     </div>
+  </div>
+
+  {{-- LINE --}}
+  <div class="h-1 w-full" style="background: #8c6843;"></div>
+</div>
 
     {{-- Panel Filter --}}
     <div id="filter-panel" class="hidden border-t border-slate-200 bg-white p-4 md:p-5">
@@ -282,7 +294,7 @@ return [
         </div>
         @if($qSort) <input type="hidden" name="sort" value="{{ e($qSort) }}"> @endif
         <div class="md:col-span-6 mt-1 flex flex-wrap items-center gap-2">
-          <button class="rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800">Terapkan</button>
+          <button class="rounded-lg bg-[#a77d52] px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800">Terapkan</button>
           <a href="{{ $resetUrl }}" class="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 hover:bg-slate-50">Reset</a>
         </div>
       </form>
@@ -305,209 +317,211 @@ return [
 
     {{-- LEFT LIST --}}
     <aside class="rounded-2xl border border-slate-200 bg-white shadow-sm md:sticky md:top-4 md:self-start">
-      {{-- Header list --}}
-      <div class="flex items-center justify-between gap-3 border-b border-slate-200 p-3">
-        <div class="min-w-0">
-          <div class="text-[12px] font-medium text-slate-500">Hasil</div>
-          <div class="text-sm font-semibold text-slate-900 leading-tight">{{ $total }} lowongan ditemukan</div>
-        </div>
 
-        {{-- Sort (keep params) --}}
-        <form method="GET" class="flex items-center gap-2" aria-label="Urutkan">
-          @foreach(['division','site','company','term'] as $keep)
-          @if(!empty($keepParams[$keep])) <input type="hidden" name="{{ $keep }}" value="{{ e($keepParams[$keep]) }}"> @endif
-          @endforeach
+  {{-- Header list --}}
+  <div class="flex items-center justify-between gap-3 border-b border-slate-200 p-3">
+    
+    <div class="min-w-0">
+      <div class="text-[12px] font-medium text-slate-500">Hasil</div>
+      <div class="text-sm font-semibold text-slate-900 leading-tight">
+        {{ $total }} lowongan ditemukan
+      </div>
+    </div>
 
-          <div class="relative">
-            <select name="sort"
-              class="h-9 appearance-none rounded-lg border border-slate-200 pl-3 pr-8 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-600/30 focus:border-blue-600/40 bg-white">
-              <option value="">Paling Relevan</option>
-              <option value="oldest" @selected($qSort==='oldest' )>Terlama</option>
-              <option value="title" @selected($qSort==='title' )>Judul (A–Z)</option>
-            </select>
-            <svg class="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500">
-              <use href="#i-chevron" />
-            </svg>
-          </div>
+    {{-- Sort --}}
+    <form method="GET" class="flex items-center gap-2" aria-label="Urutkan">
+      
+      @foreach(['division','site','company','term'] as $keep)
+      @if(!empty($keepParams[$keep]))
+      <input type="hidden" name="{{ $keep }}" value="{{ e($keepParams[$keep]) }}">
+      @endif
+      @endforeach
 
-          <button class="h-9 rounded-md bg-blue-700 px-3 text-xs font-semibold text-white hover:bg-blue-800">OK</button>
-        </form>
+      <div class="relative">
+        <select name="sort"
+          class="h-9 appearance-none rounded-lg border border-slate-200 pl-3 pr-8 text-sm text-slate-800 
+                 focus:outline-none focus:ring-2 focus:ring-[#a77d52]/30 focus:border-[#a77d52]/40 bg-white">
+          <option value="">Paling Relevan</option>
+          <option value="oldest" @selected($qSort==='oldest')>Terlama</option>
+          <option value="title" @selected($qSort==='title')>Judul (A–Z)</option>
+        </select>
+
+        <svg class="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500">
+          <use href="#i-chevron" />
+        </svg>
       </div>
 
-      {{-- List items --}}
-      <ul class="divide-y divide-slate-200 max-h-[78vh] overflow-y-auto">
-        @foreach($jobs as $idx => $job)
-        @php
-        $typeRaw = $job->employment_type ?? '';
-        $type = strtoupper($typeRaw ?: '-');
-        $typeSlug = \Illuminate\Support\Str::of($typeRaw)->lower()->value();
-        $badgeClr = match ($typeSlug) {
-        'contract','kontrak' => 'bg-amber-600',
-        'intern','magang' => 'bg-emerald-600',
-        default => 'bg-blue-700',
-        };
+      <button
+        class="h-9 rounded-md px-3 text-xs font-semibold text-white transition hover:opacity-90"
+        style="background: #a77d52;">
+        OK
+      </button>
 
-        $companyId = $job->company_id;
-        $code = $job->code;
-        $title = $job->title;
-        $division = $job->division;
-        $level = $job->level;
-        $status = $job->status;
-        $openings = (int) $job->openings;
-        $skillsCol = $extractSkills($job);
-        $createdAt = $job->created_at?->format('Y-m-d H:i');
-        $year = $job->created_at?->format('Y');
+    </form>
+  </div>
 
-        // Site = nama (fallback code)
-        $siteLabel = $job->site->name
-        ?? $job->site_name
-        ?? $job->getAttribute('site_name')
-        ?? $job->site->code
-        ?? $job->site_code
-        ?? $job->getAttribute('site_code')
-        ?? '—';
+  {{-- List items --}}
+  <ul class="divide-y divide-slate-200 max-h-[78vh] overflow-y-auto">
 
-        $meta = $deptMeta($division);
-        $rail = $railColors[$idx % count($railColors)];
-        $who = $auditWho($job);
+    @foreach($jobs as $idx => $job)
+    @php
+    $typeRaw = $job->employment_type ?? '';
+    $type = strtoupper($typeRaw ?: '-');
+    $typeSlug = \Illuminate\Support\Str::of($typeRaw)->lower()->value();
 
-        $mon = strtoupper(\Illuminate\Support\Str::substr((string)($division ?: $code ?: 'JD'),0,2));
-        @endphp
+    $badgeClr = match ($typeSlug) {
+      'contract','kontrak' => 'bg-amber-600',
+      'intern','magang' => 'bg-emerald-600',
+      default => 'bg-[#a77d52]',
+    };
 
-        <li>
-          <button type="button"
-            @click="select('{{ $job->id }}')"
-            :class="open==='{{ $job->id }}' ? 'bg-slate-50 ring-1 ring-slate-200' : 'bg-white hover:bg-slate-50'"
-            class="group relative w-full text-left p-3 transition">
-            {{-- rail kiri --}}
-            <span class="absolute inset-y-0 left-0 w-1.5 rounded-r {{ $rail }}"></span>
+    $companyId = $job->company_id;
+    $code = $job->code;
+    $title = $job->title;
+    $division = $job->division;
+    $level = $job->level;
+    $status = $job->status;
+    $openings = (int) $job->openings;
+    $skillsCol = $extractSkills($job);
+    $createdAt = $job->created_at?->format('Y-m-d H:i');
+    $year = $job->created_at?->format('Y');
 
-            <div class="flex items-start gap-3">
-              {{-- avatar/icon divisi --}}
-              <span class="grid h-11 w-11 place-items-center rounded-xl ring-1 {{ $meta['bg'] }} {{ $meta['fg'] }} {{ $meta['ring'] }}">
-                @if($meta['icon']==='i-briefcase')
-                <span class="text-xs font-bold">{{ $mon }}</span>
-                @else
-                <svg class="h-5 w-5">
-                  <use href="#{{ $meta['icon'] }}" />
-                </svg>
-                @endif
-              </span>
+    $siteLabel = $job->site->name
+      ?? $job->site_name
+      ?? $job->getAttribute('site_name')
+      ?? $job->site->code
+      ?? $job->site_code
+      ?? $job->getAttribute('site_code')
+      ?? '—';
 
-              <div class="min-w-0 flex-1">
-                {{-- judul + badges (CODE di atas, TYPE) --}}
-                <div class="flex items-start justify-between gap-3">
-                  <p class="truncate text-[15px] font-semibold text-slate-900">{{ e($title) }}</p>
-                  <div class="shrink-0 flex items-center gap-2">
-                    @if($code)
-                    <span class="inline-flex items-center rounded border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-medium text-slate-700">{{ e($code) }}</span>
-                    @endif
-                    <span class="inline-flex h-6 items-center rounded px-2 text-[11px] font-semibold text-white {{ $badgeClr }}">
-                      {{ e($type) }}
-                    </span>
-                  </div>
-                </div>
+    $meta = $deptMeta($division);
+    $rail = $railColors[$idx % count($railColors)];
+    $who = $auditWho($job);
 
-                {{-- META (icons-only, 2 kolom) --}}
-                <div class="mt-1.5 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1.5 text-[12px]">
-                  <div class="flex items-center gap-1.5" title="Company">
-                    <svg class="h-4 w-4 text-slate-600">
-                      <use href="#i-briefcase" />
-                    </svg>
-                    <span class="sr-only">Company:</span>
-                    <span class="truncate max-w-[200px] text-slate-800"> {{ e($job->company->name ?? $job->company->nama ?? '—') }}</span>
-                  </div>
+    $mon = strtoupper(\Illuminate\Support\Str::substr((string)($division ?: $code ?: 'JD'),0,2));
+    @endphp
 
-                  <div class="flex items-center gap-1.5" title="Site">
-                    <svg class="h-4 w-4 text-slate-600">
-                      <use href="#i-map" />
-                    </svg>
-                    <span class="sr-only">Site:</span>
-                    <span class="truncate max-w-[200px] text-slate-800">{{ e($siteLabel) }}</span>
-                  </div>
+    <li>
+      <button type="button"
+        @click="select('{{ $job->id }}')"
+        :class="open==='{{ $job->id }}' ? 'bg-slate-50 ring-1 ring-slate-200' : 'bg-white hover:bg-slate-50'"
+        class="group relative w-full text-left p-3 transition">
 
-                  <div class="flex items-center gap-1.5" title="Division">
-                    <svg class="h-4 w-4 text-slate-600">
-                      <use href="#i-hr" />
-                    </svg>
-                    <span class="sr-only">Division:</span>
-                    <span class="truncate max-w-[200px] text-slate-800">{{ e($division ?: '—') }}</span>
-                  </div>
+        {{-- rail kiri --}}
+        <span class="absolute inset-y-0 left-0 w-1.5 rounded-r {{ $rail }}"></span>
 
-                  <div class="flex items-center gap-1.5" title="Level">
-                    <svg class="h-4 w-4 text-slate-600">
-                      <use href="#i-clock" />
-                    </svg>
-                    <span class="sr-only">Level:</span>
-                    <span class="truncate max-w-[200px] text-slate-800">{{ e($level ?: '—') }}</span>
-                  </div>
+        <div class="flex items-start gap-3">
 
-                  <div class="flex items-center gap-1.5" title="Openings">
-                    <svg class="h-4 w-4 text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
-                      <path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-                      <circle cx="10" cy="8" r="3.2" stroke-width="1.8" />
-                      <path d="M22 21v-2a4 4 0 0 0-3-3.87" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-                      <path d="M16.5 3.8a3.2 3.2 0 1 1 0 6.4" stroke-width="1.8" />
-                    </svg>
-                    <span class="sr-only">Openings:</span>
-                    <span class="text-slate-800">{{ $openings }}</span>
-                  </div>
+          {{-- avatar --}}
+          <span class="grid h-11 w-11 place-items-center rounded-xl ring-1 {{ $meta['bg'] }} {{ $meta['fg'] }} {{ $meta['ring'] }}">
+            @if($meta['icon']==='i-briefcase')
+              <span class="text-xs font-bold">{{ $mon }}</span>
+            @else
+              <svg class="h-5 w-5">
+                <use href="#{{ $meta['icon'] }}" />
+              </svg>
+            @endif
+          </span>
 
-                  <div class="flex items-center gap-1.5" title="Status">
-                    <span class="sr-only">Status:</span>
-                    @if(\Illuminate\Support\Str::lower((string)$status) === 'open')
-                    <span class="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-500/10 px-2 py-0.5 text-[10.5px] font-semibold uppercase tracking-wide text-emerald-700">
-                      OPEN{{ $year ? ' '.$year : '' }}
-                    </span>
-                    @else
-                    <span class="inline-flex items-center rounded-full border border-slate-200 bg-slate-100 px-2 py-0.5 text-[10.5px] font-semibold uppercase tracking-wide text-slate-700">
-                      {{ strtoupper((string)($status ?: '—')) }}
-                    </span>
-                    @endif
-                  </div>
-                </div>
+          <div class="min-w-0 flex-1">
 
-                {{-- skills chips (max 4) --}}
-                @if($skillsCol->isNotEmpty())
-                <div class="mt-2 flex flex-wrap items-center gap-1.5">
-                  @foreach($skillsCol->take(4) as $sk)
-                  <span class="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] text-slate-700">{{ e($sk) }}</span>
-                  @endforeach
-                  @if($skillsCol->count() > 4)
-                  <span class="text-[10px] text-slate-500">+{{ $skillsCol->count() - 4 }} lagi</span>
-                  @endif
-                </div>
+            {{-- title --}}
+            <div class="flex items-start justify-between gap-3">
+              <p class="truncate text-[15px] font-semibold text-slate-900">
+                {{ e($title) }}
+              </p>
+
+              <div class="shrink-0 flex items-center gap-2">
+                @if($code)
+                <span class="inline-flex items-center rounded border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-medium text-slate-700">
+                  {{ e($code) }}
+                </span>
                 @endif
 
-                {{-- footer kecil --}}
-                <div class="mt-2 flex items-center justify-between">
-                  <span class="text-[10.5px] text-slate-500">
-                    @if(($who['creator'] ?? null) || ($who['updater'] ?? null))
-                    @if($who['creator'] ?? null) by {{ e($who['creator']) }} @endif
-                    @if($who['updater'] ?? null) (upd {{ e($who['updater']) }}) @endif
-                    @endif
-                  </span>
-                  @if($createdAt)
-                  <span class="inline-flex items-center gap-1 text-[11px] text-slate-500">
-                    <svg class="h-3.5 w-3.5 text-slate-600">
-                      <use href="#i-clock" />
-                    </svg>
-                    {{ $createdAt }}
-                  </span>
-                  @endif
-                </div>
+                <span class="inline-flex h-6 items-center rounded px-2 text-[11px] font-semibold text-white {{ $badgeClr }}">
+                  {{ e($type) }}
+                </span>
+              </div>
+            </div>
+
+            {{-- meta --}}
+            <div class="mt-1.5 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1.5 text-[12px]">
+
+              <div class="flex items-center gap-1.5">
+                <svg class="h-4 w-4 text-slate-600"><use href="#i-briefcase" /></svg>
+                <span class="truncate text-slate-800">{{ e($job->company->name ?? '—') }}</span>
               </div>
 
-              {{-- chevron --}}
-              <svg class="mt-1 h-4 w-4 shrink-0 text-slate-400 transition group-hover:translate-x-0.5">
-                <use href="#i-chevron" />
-              </svg>
+              <div class="flex items-center gap-1.5">
+                <svg class="h-4 w-4 text-slate-600"><use href="#i-map" /></svg>
+                <span class="truncate text-slate-800">{{ e($siteLabel) }}</span>
+              </div>
+
+              <div class="flex items-center gap-1.5">
+                <svg class="h-4 w-4 text-slate-600"><use href="#i-hr" /></svg>
+                <span class="truncate text-slate-800">{{ e($division ?: '—') }}</span>
+              </div>
+
+              <div class="flex items-center gap-1.5">
+                <svg class="h-4 w-4 text-slate-600"><use href="#i-clock" /></svg>
+                <span class="truncate text-slate-800">{{ e($level ?: '—') }}</span>
+              </div>
+
+              <div class="flex items-center gap-1.5">
+                <svg class="h-4 w-4 text-slate-600"><use href="#i-clock" /></svg>
+                <span class="text-slate-800">{{ $openings }}</span>
+              </div>
+
+              <div>
+                @if(strtolower((string)$status) === 'open')
+                <span class="inline-flex rounded-full border border-emerald-200 bg-emerald-500/10 px-2 py-0.5 text-[10.5px] font-semibold text-emerald-700">
+                  OPEN {{ $year }}
+                </span>
+                @else
+                <span class="inline-flex rounded-full border border-slate-200 bg-slate-100 px-2 py-0.5 text-[10.5px] font-semibold text-slate-700">
+                  {{ strtoupper($status) }}
+                </span>
+                @endif
+              </div>
+
             </div>
-          </button>
-        </li>
-        @endforeach
-      </ul>
-    </aside>
+
+            {{-- skills --}}
+            @if($skillsCol->isNotEmpty())
+            <div class="mt-2 flex flex-wrap gap-1.5">
+              @foreach($skillsCol->take(4) as $sk)
+              <span class="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] text-slate-700">
+                {{ e($sk) }}
+              </span>
+              @endforeach
+            </div>
+            @endif
+
+            {{-- footer --}}
+            <div class="mt-2 flex items-center justify-between text-[11px] text-slate-500">
+              <span>
+                @if($who['creator'] ?? null) by {{ e($who['creator']) }} @endif
+              </span>
+              @if($createdAt)
+              <span>{{ $createdAt }}</span>
+              @endif
+            </div>
+
+          </div>
+
+          {{-- chevron --}}
+          <svg class="mt-1 h-4 w-4 text-slate-400 group-hover:translate-x-0.5 transition">
+            <use href="#i-chevron" />
+          </svg>
+
+        </div>
+      </button>
+    </li>
+
+    @endforeach
+
+  </ul>
+</aside>
 
     {{-- RIGHT DETAIL --}}
     <div class="space-y-5">
@@ -547,7 +561,7 @@ return [
       $badgeClr = match ($typeSlug) {
       'contract','kontrak' => 'bg-amber-600',
       'intern','magang' => 'bg-emerald-600',
-      default => 'bg-blue-700',
+      default => 'bg-[#a77d52]',
       };
 
       $meta = $deptMeta($job->division);
@@ -611,7 +625,7 @@ return [
 
             <div class="flex shrink-0 items-center gap-2">
               <a href="{{ route('jobs.show', $job) }}?apply=1#apply"
-                class="rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800">
+                class="rounded-lg bg-[#a77d52] px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800">
                 Lamar
               </a>
             </div>
@@ -875,7 +889,7 @@ return [
         <h3 class="text-lg font-semibold text-slate-900">Belum ada hasil</h3>
         <p class="mt-1 text-sm text-slate-600">Coba ubah filter atau reset untuk melihat semua lowongan.</p>
         <div class="mt-4 flex items-center justify-center gap-2">
-          <a href="{{ $resetUrl }}" class="rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800">Reset Filter</a>
+          <a href="{{ $resetUrl }}" class="rounded-lg bg-[#a77d52] px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800">Reset Filter</a>
           <button id="btn-filter-empty" class="rounded-lg border border-slate-200 px-4 py-2 text-sm text-slate-900 hover:bg-slate-50">Buka Filter</button>
         </div>
       </section>
