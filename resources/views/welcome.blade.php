@@ -493,8 +493,8 @@
         <a href="{{ route('welcome') }}" class="flex items-center gap-2 font-extrabold tracking-tight" style="color: {{ $brandBlack }}" aria-label="Beranda Human.Careers">
           <!-- FOTO / LOGO -->
           <img src="{{ asset('assets/AndalanLogo.png') }}"
-            alt="Logo Human Careers"
-            class="h-10 md:h-12 w-auto object-contain">
+  alt="Logo Human Careers"
+  class="h-14 md:h-16 w-auto object-contain">
         </a>
       </div>
 
