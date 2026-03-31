@@ -710,86 +710,92 @@
 
   </div>
 </section>
-  
-  <section class="bg-white py-8">
-    <div class="max-w-7xl mx-auto px-6">
+<section class="bg-white py-10">
+  <div class="max-w-7xl mx-auto px-6">
 
-      <div class="border rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition duration-300">
+    <div class="border rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition duration-300">
 
-        <div class="grid md:grid-cols-2">
+      <div class="grid md:grid-cols-2">
 
-          <!-- IMAGE -->
-          <div class="relative">
-            <img src="{{ asset('assets/foto1.png') }}"
-              class="w-full h-full object-cover min-h-[280px]"
-              alt="Tim">
+        <!-- IMAGE -->
+        <div class="relative">
+          <img src="{{ asset('assets/foto1.png') }}"
+               class="w-full h-full object-cover min-h-[320px]"
+               alt="Tim">
 
-            <!-- Gradient Overlay -->
-            <div class="absolute bottom-0 w-full bg-gradient-to-t from-black/70 to-transparent text-white text-xs p-4">
-              Lingkungan kerja kolaboratif & aman.
-            </div>
-          </div>
-
-          <!-- CONTENT -->
-          <div class="p-6 md:p-8 space-y-5">
-
-            <!-- TITLE -->
-            <h3 class="font-bold text-lg md:text-xl text-gray-800">
-              Tahapan Rekrutmen
-            </h3>
-
-            <!-- STEPS -->
-            <div class="space-y-3">
-
-              <!-- STEP 1 -->
-              <div class="flex items-center gap-3 text-sm hover:bg-gray-50 p-2 rounded-lg transition">
-                <div class="w-7 h-7 flex items-center justify-center rounded-full bg-[#a77d52] text-white text-xs font-semibold">
-                  1
-                </div>
-                <span class="text-gray-700">Pengajuan Lamaran</span>
-              </div>
-
-              <!-- STEP 2 -->
-              <div class="flex items-center gap-3 text-sm hover:bg-gray-50 p-2 rounded-lg transition">
-                <div class="w-7 h-7 flex items-center justify-center rounded-full bg-[#a77d52] text-white text-xs font-semibold">
-                  2
-                </div>
-                <span class="text-gray-700">Penyaringan CV</span>
-              </div>
-
-              <!-- STEP 3 -->
-              <div class="flex items-center gap-3 text-sm hover:bg-gray-50 p-2 rounded-lg transition">
-                <div class="w-7 h-7 flex items-center justify-center rounded-full bg-[#a77d52] text-white text-xs font-semibold">
-                  3
-                </div>
-                <span class="text-gray-700">Wawancara / Tes</span>
-              </div>
-
-              <!-- STEP 4 -->
-              <div class="flex items-center gap-3 text-sm hover:bg-gray-50 p-2 rounded-lg transition">
-                <div class="w-7 h-7 flex items-center justify-center rounded-full bg-[#a77d52] text-white text-xs font-semibold">
-                  4
-                </div>
-                <span class="text-gray-700">Penawaran Kerja</span>
-              </div>
-
-              <!-- STEP 5 -->
-              <div class="flex items-center gap-3 text-sm hover:bg-gray-50 p-2 rounded-lg transition">
-                <div class="w-7 h-7 flex items-center justify-center rounded-full bg-[#a77d52] text-white text-xs font-semibold">
-                  5
-                </div>
-                <span class="text-gray-700">Onboarding</span>
-              </div>
-
-            </div>
-
+          <!-- Overlay -->
+          <div class="absolute bottom-0 w-full bg-gradient-to-t from-black/80 to-transparent text-white text-sm p-5">
+            <p class="font-semibold">Lingkungan kerja kolaboratif & profesional</p>
+            <p class="text-xs opacity-80">Kami menghargai proses yang transparan & adil</p>
           </div>
         </div>
 
+        <!-- CONTENT -->
+        <div class="p-6 md:p-10 space-y-6">
+
+          <!-- TITLE -->
+          <div>
+            <h3 class="font-bold text-xl md:text-2xl text-gray-800">
+              Tahapan Rekrutmen
+            </h3>
+            <p class="text-sm text-gray-500 mt-1">
+              Proses seleksi kami dirancang transparan, cepat, dan profesional.
+            </p>
+          </div>
+
+          <!-- STEPS -->
+          <div class="space-y-4">
+
+            @php
+              $steps = [
+                ['Pengajuan Lamaran', 'Kirim CV & data diri melalui sistem kami', '1-2 hari'],
+                ['Penyaringan CV', 'Tim HR akan meninjau kesesuaian kandidat', '2-3 hari'],
+                ['Wawancara / Tes', 'Interview HR & user + tes kemampuan (jika ada)', '3-5 hari'],
+                ['Penawaran Kerja', 'Kandidat terpilih akan menerima offering letter', '1-2 hari'],
+                ['Onboarding', 'Mulai bekerja & orientasi perusahaan', 'Hari pertama'],
+              ];
+            @endphp
+
+            @foreach($steps as $i => [$title, $desc, $time])
+            <div class="flex gap-4 p-3 rounded-xl hover:bg-gray-50 transition group">
+
+              <!-- NUMBER -->
+              <div class="w-9 h-9 flex items-center justify-center rounded-full bg-[#a77d52] text-white text-sm font-bold shadow">
+                {{ $i+1 }}
+              </div>
+
+              <!-- TEXT -->
+              <div class="flex-1">
+                <div class="flex justify-between items-center">
+                  <p class="font-semibold text-gray-800 text-sm">
+                    {{ $title }}
+                  </p>
+                  <span class="text-xs text-gray-400">
+                    {{ $time }}
+                  </span>
+                </div>
+                <p class="text-xs text-gray-500 mt-1">
+                  {{ $desc }}
+                </p>
+              </div>
+
+            </div>
+            @endforeach
+
+          </div>
+
+          <!-- NOTE -->
+          <div class="text-xs text-gray-400 border-t pt-4">
+            *Durasi dapat berbeda tergantung posisi & jumlah pelamar
+          </div>
+
+        </div>
       </div>
 
     </div>
-  </section>
+
+  </div>
+</section>
 
 {{-- LATEST JOBS --}}
 @php
