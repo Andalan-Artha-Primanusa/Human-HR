@@ -494,7 +494,7 @@
           <!-- FOTO / LOGO -->
           <img src="{{ asset('assets/AndalanLogo.png') }}"
             alt="Logo Human Careers"
-            class="h-32 md:h-40 w-auto object-contain">
+            class="h-10 md:h-12 w-auto object-contain">
         </a>
       </div>
 
