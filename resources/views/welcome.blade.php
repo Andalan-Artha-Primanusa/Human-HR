@@ -490,8 +490,11 @@
             <use href="#i-menu" />
           </svg>
         </button>
-        <a href="{{ route('welcome') }}" class="font-extrabold tracking-tight" style="color: {{ $brandBlack }}" aria-label="Beranda Human.Careers">
-          HUMAN<span style="color: {{ $brandBlue }}">.</span><span style="color: {{ $brandRed }}">Careers</span>
+        <a href="{{ route('welcome') }}" class="flex items-center gap-2 font-extrabold tracking-tight" style="color: {{ $brandBlack }}" aria-label="Beranda Human.Careers">
+          <!-- FOTO / LOGO -->
+          <img src="{{ asset('assets/AndalanLogo.png') }}"
+            alt="Logo Human Careers"
+            class="h-32 md:h-40 w-auto object-contain">
         </a>
       </div>
 
@@ -585,19 +588,19 @@
     </div>
   </header>
 
-<section class="hero-wrap relative overflow-hidden">
-  
-  {{-- FULL WIDTH BANNER --}}
-  <div class="w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw]">
-    <img
-      src="{{ asset('assets/banner-abn.png') }}"
-      alt="Build Your Career With Andalan"
-      class="w-full h-auto block object-cover"
-      fetchpriority="high"
-      decoding="async">
-  </div>
+  <section class="hero-wrap relative overflow-hidden">
 
-</section>
+    {{-- FULL WIDTH BANNER --}}
+    <div class="w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw]">
+      <img
+        src="{{ asset('assets/banner-abn.png') }}"
+        alt="Build Your Career With Andalan"
+        class="w-full h-auto block object-cover"
+        fetchpriority="high"
+        decoding="async">
+    </div>
+
+  </section>
 
 
 
@@ -611,7 +614,6 @@
         <div>
           <div class="flex items-center justify-between mb-3">
             <h2 class="font-semibold" style="color: {{ $brandBlack }}">Lokasi Site</h2>
-            <span class="text-xs text-zinc-500">Auto-scroll • pause saat hover</span>
           </div>
 
           @php
@@ -659,63 +661,6 @@
           <p class="text-sm text-zinc-600">Belum ada data site.</p>
           @endif
         </div>
-
-        {{-- Divisions chips --}}
-        <div>
-          @php
-          $divisions = ($byDivision instanceof \Illuminate\Support\Collection) ? $byDivision : collect($byDivision ?? []);
-          $divIconMap = [
-          'HR'=>'i-user','Human Resources'=>'i-user',
-          'IT'=>'i-bolt','Information Technology'=>'i-bolt',
-          'Operation'=>'i-briefcase','Operations'=>'i-briefcase',
-          'Finance'=>'i-shield','Accounting'=>'i-shield',
-          'HSE'=>'i-shield','Procurement'=>'i-apply',
-          'Logistic'=>'i-apply','Logistics'=>'i-apply',
-          'GA'=>'i-user','General Affairs'=>'i-user',
-          ];
-          $resolveIcon = fn(string $name) => $divIconMap[$name] ?? $divIconMap[ucwords(strtolower($name))] ?? 'i-briefcase';
-          @endphp
-
-          <div class="flex items-center justify-between mb-3">
-            <div class="flex items-center gap-3">
-              <div class="p-3 rounded-xl text-white" style="background: {{ $brandRed }}">
-                <svg class="w-6 h-6" aria-hidden="true">
-                  <use href="#i-rocket" />
-                </svg>
-              </div>
-              <div>
-                <p class="text-xs text-zinc-500">Lowongan terbuka</p>
-                <h2 class="font-semibold" style="color: {{ $brandBlack }}">Per Divisi (Open)</h2>
-              </div>
-            </div>
-            <div class="hidden sm:flex items-center gap-2 text-xs">
-              <a href="{{ route('jobs.index') }}" class="px-2.5 py-1 rounded-lg border hover:bg-zinc-50" style="border-color: {{ $brandGray }}">Semua</a>
-              @foreach($divisions->keys()->take(3) as $div)
-              <a href="{{ route('jobs.index', ['division' => $div]) }}" class="px-2.5 py-1 rounded-lg border hover:bg-zinc-50" style="border-color: {{ $brandGray }}">{{ $div }}</a>
-              @endforeach
-            </div>
-          </div>
-
-          @if($divisions->isNotEmpty())
-          <ul class="chips" role="list" aria-label="Filter per divisi">
-            @foreach($divisions as $div => $total)
-            @php $icon = $resolveIcon((string)$div); $count=(int)$total; @endphp
-            <li>
-              <a href="{{ route('jobs.index', ['division' => $div]) }}" class="chip-pill" aria-label="Divisi {{ $div }} memiliki {{ $count }} lowongan">
-                <span class="ico-sm" aria-hidden="true"><svg class="w-4 h-4">
-                    <use href="#{{ $icon }}" />
-                  </svg></span>
-                <span class="text-sm text-zinc-700">{{ $div }}</span>
-                <span class="count-badge">{{ $count }}</span>
-              </a>
-            </li>
-            @endforeach
-          </ul>
-          @else
-          <p class="text-sm text-zinc-600">Belum ada data divisi.</p>
-          @endif
-        </div>
-
       </div>
     </div>
   </section>
@@ -794,45 +739,6 @@
                   <use href="#i-shield" />
                 </svg> Data pribadi terlindungi.</span>
             </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  {{-- STATS --}}
-  <section class="bg-white">
-    <div class="max-w-7xl mx-auto px-6 lg:px-8 py-10 grid sm:grid-cols-3 gap-4">
-      <div class="rounded-2xl border p-5 card-hover" style="border-color: {{ $brandGray }}">
-        <div class="flex items-center gap-3">
-          <span class="p-2.5 rounded-lg text-white" style="background: {{ $brandBlue }}"><svg class="w-5 h-5" aria-hidden="true">
-              <use href="#i-bolt" />
-            </svg></span>
-          <div>
-            <p class="text-sm font-semibold" style="color: {{ $brandBlack }}">Transparansi Progres</p>
-            <p class="text-xs text-zinc-500">Pantau status lamaran dari layar Anda setiap saat.</p>
-          </div>
-        </div>
-      </div>
-      <div class="rounded-2xl border p-5 card-hover" style="border-color: {{ $brandGray }}">
-        <div class="flex items-center gap-3">
-          <span class="p-2.5 rounded-lg text-white" style="background: {{ $brandRed }}"><svg class="w-5 h-5" aria-hidden="true">
-              <use href="#i-rocket" />
-            </svg></span>
-          <div>
-            <p class="text-sm font-semibold" style="color: {{ $brandBlack }}">Proses Efisien</p>
-            <p class="text-xs text-zinc-500">Alur seleksi ringkas dan komunikatif.</p>
-          </div>
-        </div>
-      </div>
-      <div class="rounded-2xl border p-5 card-hover" style="border-color: {{ $brandGray }}">
-        <div class="flex items-center gap-3">
-          <span class="p-2.5 rounded-lg text-white bg-emerald-600"><svg class="w-5 h-5" aria-hidden="true">
-              <use href="#i-shield" />
-            </svg></span>
-          <div>
-            <p class="text-sm font-semibold" style="color: {{ $brandBlack }}">Keamanan Data</p>
-            <p class="text-xs text-zinc-500">Informasi pelamar kami lindungi secara menyeluruh.</p>
           </div>
         </div>
       </div>
@@ -980,225 +886,108 @@
     </div>
   </section>
 
-  {{-- TESTIMONIALS --}}
-  <section class="bg-white">
-    <div class="max-w-7xl mx-auto px-6 lg:px-8 py-10">
-      <div class="rounded-2xl border p-6 md:p-8" style="border-color: {{ $brandGray }}">
-        <div class="flex items-center justify-between gap-3 flex-wrap">
-          <h2 class="font-semibold" style="color: {{ $brandBlack }}">Cerita Singkat Karyawan</h2>
-          <span class="text-xs text-zinc-500">Testimoni internal (contoh)</span>
-        </div>
-        <div class="mt-5 grid md:grid-cols-3 gap-4">
-          <figure class="rounded-2xl border p-5 bg-white card-hover" style="border-color: {{ $brandGray }}">
-            <blockquote class="text-sm text-zinc-700">“Proses seleksi jelas dan komunikatif. Setelah bergabung, program onboarding memudahkan saya memahami budaya kerja.”</blockquote>
-            <figcaption class="mt-3 text-xs text-zinc-500">— Anisa, HR Generalist</figcaption>
-          </figure>
-          <figure class="rounded-2xl border p-5 bg-white card-hover" style="border-color: {{ $brandGray }}">
-            <blockquote class="text-sm text-zinc-700">“Tim yang suportif dan kesempatan belajar yang luas membuat saya berkembang pesat.”</blockquote>
-            <figcaption class="mt-3 text-xs text-zinc-500">— Dimas, IT Support</figcaption>
-          </figure>
-          <figure class="rounded-2xl border p-5 bg-white card-hover" style="border-color: {{ $brandGray }}">
-            <blockquote class="text-sm text-zinc-700">“Standar keselamatan yang tinggi dan perencanaan kerja yang rapi.”</blockquote>
-            <figcaption class="mt-3 text-xs text-zinc-500">— Sari, Supervisor Operasi</figcaption>
-          </figure>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  {{-- FAQ --}}
-  <section class="bg-white">
-    <div class="max-w-7xl mx-auto px-6 lg:px-8 py-10">
-      <div class="rounded-2xl border p-6 md:p-8" style="border-color: {{ $brandGray }}">
-        <div class="flex items-center justify-between gap-3 flex-wrap">
-          <h2 class="font-semibold" style="color: {{ $brandBlack }}">Pertanyaan yang Sering Diajukan</h2>
-          <span class="text-xs text-zinc-500">Kebijakan & proses rekrutmen</span>
-        </div>
-        <div class="mt-5 grid md:grid-cols-2 gap-4">
-          <details class="rounded-xl border p-4 bg-white" style="border-color: {{ $brandGray }}">
-            <summary class="flex items-center justify-between cursor-pointer select-none"><span class="text-sm font-medium" style="color: {{ $brandBlack }}">Apakah semua lowongan di sini resmi?</span><svg class="w-4 h-4 text-zinc-500 transition" aria-hidden="true">
-                <use href="#i-chevron" />
-              </svg></summary>
-            <p class="mt-2 text-sm text-zinc-600">Ya. Seluruh lowongan pada portal ini merupakan lowongan resmi Andalan. Kami tidak memungut biaya dalam proses rekrutmen.</p>
-          </details>
-          <details class="rounded-xl border p-4 bg-white" style="border-color: {{ $brandGray }}">
-            <summary class="flex items-center justify-between cursor-pointer select-none"><span class="text-sm font-medium" style="color: {{ $brandBlack }}">Bagaimana cara memantau progres lamaran?</span><svg class="w-4 h-4 text-zinc-500 transition" aria-hidden="true">
-                <use href="#i-chevron" />
-              </svg></summary>
-            <p class="mt-2 text-sm text-zinc-600">Masuk ke akun Anda lalu buka menu “Lamaran Saya”. Status akan diperbarui otomatis dan notifikasi akan dikirim saat ada perubahan penting.</p>
-          </details>
-          <details class="rounded-xl border p-4 bg-white" style="border-color: {{ $brandGray }}">
-            <summary class="flex items-center justify-between cursor-pointer select-none"><span class="text-sm font-medium" style="color: {{ $brandBlack }}">Apakah data saya aman?</span><svg class="w-4 h-4 text-zinc-500 transition" aria-hidden="true">
-                <use href="#i-chevron" />
-              </svg></summary>
-            <p class="mt-2 text-sm text-zinc-600">Kami menerapkan perlindungan data berlapis. Informasi Anda digunakan hanya untuk kepentingan rekrutmen sesuai kebijakan privasi.</p>
-          </details>
-          <details class="rounded-xl border p-4 bg-white" style="border-color: {{ $brandGray }}">
-            <summary class="flex items-center justify-between cursor-pointer select-none"><span class="text-sm font-medium" style="color: {{ $brandBlack }}">Apakah tersedia program magang atau fresh graduate?</span><svg class="w-4 h-4 text-zinc-500 transition" aria-hidden="true">
-                <use href="#i-chevron" />
-              </svg></summary>
-            <p class="mt-2 text-sm text-zinc-600">Tersedia sesuai kebutuhan periode berjalan. Silakan cek lowongan dan filter kategori terkait.</p>
-          </details>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  {{-- Secondary CTAs --}}
-  <section class="bg-white">
-    <div class="max-w-7xl mx-auto px-6 lg:px-8 py-10 grid md:grid-cols-2 gap-4">
-      <div class="rounded-2xl border p-6 bg-white card-hover" style="border-color: {{ $brandGray }}">
-        <div class="flex items-center gap-3">
-          <span class="p-2.5 rounded-lg text-white" style="background: {{ $brandBlue }}"><svg class="w-5 h-5" aria-hidden="true">
-              <use href="#i-rocket" />
-            </svg></span>
-          <div>
-            <h3 class="font-semibold" style="color: {{ $brandBlack }}">Program Campus Hiring</h3>
-            <p class="text-sm text-zinc-600">Peluang bagi lulusan baru untuk memulai karier dengan pendampingan intensif.</p>
-          </div>
-        </div>
-        <div class="mt-4"><a href="{{ route('jobs.index', ['type' => 'internship']) }}" class="inline-flex items-center gap-1.5 text-sm font-medium hover:opacity-80" style="color: {{ $brandBlue }}">Lihat peluang <svg class="w-4 h-4" aria-hidden="true">
-              <use href="#i-arrow-right" />
-            </svg></a></div>
-      </div>
-      <div class="rounded-2xl border p-6 bg-white card-hover" style="border-color: {{ $brandGray }}">
-        <div class="flex items-center gap-3">
-          <span class="p-2.5 rounded-lg text-white" style="background: {{ $brandRed }}"><svg class="w-5 h-5" aria-hidden="true">
-              <use href="#i-briefcase" />
-            </svg></span>
-          <div>
-            <h3 class="font-semibold" style="color: {{ $brandBlack }}">Experienced Hire</h3>
-            <p class="text-sm text-zinc-600">Percepat proses Anda untuk posisi yang memerlukan pengalaman profesional.</p>
-          </div>
-        </div>
-        <div class="mt-4"><a href="{{ route('jobs.index', ['type' => 'experienced']) }}" class="inline-flex items-center gap-1.5 text-sm font-medium hover:opacity-80" style="color: {{ $brandRed }}">Jelajahi posisi <svg class="w-4 h-4" aria-hidden="true">
-              <use href="#i-arrow-right" />
-            </svg></a></div>
-      </div>
-    </div>
-  </section>
-
-  {{-- Closing CTA --}}
-  <section class="max-w-7xl mx-auto px-6 lg:px-8 py-10">
-    <div class="rounded-2xl border p-6 bg-white" style="border-color: {{ $brandGray }}">
-      <div class="flex flex-col md:flex-row items-center justify-between gap-5">
-        <div class="space-y-1">
-          <div class="inline-flex items-center gap-2 text-xs text-blue-700 bg-blue-50 ring-1 ring-blue-200 px-2.5 py-1 rounded-full"><svg class="w-3.5 h-3.5" aria-hidden="true">
-              <use href="#i-bolt" />
-            </svg> Jalur Penerimaan Cepat</div>
-          <h3 class="text-xl font-extrabold" style="color: {{ $brandBlack }}">Siap Bergabung dengan Andalan?</h3>
-          <p class="text-sm text-zinc-600">Lengkapi profil, aktifkan pemberitahuan, dan jadilah pelamar pertama yang ditinjau.</p>
-          <ul class="mt-2 text-sm text-zinc-700 space-y-1">
-            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-emerald-600" aria-hidden="true">
-                <use href="#i-check" />
-              </svg> Tanda terima lamaran otomatis</li>
-            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-emerald-600" aria-hidden="true">
-                <use href="#i-check" />
-              </svg> Pelacakan progres waktu nyata</li>
-            <li class="flex items-center gap-2"><svg class="w-4 h-4" aria-hidden="true">
-                <use href="#i-bell" />
-              </svg> Notifikasi jadwal wawancara</li>
-          </ul>
-        </div>
-        <div class="flex items-center gap-3">
-          @auth
-          <a href="{{ route('profile.edit') }}" class="inline-flex items-center gap-2 rounded-xl text-white font-semibold px-4 py-2 hover:opacity-90" style="background: {{ $brandBlack }};"><svg class="w-4 h-4" aria-hidden="true">
-              <use href="#i-user" />
-            </svg> Perbarui Profil</a>
-          <a href="{{ route('applications.mine') }}" class="inline-flex items-center gap-2 rounded-xl border px-4 py-2 hover:bg-zinc-50" style="border-color: {{ $brandGray }}; color: {{ $brandBlack }};"><svg class="w-4 h-4" aria-hidden="true">
-              <use href="#i-bell" />
-            </svg> Lihat Progres</a>
-          @else
-          <a href="{{ route('register') }}" class="inline-flex items-center gap-2 rounded-xl text-white font-semibold px-4 py-2 hover:opacity-90" style="background: {{ $brandBlue }};"><svg class="w-4 h-4" aria-hidden="true">
-              <use href="#i-rocket" />
-            </svg> Daftar Sekarang</a>
-          <a href="{{ route('login') }}" class="inline-flex items-center gap-2 rounded-xl border px-4 py-2 hover:bg-zinc-50" style="border-color: {{ $brandGray }}; color: {{ $brandBlack }};"><svg class="w-4 h-4" aria-hidden="true">
-              <use href="#i-user" />
-            </svg> Masuk</a>
-          @endauth
-        </div>
-      </div>
-    </div>
-  </section>
-
   {{-- FOOTER --}}
   <footer style="background: {{ $brandBlack }};">
-    <div class="max-w-7xl mx-auto px-6 lg:px-8 py-12 text-white">
-      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
+    <div class="max-w-7xl mx-auto px-6 lg:px-8 py-14 text-white">
+
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-10">
+
+        {{-- BRAND --}}
         <div>
-          <div class="font-extrabold mb-3">HUMAN<span style="color: {{ $brandBlue }}">.</span><span style="color: {{ $brandRed }}">Careers</span></div>
-          <p class="text-sm text-zinc-300">Portal karier resmi Andalan. Transparan, objektif, dan ramah bagi pelamar.</p>
-          <div class="mt-4 flex items-center gap-2">
-            <span class="inline-flex items-center gap-1 text-[11px] px-2 py-1 rounded-full" style="background: rgba(255,255,255,.08);"><svg class="w-3.5 h-3.5" aria-hidden="true">
-                <use href="#i-shield" />
-              </svg> Pemberi kerja tepercaya</span>
-            <span class="inline-flex items-center gap-1 text-[11px] px-2 py-1 rounded-full" style="background: rgba(255,255,255,.08);"><svg class="w-3.5 h-3.5" aria-hidden="true">
-                <use href="#i-bolt" />
-              </svg> Status real-time</span>
-          </div>
+          <img src="{{ asset('assets/AndalanLogo.png') }}"
+            alt="Logo Human Careers"
+            class="h-32 md:h-40 w-auto object-contain">
+
+          <p class="text-sm text-zinc-300 leading-relaxed">
+            Portal karier resmi PT Andalan Artha Primanusa.
+            Transparan, profesional, dan terpercaya untuk seluruh pencari kerja.
+          </p>
+
         </div>
+
+        {{-- MENU --}}
         <div>
-          <h4 class="font-semibold mb-3">Tautan Utama</h4>
+          <h4 class="font-semibold mb-3">Navigasi</h4>
           <ul class="space-y-2 text-sm text-zinc-300">
-            <li><a href="{{ route('jobs.index') }}" class="hover:underline">Lowongan</a></li>
+            <li><a href="{{ route('jobs.index') }}" class="hover:text-white">Lowongan</a></li>
             @auth
-            <li><a href="{{ route('applications.mine') }}" class="hover:underline">Lamaran Saya</a></li>
-            <li><a href="{{ route('profile.edit') }}" class="hover:underline">Profil</a></li>
+            <li><a href="{{ route('applications.mine') }}" class="hover:text-white">Lamaran Saya</a></li>
+            <li><a href="{{ route('profile.edit') }}" class="hover:text-white">Profil</a></li>
             @else
-            <li><a href="{{ route('login') }}" class="hover:underline">Masuk</a></li>
-            <li><a href="{{ route('register') }}" class="hover:underline">Daftar</a></li>
+            <li><a href="{{ route('login') }}" class="hover:text-white">Masuk</a></li>
+            <li><a href="{{ route('register') }}" class="hover:text-white">Daftar</a></li>
             @endauth
           </ul>
         </div>
+
+        {{-- COMPANY --}}
         <div>
-          <h4 class="font-semibold mb-3">Informasi Perusahaan</h4>
+          <h4 class="font-semibold mb-3">Perusahaan</h4>
           <ul class="space-y-2 text-sm text-zinc-300">
-            <li><a href="#" class="hover:underline">Tentang Kami</a></li>
-            <li><a href="#" class="hover:underline">Kebijakan Privasi</a></li>
-            <li><a href="#" class="hover:underline">Syarat dan Ketentuan</a></li>
-            <li><a href="#" class="hover:underline">Etika Rekrutmen</a></li>
+            <li><a href="#" class="hover:text-white">Tentang Kami</a></li>
+            <li><a href="#" class="hover:text-white">Kebijakan Privasi</a></li>
+            <li><a href="#" class="hover:text-white">Syarat & Ketentuan</a></li>
+            <li><a href="#" class="hover:text-white">Etika Rekrutmen</a></li>
           </ul>
         </div>
+
+        {{-- CONTACT --}}
         <div>
           <h4 class="font-semibold mb-3">Kontak</h4>
-          <p class="text-sm text-zinc-300">Email: <a href="mailto:hr@andalan.co.id" class="underline">hr@andalan.co.id</a></p>
-          <p class="text-sm text-zinc-300">Alamat: Jl. Contoh Raya No. 1, Jakarta</p>
-          <div class="mt-3 flex items-center gap-2">
-            <a href="#" class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border hover:bg-white/10" style="border-color: rgba(255,255,255,.2)"><svg class="w-4 h-4" aria-hidden="true">
-                <use href="#i-linkedin" />
-              </svg> LinkedIn</a>
-            <a href="#" class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border hover:bg-white/10" style="border-color: rgba(255,255,255,.2)"><svg class="w-4 h-4" aria-hidden="true">
+
+          <p class="text-sm text-zinc-300 mb-2">
+            Email: <a href="mailto:hr@andalan.co.id" class="underline hover:text-white">hr@andalan.co.id</a>
+          </p>
+
+          <p class="text-sm text-zinc-300 leading-relaxed">
+            PT Andalan Artha Primanusa - Tanah Andalan<br>
+            Jl. Plaju No.11, Kebon Melati,<br>
+            Tanah Abang, Jakarta Pusat 10230,<br>
+            DKI Jakarta, Indonesia
+          </p>
+
+          {{-- SOCIAL --}}
+          <div class="mt-4 flex gap-3">
+
+            <a href="#" class="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition">
+              <svg class="w-5 h-5">
                 <use href="#i-instagram" />
-              </svg> Instagram</a>
+              </svg>
+            </a>
+
+            <a href="#" class="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition">
+              <svg class="w-5 h-5">
+                <use href="#i-linkedin" />
+              </svg>
+            </a>
+
+            <a href="#" class="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition">
+              <svg class="w-5 h-5">
+                <use href="#i-youtube" />
+              </svg>
+            </a>
+
           </div>
         </div>
+
       </div>
-      <div class="mt-10 pt-6 text-sm flex flex-col md:flex-row items-center justify-between gap-3" style="border-top: 1px solid rgba(255,255,255,.15);">
-        <div class="text-zinc-400">© {{ date('Y') }} PT Andalan. Seluruh hak cipta dilindungi.</div>
-        <div class="flex items-center gap-2">
-          <span class="inline-flex items-center gap-1 text-[11px] px-2 py-1 rounded-full" style="background: rgba(255,255,255,.08);"><svg class="w-4 h-4" aria-hidden="true">
-              <use href="#i-external" />
-            </svg> Karier Anda, Prioritas Kami.</span>
-          <span class="w-4 h-4 rounded-full" style="background: {{ $brandBlue }}"></span>
-          <span class="w-4 h-4 rounded-full" style="background: {{ $brandRed }}"></span>
-          <span class="w-4 h-4 rounded-full bg-white"></span>
+
+      {{-- COPYRIGHT --}}
+      <div class="mt-12 pt-6 text-sm flex flex-col md:flex-row items-center justify-between gap-4 border-t border-white/20">
+
+        <div class="text-zinc-400 text-center md:text-left">
+          © 2026 PT Andalan Artha Primanusa Tbk. Seluruh Hak Dilindungi
         </div>
+
+        <div class="text-zinc-500 text-xs">
+          Powered by Human Careers System Andalan
+        </div>
+
       </div>
+
     </div>
   </footer>
 
-  {{-- Toast (accessible, hidden by default) --}}
-  <div id="toast" class="toast rounded-xl border bg-white p-3 shadow-xl" style="border-color: {{ $brandGray }}" role="status" aria-live="polite">
-    <div class="flex items-start gap-2">
-      <div class="mt-0.5 p-1 rounded bg-emerald-100 text-emerald-700"><svg class="w-4 h-4" aria-hidden="true">
-          <use href="#i-check" />
-        </svg></div>
-      <div class="text-sm">
-        <p class="font-medium text-zinc-800">Berlangganan berhasil.</p>
-        <p class="text-[12px] text-zinc-500">Kami akan mengirimkan kabar terbaru setiap minggu.</p>
-      </div>
-    </div>
-  </div>
 
   {{-- JSON-LD (inline small; server-side renders once) --}}
   @php
