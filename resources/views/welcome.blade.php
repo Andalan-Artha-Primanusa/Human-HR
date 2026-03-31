@@ -710,6 +710,7 @@
 
   </div>
 </section>
+
 <section class="bg-white py-10">
   <div class="max-w-7xl mx-auto px-6">
 
@@ -724,7 +725,8 @@
                alt="Tim">
 
           <!-- Overlay -->
-          <div class="absolute bottom-0 w-full bg-gradient-to-t from-black/80 to-transparent text-white text-sm p-5">
+          <div class="absolute bottom-0 w-full text-white text-sm p-5"
+               style="background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);">
             <p class="font-semibold">Lingkungan kerja kolaboratif & profesional</p>
             <p class="text-xs opacity-80">Kami menghargai proses yang transparan & adil</p>
           </div>
@@ -735,10 +737,10 @@
 
           <!-- TITLE -->
           <div>
-            <h3 class="font-bold text-xl md:text-2xl text-gray-800">
+            <h3 class="font-bold text-xl md:text-2xl" style="color:#1f2937">
               Tahapan Rekrutmen
             </h3>
-            <p class="text-sm text-gray-500 mt-1">
+            <p class="text-sm mt-1" style="color:#6b7280">
               Proses seleksi kami dirancang transparan, cepat, dan profesional.
             </p>
           </div>
@@ -757,24 +759,25 @@
             @endphp
 
             @foreach($steps as $i => [$title, $desc, $time])
-            <div class="flex gap-4 p-3 rounded-xl hover:bg-gray-50 transition group">
+            <div class="flex gap-4 p-3 rounded-xl hover:bg-gray-50 transition">
 
               <!-- NUMBER -->
-              <div class="w-9 h-9 flex items-center justify-center rounded-full bg-[#a77d52] text-white text-sm font-bold shadow">
+              <div class="w-9 h-9 flex items-center justify-center rounded-full text-white text-sm font-bold shadow"
+                   style="background:#a77d52">
                 {{ $i+1 }}
               </div>
 
               <!-- TEXT -->
               <div class="flex-1">
                 <div class="flex justify-between items-center">
-                  <p class="font-semibold text-gray-800 text-sm">
+                  <p class="font-semibold text-sm" style="color:#1f2937">
                     {{ $title }}
                   </p>
-                  <span class="text-xs text-gray-400">
+                  <span class="text-xs" style="color:#9ca3af">
                     {{ $time }}
                   </span>
                 </div>
-                <p class="text-xs text-gray-500 mt-1">
+                <p class="text-xs mt-1" style="color:#6b7280">
                   {{ $desc }}
                 </p>
               </div>
@@ -785,7 +788,7 @@
           </div>
 
           <!-- NOTE -->
-          <div class="text-xs text-gray-400 border-t pt-4">
+          <div class="text-xs border-t pt-4" style="color:#9ca3af; border-color:#e5e7eb;">
             *Durasi dapat berbeda tergantung posisi & jumlah pelamar
           </div>
 
@@ -797,35 +800,27 @@
   </div>
 </section>
 
-{{-- LATEST JOBS --}}
-@php
-  $primary   = '#a77d52';  // warna utama
-  $bgMain    = '#f5efe8';  // cream utama
-  $bgCard    = '#ede5dc';  // card soft
-  $textSoft  = '#6b4f3a';  // teks coklat
-@endphp
-
 <section class="max-w-7xl mx-auto px-6 lg:px-8 py-10">
   <div class="rounded-2xl border shadow-sm"
-       style="border-color: {{ $brandGray }}; background: {{ $bgMain }}">
+       style="border-color: #e5e7eb; background: #f5efe8;">
     
     {{-- HEADER --}}
     <div class="p-6 border-b flex items-center justify-between"
-         style="border-color: {{ $brandGray }}">
-      <h2 class="font-semibold" style="color: {{ $brandBlack }}">
+         style="border-color: #e5e7eb">
+      <h2 class="font-semibold" style="color: #1f2937">
         Lowongan Terbaru
       </h2>
 
       <a href="{{ route('jobs.index') }}"
          class="text-sm font-medium hover:opacity-80"
-         style="color: {{ $primary }}">
+         style="color: #a77d52">
         Lihat semua
       </a>
     </div>
 
     <div class="p-5">
       @if(method_exists($jobs,'count') ? $jobs->count() === 0 : ($jobs->isEmpty() ?? true))
-        <p style="color: {{ $textSoft }}">Belum ada lowongan saat ini.</p>
+        <p style="color: #6b4f3a">Belum ada lowongan saat ini.</p>
       @else
 
       <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -835,14 +830,14 @@
         @endphp
 
         <div class="rounded-xl border card-hover"
-             style="border-color: {{ $brandGray }}; background: {{ $bgCard }}">
+             style="border-color: #e5e7eb; background: #ede5dc;">
           
           <div class="p-5">
 
             {{-- HEADER CARD --}}
             <div class="flex items-start gap-3">
               <div class="p-2.5 rounded-lg text-white"
-                   style="background: {{ $primary }}">
+                   style="background: #a77d52">
                 <svg class="w-5 h-5" aria-hidden="true">
                   <use href="#i-briefcase" />
                 </svg>
@@ -851,12 +846,12 @@
               <div class="min-w-0">
                 <a href="{{ route('jobs.show', $job) }}"
                    class="block font-semibold hover:opacity-80"
-                   style="color: {{ $brandBlack }}">
+                   style="color: #1f2937">
                    {{ $job->title }}
                 </a>
 
                 <p class="text-[11px] mt-0.5"
-                   style="color: {{ $textSoft }}">
+                   style="color: #6b4f3a">
                   {{ $job->site?->code ?? $job->site?->name ?? '—' }} • 
                   Diposting {{ optional($job->created_at)->diffForHumans() }}
                 </p>
@@ -866,7 +861,7 @@
             {{-- DESKRIPSI --}}
             @if(!empty($excerpt))
               <p class="text-sm mt-3 line-clamp-2"
-                 style="color: {{ $textSoft }}">
+                 style="color: #6b4f3a">
                 {{ $excerpt }}
               </p>
             @endif
@@ -877,7 +872,7 @@
               {{-- DETAIL --}}
               <a href="{{ route('jobs.show', $job) }}"
                  class="inline-flex items-center gap-1.5 text-sm font-medium hover:opacity-80"
-                 style="color: {{ $primary }}">
+                 style="color: #a77d52">
                  Detail
                  <svg class="w-4 h-4" aria-hidden="true">
                    <use href="#i-arrow-right" />
@@ -891,7 +886,7 @@
                 @csrf
                 <button type="submit"
                         class="inline-flex items-center gap-1.5 text-sm font-semibold px-3 py-1.5 rounded-lg text-white hover:opacity-90"
-                        style="background: {{ $primary }}">
+                        style="background: #a77d52">
                   <svg class="w-4 h-4" aria-hidden="true">
                     <use href="#i-apply" />
                   </svg>
@@ -902,7 +897,7 @@
               {{-- LOGIN --}}
               <a href="{{ route('login') }}?intended={{ urlencode(route('jobs.show',$job)) }}"
                  class="inline-flex items-center gap-1.5 text-sm font-semibold px-3 py-1.5 rounded-lg text-white hover:opacity-90"
-                 style="background: {{ $primary }}">
+                 style="background: #a77d52">
                  <svg class="w-4 h-4" aria-hidden="true">
                    <use href="#i-user" />
                  </svg>
