@@ -492,7 +492,7 @@
         </button>
         <a href="{{ route('welcome') }}" class="flex items-center gap-2 font-extrabold tracking-tight" style="color: {{ $brandBlack }}" aria-label="Beranda Human.Careers">
           <!-- FOTO / LOGO -->
-          <img src="{{ asset('assets/AndalanLogo.png') }}"
+          <img src="{{ asset('assets/ddd.png') }}"
             alt="Logo Human Careers"
             class="h-20 md:h-20 w-auto object-contain">
         </a>
@@ -894,7 +894,7 @@
 
         {{-- BRAND --}}
         <div>
-          <img src="{{ asset('assets/AndalanLogo.png') }}"
+          <img src="{{ asset('assets/ddd.png') }}"
             alt="Logo Human Careers"
             class="h-32 md:h-40 w-auto object-contain">
 
