@@ -93,10 +93,19 @@
             style="background-color: #a77d52;">
 
             <!-- LOGO -->
-            <div class="flex justify-center mb-6">
+
+            <div class="flex flex-col items-center mb-6 space-y-3">
+
+              <!-- LOGO ATAS -->
+              <img src="{{ asset('assets/logoicon.png') }}"
+                alt="Logo Perusahaan"
+                class="h-16 md:h-20 object-contain">
+
+              <!-- GAMBAR YANG SUDAH ADA -->
               <img src="{{ asset('assets/foto2.png') }}"
                 alt="Human Resource Andalan"
                 class="h-16 md:h-20 object-contain">
+
             </div>
 
             <!-- FORM -->

@@ -18,8 +18,6 @@
        class="absolute inset-0 w-full h-full object-cover"
        alt="bg">
 
-  <div class="absolute inset-0 bg-black/50"></div>
-  <div class="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent"></div>
 
   <!-- TEXT KIRI -->
   <div class="hidden lg:flex absolute left-0 top-0 h-full items-center pl-20 text-white z-10">
@@ -49,11 +47,19 @@
             style="background-color: rgba(167, 125, 82, 0.9);"
             style="background-color: #a77d52;">
 
-        <!-- LOGO -->
-        <div class="flex justify-center mb-6">
-          <img src="{{ asset('assets/foto2.png') }}"
-               class="h-14 md:h-16 object-contain">
-        </div>
+        <div class="flex flex-col items-center mb-6 space-y-3">
+
+              <!-- LOGO ATAS -->
+              <img src="{{ asset('assets/logoicon.png') }}"
+                alt="Logo Perusahaan"
+                class="h-16 md:h-20 object-contain">
+
+              <!-- GAMBAR YANG SUDAH ADA -->
+              <img src="{{ asset('assets/foto2.png') }}"
+                alt="Human Resource Andalan"
+                class="h-16 md:h-20 object-contain">
+
+            </div>
 
         <!-- FORM -->
         <form id="registerForm" method="POST" action="{{ route('register') }}" class="space-y-4">
