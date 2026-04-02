@@ -57,7 +57,6 @@
     <div class="absolute inset-0 bg-black/50"></div>
 
     <!-- gradient kiri -->
-    <div class="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent"></div>
 
 
     <!-- TEXT KIRI -->
