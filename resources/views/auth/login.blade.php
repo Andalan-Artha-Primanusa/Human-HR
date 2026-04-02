@@ -10,138 +10,161 @@
   <meta name="csrf-token" content="{{ csrf_token() }}">
 
   <style>
-    [x-cloak] { display: none !important; }
+    [x-cloak] {
+      display: none !important;
+    }
 
     @keyframes shake {
-      0%,100% { transform: translateX(0) }
-      20% { transform: translateX(-4px) }
-      40% { transform: translateX(4px) }
-      60% { transform: translateX(-3px) }
-      80% { transform: translateX(3px) }
+
+      0%,
+      100% {
+        transform: translateX(0)
+      }
+
+      20% {
+        transform: translateX(-4px)
+      }
+
+      40% {
+        transform: translateX(4px)
+      }
+
+      60% {
+        transform: translateX(-3px)
+      }
+
+      80% {
+        transform: translateX(3px)
+      }
     }
-    .shake { animation: shake .35s ease-in-out 1; }
+
+    .shake {
+      animation: shake .35s ease-in-out 1;
+    }
   </style>
 </head>
 
 <body class="min-h-screen text-slate-800">
 
-<div class="min-h-screen relative overflow-hidden">
+  <div class="min-h-screen relative overflow-hidden">
 
-  <!-- BACKGROUND -->
-  <img src="{{ asset('assets/hr1.jpg') }}"
-       class="absolute inset-0 w-full h-full object-cover"
-       alt="bg">
+    <!-- BACKGROUND -->
+    <img src="{{ asset('assets/hr1.jpg') }}"
+      class="absolute inset-0 w-full h-full object-cover"
+      alt="bg">
 
-  <!-- overlay -->
-  <div class="absolute inset-0 bg-black/50"></div>
+    <!-- overlay -->
+    <div class="absolute inset-0 bg-black/50"></div>
 
-  <!-- gradient kiri -->
-  <div class="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent"></div>
+    <!-- gradient kiri -->
+    <div class="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent"></div>
 
 
-  <!-- TEXT KIRI -->
-  <div class="hidden lg:flex absolute left-0 top-0 h-full items-center pl-20 text-white z-10">
-    <div class="max-w-md">
-      <h1 class="text-4xl font-bold mb-4">Human Careers</h1>
-      <p class="text-white/80">
-        Platform rekrutmen resmi Andalan Group untuk membantu Anda menemukan karier terbaik.
-      </p>
+    <!-- TEXT KIRI -->
+    <div class="hidden lg:flex absolute left-0 top-0 h-full items-center pl-20 text-white z-10">
+      <div class="max-w-md">
+        <h1 class="text-4xl font-bold mb-4">Human Careers</h1>
+        <p class="text-white/80">
+          Platform rekrutmen resmi Andalan Group untuk membantu Anda menemukan karier terbaik.
+        </p>
+      </div>
     </div>
-  </div>
 
 
-  <!-- FORM -->
-  <div class="absolute inset-0 flex items-center justify-end pr-4 sm:pr-10 lg:pr-20 z-10">
+    <!-- FORM -->
+    <div class="absolute inset-0 flex items-center justify-end pr-4 sm:pr-10 lg:pr-20 z-10">
 
-    <div class="w-full max-w-md">
+      <div class="w-full max-w-md">
 
-      @php
+        @php
         $authError = $errors->first('email');
-      @endphp
+        @endphp
 
-      @if ($authError)
+        @if ($authError)
         <div class="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-800">
           {{ $authError }}
         </div>
-      @endif
+        @endif
 
 
-      <!-- CARD -->
-      <div class="{{ $authError ? 'shake' : '' }}">
-        <div class="rounded-2xl shadow-2xl p-8 border border-white/10"
-             style="background-color: #a77d52;">
+        <!-- CARD -->
+        <div class="{{ $authError ? 'shake' : '' }}">
+          <div class="rounded-2xl shadow-2xl p-8 border border-white/10"
+            style="background-color: rgba(167, 125, 82, 0.9);"
+            style="background-color: #a77d52;">
 
-          <!-- LOGO -->
-          <div class="flex justify-center mb-6">
-            <img src="{{ asset('assets/foto2.png') }}"
-                 alt="Human Resource Andalan"
-                 class="h-16 md:h-20 object-contain">
-          </div>
-
-          <!-- FORM -->
-          <form method="POST" action="{{ route('login') }}" class="space-y-5">
-            @csrf
-
-            <!-- EMAIL -->
-            <div>
-              <label class="text-sm text-white/90">Email</label>
-              <input type="email" name="email"
-                class="w-full mt-1 px-4 py-3 rounded-lg bg-white/90 text-gray-800 border border-white/40 focus:ring-2 focus:ring-white focus:outline-none transition"
-                placeholder="nama@perusahaan.com">
+            <!-- LOGO -->
+            <div class="flex justify-center mb-6">
+              <img src="{{ asset('assets/foto2.png') }}"
+                alt="Human Resource Andalan"
+                class="h-16 md:h-20 object-contain">
             </div>
 
-            <!-- PASSWORD -->
-            <div>
-              <label class="text-sm text-white/90">Password</label>
-              <input type="password" name="password"
-                class="w-full mt-1 px-4 py-3 rounded-lg bg-white/90 text-gray-800 border border-white/40 focus:ring-2 focus:ring-white focus:outline-none transition"
-                placeholder="••••••••">
-            </div>
+            <!-- FORM -->
+            <form method="POST" action="{{ route('login') }}" class="space-y-5">
+              @csrf
 
-            <!-- REMEMBER -->
-            <div class="flex items-center justify-between text-sm text-white/90">
-              <label class="flex items-center gap-2">
-                <input type="checkbox" class="rounded">
-                Ingat saya
-              </label>
+              <!-- EMAIL -->
+              <div>
+                <label class="text-sm text-white/90">Email</label>
+                <input type="email" name="email"
+                  class="w-full mt-1 px-4 py-3 rounded-lg bg-white/90 text-gray-800 border border-white/40 focus:ring-2 focus:ring-white focus:outline-none transition"
+                  placeholder="nama@perusahaan.com">
+              </div>
 
-              @if (Route::has('password.request'))
+              <!-- PASSWORD -->
+              <div>
+                <label class="text-sm text-white/90">Password</label>
+                <input type="password" name="password"
+                  class="w-full mt-1 px-4 py-3 rounded-lg bg-white/90 text-gray-800 border border-white/40 focus:ring-2 focus:ring-white focus:outline-none transition"
+                  placeholder="••••••••">
+              </div>
+
+              <!-- REMEMBER -->
+              <div class="flex items-center justify-between text-sm text-white/90">
+                <label class="flex items-center gap-2">
+                  <input type="checkbox" class="rounded">
+                  Ingat saya
+                </label>
+
+                @if (Route::has('password.request'))
                 <a href="{{ route('password.request') }}" class="hover:underline">
                   Lupa password?
                 </a>
-              @endif
-            </div>
+                @endif
+              </div>
 
-            <!-- BUTTON -->
-            <button type="submit"
-              class="w-full bg-white text-[#a77d52] py-3 rounded-lg font-semibold hover:opacity-90 transition">
-              Masuk
-            </button>
+              <!-- BUTTON -->
+              <button type="submit"
+                class="w-full bg-white text-[#a77d52] py-3 rounded-lg font-semibold hover:opacity-90 transition">
+                Masuk
+              </button>
 
-          </form>
+            </form>
 
+          </div>
         </div>
-      </div>
 
 
-      <!-- REGISTER -->
-      @if (Route::has('register'))
+        <!-- REGISTER -->
+        @if (Route::has('register'))
         <div class="mt-5 text-center text-sm text-white/80">
           Belum punya akun?
           <a href="{{ route('register') }}" class="underline">Daftar</a>
         </div>
-      @endif
+        @endif
 
 
-      <!-- FOOTER -->
-      <div class="mt-6 text-center text-xs text-white/60">
-        © {{ now()->year }} Andalan Group
+        <!-- FOOTER -->
+        <div class="mt-6 text-center text-xs text-white/60">
+          © {{ now()->year }} Andalan Group
+        </div>
+
       </div>
-
     </div>
+
   </div>
 
-</div>
-
 </body>
+
 </html>

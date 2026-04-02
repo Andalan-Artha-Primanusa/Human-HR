@@ -46,7 +46,8 @@
 
       <!-- CARD -->
       <div class="rounded-2xl shadow-2xl p-8 border border-white/10"
-           style="background-color: #a77d52;">
+            style="background-color: rgba(167, 125, 82, 0.9);"
+            style="background-color: #a77d52;">
 
         <!-- LOGO -->
         <div class="flex justify-center mb-6">
