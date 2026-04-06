@@ -97,10 +97,10 @@ $logoutBtn   = 'w-full rounded-lg bg-red-600 hover:bg-red-700 px-3 py-2 font-med
 </style>
 
 @if($variant === 'desktop')
-<nav class="p-3 space-y-1 text-sm text-slate-900 flex flex-col min-h-full">
+<nav class="flex flex-col min-h-full p-3 space-y-1 text-sm text-slate-900">
   {{-- LOGO --}}
   <div class="mb-3">
-    <a href="{{ url('/') }}" class="logo-wrap flex w-full items-center justify-center px-3 py-3 rounded-lg hover:bg-blue-50 hover:ring-1 hover:ring-blue-900/10">
+    <a href="{{ url('/') }}" class="flex items-center justify-center w-full px-3 py-3 rounded-lg logo-wrap hover:bg-blue-50 hover:ring-1 hover:ring-blue-900/10">
       <img src="{{ $logoUrl }}" alt="Logo Andalan" class="logo-img" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.style.display='none'">
     </a>
   </div>
@@ -116,13 +116,13 @@ $logoutBtn   = 'w-full rounded-lg bg-red-600 hover:bg-red-700 px-3 py-2 font-med
     <div class="flex items-center gap-3 px-3 py-2">
       @if(($u->profile_photo_url ?? null))
         {{-- AVATAR diperkecil --}}
-        <img src="{{ $u->profile_photo_url }}" alt="{{ e($u->name) }}" class="w-8 h-8 rounded-full object-cover ring-1 ring-blue-900/10" loading="lazy" decoding="async">
+        <img src="{{ $u->profile_photo_url }}" alt="{{ e($u->name) }}" class="object-cover w-8 h-8 rounded-full ring-1 ring-blue-900/10" loading="lazy" decoding="async">
       @else
-        <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-700 grid place-content-center font-semibold ring-1 ring-blue-700/10">
+        <div class="grid w-8 h-8 font-semibold text-blue-700 bg-blue-100 rounded-full place-content-center ring-1 ring-blue-700/10">
           {{ $u ? e($initials) : 'G' }}
         </div>
       @endif
-      <div class="account-info min-w-0">
+      <div class="min-w-0 account-info">
         <div class="text-xs text-slate-700 truncate max-w-[220px]">{{ e($u->email) }}</div>
         <div class="font-medium text-slate-900 truncate max-w-[180px]">{{ e($u->name) }}</div>
         <div class="mt-0.5 inline-flex items-center text-[10px] px-2 py-0.5 rounded-full {{ $isVerified ? 'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-700/10' : 'bg-red-100 text-red-700 ring-1 ring-red-700/10' }}">
@@ -133,7 +133,7 @@ $logoutBtn   = 'w-full rounded-lg bg-red-600 hover:bg-red-700 px-3 py-2 font-med
   </a>
 
   @if(!$isVerified)
-    <div class="mx-3 mb-2 rounded-lg border border-red-200 bg-red-50 p-3">
+    <div class="p-3 mx-3 mb-2 border border-red-200 rounded-lg bg-red-50">
       <div class="text-[12px] text-red-800 mb-2">Akun belum terverifikasi. Selesaikan verifikasi untuk akses menu.</div>
       @if (Route::has('verification.send'))
       <form method="POST" action="{{ route('verification.send') }}">
@@ -149,7 +149,7 @@ $logoutBtn   = 'w-full rounded-lg bg-red-600 hover:bg-red-700 px-3 py-2 font-med
     </div>
   @endif
   @else
-    <div class="login-hint px-3 text-xs text-slate-600 mb-1">Belum masuk (login)</div>
+    <div class="px-3 mb-1 text-xs login-hint text-slate-600">Belum masuk (login)</div>
     <a href="{{ route('login') }}" class="{{ $linkDeskBlue }} {{ $activeBlue('login') }}">
       <span class="{{ $iconBlue }}"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15V18.75A2.25 2.25 0 0010.5 21h6.75A2.25 2.25 0 0019.5 18.75v-13.5A2 2 0 0017.25 3H10.5A2.25 2.25 0 008.25 5.25V9M15 12H3m0 0 3-3m-3 3 3 3"/></svg></span>
       <span class="label">Login</span>
@@ -159,7 +159,7 @@ $logoutBtn   = 'w-full rounded-lg bg-red-600 hover:bg-red-700 px-3 py-2 font-med
   {{-- GENERAL --}}
   <div class="{{ $sectionTitle }} text-center">
     <span class="inline-block w-1.5 h-1.5 rounded-sm bg-[#a77d52] align-middle mr-2"></span>
-    <span class="align-middle text-blue-700">General</span>
+    <span class="text-blue-700 align-middle">General</span>
   </div>
 
   <div class="{{ $groupBoxBlue }} {{ $lockVisual }}">
@@ -182,7 +182,7 @@ $logoutBtn   = 'w-full rounded-lg bg-red-600 hover:bg-red-700 px-3 py-2 font-med
   @if($hasAdminRole)
   <div class="{{ $sectionTitle }} text-center">
     <span class="inline-block w-1.5 h-1.5 rounded-sm bg-red-700 align-middle mr-2"></span>
-    <span class="align-middle text-red-700">Admin</span>
+    <span class="text-red-700 align-middle">Admin</span>
   </div>
 
   <div class="{{ $groupBoxRed }} {{ $lockVisual }}">
@@ -276,10 +276,10 @@ $logoutBtn   = 'w-full rounded-lg bg-red-600 hover:bg-red-700 px-3 py-2 font-med
 
   {{-- LOGOUT --}}
   @auth
-  <form method="POST" action="{{ route('logout') }}" class="px-3 pb-2 pt-2">
+  <form method="POST" action="{{ route('logout') }}" class="px-3 pt-2 pb-2">
     @csrf
     <button class="btn {{ $logoutBtn }}" title="Logout">
-      <span class="inline-flex items-center gap-2 justify-center w-full">
+      <span class="inline-flex items-center justify-center w-full gap-2">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-white/90 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3H6.75A2.25 2.25 0 004.5 5.25v13.5A2.25 2.25 0 006.75 21H13.5a2.25 2.25 0 002.25-2.25V15M9.75 12h10.5m0 0-3-3m3 3-3 3"/>
         </svg>
@@ -292,9 +292,9 @@ $logoutBtn   = 'w-full rounded-lg bg-red-600 hover:bg-red-700 px-3 py-2 font-med
 
 @else
 {{-- ===================== MOBILE ===================== --}}
-<nav class="space-y-1 text-sm text-slate-900 flex flex-col min-h-full">
+<nav class="flex flex-col min-h-full space-y-1 text-sm text-slate-900">
   <a href="{{ url('/') }}" {!! $closeAttr !!} class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-blue-50 hover:ring-1 hover:ring-blue-900/10">
-    <img src="{{ $logoUrl }}" alt="Logo" class="w-7 h-7 object-contain" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.style.display='none'">
+    <img src="{{ $logoUrl }}" alt="Logo" class="object-contain w-7 h-7" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.style.display='none'">
     <div class="leading-tight">
       <div class="font-semibold text-slate-900">{{ e($appName) }}</div>
       <div class="text-[10px] text-slate-500">Andalan Group</div>
@@ -310,11 +310,11 @@ $logoutBtn   = 'w-full rounded-lg bg-red-600 hover:bg-red-700 px-3 py-2 font-med
   <a href="{{ $href('profile.edit') }}" {!! $closeAttr !!} class="account-card mx-3 mb-2 block {{ $accountCard }} {{ $lockVisual }}">
     <div class="flex items-center gap-3 px-3 py-2">
       @if(($u->profile_photo_url ?? null))
-        <img src="{{ $u->profile_photo_url }}" alt="{{ e($u->name) }}" class="w-8 h-8 rounded-full object-cover ring-1 ring-blue-900/10" loading="lazy" decoding="async">
+        <img src="{{ $u->profile_photo_url }}" alt="{{ e($u->name) }}" class="object-cover w-8 h-8 rounded-full ring-1 ring-blue-900/10" loading="lazy" decoding="async">
       @else
-        <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-700 grid place-content-center font-semibold ring-1 ring-blue-700/10">{{ $u ? e($initials) : 'G' }}</div>
+        <div class="grid w-8 h-8 font-semibold text-blue-700 bg-blue-100 rounded-full place-content-center ring-1 ring-blue-700/10">{{ $u ? e($initials) : 'G' }}</div>
       @endif
-      <div class="account-info min-w-0">
+      <div class="min-w-0 account-info">
         <div class="text-xs text-slate-700 truncate max-w-[240px]">{{ e($u->email) }}</div>
         <div class="font-medium text-slate-900 truncate max-w-[180px]">{{ e($u->name) }}</div>
         <div class="mt-0.5 inline-flex items-center text-[10px] px-2 py-0.5 rounded-full {{ $isVerified ? 'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-700/10' : 'bg-red-100 text-red-700 ring-1 ring-red-700/10' }}">
@@ -325,7 +325,7 @@ $logoutBtn   = 'w-full rounded-lg bg-red-600 hover:bg-red-700 px-3 py-2 font-med
   </a>
 
   @if(!$isVerified)
-  <div class="mx-3 mb-2 rounded-lg border border-red-200 bg-red-50 p-3">
+  <div class="p-3 mx-3 mb-2 border border-red-200 rounded-lg bg-red-50">
     <div class="text-[12px] text-red-800 mb-2">Akun belum terverifikasi. Selesaikan verifikasi untuk akses menu.</div>
     @if (Route::has('verification.send'))
     <form method="POST" action="{{ route('verification.send') }}" {!! $closeAttr !!}>
@@ -341,7 +341,7 @@ $logoutBtn   = 'w-full rounded-lg bg-red-600 hover:bg-red-700 px-3 py-2 font-med
   </div>
   @endif
   @else
-    <div class="login-hint px-3 text-xs text-slate-600 mb-1">Belum masuk (login)</div>
+    <div class="px-3 mb-1 text-xs login-hint text-slate-600">Belum masuk (login)</div>
     <a href="{{ route('login') }}" {!! $closeAttr !!} class="{{ $linkMobileBlue }} {{ $activeBlue('login') }}">
       <span class="{{ $iconBlue }}"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15V18.75A2.25 2.25 0 0010.5 21h6.75A2.25 2.25 0 0019.5 18.75v-13.5A2 2 0 0017.25 3H10.5A2.25 2.25 0 008.25 5.25V9M15 12H3m0 0 3-3m-3 3 3 3"/></svg></span>
       <span>Login</span>
@@ -350,7 +350,7 @@ $logoutBtn   = 'w-full rounded-lg bg-red-600 hover:bg-red-700 px-3 py-2 font-med
 
   <div class="{{ $sectionTitle }} text-center">
     <span class="inline-block w-1.5 h-1.5 rounded-sm bg-[#a77d52] align-middle mr-2"></span>
-    <span class="align-middle text-blue-700">General</span>
+    <span class="text-blue-700 align-middle">General</span>
   </div>
 
   <div class="{{ $groupBoxBlue }} {{ $lockVisual }}">
@@ -377,7 +377,7 @@ $logoutBtn   = 'w-full rounded-lg bg-red-600 hover:bg-red-700 px-3 py-2 font-med
   @if($hasAdminRole)
   <div class="{{ $sectionTitle }} text-center">
     <span class="inline-block w-1.5 h-1.5 rounded-sm bg-red-700 align-middle mr-2"></span>
-    <span class="align-middle text-red-700">Admin</span>
+    <span class="text-red-700 align-middle">Admin</span>
   </div>
 
   <div class="{{ $groupBoxRed }} {{ $lockVisual }}">
@@ -470,10 +470,10 @@ $logoutBtn   = 'w-full rounded-lg bg-red-600 hover:bg-red-700 px-3 py-2 font-med
   <div class="flex-1"></div>
 
   @auth
-  <form method="POST" action="{{ route('logout') }}" class="px-3 pb-2 pt-2">
+  <form method="POST" action="{{ route('logout') }}" class="px-3 pt-2 pb-2">
     @csrf
     <button class="btn {{ $logoutBtn }}" title="Logout" {!! $closeAttr !!}>
-      <span class="inline-flex items-center gap-2 justify-center w-full">
+      <span class="inline-flex items-center justify-center w-full gap-2">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-white/90 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3H6.75A2.25 2.25 0 004.5 5.25v13.5A2.25 2.25 0 006.75 21H13.5a2.25 2.25 0 002.25-2.25V15M9.75 12h10.5m0 0-3-3m3 3-3 3"/></svg>
         <span class="label">Logout</span>
       </span>

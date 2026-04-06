@@ -56,9 +56,6 @@
     <!-- overlay -->
     <div class="absolute inset-0 bg-black/50"></div>
 
-    <!-- gradient kiri -->
-
-
     <!-- TEXT KIRI -->
     <div class="hidden lg:flex absolute left-0 top-0 h-full items-center pl-20 text-white z-10">
       <div class="max-w-md">
@@ -68,7 +65,6 @@
         </p>
       </div>
     </div>
-
 
     <!-- FORM -->
     <div class="absolute inset-0 flex items-center justify-end pr-4 sm:pr-10 lg:pr-20 z-10">
@@ -85,27 +81,19 @@
         </div>
         @endif
 
-
         <!-- CARD -->
         <div class="{{ $authError ? 'shake' : '' }}">
-          <div class="rounded-2xl shadow-2xl p-8 border border-white/10"
-            style="background-color: rgba(167, 125, 82, 0.9);"
-            style="background-color: #a77d52;">
+            <div class="rounded-2xl shadow-2xl p-8 border border-white/20 bg-white/80 backdrop-blur">
 
             <!-- LOGO -->
-
             <div class="flex flex-col items-center mb-6 space-y-3">
-
-              <!-- LOGO ATAS -->
               <img src="{{ asset('assets/logoicon.png') }}"
                 alt="Logo Perusahaan"
-                class="h-16 md:h-20 object-contain">
+                class="h-28 md:h-32 object-contain">
 
-              <!-- GAMBAR YANG SUDAH ADA -->
               <img src="{{ asset('assets/foto2.png') }}"
                 alt="Human Resource Andalan"
-                class="h-16 md:h-20 object-contain">
-
+                class="h-20 md:h-24 object-contain">
             </div>
 
             <!-- FORM -->
@@ -114,22 +102,22 @@
 
               <!-- EMAIL -->
               <div>
-                <label class="text-sm text-white/90">Email</label>
+                <label class="text-sm text-gray-700">Email</label>
                 <input type="email" name="email"
-                  class="w-full mt-1 px-4 py-3 rounded-lg bg-white/90 text-gray-800 border border-white/40 focus:ring-2 focus:ring-white focus:outline-none transition"
+                  class="w-full mt-1 px-4 py-3 rounded-lg bg-[#f3e7d9] text-gray-800 placeholder-gray-500 border border-[#a77d52]/30 focus:ring-2 focus:ring-[#a77d52] focus:outline-none transition"
                   placeholder="nama@perusahaan.com">
               </div>
 
               <!-- PASSWORD -->
               <div>
-                <label class="text-sm text-white/90">Password</label>
+                <label class="text-sm text-gray-700">Password</label>
                 <input type="password" name="password"
-                  class="w-full mt-1 px-4 py-3 rounded-lg bg-white/90 text-gray-800 border border-white/40 focus:ring-2 focus:ring-white focus:outline-none transition"
+                  class="w-full mt-1 px-4 py-3 rounded-lg bg-[#f3e7d9] text-gray-800 placeholder-gray-500 border border-[#a77d52]/30 focus:ring-2 focus:ring-[#a77d52] focus:outline-none transition"
                   placeholder="••••••••">
               </div>
 
               <!-- REMEMBER -->
-              <div class="flex items-center justify-between text-sm text-white/90">
+              <div class="flex items-center justify-between text-sm text-gray-600">
                 <label class="flex items-center gap-2">
                   <input type="checkbox" class="rounded">
                   Ingat saya
@@ -144,7 +132,7 @@
 
               <!-- BUTTON -->
               <button type="submit"
-                class="w-full bg-white text-[#a77d52] py-3 rounded-lg font-semibold hover:opacity-90 transition">
+                class="w-full bg-[#a77d52] text-white py-3 rounded-lg font-semibold hover:opacity-90 transition">
                 Masuk
               </button>
 
@@ -153,7 +141,6 @@
           </div>
         </div>
 
-
         <!-- REGISTER -->
         @if (Route::has('register'))
         <div class="mt-5 text-center text-sm text-white/80">
@@ -161,7 +148,6 @@
           <a href="{{ route('register') }}" class="underline">Daftar</a>
         </div>
         @endif
-
 
         <!-- FOOTER -->
         <div class="mt-6 text-center text-xs text-white/60">
