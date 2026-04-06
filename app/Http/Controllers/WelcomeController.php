@@ -23,7 +23,7 @@ class WelcomeController extends Controller
         // ===== Jobs terbaru (public only, kolom minimal) =====
         $jobsQuery = Job::query()
             ->select(['id','title','site_id','created_at','status'])
-            ->with(['site:id,code,name'])
+            ->with(['site:id,code,name,address,region'])
             ->orderByDesc('created_at');
 
         // Tampilkan hanya yang "open" bila kolom status ada

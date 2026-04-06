@@ -64,9 +64,9 @@ class JobController extends Controller
                 'updated_at'
             ])
             ->with([
-                'site:id,code,name',
-                'company:id,code,name',
-            ]);
+    'site:id,code,name,address,region',
+    'company:id,code,name',
+]);
 
         if (!$isAdminRoute) {
             $baseQuery->where('status', 'open');
