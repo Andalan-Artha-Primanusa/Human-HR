@@ -586,24 +586,125 @@
   </section>
 
   <section class="px-6 py-10 mx-auto max-w-7xl lg:px-8">
-    <div class="border shadow-sm rounded-2xl"
-      style="border-color: #e5e7eb; background: #f5efe8;">
+  <div class="border shadow-sm rounded-2xl"
+    style="border-color: #e5e7eb; background: #f5efe8;">
 
-      {{-- HEADER --}}
-      <div class="flex items-center justify-between p-6 border-b"
-        style="border-color: #e5e7eb">
-        <h2 class="font-semibold" style="color: #1f2937">
-          Lowongan Terbaru
-        </h2>
+    {{-- HEADER --}}
+    <div class="flex items-center justify-between p-6 border-b"
+      style="border-color: #e5e7eb">
+      <h2 class="font-semibold" style="color: #1f2937">
+        Lowongan Terbaru
+      </h2>
 
-        <a href="{{ route('jobs.index') }}"
-          class="text-sm font-medium hover:opacity-80"
-          style="color: #a77d52">
-          Lihat semua
-        </a>
+      <a href="{{ route('jobs.index') }}"
+        class="text-sm font-medium hover:opacity-80"
+        style="color: #a77d52">
+        Lihat semua
+      </a>
+    </div>
+
+    <div class="p-5">
+
+      {{-- 🔥 FORELSE (ANTI ERROR TOTAL) --}}
+      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+
+        @forelse ($jobs as $job)
+
+          @php
+            $excerpt = \Illuminate\Support\Str::limit(strip_tags($job->description ?? ''), 120);
+          @endphp
+
+          <div class="border rounded-xl"
+            style="border-color: #e5e7eb; background: #ede5dc;">
+
+            <div class="p-5">
+
+              {{-- HEADER --}}
+              <div class="flex items-start gap-3">
+                <div class="p-2.5 rounded-lg text-white"
+                  style="background: #a77d52">
+                  <svg class="w-5 h-5">
+                    <use href="#i-briefcase" />
+                  </svg>
+                </div>
+
+                <div class="min-w-0">
+                  <a href="{{ route('jobs.show', $job) }}"
+                    class="block font-semibold"
+                    style="color: #1f2937">
+                    {{ $job->title }}
+                  </a>
+
+                  <p class="text-[11px]"
+                    style="color: #6b4f3a">
+                    {{ $job->site?->code ?? $job->site?->name ?? '—' }} •
+                    Diposting {{ optional($job->created_at)->diffForHumans() }}
+                  </p>
+                </div>
+              </div>
+
+              {{-- DESKRIPSI --}}
+              @if(!empty($excerpt))
+                <p class="mt-3 text-sm"
+                  style="color: #6b4f3a">
+                  {{ $excerpt }}
+                </p>
+              @endif
+
+              {{-- ACTION --}}
+              <div class="flex items-center justify-between mt-4">
+
+                <a href="{{ route('jobs.show', $job) }}"
+                  class="text-sm font-medium"
+                  style="color: #a77d52">
+                  Detail →
+                </a>
+
+                @auth
+                  <form action="{{ route('applications.store', $job) }}" method="POST">
+                    @csrf
+                    <button type="submit"
+                      class="text-sm px-3 py-1.5 rounded-lg text-white"
+                      style="background: #a77d52">
+                      Lamar
+                    </button>
+                  </form>
+                @else
+                  <a href="{{ route('login') }}"
+                    class="text-sm px-3 py-1.5 rounded-lg text-white"
+                    style="background: #a77d52">
+                    Masuk
+                  </a>
+                @endauth
+
+              </div>
+
+            </div>
+          </div>
+
+        @empty
+
+          {{-- 🔥 EMPTY STATE --}}
+          <div class="text-center col-span-full">
+            <p style="color:#6b4f3a">
+              Belum ada lowongan saat ini.
+            </p>
+          </div>
+
+        @endforelse
+
       </div>
 
-<div class="p-5">
+      {{-- 🔥 PAGINATION AMAN --}}
+      @if($jobs instanceof \Illuminate\Pagination\AbstractPaginator)
+        <div class="mt-6">
+          {{ $jobs->links() }}
+        </div>
+      @endif
+
+    </div>
+  </div>
+</section>
 
   @if($jobs->isEmpty())
     <p style="color: #6b4f3a">Belum ada lowongan saat ini.</p>
