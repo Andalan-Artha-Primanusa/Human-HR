@@ -643,7 +643,7 @@ if(isset($filteredJobs) && $filteredJobs->isNotEmpty()){
 
                   {{-- ADDRESS --}}
                   <span>
-                    • {{ $site->address ?? 'Alamat belum tersedia' }}
+                    • {{ $site->region ?? 'Alamat belum tersedia' }}
                   </span>
 
                   {{-- REGION --}}
