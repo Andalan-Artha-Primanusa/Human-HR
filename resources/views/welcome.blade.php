@@ -644,7 +644,31 @@
     </div>
   </section>
 
+<section style="padding:40px">
+  <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:20px">
 
+    <div>
+      <h3><a href="{{ route('login') }}">Sign In</a></h3>
+      <p>Masuk ke akun</p>
+    </div>
+
+    <div>
+      <h3><a href="{{ route('register') }}">Sign Up</a></h3>
+      <p>Buat akun baru</p>
+    </div>
+
+    <div>
+      <h3><a href="{{ route('jobs.index') }}">Lowongan</a></h3>
+      <p>Lihat pekerjaan terbaru</p>
+    </div>
+
+    <div>
+      <h3><a href="/faq">FAQ</a></h3>
+      <p>Panduan penggunaan</p>
+    </div>
+
+  </div>
+</section>
 
 
   {{-- SITES & DIVISIONS --}}
