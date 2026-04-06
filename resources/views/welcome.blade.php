@@ -4,48 +4,76 @@
 
 <head>
   @vite(['resources/css/app.css', 'resources/js/app.js'])
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Human.Careers — Portal Karier Resmi Andalan</title>
+   {{-- SEO BASIC --}}
+  <meta name="description" content="Portal karier resmi Andalan. Lowongan terverifikasi, proses seleksi transparan, dan pembaruan status waktu nyata.">
+  <meta name="keywords" content="karier, lowongan, pekerjaan, Andalan, rekrutmen">
+  <meta name="author" content="PT Andalan">
+  <link rel="canonical" href="{{ url()->current() }}">
 
-  {{-- Performance: DNS prefetch & preconnect --}}
+  {{-- PERFORMANCE --}}
   <link rel="dns-prefetch" href="//fonts.googleapis.com">
   <link rel="dns-prefetch" href="//fonts.gstatic.com">
   <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-  {{-- Fonts (preload stylesheet for faster paint) --}}
+  {{-- FONTS --}}
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" media="print" onload="this.media='all'">
-  <noscript>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap">
-  </noscript>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap">
 
-  {{-- Vite Assets (module = non-blocking) --}}
-  {{-- === Vite build tanpa @vite (baca manifest.json) === --}}
-
-
-  {{-- SEO Meta --}}
-  <meta name="description" content="Portal karier resmi Andalan. Lowongan terverifikasi, proses seleksi transparan, dan pembaruan status waktu nyata. Satu akun untuk seluruh lokasi kerja Andalan.">
-  <meta name="keywords" content="karier, lowongan, pekerjaan, Andalan, rekrutmen, mining, HR, job portal">
-  <meta name="author" content="PT Andalan">
-  <meta name="theme-color" content="#0a0a0a">
-  <meta name="color-scheme" content="light dark">
-
-  {{-- Open Graph / Twitter --}}
+  {{-- OPEN GRAPH --}}
   <meta property="og:title" content="Human.Careers — Portal Karier Resmi Andalan">
-  <meta property="og:description" content="Lowongan terverifikasi, seleksi transparan, status waktu nyata.">
+  <meta property="og:description" content="Lowongan terverifikasi & proses transparan.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="{{ url()->current() }}">
   <meta property="og:image" content="{{ asset('storage/media/og-careers.jpg') }}">
+
+  {{-- TWITTER --}}
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Human.Careers — Portal Karier Resmi Andalan">
-  <meta name="twitter:description" content="Telusuri lowongan, lamar cepat, dan pantau progres secara real-time.">
+  <meta name="twitter:description" content="Lamar kerja cepat & pantau status realtime.">
   <meta name="twitter:image" content="{{ asset('storage/media/og-careers.jpg') }}">
 
-  {{-- Favicons --}}
+  {{-- FAVICON --}}
   <link rel="icon" href="{{ asset('favicon.ico') }}">
+
+  {{-- 🔥 STRUCTURED DATA (WAJIB BIAR KAYAK SITELINKS) --}}
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Human Careers",
+    "url": "{{ url('/') }}",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "{{ url('/search?q=') }}{search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  }
+  </script>
+
+  {{-- 🔥 NAVIGATION STRUCTURE --}}
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SiteNavigationElement",
+    "name": [
+      "Sign In",
+      "Sign Up",
+      "Lowongan",
+      "Tips Karier",
+      "FAQ"
+    ],
+    "url": [
+      "{{ url('/login') }}",
+      "{{ url('/register') }}",
+      "{{ url('/jobs') }}",
+      "{{ url('/blog') }}",
+      "{{ url('/faq') }}"
+    ]
+  }
+  </script>
+
+  {{-- Favicons --}}
   <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
 
   {{-- Preload hero image for LCP --}}
