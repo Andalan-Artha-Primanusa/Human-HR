@@ -4,39 +4,49 @@
 
 <head>
   @vite(['resources/css/app.css', 'resources/js/app.js'])
-   {{-- SEO BASIC --}}
-  <meta name="description" content="Portal karier resmi Andalan. Lowongan terverifikasi, proses seleksi transparan, dan pembaruan status waktu nyata.">
-  <meta name="keywords" content="karier, lowongan, pekerjaan, Andalan, rekrutmen">
-  <meta name="author" content="PT Andalan">
+
+  {{-- BASIC SEO --}}
+  <title>Human Careers | Portal Karier Resmi PT Andalan Artha Primanusa</title>
+
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <meta name="description" content="Portal karier resmi PT Andalan Artha Primanusa. Temukan lowongan kerja terbaru, proses rekrutmen transparan, dan lamar kerja secara online dengan mudah.">
+  <meta name="keywords" content="lowongan kerja, karier, PT Andalan, Human Careers, rekrutmen, pekerjaan Indonesia">
+  <meta name="author" content="PT Andalan Artha Primanusa">
+
+  <meta name="robots" content="index, follow, max-image-preview:large">
+
   <link rel="canonical" href="{{ url()->current() }}">
 
-  {{-- PERFORMANCE --}}
-  <link rel="dns-prefetch" href="//fonts.googleapis.com">
-  <link rel="dns-prefetch" href="//fonts.gstatic.com">
-  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-  {{-- FONTS --}}
-  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap">
-
-  {{-- OPEN GRAPH --}}
-  <meta property="og:title" content="Human.Careers — Portal Karier Resmi Andalan">
-  <meta property="og:description" content="Lowongan terverifikasi & proses transparan.">
+  {{-- OPEN GRAPH (WAJIB BIAR BAGUS DI GOOGLE & WA) --}}
+  <meta property="og:title" content="Human Careers | Portal Karier Andalan">
+  <meta property="og:description" content="Lowongan kerja terpercaya, proses transparan, dan update realtime.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="{{ url()->current() }}">
   <meta property="og:image" content="{{ asset('storage/media/og-careers.jpg') }}">
+  <meta property="og:site_name" content="Human Careers">
 
   {{-- TWITTER --}}
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Human.Careers — Portal Karier Resmi Andalan">
+  <meta name="twitter:title" content="Human Careers | Portal Karier Andalan">
   <meta name="twitter:description" content="Lamar kerja cepat & pantau status realtime.">
   <meta name="twitter:image" content="{{ asset('storage/media/og-careers.jpg') }}">
 
   {{-- FAVICON --}}
   <link rel="icon" href="{{ asset('favicon.ico') }}">
+  <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
 
-  {{-- 🔥 STRUCTURED DATA (WAJIB BIAR KAYAK SITELINKS) --}}
+  {{-- PERFORMANCE --}}
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  {{-- FONT --}}
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  {{-- 🔥 STRUCTURED DATA WEBSITE --}}
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -45,361 +55,70 @@
     "url": "{{ url('/') }}",
     "potentialAction": {
       "@type": "SearchAction",
-      "target": "{{ url('/search?q=') }}{search_term_string}",
+      "target": "{{ route('jobs.index') }}?q={search_term_string}",
       "query-input": "required name=search_term_string"
     }
   }
   </script>
 
-  {{-- 🔥 NAVIGATION STRUCTURE --}}
+  {{-- 🔥 ORGANIZATION --}}
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "PT Andalan Artha Primanusa",
+    "url": "{{ url('/') }}",
+    "logo": "{{ asset('storage/media/og-careers.jpg') }}",
+    "sameAs": [
+      "https://instagram.com/USERNAME_KAMU",
+      "https://linkedin.com/company/USERNAME_KAMU",
+      "https://andalan.co.id"
+    ]
+  }
+  </script>
+
+  {{-- 🔥 SITELINKS NAVIGATION (INI KUNCI UTAMA) --}}
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "SiteNavigationElement",
     "name": [
-      "Sign In",
-      "Sign Up",
+      "Login",
+      "Register",
       "Lowongan",
-      "Tips Karier",
       "FAQ"
     ],
     "url": [
-      "{{ url('/login') }}",
-      "{{ url('/register') }}",
-      "{{ url('/jobs') }}",
-      "{{ url('/blog') }}",
+      "{{ route('login') }}",
+      "{{ route('register') }}",
+      "{{ route('jobs.index') }}",
       "{{ url('/faq') }}"
     ]
   }
   </script>
 
-  {{-- Favicons --}}
-  <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
-
-  {{-- Preload hero image for LCP --}}
-  <link rel="preload" as="image" href="{{ asset('assets/hr1.jpg') }}" imagesrcset="{{ asset('assets/hr1.jpg') }} 1x" imagesizes="(min-width: 1024px) 640px, 100vw" fetchpriority="high">
-
-  <style>
-    /* ============== Base & tokens ============== */
-    :root {
-      --blue: #1d4ed8;
-      --red: #dc2626;
-      --black: #0a0a0a;
-      --gray: #e5e7eb
-    }
-
-    html,
-    body {
-      font-family: 'Poppins', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial
-    }
-
-    .ring-focus:focus {
-      outline: none;
-      box-shadow: 0 0 0 3px rgba(29, 78, 216, .35)
-    }
-
-    .card-hover {
-      transition: transform .25s ease, box-shadow .25s ease
-    }
-
-    .card-hover:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 12px 40px rgba(0, 0, 0, .08)
-    }
-
-    details>summary {
-      list-style: none;
-      cursor: pointer
-    }
-
-    details>summary::-webkit-details-marker {
-      display: none
-    }
-
-    .dropdown[open]>summary svg {
-      transform: rotate(180deg)
-    }
-
-    .to-top {
-      position: fixed;
-      right: 1rem;
-      bottom: 1rem;
-      z-index: 50;
-      display: none
-    }
-
-    .to-top.show {
-      display: block
-    }
-
-    .toast {
-      position: fixed;
-      right: 1rem;
-      bottom: 1rem;
-      z-index: 60;
-      display: none;
-      min-width: 240px;
-      max-width: 320px
-    }
-
-    .toast.show {
-      display: block;
-      animation: slideUp .25s ease
-    }
-
-    @keyframes slideUp {
-      from {
-        transform: translateY(12px);
-        opacity: 0
+  {{-- 🔥 BREADCRUMB --}}
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Beranda",
+        "item": "{{ route('welcome') }}"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Karier",
+        "item": "{{ url()->current() }}"
       }
+    ]
+  }
+  </script>
 
-      to {
-        transform: translateY(0);
-        opacity: 1
-      }
-    }
-
-    /* ============== Hero background ============== */
-    .hero-wrap {
-      position: relative;
-      isolation: isolate;
-      background: var(--black)
-    }
-
-    .hero-wrap::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      z-index: -1;
-      background:
-        radial-gradient(1200px 400px at -10% -10%, rgba(29, 78, 216, .35), transparent 60%),
-        radial-gradient(900px 300px at 120% 120%, rgba(220, 38, 38, .28), transparent 60%);
-      pointer-events: none
-    }
-
-    /* Stars (planet vibes) */
-    .star-sky {
-      position: relative;
-      isolation: isolate;
-    }
-
-    .star-sky .star-layer {
-      position: absolute;
-      inset: -12% -6% -12% -6%;
-      z-index: -1;
-      pointer-events: none;
-      will-change: transform, opacity;
-      background-repeat: no-repeat;
-      background-size: cover;
-      filter: drop-shadow(0 0 1px rgba(255, 255, 255, .15));
-    }
-
-    .star-sky .star-1 {
-      opacity: .9;
-      animation: sky-drift-1 65s linear infinite;
-      background-image:
-        radial-gradient(1px 1px at 8% 18%, #fff, transparent 52%),
-        radial-gradient(1px 1px at 24% 66%, #fff, transparent 52%),
-        radial-gradient(1.4px 1.4px at 72% 28%, #fff, transparent 52%),
-        radial-gradient(1px 1px at 64% 12%, #fff, transparent 52%),
-        radial-gradient(1px 1px at 9% 78%, #fff, transparent 52%),
-        radial-gradient(1.2px 1.2px at 45% 41%, #fff, transparent 52%),
-        radial-gradient(1px 1px at 86% 82%, #fff, transparent 52%),
-        radial-gradient(1px 1px at 22% 90%, #fff, transparent 52%);
-    }
-
-    .star-sky .star-2 {
-      opacity: .6;
-      animation: sky-drift-2 95s linear infinite reverse;
-      background-image:
-        radial-gradient(1px 1px at 16% 30%, #fff, transparent 52%),
-        radial-gradient(1px 1px at 54% 74%, #fff, transparent 52%),
-        radial-gradient(1.4px 1.4px at 68% 52%, #fff, transparent 52%),
-        radial-gradient(1px 1px at 90% 22%, #fff, transparent 52%),
-        radial-gradient(1px 1px at 12% 56%, #fff, transparent 52%);
-      filter: blur(.2px) drop-shadow(0 0 1px rgba(255, 255, 255, .12));
-    }
-
-    .star-sky .star-3 {
-      opacity: .45;
-      animation: sky-drift-3 130s linear infinite;
-      background-image:
-        radial-gradient(1px 1px at 26% 14%, #fff, transparent 52%),
-        radial-gradient(1px 1px at 40% 86%, #fff, transparent 52%),
-        radial-gradient(1px 1px at 78% 68%, #fff, transparent 52%),
-        radial-gradient(1px 1px at 92% 40%, #fff, transparent 52%),
-        radial-gradient(1px 1px at 6% 42%, #fff, transparent 52%);
-      filter: blur(.35px) drop-shadow(0 0 1px rgba(255, 255, 255, .1));
-    }
-
-    @keyframes sky-drift-1 {
-      from {
-        transform: translate3d(0, 0, 0)
-      }
-
-      to {
-        transform: translate3d(-4%, -3%, 0)
-      }
-    }
-
-    @keyframes sky-drift-2 {
-      from {
-        transform: translate3d(0, 0, 0)
-      }
-
-      to {
-        transform: translate3d(-6%, -5%, 0)
-      }
-    }
-
-    @keyframes sky-drift-3 {
-      from {
-        transform: translate3d(0, 0, 0)
-      }
-
-      to {
-        transform: translate3d(-8%, -6%, 0)
-      }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .star-sky .star-layer {
-        animation: none
-      }
-    }
-
-    /* Timeline */
-    .tl {
-      position: relative
-    }
-
-    .tl::after {
-      content: "";
-      position: absolute;
-      right: 12px;
-      top: 0;
-      bottom: 0;
-      width: 2px;
-      background: linear-gradient(180deg, rgba(10, 10, 10, .2), rgba(10, 10, 10, .05))
-    }
-
-    .tl-step {
-      position: relative;
-      padding-right: 48px
-    }
-
-    .tl-dot {
-      --c: var(--blue);
-      position: absolute;
-      right: 3px;
-      top: .4rem;
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      box-shadow: inset 0 0 0 3px var(--c), 0 0 0 4px #fff;
-      background: transparent
-    }
-
-    .tl-dot.green {
-      --c: #16a34a
-    }
-
-    .tl-dot.blue {
-      --c: var(--blue)
-    }
-
-    .tl-dot.amber {
-      --c: #f59e0b
-    }
-
-    .tl-dot.red {
-      --c: #dc2626
-    }
-
-    /* Marquee */
-    .marquee {
-      position: relative;
-      overflow: hidden
-    }
-
-    .marquee__track {
-      display: flex;
-      gap: .75rem;
-      width: max-content;
-      animation: marquee-scroll 28s linear infinite;
-      will-change: transform
-    }
-
-    .marquee:hover .marquee__track {
-      animation-play-state: paused
-    }
-
-    @keyframes marquee-scroll {
-      from {
-        transform: translateX(0)
-      }
-
-      to {
-        transform: translateX(-50%)
-      }
-    }
-
-    @media (prefers-reduced-motion:reduce) {
-      .marquee__track {
-        animation: none
-      }
-    }
-
-    .chip {
-      transition: transform .2s ease
-    }
-
-    .chip:hover {
-      transform: translateY(-2px)
-    }
-
-    .chips {
-      display: flex;
-      flex-wrap: wrap;
-      gap: .5rem
-    }
-
-    .chip-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: .5rem;
-      padding: .375rem .625rem;
-      border-radius: 9999px;
-      background: #fff;
-      border: 1px solid var(--chip-bd, #e5e7eb);
-      transition: transform .2s ease, background .2s ease
-    }
-
-    .chip-pill:hover {
-      transform: translateY(-2px);
-      background: #fafafa
-    }
-
-    .ico-sm {
-      display: inline-grid;
-      place-items: center;
-      width: 28px;
-      height: 28px;
-      border-radius: 9999px;
-      background: rgba(29, 78, 216, .08);
-      color: #1d4ed8;
-      border: 1px solid rgba(29, 78, 216, .25)
-    }
-
-    .count-badge {
-      font-size: 11px;
-      line-height: 1;
-      padding: .2rem .45rem;
-      border-radius: 9999px;
-      background: #f4f4f5;
-      color: #111827
-    }
-  </style>
 </head>
 
 <body class="antialiased bg-white text-zinc-900">
@@ -884,108 +603,98 @@
         </a>
       </div>
 
-      <div class="p-5">
-        @if(method_exists($jobs,'count') ? $jobs->count() === 0 : ($jobs->isEmpty() ?? true))
-        <p style="color: #6b4f3a">Belum ada lowongan saat ini.</p>
-        @else
+<div class="p-5">
 
-        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          @foreach ($jobs as $job)
-          @php
+  @if($jobs->isEmpty())
+    <p style="color: #6b4f3a">Belum ada lowongan saat ini.</p>
+  @else
+
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      @foreach ($jobs as $job)
+        @php
           $excerpt = \Illuminate\Support\Str::limit(strip_tags($job->description ?? ''), 120);
-          @endphp
+        @endphp
 
-          <div class="border rounded-xl card-hover"
-            style="border-color: #e5e7eb; background: #ede5dc;">
+        <div class="border rounded-xl card-hover"
+          style="border-color: #e5e7eb; background: #ede5dc;">
 
-            <div class="p-5">
+          <div class="p-5">
 
-              {{-- HEADER CARD --}}
-              <div class="flex items-start gap-3">
-                <div class="p-2.5 rounded-lg text-white"
-                  style="background: #a77d52">
-                  <svg class="w-5 h-5" aria-hidden="true">
-                    <use href="#i-briefcase" />
-                  </svg>
-                </div>
-
-                <div class="min-w-0">
-                  <a href="{{ route('jobs.show', $job) }}"
-                    class="block font-semibold hover:opacity-80"
-                    style="color: #1f2937">
-                    {{ $job->title }}
-                  </a>
-
-                  <p class="text-[11px] mt-0.5"
-                    style="color: #6b4f3a">
-                    {{ $job->site?->code ?? $job->site?->name ?? '—' }} •
-                    Diposting {{ optional($job->created_at)->diffForHumans() }}
-                  </p>
-                </div>
+            {{-- HEADER CARD --}}
+            <div class="flex items-start gap-3">
+              <div class="p-2.5 rounded-lg text-white"
+                style="background: #a77d52">
+                <svg class="w-5 h-5">
+                  <use href="#i-briefcase" />
+                </svg>
               </div>
 
-              {{-- DESKRIPSI --}}
-              @if(!empty($excerpt))
-              <p class="mt-3 text-sm line-clamp-2"
+              <div class="min-w-0">
+                <a href="{{ route('jobs.show', $job) }}"
+                  class="block font-semibold"
+                  style="color: #1f2937">
+                  {{ $job->title }}
+                </a>
+
+                <p class="text-[11px]"
+                  style="color: #6b4f3a">
+                  {{ $job->site?->code ?? $job->site?->name ?? '—' }} •
+                  Diposting {{ optional($job->created_at)->diffForHumans() }}
+                </p>
+              </div>
+            </div>
+
+            {{-- DESKRIPSI --}}
+            @if(!empty($excerpt))
+              <p class="mt-3 text-sm"
                 style="color: #6b4f3a">
                 {{ $excerpt }}
               </p>
-              @endif
+            @endif
 
-              {{-- ACTION --}}
-              <div class="flex items-center justify-between mt-4">
+            {{-- ACTION --}}
+            <div class="flex items-center justify-between mt-4">
 
-                {{-- DETAIL --}}
-                <a href="{{ route('jobs.show', $job) }}"
-                  class="inline-flex items-center gap-1.5 text-sm font-medium hover:opacity-80"
-                  style="color: #a77d52">
-                  Detail
-                  <svg class="w-4 h-4" aria-hidden="true">
-                    <use href="#i-arrow-right" />
-                  </svg>
-                </a>
+              <a href="{{ route('jobs.show', $job) }}"
+                class="text-sm font-medium"
+                style="color: #a77d52">
+                Detail →
+              </a>
 
-                @auth
-                {{-- BUTTON LAMAR --}}
-                <form action="{{ route('applications.store', $job) }}" method="POST"
-                  onsubmit="return confirm('Lamar posisi ini?')">
+              @auth
+                <form action="{{ route('applications.store', $job) }}" method="POST">
                   @csrf
                   <button type="submit"
-                    class="inline-flex items-center gap-1.5 text-sm font-semibold px-3 py-1.5 rounded-lg text-white hover:opacity-90"
+                    class="text-sm px-3 py-1.5 rounded-lg text-white"
                     style="background: #a77d52">
-                    <svg class="w-4 h-4" aria-hidden="true">
-                      <use href="#i-apply" />
-                    </svg>
                     Lamar
                   </button>
                 </form>
-                @else
-                {{-- LOGIN --}}
-                <a href="{{ route('login') }}?intended={{ urlencode(route('jobs.show',$job)) }}"
-                  class="inline-flex items-center gap-1.5 text-sm font-semibold px-3 py-1.5 rounded-lg text-white hover:opacity-90"
+              @else
+                <a href="{{ route('login') }}"
+                  class="text-sm px-3 py-1.5 rounded-lg text-white"
                   style="background: #a77d52">
-                  <svg class="w-4 h-4" aria-hidden="true">
-                    <use href="#i-user" />
-                  </svg>
                   Masuk
                 </a>
-                @endauth
+              @endauth
 
-              </div>
             </div>
+
           </div>
-          @endforeach
         </div>
+      @endforeach
+    </div>
 
-        {{-- PAGINATION --}}
-        @if(method_exists($jobs,'withQueryString'))
-        <div class="mt-6">
-          {{ $jobs->withQueryString()->links() }}
-        </div>
-        @endif
-
-        @endif
+    {{-- PAGINATION --}}
+    @if(method_exists($jobs, 'links'))
+      <div class="mt-6">
+        {{ $jobs->links() }}
       </div>
+    @endif
+
+  @endif
+
+</div>
     </div>
   </section>
 
@@ -1142,21 +851,17 @@
   ],
   ];
   @endphp
-  <script type="application/ld+json">
-    {
-      !!json_encode($orgLd, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!
-    }
-  </script>
-  <script type="application/ld+json">
-    {
-      !!json_encode($siteLd, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!
-    }
-  </script>
-  <script type="application/ld+json">
-    {
-      !!json_encode($breadcrumbLd, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!
-    }
-  </script>
+<script type="application/ld+json">
+{!! json_encode($orgLd, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}
+</script>
+
+<script type="application/ld+json">
+{!! json_encode($siteLd, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}
+</script>
+
+<script type="application/ld+json">
+{!! json_encode($breadcrumbLd, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}
+</script>
 
   {{-- Minimal inline JS (no frameworks; tiny & fast) --}}
   <script>
