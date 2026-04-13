@@ -1,6 +1,13 @@
 # Human-HR API Documentation
 
 ## Base URL
+
+### Production
+```
+https://karirandalan.com/api
+```
+
+### Development (Local)
 ```
 http://127.0.0.1:8000/api
 ```
@@ -21,8 +28,10 @@ Authorization: Bearer {token}
 
 ## Endpoints
 
-### 1. Login (Tanpa Token)
+### 1. Login (Tanpa Token) ⚠️ **POST ONLY**
 **POST** `/login`
+
+**⚠️ PENTING**: Endpoint ini HANYA support **POST method**. Jangan gunakan GET!
 
 Endpoint untuk login dan mendapatkan Bearer token.
 
@@ -59,7 +68,15 @@ Endpoint untuk login dan mendapatkan Bearer token.
 }
 ```
 
-#### cURL
+#### cURL (Production)
+```bash
+curl -X POST "https://karirandalan.com/api/login" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -d '{"email":"admin@local.test","password":"password123"}'
+```
+
+#### cURL (Development)
 ```bash
 curl -X POST "http://127.0.0.1:8000/api/login" \
   -H "Accept: application/json" \
@@ -67,7 +84,15 @@ curl -X POST "http://127.0.0.1:8000/api/login" \
   -d '{"email":"admin@local.test","password":"password123"}'
 ```
 
-#### PowerShell
+#### PowerShell (Production)
+```powershell
+curl.exe -X POST "https://karirandalan.com/api/login" `
+  -H "Accept: application/json" `
+  -H "Content-Type: application/json" `
+  -d '{"email":"admin@local.test","password":"password123"}'
+```
+
+#### PowerShell (Development)
 ```powershell
 curl.exe -X POST "http://127.0.0.1:8000/api/login" `
   -H "Accept: application/json" `
@@ -115,14 +140,28 @@ atau
 }
 ```
 
-#### cURL
+#### cURL (Production)
+```bash
+curl "https://karirandalan.com/api/me" \
+  -H "Accept: application/json" \
+  -H "Authorization: Bearer TOKEN_DARI_LOGIN"
+```
+
+#### cURL (Development)
 ```bash
 curl "http://127.0.0.1:8000/api/me" \
   -H "Accept: application/json" \
   -H "Authorization: Bearer TOKEN_DARI_LOGIN"
 ```
 
-#### PowerShell
+#### PowerShell (Production)
+```powershell
+curl.exe "https://karirandalan.com/api/me" `
+  -H "Accept: application/json" `
+  -H "Authorization: Bearer TOKEN_DARI_LOGIN"
+```
+
+#### PowerShell (Development)
 ```powershell
 curl.exe "http://127.0.0.1:8000/api/me" `
   -H "Accept: application/json" `
@@ -174,14 +213,28 @@ Authorization: Bearer {token}
 }
 ```
 
-#### cURL
+#### cURL (Production)
+```bash
+curl "https://karirandalan.com/api/users" \
+  -H "Accept: application/json" \
+  -H "Authorization: Bearer TOKEN_DARI_LOGIN"
+```
+
+#### cURL (Development)
 ```bash
 curl "http://127.0.0.1:8000/api/users" \
   -H "Accept: application/json" \
   -H "Authorization: Bearer TOKEN_DARI_LOGIN"
 ```
 
-#### PowerShell
+#### PowerShell (Production)
+```powershell
+curl.exe "https://karirandalan.com/api/users" `
+  -H "Accept: application/json" `
+  -H "Authorization: Bearer TOKEN_DARI_LOGIN"
+```
+
+#### PowerShell (Development)
 ```powershell
 curl.exe "http://127.0.0.1:8000/api/users" `
   -H "Accept: application/json" `
@@ -232,14 +285,28 @@ Authorization: Bearer {token}
 }
 ```
 
-#### cURL
+#### cURL (Production)
+```bash
+curl "https://karirandalan.com/api/users/UUID_USER" \
+  -H "Accept: application/json" \
+  -H "Authorization: Bearer TOKEN_DARI_LOGIN"
+```
+
+#### cURL (Development)
 ```bash
 curl "http://127.0.0.1:8000/api/users/UUID_USER" \
   -H "Accept: application/json" \
   -H "Authorization: Bearer TOKEN_DARI_LOGIN"
 ```
 
-#### PowerShell
+#### PowerShell (Production)
+```powershell
+curl.exe "https://karirandalan.com/api/users/UUID_USER" `
+  -H "Accept: application/json" `
+  -H "Authorization: Bearer TOKEN_DARI_LOGIN"
+```
+
+#### PowerShell (Development)
 ```powershell
 curl.exe "http://127.0.0.1:8000/api/users/UUID_USER" `
   -H "Accept: application/json" `
@@ -279,13 +346,25 @@ Mendapatkan daftar semua user secara publik (tanpa memerlukan token).
 }
 ```
 
-#### cURL
+#### cURL (Production)
+```bash
+curl "https://karirandalan.com/api/public/users" \
+  -H "Accept: application/json"
+```
+
+#### cURL (Development)
 ```bash
 curl "http://127.0.0.1:8000/api/public/users" \
   -H "Accept: application/json"
 ```
 
-#### PowerShell
+#### PowerShell (Production)
+```powershell
+curl.exe "https://karirandalan.com/api/public/users" `
+  -H "Accept: application/json"
+```
+
+#### PowerShell (Development)
 ```powershell
 curl.exe "http://127.0.0.1:8000/api/public/users" `
   -H "Accept: application/json"
@@ -323,17 +402,42 @@ Mendapatkan data user tertentu berdasarkan UUID secara publik (tanpa memerlukan 
 }
 ```
 
-#### cURL
+#### cURL (Production)
+```bash
+curl "https://karirandalan.com/api/public/users/UUID_USER" \
+  -H "Accept: application/json"
+```
+
+#### cURL (Development)
 ```bash
 curl "http://127.0.0.1:8000/api/public/users/UUID_USER" \
   -H "Accept: application/json"
 ```
 
-#### PowerShell
+#### PowerShell (Production)
+```powershell
+curl.exe "https://karirandalan.com/api/public/users/UUID_USER" `
+  -H "Accept: application/json"
+```
+
+#### PowerShell (Development)
 ```powershell
 curl.exe "http://127.0.0.1:8000/api/public/users/UUID_USER" `
   -H "Accept: application/json"
 ```
+
+---
+
+## ⚠️ Important Notes
+
+### HTTP Methods
+**Pastikan menggunakan method HTTP yang benar:**
+- `POST /api/login` - Hanya gunakan **POST**, bukan GET!
+- `GET /api/me` - Hanya gunakan **GET**, bukan POST!
+- `GET /api/users` - Hanya gunakan **GET**, bukan POST!
+- Dan seterusnya...
+
+Error "The GET method is not supported for route api/login" terjadi saat kamu menggunakan GET di endpoint yang memerlukan POST.
 
 ---
 
