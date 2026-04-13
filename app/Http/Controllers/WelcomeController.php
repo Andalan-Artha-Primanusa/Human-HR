@@ -7,7 +7,9 @@ use App\Models\JobApplication;
 use App\Models\Site;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
 class WelcomeController extends Controller
@@ -27,7 +29,7 @@ class WelcomeController extends Controller
             ->orderByDesc('created_at');
 
         // Tampilkan hanya yang "open" bila kolom status ada
-        if (\Schema::hasColumn('jobs', 'status')) {
+        if (Schema::hasColumn('jobs', 'status')) {
             $jobsQuery->where('status', 'open');
         }
 
@@ -59,7 +61,7 @@ class WelcomeController extends Controller
         $myAppsProgress = collect();
 
         // ===== Untuk user login: ambil lamaran terakhir + ringkasan =====
-        if ($userId = auth()->id()) {
+        if ($userId = Auth::id()) {
             $myApps = JobApplication::query()
                 ->select(['id','job_id','user_id','current_stage','overall_status','created_at'])
                 ->with([
@@ -73,7 +75,9 @@ class WelcomeController extends Controller
                 ->get();
 
             $myAppsSummary  = $this->buildSummary($userId);
-            $myAppsProgress = $myApps->map(fn ($app) => $this->decorateProgress($app))
+            $myAppsProgress = $myApps->map(function (JobApplication $app) {
+                return $this->decorateProgress($app);
+            })
                                      ->keyBy('application_id');
         }
 
@@ -101,7 +105,7 @@ class WelcomeController extends Controller
     {
         $q = Job::query();
 
-        if (\Schema::hasColumn('jobs', 'status')) {
+        if (Schema::hasColumn('jobs', 'status')) {
             $q->where('status', 'open');
         }
 

@@ -131,7 +131,8 @@ class AuditLogController extends Controller
                 ->when($targetType !== '', fn($qq) => $qq->where('target_type', $targetType))
                 ->when($fromAt, fn($qq) => $qq->where('created_at', '>=', $fromAt))
                 ->when($toAt,   fn($qq) => $qq->where('created_at', '<=', $toAt))
-                ->orderByDesc('id');
+                // chunkById stabil dengan urutan id ASC.
+                ->orderBy('id');
 
             // chunkById menghindari offset-scan panjang
             $builder->chunkById(1000, function ($rows) use ($out) {
@@ -170,6 +171,11 @@ class AuditLogController extends Controller
         if ($to) {
             try { $toAt = Carbon::parse($to)->endOfDay(); } catch (\Throwable $e) {}
         }
+
+        if ($fromAt && $toAt && $fromAt->greaterThan($toAt)) {
+            [$fromAt, $toAt] = [$toAt->copy()->startOfDay(), $fromAt->copy()->endOfDay()];
+        }
+
         return [$fromAt, $toAt];
     }
 }

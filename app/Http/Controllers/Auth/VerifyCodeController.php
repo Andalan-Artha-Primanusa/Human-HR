@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\EmailVerificationCode;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Auth\Events\Verified;
@@ -14,7 +15,7 @@ class VerifyCodeController extends Controller
 {
     public function notice()
     {
-        return auth()->user()?->email_verified_at
+        return Auth::user()?->email_verified_at
             ? redirect()->route('welcome')
             : redirect()->route('verification.code.form');
     }
@@ -105,7 +106,7 @@ class VerifyCodeController extends Controller
         $plain = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
 
         $row->fill([
-            'code_hash'    => \Hash::make($plain),
+            'code_hash'    => Hash::make($plain),
             'expires_at'   => now()->addMinutes($ttl),
             'attempts'     => 0,
             'last_sent_at' => now(),

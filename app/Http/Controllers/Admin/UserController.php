@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
@@ -85,7 +86,8 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
-        $q      = (string) $request->query('q', '');
+        $qRaw   = (string) $request->query('q', '');
+        $q      = Str::limit(preg_replace('/[\x00-\x1F\x7F]/u', '', trim($qRaw)) ?? '', 120, '');
         $role   = (string) $request->query('role', '');
         $status = (string) $request->query('status', '');
 
@@ -127,26 +129,34 @@ class UserController extends Controller
 
     public function store(Request $request)
     {
+        $roleRules = ['nullable','string','max:100'];
+        if (Schema::hasColumn('users', 'role')) {
+            $roleRules[] = Rule::in($this->allowedRoles());
+        }
+
         $data = $request->validate([
             'name'       => ['required','string','max:255'],
             'email'      => ['required','email','max:255','unique:users,email'],
             'password'   => ['nullable','string','min:8'],
-            'role'       => ['nullable','string','max:100'],
+            'role'       => $roleRules,
             'active'     => ['nullable','boolean'],
             'id_employe' => ['nullable','string','max:50', Rule::unique('users','id_employe')],
         ]);
+
+        $requestedRole = isset($data['role']) ? strtolower(trim((string) $data['role'])) : null;
+        $this->ensureCanAssignRole($requestedRole);
 
         $u = new User();
         $u->name       = $data['name'];
         $u->email      = $data['email'];
         $u->password   = Hash::make($data['password'] ?? Str::random(12));
         if (Schema::hasColumn('users','active')) $u->active = (bool)($data['active'] ?? true);
-        if (Schema::hasColumn('users','role') && isset($data['role'])) $u->role = $data['role'];
+        if (Schema::hasColumn('users','role') && $requestedRole) $u->role = $requestedRole;
         if (Schema::hasColumn('users','id_employe') && array_key_exists('id_employe',$data)) $u->id_employe = $data['id_employe'];
         $u->save();
 
-        if (!Schema::hasColumn('users','role') && !empty($data['role']) && method_exists($u,'syncRoles')) {
-            try { $u->syncRoles([$data['role']]); } catch (\Throwable $e) {}
+        if (!Schema::hasColumn('users','role') && $requestedRole && method_exists($u,'syncRoles')) {
+            try { $u->syncRoles([$requestedRole]); } catch (\Throwable $e) {}
         }
 
         return redirect()->route('admin.users.index')->with('ok','User created.');
@@ -160,25 +170,35 @@ class UserController extends Controller
 
     public function update(Request $request, User $user)
     {
+        $this->ensureCanMutateUser($user);
+
+        $roleRules = ['nullable','string','max:100'];
+        if (Schema::hasColumn('users', 'role')) {
+            $roleRules[] = Rule::in($this->allowedRoles());
+        }
+
         $data = $request->validate([
             'name'       => ['required','string','max:255'],
             'email'      => ['required','email','max:255', Rule::unique('users','email')->ignore($user->id)],
             'password'   => ['nullable','string','min:8'],
-            'role'       => ['nullable','string','max:100'],
+            'role'       => $roleRules,
             'active'     => ['nullable','boolean'],
             'id_employe' => ['nullable','string','max:50', Rule::unique('users','id_employe')->ignore($user->id)],
         ]);
+
+        $requestedRole = isset($data['role']) ? strtolower(trim((string) $data['role'])) : null;
+        $this->ensureCanAssignRole($requestedRole);
 
         $user->name  = $data['name'];
         $user->email = $data['email'];
         if (!empty($data['password'])) $user->password = Hash::make($data['password']);
         if (Schema::hasColumn('users','active') && array_key_exists('active',$data)) $user->active = (bool)$data['active'];
-        if (Schema::hasColumn('users','role') && isset($data['role'])) $user->role = $data['role'];
+        if (Schema::hasColumn('users','role') && $requestedRole) $user->role = $requestedRole;
         if (Schema::hasColumn('users','id_employe') && array_key_exists('id_employe',$data)) $user->id_employe = $data['id_employe'];
         $user->save();
 
         if (!Schema::hasColumn('users','role') && method_exists($user,'syncRoles')) {
-            try { !empty($data['role']) ? $user->syncRoles([$data['role']]) : $user->syncRoles([]); } catch (\Throwable $e) {}
+            try { $requestedRole ? $user->syncRoles([$requestedRole]) : $user->syncRoles([]); } catch (\Throwable $e) {}
         }
 
         return redirect()->route('admin.users.index')->with('ok','User updated.');
@@ -186,7 +206,9 @@ class UserController extends Controller
 
     public function destroy(User $user)
     {
-        if (auth()->id() === $user->id) {
+        $this->ensureCanMutateUser($user);
+
+        if (Auth::id() === $user->id) {
             return back()->with('warn','Tidak bisa menghapus akun sendiri.');
         }
         $user->delete();
@@ -232,12 +254,22 @@ class UserController extends Controller
                     $name  = trim($row[$iName] ?? '');
                     $email = trim($row[$iEmail] ?? '');
                     $pass  = $iPass !== false ? trim((string)($row[$iPass] ?? '')) : '';
-                    $role  = $iRole !== false ? trim((string)($row[$iRole] ?? '')) : '';
+                    $role  = $iRole !== false ? strtolower(trim((string)($row[$iRole] ?? ''))) : '';
                     $actIn = $iActive !== false ? trim((string)($row[$iActive] ?? '')) : null;
                     $empId = $iEmp !== false ? trim((string)($row[$iEmp] ?? '')) : '';
 
                     if ($name === '' || $email === '') {
                         $errors[] = 'Skip: name/email kosong -> '.implode(',',$row);
+                        continue;
+                    }
+
+                    if ($role !== '' && !in_array($role, $this->allowedRoles(), true)) {
+                        $errors[] = 'Skip: role tidak valid untuk email '.$email;
+                        continue;
+                    }
+
+                    if ($role !== '' && !$this->canAssignRole($role)) {
+                        $errors[] = 'Skip: tidak berwenang assign role '.$role.' untuk '.$email;
                         continue;
                     }
 
@@ -332,5 +364,43 @@ class UserController extends Controller
             return \Spatie\Permission\Models\Role::query()->orderBy('name')->pluck('name')->all();
         }
         return [];
+    }
+
+    private function allowedRoles(): array
+    {
+        return ['pelamar', 'hr', 'superadmin', 'admin'];
+    }
+
+    private function ensureCanMutateUser(User $user): void
+    {
+        if (($user->role ?? null) === 'superadmin' && (($this->currentUserRole()) !== 'superadmin')) {
+            abort(403, 'Hanya superadmin yang dapat mengubah user superadmin.');
+        }
+    }
+
+    private function ensureCanAssignRole(?string $role): void
+    {
+        if ($role && !$this->canAssignRole($role)) {
+            abort(403, 'Hanya superadmin yang dapat menetapkan role superadmin.');
+        }
+    }
+
+    private function canAssignRole(string $role): bool
+    {
+        if ($role !== 'superadmin') {
+            return true;
+        }
+
+        return $this->currentUserRole() === 'superadmin';
+    }
+
+    private function currentUserRole(): ?string
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return null;
+        }
+
+        return is_string($user->role ?? null) ? strtolower((string) $user->role) : null;
     }
 }

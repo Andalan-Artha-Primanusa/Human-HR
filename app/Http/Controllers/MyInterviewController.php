@@ -70,9 +70,12 @@ class MyInterviewController extends Controller
     {
         $iv = $this->forUserOrFail($request, $interview);
 
+        abort_if(is_null($iv->start_at) || is_null($iv->end_at), 422, 'Jadwal interview belum lengkap.');
+        abort_if($iv->end_at->lessThanOrEqualTo($iv->start_at), 422, 'Rentang waktu interview tidak valid.');
+
         $uid     = Str::uuid().'@andalan-careers';
-        $dtStart = optional($iv->start_at)->copy()->setTimezone('UTC')->format('Ymd\THis\Z');
-        $dtEnd   = optional($iv->end_at)->copy()->setTimezone('UTC')->format('Ymd\THis\Z');
+        $dtStart = $iv->start_at->copy()->setTimezone('UTC')->format('Ymd\THis\Z');
+        $dtEnd   = $iv->end_at->copy()->setTimezone('UTC')->format('Ymd\THis\Z');
         $dtStamp = now()->setTimezone('UTC')->format('Ymd\THis\Z');
 
         $summary = $iv->title ?: ('Interview: '.$iv->application->job->title);

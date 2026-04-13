@@ -41,8 +41,8 @@ class RegisteredUserController extends Controller
             'name'       => (string) $request->string('name'),
             'email'      => (string) $request->string('email'),
             'password'   => Hash::make((string) $request->string('password')),
-            'role'       => $request->input('role', 'pelamar'),
-            'id_employe' => $request->input('id_employe'),
+            // Registrasi publik selalu jadi pelamar.
+            'role'       => 'pelamar',
         ]);
 
         // Trigger event standar → listener SendEmailVerificationCode akan generate & kirim OTP

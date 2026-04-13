@@ -15,6 +15,34 @@ use App\Models\JobApplication;
 class ManpowerRequirementController extends Controller
 {
     /**
+     * Daftar job untuk entry point pengaturan manpower.
+     */
+    public function index(Request $request): View|JsonResponse
+    {
+        $q = trim((string) $request->query('q', ''));
+
+        $jobsForManpower = Job::query()
+            ->select(['id', 'code', 'title', 'created_at'])
+            ->when($q !== '', function ($qq) use ($q) {
+                $qq->where(function ($w) use ($q) {
+                    $w->where('code', 'like', "%{$q}%")
+                        ->orWhere('title', 'like', "%{$q}%");
+                });
+            })
+            ->latest('created_at')
+            ->limit(100)
+            ->get();
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'jobs' => $jobsForManpower,
+            ]);
+        }
+
+        return view('admin.manpower.index', compact('jobsForManpower', 'q'));
+    }
+
+    /**
      * Tampilkan form untuk mengelola manpower per Job (tanpa site):
      * - List baris per asset_name (opsional)
      * - Form tambah/ubah baris

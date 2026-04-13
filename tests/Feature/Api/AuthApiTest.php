@@ -63,7 +63,8 @@ class AuthApiTest extends TestCase
 
         $response->assertOk()
             ->assertJsonPath('user.id', $user->id)
-            ->assertJsonPath('user.email', $user->email);
+            ->assertJsonPath('user.name', $user->name)
+            ->assertJsonMissingPath('user.email');
     }
 
     public function test_public_users_index_returns_all_users(): void
@@ -73,7 +74,8 @@ class AuthApiTest extends TestCase
         $response = $this->getJson('/api/public/users');
 
         $response->assertOk()
-            ->assertJsonCount(3, 'users');
+            ->assertJsonCount(3, 'users')
+            ->assertJsonMissingPath('users.0.email');
     }
 
     public function test_users_index_requires_token(): void
@@ -90,5 +92,56 @@ class AuthApiTest extends TestCase
         $response = $this->getJson('/api/users/'.$user->id);
 
         $response->assertUnauthorized();
+    }
+
+    public function test_regular_user_cannot_access_staff_api_users(): void
+    {
+        $user = User::factory()->create([
+            'role' => 'pelamar',
+        ]);
+
+        $login = $this->postJson('/api/login', [
+            'email' => $user->email,
+            'password' => 'password',
+        ]);
+
+        $token = $login->json('token');
+
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
+            ->getJson('/api/users');
+
+        $response->assertForbidden();
+    }
+
+    public function test_staff_user_can_access_staff_api_users(): void
+    {
+        $user = User::factory()->create([
+            'role' => 'hr',
+        ]);
+
+        $login = $this->postJson('/api/login', [
+            'email' => $user->email,
+            'password' => 'password',
+        ]);
+
+        $token = $login->json('token');
+
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
+            ->getJson('/api/users');
+
+        $response->assertOk();
+    }
+
+    public function test_unverified_user_cannot_login_api(): void
+    {
+        $user = User::factory()->unverified()->create();
+
+        $response = $this->postJson('/api/login', [
+            'email' => $user->email,
+            'password' => 'password',
+        ]);
+
+        $response->assertStatus(403)
+            ->assertJsonPath('message', 'Email belum diverifikasi.');
     }
 }

@@ -9,11 +9,18 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class OfferController extends Controller
 {
+  protected function ensureAdmin(Request $request): void
+  {
+    abort_unless($request->user()?->hasRole(['hr', 'superadmin']), 403, 'Forbidden.');
+  }
+
   /**
    * Admin: buat draft offer
    */
   public function store(Request $request, JobApplication $application)
   {
+    $this->ensureAdmin($request);
+
     $data = $request->validate([
       'gross_salary' => 'required|numeric|min:0',
       'allowance'    => 'nullable|numeric|min:0',
@@ -43,8 +50,10 @@ class OfferController extends Controller
    * - Default: stream (preview di browser)
    * - ?dl=1   : force download
    */
-  public function pdf(Offer $offer)
+  public function pdf(Request $request, Offer $offer)
   {
+    $this->ensureAdmin($request);
+
     $offer->load('application.user', 'application.job', 'application.job.site');
 
     // === Render HTML dari Blade (sesuai template foto) ===
@@ -103,6 +112,8 @@ HTML;
    */
   public function index(Request $request)
   {
+    $this->ensureAdmin($request);
+
     $q      = (string) $request->query('q', '');
     $status = (string) $request->query('status', '');
 

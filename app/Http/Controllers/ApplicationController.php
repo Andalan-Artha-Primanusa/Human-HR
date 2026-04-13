@@ -12,6 +12,7 @@ use App\Models\PsychotestTest;
 use App\Models\CandidateProfile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage; // +++ untuk hapus file
 use Illuminate\Validation\Rule;
 use Illuminate\Notifications\DatabaseNotification;
@@ -354,10 +355,11 @@ class ApplicationController extends Controller
     protected function applyTransition(JobApplication $application, string $to, string $status = 'pending', ?string $note = null, ?float $score = null)
     {
         $attempt = null;
+        $actorUser = Auth::user();
+        $userId = Auth::id();
+        $actor = $actorUser?->name ?? 'System';
 
-        DB::transaction(function () use ($application, $to, $status, $note, $score, &$attempt) {
-            $userId   = auth()->id();
-            $actor    = auth()->user()?->name ?? 'System';
+        DB::transaction(function () use ($application, $to, $status, $note, $score, &$attempt, $userId, $actor) {
             $from     = $application->current_stage;
             $prevOverall = $application->overall_status;
 
@@ -529,11 +531,6 @@ class ApplicationController extends Controller
     /** Redirect pintar setelah perpindahan stage */
     protected function redirectAfterMove(Request $request, JobApplication $application, string $to, $attempt = null)
     {
-        $isAdmin = $request->user()
-            && (method_exists($request->user(), 'hasAnyRole')
-                ? $request->user()->hasAnyRole(['hr','superadmin'])
-                : in_array($request->user()->role ?? null, ['hr','superadmin'], true));
-
         $isOwner = $request->user() && (string)$request->user()->id === (string)$application->user_id;
 
         switch ($to) {

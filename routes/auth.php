@@ -37,6 +37,11 @@ Route::middleware('guest')->group(function () {
 
 Route::middleware('auth')->group(function () {
 
+    // Backward compatibility: beberapa halaman/test lama masih mengarah ke /verify-email.
+    Route::get('verify-email', function () {
+        return redirect()->route('verification.notice');
+    });
+
     Route::get('verify-email/{id}/{hash}', VerifyEmailController::class)
         ->middleware(['signed', 'throttle:6,1'])
         ->name('verification.verify');

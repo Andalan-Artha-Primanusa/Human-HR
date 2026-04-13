@@ -12,9 +12,14 @@ class SitePublicController extends Controller
      */
     public function index(Request $request)
     {
-        $q = trim((string) $request->get('q'));
+        $data = $request->validate([
+            'q' => ['nullable', 'string', 'max:100'],
+        ]);
+
+        $q = trim((string) ($data['q'] ?? ''));
 
         $sites = Site::query()
+            ->select(['id', 'code', 'name', 'region', 'timezone', 'address'])
             ->where('is_active', true)
             ->when($q !== '', function ($qq) use ($q) {
                 $qq->where(function ($w) use ($q) {
@@ -45,8 +50,10 @@ class SitePublicController extends Controller
             abort(404);
         }
 
-        // Hitung total jobs dan siapkan 5 job "open" terbaru (untuk panel di view).
-        $site->loadCount(['jobs']);
+        // Hitung total jobs open dan siapkan 5 job open terbaru (untuk panel di view).
+        $site->loadCount([
+            'jobs as open_jobs_count' => fn($q) => $q->where('status', 'open'),
+        ]);
         $site->load([
             'jobs' => fn($q) => $q->select(['id','title','status','site_id','created_at'])
                                   ->where('status', 'open')

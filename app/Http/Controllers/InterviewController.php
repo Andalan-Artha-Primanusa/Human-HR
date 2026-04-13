@@ -11,12 +11,19 @@ use App\Notifications\InterviewScheduled;
 
 class InterviewController extends Controller
 {
+    protected function ensureAdmin(Request $request): void
+    {
+        abort_unless($request->user()?->hasRole(['hr', 'superadmin']), 403, 'Forbidden.');
+    }
+
     /**
      * ADMIN: daftar interview (optional untuk sidebar).
      * Filter sederhana: q by job title/candidate name (optional).
      */
     public function index(Request $request)
     {
+        $this->ensureAdmin($request);
+
         $q = (string) $request->query('q', '');
 
         $interviews = Interview::with([
@@ -42,6 +49,8 @@ class InterviewController extends Controller
      */
     public function store(Request $request, string $application)
     {
+        $this->ensureAdmin($request);
+
         /** @var JobApplication $app */
         $app = JobApplication::with(['user', 'job.site'])->whereKey($application)->firstOrFail();
 
@@ -86,6 +95,8 @@ class InterviewController extends Controller
      */
     public function update(Request $request, string $interview)
     {
+        $this->ensureAdmin($request);
+
         $iv = Interview::with(['application.user', 'application.job.site'])->whereKey($interview)->firstOrFail();
 
         $data = $request->validate([
@@ -119,6 +130,8 @@ class InterviewController extends Controller
      */
     public function destroy(Request $request, string $interview)
     {
+        $this->ensureAdmin($request);
+
         $iv = Interview::whereKey($interview)->firstOrFail();
         $iv->delete();
 

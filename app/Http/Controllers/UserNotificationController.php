@@ -14,6 +14,11 @@ class UserNotificationController extends Controller
      */
     public function index(Request $request)
     {
+        $request->validate([
+            'format' => ['nullable', 'in:json'],
+            'ajax' => ['nullable', 'boolean'],
+        ]);
+
         $user = $request->user();
 
         // === JSON (AJAX polling) ===
@@ -30,7 +35,7 @@ class UserNotificationController extends Controller
                     $data  = (array) ($n->data ?? []);
                     $title = $data['title'] ?? ($data['message'] ?? 'Notifikasi');
                     $body  = $data['body']  ?? ($data['excerpt'] ?? null);
-                    $url   = $data['url']   ?? null;
+                    $url   = $this->sanitizeNotificationUrl($data['url'] ?? null);
 
                     return [
                         'id'         => (string) $n->id,
@@ -121,5 +126,29 @@ class UserNotificationController extends Controller
         }
 
         return back()->with('ok', 'Pemberitahuan dihapus.');
+    }
+
+    private function sanitizeNotificationUrl(mixed $url): ?string
+    {
+        if (!is_string($url) || $url === '') {
+            return null;
+        }
+
+        // Relative URL internal selalu diizinkan.
+        if (str_starts_with($url, '/')) {
+            return $url;
+        }
+
+        $parts = parse_url($url);
+        if (!is_array($parts) || !isset($parts['scheme'])) {
+            return null;
+        }
+
+        $scheme = strtolower((string) $parts['scheme']);
+        if (!in_array($scheme, ['http', 'https'], true)) {
+            return null;
+        }
+
+        return $url;
     }
 }

@@ -6,15 +6,21 @@ use App\Models\PsychotestAttempt;
 use App\Models\PsychotestAnswer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class PsychotestController extends Controller
 {
     // ====== ADMIN: daftar attempt psikotes ======
     public function index(Request $request)
     {
-        $q      = (string) $request->query('q', '');
+        $payload = $request->validate([
+            'q' => ['nullable', 'string', 'max:120'],
+            'status' => ['nullable', Rule::in(['active', 'finished'])],
+        ]);
+
+        $q = trim((string) ($payload['q'] ?? ''));
         // nilai status di query opsional: 'active' | 'finished'
-        $status = (string) $request->query('status', '');
+        $status = (string) ($payload['status'] ?? '');
 
         // definisi status aktif & selesai berbasis kolom status (bukan is_active)
         $ACTIVE_STATUSES   = ['pending','in_progress'];
@@ -93,6 +99,7 @@ class PsychotestController extends Controller
 
         $data = $request->validate([
             'answers' => 'required|array', // [question_id => answer_string]
+            'answers.*' => ['nullable', 'string', 'max:5000'],
         ]);
 
         $attempt->load(['test.questions']);
@@ -143,25 +150,27 @@ class PsychotestController extends Controller
 
             $payload = ['max_score' => $maxScore];
 
+            $cfg   = $attempt->test->scoring ?? [];
+            $ratio = is_array($cfg) && isset($cfg['pass_ratio']) ? (float)$cfg['pass_ratio'] : 0.6;
+            $isPassed = $maxScore > 0 && ($score / $maxScore) >= $ratio;
+
             if ($stage) {
                 $stage->update([
                     'score'   => $score,
-                    'status'  => 'passed', // atau 'failed' kalau mau pakai threshold nanti
+                    'status'  => $isPassed ? 'passed' : 'failed',
                     'payload' => $payload
                 ]);
             } else {
                 $attempt->application->stages()->create([
                     'stage_key' => 'psychotest',
-                    'status'    => 'passed',
+                    'status'    => $isPassed ? 'passed' : 'failed',
                     'score'     => $score,
                     'payload'   => $payload,
                 ]);
             }
 
             // auto-move by threshold (pakai pass_ratio dari test->scoring)
-            $cfg   = $attempt->test->scoring ?? [];
-            $ratio = is_array($cfg) && isset($cfg['pass_ratio']) ? (float)$cfg['pass_ratio'] : 0.6;
-            if ($maxScore > 0 && ($score / $maxScore) >= $ratio) {
+            if ($isPassed) {
                 $attempt->application->update(['current_stage' => 'hr_iv']);
             }
         });

@@ -6,10 +6,12 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [AuthController::class, 'login']);
 
-Route::middleware('api.token')->group(function () {
+Route::middleware(['api.token', 'verified'])->group(function () {
 	Route::get('/me', [AuthController::class, 'me']);
-	Route::get('/users', [UserController::class, 'index']);
-	Route::get('/users/{user}', [UserController::class, 'show']);
+	Route::middleware('role:hr|superadmin')->group(function () {
+		Route::get('/users', [UserController::class, 'index']);
+		Route::get('/users/{user}', [UserController::class, 'show']);
+	});
 });
 
 Route::prefix('public')->group(function () {

@@ -12,13 +12,22 @@ class Offer extends Model
     use HasFactory, HasUuidPrimaryKey;
 
     protected $fillable = [
-        'application_id','status','salary','body_template','signed_path'
+        'application_id',
+        'status',
+        'salary',
+        'body_template',
+        'signed_path',
+        'meta',
     ];
 
     protected $casts = [
         'salary' => 'array',
+        'meta' => 'array',
     ];
 
     /** @return BelongsTo<JobApplication,Offer> */
-    public function application(): BelongsTo { return $this->belongsTo(JobApplication::class, 'application_id'); }
+    public function application(): BelongsTo
+    {
+        return $this->belongsTo(JobApplication::class, 'application_id');
+    }
 }

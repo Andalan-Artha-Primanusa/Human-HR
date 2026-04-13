@@ -386,7 +386,7 @@ class CandidateProfileController extends Controller
 
         // Disk 'public' → cepat untuk file statik
         if (Storage::disk('public')->exists($profile->cv_path)) {
-            return redirect()->away(Storage::disk('public')->url($profile->cv_path));
+            return response()->file(Storage::disk('public')->path($profile->cv_path));
         }
 
         // Fallback: stream dari local/private disk

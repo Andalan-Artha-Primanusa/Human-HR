@@ -101,12 +101,12 @@
 
     Route::middleware(['auth', 'verified'])->group(function () {
         // Profile (Breeze)
-        Route::get('/profile',  [ProfileController::class, 'edit'])->name('profile.edit');
+        Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
         Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
         Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
         // Apply job (form profile & submit)
-        Route::get('/jobs/{job}/apply/profile',  [CandidateProfileController::class, 'edit'])
+        Route::get('/jobs/{job}/apply/profile', [CandidateProfileController::class, 'edit'])
             ->name('candidate.profiles.edit');
         Route::post('/jobs/{job}/apply/profile', [CandidateProfileController::class, 'update'])
             ->name('candidate.profiles.update');
@@ -119,13 +119,12 @@
             ->name('applications.mine');
 
         // Psikotes
-        Route::get('/me/psychotest/{attempt}',  [PsychotestController::class, 'show'])
+        Route::get('/me/psychotest/{attempt}', [PsychotestController::class, 'show'])
             ->name('psychotest.show');
         Route::post('/me/psychotest/{attempt}', [PsychotestController::class, 'submit'])
             ->name('psychotest.submit');
 
-
-    Route::middleware(['auth'])->group(function () {
+        // Notifikasi user
         Route::get('/me/notifications', [UserNotificationController::class, 'index'])
             ->name('me.notifications.index');
         Route::post('/me/notifications/read-all', [UserNotificationController::class, 'markAllRead'])
@@ -134,8 +133,8 @@
             ->name('me.notifications.read');
         Route::delete('/me/notifications/{notification}', [UserNotificationController::class, 'destroy'])
             ->name('me.notifications.destroy');
-    });
-        // ===== My Interviews (user) =====
+
+        // Interview user
         Route::get('/me/interviews', [MyInterviewController::class, 'index'])
             ->name('me.interviews.index');
         Route::get('/me/interviews/{interview}', [MyInterviewController::class, 'show'])
@@ -234,15 +233,16 @@
         Route::post('/reset-password', [NewPasswordController::class, 'store'])
             ->name('password.store');
     });
-/*P
-|--------------------------------------------------------------------------
-| Extra SEO Pages (WAJIB BUAT SITELINKS)
-|--------------------------------------------------------------------------
-*/
 
-Route::view('/faq', 'faq')->name('faq');
-Route::view('/blog', 'blog')->name('blog');
-Route::get('/search', [JobController::class, 'index'])->name('search');
+    /*
+    |--------------------------------------------------------------------------
+    | Extra SEO Pages (WAJIB BUAT SITELINKS)
+    |--------------------------------------------------------------------------
+    */
+
+    Route::view('/faq', 'faq')->name('faq');
+    Route::view('/blog', 'blog')->name('blog');
+    Route::get('/search', [JobController::class, 'index'])->name('search');
     /*
     |--------------------------------------------------------------------------
     | Auth scaffolding routes (Breeze/Fortify)

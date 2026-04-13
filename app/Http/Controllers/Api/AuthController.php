@@ -26,6 +26,12 @@ class AuthController extends Controller
             ], 422);
         }
 
+        if (! $user->hasVerifiedEmail()) {
+            return response()->json([
+                'message' => 'Email belum diverifikasi.',
+            ], 403);
+        }
+
         $token = Str::random(80);
 
         $user->forceFill([
@@ -36,14 +42,14 @@ class AuthController extends Controller
             'message' => 'Login berhasil.',
             'token_type' => 'Bearer',
             'token' => $token,
-            'user' => $user,
+            'user' => $user->only(['id', 'name', 'email', 'role']),
         ]);
     }
 
     public function me(Request $request): JsonResponse
     {
         return response()->json([
-            'user' => $request->user(),
+            'user' => $request->user()?->only(['id', 'name', 'email', 'role']),
         ]);
     }
 }

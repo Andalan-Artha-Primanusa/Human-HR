@@ -170,10 +170,10 @@ curl.exe "http://127.0.0.1:8000/api/me" `
 
 ---
 
-### 3. Get All Users (Dengan Token)
+### 3. Get All Users (Dengan Token + Staff Only)
 **GET** `/users`
 
-Mendapatkan daftar semua user yang tersedia (memerlukan token).
+Mendapatkan daftar semua user yang tersedia. Endpoint ini memerlukan token dan role `hr` atau `superadmin`.
 
 #### Headers
 ```
@@ -243,10 +243,10 @@ curl.exe "http://127.0.0.1:8000/api/users" `
 
 ---
 
-### 4. Get User by ID (Dengan Token)
+### 4. Get User by ID (Dengan Token + Staff Only)
 **GET** `/users/{user}`
 
-Mendapatkan data user tertentu berdasarkan UUID (memerlukan token).
+Mendapatkan data user tertentu berdasarkan UUID. Endpoint ini memerlukan token dan role `hr` atau `superadmin`.
 
 #### Parameters
 - `user` (path, required): UUID user

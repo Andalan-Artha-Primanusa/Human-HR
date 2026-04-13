@@ -32,8 +32,8 @@ class JobController extends Controller
         $data = $request->validate([
             'division'   => ['nullable', 'string', 'max:100'],
             'site'       => ['nullable', 'string', 'max:50'], // site code
-            'company'    => ['nullable', 'string', 'max:50'], // company code
-            'company_id' => ['nullable', 'uuid', 'exists:companies,id'],
+            'company'    => ['nullable', 'string', 'max:50', 'prohibits:company_id'], // company code
+            'company_id' => ['nullable', 'uuid', 'exists:companies,id', 'prohibits:company'],
             'type'       => ['nullable', Rule::in(['intern', 'contract', 'fulltime'])], // enum DB
             'term'       => ['nullable', 'string', 'max:200'],
             'sort'       => ['nullable', Rule::in(['latest', 'oldest', 'title'])],
@@ -64,17 +64,16 @@ class JobController extends Controller
                 'updated_at'
             ])
             ->with([
-    'site:id,code,name,address,region',
-    'company:id,code,name',
-]);
+                'site:id,code,name,address,region',
+                'company:id,code,name',
+            ]);
 
         if (!$isAdminRoute) {
             $baseQuery->where('status', 'open');
         }
 
         if (!empty($data['division'])) {
-            // Model kamu sudah punya normalizer, tapi di sini tetap pakai raw string yang divalidasi
-            $baseQuery->where('division', $data['division']);
+            $baseQuery->inDivision($data['division']);
         }
 
         if (!empty($data['site'])) {
@@ -95,21 +94,7 @@ class JobController extends Controller
         }
 
         if (!empty($data['term'])) {
-            $term = trim($data['term']);
-            $like = '%' . $term . '%';
-            $baseQuery->where(function ($q) use ($like, $term) {
-                $q->where('title', 'like', $like)
-                    ->orWhere('description', 'like', $like)
-                    ->orWhere('code', 'like', $like)
-                    ->orWhere('keywords', 'like', $like);
-
-                // Opsional: cari dalam JSON "skills" (MySQL 5.7+/8 & MariaDB modern)
-                try {
-                    $q->orWhereJsonContains('skills', $term);
-                } catch (\Throwable $e) {
-                    // ignore jika engine tidak mendukung JSON contains
-                }
-            });
+            $baseQuery->search(trim($data['term']));
         }
 
         // 3) Sorting
@@ -149,6 +134,8 @@ class JobController extends Controller
      */
     public function show(Job $job)
     {
+        $this->authorize('view', $job);
+
         $job->loadMissing([
             'site:id,code,name,region,timezone,address',
             'company:id,code,name',
@@ -345,6 +332,13 @@ class JobController extends Controller
 
     private function resolveSiteId(?string $siteId, ?string $siteCode): string
     {
+        if ($siteId && $siteCode) {
+            $matched = Site::whereKey($siteId)->where('code', $siteCode)->exists();
+            abort_unless($matched, 422, 'site_id dan site_code tidak cocok.');
+
+            return $siteId;
+        }
+
         if ($siteId) return $siteId;
 
         if ($siteCode) {
@@ -359,6 +353,13 @@ class JobController extends Controller
     /** company_id opsional (boleh null). Jika ada company_code, di-resolve; jika keduanya null → return null. */
     private function resolveCompanyId(?string $companyId, ?string $companyCode): ?string
     {
+        if ($companyId && $companyCode) {
+            $matched = Company::whereKey($companyId)->where('code', $companyCode)->exists();
+            abort_unless($matched, 422, 'company_id dan company_code tidak cocok.');
+
+            return $companyId;
+        }
+
         if ($companyId) return $companyId;
 
         if ($companyCode) {
@@ -390,13 +391,27 @@ class JobController extends Controller
 
     private function checkUserCanUseSite(string $siteId): void
     {
-        // Jika punya relasi user->sites:
-        // abort_if(!Auth::user()->sites()->whereKey($siteId)->exists(), 403, 'Tidak berwenang memilih site ini.');
+        $user = Auth::user();
+        $relation = 'sites';
+
+        // Default: jika relasi sites tidak tersedia, jangan memblokir flow.
+        if (!$user || !method_exists($user, $relation)) {
+            return;
+        }
+
+        $sites = $user->{$relation}();
+        abort_if(!$sites->whereKey($siteId)->exists(), 403, 'Tidak berwenang memilih site ini.');
     }
 
     private function restrictSitesForUser($sitesQuery, $user)
     {
-        // return $sitesQuery->whereIn('id', $user->sites()->pluck('sites.id'));
+        $relation = 'sites';
+
+        if ($user && method_exists($user, $relation)) {
+            $sites = $user->{$relation}();
+            return $sitesQuery->whereIn('id', $sites->pluck('sites.id'));
+        }
+
         return $sitesQuery;
     }
 }

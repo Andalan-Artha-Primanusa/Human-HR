@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use App\Models\User;
 use Closure;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -28,6 +29,7 @@ class EnsureApiToken
         }
 
         $request->setUserResolver(fn () => $user);
+        Auth::setUser($user);
 
         return $next($request);
     }
