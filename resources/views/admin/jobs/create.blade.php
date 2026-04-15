@@ -29,8 +29,8 @@
   {{-- HEADER dua-tone --}}
   <section class="relative rounded-2xl border bg-white shadow-sm" style="border-color: {{ $BORD }}">
     <div class="relative h-20 sm:h-24 rounded-t-2xl overflow-hidden">
-      <div class="absolute inset-0 rounded-t-2xl" style="background: {{ $ACCENT }}"></div>
-      <div class="absolute inset-y-0 right-0 rounded-tr-2xl w-24 sm:w-36" style="background: {{ $ACCENT_DARK }}"></div>
+      <div class="absolute inset-0 rounded-t-2xl" style="background: linear-gradient(90deg, {{ $ACCENT }}, {{ $ACCENT_DARK }});"></div>
+      <div class="absolute inset-y-0 right-0 rounded-tr-2xl w-24 sm:w-36" style="background: linear-gradient(90deg, {{ $ACCENT_DARK }}, {{ $ACCENT }});"></div>
 
       <div class="relative h-full px-5 md:px-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div class="min-w-0">
@@ -46,7 +46,7 @@
              class="inline-flex items-center rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2"
              style="--tw-ring-color: {{ $ACCENT }}">Kembali</a>
           <button form="jobCreateForm"
-                  class="inline-flex items-center rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:opacity-95 focus:outline-none focus:ring-2 focus:ring-offset-2"
+                  class="inline-flex items-center rounded-lg bg-[linear-gradient(90deg,_#a77d52,_#8b5e3c)] px-4 py-2 text-sm font-semibold text-white hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-offset-2"
                   style="--tw-ring-color: {{ $ACCENT }}">Simpan</button>
         </div>
       </div>
@@ -54,13 +54,13 @@
   </section>
 
   {{-- Info unik per company --}}
-  <div class="rounded-xl bg-sky-50 text-sky-800 px-4 py-3 border text-sm" style="border-color: {{ $BORD }}">
+  <div class="rounded-xl bg-[linear-gradient(180deg,_#faf7f4,_#ffffff)] text-[#7a5236] px-4 py-3 border text-sm" style="border-color: {{ $BORD }}">
     Kode lowongan (<code class="font-mono">code</code>) unik <strong>per company</strong>. Kamu boleh kosongkan Company bila job tidak terikat company tertentu.
   </div>
 
   {{-- Error summary --}}
   @if ($errors->any())
-    <div class="rounded-xl bg-red-50 text-red-700 px-4 py-3 border" style="border-color: #fecaca">
+    <div class="rounded-xl bg-rose-50 text-rose-700 px-4 py-3 border" style="border-color: #fecaca">
       <div class="font-medium">Periksa kembali isian Anda:</div>
       <ul class="mt-1 list-disc list-inside text-sm">
         @foreach ($errors->all() as $error)
@@ -76,12 +76,12 @@
         method="POST" action="{{ route('admin.jobs.store') }}" novalidate>
     @csrf
 
-    <div class="p-5 grid gap-4 md:grid-cols-2">
+    <div class="p-6 md:p-7 grid gap-4 md:grid-cols-2 bg-[linear-gradient(180deg,_#faf7f4,_#ffffff)]">
       {{-- Code --}}
       <div>
         <label class="label">Code <span class="text-rose-600">*</span></label>
         <input class="input" name="code" value="{{ old('code') }}" required maxlength="50"
-               placeholder="Mis. MCH-OPR-01" style="--tw-ring-color: {{ $BLUE }}" autofocus>
+           placeholder="Mis. MCH-OPR-01" style="--tw-ring-color: {{ $ACCENT }}" autofocus>
         @error('code')<p class="text-xs text-rose-600 mt-1">{{ $message }}</p>@enderror
       </div>
 
@@ -89,7 +89,7 @@
       <div>
         <label class="label">Title <span class="text-rose-600">*</span></label>
         <input class="input" name="title" value="{{ old('title') }}" required maxlength="200"
-               placeholder="Operator Excavator" style="--tw-ring-color: {{ $BLUE }}">
+           placeholder="Operator Excavator" style="--tw-ring-color: {{ $ACCENT }}">
         @error('title')<p class="text-xs text-rose-600 mt-1">{{ $message }}</p>@enderror
       </div>
 
@@ -97,7 +97,7 @@
       <div>
         <label class="label">Division</label>
         @php $divisionOld = old('division'); @endphp
-        <select class="input" name="division" style="--tw-ring-color: {{ $BLUE }}">
+        <select class="input" name="division" style="--tw-ring-color: {{ $ACCENT }}">
           <option value="">— Pilih Division —</option>
           @foreach($divisions as $val => $label)
             <option value="{{ $val }}" @selected($divisionOld === $val)>{{ $label }}</option>
@@ -110,7 +110,7 @@
       <div>
         <label class="label">Level</label>
         @php $levelOld = old('level'); @endphp
-        <select class="input" name="level" style="--tw-ring-color: {{ $BLUE }}">
+        <select class="input" name="level" style="--tw-ring-color: {{ $ACCENT }}">
           <option value="">— Pilih Level —</option>
           @foreach($levels as $val => $label)
             <option value="{{ $val }}" @selected($levelOld === $val)>{{ $label }}</option>
@@ -122,7 +122,7 @@
       {{-- Site --}}
       <div>
         <label class="label">Site <span class="text-rose-600">*</span></label>
-        <select class="input" name="site_id" id="site_id" required style="--tw-ring-color: {{ $BLUE }}">
+        <select class="input" name="site_id" id="site_id" required style="--tw-ring-color: {{ $ACCENT }}">
           <option value="">— Pilih Site —</option>
           @forelse($sites as $s)
             <option value="{{ $s->id }}" data-code="{{ $s->code }}"
@@ -141,7 +141,7 @@
       <div>
         <label class="label">Employment Type <span class="text-rose-600">*</span></label>
         @php $et = old('employment_type', 'fulltime'); @endphp
-        <select class="input" name="employment_type" required style="--tw-ring-color: {{ $BLUE }}">
+        <select class="input" name="employment_type" required style="--tw-ring-color: {{ $ACCENT }}">
           <option value="fulltime" @selected($et==='fulltime')>Fulltime</option>
           <option value="contract" @selected($et==='contract')>Contract</option>
           <option value="intern"   @selected($et==='intern')>Intern</option>
@@ -153,11 +153,11 @@
       <div class="md:col-span-2 grid md:grid-cols-2 gap-4">
         <div>
           <label class="label">Company (opsional)</label>
-          <select class="input" name="company_id" id="company_id" style="--tw-ring-color: {{ $BLUE }}">
+          <select class="input" name="company_id" id="company_id" style="--tw-ring-color: {{ $ACCENT }}">
             <option value="">— Tidak ada company —</option>
             @forelse(($companies ?? []) as $c)
-              <option value="{{ $c->id }}" data-code="{{ $c->code }}"
-                @selected(old('company_id') == $c->id)>{{ $c->code }} — {{ $c->name }}</option>
+              <option value="{{ data_get($c, 'id') }}" data-code="{{ data_get($c, 'code') }}"
+                @selected((string)old('company_id') === (string)data_get($c, 'id'))>{{ data_get($c, 'code') }} — {{ data_get($c, 'name') }}</option>
             @empty
               <option value="" disabled>Tidak ada data company</option>
             @endforelse
@@ -167,7 +167,7 @@
         <div>
           <label class="label">Company Code (opsional)</label>
           <input class="input" name="company_code" id="company_code" value="{{ old('company_code') }}"
-                 maxlength="50" placeholder="mis. ACME" style="--tw-ring-color: {{ $BLUE }}">
+                 maxlength="50" placeholder="mis. ACME" style="--tw-ring-color: {{ $ACCENT }}">
           <p class="text-xs text-slate-500 mt-1">
             Isi salah satu: <code>Company</code> (dropdown) <em>atau</em> <code>Company Code</code>.
           </p>
@@ -179,7 +179,7 @@
       <div>
         <label class="label">Status <span class="align-top text-[10px] px-1 rounded bg-slate-100 text-slate-700">admin</span></label>
         @php $st = old('status', 'open'); @endphp
-        <select class="input" name="status" style="--tw-ring-color: {{ $BLUE }}">
+        <select class="input" name="status" style="--tw-ring-color: {{ $ACCENT }}">
           <option value="draft"  @selected($st==='draft')>Draft</option>
           <option value="open"   @selected($st==='open')>Open</option>
           <option value="closed" @selected($st==='closed')>Closed</option>
@@ -191,7 +191,7 @@
       <div>
         <label class="label">Openings</label>
         <input class="input" type="number" min="0" value="{{ old('openings', 0) }}" disabled
-               style="--tw-ring-color: {{ $BLUE }}">
+               style="--tw-ring-color: {{ $ACCENT }}">
         <p class="text-xs text-slate-500 mt-1">Nilai ini akan disinkron otomatis dari <em>Manpower Requirements</em>.</p>
       </div>
 
@@ -200,7 +200,7 @@
         <label class="label">Keywords (SEO internal)</label>
         <input class="input" name="keywords" id="keywords" maxlength="500"
                value="{{ old('keywords') }}" placeholder="contoh: excavator, operator alat berat, tambang"
-               style="--tw-ring-color: {{ $BLUE }}">
+               style="--tw-ring-color: {{ $ACCENT }}">
         <div class="mt-1 flex items-center justify-between text-xs text-slate-500">
           <span>Pisahkan dengan koma untuk memudahkan pencarian.</span>
           <span id="kw_count">0/500</span>
@@ -213,7 +213,7 @@
         <label class="label">Skills</label>
         <textarea class="input min-h-[84px]" name="skills" id="skills"
                   placeholder="Ketik skill, pisahkan dengan koma atau Enter. Contoh: Excavator A40, SIM B2 Umum, Basic Safety"
-                  style="--tw-ring-color: {{ $BLUE }}">{{ old('skills') }}</textarea>
+                  style="--tw-ring-color: {{ $ACCENT }}">{{ old('skills') }}</textarea>
         <p class="text-xs text-slate-500 mt-1">Boleh diisi: <em>comma-separated</em> atau satu skill per baris. Sistem akan menormalkan sebagai array.</p>
         @error('skills')<p class="text-xs text-rose-600 mt-1">{{ $message }}</p>@enderror
       </div>

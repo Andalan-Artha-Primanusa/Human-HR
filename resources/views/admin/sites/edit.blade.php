@@ -15,8 +15,8 @@
   {{-- HEADER dua-tone --}}
   <section class="relative rounded-2xl border bg-white shadow-sm" style="border-color: {{ $BORD }}">
     <div class="relative h-20 sm:h-24 rounded-t-2xl overflow-hidden">
-      <div class="absolute inset-0 rounded-t-2xl" style="background: {{ $BLUE }}"></div>
-      <div class="absolute inset-y-0 right-0 rounded-tr-2xl w-24 sm:w-36" style="background: {{ $RED }}"></div>
+      <div class="absolute inset-0 rounded-t-2xl" style="background: linear-gradient(135deg, {{ $ACCENT }}, {{ $ACCENT_DARK }})"></div>
+      <div class="absolute inset-y-0 right-0 rounded-tr-2xl w-24 sm:w-36" style="background: {{ $ACCENT_DARK }}"></div>
 
       <div class="relative h-full px-5 md:px-6 flex items-center justify-between gap-3">
         <div class="min-w-0">
@@ -27,7 +27,7 @@
         </div>
         <a href="{{ route('admin.sites.index') }}"
            class="hidden sm:inline-flex items-center rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2"
-           style="--tw-ring-color: {{ $BLUE }}">
+            style="--tw-ring-color: {{ $ACCENT }}">
           Kembali
         </a>
       </div>
@@ -67,7 +67,7 @@
           <label class="block text-sm font-medium text-slate-700">Nama <span class="text-rose-600">*</span></label>
           <input type="text" name="name" value="{{ old('name', $site->name) }}" required
                  class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2"
-                 style="--tw-ring-color: {{ $BLUE }}">
+               style="--tw-ring-color: {{ $ACCENT }}">
           @error('name') <div class="text-sm text-rose-600 mt-1">{{ $message }}</div> @enderror
         </div>
         <div>
@@ -75,7 +75,7 @@
           <input type="text" name="code" value="{{ old('code', $site->code) }}" required
                  placeholder="A–Z, 0–9, - _ ."
                  class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2"
-                 style="--tw-ring-color: {{ $BLUE }}">
+               style="--tw-ring-color: {{ $ACCENT }}">
           @error('code') <div class="text-sm text-rose-600 mt-1">{{ $message }}</div> @enderror
         </div>
       </div>
@@ -87,7 +87,7 @@
           <input type="text" name="region" value="{{ old('region', $site->region) }}"
                  placeholder="Mis. Kalimantan Timur"
                  class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2"
-                 style="--tw-ring-color: {{ $BLUE }}">
+               style="--tw-ring-color: {{ $ACCENT }}">
           @error('region') <div class="text-sm text-rose-600 mt-1">{{ $message }}</div> @enderror
         </div>
         <div>
@@ -95,7 +95,7 @@
           <input type="text" name="timezone" value="{{ old('timezone', $site->timezone) }}"
                  placeholder="Mis. Asia/Makassar"
                  class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2"
-                 style="--tw-ring-color: {{ $BLUE }}">
+               style="--tw-ring-color: {{ $ACCENT }}">
           @error('timezone') <div class="text-sm text-rose-600 mt-1">{{ $message }}</div> @enderror
         </div>
       </div>
@@ -106,7 +106,7 @@
         <input type="text" name="address" value="{{ old('address', $site->address) }}"
                placeholder="Jl. ..."
                class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2"
-               style="--tw-ring-color: {{ $BLUE }}">
+           style="--tw-ring-color: {{ $ACCENT }}">
         @error('address') <div class="text-sm text-rose-600 mt-1">{{ $message }}</div> @enderror
       </div>
 
@@ -116,7 +116,7 @@
           <label class="block text-sm font-medium text-slate-700">Meta (JSON, opsional)</label>
           <textarea name="meta_json" rows="6"
             class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 font-mono text-xs focus:outline-none focus:ring-2"
-            style="--tw-ring-color: {{ $BLUE }}"
+            style="--tw-ring-color: {{ $ACCENT }}"
             placeholder='{"timezone":"Asia/Makassar","address":"Jl. ..."}'>{{ old('meta_json', $site->meta ? json_encode($site->meta, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES) : '') }}</textarea>
           @if($errors->has('meta'))
             <div class="text-sm text-rose-600 mt-1">{{ $errors->first('meta') }}</div>
@@ -126,7 +126,7 @@
           <label class="block text-sm font-medium text-slate-700">Catatan (opsional)</label>
           <textarea name="notes" rows="6"
             class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2"
-            style="--tw-ring-color: {{ $BLUE }}"
+            style="--tw-ring-color: {{ $ACCENT }}"
             placeholder="Catatan internal untuk site">{{ old('notes', $site->notes) }}</textarea>
           @error('notes') <div class="text-sm text-rose-600 mt-1">{{ $message }}</div> @enderror
         </div>
@@ -136,20 +136,20 @@
       <div class="flex items-center justify-between pt-2">
         <div class="flex gap-2">
           <button type="submit"
-                  class="inline-flex items-center rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2"
-                  style="--tw-ring-color: {{ $BLUE }}">
+                  class="inline-flex items-center rounded-lg bg-[linear-gradient(90deg,_#a77d52,_#8b5e3c)] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-offset-2"
+                  style="--tw-ring-color: {{ $ACCENT }}">
             Simpan Perubahan
           </button>
           <a href="{{ route('admin.sites.index') }}"
              class="inline-flex items-center rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2"
-             style="--tw-ring-color: {{ $BLUE }}">
+             style="--tw-ring-color: {{ $ACCENT }}">
             Batal
           </a>
         </div>
         {{-- tombol hapus trigger form delete di bawah --}}
         <button type="submit" form="siteDeleteForm"
                 class="inline-flex items-center rounded-lg border border-rose-200 bg-white px-4 py-2 text-sm font-semibold text-rose-700 hover:bg-rose-50 focus:outline-none focus:ring-2 focus:ring-offset-2"
-                style="--tw-ring-color: {{ $BLUE }}"
+          style="--tw-ring-color: {{ $ACCENT }}"
                 onclick="return confirm('Hapus site ini? Aksi tidak dapat dibatalkan.');">
           Hapus
         </button>

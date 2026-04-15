@@ -42,33 +42,40 @@ $BORD = '#e5e7eb'; // slate-200
     </div>
 
     {{-- SEARCH FORM --}}
-    <form method="GET"
-      class="mt-3 md:mt-4 grid grid-cols-1 gap-2 md:grid-cols-[1fr_auto] px-3 py-3 md:px-4 md:py-4 shadow-sm"
-      role="search" aria-label="Cari kandidat" style="border-color: {{ $BORD }}">
-      <label class="sr-only" for="q">Cari</label>
-      <input
-        id="q"
-        type="text"
-        name="q"
-        value="{{ e($q ?? '') }}"
-        placeholder="Cari nama / email / HP / NIK"
-        class="w-full px-3 py-2 text-sm border rounded-lg input border-slate-200 focus:outline-none focus:ring-2"
-        style="--tw-ring-color: {{ $BORD }}"
-        autocomplete="off">
-        
-      <button type="submit"
-        class="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-lg hover:opacity-95 focus:outline-none focus:ring-2 focus:ring-offset-2 md:shrink-0"
-        style="background-color:#0f172a; border:1px solid #0f172a; --tw-ring-color:#0f172a;"
-        aria-label="Filter">
-        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <circle cx="11" cy="11" r="7" stroke="#ffffff" stroke-width="2"/>
-          <path d="M21 21l-3.5-3.5" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
-        </svg>
-        <span>Filter</span>
-      </button>
+    <div class="p-6 border-t md:p-7 bg-[linear-gradient(180deg,_#faf7f4,_#ffffff)]" style="border-color: {{ $BORD }}">
+      <form method="GET"
+        class="grid grid-cols-1 gap-4 md:grid-cols-[1fr_auto_auto] md:items-end"
+        role="search" aria-label="Cari kandidat">
+        <label class="sr-only" for="q">Cari</label>
+        <input
+          id="q"
+          type="text"
+          name="q"
+          value="{{ e($q ?? '') }}"
+          placeholder="Cari nama / email / HP / NIK"
+          class="w-full px-4 py-3 text-sm bg-white border shadow-sm rounded-xl input border-slate-200 focus:outline-none focus:ring-2"
+          style="--tw-ring-color: {{ $ACCENT }}"
+          autocomplete="off">
 
+        <button type="submit"
+          class="inline-flex items-center justify-center gap-2 px-5 py-3 text-sm font-semibold text-white rounded-xl bg-[linear-gradient(90deg,_#a77d52,_#8b5e3c)] shadow-sm hover:brightness-105 focus:outline-none focus:ring-2"
+          style="--tw-ring-color: {{ $ACCENT }}"
+          aria-label="Filter">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <circle cx="11" cy="11" r="7" stroke="#ffffff" stroke-width="2"/>
+            <path d="M21 21l-3.5-3.5" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <span>Filter</span>
+        </button>
 
-    </form>
+        @if(filled($q ?? ''))
+          <a href="{{ route('admin.candidates.index') }}"
+             class="inline-flex items-center justify-center px-5 py-3 text-sm bg-white border shadow-sm rounded-xl border-slate-200 hover:bg-slate-50">
+            Reset
+          </a>
+        @endif
+      </form>
+    </div>
   </section>
 
   {{-- TABEL (footer dipisah; tidak nempel) --}}
@@ -76,7 +83,7 @@ $BORD = '#e5e7eb'; // slate-200
     @if($profiles->count())
     <div class="overflow-x-auto">
       <table class="min-w-full text-sm">
-        <thead class="bg-slate-50 text-slate-600">
+        <thead class="text-white bg-[linear-gradient(90deg,_#a77d52,_#8b5e3c)]">
           <tr>
             <th class="px-4 py-3 text-left">Nama</th>
             <th class="px-4 py-3 text-left">Email</th>
@@ -88,7 +95,7 @@ $BORD = '#e5e7eb'; // slate-200
         </thead>
         <tbody class="divide-y divide-slate-100">
           @foreach($profiles as $p)
-          <tr class="hover:bg-slate-50/60">
+          <tr class="transition hover:bg-[#f8f5f2]">
             <td class="px-4 py-3">
               <div class="font-medium text-slate-900">{{ e($p->full_name) }}</div>
               <div class="text-xs text-slate-500">Updated: {{ e(optional($p->updated_at)->format('d M Y H:i')) }}</div>
@@ -112,7 +119,7 @@ $BORD = '#e5e7eb'; // slate-200
     </div>
     @else
     {{-- EMPTY STATE --}}
-    <div class="p-10 text-center">
+    <div class="p-10 text-center border border-dashed rounded-2xl border-slate-300 m-6">
       <div class="grid w-12 h-12 mx-auto mb-3 rounded-2xl bg-slate-100 place-content-center text-slate-400">
         <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" d="M9 7V6a3 3 0 1 1 6 0v1M5 11h14m-1 8H6a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2Z" />
@@ -152,11 +159,10 @@ $BORD = '#e5e7eb'; // slate-200
       };
       @endphp
 
-      <section class="p-4 bg-white border shadow-sm rounded-2xl border-slate-200">
+      <section class="p-4 mt-4 bg-white border shadow-sm rounded-2xl border-slate-200">
         <div class="flex items-center justify-between text-sm">
           <div class="flex items-center gap-4 text-slate-700">
             <span>Menampilkan <span class="font-semibold text-slate-900">{{ $from }}–{{ $to }}</span> dari <span class="font-semibold text-slate-900">{{ $total }}</span></span>
-            <span class="hidden sm:inline">Showing <span class="font-semibold text-slate-900">{{ $from }}</span> to <span class="font-semibold text-slate-900">{{ $to }}</span> of <span class="font-semibold text-slate-900">{{ $total }}</span> results</span>
           </div>
 
           <nav aria-label="Pagination">

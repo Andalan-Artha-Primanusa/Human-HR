@@ -22,69 +22,70 @@
 <div class="mx-auto w-full max-w-[1440px] px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
   {{-- HEADER --}}
-  <section class="overflow-hidden rounded-2xl border bg-white shadow-sm" style="border-color: {{ $BORD }}">
-    <div class="relative h-20 sm:h-24 rounded-t-2xl overflow-hidden">
+  <section class="overflow-hidden bg-white border shadow-sm rounded-2xl" style="border-color: {{ $BORD }}">
+    <div class="relative h-20 overflow-hidden sm:h-24 rounded-t-2xl">
       <div class="absolute inset-0 rounded-t-2xl" style="background: linear-gradient(90deg, {{ $PRIMARY }}, {{ $SECOND }});"></div>
-      <div class="absolute inset-y-0 right-0 rounded-tr-2xl w-24 sm:w-36" style="background: linear-gradient(90deg, {{ $SECOND }}, {{ $PRIMARY }});"></div>
+      <div class="absolute inset-y-0 right-0 w-24 rounded-tr-2xl sm:w-36" style="background: linear-gradient(90deg, {{ $SECOND }}, {{ $PRIMARY }});"></div>
 
-      <div class="relative h-full px-5 md:px-6 flex items-center text-white">
+      <div class="relative flex items-center h-full px-5 text-white md:px-6">
         <div class="min-w-0">
-          <h1 class="text-2xl sm:text-3xl font-semibold tracking-tight text-white">Audit Logs</h1>
+          <h1 class="text-2xl font-semibold tracking-tight text-white sm:text-3xl">Audit Logs</h1>
           <p class="text-xs sm:text-sm text-white/90">Jejak perubahan data & aktivitas pengguna.</p>
         </div>
       </div>
     </div>
 
     {{-- FILTER --}}
+    <div class="p-6 border-t md:p-7 bg-[linear-gradient(180deg,_#faf7f4,_#ffffff)]" style="border-color: {{ $BORD }}">
     <form method="GET"
-      class="mt-3 md:mt-4 grid grid-cols-1 gap-2 md:grid-cols-6 px-3 py-3 md:px-4 md:py-4 shadow-sm"
-      role="search" aria-label="Filter Audit Logs"
-      style="border-color: {{ $BORD }}">
+      class="grid grid-cols-1 gap-3 md:grid-cols-6"
+      role="search" aria-label="Filter Audit Logs">
 
-      <input class="rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2"
+      <input class="px-3 py-2 text-sm border rounded-lg border-slate-200 focus:outline-none focus:ring-2"
         style="--tw-ring-color: {{ $PRIMARY }}"
         type="text" name="q" placeholder="Search...">
 
-      <input class="rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2"
+      <input class="px-3 py-2 text-sm border rounded-lg border-slate-200 focus:outline-none focus:ring-2"
         style="--tw-ring-color: {{ $PRIMARY }}"
         type="text" name="event" placeholder="Event">
 
-      <input class="rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2"
+      <input class="px-3 py-2 text-sm border rounded-lg border-slate-200 focus:outline-none focus:ring-2"
         style="--tw-ring-color: {{ $PRIMARY }}"
         type="text" name="user_id" placeholder="User ID">
 
-      <input class="rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2"
+      <input class="px-3 py-2 text-sm border rounded-lg border-slate-200 focus:outline-none focus:ring-2"
         style="--tw-ring-color: {{ $PRIMARY }}"
         type="text" name="target_type" placeholder="Target">
 
-      <input class="rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2"
+      <input class="px-3 py-2 text-sm border rounded-lg border-slate-200 focus:outline-none focus:ring-2"
         style="--tw-ring-color: {{ $PRIMARY }}"
         type="date" name="from">
 
-      <input class="rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2"
+      <input class="px-3 py-2 text-sm border rounded-lg border-slate-200 focus:outline-none focus:ring-2"
         style="--tw-ring-color: {{ $PRIMARY }}"
         type="date" name="to">
 
-      <div class="md:col-span-6 flex gap-2">
+      <div class="flex gap-2 md:col-span-6">
         <button type="submit"
-          class="inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-white hover:opacity-95 focus:outline-none focus:ring-2 focus:ring-offset-2"
-          style="background: {{ $PRIMARY }}; --tw-ring-color: {{ $PRIMARY }};">
+          class="inline-flex items-center justify-center gap-2 px-5 py-3 text-sm font-semibold text-white rounded-xl bg-[linear-gradient(90deg,_#a77d52,_#8b5e3c)] shadow-sm hover:brightness-105 focus:outline-none focus:ring-2"
+          style="--tw-ring-color: {{ $PRIMARY }};">
           Filter
         </button>
 
         <a href="#"
-          class="px-4 py-2 rounded-lg border border-slate-200 text-sm hover:bg-slate-50">
+          class="inline-flex items-center justify-center px-5 py-3 text-sm bg-white border shadow-sm rounded-xl border-slate-200 hover:bg-slate-50">
           Export CSV
         </a>
       </div>
     </form>
+    </div>
   </section>
 
   {{-- TABLE --}}
-  <section class="rounded-2xl border bg-white shadow-sm" style="border-color: {{ $BORD }}">
+  <section class="bg-white border shadow-sm rounded-2xl" style="border-color: {{ $BORD }}">
     <div class="overflow-x-auto">
       <table class="min-w-full text-sm">
-        <thead class="bg-gray-50">
+        <thead class="text-white bg-[linear-gradient(90deg,_#a77d52,_#8b5e3c)]">
           <tr>
             <th class="px-4 py-3 text-left">Time</th>
             <th class="px-4 py-3 text-left">Event</th>
@@ -95,15 +96,15 @@
           </tr>
         </thead>
 
-        <tbody class="divide-y">
+        <tbody class="divide-y divide-slate-100">
           @forelse ($items as $it)
-          <tr class="hover:bg-gray-50">
+          <tr class="transition hover:bg-[#f8f5f2]">
             <td class="px-4 py-3">{{ $it->created_at }}</td>
             <td class="px-4 py-3">{{ $it->event }}</td>
             <td class="px-4 py-3">{{ $it->user->name ?? '-' }}</td>
             <td class="px-4 py-3">
               <div>{{ $it->target_type }}</div>
-              <div class="text-xs text-gray-500">{{ $it->target_id }}</div>
+              <div class="text-xs text-slate-500">{{ $it->target_id }}</div>
             </td>
             <td class="px-4 py-3">{{ $it->ip }}</td>
             <td class="px-4 py-3 text-right">
@@ -116,7 +117,12 @@
           </tr>
           @empty
           <tr>
-            <td colspan="6" class="text-center py-6 text-gray-500">No data</td>
+            <td colspan="6" class="p-6">
+              <div class="p-10 text-center border border-dashed rounded-2xl border-slate-300">
+                <div class="font-medium text-slate-700">Belum ada data.</div>
+                <div class="mt-1 text-sm text-slate-500">Coba ubah filter pencarian.</div>
+              </div>
+            </td>
           </tr>
           @endforelse
         </tbody>

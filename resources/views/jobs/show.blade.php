@@ -5,8 +5,8 @@
   use Illuminate\Support\Carbon;
 
   // Palet warna utama (disamakan ke brown theme)
-  $BLUE  = '#a77d52'; // accent brown
-  $RED   = '#8b5e3c'; // accent dark brown
+  $ACCENT = '#a77d52'; // accent brown
+  $ACCENT_DARK = '#8b5e3c'; // accent dark brown
 
   // ==== SANITIZER (whitelist aman untuk konten dari editor) ====
   $sanitize = function ($v) {
@@ -191,7 +191,7 @@
   {{-- BREADCRUMB --}}
   <nav class="mb-4" aria-label="Breadcrumb">
     <div class="relative rounded-xl border border-slate-200 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 shadow-sm">
-      <div class="w-full h-1 overflow-hidden rounded-t-xl"><div class="w-full h-full" style="background: linear-gradient(90deg, {{ $RED }} 0%, {{ $BLUE }} 100%);"></div></div>
+      <div class="w-full h-1 overflow-hidden rounded-t-xl"><div class="w-full h-full" style="background: linear-gradient(90deg, {{ $ACCENT_DARK }} 0%, {{ $ACCENT }} 100%);"></div></div>
       <ol class="flex items-center gap-2 px-3 py-2 overflow-x-auto text-sm text-slate-600" itemscope itemtype="https://schema.org/BreadcrumbList">
         <li class="flex items-center gap-2 shrink-0" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
           <a href="{{ route('dashboard') }}" itemprop="item" class="inline-flex items-center gap-1 px-2 py-1 rounded-lg group hover:bg-slate-50">
@@ -227,7 +227,7 @@
 
   {{-- HEADER --}}
   <div class="overflow-hidden bg-white border shadow-sm rounded-2xl border-slate-200">
-    <div class="flex w-full h-2"><div class="flex-1" style="background: {{ $BLUE }}"></div><div class="w-32" style="background: {{ $RED }}"></div></div>
+    <div class="flex w-full h-2"><div class="flex-1" style="background: {{ $ACCENT }}"></div><div class="w-32" style="background: {{ $ACCENT_DARK }}"></div></div>
 
     <div class="p-5 md:p-6">
       <div class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
@@ -296,22 +296,22 @@
             @if(($job->status ?? 'draft') === 'open' && !$myApp)
               <form method="POST" action="{{ route('applications.store',$job) }}">@csrf
                 <button class="px-4 py-2 text-sm font-semibold text-white rounded-lg"
-                        style="background: linear-gradient(90deg, {{ $BLUE }} 0%, {{ $RED }} 100%);">
+                        style="background: linear-gradient(90deg, {{ $ACCENT }} 0%, {{ $ACCENT_DARK }} 100%);">
                   Lamar Sekarang
                 </button>
               </form>
             @elseif($myApp)
               <a href="{{ route('applications.mine') }}"
                  class="px-4 py-2 text-sm font-semibold text-white rounded-lg"
-                 style="background: {{ $RED }}">
+                 style="background: {{ $ACCENT_DARK }}">
                 Lihat Progres
               </a>
             @else
-              <button disabled class="px-4 py-2 text-sm font-semibold text-white rounded-lg opacity-60" style="background: {{ $RED }}">Tutup</button>
+              <button disabled class="px-4 py-2 text-sm font-semibold text-white rounded-lg opacity-60" style="background: {{ $ACCENT_DARK }}">Tutup</button>
             @endif
           @else
             <a class="px-4 py-2 text-sm font-semibold text-white rounded-lg"
-               style="background: linear-gradient(90deg, {{ $BLUE }} 0%, {{ $RED }} 100%);"
+               style="background: linear-gradient(90deg, {{ $ACCENT }} 0%, {{ $ACCENT_DARK }} 100%);"
                href="{{ route('login') }}">
               Login untuk Melamar
             </a>
@@ -581,7 +581,7 @@
                   @csrf
                   <input type="hidden" name="to" value="{{ $canNext ? e($nextKey) : '' }}">
                   <button type="submit" class="rounded-lg border border-slate-200 px-2.5 py-1.5 text-white disabled:opacity-40"
-                          style="background: {{ $BLUE }}"
+                          style="background: {{ $ACCENT }}"
                           {{ $canNext ? '' : 'disabled' }}
                           title="{{ $canNext ? 'Lanjut ke: '.($pretty[$nextKey] ?? '—') : 'Sudah tahap terakhir' }}">
                     <svg class="w-4 h-4" aria-hidden="true"><use href="#i-chevron-right"/></svg>
@@ -603,7 +603,7 @@
                 @if(($job->status ?? 'draft')==='open')
                 <form method="POST" action="{{ route('applications.store',$job) }}" class="mt-3">@csrf
                   <button class="w-full px-3 py-2 text-sm font-semibold text-white rounded-lg"
-                          style="background: linear-gradient(90deg, {{ $BLUE }} 0%, {{ $RED }} 100%);">
+                          style="background: linear-gradient(90deg, {{ $ACCENT }} 0%, {{ $ACCENT_DARK }} 100%);">
                     Lamar Sekarang
                   </button>
                 </form>
@@ -614,7 +614,7 @@
               <div class="mt-3">
                 <div class="flex items-center justify-between text-xs text-slate-600"><span>Progress</span><span>{{ $pct }}%</span></div>
                 <div class="w-full h-2 mt-1 overflow-hidden rounded-full bg-slate-100">
-                  <div class="h-full rounded-full" style="width: {{ $pct }}%; background: {{ in_array($overall,['rejected','not_qualified'],true) ? $RED : $BLUE }}"></div>
+                  <div class="h-full rounded-full" style="width: {{ $pct }}%; background: {{ in_array($overall,['rejected','not_qualified'],true) ? $ACCENT_DARK : $ACCENT }}"></div>
                 </div>
               </div>
 
@@ -626,7 +626,7 @@
                       $isNow  = ($key === $currKey) && !in_array($overall,['rejected','not_qualified'],true);
                       $done   = in_array($key,$visited,true) && !$isNow;
                       $muted  = !$done && !$isNow;
-                      $dotBg  = $done ? '#16a34a' : ($isNow ? $BLUE : '#f59e0b');
+                      $dotBg  = $done ? '#16a34a' : ($isNow ? $ACCENT : '#f59e0b');
 
                       $st = $stageMap[$key] ?? null;
                       $ts = $done ? ($st->updated_at ?? $st->created_at ?? null) : ($isNow ? ($st->created_at ?? null) : null);
@@ -681,7 +681,7 @@
                       $rejectBy   = $latestStage ? $actorName($latestStage) : ($lastChangedBy ?? null);
                     @endphp
                     <div class="relative pr-12">
-                      <span class="absolute right-0 grid w-4 h-4 rounded-full top-1 place-items-center ring-4 ring-white" style="background: {{ $RED }}"></span>
+                      <span class="absolute right-0 grid w-4 h-4 rounded-full top-1 place-items-center ring-4 ring-white" style="background: {{ $ACCENT_DARK }}"></span>
                       <div class="flex items-start justify-between gap-3">
                         <div class="min-w-0">
                           <div class="text-sm font-medium text-slate-900">Keputusan</div>
