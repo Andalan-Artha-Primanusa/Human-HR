@@ -13,9 +13,9 @@
     tailwind.config = {
       theme: {
         extend: {
-          fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui'] },
+          fontFamily: { sans: ['Poppins', 'ui-sans-serif', 'system-ui'] },
           colors: {
-            brand: { 50:'#eff6ff',100:'#dbeafe',200:'#bfdbfe',300:'#93c5fd',400:'#60a5fa',500:'#3b82f6',600:'#2563eb',700:'#1d4ed8',800:'#1e40af',900:'#1e3a8a' }
+            brand: { 50:'#faf5ef',100:'#f3e8db',200:'#e7d3bd',300:'#d9bc9d',400:'#c79d75',500:'#b4865d',600:'#a77d52',700:'#8b5e3c',800:'#754e34',900:'#5f412d' }
           }
         }
       }
@@ -24,7 +24,18 @@
   <style>
     html,body{height:100%}
     [x-cloak]{display:none!important}
-    .card{border:1px solid #e5e7eb}
+    .card{border:1px solid #e2d6c8; background:#fff; box-shadow:0 8px 24px -18px rgba(80,58,38,.35)}
+    main input, main select, main textarea{
+      border-color:#dccfbe!important;
+      border-radius:.75rem!important;
+      background:#fff;
+      transition:border-color .15s ease, box-shadow .15s ease;
+    }
+    main input:focus, main select:focus, main textarea:focus{
+      outline:none;
+      border-color:#a77d52!important;
+      box-shadow:0 0 0 3px rgba(167,125,82,.18);
+    }
   </style>
   {{-- Alpine --}}
   <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -46,12 +57,12 @@
     });
   </script>
 </head>
-<body class="min-h-screen bg-slate-50 text-slate-900">
+<body class="min-h-screen text-slate-900 bg-[linear-gradient(180deg,_#f8f5f1,_#fefcf9)]">
 
   {{-- HEADER --}}
-  <header class="relative isolate overflow-hidden bg-gradient-to-r from-brand-700 via-brand-600 to-indigo-600">
+  <header class="relative overflow-hidden isolate bg-gradient-to-r from-brand-700 via-brand-600 to-brand-800">
     <div class="absolute inset-0 opacity-10">
-      <svg class="h-full w-full" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" viewBox="0 0 1200 800" fill="none">
+      <svg class="w-full h-full" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" viewBox="0 0 1200 800" fill="none">
         <g opacity=".7">
           <circle cx="100" cy="120" r="80" stroke="white"/>
           <circle cx="300" cy="60" r="40" stroke="white"/>
@@ -60,42 +71,42 @@
         </g>
       </svg>
     </div>
-    <div class="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8 relative">
+    <div class="relative max-w-6xl px-4 py-8 mx-auto sm:px-6 lg:px-8">
       <div class="flex flex-wrap items-center justify-between gap-3 text-white">
         <div class="min-w-0">
           <div class="flex items-center gap-3">
-            <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 ring-1 ring-white/20">
-              <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <span class="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-white/10 ring-1 ring-white/20">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M3 7h18M5 7v10a2 2 0 002 2h10a2 2 0 002-2V7M9 7V5a3 3 0 013-3h0a3 3 0 013 3v2"/>
               </svg>
             </span>
             <div>
-              <h1 class="truncate text-2xl font-semibold">Lengkapi Data Kandidat</h1>
+              <h1 class="text-2xl font-semibold truncate">Lengkapi Data Kandidat</h1>
               <p class="mt-0.5 text-sm opacity-90">Posisi: <span class="font-medium">{{ $job->title }}</span></p>
             </div>
           </div>
         </div>
         <div class="flex items-center gap-2">
-          <a href="{{ route('jobs.show',$job) }}" class="rounded-lg bg-white/10 px-3 py-2 text-sm font-medium ring-1 ring-inset ring-white/30 hover:bg-white/15">Kembali ke Lowongan</a>
+          <a href="{{ route('jobs.show',$job) }}" class="px-3 py-2 text-sm font-medium rounded-lg bg-white/10 ring-1 ring-inset ring-white/30 hover:bg-white/15">Kembali ke Lowongan</a>
         </div>
       </div>
     </div>
   </header>
 
   {{-- MAIN --}}
-  <main x-data="wizard()" x-init="init()" class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-8">
+  <main x-data="wizard()" x-init="init()" class="max-w-6xl px-4 py-8 mx-auto sm:px-6 lg:px-8">
 
     {{-- Alerts --}}
     @if(session('info'))
-      <div class="mb-4 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-blue-800">{{ session('info') }}</div>
+      <div class="px-4 py-3 mb-4 border rounded-xl border-brand-200 bg-brand-50 text-brand-800">{{ session('info') }}</div>
     @endif
     @if(session('success'))
-      <div class="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-emerald-700">{{ session('success') }}</div>
+      <div class="px-4 py-3 mb-4 border rounded-xl border-brand-200 bg-brand-50 text-brand-800">{{ session('success') }}</div>
     @endif
     @if($errors->any())
-      <div class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-red-700">
-        <div class="font-semibold mb-1">Periksa kembali isian kamu:</div>
-        <ul class="list-disc pl-5 text-sm">
+      <div class="px-4 py-3 mb-4 border rounded-xl border-brand-200 bg-[#fbf3ea] text-brand-900">
+        <div class="mb-1 font-semibold">Periksa kembali isian kamu:</div>
+        <ul class="pl-5 text-sm list-disc">
           @foreach($errors->all() as $e)
             <li>{{ $e }}</li>
           @endforeach
@@ -106,11 +117,11 @@
     {{-- Stepper --}}
     <div class="mb-6">
       <ol class="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <li class="card rounded-2xl bg-white p-4 shadow-sm" :class="step>=1 ? 'ring-1 ring-brand-200' : ''">
+        <li class="p-4 bg-white shadow-sm card rounded-2xl" :class="step>=1 ? 'ring-1 ring-brand-200' : ''">
           <div class="flex items-start gap-3">
-            <div class="mt-1 grid h-8 w-8 place-items-center rounded-full" :class="step>1 ? 'bg-emerald-500 text-white' : 'bg-brand-600 text-white'">
+            <div class="grid w-8 h-8 mt-1 rounded-full place-items-center" :class="step>1 ? 'bg-brand-700 text-white' : 'bg-brand-600 text-white'">
               <template x-if="step>1">
-                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
               </template>
               <template x-if="step<=1"><span class="font-semibold">1</span></template>
             </div>
@@ -120,11 +131,11 @@
             </div>
           </div>
         </li>
-        <li class="card rounded-2xl bg-white p-4 shadow-sm" :class="step>=2 ? 'ring-1 ring-brand-200' : ''">
+        <li class="p-4 bg-white shadow-sm card rounded-2xl" :class="step>=2 ? 'ring-1 ring-brand-200' : ''">
           <div class="flex items-start gap-3">
-            <div class="mt-1 grid h-8 w-8 place-items-center rounded-full" :class="step>2 ? 'bg-emerald-500 text-white' : (step==2 ? 'bg-brand-600 text-white' : 'bg-slate-200 text-slate-600')">
+            <div class="grid w-8 h-8 mt-1 rounded-full place-items-center" :class="step>2 ? 'bg-brand-700 text-white' : (step==2 ? 'bg-brand-600 text-white' : 'bg-slate-200 text-slate-600')">
               <template x-if="step>2">
-                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
               </template>
               <template x-if="step<=2"><span class="font-semibold">2</span></template>
             </div>
@@ -134,9 +145,9 @@
             </div>
           </div>
         </li>
-        <li class="card rounded-2xl bg-white p-4 shadow-sm" :class="step>=3 ? 'ring-1 ring-brand-200' : ''">
+        <li class="p-4 bg-white shadow-sm card rounded-2xl" :class="step>=3 ? 'ring-1 ring-brand-200' : ''">
           <div class="flex items-start gap-3">
-            <div class="mt-1 grid h-8 w-8 place-items-center rounded-full" :class="step==3 ? 'bg-brand-600 text-white' : 'bg-slate-200 text-slate-600'">
+            <div class="grid w-8 h-8 mt-1 rounded-full place-items-center" :class="step==3 ? 'bg-brand-600 text-white' : 'bg-slate-200 text-slate-600'">
               <span class="font-semibold">3</span>
             </div>
             <div>
@@ -146,8 +157,8 @@
           </div>
         </li>
       </ol>
-      <div class="mt-4 h-2 w-full overflow-hidden rounded-full bg-slate-200">
-        <div class="h-full bg-brand-600 transition-all" :style="`width: ${progress}%`"></div>
+      <div class="w-full h-2 mt-4 overflow-hidden rounded-full bg-slate-200">
+        <div class="h-full transition-all bg-brand-600" :style="`width: ${progress}%`"></div>
       </div>
     </div>
 
@@ -161,23 +172,23 @@
 
       {{-- STEP 1 --}}
       <section x-show="step===1" x-cloak class="space-y-6">
-        <div class="card rounded-2xl bg-white p-5 shadow-sm">
+        <div class="p-5 bg-white shadow-sm card rounded-2xl">
           <h2 class="flex items-center gap-2 text-lg font-semibold">
-            <svg class="h-5 w-5 text-brand-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5.121 17.804A13.937 13.937 0 0112 15c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <svg class="w-5 h-5 text-brand-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5.121 17.804A13.937 13.937 0 0112 15c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round"/></svg>
             Data Pribadi
           </h2>
-          <div class="mt-4 grid gap-4 sm:grid-cols-2">
+          <div class="grid gap-4 mt-4 sm:grid-cols-2">
             <div>
               <label class="text-sm text-slate-600">Nama Lengkap <span class="text-red-600">*</span></label>
-              <input required name="full_name" value="{{ old('full_name',$profile->full_name) }}" class="mt-1 w-full rounded-lg border px-3 py-2">
+              <input required name="full_name" value="{{ old('full_name',$profile->full_name) }}" class="w-full px-3 py-2 mt-1 border rounded-lg">
             </div>
             <div>
               <label class="text-sm text-slate-600">Nama Panggilan</label>
-              <input name="nickname" value="{{ old('nickname',$profile->nickname) }}" class="mt-1 w-full rounded-lg border px-3 py-2">
+              <input name="nickname" value="{{ old('nickname',$profile->nickname) }}" class="w-full px-3 py-2 mt-1 border rounded-lg">
             </div>
             <div>
               <label class="text-sm text-slate-600">Jenis Kelamin <span class="text-red-600">*</span></label>
-              <select required name="gender" class="mt-1 w-full rounded-lg border px-3 py-2">
+              <select required name="gender" class="w-full px-3 py-2 mt-1 border rounded-lg">
                 <option value="">—</option>
                 <option value="male"   @selected(old('gender',$profile->gender)==='male')>Laki-laki</option>
                 <option value="female" @selected(old('gender',$profile->gender)==='female')>Perempuan</option>
@@ -185,39 +196,39 @@
             </div>
             <div>
               <label class="text-sm text-slate-600">Usia <span class="text-red-600">*</span></label>
-              <input required type="number" min="15" max="80" name="age" value="{{ old('age',$profile->age) }}" class="mt-1 w-full rounded-lg border px-3 py-2">
+              <input required type="number" min="15" max="80" name="age" value="{{ old('age',$profile->age) }}" class="w-full px-3 py-2 mt-1 border rounded-lg">
             </div>
             <div>
               <label class="text-sm text-slate-600">Tempat Lahir <span class="text-red-600">*</span></label>
-              <input required name="birthplace" value="{{ old('birthplace',$profile->birthplace) }}" class="mt-1 w-full rounded-lg border px-3 py-2">
+              <input required name="birthplace" value="{{ old('birthplace',$profile->birthplace) }}" class="w-full px-3 py-2 mt-1 border rounded-lg">
             </div>
             <div>
               <label class="text-sm text-slate-600">Tanggal Lahir <span class="text-red-600">*</span></label>
-              <input required type="date" name="birthdate" value="{{ old('birthdate', optional($profile->birthdate)->format('Y-m-d')) }}" class="mt-1 w-full rounded-lg border px-3 py-2">
+              <input required type="date" name="birthdate" value="{{ old('birthdate', optional($profile->birthdate)->format('Y-m-d')) }}" class="w-full px-3 py-2 mt-1 border rounded-lg">
             </div>
             <div>
               <label class="text-sm text-slate-600">NIK KTP <span class="text-red-600">*</span></label>
-              <input required name="nik" value="{{ old('nik',$profile->nik) }}" maxlength="16" class="mt-1 w-full rounded-lg border px-3 py-2">
+              <input required name="nik" value="{{ old('nik',$profile->nik) }}" maxlength="16" class="w-full px-3 py-2 mt-1 border rounded-lg">
             </div>
             <div>
               <label class="text-sm text-slate-600">Email <span class="text-red-600">*</span></label>
-              <input required type="email" name="email" value="{{ old('email',$profile->email ?? auth()->user()->email) }}" class="mt-1 w-full rounded-lg border px-3 py-2">
+              <input required type="email" name="email" value="{{ old('email',$profile->email ?? auth()->user()->email) }}" class="w-full px-3 py-2 mt-1 border rounded-lg">
             </div>
             <div>
               <label class="text-sm text-slate-600">Nomor HP <span class="text-red-600">*</span></label>
-              <input required name="phone" value="{{ old('phone',$profile->phone) }}" class="mt-1 w-full rounded-lg border px-3 py-2">
+              <input required name="phone" value="{{ old('phone',$profile->phone) }}" class="w-full px-3 py-2 mt-1 border rounded-lg">
             </div>
             <div>
               <label class="text-sm text-slate-600">Nomor WhatsApp</label>
-              <input name="whatsapp" value="{{ old('whatsapp',$profile->whatsapp) }}" class="mt-1 w-full rounded-lg border px-3 py-2">
+              <input name="whatsapp" value="{{ old('whatsapp',$profile->whatsapp) }}" class="w-full px-3 py-2 mt-1 border rounded-lg">
             </div>
           </div>
 
-          <div class="mt-4 grid gap-4 sm:grid-cols-3">
+          <div class="grid gap-4 mt-4 sm:grid-cols-3">
             <div>
               <label class="text-sm text-slate-600">Pendidikan Terakhir <span class="text-red-600">*</span></label>
               @php $ed = old('last_education',$profile->last_education); @endphp
-              <select required name="last_education" class="mt-1 w-full rounded-lg border px-3 py-2">
+              <select required name="last_education" class="w-full px-3 py-2 mt-1 border rounded-lg">
                 <option value="">—</option>
                 @foreach(['SD','SMP','SMA_SMK','D1','D2','D3','D4','S1','S2','S3','LAINNYA'] as $e)
                   <option value="{{ $e }}" @selected($ed===$e)>{{ $e }}</option>
@@ -226,36 +237,36 @@
             </div>
             <div>
               <label class="text-sm text-slate-600">Jurusan <span class="text-red-600">*</span></label>
-              <input required name="education_major" value="{{ old('education_major',$profile->education_major) }}" class="mt-1 w-full rounded-lg border px-3 py-2">
+              <input required name="education_major" value="{{ old('education_major',$profile->education_major) }}" class="w-full px-3 py-2 mt-1 border rounded-lg">
             </div>
             <div>
               <label class="text-sm text-slate-600">Sekolah/Kampus <span class="text-red-600">*</span></label>
-              <input required name="education_school" value="{{ old('education_school',$profile->education_school) }}" class="mt-1 w-full rounded-lg border px-3 py-2">
+              <input required name="education_school" value="{{ old('education_school',$profile->education_school) }}" class="w-full px-3 py-2 mt-1 border rounded-lg">
             </div>
           </div>
         </div>
 
-        <div class="card rounded-2xl bg-white p-5 shadow-sm">
+        <div class="p-5 bg-white shadow-sm card rounded-2xl">
           <h2 class="flex items-center gap-2 text-lg font-semibold">
-            <svg class="h-5 w-5 text-brand-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 7h18M5 7v10a2 2 0 002 2h10a2 2 0 002-2V7"/></svg>
+            <svg class="w-5 h-5 text-brand-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 7h18M5 7v10a2 2 0 002 2h10a2 2 0 002-2V7"/></svg>
             Alamat KTP & Domisili
           </h2>
 
-          <div class="mt-4 grid gap-3">
+          <div class="grid gap-3 mt-4">
             <label class="text-sm text-slate-600">Alamat KTP <span class="text-red-600">*</span></label>
-            <textarea required name="ktp_address" class="w-full rounded-lg border px-3 py-2" rows="2">{{ old('ktp_address',$profile->ktp_address) }}</textarea>
+            <textarea required name="ktp_address" class="w-full px-3 py-2 border rounded-lg" rows="2">{{ old('ktp_address',$profile->ktp_address) }}</textarea>
             <div class="grid gap-3 sm:grid-cols-6">
-              <input name="ktp_rt"  placeholder="RT"  value="{{ old('ktp_rt',$profile->ktp_rt) }}"  class="rounded-lg border px-3 py-2">
-              <input name="ktp_rw"  placeholder="RW"  value="{{ old('ktp_rw',$profile->ktp_rw) }}"  class="rounded-lg border px-3 py-2">
-              <input required name="ktp_village"  placeholder="Desa/Kelurahan" value="{{ old('ktp_village',$profile->ktp_village) }}" class="rounded-lg border px-3 py-2">
-              <input required name="ktp_district" placeholder="Kecamatan" value="{{ old('ktp_district',$profile->ktp_district) }}" class="rounded-lg border px-3 py-2">
-              <input required name="ktp_city"     placeholder="Kab/Kota" value="{{ old('ktp_city',$profile->ktp_city) }}" class="rounded-lg border px-3 py-2">
-              <input required name="ktp_province" placeholder="Provinsi" value="{{ old('ktp_province',$profile->ktp_province) }}" class="rounded-lg border px-3 py-2">
+              <input name="ktp_rt"  placeholder="RT"  value="{{ old('ktp_rt',$profile->ktp_rt) }}"  class="px-3 py-2 border rounded-lg">
+              <input name="ktp_rw"  placeholder="RW"  value="{{ old('ktp_rw',$profile->ktp_rw) }}"  class="px-3 py-2 border rounded-lg">
+              <input required name="ktp_village"  placeholder="Desa/Kelurahan" value="{{ old('ktp_village',$profile->ktp_village) }}" class="px-3 py-2 border rounded-lg">
+              <input required name="ktp_district" placeholder="Kecamatan" value="{{ old('ktp_district',$profile->ktp_district) }}" class="px-3 py-2 border rounded-lg">
+              <input required name="ktp_city"     placeholder="Kab/Kota" value="{{ old('ktp_city',$profile->ktp_city) }}" class="px-3 py-2 border rounded-lg">
+              <input required name="ktp_province" placeholder="Provinsi" value="{{ old('ktp_province',$profile->ktp_province) }}" class="px-3 py-2 border rounded-lg">
             </div>
             <div class="grid gap-3 sm:grid-cols-3">
-              <input required name="ktp_postal_code" placeholder="Kode Pos" value="{{ old('ktp_postal_code',$profile->ktp_postal_code) }}" class="rounded-lg border px-3 py-2">
+              <input required name="ktp_postal_code" placeholder="Kode Pos" value="{{ old('ktp_postal_code',$profile->ktp_postal_code) }}" class="px-3 py-2 border rounded-lg">
               @php $s = old('ktp_residence_status',$profile->ktp_residence_status); @endphp
-              <select name="ktp_residence_status" class="rounded-lg border px-3 py-2">
+              <select name="ktp_residence_status" class="px-3 py-2 border rounded-lg">
                 <option value="">Status Tempat Tinggal</option>
                 @foreach(['OWN'=>'Milik','RENT'=>'Sewa','DORM'=>'Kost','FAMILY'=>'Keluarga','COMPANY'=>'Dinas','OTHER'=>'Lainnya'] as $k=>$v)
                   <option value="{{ $k }}" @selected($s===$k)>{{ $v }}</option>
@@ -263,22 +274,22 @@
               </select>
             </div>
 
-            <label class="mt-4 inline-flex items-center gap-2 text-sm"><input type="checkbox" x-model="sameAsKtp" class="rounded"> <span>Domisili sama dengan Alamat KTP</span></label>
+            <label class="inline-flex items-center gap-2 mt-4 text-sm"><input type="checkbox" x-model="sameAsKtp" class="rounded"> <span>Domisili sama dengan Alamat KTP</span></label>
 
-            <label class="text-sm text-slate-600 mt-1">Alamat Domisili <span class="text-red-600">*</span></label>
-            <textarea required name="domicile_address" x-model="domicile_address" class="w-full rounded-lg border px-3 py-2" rows="2">{{ old('domicile_address',$profile->domicile_address) }}</textarea>
+            <label class="mt-1 text-sm text-slate-600">Alamat Domisili <span class="text-red-600">*</span></label>
+            <textarea required name="domicile_address" x-model="domicile_address" class="w-full px-3 py-2 border rounded-lg" rows="2">{{ old('domicile_address',$profile->domicile_address) }}</textarea>
             <div class="grid gap-3 sm:grid-cols-6">
-              <input name="domicile_rt"  placeholder="RT"  x-model="domicile_rt"  class="rounded-lg border px-3 py-2">
-              <input name="domicile_rw"  placeholder="RW"  x-model="domicile_rw"  class="rounded-lg border px-3 py-2">
-              <input required name="domicile_village"  placeholder="Desa/Kelurahan" x-model="domicile_village" class="rounded-lg border px-3 py-2">
-              <input required name="domicile_district" placeholder="Kecamatan" x-model="domicile_district" class="rounded-lg border px-3 py-2">
-              <input required name="domicile_city"     placeholder="Kab/Kota" x-model="domicile_city" class="rounded-lg border px-3 py-2">
-              <input required name="domicile_province" placeholder="Provinsi" x-model="domicile_province" class="rounded-lg border px-3 py-2">
+              <input name="domicile_rt"  placeholder="RT"  x-model="domicile_rt"  class="px-3 py-2 border rounded-lg">
+              <input name="domicile_rw"  placeholder="RW"  x-model="domicile_rw"  class="px-3 py-2 border rounded-lg">
+              <input required name="domicile_village"  placeholder="Desa/Kelurahan" x-model="domicile_village" class="px-3 py-2 border rounded-lg">
+              <input required name="domicile_district" placeholder="Kecamatan" x-model="domicile_district" class="px-3 py-2 border rounded-lg">
+              <input required name="domicile_city"     placeholder="Kab/Kota" x-model="domicile_city" class="px-3 py-2 border rounded-lg">
+              <input required name="domicile_province" placeholder="Provinsi" x-model="domicile_province" class="px-3 py-2 border rounded-lg">
             </div>
             <div class="grid gap-3 sm:grid-cols-3">
-              <input required name="domicile_postal_code" placeholder="Kode Pos" x-model="domicile_postal_code" class="rounded-lg border px-3 py-2">
+              <input required name="domicile_postal_code" placeholder="Kode Pos" x-model="domicile_postal_code" class="px-3 py-2 border rounded-lg">
               @php $s2 = old('domicile_residence_status',$profile->domicile_residence_status); @endphp
-              <select name="domicile_residence_status" x-model="domicile_residence_status" class="rounded-lg border px-3 py-2">
+              <select name="domicile_residence_status" x-model="domicile_residence_status" class="px-3 py-2 border rounded-lg">
                 <option value="">Status Tempat Tinggal</option>
                 @foreach(['OWN'=>'Milik','RENT'=>'Sewa','DORM'=>'Kost','FAMILY'=>'Keluarga','COMPANY'=>'Dinas','OTHER'=>'Lainnya'] as $k=>$v)
                   <option value="{{ $k }}" @selected($s2===$k)>{{ $v }}</option>
@@ -291,56 +302,56 @@
 
       {{-- STEP 2 --}}
       <section x-show="step===2" x-cloak class="space-y-6">
-        <div class="card rounded-2xl bg-white p-5 shadow-sm" x-data="{ items: $store.form.trainings }">
+        <div class="p-5 bg-white shadow-sm card rounded-2xl" x-data="{ items: $store.form.trainings }">
           <div class="flex items-center justify-between">
             <h2 class="flex items-center gap-2 text-lg font-semibold">
-              <svg class="h-5 w-5 text-brand-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5z"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l6.16-3.422A12.083 12.083 0 016 10.882M12 14v7"/></svg>
+              <svg class="w-5 h-5 text-brand-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5z"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l6.16-3.422A12.083 12.083 0 016 10.882M12 14v7"/></svg>
               Pendidikan Non-Formal (Pelatihan/Sertifikasi)
             </h2>
-            <button type="button" class="rounded-lg border px-3 py-1.5 text-sm hover:bg-slate-50" @click="items.push({title:'',institution:'',period_start:'',period_end:''})">+ Tambah</button>
+            <button type="button" class="rounded-xl border border-brand-200 px-3 py-1.5 text-sm text-brand-800 hover:bg-brand-50" @click="items.push({title:'',institution:'',period_start:'',period_end:''})">+ Tambah</button>
           </div>
           <p class="mt-1 text-xs text-slate-500">Minimal 1 pelatihan diisi.</p>
           <template x-for="(it,idx) in items" :key="idx">
-            <div class="mt-4 grid gap-3 rounded-xl border p-3">
-              <input class="rounded-lg border px-3 py-2" :name="`trainings[${idx}][title]`" x-model="it.title" placeholder="Nama Training/Sertifikasi *" required>
+            <div class="grid gap-3 p-3 mt-4 border rounded-xl">
+              <input class="px-3 py-2 border rounded-lg" :name="`trainings[${idx}][title]`" x-model="it.title" placeholder="Nama Training/Sertifikasi *" required>
               <div class="grid gap-3 sm:grid-cols-2">
-                <input class="rounded-lg border px-3 py-2" :name="`trainings[${idx}][institution]`" x-model="it.institution" placeholder="Institusi/Penyelenggara *" required>
+                <input class="px-3 py-2 border rounded-lg" :name="`trainings[${idx}][institution]`" x-model="it.institution" placeholder="Institusi/Penyelenggara *" required>
                 <div class="grid gap-3 sm:grid-cols-2">
-                  <input type="date" class="rounded-lg border px-3 py-2" :name="`trainings[${idx}][period_start]`" x-model="it.period_start" required>
-                  <input type="date" class="rounded-lg border px-3 py-2" :name="`trainings[${idx}][period_end]`"   x-model="it.period_end">
+                  <input type="date" class="px-3 py-2 border rounded-lg" :name="`trainings[${idx}][period_start]`" x-model="it.period_start" required>
+                  <input type="date" class="px-3 py-2 border rounded-lg" :name="`trainings[${idx}][period_end]`"   x-model="it.period_end">
                 </div>
               </div>
               <div class="text-right">
-                <button type="button" class="text-sm text-red-600 hover:underline" @click="items.splice(idx,1)">Hapus</button>
+                <button type="button" class="text-sm text-brand-700 hover:underline" @click="items.splice(idx,1)">Hapus</button>
               </div>
             </div>
           </template>
         </div>
 
-        <div class="card rounded-2xl bg-white p-5 shadow-sm" x-data="{ items: $store.form.employments }">
+        <div class="p-5 bg-white shadow-sm card rounded-2xl" x-data="{ items: $store.form.employments }">
           <div class="flex items-center justify-between">
             <h2 class="flex items-center gap-2 text-lg font-semibold">
-              <svg class="h-5 w-5 text-brand-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 7h18M7 7v10a2 2 0 002 2h6a2 2 0 002-2V7"/></svg>
+              <svg class="w-5 h-5 text-brand-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 7h18M7 7v10a2 2 0 002 2h6a2 2 0 002-2V7"/></svg>
               Riwayat Pekerjaan
             </h2>
-            <button type="button" class="rounded-lg border px-3 py-1.5 text-sm hover:bg-slate-50" @click="items.push({company:'',position_start:'',position_end:'',period_start:'',period_end:'',reason_for_leaving:'',job_description:''})">+ Tambah</button>
+            <button type="button" class="rounded-xl border border-brand-200 px-3 py-1.5 text-sm text-brand-800 hover:bg-brand-50" @click="items.push({company:'',position_start:'',position_end:'',period_start:'',period_end:'',reason_for_leaving:'',job_description:''})">+ Tambah</button>
           </div>
           <p class="mt-1 text-xs text-slate-500">Minimal 1 riwayat pekerjaan diisi.</p>
           <template x-for="(it,idx) in items" :key="idx">
-            <div class="mt-4 grid gap-3 rounded-xl border p-3">
-              <input class="rounded-lg border px-3 py-2" :name="`employments[${idx}][company]`" x-model="it.company" placeholder="Nama Perusahaan *" required>
+            <div class="grid gap-3 p-3 mt-4 border rounded-xl">
+              <input class="px-3 py-2 border rounded-lg" :name="`employments[${idx}][company]`" x-model="it.company" placeholder="Nama Perusahaan *" required>
               <div class="grid gap-3 sm:grid-cols-2">
-                <input class="rounded-lg border px-3 py-2" :name="`employments[${idx}][position_start]`" x-model="it.position_start" placeholder="Jabatan Awal *" required>
-                <input class="rounded-lg border px-3 py-2" :name="`employments[${idx}][position_end]`"   x-model="it.position_end"   placeholder="Jabatan Akhir">
+                <input class="px-3 py-2 border rounded-lg" :name="`employments[${idx}][position_start]`" x-model="it.position_start" placeholder="Jabatan Awal *" required>
+                <input class="px-3 py-2 border rounded-lg" :name="`employments[${idx}][position_end]`"   x-model="it.position_end"   placeholder="Jabatan Akhir">
               </div>
               <div class="grid gap-3 sm:grid-cols-2">
-                <input type="date" class="rounded-lg border px-3 py-2" :name="`employments[${idx}][period_start]`" x-model="it.period_start" required>
-                <input type="date" class="rounded-lg border px-3 py-2" :name="`employments[${idx}][period_end]`"   x-model="it.period_end">
+                <input type="date" class="px-3 py-2 border rounded-lg" :name="`employments[${idx}][period_start]`" x-model="it.period_start" required>
+                <input type="date" class="px-3 py-2 border rounded-lg" :name="`employments[${idx}][period_end]`"   x-model="it.period_end">
               </div>
-              <input class="rounded-lg border px-3 py-2" :name="`employments[${idx}][reason_for_leaving]`" x-model="it.reason_for_leaving" placeholder="Alasan Berhenti">
-              <textarea class="rounded-lg border px-3 py-2" rows="2" :name="`employments[${idx}][job_description]`" x-model="it.job_description" placeholder="Deskripsi Pekerjaan"></textarea>
+              <input class="px-3 py-2 border rounded-lg" :name="`employments[${idx}][reason_for_leaving]`" x-model="it.reason_for_leaving" placeholder="Alasan Berhenti">
+              <textarea class="px-3 py-2 border rounded-lg" rows="2" :name="`employments[${idx}][job_description]`" x-model="it.job_description" placeholder="Deskripsi Pekerjaan"></textarea>
               <div class="text-right">
-                <button type="button" class="text-sm text-red-600 hover:underline" @click="items.splice(idx,1)">Hapus</button>
+                <button type="button" class="text-sm text-brand-700 hover:underline" @click="items.splice(idx,1)">Hapus</button>
               </div>
             </div>
           </template>
@@ -349,16 +360,16 @@
 
       {{-- STEP 3 --}}
       <section x-show="step===3" x-cloak class="space-y-6">
-        <div class="card rounded-2xl bg-white p-5 shadow-sm">
+        <div class="p-5 bg-white shadow-sm card rounded-2xl">
   <h2 class="flex items-center gap-2 text-lg font-semibold">
-    <svg class="h-5 w-5 text-brand-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <svg class="w-5 h-5 text-brand-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-3.314 0-6 2.239-6 5v5h12v-5c0-2.761-2.686-5-6-5z"/>
       <path stroke-linecap="round" stroke-linejoin="round" d="M12 4a4 4 0 110 8 4 4 0 010-8z"/>
     </svg>
     Informasi Tambahan
   </h2>
 
-  <div class="mt-4 grid gap-4 sm:grid-cols-2">
+  <div class="grid gap-4 mt-4 sm:grid-cols-2">
 
     {{-- Gaji Saat Ini --}}
     <div>
@@ -367,7 +378,7 @@
         type="number"
         name="current_salary"
         step="0.01"
-        class="mt-1 w-full rounded-lg border px-3 py-2"
+        class="w-full px-3 py-2 mt-1 border rounded-lg"
         placeholder="Contoh: 5000000"
         value="{{ old('current_salary', $profile->current_salary) }}"
       >
@@ -380,7 +391,7 @@
         type="number"
         name="expected_salary"
         step="0.01"
-        class="mt-1 w-full rounded-lg border px-3 py-2"
+        class="w-full px-3 py-2 mt-1 border rounded-lg"
         placeholder="Contoh: 7000000"
         value="{{ old('expected_salary', $profile->expected_salary) }}"
       >
@@ -392,7 +403,7 @@
       <textarea
         name="expected_facilities"
         rows="3"
-        class="mt-1 w-full rounded-lg border px-3 py-2"
+        class="w-full px-3 py-2 mt-1 border rounded-lg"
         placeholder="Mess, transport, asuransi, dll"
       >{{ old('expected_facilities', $profile->expected_facilities) }}</textarea>
     </div>
@@ -403,7 +414,7 @@
       <input
         type="date"
         name="available_start_date"
-        class="mt-1 w-full rounded-lg border px-3 py-2"
+        class="w-full px-3 py-2 mt-1 border rounded-lg"
         value="{{ old('available_start_date', optional($profile->available_start_date)->format('Y-m-d')) }}"
       >
     </div>
@@ -414,7 +425,7 @@
       <textarea
         name="work_motivation"
         rows="4"
-        class="mt-1 w-full rounded-lg border px-3 py-2"
+        class="w-full px-3 py-2 mt-1 border rounded-lg"
       >{{ old('work_motivation', $profile->work_motivation) }}</textarea>
     </div>
 
@@ -424,7 +435,7 @@
       <textarea
         name="medical_history"
         rows="3"
-        class="mt-1 w-full rounded-lg border px-3 py-2"
+        class="w-full px-3 py-2 mt-1 border rounded-lg"
       >{{ old('medical_history', $profile->medical_history) }}</textarea>
     </div>
 
@@ -434,7 +445,7 @@
       <input
         type="text"
         name="last_medical_checkup"
-        class="mt-1 w-full rounded-lg border px-3 py-2"
+        class="w-full px-3 py-2 mt-1 border rounded-lg"
         placeholder="Contoh: Jan 2024 - RS Siloam"
         value="{{ old('last_medical_checkup', $profile->last_medical_checkup) }}"
       >
@@ -443,48 +454,48 @@
   </div>
 </div>
 
-      <div class="card rounded-2xl bg-white p-5 shadow-sm" x-data="{ items: $store.form.references }">
+      <div class="p-5 bg-white shadow-sm card rounded-2xl" x-data="{ items: $store.form.references }">
           <div class="flex items-center justify-between">
             <h2 class="flex items-center gap-2 text-lg font-semibold">
-              <svg class="h-5 w-5 text-brand-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a4 4 0 00-4-4h-1M9 20H4v-2a4 4 0 014-4h1M12 12a5 5 0 100-10 5 5 0 000 10z"/></svg>
+              <svg class="w-5 h-5 text-brand-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a4 4 0 00-4-4h-1M9 20H4v-2a4 4 0 014-4h1M12 12a5 5 0 100-10 5 5 0 000 10z"/></svg>
               Referensi (bukan keluarga)
             </h2>
-            <button type="button" class="rounded-lg border px-3 py-1.5 text-sm hover:bg-slate-50" @click="items.push({name:'',job_title:'',company:'',contact:''})">+ Tambah</button>
+            <button type="button" class="rounded-xl border border-brand-200 px-3 py-1.5 text-sm text-brand-800 hover:bg-brand-50" @click="items.push({name:'',job_title:'',company:'',contact:''})">+ Tambah</button>
           </div>
           <p class="mt-1 text-xs text-slate-500">Minimal isi 3 referensi.</p>
           <template x-for="(it,idx) in items" :key="idx">
-            <div class="mt-4 grid gap-3 rounded-xl border p-3 sm:grid-cols-2">
-              <input class="rounded-lg border px-3 py-2" :name="`references[${idx}][name]`" x-model="it.name" placeholder="Nama *" required>
-              <input class="rounded-lg border px-3 py-2" :name="`references[${idx}][job_title]`" x-model="it.job_title" placeholder="Jabatan *" required>
-              <input class="rounded-lg border px-3 py-2" :name="`references[${idx}][company]`" x-model="it.company" placeholder="Perusahaan *" required>
-              <input class="rounded-lg border px-3 py-2" :name="`references[${idx}][contact]`" x-model="it.contact" placeholder="Kontak (HP/Email) *" required>
-              <div class="sm:col-span-2 text-right">
-                <button type="button" class="text-sm text-red-600 hover:underline" @click="items.splice(idx,1)">Hapus</button>
+            <div class="grid gap-3 p-3 mt-4 border rounded-xl sm:grid-cols-2">
+              <input class="px-3 py-2 border rounded-lg" :name="`references[${idx}][name]`" x-model="it.name" placeholder="Nama *" required>
+              <input class="px-3 py-2 border rounded-lg" :name="`references[${idx}][job_title]`" x-model="it.job_title" placeholder="Jabatan *" required>
+              <input class="px-3 py-2 border rounded-lg" :name="`references[${idx}][company]`" x-model="it.company" placeholder="Perusahaan *" required>
+              <input class="px-3 py-2 border rounded-lg" :name="`references[${idx}][contact]`" x-model="it.contact" placeholder="Kontak (HP/Email) *" required>
+              <div class="text-right sm:col-span-2">
+                <button type="button" class="text-sm text-brand-700 hover:underline" @click="items.splice(idx,1)">Hapus</button>
               </div>
             </div>
           </template>
         </div>
 
-        <div class="card rounded-2xl bg-white p-5 shadow-sm">
+        <div class="p-5 bg-white shadow-sm card rounded-2xl">
           <h2 class="flex items-center gap-2 text-lg font-semibold">
-            <svg class="h-5 w-5 text-brand-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 12v7m-6 0h12a2 2 0 002-2V7a2 2 0 00-2-2H6a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+            <svg class="w-5 h-5 text-brand-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 12v7m-6 0h12a2 2 0 002-2V7a2 2 0 00-2-2H6a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
             Berkas
           </h2>
-          <div class="mt-3 grid gap-4 sm:grid-cols-2">
+          <div class="grid gap-4 mt-3 sm:grid-cols-2">
             <div>
               <label class="text-sm text-slate-600">CV (PDF/DOC, maks 4MB) <span class="text-red-600" x-show="!hasCv">*</span></label>
-              <input :required="!hasCv" type="file" name="cv" class="mt-1 w-full rounded-lg border px-3 py-2">
+              <input :required="!hasCv" type="file" name="cv" class="w-full px-3 py-2 mt-1 border rounded-lg">
               @if($profile->cv_path)
-                <div class="mt-1 text-xs text-slate-600">Terunggah: <a class="text-brand-700 underline" href="{{ Storage::disk('public')->url($profile->cv_path) }}" target="_blank">Lihat CV</a></div>
+                <div class="mt-1 text-xs text-slate-600">Terunggah: <a class="underline text-brand-700" href="{{ asset('storage/' . ltrim($profile->cv_path, '/')) }}" target="_blank">Lihat CV</a></div>
               @endif
             </div>
             <div>
               <label class="text-sm text-slate-600">Dokumen pendukung (bisa pilih banyak)</label>
-              <input type="file" name="documents[]" multiple class="mt-1 w-full rounded-lg border px-3 py-2">
+              <input type="file" name="documents[]" multiple class="w-full px-3 py-2 mt-1 border rounded-lg">
               @if(is_array($profile->documents) && count($profile->documents))
-                <ul class="mt-1 text-xs list-disc pl-5">
+                <ul class="pl-5 mt-1 text-xs list-disc">
                   @foreach($profile->documents as $d)
-                    <li><a class="text-brand-700 underline" href="{{ Storage::disk('public')->url($d['path']) }}" target="_blank">{{ $d['name'] }}</a></li>
+                    <li><a class="underline text-brand-700" href="{{ asset('storage/' . ltrim($d['path'], '/')) }}" target="_blank">{{ $d['name'] }}</a></li>
                   @endforeach
                 </ul>
               @endif
@@ -494,23 +505,35 @@
       </section>
 
       {{-- Right Action Rail --}}
-      <div class="pointer-events-none fixed right-4 bottom-6 z-20 md:top-1/2 md:bottom-auto md:-translate-y-1/2">
-        <div class="pointer-events-auto w-48 rounded-2xl border bg-white/95 p-3 shadow-lg backdrop-blur">
+      <div class="fixed z-20 pointer-events-none right-4 bottom-6 md:top-1/2 md:bottom-auto md:-translate-y-1/2">
+        <div class="w-48 p-3 border shadow-lg pointer-events-auto rounded-2xl border-brand-200/70 bg-white/95 backdrop-blur">
           <div class="px-1 pb-2 text-xs text-slate-600">Langkah <span class="font-semibold text-slate-900" x-text="step"></span> / 3 · <span x-text="progress+'%'"></span></div>
           <div class="space-y-2">
-            <button type="button" @click.prevent="prev()" :disabled="step===1" class="w-full inline-flex items-center justify-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium disabled:opacity-50">
-              <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+            <button type="button" @click.prevent="prev()" :disabled="step===1" class="inline-flex items-center justify-center w-full gap-2 px-3 py-2 text-sm font-medium border rounded-xl border-brand-200 text-brand-800 hover:bg-brand-50 disabled:opacity-50">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
               <span>Prev</span>
             </button>
-            <button type="button" x-show="step<3" @click.prevent="next()" class="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-brand-600 px-3 py-2 text-sm font-semibold text-white hover:bg-brand-700">
+            <button type="button" x-show="step<3" @click.prevent="next()" class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-[linear-gradient(90deg,_#a77d52,_#8b5e3c)] px-3 py-2 text-sm font-semibold text-white hover:brightness-105">
               <span>Lanjut</span>
-              <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
             </button>
             {{-- SUBMIT TERKONTROL: prevent default & submit manual saat valid --}}
-            <button type="submit" x-show="step===3" @click.prevent="if (validate(3)) $refs.form.submit()" class="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-600 px-3 py-2 text-sm font-semibold text-white hover:bg-emerald-700">
+            <button type="submit" x-show="step===3" @click.prevent="if (validate(3)) confirmOpen=true" class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-[linear-gradient(90deg,_#a77d52,_#8b5e3c)] px-3 py-2 text-sm font-semibold text-white hover:brightness-105">
               <span>Simpan & Selesai</span>
-              <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
             </button>
+          </div>
+        </div>
+      </div>
+
+      {{-- Popup konfirmasi submit --}}
+      <div x-show="confirmOpen" x-cloak class="fixed inset-0 z-40 grid p-4 place-items-center bg-black/35" @click.self="confirmOpen=false">
+        <div class="w-full max-w-md p-5 bg-white border shadow-xl rounded-2xl border-brand-200">
+          <h3 class="text-lg font-semibold text-slate-900">Simpan Data Kandidat?</h3>
+          <p class="mt-1 text-sm text-slate-600">Pastikan semua data sudah benar. Kamu tetap bisa mengubahnya lagi nanti.</p>
+          <div class="flex items-center justify-end gap-2 mt-4">
+            <button type="button" class="px-4 py-2 text-sm border rounded-xl border-brand-200 text-brand-800 hover:bg-brand-50" @click="confirmOpen=false">Batal</button>
+            <button type="button" class="rounded-xl bg-[linear-gradient(90deg,_#a77d52,_#8b5e3c)] px-4 py-2 text-sm font-semibold text-white hover:brightness-105" @click="confirmOpen=false; $refs.form.submit()">Ya, Simpan</button>
           </div>
         </div>
       </div>
@@ -518,9 +541,9 @@
 
     {{-- Error bubble --}}
     <template x-if="errors.length">
-      <div class="mt-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+      <div class="p-4 mt-6 text-sm border rounded-xl border-brand-200 bg-[#fbf3ea] text-brand-900">
         <div class="font-semibold">Lengkapi isian berikut sebelum lanjut:</div>
-        <ul class="mt-2 list-disc pl-5">
+        <ul class="pl-5 mt-2 list-disc">
           <template x-for="(e,i) in errors" :key="i"><li x-text="e"></li></template>
         </ul>
       </div>
@@ -535,6 +558,7 @@
       step: 1,
       progress: 0,
       errors: [],
+      confirmOpen: false,
       sameAsKtp: false,
       hasCv: {{ $profile->cv_path ? 'true' : 'false' }},
 

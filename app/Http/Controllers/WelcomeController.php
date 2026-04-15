@@ -114,13 +114,25 @@ class WelcomeController extends Controller
             $q->where('status', 'open');
         }
 
-        // Gunakan COALESCE + NULLIF agar NULL/'' -> "Tanpa Divisi"
-        // GROUP BY dengan raw expression untuk safety
-        return $q->selectRaw("COALESCE(NULLIF(division, ''), 'Tanpa Divisi') AS div_name, COUNT(*) AS total")
-                 ->groupByRaw("COALESCE(NULLIF(division, ''), 'Tanpa Divisi')")
-                 ->orderByDesc('total')
-                 ->get()
-                 ->pluck('total', 'div_name');
+        // Hindari GROUP BY expression (raw) agar kompatibel dengan MySQL strict mode.
+        $rows = $q->select('division')
+            ->selectRaw('COUNT(*) AS total')
+            ->groupBy('division')
+            ->orderByDesc('total')
+            ->get();
+
+        $totals = [];
+        foreach ($rows as $row) {
+            $key = filled(trim((string) $row->division))
+                ? (string) $row->division
+                : 'Tanpa Divisi';
+
+            $totals[$key] = ($totals[$key] ?? 0) + (int) $row->total;
+        }
+
+        arsort($totals);
+
+        return collect($totals);
     }
 
     /** Warna HSL konsisten dari string (untuk ikon dot). */

@@ -4,9 +4,9 @@
 @php
   use Illuminate\Support\Carbon;
 
-  // Palet warna utama
-  $BLUE  = '#1d4ed8'; // Tailwind blue-700
-  $RED   = '#dc2626'; // Tailwind red-600
+  // Palet warna utama (disamakan ke brown theme)
+  $BLUE  = '#a77d52'; // accent brown
+  $RED   = '#8b5e3c'; // accent dark brown
 
   // ==== SANITIZER (whitelist aman untuk konten dari editor) ====
   $sanitize = function ($v) {
@@ -191,34 +191,34 @@
   {{-- BREADCRUMB --}}
   <nav class="mb-4" aria-label="Breadcrumb">
     <div class="relative rounded-xl border border-slate-200 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 shadow-sm">
-      <div class="h-1 w-full overflow-hidden rounded-t-xl"><div class="h-full w-full" style="background: linear-gradient(90deg, {{ $RED }} 0%, {{ $BLUE }} 100%);"></div></div>
-      <ol class="flex items-center gap-2 px-3 py-2 text-sm text-slate-600 overflow-x-auto" itemscope itemtype="https://schema.org/BreadcrumbList">
+      <div class="w-full h-1 overflow-hidden rounded-t-xl"><div class="w-full h-full" style="background: linear-gradient(90deg, {{ $RED }} 0%, {{ $BLUE }} 100%);"></div></div>
+      <ol class="flex items-center gap-2 px-3 py-2 overflow-x-auto text-sm text-slate-600" itemscope itemtype="https://schema.org/BreadcrumbList">
         <li class="flex items-center gap-2 shrink-0" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-          <a href="{{ route('dashboard') }}" itemprop="item" class="group inline-flex items-center gap-1 rounded-lg px-2 py-1 hover:bg-slate-50">
-            <svg class="h-4 w-4 text-slate-500 group-hover:text-slate-700" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 10.5l9-7 9 7V20a2 2 0 0 1-2 2h-4.5a.5.5 0 0 1-.5-.5V15a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v6.5a.5.5 0 0 1-.5.5H5a2 2 0 0 1-2-2v-9.5z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+          <a href="{{ route('dashboard') }}" itemprop="item" class="inline-flex items-center gap-1 px-2 py-1 rounded-lg group hover:bg-slate-50">
+            <svg class="w-4 h-4 text-slate-500 group-hover:text-slate-700" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 10.5l9-7 9 7V20a2 2 0 0 1-2 2h-4.5a.5.5 0 0 1-.5-.5V15a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v6.5a.5.5 0 0 1-.5.5H5a2 2 0 0 1-2-2v-9.5z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
             <span class="font-medium text-slate-700 group-hover:text-slate-900" itemprop="name">Dashboard</span>
           </a><meta itemprop="position" content="1"/><span class="text-slate-300">/</span>
         </li>
         <li class="flex items-center gap-2 shrink-0" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-          <a href="{{ route('jobs.index') }}" itemprop="item" class="group inline-flex items-center gap-1 rounded-lg px-2 py-1 hover:bg-slate-50">
-            <svg class="h-4 w-4 text-slate-500 group-hover:text-slate-700" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v9a3 3 0  0 1-3 3H6a3 3 0 0 1-3-3V8z" stroke="currentColor" stroke-width="1.5"/><path d="M9 6a3 3 0 0 1 6 0" stroke="currentColor" stroke-width="1.5"/></svg>
+          <a href="{{ route('jobs.index') }}" itemprop="item" class="inline-flex items-center gap-1 px-2 py-1 rounded-lg group hover:bg-slate-50">
+            <svg class="w-4 h-4 text-slate-500 group-hover:text-slate-700" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v9a3 3 0  0 1-3 3H6a3 3 0 0 1-3-3V8z" stroke="currentColor" stroke-width="1.5"/><path d="M9 6a3 3 0 0 1 6 0" stroke="currentColor" stroke-width="1.5"/></svg>
             <span class="font-medium text-slate-700 group-hover:text-slate-900" itemprop="name">Jobs</span>
           </a><meta itemprop="position" content="2"/><span class="text-slate-300">/</span>
         </li>
-        <li class="flex items-center gap-2 min-w-0" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem" aria-current="page">
-          <div class="inline-flex items-center gap-1 rounded-lg px-2 py-1 bg-slate-50 ring-1 ring-slate-200">
-            <svg class="h-4 w-4 text-slate-500" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 12m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" stroke="currentColor" stroke-width="1.5"/><path d="M12 8v4l3 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-            <span class="truncate font-semibold text-slate-900" itemprop="name">{{ e($job->title) }}</span>
+        <li class="flex items-center min-w-0 gap-2" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem" aria-current="page">
+          <div class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-slate-50 ring-1 ring-slate-200">
+            <svg class="w-4 h-4 text-slate-500" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 12m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" stroke="currentColor" stroke-width="1.5"/><path d="M12 8v4l3 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            <span class="font-semibold truncate text-slate-900" itemprop="name">{{ e($job->title) }}</span>
           </div>
           <meta itemprop="item" content="{{ request()->fullUrl() }}"/><meta itemprop="position" content="3"/>
         </li>
       </ol>
 
-      <div class="absolute right-2 top-2 flex gap-2">
-        <a href="{{ url()->previous() }}" class="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-white px-2 py-1 text-xs text-slate-600 hover:bg-slate-50">← Kembali</a>
+      <div class="absolute flex gap-2 right-2 top-2">
+        <a href="{{ url()->previous() }}" class="inline-flex items-center gap-1 px-2 py-1 text-xs bg-white border rounded-md border-slate-200 text-slate-600 hover:bg-slate-50">← Kembali</a>
         <button type="button"
                 onclick="navigator.clipboard?.writeText('{{ e(request()->fullUrl()) }}'); this.innerText='Tautan Disalin'; setTimeout(()=>this.innerText='Salin Tautan',1500)"
-                class="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-white px-2 py-1 text-xs text-slate-600 hover:bg-slate-50">
+                class="inline-flex items-center gap-1 px-2 py-1 text-xs bg-white border rounded-md border-slate-200 text-slate-600 hover:bg-slate-50">
           Salin Tautan
         </button>
       </div>
@@ -226,38 +226,38 @@
   </nav>
 
   {{-- HEADER --}}
-  <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-    <div class="flex h-2 w-full"><div class="flex-1" style="background: {{ $BLUE }}"></div><div class="w-32" style="background: {{ $RED }}"></div></div>
+  <div class="overflow-hidden bg-white border shadow-sm rounded-2xl border-slate-200">
+    <div class="flex w-full h-2"><div class="flex-1" style="background: {{ $BLUE }}"></div><div class="w-32" style="background: {{ $RED }}"></div></div>
 
     <div class="p-5 md:p-6">
       <div class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
         <div class="min-w-0">
-          <h1 class="truncate text-3xl font-semibold text-slate-900">{{ e($job->title) ?? '—' }}</h1>
+          <h1 class="text-3xl font-semibold truncate text-slate-900">{{ e($job->title) ?? '—' }}</h1>
 
-          <div class="mt-1 flex flex-wrap items-center gap-2 text-sm text-slate-600">
+          <div class="flex flex-wrap items-center gap-2 mt-1 text-sm text-slate-600">
             <span class="inline-flex items-center gap-1">
-              <svg class="h-4 w-4 text-slate-500" aria-hidden="true"><use href="#i-brief"/></svg>
+              <svg class="w-4 h-4 text-slate-500" aria-hidden="true"><use href="#i-brief"/></svg>
               {{ e($job->division ?: '—') }}
             </span>
             <span class="text-slate-300">•</span>
             <span class="inline-flex items-center gap-1">
-              <svg class="h-4 w-4 text-slate-500" aria-hidden="true"><use href="#i-pin"/></svg>
+              <svg class="w-4 h-4 text-slate-500" aria-hidden="true"><use href="#i-pin"/></svg>
               {{ e($job->site?->code ? ($job->site->code . ' — ' . ($job->site->name ?? '')) : '—') }}
             </span>
             @if($closingAt)
               <span class="text-slate-300">•</span>
               <span class="inline-flex items-center gap-1">
-                <svg class="h-4 w-4 text-slate-500" aria-hidden="true"><use href="#i-clock"/></svg>
+                <svg class="w-4 h-4 text-slate-500" aria-hidden="true"><use href="#i-clock"/></svg>
                 Tutup: {{ e(Carbon::parse($closingAt)->timezone($TZ)->format('d M Y, H:i')) }} {{ $abbrTz($TZ) }}
               </span>
             @endif
           </div>
 
-          <div class="mt-2 flex flex-wrap items-center gap-2 text-xs">
-            <span class="rounded-full bg-blue-50 px-2.5 py-1 font-medium text-blue-700 ring-1 ring-inset ring-blue-200">
+          <div class="flex flex-wrap items-center gap-2 mt-2 text-xs">
+            <span class="rounded-full bg-[#f5ede4] px-2.5 py-1 font-medium text-[#8b5e3c] ring-1 ring-inset ring-[#e6d4c0]">
               Diposting: {{ e(optional($job->created_at)->timezone($TZ)->format('d M Y, H:i') ?? '—') }}
             </span>
-            <span class="rounded-full bg-red-50 px-2.5 py-1 font-medium text-red-700 ring-1 ring-inset ring-red-200">
+            <span class="rounded-full bg-[#efe3d6] px-2.5 py-1 font-medium text-[#7a5236] ring-1 ring-inset ring-[#ddc6b0]">
               Diubah: {{ e(optional($job->updated_at)->timezone($TZ)->format('d M Y, H:i') ?? '—') }}
             </span>
             @if(isset($job->applications_count))
@@ -277,15 +277,15 @@
         <div class="flex flex-wrap items-center gap-2">
           @if($isAdmin)
             @if(Route::has('admin.jobs.edit'))
-              <a href="{{ route('admin.jobs.edit', $job) }}" class="rounded-lg border border-slate-200 px-3 py-2 text-sm hover:bg-slate-50">Edit</a>
+              <a href="{{ route('admin.jobs.edit', $job) }}" class="px-3 py-2 text-sm border rounded-lg border-slate-200 hover:bg-slate-50">Edit</a>
             @endif
             @if(Route::has('admin.applications.index'))
-              <a href="{{ route('admin.applications.index', ['job' => $job->id]) }}" class="rounded-lg border border-slate-200 px-3 py-2 text-sm hover:bg-slate-50">Kandidat</a>
+              <a href="{{ route('admin.applications.index', ['job' => $job->id]) }}" class="px-3 py-2 text-sm border rounded-lg border-slate-200 hover:bg-slate-50">Kandidat</a>
             @endif
             @if(Route::has('admin.jobs.toggle'))
               <form method="POST" action="{{ route('admin.jobs.toggle', $job) }}" onsubmit="return confirm('Ubah status lowongan?');">
                 @csrf @method('PATCH')
-                <button type="submit" class="rounded-lg border border-slate-200 px-3 py-2 text-sm hover:bg-slate-50">
+                <button type="submit" class="px-3 py-2 text-sm border rounded-lg border-slate-200 hover:bg-slate-50">
                   {{ ($job->status === 'open') ? 'Tutup' : 'Buka' }}
                 </button>
               </form>
@@ -295,22 +295,22 @@
           @auth
             @if(($job->status ?? 'draft') === 'open' && !$myApp)
               <form method="POST" action="{{ route('applications.store',$job) }}">@csrf
-                <button class="rounded-lg px-4 py-2 text-sm font-semibold text-white"
+                <button class="px-4 py-2 text-sm font-semibold text-white rounded-lg"
                         style="background: linear-gradient(90deg, {{ $BLUE }} 0%, {{ $RED }} 100%);">
                   Lamar Sekarang
                 </button>
               </form>
             @elseif($myApp)
               <a href="{{ route('applications.mine') }}"
-                 class="rounded-lg px-4 py-2 text-sm font-semibold text-white"
+                 class="px-4 py-2 text-sm font-semibold text-white rounded-lg"
                  style="background: {{ $RED }}">
                 Lihat Progres
               </a>
             @else
-              <button disabled class="rounded-lg px-4 py-2 text-sm font-semibold text-white opacity-60" style="background: {{ $RED }}">Tutup</button>
+              <button disabled class="px-4 py-2 text-sm font-semibold text-white rounded-lg opacity-60" style="background: {{ $RED }}">Tutup</button>
             @endif
           @else
-            <a class="rounded-lg px-4 py-2 text-sm font-semibold text-white"
+            <a class="px-4 py-2 text-sm font-semibold text-white rounded-lg"
                style="background: linear-gradient(90deg, {{ $BLUE }} 0%, {{ $RED }} 100%);"
                href="{{ route('login') }}">
               Login untuk Melamar
@@ -322,26 +322,26 @@
   </div>
 
   {{-- GRID UTAMA --}}
-  <div class="mt-6 grid gap-6 lg:grid-cols-3">
+  <div class="grid gap-6 mt-6 lg:grid-cols-3">
     {{-- LEFT --}}
-    <div class="lg:col-span-2 space-y-6">
+    <div class="space-y-6 lg:col-span-2">
       {{-- Ringkasan --}}
-      <div class="rounded-2xl border border-slate-200 bg-white shadow-sm p-5 md:p-6">
+      <div class="p-5 bg-white border shadow-sm rounded-2xl border-slate-200 md:p-6">
         <div class="grid gap-4 sm:grid-cols-3">
-          <div class="rounded-xl border border-slate-200 bg-white px-4 py-3">
+          <div class="px-4 py-3 bg-white border rounded-xl border-slate-200">
             <div class="text-xs text-slate-500">Tipe</div>
             <div class="mt-1 inline-flex items-center rounded bg-[#a77d52] px-2 py-1 text-[11px] font-semibold text-white">
               {{ e($employmentPretty[$job->employment_type] ?? strtoupper($job->employment_type ?? '—')) }}
             </div>
           </div>
-          <div class="rounded-xl border border-slate-200 bg-white px-4 py-3">
+          <div class="px-4 py-3 bg-white border rounded-xl border-slate-200">
             <div class="text-xs text-slate-500">Openings</div>
             <div class="mt-1 text-xl font-semibold text-slate-900">{{ (int) ($job->openings ?? 1) }}</div>
           </div>
-          <div class="rounded-xl border border-slate-200 bg-white px-4 py-3">
+          <div class="px-4 py-3 bg-white border rounded-xl border-slate-200">
             <div class="text-xs text-slate-500">Lokasi</div>
-            <div class="mt-1 inline-flex items-center gap-1 text-slate-800">
-              <svg class="h-4 w-4 text-slate-500" aria-hidden="true"><use href="#i-pin"/></svg>
+            <div class="inline-flex items-center gap-1 mt-1 text-slate-800">
+              <svg class="w-4 h-4 text-slate-500" aria-hidden="true"><use href="#i-pin"/></svg>
               {{ e($job->site?->name ?? $job->site?->code ?? '—') }}
             </div>
           </div>
@@ -349,7 +349,7 @@
 
         {{-- Gaji (opsional) --}}
         @if($job->salary_min || $job->salary_max || $job->currency)
-          <div class="mt-4 rounded-xl border border-slate-200 bg-white px-4 py-3">
+          <div class="px-4 py-3 mt-4 bg-white border rounded-xl border-slate-200">
             <div class="text-xs text-slate-500">Perkiraan Gaji</div>
             <div class="mt-1 text-slate-900">
               @php
@@ -367,7 +367,7 @@
                 {{ e($cur) }}
               @endif
               @if(!empty($job->salary_period))
-                <span class="text-slate-500 text-sm">/ {{ e($job->salary_period) }}</span>
+                <span class="text-sm text-slate-500">/ {{ e($job->salary_period) }}</span>
               @endif
             </div>
           </div>
@@ -375,10 +375,10 @@
       </div>
 
       {{-- ===== INFORMASI LENGKAP (ini yang kemarin hilang) ===== --}}
-      <div class="rounded-2xl border border-slate-200 bg-white shadow-sm p-5 md:p-6">
+      <div class="p-5 bg-white border shadow-sm rounded-2xl border-slate-200 md:p-6">
         <h2 class="text-lg font-semibold text-slate-900">Informasi Lengkap</h2>
 
-        <dl class="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3 text-sm">
+        <dl class="grid grid-cols-1 mt-3 text-sm sm:grid-cols-2 gap-x-8 gap-y-3">
           <div class="grid grid-cols-3 gap-2">
             <dt class="text-slate-500">Kode Lowongan</dt>
             <dd class="col-span-2 text-slate-800">{{ e($job->code ?? '—') }}</dd>
@@ -465,7 +465,7 @@
 
       {{-- ===== Kualifikasi ===== --}}
       @if(filled($job->qualifications))
-      <div class="rounded-2xl border border-slate-200 bg-white shadow-sm p-5 md:p-6">
+      <div class="p-5 bg-white border shadow-sm rounded-2xl border-slate-200 md:p-6">
         <h2 class="text-lg font-semibold text-slate-900">Kualifikasi</h2>
         <div class="prose max-w-none text-slate-800">
           {!! $sanitize($job->qualifications) !!}
@@ -474,7 +474,7 @@
       @endif
 
       {{-- Deskripsi Pekerjaan --}}
-      <div class="rounded-2xl border border-slate-200 bg-white shadow-sm p-5 md:p-6">
+      <div class="p-5 bg-white border shadow-sm rounded-2xl border-slate-200 md:p-6">
         <h2 class="text-lg font-semibold text-slate-900">Deskripsi Pekerjaan</h2>
         <div class="prose max-w-none text-slate-800">
           <style>.prose ul{list-style:disc;padding-left:1.25rem}.prose ol{list-style:decimal;padding-left:1.25rem}.prose li{margin:.25rem 0}</style>
@@ -488,7 +488,7 @@
 
       {{-- Tanggung Jawab --}}
       @if(filled($job->responsibilities))
-      <div class="rounded-2xl border border-slate-200 bg-white shadow-sm p-5 md:p-6">
+      <div class="p-5 bg-white border shadow-sm rounded-2xl border-slate-200 md:p-6">
         <h2 class="text-lg font-semibold text-slate-900">Tanggung Jawab</h2>
         <div class="prose max-w-none text-slate-800">
           {!! $sanitize($job->responsibilities) !!}
@@ -498,7 +498,7 @@
 
       {{-- Benefit --}}
       @if(filled($job->benefits))
-      <div class="rounded-2xl border border-slate-200 bg-white shadow-sm p-5 md:p-6">
+      <div class="p-5 bg-white border shadow-sm rounded-2xl border-slate-200 md:p-6">
         <h2 class="text-lg font-semibold text-slate-900">Benefit</h2>
         <div class="prose max-w-none text-slate-800">
           {!! $sanitize($job->benefits) !!}
@@ -508,15 +508,19 @@
 
       {{-- Kata Kunci & Keahlian --}}
       @php
-        $tags = collect($job->tags ?? [])->when(is_string($job->tags ?? null), fn($c) => collect(preg_split('/\s*,\s*/', $job->tags, -1, PREG_SPLIT_NO_EMPTY)))->filter()->unique()->values();
+        $rawTags = $job->tags ?? [];
+        $tags = is_string($rawTags)
+          ? collect(preg_split('/\s*,\s*/', $rawTags, -1, PREG_SPLIT_NO_EMPTY))
+          : collect(is_array($rawTags) ? $rawTags : []);
+        $tags = $tags->filter()->unique()->values();
       @endphp
       @if($keywords->count() || $skills->count() || $tags->count())
-      <div class="rounded-2xl border border-slate-200 bg-white shadow-sm p-5 md:p-6">
+      <div class="p-5 bg-white border shadow-sm rounded-2xl border-slate-200 md:p-6">
         <h2 class="text-lg font-semibold text-slate-900">Kata Kunci & Keahlian</h2>
 
         @if($keywords->count())
           <div class="mt-2">
-            <div class="text-xs text-slate-500 mb-1">Keywords</div>
+            <div class="mb-1 text-xs text-slate-500">Keywords</div>
             <div class="flex flex-wrap gap-2">
               @foreach($keywords as $kw)
                 <span class="rounded-full bg-slate-100 px-2 py-1 text-[11px] font-semibold text-slate-700 ring-1 ring-inset ring-slate-200">{{ e($kw) }}</span>
@@ -527,10 +531,10 @@
 
         @if($skills->count())
           <div class="mt-3">
-            <div class="text-xs text-slate-500 mb-1">Skills</div>
+            <div class="mb-1 text-xs text-slate-500">Skills</div>
             <div class="flex flex-wrap gap-2">
               @foreach($skills as $sk)
-                <span class="rounded-full bg-blue-50 px-2 py-1 text-[11px] font-semibold text-blue-700 ring-1 ring-inset ring-blue-200">{{ e($sk) }}</span>
+                <span class="rounded-full bg-[#f5ede4] px-2 py-1 text-[11px] font-semibold text-[#8b5e3c] ring-1 ring-inset ring-[#e6d4c0]">{{ e($sk) }}</span>
               @endforeach
             </div>
           </div>
@@ -538,7 +542,7 @@
 
         @if($tags->count())
           <div class="mt-3">
-            <div class="text-xs text-slate-500 mb-1">Tags</div>
+            <div class="mb-1 text-xs text-slate-500">Tags</div>
             <div class="flex flex-wrap gap-2">
               @foreach($tags as $t)
                 <span class="rounded-full bg-slate-100 px-2 py-1 text-[11px] font-semibold text-slate-700 ring-1 ring-inset ring-slate-200">{{ e($t) }}</span>
@@ -553,7 +557,7 @@
     {{-- RIGHT: Progres / Site / Profil Kandidat --}}
     <aside class="space-y-6">
       {{-- Progres Lamaran --}}
-      <div class="rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div class="bg-white border shadow-sm rounded-2xl border-slate-200">
         <div class="p-5 md:p-6">
           <div class="flex items-center justify-between">
             <h3 class="text-base font-semibold text-slate-900">Progres Lamaran Kamu</h3>
@@ -568,7 +572,7 @@
                   <button type="submit" class="rounded-lg border border-slate-200 px-2.5 py-1.5 text-slate-900 hover:bg-slate-50 disabled:opacity-40"
                           {{ $canPrev ? '' : 'disabled' }}
                           title="{{ $canPrev ? 'Kembali ke: '.($pretty[$prevKey] ?? '—') : 'Tidak bisa mundur' }}">
-                    <svg class="h-4 w-4" aria-hidden="true"><use href="#i-chevron-left"/></svg>
+                    <svg class="w-4 h-4" aria-hidden="true"><use href="#i-chevron-left"/></svg>
                   </button>
                 </form>
 
@@ -580,7 +584,7 @@
                           style="background: {{ $BLUE }}"
                           {{ $canNext ? '' : 'disabled' }}
                           title="{{ $canNext ? 'Lanjut ke: '.($pretty[$nextKey] ?? '—') : 'Sudah tahap terakhir' }}">
-                    <svg class="h-4 w-4" aria-hidden="true"><use href="#i-chevron-right"/></svg>
+                    <svg class="w-4 h-4" aria-hidden="true"><use href="#i-chevron-right"/></svg>
                   </button>
                 </form>
               </div>
@@ -589,16 +593,16 @@
 
           @guest
             <p class="mt-2 text-sm text-slate-600">Masuk untuk melihat timeline lamaran pribadi.</p>
-            <a href="{{ route('login') }}" class="mt-3 inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 hover:bg-slate-50">
+            <a href="{{ route('login') }}" class="inline-flex items-center gap-2 px-3 py-2 mt-3 text-sm border rounded-lg border-slate-200 text-slate-900 hover:bg-slate-50">
               Login
             </a>
           @else
             @if(!$myApp)
-              <div class="mt-3 rounded-xl border border-slate-200 px-4 py-3 text-sm">
+              <div class="px-4 py-3 mt-3 text-sm border rounded-xl border-slate-200">
                 Belum ada lamaran untuk posisi ini.
                 @if(($job->status ?? 'draft')==='open')
                 <form method="POST" action="{{ route('applications.store',$job) }}" class="mt-3">@csrf
-                  <button class="w-full rounded-lg px-3 py-2 text-sm font-semibold text-white"
+                  <button class="w-full px-3 py-2 text-sm font-semibold text-white rounded-lg"
                           style="background: linear-gradient(90deg, {{ $BLUE }} 0%, {{ $RED }} 100%);">
                     Lamar Sekarang
                   </button>
@@ -609,12 +613,12 @@
               @php $pct = $progressPct(); @endphp
               <div class="mt-3">
                 <div class="flex items-center justify-between text-xs text-slate-600"><span>Progress</span><span>{{ $pct }}%</span></div>
-                <div class="mt-1 h-2 w-full overflow-hidden rounded-full bg-slate-100">
+                <div class="w-full h-2 mt-1 overflow-hidden rounded-full bg-slate-100">
                   <div class="h-full rounded-full" style="width: {{ $pct }}%; background: {{ in_array($overall,['rejected','not_qualified'],true) ? $RED : $BLUE }}"></div>
                 </div>
               </div>
 
-              <div class="mt-5 relative">
+              <div class="relative mt-5">
                 <div class="absolute right-3 top-0 bottom-0 w-0.5 bg-slate-200"></div>
                 <div class="space-y-3">
                   @foreach($stageOrder as $key)
@@ -632,7 +636,7 @@
                       $label = $pretty[$key] ?? strtoupper(str_replace('_',' ',$key));
                     @endphp
                     <div class="relative pr-12">
-                      <span class="absolute right-0 top-1 grid h-4 w-4 place-items-center rounded-full ring-4 ring-white" style="background: {{ $dotBg }}"></span>
+                      <span class="absolute right-0 grid w-4 h-4 rounded-full top-1 place-items-center ring-4 ring-white" style="background: {{ $dotBg }}"></span>
                       <div class="flex items-start justify-between gap-3">
                         <div class="min-w-0">
                           <div class="text-sm font-medium {{ $muted ? 'text-slate-700' : 'text-slate-900' }}">{{ e($label) }}</div>
@@ -661,7 +665,7 @@
                           @endif
                         </div>
                         @if($isNow)
-                          <span class="shrink-0 rounded-full bg-blue-50 px-2 py-1 text-[11px] font-semibold text-blue-700 ring-1 ring-inset ring-blue-200">Aktif</span>
+                          <span class="shrink-0 rounded-full bg-[#f5ede4] px-2 py-1 text-[11px] font-semibold text-[#8b5e3c] ring-1 ring-inset ring-[#e6d4c0]">Aktif</span>
                         @elseif($done)
                           <span class="shrink-0 rounded-full bg-emerald-50 px-2 py-1 text-[11px] font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-200">Selesai</span>
                         @else
@@ -677,7 +681,7 @@
                       $rejectBy   = $latestStage ? $actorName($latestStage) : ($lastChangedBy ?? null);
                     @endphp
                     <div class="relative pr-12">
-                      <span class="absolute right-0 top-1 grid h-4 w-4 place-items-center rounded-full ring-4 ring-white" style="background: {{ $RED }}"></span>
+                      <span class="absolute right-0 grid w-4 h-4 rounded-full top-1 place-items-center ring-4 ring-white" style="background: {{ $RED }}"></span>
                       <div class="flex items-start justify-between gap-3">
                         <div class="min-w-0">
                           <div class="text-sm font-medium text-slate-900">Keputusan</div>
@@ -703,20 +707,20 @@
                 </div>
               </div>
 
-              <div class="mt-5 grid gap-2 text-xs text-slate-600">
+              <div class="grid gap-2 mt-5 text-xs text-slate-600">
                 <div class="inline-flex items-center gap-2">
-                  <svg class="h-4 w-4 text-slate-500" aria-hidden="true"><use href="#i-clock"/></svg>
+                  <svg class="w-4 h-4 text-slate-500" aria-hidden="true"><use href="#i-clock"/></svg>
                   Diajukan: {{ $myApp?->created_at ? e($formatTs($myApp->created_at)) : '—' }}
                 </div>
                 <div class="inline-flex items-center gap-2">
-                  <svg class="h-4 w-4 text-slate-500" aria-hidden="true"><use href="#i-brief"/></svg>
+                  <svg class="w-4 h-4 text-slate-500" aria-hidden="true"><use href="#i-brief"/></svg>
                   Status keseluruhan:
                   @php
                     $overallText = strtoupper($overall ?? 'IN_PROGRESS');
                     $overallClass =
                       ($overall==='hired' ? 'bg-emerald-50 text-emerald-700 ring-emerald-200' :
                       (in_array($overall,['rejected','not_qualified'],true) ? 'bg-slate-100 text-slate-700 ring-slate-200' :
-                      'bg-blue-50 text-blue-700 ring-blue-200'));
+                      'bg-[#f5ede4] text-[#8b5e3c] ring-[#e6d4c0]'));
                   @endphp
                   <span class="ml-1 rounded-full px-2 py-0.5 text-[11px] font-semibold ring-1 ring-inset {{ $overallClass }}">
                     {{ e($overallText) }}
@@ -725,7 +729,7 @@
 
                 @if($lastChangedAt)
                   <div class="inline-flex items-center gap-2">
-                    <svg class="h-4 w-4 text-slate-500" aria-hidden="true"><use href="#i-clock"/></svg>
+                    <svg class="w-4 h-4 text-slate-500" aria-hidden="true"><use href="#i-clock"/></svg>
                     Terakhir diubah: {{ e($formatTs($lastChangedAt)) }}
                     @if($lastChangedBy)
                       <span>• oleh <span class="font-medium text-slate-700">{{ e($lastChangedBy) }}</span></span>
@@ -739,7 +743,7 @@
       </div>
 
       {{-- Tentang Site --}}
-      <div class="rounded-2xl border border-slate-200 bg-white shadow-sm p-5 md:p-6">
+      <div class="p-5 bg-white border shadow-sm rounded-2xl border-slate-200 md:p-6">
         <h3 class="text-base font-semibold text-slate-900">Tentang Site</h3>
         @if($job->site)
           @php
@@ -748,15 +752,15 @@
             $tz    = $normalizeTz($tzRaw);
             $addr  = $s->address ?: data_get($s->meta, 'address');
           @endphp
-          <dl class="mt-3 grid grid-cols-3 gap-y-2 text-sm">
+          <dl class="grid grid-cols-3 mt-3 text-sm gap-y-2">
             <dt class="text-slate-500">Kode</dt><dd class="col-span-2 text-slate-800">{{ e($s->code) }}</dd>
             <dt class="text-slate-500">Nama</dt><dd class="col-span-2 text-slate-800">{{ e($s->name) }}</dd>
             <dt class="text-slate-500">Region</dt><dd class="col-span-2 text-slate-800">{{ e($s->region ?: '—') }}</dd>
             <dt class="text-slate-500">Timezone</dt><dd class="col-span-2 text-slate-800">{{ e($tz ?: '—') }}</dd>
             @if($addr)<dt class="text-slate-500">Alamat</dt><dd class="col-span-2 text-slate-800">{{ e($addr) }}</dd>@endif
           </dl>
-          <div class="mt-3 flex items-center gap-3">
-            <a href="{{ route('sites.show', $s) }}" class="text-sm text-blue-700 hover:underline">Lihat detail site</a>
+          <div class="flex items-center gap-3 mt-3">
+            <a href="{{ route('sites.show', $s) }}" class="text-sm text-[#8b5e3c] hover:underline">Lihat detail site</a>
             @if($isAdmin && Route::has('admin.sites.show'))
               <span class="text-slate-300">•</span>
               <a href="{{ route('admin.sites.show', $s) }}" class="text-sm text-slate-700 hover:underline">Admin view</a>
@@ -769,16 +773,16 @@
 
       {{-- PROFIL KANDIDAT --}}
       @auth
-      <div class="rounded-2xl border border-slate-200 bg-white shadow-sm p-5 md:p-6">
+      <div class="p-5 bg-white border shadow-sm rounded-2xl border-slate-200 md:p-6">
         <div class="flex items-center justify-between">
           <h3 class="text-base font-semibold text-slate-900">Profil Kandidat Kamu</h3>
           @if(Route::has('candidate.profiles.edit'))
-            <a href="{{ route('candidate.profiles.edit', $job) }}" class="text-sm text-blue-700 hover:underline">Ubah</a>
+            <a href="{{ route('candidate.profiles.edit', $job) }}" class="text-sm text-[#8b5e3c] hover:underline">Ubah</a>
           @endif
         </div>
 
         @if($meProfile)
-          <dl class="mt-3 grid grid-cols-3 gap-y-2 text-sm">
+          <dl class="grid grid-cols-3 mt-3 text-sm gap-y-2">
             <dt class="text-slate-500">Nama</dt>
             <dd class="col-span-2 text-slate-800">{{ e($meProfile->full_name ?? auth()->user()->name) }}</dd>
 
@@ -796,13 +800,13 @@
 
           @if($meProfile->cv_path)
             <div class="mt-3 text-sm">
-              <a class="text-blue-700 hover:underline" href="{{ Storage::disk('public')->url($meProfile->cv_path) }}" target="_blank" rel="noopener">Lihat CV</a>
+              <a class="text-[#8b5e3c] hover:underline" href="{{ Storage::disk('public')->url($meProfile->cv_path) }}" target="_blank" rel="noopener">Lihat CV</a>
             </div>
           @endif
 
           <div class="mt-4">
             @if(Route::has('candidate.profiles.edit'))
-              <a href="{{ route('candidate.profiles.edit', $job) }}" class="inline-flex items-center rounded-lg border border-slate-200 px-3 py-2 text-sm hover:bg-slate-50">
+              <a href="{{ route('candidate.profiles.edit', $job) }}" class="inline-flex items-center px-3 py-2 text-sm border rounded-lg border-slate-200 hover:bg-slate-50">
                 Perbarui Profil
               </a>
             @endif
@@ -810,7 +814,7 @@
         @else
           <p class="mt-2 text-sm text-slate-600">Profil kandidat belum diisi.</p>
           @if(Route::has('candidate.profiles.edit'))
-            <a href="{{ route('candidate.profiles.edit', $job) }}" class="mt-3 inline-flex items-center rounded-lg bg-blue-600 px-3 py-2 text-sm font-semibold text-white">
+            <a href="{{ route('candidate.profiles.edit', $job) }}" class="mt-3 inline-flex items-center rounded-lg bg-[linear-gradient(90deg,_#a77d52,_#8b5e3c)] px-3 py-2 text-sm font-semibold text-white">
               Lengkapi Sekarang
             </a>
           @endif
@@ -820,16 +824,16 @@
 
       @isset($relatedJobs)
         @if($relatedJobs->count())
-          <div class="rounded-2xl border border-slate-200 bg-white shadow-sm p-5 md:p-6">
+          <div class="p-5 bg-white border shadow-sm rounded-2xl border-slate-200 md:p-6">
             <h3 class="text-base font-semibold text-slate-900">Lowongan Serupa</h3>
             <ul class="mt-3 space-y-2">
               @foreach($relatedJobs as $r)
                 <li class="flex items-center justify-between gap-3">
                   <div class="min-w-0">
-                    <a href="{{ route('jobs.show', $r) }}" class="font-medium text-slate-900 hover:underline truncate">{{ e($r->title) }}</a>
+                    <a href="{{ route('jobs.show', $r) }}" class="font-medium truncate text-slate-900 hover:underline">{{ e($r->title) }}</a>
                     <div class="text-xs text-slate-500">{{ e($r->division ?: '—') }} · {{ e($r->site?->code ?: '—') }}</div>
                   </div>
-                  <a href="{{ route('jobs.show', $r) }}" class="text-sm text-blue-700 hover:underline shrink-0">Lihat</a>
+                  <a href="{{ route('jobs.show', $r) }}" class="text-sm text-[#8b5e3c] hover:underline shrink-0">Lihat</a>
                 </li>
               @endforeach
             </ul>
