@@ -17,6 +17,7 @@ class MyInterviewController extends Controller
     private function forUserOrFail(Request $r, string $id): Interview
     {
         $u = $r->user();
+        abort_if(!$u, 401);
 
         return Interview::query()
             ->select(['id','application_id','title','mode','start_at','end_at','location','meeting_link','notes'])
@@ -27,7 +28,7 @@ class MyInterviewController extends Controller
                 'application.job.site:id,code,name',
             ])
             ->whereKey($id)
-            ->whereHas('application', fn($q) => $q->where('user_id', $u->id))
+            ->whereRelation('application', 'user_id', $u->id)
             ->firstOrFail();
     }
 
@@ -39,6 +40,7 @@ class MyInterviewController extends Controller
     public function index(Request $request)
     {
         $u = $request->user();
+        abort_if(!$u, 401);
 
         $interviews = Interview::query()
             ->select(['id','application_id','title','mode','start_at','end_at','location','meeting_link'])
@@ -47,8 +49,9 @@ class MyInterviewController extends Controller
                 'application.job:id,title,division,site_id',
                 'application.job.site:id,code,name',
             ])
-            ->whereHas('application', fn($q) => $q->where('user_id', $u->id))
+            ->whereRelation('application', 'user_id', $u->id)
             ->orderBy('start_at')
+            ->orderBy('id')
             ->cursorPaginate(20)
             ->withQueryString();
 

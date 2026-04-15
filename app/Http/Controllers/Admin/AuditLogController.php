@@ -28,14 +28,13 @@ class AuditLogController extends Controller
         }
 
         // === Ambil & sanitasi filter ===
-        $qRaw       = (string) $request->query('q', '');
-        // buang karakter kontrol & batasi panjang (hindari query liar di LIKE)
-        $q          = Str::limit(preg_replace('/[\x00-\x1F\x7F]/u', '', trim($qRaw)) ?? '', 120, '');
-        $event      = (string) $request->query('event', '');
-        $userId     = (string) $request->query('user_id', '');
-        $targetType = (string) $request->query('target_type', '');
+        $q          = $this->sanitizeFilter((string) $request->query('q', ''), 120);
+        $event      = $this->sanitizeFilter((string) $request->query('event', ''), 100);
+        $userId     = $this->sanitizeFilter((string) $request->query('user_id', ''), 64);
+        $targetType = $this->sanitizeFilter((string) $request->query('target_type', ''), 150);
         $dateFrom   = (string) $request->query('from', '');
         $dateTo     = (string) $request->query('to', '');
+        $like       = $q !== '' ? '%'.addcslashes($q, '\\%_').'%' : null;
 
         // parse tanggal aman (opsional)
         [$fromAt, $toAt] = $this->parseDateRange($dateFrom, $dateTo);
@@ -45,8 +44,7 @@ class AuditLogController extends Controller
             ->select(['id','created_at','user_id','event','target_type','target_id','ip']) // kolom minimal untuk listing
             ->with(['user:id,name']) // hanya id & name
             // cari bebas: bungkus OR dalam group agar precedence benar
-            ->when($q !== '', function ($qq) use ($q) {
-                $like = '%'.$q.'%';
+                        ->when($like !== null, function ($qq) use ($like) {
                 $qq->where(function ($w) use ($like) {
                     $w->where('target_id', 'like', $like)
                       ->orWhere('ip', 'like', $like)
@@ -99,18 +97,18 @@ class AuditLogController extends Controller
         }
 
         // Ambil filter yang sama dengan index
-        $qRaw       = (string) $request->query('q', '');
-        $q          = Str::limit(preg_replace('/[\x00-\x1F\x7F]/u', '', trim($qRaw)) ?? '', 120, '');
-        $event      = (string) $request->query('event', '');
-        $userId     = (string) $request->query('user_id', '');
-        $targetType = (string) $request->query('target_type', '');
+        $q          = $this->sanitizeFilter((string) $request->query('q', ''), 120);
+        $event      = $this->sanitizeFilter((string) $request->query('event', ''), 100);
+        $userId     = $this->sanitizeFilter((string) $request->query('user_id', ''), 64);
+        $targetType = $this->sanitizeFilter((string) $request->query('target_type', ''), 150);
         $dateFrom   = (string) $request->query('from', '');
         $dateTo     = (string) $request->query('to', '');
+        $like       = $q !== '' ? '%'.addcslashes($q, '\\%_').'%' : null;
         [$fromAt, $toAt] = $this->parseDateRange($dateFrom, $dateTo);
 
         $file = 'audit_logs_'.now()->format('Ymd_His').'.csv';
 
-        $callback = function () use ($q, $event, $userId, $targetType, $fromAt, $toAt) {
+        $callback = function () use ($like, $event, $userId, $targetType, $fromAt, $toAt) {
             @set_time_limit(0);
             $out = fopen('php://output', 'w');
             fputcsv($out, ['id','created_at','user_id','event','target_type','target_id','ip']);
@@ -118,8 +116,7 @@ class AuditLogController extends Controller
             // Query Builder untuk stream ringan; apply filter yang sama
             $builder = DB::table('audit_logs')
                 ->select(['id','created_at','user_id','event','target_type','target_id','ip'])
-                ->when($q !== '', function ($qq) use ($q) {
-                    $like = '%'.$q.'%';
+                                ->when($like !== null, function ($qq) use ($like) {
                     $qq->where(function ($w) use ($like) {
                         $w->where('target_id','like',$like)
                           ->orWhere('ip','like',$like)
@@ -177,5 +174,14 @@ class AuditLogController extends Controller
         }
 
         return [$fromAt, $toAt];
+    }
+
+    private function sanitizeFilter(string $value, int $maxLen): string
+    {
+        return Str::limit(
+            preg_replace('/[\x00-\x1F\x7F]/u', '', trim($value)) ?? '',
+            $maxLen,
+            ''
+        );
     }
 }

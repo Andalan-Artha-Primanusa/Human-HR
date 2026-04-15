@@ -7,6 +7,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
 use App\Models\{
     User,
+    Company,
     Site,
     Job,
     JobApplication,
@@ -17,6 +18,7 @@ use App\Models\{
     PsychotestAttempt,
     Interview,
     Offer,
+    AuditLog,
     ManpowerRequirement, // budget_headcount dihitung di model
 };
 
@@ -75,6 +77,33 @@ class DemoDataSeeder extends Seeder
         }
 
         /* ===============================
+         * COMPANIES (idempotent)
+         * =============================== */
+        $companiesByCode = [
+            'AHR' => ['name' => 'Andalan HR Services', 'legal_name' => 'PT Andalan HR Services', 'city' => 'Jakarta', 'status' => 'active'],
+            'AGP' => ['name' => 'Andalan Group Plant', 'legal_name' => 'PT Andalan Group Plant', 'city' => 'Samarinda', 'status' => 'active'],
+            'AOP' => ['name' => 'Andalan Operations', 'legal_name' => 'PT Andalan Operations Prima', 'city' => 'Makassar', 'status' => 'active'],
+        ];
+        $companyMap = [];
+        foreach ($companiesByCode as $code => $data) {
+            $companyMap[$code] = Company::updateOrCreate(
+                ['code' => $code],
+                [
+                    'name'        => $data['name'],
+                    'legal_name'  => $data['legal_name'],
+                    'city'        => $data['city'],
+                    'province'    => $data['city'] === 'Jakarta' ? 'DKI Jakarta' : 'Kalimantan Timur',
+                    'country'     => 'Indonesia',
+                    'status'      => $data['status'],
+                    'email'       => strtolower($code).'@andalan.local.test',
+                    'phone'       => '021-555-0101',
+                    'website'     => 'https://andalan.local.test',
+                    'address'     => 'Jl. Demo No. 1',
+                ]
+            );
+        }
+
+        /* ===============================
          * CANDIDATE PROFILES (upsert)
          * =============================== */
         foreach ($candidates as $c) {
@@ -106,6 +135,14 @@ class DemoDataSeeder extends Seeder
         foreach ($sitesByCode as $code => $name) {
             $siteMap[$code] = Site::updateOrCreate(['code' => $code], ['name' => $name]);
         }
+
+        $companyBySite = [
+            'HO'  => 'AHR',
+            'DBK' => 'AGP',
+            'POS' => 'AOP',
+            'SBS' => 'AGP',
+            'MKS' => 'AOP',
+        ];
 
         /* ===============================
          * JOBS + MANPOWER per-site (upsert)
@@ -374,6 +411,7 @@ class DemoDataSeeder extends Seeder
 
             $payload = collect($d)->except('site_code')->toArray();
             $payload['site_id'] = $site->id;
+            $payload['company_id'] = null;
 
             /** @var Job $job */
             $job = Job::updateOrCreate(['code' => $d['code']], $payload);
@@ -396,6 +434,15 @@ class DemoDataSeeder extends Seeder
 
             return $job->fresh();
         })->keyBy('code');
+
+        foreach ($jobs as $code => $job) {
+            $siteCode = $job->site?->code;
+            $companyCode = $companyBySite[$siteCode] ?? 'AHR';
+            $company = $companyMap[$companyCode] ?? null;
+            if ($company) {
+                $job->forceFill(['company_id' => $company->id])->save();
+            }
+        }
 
         /* ===============================
          * PSYCHOTEST master (upsert)
@@ -579,7 +626,7 @@ class DemoDataSeeder extends Seeder
         $J = fn($code) => $jobs[$code];
 
         // Full journey → Hired
-        $seedFullJourney($users['andi@demo.test'],  $J('PLT-ENG-01'));
+        $andiApp = $seedFullJourney($users['andi@demo.test'],  $J('PLT-ENG-01'));
 
         // Aktif berhenti di user_iv
         $bela = JobApplication::updateOrCreate(
@@ -610,6 +657,7 @@ class DemoDataSeeder extends Seeder
         $ensureStage($cici, 'user_iv', 'passed');
         $ensureOffer($cici, 'draft');
         $ensureStage($cici, 'offer', 'pending');
+        $ciciOffer = Offer::where('application_id', $cici->id)->first();
 
         // Beragam stage untuk user lain (contoh singkat)
         $pairs = [
@@ -672,6 +720,70 @@ class DemoDataSeeder extends Seeder
                 $app->update(['overall_status' => 'hired']);
                 $incFilledForJobSite($job);
             }
+        }
+
+        /* ===============================
+         * AUDIT LOGS (demo for admin page)
+         * =============================== */
+        $auditSeed = [
+            [
+                'user_id' => $users['admin@local.test']->id,
+                'event' => 'company.seeded',
+                'target_type' => 'Company',
+                'target_id' => $companyMap['AHR']->id,
+                'before' => null,
+                'after' => ['code' => 'AHR', 'name' => $companyMap['AHR']->name],
+            ],
+            [
+                'user_id' => $users['admin@local.test']->id,
+                'event' => 'job.seeded',
+                'target_type' => 'Job',
+                'target_id' => $J('PLT-ENG-01')->id,
+                'before' => null,
+                'after' => ['code' => 'PLT-ENG-01', 'title' => $J('PLT-ENG-01')->title, 'status' => $J('PLT-ENG-01')->status],
+            ],
+            [
+                'user_id' => $users['hr@demo.test']->id,
+                'event' => 'application.stage.updated',
+                'target_type' => 'JobApplication',
+                'target_id' => $bela->id,
+                'before' => ['stage' => 'psychotest'],
+                'after' => ['stage' => 'user_iv', 'status' => 'pending'],
+            ],
+            [
+                'user_id' => $users['hr@demo.test']->id,
+                'event' => 'offer.created',
+                'target_type' => 'Offer',
+                'target_id' => $ciciOffer?->id,
+                'before' => null,
+                'after' => ['status' => 'draft', 'application_id' => $cici->id],
+            ],
+            [
+                'user_id' => $users['admin@local.test']->id,
+                'event' => 'application.hired',
+                'target_type' => 'JobApplication',
+                'target_id' => $andiApp->id,
+                'before' => ['overall_status' => 'active'],
+                'after' => ['overall_status' => 'hired'],
+            ],
+        ];
+
+        foreach ($auditSeed as $row) {
+            if (!$row['target_id']) continue;
+            AuditLog::updateOrCreate(
+                [
+                    'event'       => $row['event'],
+                    'target_type' => $row['target_type'],
+                    'target_id'   => $row['target_id'],
+                ],
+                [
+                    'user_id'    => $row['user_id'],
+                    'ip'         => '127.0.0.1',
+                    'user_agent' => 'Seeder',
+                    'before'     => $row['before'],
+                    'after'      => $row['after'],
+                ]
+            );
         }
     }
 }

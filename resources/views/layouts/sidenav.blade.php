@@ -44,63 +44,78 @@ if ($u && ($u->name ?? null)) {
 
 // ===== Helper href: kalau belum verified -> arahkan ke notice =====
 $verifyNoticeUrl = Route::has('verification.notice') ? route('verification.notice') : url('/email/verify');
-$href = function(string $routeName, array $params = []) use ($isVerified, $verifyNoticeUrl) {
+$href = function(string $routeName, ...$params) use ($isVerified, $verifyNoticeUrl) {
+  $params = $params[0] ?? [];
+  if (!is_array($params)) {
+    $params = [$params];
+  }
   if (!$isVerified) return $verifyNoticeUrl;
   return Route::has($routeName) ? route($routeName, $params) : url('/');
 };
 
 // ===== Kelas utilitas (tone biru/merah, tanpa gradient putih) =====
 $activeBlue = fn($p) => request()->routeIs($p)
-  ? 'border-blue-600 bg-blue-100/80 text-slate-900 font-semibold ring-1 ring-blue-600/10'
-  : 'border-transparent text-blue-800';
+  ? 'border-white/40 bg-white/20 text-white font-semibold ring-1 ring-white/20'
+  : 'border-transparent text-white/90';
 $activeRed  = fn($p) => request()->routeIs($p)
-  ? 'border-red-600 bg-red-100/80 text-slate-900 font-semibold ring-1 ring-red-600/10'
-  : 'border-transparent text-red-800';
+  ? 'border-white/40 bg-white/20 text-white font-semibold ring-1 ring-white/20'
+  : 'border-transparent text-white/90';
 
-$baseLink       = 'flex items-center gap-3 px-3 py-2 rounded-lg border-l-4 transition hover:ring-1 focus:outline-none hover:ring-black/5 focus-visible:ring-2 focus-visible:ring-slate-900/20';
-$linkDeskBlue   = $baseLink.' hover:bg-blue-100/60';
-$linkDeskRed    = $baseLink.' hover:bg-red-100/60';
-$linkMobileBlue = $baseLink.' hover:bg-blue-100/60';
-$linkMobileRed  = $baseLink.' hover:bg-red-100/60';
+$baseLink       = 'side-link flex items-center gap-3 px-3 py-2 rounded-lg border-l-4 text-white transition hover:ring-1 focus:outline-none hover:ring-black/5 focus-visible:ring-2 focus-visible:ring-slate-900/20';
+$linkDeskBlue   = $baseLink.' hover:bg-white/10';
+$linkDeskRed    = $baseLink.' hover:bg-white/10';
+$linkMobileBlue = $baseLink.' hover:bg-white/10';
+$linkMobileRed  = $baseLink.' hover:bg-white/10';
 
 /* ==== ICON WRAPPERS (dibesut ulang supaya benar² center) ==== */
-$iconBlue = 'grid place-items-center shrink-0 w-8 h-8 rounded-md bg-blue-100 text-blue-700 ring-1 ring-blue-700/10';
-$iconRed  = 'grid place-items-center shrink-0 w-8 h-8 rounded-md bg-red-100  text-red-700  ring-1 ring-red-700/10';
+$iconBlue = 'grid place-items-center shrink-0 w-8 h-8 rounded-md bg-white/95 text-[#8b5e3c] ring-1 ring-white/70';
+$iconRed  = 'grid place-items-center shrink-0 w-8 h-8 rounded-md bg-white/95 text-[#8b5e3c] ring-1 ring-white/70';
 
-$sectionTitle = 'px-3 pt-0.5 pb-0 text-[11px] tracking-wide font-semibold uppercase text-slate-700';
+$sectionTitle = 'section-title px-3 pt-0.5 pb-0 text-[11px] tracking-wide font-semibold uppercase text-white/85';
 $lockVisual   = !$isVerified ? 'opacity-85' : '';
 
 // Group boxes (berwarna, tanpa background putih)
-$groupBoxBlue = 'mx-2 mt-1 rounded-xl border border-blue-200 bg-blue-50 p-1.5 shadow-[inset_0_1px_0_rgba(59,130,246,.18)]';
-$groupBoxRed  = 'mx-2 mt-1 rounded-xl border border-red-200  bg-red-50  p-1.5 shadow-[inset_0_1px_0_rgba(239,68,68,.18)]';
+$groupBoxBlue = 'group-box mx-0 mt-1 rounded-xl border border-[#8b5e3c] bg-[linear-gradient(90deg,_#a77d52,_#8b5e3c)] p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,.18)]';
+$groupBoxRed  = 'group-box mx-0 mt-1 rounded-xl border border-[#8b5e3c] bg-[linear-gradient(90deg,_#a77d52,_#8b5e3c)] p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,.18)]';
 
 // Kartu akun & tombol logout
-$accountCard = 'rounded-xl border border-blue-200 bg-blue-50 hover:bg-blue-100/60 hover:ring-1 hover:ring-blue-900/10 transition';
+$accountCard = 'rounded-xl border border-[#8b5e3c] bg-[linear-gradient(90deg,_#a77d52,_#8b5e3c)] hover:brightness-105 hover:ring-1 hover:ring-[#8b5e3c]/40 transition text-white';
 $logoutBtn   = 'w-full rounded-lg bg-red-600 hover:bg-red-700 px-3 py-2 font-medium shadow-sm hover:shadow transition text-white [&_*]:text-white';
 @endphp
 
 {{-- ====== MINI MODE & LOGO SIZING ====== --}}
 <style>
+  /* Paksa label menu tetap putih di semua state */
+  .sidenav-shell { width: 100%; }
+  .side-link { color: rgba(255, 255, 255, 0.96) !important; }
+  .side-link > span + span { color: #fff !important; }
+
   /* Desktop mini mode */
   @media (min-width: 768px) {
     aside.is-mini a.account-card { justify-content: center; padding: .5rem !important }
     aside.is-mini a.account-card .account-info, aside.is-mini .login-hint { display: none !important }
+    aside.is-mini .section-title { text-align: center; padding-left: 0; padding-right: 0 }
+    aside.is-mini .section-title span:not(:first-child) { display: none !important }
+    aside.is-mini .group-box { margin-left: 0; margin-right: 0; padding: .4rem; border-radius: .9rem }
+    aside.is-mini .side-link { justify-content: center; padding: .55rem !important; border-left-width: 0 !important }
+    aside.is-mini .side-link .label { display: none !important }
     aside.is-mini form .btn { width: 44px; height: 44px; padding: 0; border-radius: .75rem; display: flex; align-items: center; justify-content: center }
     aside.is-mini form .btn>span { gap: 0 }
     aside.is-mini form .btn .label { display: none }
-    aside.is-mini .logo-img { max-height: 40px !important; max-width: 140px !important }
+    aside.is-mini .logo-wrap { min-height: 56px; padding: .25rem .5rem !important }
+    aside.is-mini .logo-img { max-height: 40px !important; max-width: 100% !important }
   }
 
   /* Logo wrapper agar responsif dan tidak overflow */
-  .logo-wrap { min-height: 72px }
+  .logo-wrap { min-height: 72px; width: 100% }
   .logo-img  { max-height: 56px; max-width: 220px; width: auto; object-fit: contain }
 </style>
 
 @if($variant === 'desktop')
-<nav class="flex flex-col min-h-full p-3 space-y-1 text-sm text-slate-900">
+<nav class="flex flex-col min-h-full p-3 space-y-1 text-sm text-white sidenav-shell">
   {{-- LOGO --}}
   <div class="mb-3">
-    <a href="{{ url('/') }}" class="flex items-center justify-center w-full px-3 py-3 rounded-lg logo-wrap hover:bg-blue-50 hover:ring-1 hover:ring-blue-900/10">
+    <a href="{{ url('/') }}" class="flex items-center justify-center w-full px-0 py-3 rounded-lg logo-wrap hover:bg-blue-50 hover:ring-1 hover:ring-blue-900/10">
       <img src="{{ $logoUrl }}" alt="Logo Andalan" class="logo-img" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.style.display='none'">
     </a>
   </div>
@@ -108,24 +123,24 @@ $logoutBtn   = 'w-full rounded-lg bg-red-600 hover:bg-red-700 px-3 py-2 font-med
   {{-- ACCOUNT --}}
   <div class="{{ $sectionTitle }} text-center">
     <span class="inline-block w-1.5 h-1.5 rounded-sm bg-slate-900 align-middle mr-2"></span>
-    <span class="align-middle text-slate-900">Account</span>
+    <span class="text-white align-middle">Account</span>
   </div>
 
   @auth
-  <a href="{{ $href('profile.edit') }}" class="account-card mx-3 mb-2 block {{ $accountCard }} {{ $lockVisual }}">
+  <a href="{{ $href('profile.edit') }}" class="account-card mx-0 mb-2 block {{ $accountCard }} {{ $lockVisual }}">
     <div class="flex items-center gap-3 px-3 py-2">
       @if(($u->profile_photo_url ?? null))
         {{-- AVATAR diperkecil --}}
-        <img src="{{ $u->profile_photo_url }}" alt="{{ e($u->name) }}" class="object-cover w-8 h-8 rounded-full ring-1 ring-blue-900/10" loading="lazy" decoding="async">
+        <img src="{{ $u->profile_photo_url }}" alt="{{ e($u->name) }}" class="object-cover w-8 h-8 rounded-full ring-1 ring-white/50" loading="lazy" decoding="async">
       @else
-        <div class="grid w-8 h-8 font-semibold text-blue-700 bg-blue-100 rounded-full place-content-center ring-1 ring-blue-700/10">
+        <div class="grid w-8 h-8 font-semibold text-[#8b5e3c] bg-white/90 rounded-full place-content-center ring-1 ring-white/60">
           {{ $u ? e($initials) : 'G' }}
         </div>
       @endif
       <div class="min-w-0 account-info">
-        <div class="text-xs text-slate-700 truncate max-w-[220px]">{{ e($u->email) }}</div>
-        <div class="font-medium text-slate-900 truncate max-w-[180px]">{{ e($u->name) }}</div>
-        <div class="mt-0.5 inline-flex items-center text-[10px] px-2 py-0.5 rounded-full {{ $isVerified ? 'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-700/10' : 'bg-red-100 text-red-700 ring-1 ring-red-700/10' }}">
+        <div class="text-xs text-white/85 truncate max-w-[220px]">{{ e($u->email) }}</div>
+        <div class="font-medium text-white truncate max-w-[180px]">{{ e($u->name) }}</div>
+        <div class="mt-0.5 inline-flex items-center text-[10px] px-2 py-0.5 rounded-full {{ $isVerified ? 'bg-white/20 text-white ring-1 ring-white/35' : 'bg-white/15 text-white ring-1 ring-white/30' }}">
           {{ $isVerified ? 'Verified' : 'Belum Terverifikasi' }}
         </div>
       </div>
@@ -133,7 +148,7 @@ $logoutBtn   = 'w-full rounded-lg bg-red-600 hover:bg-red-700 px-3 py-2 font-med
   </a>
 
   @if(!$isVerified)
-    <div class="p-3 mx-3 mb-2 border border-red-200 rounded-lg bg-red-50">
+    <div class="p-3 mx-0 mb-2 border border-red-200 rounded-lg bg-red-50">
       <div class="text-[12px] text-red-800 mb-2">Akun belum terverifikasi. Selesaikan verifikasi untuk akses menu.</div>
       @if (Route::has('verification.send'))
       <form method="POST" action="{{ route('verification.send') }}">
@@ -149,7 +164,7 @@ $logoutBtn   = 'w-full rounded-lg bg-red-600 hover:bg-red-700 px-3 py-2 font-med
     </div>
   @endif
   @else
-    <div class="px-3 mb-1 text-xs login-hint text-slate-600">Belum masuk (login)</div>
+    <div class="px-3 mb-1 text-xs login-hint text-white/80">Belum masuk (login)</div>
     <a href="{{ route('login') }}" class="{{ $linkDeskBlue }} {{ $activeBlue('login') }}">
       <span class="{{ $iconBlue }}"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15V18.75A2.25 2.25 0 0010.5 21h6.75A2.25 2.25 0 0019.5 18.75v-13.5A2 2 0 0017.25 3H10.5A2.25 2.25 0 008.25 5.25V9M15 12H3m0 0 3-3m-3 3 3 3"/></svg></span>
       <span class="label">Login</span>
@@ -159,7 +174,7 @@ $logoutBtn   = 'w-full rounded-lg bg-red-600 hover:bg-red-700 px-3 py-2 font-med
   {{-- GENERAL --}}
   <div class="{{ $sectionTitle }} text-center">
     <span class="inline-block w-1.5 h-1.5 rounded-sm bg-[#a77d52] align-middle mr-2"></span>
-    <span class="text-blue-700 align-middle">General</span>
+    <span class="text-white align-middle">General</span>
   </div>
 
   <div class="{{ $groupBoxBlue }} {{ $lockVisual }}">
@@ -182,7 +197,7 @@ $logoutBtn   = 'w-full rounded-lg bg-red-600 hover:bg-red-700 px-3 py-2 font-med
   @if($hasAdminRole)
   <div class="{{ $sectionTitle }} text-center">
     <span class="inline-block w-1.5 h-1.5 rounded-sm bg-red-700 align-middle mr-2"></span>
-    <span class="text-red-700 align-middle">Admin</span>
+    <span class="text-black align-middle">Admin</span>
   </div>
 
   <div class="{{ $groupBoxRed }} {{ $lockVisual }}">
@@ -276,7 +291,7 @@ $logoutBtn   = 'w-full rounded-lg bg-red-600 hover:bg-red-700 px-3 py-2 font-med
 
   {{-- LOGOUT --}}
   @auth
-  <form method="POST" action="{{ route('logout') }}" class="px-3 pt-2 pb-2">
+  <form method="POST" action="{{ route('logout') }}" class="px-0 pt-2 pb-2">
     @csrf
     <button class="btn {{ $logoutBtn }}" title="Logout">
       <span class="inline-flex items-center justify-center w-full gap-2">
@@ -292,32 +307,32 @@ $logoutBtn   = 'w-full rounded-lg bg-red-600 hover:bg-red-700 px-3 py-2 font-med
 
 @else
 {{-- ===================== MOBILE ===================== --}}
-<nav class="flex flex-col min-h-full space-y-1 text-sm text-slate-900">
+<nav class="flex flex-col min-h-full space-y-1 text-sm text-white sidenav-shell">
   <a href="{{ url('/') }}" {!! $closeAttr !!} class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-blue-50 hover:ring-1 hover:ring-blue-900/10">
     <img src="{{ $logoUrl }}" alt="Logo" class="object-contain w-7 h-7" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.style.display='none'">
     <div class="leading-tight">
-      <div class="font-semibold text-slate-900">{{ e($appName) }}</div>
-      <div class="text-[10px] text-slate-500">Andalan Group</div>
+      <div class="font-semibold text-white">{{ e($appName) }}</div>
+      <div class="text-[10px] text-white/75">Andalan Group</div>
     </div>
   </a>
 
   <div class="{{ $sectionTitle }} text-center">
     <span class="inline-block w-1.5 h-1.5 rounded-sm bg-slate-900 align-middle mr-2"></span>
-    <span class="align-middle text-slate-900">Account</span>
+    <span class="text-black align-middle">Account</span>
   </div>
 
   @auth
-  <a href="{{ $href('profile.edit') }}" {!! $closeAttr !!} class="account-card mx-3 mb-2 block {{ $accountCard }} {{ $lockVisual }}">
+  <a href="{{ $href('profile.edit') }}" {!! $closeAttr !!} class="account-card mx-0 mb-2 block {{ $accountCard }} {{ $lockVisual }}">
     <div class="flex items-center gap-3 px-3 py-2">
       @if(($u->profile_photo_url ?? null))
-        <img src="{{ $u->profile_photo_url }}" alt="{{ e($u->name) }}" class="object-cover w-8 h-8 rounded-full ring-1 ring-blue-900/10" loading="lazy" decoding="async">
+        <img src="{{ $u->profile_photo_url }}" alt="{{ e($u->name) }}" class="object-cover w-8 h-8 rounded-full ring-1 ring-white/50" loading="lazy" decoding="async">
       @else
-        <div class="grid w-8 h-8 font-semibold text-blue-700 bg-blue-100 rounded-full place-content-center ring-1 ring-blue-700/10">{{ $u ? e($initials) : 'G' }}</div>
+        <div class="grid w-8 h-8 font-semibold text-[#8b5e3c] bg-white/90 rounded-full place-content-center ring-1 ring-white/60">{{ $u ? e($initials) : 'G' }}</div>
       @endif
       <div class="min-w-0 account-info">
-        <div class="text-xs text-slate-700 truncate max-w-[240px]">{{ e($u->email) }}</div>
-        <div class="font-medium text-slate-900 truncate max-w-[180px]">{{ e($u->name) }}</div>
-        <div class="mt-0.5 inline-flex items-center text-[10px] px-2 py-0.5 rounded-full {{ $isVerified ? 'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-700/10' : 'bg-red-100 text-red-700 ring-1 ring-red-700/10' }}">
+        <div class="text-xs text-white/85 truncate max-w-[240px]">{{ e($u->email) }}</div>
+        <div class="font-medium text-white truncate max-w-[180px]">{{ e($u->name) }}</div>
+        <div class="mt-0.5 inline-flex items-center text-[10px] px-2 py-0.5 rounded-full {{ $isVerified ? 'bg-white/20 text-white ring-1 ring-white/35' : 'bg-white/15 text-white ring-1 ring-white/30' }}">
           {{ $isVerified ? 'Verified' : 'Belum Terverifikasi' }}
         </div>
       </div>
@@ -325,7 +340,7 @@ $logoutBtn   = 'w-full rounded-lg bg-red-600 hover:bg-red-700 px-3 py-2 font-med
   </a>
 
   @if(!$isVerified)
-  <div class="p-3 mx-3 mb-2 border border-red-200 rounded-lg bg-red-50">
+  <div class="p-3 mx-0 mb-2 border border-red-200 rounded-lg bg-red-50">
     <div class="text-[12px] text-red-800 mb-2">Akun belum terverifikasi. Selesaikan verifikasi untuk akses menu.</div>
     @if (Route::has('verification.send'))
     <form method="POST" action="{{ route('verification.send') }}" {!! $closeAttr !!}>
@@ -341,7 +356,7 @@ $logoutBtn   = 'w-full rounded-lg bg-red-600 hover:bg-red-700 px-3 py-2 font-med
   </div>
   @endif
   @else
-    <div class="px-3 mb-1 text-xs login-hint text-slate-600">Belum masuk (login)</div>
+    <div class="px-3 mb-1 text-xs login-hint text-white/80">Belum masuk (login)</div>
     <a href="{{ route('login') }}" {!! $closeAttr !!} class="{{ $linkMobileBlue }} {{ $activeBlue('login') }}">
       <span class="{{ $iconBlue }}"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15V18.75A2.25 2.25 0 0010.5 21h6.75A2.25 2.25 0 0019.5 18.75v-13.5A2 2 0 0017.25 3H10.5A2.25 2.25 0 008.25 5.25V9M15 12H3m0 0 3-3m-3 3 3 3"/></svg></span>
       <span>Login</span>
@@ -350,7 +365,7 @@ $logoutBtn   = 'w-full rounded-lg bg-red-600 hover:bg-red-700 px-3 py-2 font-med
 
   <div class="{{ $sectionTitle }} text-center">
     <span class="inline-block w-1.5 h-1.5 rounded-sm bg-[#a77d52] align-middle mr-2"></span>
-    <span class="text-blue-700 align-middle">General</span>
+    <span class="text-black align-middle">General</span>
   </div>
 
   <div class="{{ $groupBoxBlue }} {{ $lockVisual }}">
@@ -377,7 +392,7 @@ $logoutBtn   = 'w-full rounded-lg bg-red-600 hover:bg-red-700 px-3 py-2 font-med
   @if($hasAdminRole)
   <div class="{{ $sectionTitle }} text-center">
     <span class="inline-block w-1.5 h-1.5 rounded-sm bg-red-700 align-middle mr-2"></span>
-    <span class="text-red-700 align-middle">Admin</span>
+    <span class="text-black align-middle">Admin</span>
   </div>
 
   <div class="{{ $groupBoxRed }} {{ $lockVisual }}">
@@ -470,7 +485,7 @@ $logoutBtn   = 'w-full rounded-lg bg-red-600 hover:bg-red-700 px-3 py-2 font-med
   <div class="flex-1"></div>
 
   @auth
-  <form method="POST" action="{{ route('logout') }}" class="px-3 pt-2 pb-2">
+  <form method="POST" action="{{ route('logout') }}" class="px-0 pt-2 pb-2">
     @csrf
     <button class="btn {{ $logoutBtn }}" title="Logout" {!! $closeAttr !!}>
       <span class="inline-flex items-center justify-center w-full gap-2">

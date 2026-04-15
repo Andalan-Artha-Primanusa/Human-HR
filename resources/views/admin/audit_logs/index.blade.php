@@ -19,66 +19,61 @@
   </svg>
 @endonce
 
-<div class="mx-auto w-full max-w-[1440px] px-4 py-6 space-y-6">
+<div class="mx-auto w-full max-w-[1440px] px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
   {{-- HEADER --}}
-  <section class="relative rounded-2xl border bg-white shadow-sm" style="border-color: {{ $BORD }}">
-    <div class="relative h-24 rounded-t-2xl overflow-hidden">
+  <section class="overflow-hidden rounded-2xl border bg-white shadow-sm" style="border-color: {{ $BORD }}">
+    <div class="relative h-20 sm:h-24 rounded-t-2xl overflow-hidden">
+      <div class="absolute inset-0 rounded-t-2xl" style="background: linear-gradient(90deg, {{ $PRIMARY }}, {{ $SECOND }});"></div>
+      <div class="absolute inset-y-0 right-0 rounded-tr-2xl w-24 sm:w-36" style="background: linear-gradient(90deg, {{ $SECOND }}, {{ $PRIMARY }});"></div>
 
-      {{-- 🔥 GRADIENT BRAND --}}
-      <div class="absolute inset-0"
-           style="background: linear-gradient(90deg, {{ $PRIMARY }}, {{ $SECOND }});">
-      </div>
-
-      {{-- aksen kanan --}}
-      <div class="absolute right-0 w-32 h-full opacity-30 bg-black"></div>
-
-      <div class="relative h-full px-6 flex items-center text-white">
-        <div>
-          <h1 class="text-2xl font-bold">Audit Logs</h1>
-          <p class="text-sm opacity-90">Jejak perubahan data & aktivitas pengguna.</p>
+      <div class="relative h-full px-5 md:px-6 flex items-center text-white">
+        <div class="min-w-0">
+          <h1 class="text-2xl sm:text-3xl font-semibold tracking-tight text-white">Audit Logs</h1>
+          <p class="text-xs sm:text-sm text-white/90">Jejak perubahan data & aktivitas pengguna.</p>
         </div>
       </div>
     </div>
 
     {{-- FILTER --}}
     <form method="GET"
-      class="mt-4 grid md:grid-cols-6 gap-3 rounded-xl border bg-white p-4 shadow-sm"
+      class="mt-3 md:mt-4 grid grid-cols-1 gap-2 md:grid-cols-6 px-3 py-3 md:px-4 md:py-4 shadow-sm"
+      role="search" aria-label="Filter Audit Logs"
       style="border-color: {{ $BORD }}">
 
-      <input class="rounded-lg border px-3 py-2 text-sm focus:ring-2"
+      <input class="rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2"
         style="--tw-ring-color: {{ $PRIMARY }}"
         type="text" name="q" placeholder="Search...">
 
-      <input class="rounded-lg border px-3 py-2 text-sm focus:ring-2"
+      <input class="rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2"
         style="--tw-ring-color: {{ $PRIMARY }}"
         type="text" name="event" placeholder="Event">
 
-      <input class="rounded-lg border px-3 py-2 text-sm focus:ring-2"
+      <input class="rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2"
         style="--tw-ring-color: {{ $PRIMARY }}"
         type="text" name="user_id" placeholder="User ID">
 
-      <input class="rounded-lg border px-3 py-2 text-sm focus:ring-2"
+      <input class="rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2"
         style="--tw-ring-color: {{ $PRIMARY }}"
         type="text" name="target_type" placeholder="Target">
 
-      <input class="rounded-lg border px-3 py-2 text-sm focus:ring-2"
+      <input class="rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2"
         style="--tw-ring-color: {{ $PRIMARY }}"
         type="date" name="from">
 
-      <input class="rounded-lg border px-3 py-2 text-sm focus:ring-2"
+      <input class="rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2"
         style="--tw-ring-color: {{ $PRIMARY }}"
         type="date" name="to">
 
       <div class="md:col-span-6 flex gap-2">
         <button type="submit"
-          class="px-4 py-2 text-white rounded-lg font-semibold"
-          style="background: {{ $PRIMARY }}">
+          class="inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-white hover:opacity-95 focus:outline-none focus:ring-2 focus:ring-offset-2"
+          style="background: {{ $PRIMARY }}; --tw-ring-color: {{ $PRIMARY }};">
           Filter
         </button>
 
         <a href="#"
-          class="px-4 py-2 rounded-lg border text-sm hover:bg-gray-50">
+          class="px-4 py-2 rounded-lg border border-slate-200 text-sm hover:bg-slate-50">
           Export CSV
         </a>
       </div>

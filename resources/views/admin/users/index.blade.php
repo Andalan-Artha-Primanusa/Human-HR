@@ -19,45 +19,44 @@
   $status = $status ?? request('status');
 @endphp
 
-<div class="mx-auto w-full max-w-[1440px] px-4 py-6 space-y-6">
+<div class="mx-auto w-full max-w-[1440px] px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
-  {{-- HEADER --}}
-  <section class="rounded-2xl border bg-white shadow-sm" style="border-color: {{ $BORD }}">
-    <div class="relative h-24 rounded-t-2xl overflow-hidden">
+  {{-- HEADER dua-tone + FILTER --}}
+  <section class="overflow-hidden bg-white border shadow-sm rounded-2xl" style="border-color: {{ $BORD }}">
+    <div class="relative">
+      <div class="w-full h-20 sm:h-24" style="background: linear-gradient(90deg, {{ $PRIMARY }}, {{ $SECOND }});"></div>
+      <div class="absolute inset-y-0 right-0 w-24 sm:w-36" style="background: linear-gradient(90deg, {{ $SECOND }}, {{ $PRIMARY }});"></div>
 
-      {{-- 🔥 GRADIENT --}}
-      <div class="absolute inset-0"
-           style="background: linear-gradient(90deg, {{ $PRIMARY }}, {{ $SECOND }});"></div>
-
-      <div class="absolute right-0 w-32 h-full opacity-30 bg-black"></div>
-
-      <div class="relative h-full px-6 flex items-center justify-between text-white">
-        <div>
-          <h1 class="text-2xl font-bold">Users</h1>
-          <p class="text-sm opacity-90">Kelola pengguna & peran</p>
+      <div class="absolute inset-0 flex flex-col gap-3 px-5 py-4 text-white md:px-6 sm:flex-row sm:items-center sm:justify-between">
+        <div class="min-w-0">
+          <h1 class="text-2xl font-semibold tracking-tight text-white sm:text-3xl">Users</h1>
+          <p class="text-xs sm:text-sm text-white/90">Kelola pengguna & peran.</p>
         </div>
 
-        <div class="flex gap-2">
-          <a href="{{ route('admin.users.create') }}"
-             class="px-4 py-2 rounded-lg bg-white text-sm font-semibold text-gray-800">
-             + New User
-          </a>
-        </div>
+        <a href="{{ route('admin.users.create') }}"
+           class="inline-flex items-center justify-center w-full gap-2 px-4 py-2 text-sm font-semibold bg-white rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-offset-2 sm:w-auto"
+           style="--tw-ring-color: {{ $PRIMARY }}">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" aria-hidden="true" style="color: {{ $PRIMARY }}">
+            <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          + New User
+        </a>
       </div>
     </div>
 
     {{-- FILTER --}}
     <form method="GET"
-      class="mt-4 grid sm:grid-cols-4 gap-3 rounded-xl border bg-white p-4 shadow-sm"
+      class="mt-3 md:mt-4 grid grid-cols-1 gap-2 md:grid-cols-[1fr_auto_auto_auto] px-3 py-3 md:px-4 md:py-4 shadow-sm"
+      role="search" aria-label="Filter Users"
       style="border-color: {{ $BORD }}">
 
       <input type="text" name="q" value="{{ $q }}"
         placeholder="Search..."
-        class="rounded-lg border px-3 py-2 text-sm focus:ring-2"
+        class="w-full px-3 py-2 text-sm border rounded-lg border-slate-200 focus:outline-none focus:ring-2"
         style="--tw-ring-color: {{ $PRIMARY }}">
 
       <select name="role"
-        class="rounded-lg border px-3 py-2 text-sm focus:ring-2"
+        class="w-full px-3 py-2 text-sm border rounded-lg border-slate-200 focus:outline-none focus:ring-2"
         style="--tw-ring-color: {{ $PRIMARY }}">
         <option value="">All Role</option>
         @foreach(($roleOptions ?? []) as $opt)
@@ -66,23 +65,30 @@
       </select>
 
       <select name="status"
-        class="rounded-lg border px-3 py-2 text-sm focus:ring-2"
+        class="w-full px-3 py-2 text-sm border rounded-lg border-slate-200 focus:outline-none focus:ring-2"
         style="--tw-ring-color: {{ $PRIMARY }}">
         <option value="">All Status</option>
         <option value="active">Active</option>
         <option value="inactive">Inactive</option>
       </select>
 
-      <button
-        class="rounded-lg text-white font-semibold"
-        style="background: {{ $PRIMARY }}">
-        Filter
-      </button>
+      <div class="flex gap-2">
+        <button type="submit"
+          class="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-lg hover:opacity-95 focus:outline-none focus:ring-2 focus:ring-offset-2 md:shrink-0"
+          style="background-color:#0f172a; border:1px solid #0f172a; --tw-ring-color: {{ $PRIMARY }};"
+          aria-label="Filter">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <circle cx="11" cy="11" r="7" stroke="#ffffff" stroke-width="2"/>
+            <path d="M21 21l-3.5-3.5" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <span>Filter</span>
+        </button>
+      </div>
     </form>
   </section>
 
   {{-- TABLE --}}
-  <section class="rounded-2xl border bg-white shadow-sm" style="border-color: {{ $BORD }}">
+  <section class="bg-white border shadow-sm rounded-2xl border-slate-200" style="border-color: {{ $BORD }}">
     <div class="overflow-x-auto">
       <table class="min-w-full text-sm">
 
@@ -112,7 +118,7 @@
             @endif
 
             <td class="px-4 py-3">
-              <span class="px-2 py-1 rounded text-sm"
+              <span class="px-2 py-1 text-sm rounded"
                     style="background:#f5efe8; color:#8b5e3c">
                 {{ $user->role ?? '-' }}
               </span>
@@ -141,7 +147,7 @@
           </tr>
           @empty
           <tr>
-            <td colspan="6" class="text-center py-6 text-gray-500">No data</td>
+            <td colspan="6" class="py-6 text-center text-gray-500">No data</td>
           </tr>
           @endforelse
         </tbody>

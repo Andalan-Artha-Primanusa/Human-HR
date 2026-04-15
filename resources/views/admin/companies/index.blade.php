@@ -3,8 +3,8 @@
 
 @php
   // THEME
-  $BLUE = '#1d4ed8'; // blue-700
-  $RED  = '#dc2626'; // red-600
+  $ACCENT = '#a77d52';
+  $ACCENT_DARK = '#8b5e3c';
   $BORD = '#e5e7eb'; // slate-200
 @endphp
 
@@ -31,20 +31,20 @@
 <div class="mx-auto w-full max-w-[1440px] px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
   {{-- HEADER dua-tone biru/merah --}}
-  <section class="overflow-hidden rounded-2xl border bg-white shadow-sm" style="border-color: {{ $BORD }}">
+  <section class="overflow-hidden bg-white border shadow-sm rounded-2xl" style="border-color: {{ $BORD }}">
     <div class="relative">
-      <div class="h-20 sm:h-24 w-full" style="background: {{ $BLUE }}"></div>
-      <div class="absolute inset-y-0 right-0 w-24 sm:w-36" style="background: {{ $RED }}"></div>
+      <div class="w-full h-20 sm:h-24" style="background: linear-gradient(90deg, {{ $ACCENT }}, {{ $ACCENT_DARK }})"></div>
+      <div class="absolute inset-y-0 right-0 w-24 sm:w-36" style="background: linear-gradient(90deg, {{ $ACCENT_DARK }}, {{ $ACCENT }})"></div>
 
-      <div class="absolute inset-0 flex flex-col gap-3 px-5 md:px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
+      <div class="absolute inset-0 flex flex-col gap-3 px-5 py-4 md:px-6 sm:flex-row sm:items-center sm:justify-between">
         <div class="min-w-0">
-          <h1 class="text-2xl sm:text-3xl font-semibold tracking-tight text-white">Companies</h1>
+          <h1 class="text-2xl font-semibold tracking-tight text-white sm:text-3xl">Companies</h1>
           <p class="text-xs sm:text-sm text-white/90">Kelola daftar perusahaan dengan cepat.</p>
         </div>
         <a href="{{ route('admin.companies.create') }}"
-           class="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-offset-2"
-           style="--tw-ring-color: {{ $BLUE }}">
-          <svg class="h-4 w-4" style="color: {{ $BLUE }}"><use href="#i-arrow"/></svg>
+           class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold bg-white rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-offset-2"
+           style="--tw-ring-color: {{ $ACCENT }}">
+          <svg class="w-4 h-4" style="color: {{ $ACCENT }}"><use href="#i-arrow"/></svg>
           New Company
         </a>
       </div>
@@ -52,21 +52,20 @@
 
     {{-- FILTERS --}}
     <div class="p-5 md:p-6">
-      <form method="GET" class="grid grid-cols-1 md:grid-cols-3 gap-3" role="search" aria-label="Filter Companies">
+      <form method="GET" class="grid grid-cols-1 gap-3 md:grid-cols-3" role="search" aria-label="Filter Companies">
         <input name="q" value="{{ e($q ?? '') }}" placeholder="Search name/code…"
-               class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2"
-               style="--tw-ring-color: {{ $BLUE }}" autocomplete="off" />
+               class="w-full px-3 py-2 text-sm border rounded-lg border-slate-200 focus:outline-none focus:ring-2"
+               style="--tw-ring-color: {{ $ACCENT }}" autocomplete="off" />
         <select name="status"
-                class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2"
-                style="--tw-ring-color: {{ $BLUE }}">
+                class="w-full px-3 py-2 text-sm border rounded-lg border-slate-200 focus:outline-none focus:ring-2"
+          style="--tw-ring-color: {{ $ACCENT }}">
           <option value="">All status</option>
           <option value="active" @selected(($status ?? '')==='active')>Active</option>
           <option value="inactive" @selected(($status ?? '')==='inactive')>Inactive</option>
         </select>
        <div class="flex gap-2">
   <button type="submit"
-          class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-white
-                 hover:opacity-95 focus:outline-none focus:ring-2"
+          class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-lg hover:opacity-95 focus:outline-none focus:ring-2"
           style="background-color:#0f172a; border:1px solid #0f172a; --tw-ring-color:#0f172a;"
           aria-label="Filter">
     {{-- ICON inline: putih fix, tanpa currentColor --}}
@@ -89,13 +88,13 @@
         $isActive = strtolower((string)$c->status) === 'active';
       @endphp
       <a href="{{ route('admin.companies.show', $c) }}"
-         class="block rounded-2xl border border-slate-200 bg-white p-4 shadow-sm hover:shadow-md transition">
+         class="block p-4 transition bg-white border shadow-sm rounded-2xl border-slate-200 hover:shadow-md">
         <div class="flex items-start justify-between gap-3">
           <div class="min-w-0">
             <div class="text-xs text-slate-500">{{ e($c->code) }}</div>
             <div class="mt-0.5 text-lg font-semibold text-slate-900 truncate">{{ e($c->name) }}</div>
             @if($c->legal_name)
-              <div class="text-slate-600 text-sm truncate">{{ e($c->legal_name) }}</div>
+              <div class="text-sm truncate text-slate-600">{{ e($c->legal_name) }}</div>
             @endif
           </div>
           <span class="shrink-0 inline-flex items-center gap-1 rounded-full px-2 py-1 text-[11px] font-semibold ring-1 ring-inset
@@ -106,7 +105,7 @@
         </div>
       </a>
     @empty
-      <div class="col-span-full rounded-2xl border border-dashed border-slate-200 bg-white p-8 text-center text-slate-500">
+      <div class="p-8 text-center bg-white border border-dashed col-span-full rounded-2xl border-slate-200 text-slate-500">
         No companies.
       </div>
     @endforelse
@@ -128,6 +127,7 @@
 
   // Nomor halaman hanya untuk LengthAware
   if ($isLength) {
+      $paginator = $items;
       $current = $items->currentPage();
       $last    = $items->lastPage();
 
@@ -143,12 +143,12 @@
         if ($right < $last - 1) $pages[] = '...';
         $pages[] = $last;
       }
-      $pageUrl = fn (int $p) => $items->url($p);
+      $pageUrl = fn (int $p) => $paginator->url($p);
   }
 @endphp
 
-<section class="rounded-2xl border border-slate-200 bg-white p-3 md:p-4 shadow-sm">
-  <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between text-sm">
+<section class="p-3 bg-white border shadow-sm rounded-2xl border-slate-200 md:p-4">
+  <div class="flex flex-col gap-3 text-sm md:flex-row md:items-center md:justify-between">
     <div class="text-slate-700">
       Menampilkan <span class="font-semibold text-slate-900">{{ $from }}–{{ $to }}</span>
       @if($isLength)
@@ -157,17 +157,17 @@
     </div>
 
     <nav class="ml-auto" aria-label="Pagination">
-      <ul class="inline-flex items-stretch overflow-hidden rounded-xl border border-slate-200 bg-white">
+      <ul class="inline-flex items-stretch overflow-hidden bg-white border rounded-xl border-slate-200">
         {{-- Prev --}}
         <li>
           @if($prevUrl)
             <a href="{{ $prevUrl }}" class="grid place-items-center px-2.5 h-9 hover:bg-slate-50 focus:outline-none focus:ring-2"
-               style="--tw-ring-color: {{ $BLUE }}" aria-label="Previous">
-              <svg class="h-4 w-4 text-slate-700"><use href="#i-chevron-left"/></svg>
+               style="--tw-ring-color: {{ $ACCENT }}" aria-label="Previous">
+              <svg class="w-4 h-4 text-slate-700"><use href="#i-chevron-left"/></svg>
             </a>
           @else
             <span class="grid place-items-center px-2.5 h-9 opacity-40 cursor-not-allowed" aria-hidden="true">
-              <svg class="h-4 w-4 text-slate-700"><use href="#i-chevron-left"/></svg>
+              <svg class="w-4 h-4 text-slate-700"><use href="#i-chevron-left"/></svg>
             </span>
           @endif
         </li>
@@ -176,16 +176,16 @@
         @if($isLength)
           @foreach($pages as $p)
             @if($p === '...')
-              <li class="grid place-items-center px-3 h-9 text-slate-500 select-none">…</li>
+              <li class="grid px-3 select-none place-items-center h-9 text-slate-500">…</li>
             @else
               @php $isCur = ((int)$p === $current); @endphp
               <li class="grid place-items-center h-9">
                 @if($isCur)
-                  <span class="px-3 h-full inline-flex items-center font-semibold text-slate-900 bg-slate-100 border-l border-slate-200 select-none">{{ $p }}</span>
+                  <span class="inline-flex items-center h-full px-3 font-semibold border-l select-none text-slate-900 bg-slate-100 border-slate-200">{{ $p }}</span>
                 @else
                   <a href="{{ $pageUrl((int)$p) }}"
-                     class="px-3 h-full inline-flex items-center text-slate-700 hover:bg-slate-50 border-l border-slate-200 focus:outline-none focus:ring-2"
-                     style="--tw-ring-color: {{ $BLUE }}" aria-label="Page {{ $p }}">{{ $p }}</a>
+                     class="inline-flex items-center h-full px-3 border-l text-slate-700 hover:bg-slate-50 border-slate-200 focus:outline-none focus:ring-2"
+                     style="--tw-ring-color: {{ $ACCENT }}" aria-label="Page {{ $p }}">{{ $p }}</a>
                 @endif
               </li>
             @endif
@@ -196,12 +196,12 @@
         <li class="border-l border-slate-200">
           @if($nextUrl)
             <a href="{{ $nextUrl }}" class="grid place-items-center px-2.5 h-9 hover:bg-slate-50 focus:outline-none focus:ring-2"
-               style="--tw-ring-color: {{ $BLUE }}" aria-label="Next">
-              <svg class="h-4 w-4 text-slate-700"><use href="#i-chevron-right"/></svg>
+               style="--tw-ring-color: {{ $ACCENT }}" aria-label="Next">
+              <svg class="w-4 h-4 text-slate-700"><use href="#i-chevron-right"/></svg>
             </a>
           @else
             <span class="grid place-items-center px-2.5 h-9 opacity-40 cursor-not-allowed" aria-hidden="true">
-              <svg class="h-4 w-4 text-slate-700"><use href="#i-chevron-right"/></svg>
+              <svg class="w-4 h-4 text-slate-700"><use href="#i-chevron-right"/></svg>
             </span>
           @endif
         </li>

@@ -3,8 +3,8 @@
 
 @php
   // THEME
-  $BLUE = '#1d4ed8'; // blue-700
-  $RED  = '#dc2626'; // red-600
+  $ACCENT = '#a77d52'; // brown
+  $ACCENT_DARK = '#8b5e3c'; // dark brown
   $BORD = '#e5e7eb'; // slate-200
 
   // Opsi Level & Division dari Model (fallback)
@@ -29,8 +29,8 @@
   {{-- HEADER dua-tone --}}
   <section class="relative rounded-2xl border bg-white shadow-sm" style="border-color: {{ $BORD }}">
     <div class="relative h-20 sm:h-24 rounded-t-2xl overflow-hidden">
-      <div class="absolute inset-0 rounded-t-2xl" style="background: {{ $BLUE }}"></div>
-      <div class="absolute inset-y-0 right-0 rounded-tr-2xl w-24 sm:w-36" style="background: {{ $RED }}"></div>
+      <div class="absolute inset-0 rounded-t-2xl" style="background: {{ $ACCENT }}"></div>
+      <div class="absolute inset-y-0 right-0 rounded-tr-2xl w-24 sm:w-36" style="background: {{ $ACCENT_DARK }}"></div>
 
       <div class="relative h-full px-5 md:px-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div class="min-w-0">
@@ -44,10 +44,10 @@
         <div class="flex gap-2">
           <a href="{{ route('admin.jobs.index') }}"
              class="inline-flex items-center rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2"
-             style="--tw-ring-color: {{ $BLUE }}">Kembali</a>
+             style="--tw-ring-color: {{ $ACCENT }}">Kembali</a>
           <button form="jobCreateForm"
                   class="inline-flex items-center rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:opacity-95 focus:outline-none focus:ring-2 focus:ring-offset-2"
-                  style="--tw-ring-color: {{ $BLUE }}">Simpan</button>
+                  style="--tw-ring-color: {{ $ACCENT }}">Simpan</button>
         </div>
       </div>
     </div>

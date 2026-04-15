@@ -86,33 +86,57 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
-        $qRaw   = (string) $request->query('q', '');
+        $filters = $request->validate([
+            'q' => ['nullable', 'string', 'max:120'],
+            'role' => ['nullable', 'string', 'max:100'],
+            'status' => ['nullable', Rule::in(['active', 'inactive'])],
+        ]);
+
+        $qRaw   = (string) ($filters['q'] ?? '');
         $q      = Str::limit(preg_replace('/[\x00-\x1F\x7F]/u', '', trim($qRaw)) ?? '', 120, '');
-        $role   = (string) $request->query('role', '');
-        $status = (string) $request->query('status', '');
+        $like   = $q !== '' ? '%'.addcslashes($q, '\\%_').'%' : null;
+        $role   = (string) ($filters['role'] ?? '');
+        $status = (string) ($filters['status'] ?? '');
+
+        $hasUsersRole   = Schema::hasColumn('users','role');
+        $hasUsersActive = Schema::hasColumn('users','active');
+        $hasIdEmploye   = Schema::hasColumn('users','id_employe');
+
+        $selectColumns = ['users.id', 'users.name', 'users.email', 'users.created_at'];
+        if ($hasUsersRole) {
+            $selectColumns[] = 'users.role';
+        }
+        if ($hasUsersActive) {
+            $selectColumns[] = 'users.active';
+        }
+        if ($hasIdEmploye) {
+            $selectColumns[] = 'users.id_employe';
+        }
 
         $users = $this->staffOrHiredQuery()
-            ->when($q, function ($qq) use ($q) {
-                $qq->where(function ($w) use ($q) {
-                    $w->where('users.name','like',"%{$q}%")
-                      ->orWhere('users.email','like',"%{$q}%");
-                    if (Schema::hasColumn('users','id_employe')) {
-                        $w->orWhere('users.id_employe','like',"%{$q}%");
+            ->select($selectColumns)
+            ->when($like !== null, function ($qq) use ($like, $hasIdEmploye) {
+                $qq->where(function ($w) use ($like, $hasIdEmploye) {
+                    $w->where('users.name','like',$like)
+                      ->orWhere('users.email','like',$like);
+                    if ($hasIdEmploye) {
+                        $w->orWhere('users.id_employe','like',$like);
                     }
                 });
             })
-            ->when($status === 'active'   && Schema::hasColumn('users','active'), fn($qq)=>$qq->where('users.active',true))
-            ->when($status === 'inactive' && Schema::hasColumn('users','active'), fn($qq)=>$qq->where('users.active',false))
-            ->when($role !== '', function ($qq) use ($role) {
-                if (Schema::hasColumn('users','role')) $qq->where('users.role',$role);
+            ->when($status === 'active'   && $hasUsersActive, fn($qq)=>$qq->where('users.active',true))
+            ->when($status === 'inactive' && $hasUsersActive, fn($qq)=>$qq->where('users.active',false))
+            ->when($role !== '', function ($qq) use ($role, $hasUsersRole) {
+                if ($hasUsersRole) $qq->where('users.role',$role);
                 elseif (method_exists(User::class,'role')) $qq->role($role);
             })
             ->orderByDesc('users.created_at')
+            ->orderByDesc('users.id')
             ->paginate(20)
             ->withQueryString();
 
         $roleOptions = [];
-        if (Schema::hasColumn('users','role')) {
+        if ($hasUsersRole) {
             $roleOptions = User::query()->select('role')->whereNotNull('role')->distinct()->pluck('role')->all();
         } elseif (class_exists(\Spatie\Permission\Models\Role::class)) {
             $roleOptions = \Spatie\Permission\Models\Role::query()->orderBy('name')->pluck('name')->all();
@@ -251,15 +275,20 @@ class UserController extends Controller
                 while (($row = fgetcsv($handle)) !== false) {
                     if (count($row) === 1 && trim($row[0]) === '') continue;
 
-                    $name  = trim($row[$iName] ?? '');
-                    $email = trim($row[$iEmail] ?? '');
+                    $name  = Str::limit(trim((string) ($row[$iName] ?? '')), 255, '');
+                    $email = strtolower(trim((string) ($row[$iEmail] ?? '')));
                     $pass  = $iPass !== false ? trim((string)($row[$iPass] ?? '')) : '';
                     $role  = $iRole !== false ? strtolower(trim((string)($row[$iRole] ?? ''))) : '';
                     $actIn = $iActive !== false ? trim((string)($row[$iActive] ?? '')) : null;
-                    $empId = $iEmp !== false ? trim((string)($row[$iEmp] ?? '')) : '';
+                    $empId = $iEmp !== false ? Str::limit(trim((string)($row[$iEmp] ?? '')), 50, '') : '';
 
                     if ($name === '' || $email === '') {
                         $errors[] = 'Skip: name/email kosong -> '.implode(',',$row);
+                        continue;
+                    }
+
+                    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                        $errors[] = 'Skip: email tidak valid -> '.$email;
                         continue;
                     }
 
@@ -325,13 +354,21 @@ class UserController extends Controller
     public function export(Request $request): StreamedResponse
     {
         $filename = 'users-export-'.now()->format('Ymd-His').'.csv';
-        $query = $this->staffOrHiredQuery()->orderBy('users.created_at');
+        $hasRoleCol   = Schema::hasColumn('users','role');
+        $hasActiveCol = Schema::hasColumn('users','active');
+        $hasEmpIdCol  = Schema::hasColumn('users','id_employe');
 
-        return response()->streamDownload(function () use ($query) {
+        $selectColumns = ['users.id','users.name','users.email','users.created_at'];
+        if ($hasEmpIdCol) $selectColumns[] = 'users.id_employe';
+        if ($hasRoleCol) $selectColumns[] = 'users.role';
+        if ($hasActiveCol) $selectColumns[] = 'users.active';
+
+        $query = $this->staffOrHiredQuery()
+            ->select($selectColumns)
+            ->orderBy('users.id');
+
+        return response()->streamDownload(function () use ($query, $hasRoleCol, $hasActiveCol, $hasEmpIdCol) {
             $out = fopen('php://output','w');
-            $hasRoleCol   = Schema::hasColumn('users','role');
-            $hasActiveCol = Schema::hasColumn('users','active');
-            $hasEmpIdCol  = Schema::hasColumn('users','id_employe');
 
             $headers = ['id','name','email'];
             if ($hasEmpIdCol) $headers[] = 'id_employe';
@@ -340,7 +377,7 @@ class UserController extends Controller
             $headers[] = 'created_at';
             fputcsv($out, $headers);
 
-            $query->chunk(500, function ($chunk) use ($out,$hasRoleCol,$hasActiveCol,$hasEmpIdCol) {
+            $query->chunkById(500, function ($chunk) use ($out,$hasRoleCol,$hasActiveCol,$hasEmpIdCol) {
                 foreach ($chunk as $u) {
                     $row = [$u->id,$u->name,$u->email];
                     if ($hasEmpIdCol) $row[] = $u->id_employe ?? '';
@@ -349,7 +386,7 @@ class UserController extends Controller
                     $row[] = optional($u->created_at)->toDateTimeString();
                     fputcsv($out, $row);
                 }
-            });
+            }, 'users.id', 'users.id');
 
             fclose($out);
         }, $filename, ['Content-Type'=>'text/csv; charset=UTF-8']);

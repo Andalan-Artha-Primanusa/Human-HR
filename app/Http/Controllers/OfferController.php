@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\JobApplication;
 use App\Models\Offer;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class OfferController extends Controller
@@ -102,7 +104,7 @@ HTML;
     $filename = 'OfferingLetter-'.$offer->id.'.pdf';
 
     // ?dl=1 untuk download, selain itu stream preview
-    return request()->boolean('dl')
+    return $request->boolean('dl')
       ? $pdf->download($filename)
       : $pdf->stream($filename);
   }
@@ -114,22 +116,37 @@ HTML;
   {
     $this->ensureAdmin($request);
 
-    $q      = (string) $request->query('q', '');
-    $status = (string) $request->query('status', '');
+    $payload = $request->validate([
+      'q' => ['nullable', 'string', 'max:120'],
+      'status' => ['nullable', Rule::in(['draft', 'sent', 'accepted', 'rejected'])],
+    ]);
+
+    $qRaw = (string) ($payload['q'] ?? '');
+    $q = Str::limit(
+      preg_replace('/[\x00-\x1F\x7F]/u', '', trim($qRaw)) ?? '',
+      120,
+      ''
+    );
+    $like = $q !== '' ? '%'.addcslashes($q, '\\%_').'%' : null;
+    $status = (string) ($payload['status'] ?? '');
 
     $offers = Offer::query()
+      ->select(['id', 'application_id', 'status', 'salary', 'created_at'])
       ->with([
         'application.user:id,name',
         'application.job:id,title,site_id',
         'application.job.site:id,code,name',
       ])
-      ->when($q, function ($qq) use ($q) {
-        $qq->whereHas('application.user', fn($u) => $u->where('name', 'like', "%{$q}%"))
-           ->orWhereHas('application.job', fn($j) => $j->where('title', 'like', "%{$q}%"));
+      ->when($like !== null, function ($qq) use ($like) {
+        $qq->where(function ($w) use ($like) {
+          $w->whereHas('application.user', fn($u) => $u->where('name', 'like', $like))
+            ->orWhereHas('application.job', fn($j) => $j->where('title', 'like', $like));
+        });
       })
       ->when($status, fn($qq) => $qq->where('status', $status))
       ->latest()
-      ->paginate(15);
+      ->paginate(15)
+      ->withQueryString();
 
     return view('admin.offers.index', compact('offers', 'q', 'status'));
   }

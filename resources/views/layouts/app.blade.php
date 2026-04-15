@@ -19,6 +19,8 @@
       aside.is-mini nav a .label{ display:none; }
       aside.is-mini .section-title{ display:none; }
       aside.is-mini .brand-text{ display:none; }
+      aside.is-mini .logo-wrap{ justify-content:center; padding-left:.5rem; padding-right:.5rem; }
+      aside.is-mini .logo-img{ max-width:100% !important; }
 
       /* Tombol Logout saat mini: icon-only, square */
       aside.is-mini form .btn{
@@ -41,11 +43,11 @@
 </head>
 <body class="h-full bg-slate-50 text-slate-800">
 
-<div id="appRoot" class="min-h-screen flex" data-cloak>
+<div id="appRoot" class="flex min-h-screen" data-cloak>
   {{-- ===== Desktop Sidebar (>= md) ===== --}}
   <aside
     id="desktopSidebar"
-    class="hidden md:flex md:flex-col border-r border-slate-200 bg-white transition-all duration-200 md:w-64">
+    class="hidden transition-all duration-200 bg-white border-r md:flex md:flex-col border-slate-200 md:w-64">
     <div class="flex-1 overflow-y-auto">
       @include('layouts.sidenav', [
         'variant' => 'desktop',
@@ -58,21 +60,21 @@
   {{-- ===== Mobile Drawer (< md) ===== --}}
   <div class="md:hidden">
     {{-- Overlay --}}
-    <div id="drawerOverlay" class="drawer-overlay fixed inset-0 bg-black/40 z-40" aria-hidden="true"></div>
+    <div id="drawerOverlay" class="fixed inset-0 z-40 drawer-overlay bg-black/40" aria-hidden="true"></div>
 
     {{-- Panel --}}
     <aside
       id="mobileDrawer"
       class="drawer-panel transition-base fixed inset-y-0 left-0 z-50 w-72 max-w-[80vw] bg-white border-r border-slate-200 shadow-xl flex flex-col"
       role="dialog" aria-modal="true" aria-label="Menu">
-      <div class="h-14 flex items-center justify-between px-4 border-b border-slate-200">
+      <div class="flex items-center justify-between px-4 border-b h-14 border-slate-200">
         <div class="flex items-center gap-2">
         </div>
         <button id="drawerCloseBtn" class="p-2 rounded-lg hover:bg-slate-100" aria-label="Tutup menu">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
         </button>
       </div>
-      <div class="flex-1 overflow-y-auto p-2">
+      <div class="flex-1 p-2 overflow-y-auto">
         @include('layouts.sidenav', [
           'variant' => 'mobile',
           'closeOnClick' => true,
@@ -83,17 +85,17 @@
   </div>
 
   {{-- ===== Main ===== --}}
-  <div class="flex-1 flex flex-col min-w-0">
-    <header class="h-14 sticky top-0 z-30 bg-white border-b border-slate-200 flex items-center px-3 md:px-5 gap-2">
-      <button id="drawerOpenBtn" class="md:hidden p-2 rounded-lg hover:bg-slate-100" aria-label="Buka menu">
+  <div class="flex flex-col flex-1 min-w-0">
+    <header class="sticky top-0 z-30 flex items-center gap-2 px-3 bg-white border-b h-14 border-slate-200 md:px-5">
+      <button id="drawerOpenBtn" class="p-2 rounded-lg md:hidden hover:bg-slate-100" aria-label="Buka menu">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5"/>
         </svg>
       </button>
 
       {{-- Desktop collapse/expand --}}
-      <button id="toggleSidebarBtn" class="hidden md:inline-flex p-2 rounded-lg hover:bg-slate-100" aria-label="Ubah ukuran sidebar" aria-pressed="false">
-        <svg id="iconExpand" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+      <button id="toggleSidebarBtn" class="hidden p-2 rounded-lg md:inline-flex hover:bg-slate-100" aria-label="Ubah ukuran sidebar" aria-pressed="false">
+        <svg id="iconExpand" xmlns="http://www.w3.org/2000/svg" class="hidden w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" d="M4 12h16M4 6h10M4 18h10"/>
         </svg>
         <svg id="iconCollapse" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">

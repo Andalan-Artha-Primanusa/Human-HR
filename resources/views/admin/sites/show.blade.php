@@ -3,8 +3,8 @@
 @section('title', 'Detail Site · ' . ($site->code ?? 'Site'))
 
 @php
-  $BLUE = '#1d4ed8'; // blue-700
-  $RED  = '#dc2626'; // red-600
+  $ACCENT = '#a77d52'; // brown
+  $ACCENT_DARK = '#8b5e3c'; // dark brown
   $BORD = '#e5e7eb'; // slate-200
 @endphp
 

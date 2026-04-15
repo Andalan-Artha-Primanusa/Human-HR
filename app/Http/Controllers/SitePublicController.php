@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Site;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class SitePublicController extends Controller
 {
@@ -16,18 +17,24 @@ class SitePublicController extends Controller
             'q' => ['nullable', 'string', 'max:100'],
         ]);
 
-        $q = trim((string) ($data['q'] ?? ''));
+        $qRaw = (string) ($data['q'] ?? '');
+        $q = Str::limit(
+            preg_replace('/[\x00-\x1F\x7F]/u', '', trim($qRaw)) ?? '',
+            80,
+            ''
+        );
+        $like = $q !== '' ? '%'.addcslashes($q, '\\%_').'%' : null;
 
         $sites = Site::query()
             ->select(['id', 'code', 'name', 'region', 'timezone', 'address'])
             ->where('is_active', true)
-            ->when($q !== '', function ($qq) use ($q) {
-                $qq->where(function ($w) use ($q) {
-                    $w->where('code', 'like', "%{$q}%")
-                      ->orWhere('name', 'like', "%{$q}%")
-                      ->orWhere('region', 'like', "%{$q}%")
-                      ->orWhere('timezone', 'like', "%{$q}%")
-                      ->orWhere('address', 'like', "%{$q}%");
+            ->when($like !== null, function ($qq) use ($like) {
+                $qq->where(function ($w) use ($like) {
+                    $w->where('code', 'like', $like)
+                      ->orWhere('name', 'like', $like)
+                      ->orWhere('region', 'like', $like)
+                      ->orWhere('timezone', 'like', $like)
+                      ->orWhere('address', 'like', $like);
                 });
             })
             ->orderBy('code')
@@ -46,9 +53,7 @@ class SitePublicController extends Controller
      */
     public function show(Request $request, Site $site)
     {
-        if (!$site->is_active) {
-            abort(404);
-        }
+        abort_unless((bool) $site->is_active, 404);
 
         // Hitung total jobs open dan siapkan 5 job open terbaru (untuk panel di view).
         $site->loadCount([
@@ -62,7 +67,17 @@ class SitePublicController extends Controller
         ]);
 
         if ($request->wantsJson()) {
-            return response()->json($site);
+            return response()->json([
+                'site' => $site->only(['id', 'code', 'name', 'region', 'timezone', 'address']),
+                'open_jobs_count' => (int) $site->open_jobs_count,
+                'jobs' => $site->jobs->map(fn ($job) => [
+                    'id' => $job->id,
+                    'title' => $job->title,
+                    'status' => $job->status,
+                    'site_id' => $job->site_id,
+                    'created_at' => optional($job->created_at)?->toISOString(),
+                ])->values(),
+            ]);
         }
 
         return view('sites.show', compact('site'));

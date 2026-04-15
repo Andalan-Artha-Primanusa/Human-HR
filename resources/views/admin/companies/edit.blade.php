@@ -2,8 +2,8 @@
 @extends('layouts.app', ['title' => 'Edit Company'])
 
 @php
-  $BLUE = '#1d4ed8'; // blue-700
-  $RED  = '#dc2626'; // red-600
+  $ACCENT = '#a77d52'; // brown
+  $ACCENT_DARK = '#8b5e3c'; // dark brown
   $BORD = '#e5e7eb'; // slate-200
 @endphp
 
@@ -13,8 +13,8 @@
   {{-- HEADER dua-tone --}}
   <section class="relative rounded-2xl border bg-white shadow-sm" style="border-color: {{ $BORD }}">
     <div class="relative h-20 sm:h-24 rounded-t-2xl overflow-hidden">
-      <div class="absolute inset-0" style="background: {{ $BLUE }}"></div>
-      <div class="absolute inset-y-0 right-0 w-24 sm:w-36" style="background: {{ $RED }}"></div>
+      <div class="absolute inset-0" style="background: {{ $ACCENT }}"></div>
+      <div class="absolute inset-y-0 right-0 w-24 sm:w-36" style="background: {{ $ACCENT_DARK }}"></div>
 
       <div class="relative h-full px-5 md:px-6 flex items-center">
         <div class="min-w-0">
@@ -37,7 +37,7 @@
           <label class="block text-sm font-medium text-slate-700">Code <span class="text-rose-600">*</span></label>
           <input name="code" value="{{ old('code', $record->code) }}"
                  class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2"
-                 style="--tw-ring-color: {{ $BLUE }}" required autocomplete="off">
+                 style="--tw-ring-color: {{ $ACCENT }}" required autocomplete="off">
           @error('code')<div class="text-sm text-rose-600 mt-1">{{ $message }}</div>@enderror
         </div>
 
@@ -46,7 +46,7 @@
           <label class="block text-sm font-medium text-slate-700">Name <span class="text-rose-600">*</span></label>
           <input name="name" value="{{ old('name', $record->name) }}"
                  class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2"
-                 style="--tw-ring-color: {{ $BLUE }}" required autocomplete="off">
+                 style="--tw-ring-color: {{ $ACCENT }}" required autocomplete="off">
           @error('name')<div class="text-sm text-rose-600 mt-1">{{ $message }}</div>@enderror
         </div>
 

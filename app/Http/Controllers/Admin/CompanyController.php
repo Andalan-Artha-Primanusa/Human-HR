@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -26,11 +27,17 @@ class CompanyController extends Controller
      */
     public function index(Request $request): View
     {
+        $filters = $request->validate([
+            'q' => ['nullable', 'string', 'max:80'],
+            'status' => ['nullable', Rule::in(['active', 'inactive'])],
+        ]);
+
         // Sanitize pencarian
-        $qRaw   = (string) $request->query('q', '');
+        $qRaw   = (string) ($filters['q'] ?? '');
         $qClean = trim(preg_replace('/[^\pL\pN\s\-\_\.]/u', '', $qRaw) ?? '');
         $q      = Str::limit($qClean, 80, '');
-        $status = $request->query('status');
+        $like   = $q !== '' ? '%'.addcslashes($q, '\\%_').'%' : null;
+        $status = (string) ($filters['status'] ?? '');
 
         // Deteksi dukungan FULLTEXT (cache 1 hari)
         $hasFulltext = Cache::remember('companies:has_fulltext', 86400, function () {
@@ -47,11 +54,10 @@ class CompanyController extends Controller
         $items = Company::query()
             ->select(['id','name','code','status','created_at'])
             ->when($status, fn($q2) => $q2->where('status', $status))
-            ->when($q !== '', function ($q2) use ($q, $hasFulltext) {
+            ->when($like !== null, function ($q2) use ($like, $hasFulltext) {
                 if ($hasFulltext) {
-                    return $q2->whereRaw("MATCH(name, code, alias) AGAINST (? IN NATURAL LANGUAGE MODE)", [$q]);
+                    return $q2->whereRaw("MATCH(name, code, alias) AGAINST (? IN NATURAL LANGUAGE MODE)", [trim($like, '%')]);
                 }
-                $like = '%'.$q.'%';
                 return $q2->where(function ($w) use ($like) {
                     $w->where('name','like',$like)
                       ->orWhere('code','like',$like)
@@ -59,6 +65,7 @@ class CompanyController extends Controller
                 });
             })
             ->orderBy('name')
+            ->orderBy('id')
             ->cursorPaginate(20)
             ->withQueryString();
 

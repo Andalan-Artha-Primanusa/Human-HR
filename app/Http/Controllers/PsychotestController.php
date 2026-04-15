@@ -6,6 +6,7 @@ use App\Models\PsychotestAttempt;
 use App\Models\PsychotestAnswer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class PsychotestController extends Controller
@@ -18,7 +19,13 @@ class PsychotestController extends Controller
             'status' => ['nullable', Rule::in(['active', 'finished'])],
         ]);
 
-        $q = trim((string) ($payload['q'] ?? ''));
+        $qRaw = (string) ($payload['q'] ?? '');
+        $q = Str::limit(
+            preg_replace('/[\x00-\x1F\x7F]/u', '', trim($qRaw)) ?? '',
+            120,
+            ''
+        );
+        $like = $q !== '' ? '%'.addcslashes($q, '\\%_').'%' : null;
         // nilai status di query opsional: 'active' | 'finished'
         $status = (string) ($payload['status'] ?? '');
 
@@ -32,16 +39,17 @@ class PsychotestController extends Controller
                 'application.job.site:id,code',
                 'test:id,name',
             ])
-            ->when($q, function ($qq) use ($q) {
-                $qq->where(function ($w) use ($q) {
-                    $w->whereHas('application.user', fn($u) => $u->where('name', 'like', "%{$q}%"))
-                      ->orWhereHas('application.job', fn($j) => $j->where('title', 'like', "%{$q}%"));
+            ->when($like !== null, function ($qq) use ($like) {
+                $qq->where(function ($w) use ($like) {
+                    $w->whereHas('application.user', fn($u) => $u->where('name', 'like', $like))
+                      ->orWhereHas('application.job', fn($j) => $j->where('title', 'like', $like));
                 });
             })
             ->when($status === 'active',   fn($qq) => $qq->whereIn('status', $ACTIVE_STATUSES))
             ->when($status === 'finished', fn($qq) => $qq->whereIn('status', $FINISHED_STATUSES))
             ->latest()
-            ->paginate(15);
+            ->paginate(15)
+            ->withQueryString();
 
         return view('admin.psychotests.index', compact('attempts', 'q', 'status'));
     }

@@ -53,25 +53,25 @@
   @endphp
 
   {{-- Header panel --}}
-  <div class="relative rounded-2xl border border-slate-200 bg-white shadow-sm mb-5">
-    <div class="h-2 rounded-t-2xl overflow-hidden">
-      <div class="h-full w-full flex">
-        <div class="h-full bg-blue-600" style="width: 90%"></div>
-        <div class="h-full bg-red-500"  style="width: 10%"></div>
+  <div class="relative mb-5 bg-white border shadow-sm rounded-2xl border-slate-200">
+    <div class="h-2 overflow-hidden rounded-t-2xl">
+      <div class="flex w-full h-full">
+        <div class="h-full" style="background: linear-gradient(90deg, #a77d52, #8b5e3c); width: 90%"></div>
+        <div class="h-full" style="background: linear-gradient(90deg, #8b5e3c, #a77d52); width: 10%"></div>
       </div>
     </div>
     <div class="p-6 md:p-7">
       <div class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>
-          <h1 class="text-2xl md:text-3xl font-semibold tracking-tight text-slate-900">Kanban Kandidat</h1>
+          <h1 class="text-2xl font-semibold tracking-tight md:text-3xl text-slate-900">Kanban Kandidat</h1>
           <p class="text-sm text-slate-600">
             Drag & drop kartu antar stage. Klik <b>Schedule</b> untuk kirim undangan interview (ICS).
           </p>
         </div>
 
         {{-- Filter ringkas --}}
-        <form method="GET" class="glass rounded-xl p-3 shadow-sm grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-3">
-          <input name="q" value="{{ request('q') }}" placeholder="Cari nama / posisi..." class="input col-span-2 md:col-span-1"/>
+        <form method="GET" class="grid grid-cols-2 gap-2 p-3 shadow-sm glass rounded-xl md:grid-cols-3 md:gap-3">
+          <input name="q" value="{{ request('q') }}" placeholder="Cari nama / posisi..." class="col-span-2 input md:col-span-1"/>
           <select name="only" class="input">
             <option value="">Semua Stage</option>
             @foreach(array_keys($stages) as $key)
@@ -128,30 +128,30 @@
                   draggable="true"
                   @dragstart="onDragStart('{{ $a->id }}', '{{ route('admin.applications.move', $a) }}', '{{ csrf_token() }}') ; $el.classList.add('dragging')"
                   @dragend="$el.classList.remove('dragging')"
-                  class="card card-hover bg-white"
+                  class="bg-white card card-hover"
                   data-move-url="{{ route('admin.applications.move', $a) }}"
                   data-schedule-url="{{ route('admin.interviews.store', $a) }}"
                   data-current-stage="{{ $a->current_stage ?? 'applied' }}"
                 >
-                  <div class="card-body py-3">
+                  <div class="py-3 card-body">
                     <div class="flex items-start justify-between gap-3">
                       <div class="min-w-0">
-                        <div class="font-medium text-slate-900 truncate">{{ $candidateName }}</div>
-                        <div class="text-xs text-slate-500 truncate">{{ $jobTitle }}</div>
+                        <div class="font-medium truncate text-slate-900">{{ $candidateName }}</div>
+                        <div class="text-xs truncate text-slate-500">{{ $jobTitle }}</div>
                       </div>
                       <div class="text-right shrink-0">
                         <div class="text-[11px] text-slate-400">{{ optional($a->created_at)->format('d M') }}</div>
                       </div>
                     </div>
 
-                    <div class="mt-2 flex items-center gap-2 flex-wrap">
+                    <div class="flex flex-wrap items-center gap-2 mt-2">
                       @if($last && !is_null($last->score))
                         <span class="badge badge-green">Score {{ number_format($last->score,1) }}</span>
                       @endif
                       <span class="badge {{ $overallClass }}">{{ strtoupper(str_replace('_',' ',$overall)) }}</span>
                     </div>
 
-                    <div class="mt-3 flex items-center justify-end gap-2">
+                    <div class="flex items-center justify-end gap-2 mt-3">
                       @if(in_array($stageKey, ['hr_iv','user_iv','user_trainer_iv']))
                         <button
                           type="button"
@@ -172,25 +172,25 @@
     </div>
 
     {{-- Toast --}}
-    <div x-show="toast.show" x-transition.opacity class="fixed bottom-4 right-4 z-50">
-      <div class="rounded-lg shadow-lg px-4 py-3 text-sm"
+    <div x-show="toast.show" x-transition.opacity class="fixed z-50 bottom-4 right-4">
+      <div class="px-4 py-3 text-sm rounded-lg shadow-lg"
            :class="toast.type==='ok' ? 'bg-green-600 text-white' : 'bg-rose-600 text-white'">
         <span x-text="toast.msg"></span>
       </div>
     </div>
 
     {{-- Modal Schedule Interview --}}
-    <div x-show="modal.open" x-transition.opacity class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" style="display:none">
-      <div x-show="modal.open" x-transition.scale.origin.center class="card w-full max-w-xl">
-        <div class="px-5 py-4 border-b border-slate-200 flex items-center justify-between bg-white">
+    <div x-show="modal.open" x-transition.opacity class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40" style="display:none">
+      <div x-show="modal.open" x-transition.scale.origin.center class="w-full max-w-xl card">
+        <div class="flex items-center justify-between px-5 py-4 bg-white border-b border-slate-200">
           <div>
             <div class="text-sm text-slate-500">Schedule Interview</div>
             <div class="font-semibold text-slate-900" x-text="modal.title"></div>
           </div>
           <button type="button" class="btn btn-ghost" @click="modal.open=false">Close</button>
         </div>
-        <form method="POST" :action="modal.action" class="card-body grid gap-4" x-ref="form">@csrf
-          <div class="grid md:grid-cols-2 gap-4">
+        <form method="POST" :action="modal.action" class="grid gap-4 card-body" x-ref="form">@csrf
+          <div class="grid gap-4 md:grid-cols-2">
             <div>
               <label class="label">Title</label>
               <input class="input" name="title" :value="`Interview - ${modal.candidate}`" required>
@@ -215,7 +215,7 @@
               <input class="input" name="location" placeholder="R. Interview / Alamat kantor">
             </div>
           </template>
-          <div class="grid md:grid-cols-2 gap-4">
+          <div class="grid gap-4 md:grid-cols-2">
             <div>
               <label class="label">Start</label>
               <input class="input" type="datetime-local" name="start_at" required>

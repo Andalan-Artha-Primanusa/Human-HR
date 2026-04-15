@@ -24,21 +24,35 @@ class InterviewController extends Controller
     {
         $this->ensureAdmin($request);
 
-        $q = (string) $request->query('q', '');
+        $payload = $request->validate([
+            'q' => ['nullable', 'string', 'max:120'],
+        ]);
 
-        $interviews = Interview::with([
-            'application.user:id,name,email',
-            'application.job:id,title,division,site_id',
-            'application.job.site:id,code,name',
-        ])
-            ->when($q, function ($qq) use ($q) {
-                $qq->where(function ($w) use ($q) {
-                    $w->whereHas('application.job',  fn($j) => $j->where('title', 'like', "%{$q}%"))
-                        ->orWhereHas('application.user', fn($u) => $u->where('name',  'like', "%{$q}%"));
+        $qRaw = (string) ($payload['q'] ?? '');
+        $q = Str::limit(
+            preg_replace('/[\x00-\x1F\x7F]/u', '', trim($qRaw)) ?? '',
+            120,
+            ''
+        );
+        $like = $q !== '' ? '%'.addcslashes($q, '\\%_').'%' : null;
+
+        $interviews = Interview::query()
+            ->select(['id', 'application_id', 'title', 'mode', 'start_at', 'end_at', 'location', 'meeting_link', 'notes'])
+            ->with([
+                'application.user:id,name,email',
+                'application.job:id,title,division,site_id',
+                'application.job.site:id,code,name',
+            ])
+            ->when($like !== null, function ($qq) use ($like) {
+                $qq->where(function ($w) use ($like) {
+                    $w->whereHas('application.job', fn($j) => $j->where('title', 'like', $like))
+                      ->orWhereHas('application.user', fn($u) => $u->where('name', 'like', $like));
                 });
             })
             ->orderBy('start_at')
-            ->paginate(20);
+            ->orderBy('id')
+            ->paginate(20)
+            ->withQueryString();
 
         return view('admin.interviews.index', compact('interviews', 'q'));
     }
@@ -52,19 +66,29 @@ class InterviewController extends Controller
         $this->ensureAdmin($request);
 
         /** @var JobApplication $app */
-        $app = JobApplication::with(['user', 'job.site'])->whereKey($application)->firstOrFail();
+        $app = JobApplication::query()
+            ->select(['id', 'user_id', 'job_id'])
+            ->with(['user:id'])
+            ->whereKey($application)
+            ->firstOrFail();
 
         $data = $request->validate([
             'title'         => ['required', 'string', 'max:200'],
             'mode'          => ['required', Rule::in(['online', 'onsite'])],
-            'location'      => ['nullable', 'string', 'max:255'],
-            'meeting_link'  => ['nullable', 'string', 'max:255'],
+            'location'      => ['nullable', 'string', 'max:255', 'required_if:mode,onsite'],
+            'meeting_link'  => ['nullable', 'url', 'max:255', 'required_if:mode,online'],
             'start_at'      => ['required', 'date'],
             'end_at'        => ['required', 'date', 'after:start_at'],
-            'panel'         => ['nullable', 'array'],
+            'panel'         => ['nullable', 'array', 'max:20'],
             'panel.*'       => ['nullable', 'string', 'max:120'], // nama/role interviewer
             'notes'         => ['nullable', 'string'],
         ]);
+
+        $panel = collect((array) ($data['panel'] ?? []))
+            ->map(fn($v) => Str::limit(preg_replace('/[\x00-\x1F\x7F]/u', '', trim((string) $v)) ?? '', 120, ''))
+            ->filter(fn($v) => $v !== '')
+            ->values()
+            ->all();
 
         // Simpan
         $iv = new Interview();
@@ -76,7 +100,7 @@ class InterviewController extends Controller
         $iv->meeting_link   = $data['meeting_link'] ?? null;
         $iv->start_at       = $data['start_at'];
         $iv->end_at         = $data['end_at'];
-        $iv->panel          = !empty($data['panel']) ? array_values(array_filter($data['panel'])) : null;
+        $iv->panel          = !empty($panel) ? $panel : null;
         $iv->notes          = $data['notes'] ?? null;
         $iv->save();
 
@@ -97,19 +121,25 @@ class InterviewController extends Controller
     {
         $this->ensureAdmin($request);
 
-        $iv = Interview::with(['application.user', 'application.job.site'])->whereKey($interview)->firstOrFail();
+        $iv = Interview::query()->whereKey($interview)->firstOrFail();
 
         $data = $request->validate([
             'title'         => ['required', 'string', 'max:200'],
             'mode'          => ['required', Rule::in(['online', 'onsite'])],
-            'location'      => ['nullable', 'string', 'max:255'],
-            'meeting_link'  => ['nullable', 'string', 'max:255'],
+            'location'      => ['nullable', 'string', 'max:255', 'required_if:mode,onsite'],
+            'meeting_link'  => ['nullable', 'url', 'max:255', 'required_if:mode,online'],
             'start_at'      => ['required', 'date'],
             'end_at'        => ['required', 'date', 'after:start_at'],
-            'panel'         => ['nullable', 'array'],
+            'panel'         => ['nullable', 'array', 'max:20'],
             'panel.*'       => ['nullable', 'string', 'max:120'],
             'notes'         => ['nullable', 'string'],
         ]);
+
+        $panel = collect((array) ($data['panel'] ?? []))
+            ->map(fn($v) => Str::limit(preg_replace('/[\x00-\x1F\x7F]/u', '', trim((string) $v)) ?? '', 120, ''))
+            ->filter(fn($v) => $v !== '')
+            ->values()
+            ->all();
 
         $iv->fill([
             'title'        => $data['title'],
@@ -118,7 +148,7 @@ class InterviewController extends Controller
             'meeting_link' => $data['meeting_link'] ?? null,
             'start_at'     => $data['start_at'],
             'end_at'       => $data['end_at'],
-            'panel'        => !empty($data['panel']) ? array_values(array_filter($data['panel'])) : null,
+            'panel'        => !empty($panel) ? $panel : null,
             'notes'        => $data['notes'] ?? null,
         ])->save();
 

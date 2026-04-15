@@ -15,27 +15,26 @@ class SiteController extends Controller
      */
     public function index(Request $request)
     {
+        $filters = $request->validate([
+            'q' => ['nullable', 'string', 'max:120'],
+            'status' => ['nullable', Rule::in(['active', 'inactive'])],
+            'sort' => ['nullable', Rule::in(['code', 'name', 'region', 'created_at'])],
+            'order' => ['nullable', Rule::in(['asc', 'desc'])],
+        ]);
+
         // === Ambil & sanitasi input ===
-        $qRaw   = (string) $request->get('q', '');
-        // buang karakter kontrol & batasi panjang (hindari LIKE liar)
+        $qRaw   = (string) ($filters['q'] ?? '');
         $q      = Str::limit(preg_replace('/[\x00-\x1F\x7F]/u', '', trim($qRaw)) ?? '', 120, '');
+        $like   = $q !== '' ? '%'.addcslashes($q, '\\%_').'%' : null;
 
-        $status = $request->get('status'); // 'active' | 'inactive' | null
-        $sort   = (string) $request->get('sort', 'code');       // code|name|region|created_at
-        $order  = strtolower((string) $request->get('order', 'asc')); // asc|desc
-
-        // Whitelist kolom sort & arah
-        $sortable = ['code','name','region','created_at'];
-        if (! in_array($sort, $sortable, true)) {
-            $sort = 'code';
-        }
-        $order = $order === 'desc' ? 'desc' : 'asc';
+        $status = (string) ($filters['status'] ?? '');
+        $sort   = (string) ($filters['sort'] ?? 'code');
+        $order  = (string) ($filters['order'] ?? 'asc');
 
         // === Query: pilih kolom minimal + filter aman + cursor paginate ===
         $sites = Site::query()
-            ->select(['id','code','name','region','timezone','is_active','created_at'])
-            ->when($q !== '', function ($qq) use ($q) {
-                $like = '%'.$q.'%';
+            ->select(['id','code','name','region','timezone','address','is_active','created_at'])
+            ->when($like !== null, function ($qq) use ($like) {
                 $qq->where(function ($w) use ($like) {
                     $w->where('code', 'like', $like)
                       ->orWhere('name', 'like', $like)
@@ -46,7 +45,8 @@ class SiteController extends Controller
             })
             ->when($status === 'active', fn($qq) => $qq->where('is_active', true))
             ->when($status === 'inactive', fn($qq) => $qq->where('is_active', false))
-            ->when(true, fn($qq) => $qq->orderBy($sort, $order))
+            ->orderBy($sort, $order)
+            ->orderBy('id', $order)
             // cursorPaginate lebih hemat di dataset besar
             ->cursorPaginate(20)
             ->withQueryString();

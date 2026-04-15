@@ -5,8 +5,8 @@
 
 @php
   // THEME (solid)
-  $BLUE = '#1d4ed8'; // blue-700
-  $RED  = '#dc2626'; // red-600
+  $ACCENT = '#a77d52'; // brown
+  $ACCENT_DARK  = '#8b5e3c'; // dark brown
   $BORD = '#e5e7eb'; // slate-200
 @endphp
 
@@ -43,51 +43,50 @@
 
 <div class="mx-auto w-full max-w-[1440px] px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
-<section class="overflow-hidden rounded-2xl border bg-white shadow-sm" style="border-color: {{ $BORD }}">
-  {{-- Masthead dua-tone --}}
+<section class="overflow-hidden bg-white border shadow-sm rounded-2xl" style="border-color: {{ $BORD }}">
   <div class="relative">
-    <div class="h-20 sm:h-24 w-full" style="background: {{ $BLUE }}"></div>
-    <div class="absolute inset-y-0 right-0 w-24 sm:w-36" style="background: {{ $RED }}"></div>
+    <div class="w-full h-20 sm:h-24" style="background: linear-gradient(90deg, {{ $ACCENT }}, {{ $ACCENT_DARK }});"></div>
+    <div class="absolute inset-y-0 right-0 w-24 sm:w-36" style="background: linear-gradient(90deg, {{ $ACCENT_DARK }}, {{ $ACCENT }});"></div>
 
-    <div class="absolute inset-0 flex flex-col gap-3 px-5 md:px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
+    <div class="absolute inset-0 flex flex-col gap-3 px-5 py-4 text-white md:px-6 sm:flex-row sm:items-center sm:justify-between">
       <div class="min-w-0">
-        <h1 class="text-2xl sm:text-3xl font-semibold tracking-tight text-white">Sites</h1>
+        <h1 class="text-2xl font-semibold tracking-tight text-white sm:text-3xl">Sites</h1>
         <p class="text-xs sm:text-sm text-white/90">Kelola daftar site / lokasi operasional.</p>
       </div>
       <a href="{{ route('admin.sites.create') }}"
-         class="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-offset-2"
-         style="--tw-ring-color: {{ $BLUE }}">
-        <svg class="w-4 h-4" style="color: {{ $BLUE }}"><use href="#i-plus"/></svg>
+         class="inline-flex items-center justify-center w-full gap-2 px-4 py-2 text-sm font-semibold bg-white rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-offset-2 sm:w-auto"
+         style="--tw-ring-color: {{ $ACCENT }}">
+        <svg class="w-4 h-4" style="color: {{ $ACCENT }}"><use href="#i-plus"/></svg>
         Tambah Site
       </a>
     </div>
   </div>
 
   {{-- FILTER menyatu di dalam kartu header --}}
-  <div class="p-5 md:p-6 border-t" style="border-color: {{ $BORD }}">
-    <form method="GET" class="grid grid-cols-1 sm:grid-cols-3 gap-2" role="search" aria-label="Filter Sites">
+  <div class="p-5 border-t md:p-6" style="border-color: {{ $BORD }}">
+    <form method="GET" class="grid grid-cols-1 gap-2 md:grid-cols-[1fr_auto_auto]" role="search" aria-label="Filter Sites">
       <label class="sr-only" for="q">Cari</label>
       <input id="q" type="text" name="q" value="{{ e(request('q','')) }}" placeholder="Cari nama / kode…"
-             class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2"
-             style="--tw-ring-color: {{ $BLUE }}" autocomplete="off">
+             class="w-full px-3 py-2 text-sm border rounded-lg border-slate-200 focus:outline-none focus:ring-2"
+             style="--tw-ring-color: {{ $ACCENT }}" autocomplete="off">
 
       <label class="sr-only" for="status">Status</label>
       <select id="status" name="status"
-              class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2"
-              style="--tw-ring-color: {{ $BLUE }}">
+              class="w-full px-3 py-2 text-sm border rounded-lg border-slate-200 focus:outline-none focus:ring-2"
+              style="--tw-ring-color: {{ $ACCENT }}">
         <option value="">Semua Status</option>
         <option value="active"   @selected(request('status')==='active')>Active</option>
         <option value="inactive" @selected(request('status')==='inactive')>Inactive</option>
       </select>
 
       <div class="flex gap-2">
-        <button class="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:opacity-95 focus:outline-none focus:ring-2"
-                style="--tw-ring-color: {{ $BLUE }}">
+        <button class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-lg bg-slate-900 hover:opacity-95 focus:outline-none focus:ring-2"
+                style="--tw-ring-color: {{ $ACCENT }}">
           <svg class="w-4 h-4"><use href="#i-search"/></svg>
           Cari
         </button>
         @if(request()->filled('q') || request()->filled('status'))
-          <a href="{{ route('admin.sites.index') }}" class="rounded-lg border border-slate-200 px-4 py-2 text-sm hover:bg-slate-50">
+          <a href="{{ route('admin.sites.index') }}" class="px-4 py-2 text-sm border rounded-lg border-slate-200 hover:bg-slate-50">
             Reset
           </a>
         @endif
@@ -99,30 +98,30 @@
 
   {{-- FLASH --}}
   @if(session('success') || session('ok'))
-    <div class="rounded-2xl border border-emerald-200 bg-emerald-50 text-emerald-700 px-4 py-3">
+    <div class="px-4 py-3 border rounded-2xl border-emerald-200 bg-emerald-50 text-emerald-700">
       {{ e(session('success') ?? session('ok')) }}
     </div>
   @endif
   @if(session('error'))
-    <div class="rounded-2xl border border-red-200 bg-red-50 text-red-700 px-4 py-3">
+    <div class="px-4 py-3 text-red-700 border border-red-200 rounded-2xl bg-red-50">
       {{ e(session('error')) }}
     </div>
   @endif
   {{-- TABEL --}}
   @php /** @var \Illuminate\Contracts\Pagination\LengthAwarePaginator|\Illuminate\Support\Collection $sites */ @endphp
   @if(isset($sites) && $sites->count())
-    <div class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+    <div class="overflow-hidden bg-white border shadow-sm rounded-2xl border-slate-200">
       <table class="min-w-full text-sm">
-        <thead class="bg-slate-800 text-white">
+        <thead class="text-white bg-slate-800">
           <tr>
             <th class="px-4 py-3 text-left">Nama</th>
             <th class="px-4 py-3 text-left">Kode</th>
             <th class="px-4 py-3 text-left">Region</th>
             <th class="px-4 py-3 text-left">TZ</th>
-            <th class="px-4 py-3 text-left hidden md:table-cell">Alamat</th>
+            <th class="hidden px-4 py-3 text-left md:table-cell">Alamat</th>
             <th class="px-4 py-3 text-left">Status</th>
             <th class="px-4 py-3 text-left">Dibuat</th>
-            <th class="px-4 py-3 text-right w-1">Aksi</th>
+            <th class="w-1 px-4 py-3 text-right">Aksi</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-100">
@@ -158,7 +157,7 @@
               </td>
 
               {{-- Alamat --}}
-              <td class="px-4 py-3 hidden md:table-cell" title="{{ e($site->address ?? '') }}">
+              <td class="hidden px-4 py-3 md:table-cell" title="{{ e($site->address ?? '') }}">
                 {{ \Illuminate\Support\Str::limit((string)($site->address ?? '—'), 40) }}
               </td>
 
@@ -243,25 +242,25 @@
       };
     @endphp
 
-    <section class="mt-4 rounded-2xl border border-slate-200 bg-white p-3 md:p-4 shadow-sm">
-      <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between text-sm">
+    <section class="p-3 mt-4 bg-white border shadow-sm rounded-2xl border-slate-200 md:p-4">
+      <div class="flex flex-col gap-3 text-sm md:flex-row md:items-center md:justify-between">
         <div class="text-slate-700">
           Menampilkan <span class="font-semibold text-slate-900">{{ $from }}–{{ $to }}</span>
           dari <span class="font-semibold text-slate-900">{{ $total }}</span>
         </div>
         <nav class="ml-auto" aria-label="Pagination">
-          <ul class="inline-flex items-stretch overflow-hidden rounded-xl border border-slate-200 bg-white">
+          <ul class="inline-flex items-stretch overflow-hidden bg-white border rounded-xl border-slate-200">
             {{-- Prev --}}
             <li>
               @if($current > 1)
                 <a href="{{ $pageUrl($current - 1) }}"
                    class="grid place-items-center px-2.5 h-9 hover:bg-slate-50 focus:outline-none focus:ring-2"
-                   style="--tw-ring-color: {{ $BLUE }}" aria-label="Sebelumnya">
-                  <svg class="h-4 w-4 text-slate-700"><use href="#i-chevron-left"/></svg>
+                   style="--tw-ring-color: {{ $ACCENT }}" aria-label="Sebelumnya">
+                  <svg class="w-4 h-4 text-slate-700"><use href="#i-chevron-left"/></svg>
                 </a>
               @else
                 <span class="grid place-items-center px-2.5 h-9 opacity-40 cursor-not-allowed" aria-hidden="true">
-                  <svg class="h-4 w-4 text-slate-700"><use href="#i-chevron-left"/></svg>
+                  <svg class="w-4 h-4 text-slate-700"><use href="#i-chevron-left"/></svg>
                 </span>
               @endif
             </li>
@@ -269,16 +268,16 @@
             {{-- Pages --}}
             @foreach($pages as $p)
               @if($p === '...')
-                <li class="grid place-items-center px-3 h-9 text-slate-500 select-none">…</li>
+                <li class="grid px-3 select-none place-items-center h-9 text-slate-500">…</li>
               @else
                 @php $isCur = ((int)$p === $current); @endphp
                 <li class="grid place-items-center h-9">
                   @if($isCur)
-                    <span class="px-3 h-full inline-flex items-center font-semibold text-slate-900 bg-slate-100 border-l border-slate-200 select-none">{{ $p }}</span>
+                    <span class="inline-flex items-center h-full px-3 font-semibold border-l select-none text-slate-900 bg-slate-100 border-slate-200">{{ $p }}</span>
                   @else
                     <a href="{{ $pageUrl((int)$p) }}"
-                       class="px-3 h-full inline-flex items-center text-slate-700 hover:bg-slate-50 border-l border-slate-200 focus:outline-none focus:ring-2"
-                       style="--tw-ring-color: {{ $BLUE }}" aria-label="Halaman {{ $p }}">{{ $p }}</a>
+                       class="inline-flex items-center h-full px-3 border-l text-slate-700 hover:bg-slate-50 border-slate-200 focus:outline-none focus:ring-2"
+                       style="--tw-ring-color: {{ $ACCENT }}" aria-label="Halaman {{ $p }}">{{ $p }}</a>
                   @endif
                 </li>
               @endif
@@ -289,12 +288,12 @@
               @if($current < $last)
                 <a href="{{ $pageUrl($current + 1) }}"
                    class="grid place-items-center px-2.5 h-9 hover:bg-slate-50 focus:outline-none focus:ring-2"
-                   style="--tw-ring-color: {{ $BLUE }}" aria-label="Berikutnya">
-                  <svg class="h-4 w-4 text-slate-700"><use href="#i-chevron-right"/></svg>
+                   style="--tw-ring-color: {{ $ACCENT }}" aria-label="Berikutnya">
+                  <svg class="w-4 h-4 text-slate-700"><use href="#i-chevron-right"/></svg>
                 </a>
               @else
                 <span class="grid place-items-center px-2.5 h-9 opacity-40 cursor-not-allowed" aria-hidden="true">
-                  <svg class="h-4 w-4 text-slate-700"><use href="#i-chevron-right"/></svg>
+                  <svg class="w-4 h-4 text-slate-700"><use href="#i-chevron-right"/></svg>
                 </span>
               @endif
             </li>
@@ -304,17 +303,17 @@
     </section>
   @else
     {{-- EMPTY STATE --}}
-    <section class="rounded-2xl border border-dashed border-slate-300 p-10 text-center bg-white">
-      <div class="mx-auto w-12 h-12 rounded-2xl bg-slate-100 grid place-content-center text-slate-400 mb-3">
+    <section class="p-10 text-center bg-white border border-dashed rounded-2xl border-slate-300">
+      <div class="grid w-12 h-12 mx-auto mb-3 rounded-2xl bg-slate-100 place-content-center text-slate-400">
         <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" d="M9 7V6a3 3 0 1 1 6 0v1M5 11h14m-1 8H6a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2Z"/>
         </svg>
       </div>
-      <div class="text-slate-700 font-medium">Belum ada data site.</div>
-      <div class="text-slate-500 text-sm mt-1">Tambahkan site pertama kamu sekarang.</div>
+      <div class="font-medium text-slate-700">Belum ada data site.</div>
+      <div class="mt-1 text-sm text-slate-500">Tambahkan site pertama kamu sekarang.</div>
       <a href="{{ route('admin.sites.create') }}"
-         class="mt-4 inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white focus:outline-none focus:ring-2"
-         style="--tw-ring-color: {{ $BLUE }}">
+         class="inline-flex items-center gap-2 px-4 py-2 mt-4 text-sm font-semibold text-white rounded-lg bg-slate-900 focus:outline-none focus:ring-2"
+         style="--tw-ring-color: {{ $ACCENT }}">
         <svg class="w-4 h-4"><use href="#i-plus"/></svg>
         Tambah Site
       </a>

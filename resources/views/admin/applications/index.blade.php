@@ -2,8 +2,8 @@
 @extends('layouts.app', ['title' => 'Applications'])
 
 @php
-  $BLUE = '#1d4ed8'; // blue-700
-  $RED  = '#dc2626'; // red-600
+  $ACCENT = '#a77d52';
+  $ACCENT_DARK = '#8b5e3c';
   $BORD = '#e5e7eb'; // slate-200
 @endphp
 
@@ -32,17 +32,17 @@
   {{-- CSS kecil untuk header 2-tone yang fleksibel --}}
   <style>
     .twotone {
-      --red-w: 84px; /* lebar strip merah (mobile) */
+      --accent-w: 84px; /* lebar strip accent (mobile) */
       background:
         linear-gradient(
           to right,
-          {{ $BLUE }} 0%,
-          {{ $BLUE }} calc(100% - var(--red-w)),
-          {{ $RED }}  calc(100% - var(--red-w)),
-          {{ $RED }} 100%
+          {{ $ACCENT }} 0%,
+          {{ $ACCENT }} calc(100% - var(--accent-w)),
+          {{ $ACCENT_DARK }}  calc(100% - var(--accent-w)),
+          {{ $ACCENT_DARK }} 100%
         );
     }
-    @media (min-width: 640px) { .twotone { --red-w: 144px; } }
+    @media (min-width: 640px) { .twotone { --accent-w: 144px; } }
   </style>
 @endonce
 
@@ -86,19 +86,18 @@
 <div class="mx-auto w-full max-w-[1440px] px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
   {{-- ===== HEADER + CTA (responsif) ===== --}}
-  <section class="relative rounded-2xl border bg-white shadow-sm overflow-hidden" style="border-color: {{ $BORD }}">
-    <div class="twotone rounded-t-2xl text-white">
+  <section class="relative overflow-hidden bg-white border shadow-sm rounded-2xl" style="border-color: {{ $BORD }}">
+    <div class="text-white twotone rounded-t-2xl">
       <div class="px-5 md:px-6 py-6 md:py-7 min-h-[96px] flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div class="min-w-0">
-          <h1 class="text-2xl sm:text-3xl font-semibold tracking-tight">Applications</h1>
+          <h1 class="text-2xl font-semibold tracking-tight sm:text-3xl">Applications</h1>
           <p class="text-xs sm:text-sm text-white/90">Daftar semua kandidat &amp; status proses rekrutmen.</p>
         </div>
 
         <a href="{{ route('admin.jobs.index') }}"
-           class="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-slate-900
-                  focus:outline-none focus:ring-2 focus:ring-offset-2 w-full sm:w-auto justify-center"
-           style="--tw-ring-color: {{ $BLUE }}">
-          <svg class="w-4 h-4" style="color: {{ $BLUE }}"><use href="#i-search"/></svg>
+           class="inline-flex items-center justify-center w-full gap-2 px-4 py-2 text-sm font-semibold bg-white rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-offset-2 sm:w-auto"
+           style="--tw-ring-color: {{ $ACCENT }}">
+          <svg class="w-4 h-4" style="color: {{ $ACCENT }}"><use href="#i-search"/></svg>
           Cari Lowongan
         </a>
       </div>
@@ -106,7 +105,7 @@
 
     {{-- ===== FILTER ===== --}}
     <form method="GET"
-          class="mt-4 grid grid-cols-1 gap-2 md:grid-cols-5 px-3 py-3 md:px-4 md:py-4"
+          class="grid grid-cols-1 gap-2 px-3 py-3 mt-4 md:grid-cols-5 md:px-4 md:py-4"
           style="border-top:1px solid {{ $BORD }}">
       {{-- q --}}
       <input name="q"
@@ -138,9 +137,8 @@
       {{-- actions --}}
       <div class="flex gap-2">
         <button type="submit"
-                class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-white
-                       hover:opacity-95 focus:outline-none focus:ring-2 focus:ring-offset-2 w-full sm:w-auto justify-center"
-                style="background-color:#0f172a; border:1px solid #0f172a; --tw-ring-color: {{ $BLUE }};"
+                class="inline-flex items-center justify-center w-full gap-2 px-4 py-2 text-sm font-semibold text-white rounded-lg hover:opacity-95 focus:outline-none focus:ring-2 focus:ring-offset-2 sm:w-auto"
+                style="background-color:#0f172a; border:1px solid #0f172a; --tw-ring-color: {{ $ACCENT }};"
                 aria-label="Filter">
           <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <circle cx="11" cy="11" r="7" stroke="#ffffff" stroke-width="2"/>
@@ -151,7 +149,7 @@
 
         @if(request()->hasAny(['q','stage','site']))
           <a href="{{ route('admin.applications.index') }}"
-             class="rounded-lg border border-slate-200 px-4 py-2 text-sm hover:bg-slate-50 w-full sm:w-auto text-center">
+             class="w-full px-4 py-2 text-sm text-center border rounded-lg border-slate-200 hover:bg-slate-50 sm:w-auto">
             Reset
           </a>
         @endif
@@ -160,24 +158,24 @@
   </section>
 
   {{-- ===== TABEL ===== --}}
-  <section class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden" style="border-color: {{ $BORD }}">
+  <section class="overflow-hidden bg-white border shadow-sm rounded-2xl border-slate-200" style="border-color: {{ $BORD }}">
     <div class="overflow-x-auto">
       @if($apps->count())
 <table class="min-w-[960px] w-full text-sm">
-  <thead class="bg-slate-800 text-white">
+  <thead class="text-white bg-slate-800">
     <tr>
-      <th class="px-4 py-3 text-left font-semibold">Kandidat</th>
-      <th class="px-4 py-3 text-left font-semibold">Posisi</th>
-      <th class="px-4 py-3 text-left w-40 font-semibold">Divisi</th>
-      <th class="px-4 py-3 text-left w-24 font-semibold">Site</th>
-      <th class="px-4 py-3 text-center w-40 font-semibold">Stage</th>
-      <th class="px-4 py-3 text-center w-28 font-semibold">Overall</th>
-      <th class="px-4 py-3 text-left w-28 font-semibold">Dibuat</th>
+      <th class="px-4 py-3 font-semibold text-left">Kandidat</th>
+      <th class="px-4 py-3 font-semibold text-left">Posisi</th>
+      <th class="w-40 px-4 py-3 font-semibold text-left">Divisi</th>
+      <th class="w-24 px-4 py-3 font-semibold text-left">Site</th>
+      <th class="w-40 px-4 py-3 font-semibold text-center">Stage</th>
+      <th class="px-4 py-3 font-semibold text-center w-28">Overall</th>
+      <th class="px-4 py-3 font-semibold text-left w-28">Dibuat</th>
       <th class="px-4 py-3 text-right w-[360px] font-semibold">Aksi</th>
     </tr>
   </thead>
 
-  <tbody class="divide-y divide-slate-100 text-black">
+  <tbody class="text-black divide-y divide-slate-100">
     @foreach($apps as $app)
       @php
         $stageKey   = $app->current_stage ?? 'applied';
@@ -268,13 +266,13 @@
 
       @else
         {{-- EMPTY STATE --}}
-        <div class="py-16 grid place-content-center text-center">
-          <div class="mx-auto w-12 h-12 rounded-2xl bg-slate-100 grid place-content-center text-slate-400 mb-3">
+        <div class="grid py-16 text-center place-content-center">
+          <div class="grid w-12 h-12 mx-auto mb-3 rounded-2xl bg-slate-100 place-content-center text-slate-400">
             <svg class="w-6 h-6"><use href="#i-plus"/></svg>
           </div>
-          <div class="text-slate-700 font-medium">Belum ada data aplikasi.</div>
-          <div class="text-slate-500 text-sm mt-1">Coba ubah filter atau cari lowongan.</div>
-          <a href="{{ route('admin.jobs.index') }}" class="btn btn-primary mt-3 inline-flex items-center gap-2">
+          <div class="font-medium text-slate-700">Belum ada data aplikasi.</div>
+          <div class="mt-1 text-sm text-slate-500">Coba ubah filter atau cari lowongan.</div>
+          <a href="{{ route('admin.jobs.index') }}" class="inline-flex items-center gap-2 mt-3 btn btn-primary">
             <svg class="w-4 h-4"><use href="#i-search"/></svg>
             Cari Lowongan
           </a>
@@ -305,26 +303,26 @@
       $pageUrl=function(int $p) use($apps){ return $apps->appends(request()->except('page'))->url($p); };
     @endphp
 
-    <section class="rounded-2xl border bg-white p-4 shadow-sm" style="border-color: {{ $BORD }}">
-      <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between text-sm">
+    <section class="p-4 bg-white border shadow-sm rounded-2xl" style="border-color: {{ $BORD }}">
+      <div class="flex flex-col gap-3 text-sm sm:flex-row sm:items-center sm:justify-between">
         <div class="text-slate-700">
           Menampilkan <span class="font-semibold text-slate-900">{{ $from }}–{{ $to }}</span> dari
           <span class="font-semibold text-slate-900">{{ $total }}</span>
         </div>
 
         <nav aria-label="Pagination" class="self-center sm:self-auto">
-          <ul class="inline-flex items-stretch overflow-hidden rounded-full ring-1 ring-slate-200 bg-white">
+          <ul class="inline-flex items-stretch overflow-hidden bg-white rounded-full ring-1 ring-slate-200">
             {{-- Prev --}}
             <li>
               @if($current>1)
                 <a href="{{ $pageUrl($current-1) }}"
                    class="grid place-items-center h-9 w-9 hover:bg-slate-50 focus:outline-none focus:ring-2"
-                   style="--tw-ring-color: {{ $BLUE }}" aria-label="Previous">
-                  <svg class="h-4 w-4 text-slate-700"><use href="#i-chevron-left"/></svg>
+                   style="--tw-ring-color: {{ $ACCENT }}" aria-label="Previous">
+                  <svg class="w-4 h-4 text-slate-700"><use href="#i-chevron-left"/></svg>
                 </a>
               @else
-                <span class="grid place-items-center h-9 w-9 opacity-40 cursor-not-allowed" aria-hidden="true">
-                  <svg class="h-4 w-4 text-slate-700"><use href="#i-chevron-left"/></svg>
+                <span class="grid cursor-not-allowed place-items-center h-9 w-9 opacity-40" aria-hidden="true">
+                  <svg class="w-4 h-4 text-slate-700"><use href="#i-chevron-left"/></svg>
                 </span>
               @endif
             </li>
@@ -332,16 +330,16 @@
             {{-- Pages --}}
             @foreach($pages as $p)
               @if($p==='...')
-                <li class="grid place-items-center h-9 px-3 text-slate-500 select-none border-l border-slate-200">…</li>
+                <li class="grid px-3 border-l select-none place-items-center h-9 text-slate-500 border-slate-200">…</li>
               @else
                 @php $isCur=((int)$p===$current); @endphp
-                <li class="grid place-items-center h-9 border-l border-slate-200">
+                <li class="grid border-l place-items-center h-9 border-slate-200">
                   @if($isCur)
-                    <span class="px-3 h-full inline-flex items-center font-semibold text-slate-900 bg-blue-50">{{ $p }}</span>
+                    <span class="inline-flex items-center h-full px-3 font-semibold text-slate-900 bg-slate-100">{{ $p }}</span>
                   @else
                     <a href="{{ $pageUrl((int)$p) }}"
-                       class="px-3 h-full inline-flex items-center text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-2"
-                       style="--tw-ring-color: {{ $BLUE }}" aria-label="Page {{ $p }}">{{ $p }}</a>
+                       class="inline-flex items-center h-full px-3 text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-2"
+                       style="--tw-ring-color: {{ $ACCENT }}" aria-label="Page {{ $p }}">{{ $p }}</a>
                   @endif
                 </li>
               @endif
@@ -352,12 +350,12 @@
               @if($current<$last)
                 <a href="{{ $pageUrl($current+1) }}"
                    class="grid place-items-center h-9 w-9 hover:bg-slate-50 focus:outline-none focus:ring-2"
-                   style="--tw-ring-color: {{ $BLUE }}" aria-label="Next">
-                  <svg class="h-4 w-4 text-slate-700"><use href="#i-chevron-right"/></svg>
+                   style="--tw-ring-color: {{ $ACCENT }}" aria-label="Next">
+                  <svg class="w-4 h-4 text-slate-700"><use href="#i-chevron-right"/></svg>
                 </a>
               @else
-                <span class="grid place-items-center h-9 w-9 opacity-40 cursor-not-allowed" aria-hidden="true">
-                  <svg class="h-4 w-4 text-slate-700"><use href="#i-chevron-right"/></svg>
+                <span class="grid cursor-not-allowed place-items-center h-9 w-9 opacity-40" aria-hidden="true">
+                  <svg class="w-4 h-4 text-slate-700"><use href="#i-chevron-right"/></svg>
                 </span>
               @endif
             </li>

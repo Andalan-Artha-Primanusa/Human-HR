@@ -62,17 +62,22 @@ class WelcomeController extends Controller
 
         // ===== Untuk user login: ambil lamaran terakhir + ringkasan =====
         if ($userId = Auth::id()) {
-            $myApps = JobApplication::query()
-                ->select(['id','job_id','user_id','current_stage','overall_status','created_at'])
-                ->with([
-                    'job:id,title,site_id,division,level',
-                    'job.site:id,code,name',
-                    'stages' => fn ($q) => $q->select(['id','application_id','stage_key','created_at'])->orderBy('created_at', 'asc'),
-                ])
-                ->where('user_id', $userId)
-                ->orderByDesc('created_at')
-                ->limit(6)
-                ->get();
+            // Cache per user untuk 10 menit (dashboard user-specific)
+            $cacheKey = "welcome.user_apps.{$userId}";
+            
+            $myApps = Cache::remember($cacheKey, 600, function () use ($userId) {
+                return JobApplication::query()
+                    ->select(['id','job_id','user_id','current_stage','overall_status','created_at'])
+                    ->with([
+                        'job:id,title,site_id,division,level',
+                        'job.site:id,code,name',
+                        'stages' => fn ($q) => $q->select(['id','application_id','stage_key','created_at'])->orderBy('created_at', 'asc'),
+                    ])
+                    ->where('user_id', (int) $userId)
+                    ->orderByDesc('created_at')
+                    ->limit(6)
+                    ->get();
+            });
 
             $myAppsSummary  = $this->buildSummary($userId);
             $myAppsProgress = $myApps->map(function (JobApplication $app) {
@@ -110,8 +115,9 @@ class WelcomeController extends Controller
         }
 
         // Gunakan COALESCE + NULLIF agar NULL/'' -> "Tanpa Divisi"
+        // GROUP BY dengan raw expression untuk safety
         return $q->selectRaw("COALESCE(NULLIF(division, ''), 'Tanpa Divisi') AS div_name, COUNT(*) AS total")
-                 ->groupBy('div_name')
+                 ->groupByRaw("COALESCE(NULLIF(division, ''), 'Tanpa Divisi')")
                  ->orderByDesc('total')
                  ->get()
                  ->pluck('total', 'div_name');
@@ -142,13 +148,14 @@ class WelcomeController extends Controller
     /**
      * Ringkasan status lamaran user.
      * - Normalisasi key dari DB (lowercase seperti 'hired','not_qualified') ke pipeline uppercase.
+     * - Raw GROUP BY untuk optimal query & safety
      */
     protected function buildSummary(string|int $userId): array
     {
         $counts = JobApplication::query()
             ->selectRaw('LOWER(COALESCE(overall_status, "submitted")) as k, COUNT(*) as total')
-            ->where('user_id', $userId)
-            ->groupBy('k')
+            ->where('user_id', (int) $userId)
+            ->groupByRaw('LOWER(COALESCE(overall_status, "submitted"))')
             ->pluck('total', 'k');
 
         // Mapping DB -> pipeline

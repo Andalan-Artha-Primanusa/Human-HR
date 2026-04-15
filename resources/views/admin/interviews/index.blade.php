@@ -2,8 +2,8 @@
 @extends('layouts.app', [ 'title' => 'Admin · Interviews' ])
 
 @php
-  $BLUE  = '#1d4ed8'; // blue-700
-  $RED   = '#dc2626'; // red-600
+  $ACCENT = '#a77d52';
+  $ACCENT_DARK = '#8b5e3c';
   $BORD  = '#e5e7eb'; // slate-200
   $DARK  = '#0f172a'; // slate-900-like, untuk tombol gelap
 @endphp
@@ -23,38 +23,37 @@
 
 <div class="mx-auto w-full max-w-[1440px] px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
-  {{-- HEADER dua-tone (biru/merah) + search form terpisah dan ada spasi --}}
-  <section class="relative rounded-2xl border bg-white shadow-sm" style="border-color: {{ $BORD }}">
-    <div class="relative h-20 sm:h-24 rounded-t-2xl overflow-hidden">
-      <div class="absolute inset-0 rounded-t-2xl" style="background: {{ $BLUE }}"></div>
-      <div class="absolute inset-y-0 right-0 rounded-tr-2xl w-24 sm:w-36" style="background: {{ $RED }}"></div>
+  {{-- HEADER dua-tone + search form terpisah --}}
+  <section class="overflow-hidden bg-white border shadow-sm rounded-2xl" style="border-color: {{ $BORD }}">
+    <div class="relative">
+      <div class="w-full h-20 sm:h-24" style="background: linear-gradient(90deg, {{ $ACCENT }}, {{ $ACCENT_DARK }});"></div>
+      <div class="absolute inset-y-0 right-0 w-24 sm:w-36" style="background: linear-gradient(90deg, {{ $ACCENT_DARK }}, {{ $ACCENT }});"></div>
 
-      <div class="relative h-full px-5 md:px-6 flex items-center">
+      <div class="absolute inset-0 flex flex-col gap-3 px-5 py-4 text-white md:px-6 sm:flex-row sm:items-center sm:justify-between">
         <div class="min-w-0">
-          <h1 class="text-2xl md:text-3xl font-semibold tracking-tight text-white">Interviews</h1>
-          <p class="text-sm text-white/90">Jadwal interview yang sudah dibuat & terkirim.</p>
+          <h1 class="text-2xl font-semibold tracking-tight text-white sm:text-3xl">Interviews</h1>
+          <p class="text-xs sm:text-sm text-white/90">Jadwal interview yang sudah dibuat & terkirim.</p>
         </div>
       </div>
     </div>
 
     {{-- SEARCH FORM (jarak mt-3, bukan -mt) --}}
-    <form method="GET"
+        <form method="GET"
           class="mt-3 md:mt-4 grid grid-cols-1 gap-2 md:grid-cols-[1fr_auto_auto] px-3 py-3 md:px-4 md:py-4 shadow-sm"
           role="search" aria-label="Cari Interview" style="border-color: {{ $BORD }}">
       <input
         name="q"
         value="{{ e($q ?? request('q','')) }}"
-        class="input w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2"
-        style="--tw-ring-color: {{ $BLUE }}"
+        class="w-full px-3 py-2 text-sm border rounded-lg input border-slate-200 focus:outline-none focus:ring-2"
+        style="--tw-ring-color: {{ $ACCENT }}"
         placeholder="Cari kandidat / job…"
         autocomplete="off"
       >
 
       {{-- Tombol Filter: gelap + ikon putih (inline, tanpa currentColor) --}}
       <button type="submit"
-              class="inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-white
-                     hover:opacity-95 focus:outline-none focus:ring-2 focus:ring-offset-2 md:shrink-0"
-              style="background-color: {{ $DARK }}; border:1px solid {{ $DARK }}; --tw-ring-color: {{ $BLUE }};"
+              class="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-lg hover:opacity-95 focus:outline-none focus:ring-2 focus:ring-offset-2 md:shrink-0"
+              style="background-color: {{ $DARK }}; border:1px solid {{ $DARK }}; --tw-ring-color: {{ $ACCENT }};"
               aria-label="Filter">
         <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
           <circle cx="11" cy="11" r="7" stroke="#ffffff" stroke-width="2"/>
@@ -65,7 +64,7 @@
 
       @if(filled($q ?? request('q')))
         <a href="{{ route('admin.interviews.index') }}"
-           class="rounded-lg border border-slate-200 px-4 py-2 text-sm hover:bg-slate-50 text-slate-900">
+           class="px-4 py-2 text-sm border rounded-lg border-slate-200 hover:bg-slate-50 text-slate-900">
           Reset
         </a>
       @endif
@@ -73,16 +72,16 @@
   </section>
 
   {{-- TABEL --}}
-  <section class="rounded-2xl border bg-white shadow-sm" style="border-color: {{ $BORD }}">
+  <section class="bg-white border shadow-sm rounded-2xl" style="border-color: {{ $BORD }}">
     <div class="overflow-x-auto">
       @if(($interviews->count() ?? 0) > 0)
         <table class="min-w-[960px] w-full text-sm">
           <thead class="bg-slate-50 text-slate-600">
             <tr>
-              <th class="px-4 py-3 text-left w-56">Tanggal</th>
+              <th class="w-56 px-4 py-3 text-left">Tanggal</th>
               <th class="px-4 py-3 text-left w-60">Kandidat</th>
               <th class="px-4 py-3 text-left">Posisi</th>
-              <th class="px-4 py-3 text-center w-32">Mode</th>
+              <th class="w-32 px-4 py-3 text-center">Mode</th>
               <th class="px-4 py-3 text-left w-[22rem]">Lokasi / Link</th>
               <th class="px-4 py-3 text-left w-52">PIC / Email</th>
             </tr>
@@ -144,15 +143,15 @@
         </table>
       @else
         {{-- EMPTY STATE --}}
-        <div class="py-16 grid place-content-center text-center">
-          <div class="mx-auto w-12 h-12 rounded-2xl bg-slate-100 grid place-content-center text-slate-400 mb-3">
+        <div class="grid py-16 text-center place-content-center">
+          <div class="grid w-12 h-12 mx-auto mb-3 rounded-2xl bg-slate-100 place-content-center text-slate-400">
             <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round"
                     d="M8 7V5m8 2V5M5 11h14M7 21h10a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2H7A2 2 0 0 0 5 8v11a2 2 0 0 0 2 2Z"/>
             </svg>
           </div>
-          <div class="text-slate-700 font-medium">Belum ada jadwal interview.</div>
-          <div class="text-slate-500 text-sm mt-1">Buat dari tombol <span class="font-medium">Schedule</span> di Kanban.</div>
+          <div class="font-medium text-slate-700">Belum ada jadwal interview.</div>
+          <div class="mt-1 text-sm text-slate-500">Buat dari tombol <span class="font-medium">Schedule</span> di Kanban.</div>
         </div>
       @endif
     </div>
@@ -161,7 +160,7 @@
   {{-- PAGINATION (kapsul, custom) --}}
   @php
     /** @var \Illuminate\Contracts\Pagination\LengthAwarePaginator $interviews */
-    $hasData = ($interviews->count() ?? 0) > 0;
+    $hasData = (int) $interviews->total() > 0;
   @endphp
 
   @if($hasData)
@@ -193,8 +192,8 @@
       };
     @endphp
 
-    <section class="rounded-2xl border border-slate-200 bg-white p-3 md:p-4 shadow-sm">
-      <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between text-sm">
+    <section class="p-3 bg-white border shadow-sm rounded-2xl border-slate-200 md:p-4">
+      <div class="flex flex-col gap-3 text-sm md:flex-row md:items-center md:justify-between">
         <div class="text-slate-700">
           Menampilkan <span class="font-semibold text-slate-900">{{ $from }}–{{ $to }}</span>
           dari <span class="font-semibold text-slate-900">{{ $total }}</span>
@@ -206,18 +205,18 @@
         </div>
 
         <nav class="ml-auto" aria-label="Pagination">
-          <ul class="inline-flex items-stretch overflow-hidden rounded-xl border border-slate-200 bg-white">
+          <ul class="inline-flex items-stretch overflow-hidden bg-white border rounded-xl border-slate-200">
             {{-- Prev --}}
             <li>
               @if($current > 1)
                 <a href="{{ $pageUrl($current - 1) }}"
                    class="grid place-items-center px-2.5 h-9 hover:bg-slate-50 focus:outline-none focus:ring-2"
-                   style="--tw-ring-color: {{ $BLUE }}" aria-label="Previous">
-                  <svg class="h-4 w-4 text-slate-700"><use href="#i-chevron-left"/></svg>
+                   style="--tw-ring-color: {{ $ACCENT }}" aria-label="Previous">
+                  <svg class="w-4 h-4 text-slate-700"><use href="#i-chevron-left"/></svg>
                 </a>
               @else
                 <span class="grid place-items-center px-2.5 h-9 opacity-40 cursor-not-allowed" aria-hidden="true">
-                  <svg class="h-4 w-4 text-slate-700"><use href="#i-chevron-left"/></svg>
+                  <svg class="w-4 h-4 text-slate-700"><use href="#i-chevron-left"/></svg>
                 </span>
               @endif
             </li>
@@ -225,16 +224,16 @@
             {{-- Pages --}}
             @foreach($pages as $p)
               @if($p === '...')
-                <li class="grid place-items-center px-3 h-9 text-slate-500 select-none">…</li>
+                <li class="grid px-3 select-none place-items-center h-9 text-slate-500">…</li>
               @else
                 @php $isCur = ((int)$p === $current); @endphp
                 <li class="grid place-items-center h-9">
                   @if($isCur)
-                    <span class="px-3 h-full inline-flex items-center font-semibold text-slate-900 bg-slate-100 border-l border-slate-200 select-none">{{ $p }}</span>
+                    <span class="inline-flex items-center h-full px-3 font-semibold border-l select-none text-slate-900 bg-slate-100 border-slate-200">{{ $p }}</span>
                   @else
                     <a href="{{ $pageUrl((int)$p) }}"
-                       class="px-3 h-full inline-flex items-center text-slate-700 hover:bg-slate-50 border-l border-slate-200 focus:outline-none focus:ring-2"
-                       style="--tw-ring-color: {{ $BLUE }}" aria-label="Page {{ $p }}">{{ $p }}</a>
+                       class="inline-flex items-center h-full px-3 border-l text-slate-700 hover:bg-slate-50 border-slate-200 focus:outline-none focus:ring-2"
+                       style="--tw-ring-color: {{ $ACCENT }}" aria-label="Page {{ $p }}">{{ $p }}</a>
                   @endif
                 </li>
               @endif
@@ -245,12 +244,12 @@
               @if($current < $last)
                 <a href="{{ $pageUrl($current + 1) }}"
                    class="grid place-items-center px-2.5 h-9 hover:bg-slate-50 focus:outline-none focus:ring-2"
-                   style="--tw-ring-color: {{ $BLUE }}" aria-label="Next">
-                  <svg class="h-4 w-4 text-slate-700"><use href="#i-chevron-right"/></svg>
+                   style="--tw-ring-color: {{ $ACCENT }}" aria-label="Next">
+                  <svg class="w-4 h-4 text-slate-700"><use href="#i-chevron-right"/></svg>
                 </a>
               @else
                 <span class="grid place-items-center px-2.5 h-9 opacity-40 cursor-not-allowed" aria-hidden="true">
-                  <svg class="h-4 w-4 text-slate-700"><use href="#i-chevron-right"/></svg>
+                  <svg class="w-4 h-4 text-slate-700"><use href="#i-chevron-right"/></svg>
                 </span>
               @endif
             </li>

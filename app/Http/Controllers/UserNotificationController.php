@@ -7,6 +7,10 @@ use Illuminate\Support\Str;
 
 class UserNotificationController extends Controller
 {
+    private const TOPBAR_LIMIT = 10;
+    private const HTML_UNREAD_LIMIT = 100;
+    private const HTML_READ_LIMIT = 50;
+
     /**
      * Tampilkan daftar notifikasi milik user login.
      * - HTML: unread (semua) + read (50 terakhir)
@@ -20,6 +24,7 @@ class UserNotificationController extends Controller
         ]);
 
         $user = $request->user();
+        abort_if(!$user, 401);
 
         // === JSON (AJAX polling) ===
         if ($request->wantsJson() || $request->boolean('ajax') || $request->query('format') === 'json') {
@@ -29,7 +34,7 @@ class UserNotificationController extends Controller
             $items = $user->notifications()
                 ->select(['id','data','created_at','read_at'])
                 ->latest()
-                ->limit(10)
+                ->limit(self::TOPBAR_LIMIT)
                 ->get()
                 ->map(function ($n) {
                     $data  = (array) ($n->data ?? []);
@@ -54,17 +59,18 @@ class UserNotificationController extends Controller
         }
 
         // === HTML ===
-        // Unread: tampilkan semua (biasanya tidak banyak). Jika ingin dibatasi, ubah ke paginate/cursorPaginate.
+        // Unread dibatasi agar tidak berat jika akun punya notifikasi sangat banyak.
         $unread = $user->unreadNotifications()
             ->select(['id','data','created_at','read_at'])
             ->latest()
+            ->limit(self::HTML_UNREAD_LIMIT)
             ->get();
 
         // Read: batasi 50 terakhir agar tidak berat
         $read = $user->readNotifications()
             ->select(['id','data','created_at','read_at'])
             ->latest()
-            ->limit(50)
+            ->limit(self::HTML_READ_LIMIT)
             ->get();
 
         return view('me.notifications.index', compact('unread','read'));
@@ -77,7 +83,10 @@ class UserNotificationController extends Controller
      */
     public function markAllRead(Request $request)
     {
-        $request->user()
+        $user = $request->user();
+        abort_if(!$user, 401);
+
+        $user
             ->unreadNotifications()
             ->update(['read_at' => now()]);
 
@@ -95,7 +104,10 @@ class UserNotificationController extends Controller
      */
     public function markRead(Request $request, string $notification)
     {
-        $affected = $request->user()
+        $user = $request->user();
+        abort_if(!$user, 401);
+
+        $affected = $user
             ->notifications()
             ->whereKey($notification)
             ->whereNull('read_at')
@@ -114,7 +126,10 @@ class UserNotificationController extends Controller
      */
     public function destroy(Request $request, string $notification)
     {
-        $n = $request->user()
+        $user = $request->user();
+        abort_if(!$user, 401);
+
+        $n = $user
             ->notifications()
             ->whereKey($notification)
             ->firstOrFail();
@@ -146,6 +161,13 @@ class UserNotificationController extends Controller
 
         $scheme = strtolower((string) $parts['scheme']);
         if (!in_array($scheme, ['http', 'https'], true)) {
+            return null;
+        }
+
+        // Izinkan absolute URL hanya jika host sama dengan APP_URL.
+        $targetHost = strtolower((string) ($parts['host'] ?? ''));
+        $appHost = strtolower((string) parse_url((string) config('app.url'), PHP_URL_HOST));
+        if ($targetHost === '' || $appHost === '' || $targetHost !== $appHost) {
             return null;
         }
 

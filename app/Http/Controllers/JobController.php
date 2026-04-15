@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class JobController extends Controller
@@ -43,6 +44,18 @@ class JobController extends Controller
 
         $perPage = $data['per_page'] ?? 12;
         $sort    = $data['sort']     ?? 'latest';
+        $division = isset($data['division'])
+            ? Str::limit(preg_replace('/[\x00-\x1F\x7F]/u', '', trim((string) $data['division'])) ?? '', 100, '')
+            : null;
+        $siteCode = isset($data['site'])
+            ? Str::limit(preg_replace('/[\x00-\x1F\x7F]/u', '', trim((string) $data['site'])) ?? '', 50, '')
+            : null;
+        $companyCode = isset($data['company'])
+            ? Str::limit(preg_replace('/[\x00-\x1F\x7F]/u', '', trim((string) $data['company'])) ?? '', 50, '')
+            : null;
+        $term = isset($data['term'])
+            ? Str::limit(preg_replace('/[\x00-\x1F\x7F]/u', '', trim((string) $data['term'])) ?? '', 200, '')
+            : null;
 
         // 2) Query dasar (kolom minimal + eager load ketat)
         $baseQuery = Job::query()
@@ -72,20 +85,18 @@ class JobController extends Controller
             $baseQuery->where('status', 'open');
         }
 
-        if (!empty($data['division'])) {
-            $baseQuery->inDivision($data['division']);
+        if (!empty($division)) {
+            $baseQuery->inDivision($division);
         }
 
-        if (!empty($data['site'])) {
-            $siteCode = $data['site'];
+        if (!empty($siteCode)) {
             $baseQuery->whereHas('site', fn($q) => $q->where('code', $siteCode));
         }
 
         // Filter by company_id atau company code
         if (!empty($data['company_id'])) {
             $baseQuery->where('company_id', $data['company_id']);
-        } elseif (!empty($data['company'])) {
-            $companyCode = $data['company'];
+        } elseif (!empty($companyCode)) {
             $baseQuery->whereHas('company', fn($q) => $q->where('code', $companyCode));
         }
 
@@ -93,32 +104,32 @@ class JobController extends Controller
             $baseQuery->where('employment_type', $data['type']);
         }
 
-        if (!empty($data['term'])) {
-            $baseQuery->search(trim($data['term']));
+        if (!empty($term)) {
+            $baseQuery->search($term);
         }
 
         // 3) Sorting
         match ($sort) {
-            'oldest' => $baseQuery->orderBy('created_at', 'asc'),
+            'oldest' => $baseQuery->orderBy('created_at', 'asc')->orderBy('id', 'asc'),
             'title'  => $baseQuery->orderBy('title')->orderByDesc('created_at'),
-            default  => $baseQuery->orderBy('created_at', 'desc'), // latest
+            default  => $baseQuery->orderBy('created_at', 'desc')->orderBy('id', 'desc'), // latest
         };
 
         // 4) Micro-cache untuk publik
         if (!$isAdminRoute) {
             $cacheKey = 'jobs.public.' . md5(json_encode([
-                'division'   => $data['division'] ?? null,
-                'site'       => $data['site'] ?? null,
-                'company'    => $data['company'] ?? null,
+                'division'   => $division,
+                'site'       => $siteCode,
+                'company'    => $companyCode,
                 'company_id' => $data['company_id'] ?? null,
                 'type'       => $data['type'] ?? null,
-                'term'       => $data['term'] ?? null,
+                'term'       => $term,
                 'sort'       => $sort,
                 'page'       => $data['page'] ?? 1,
                 'per_page'   => $perPage,
             ]));
 
-            $jobs = Cache::remember($cacheKey, now()->addSeconds(30), function () use ($baseQuery, $perPage) {
+            $jobs = Cache::remember($cacheKey, 30, function () use ($baseQuery, $perPage) {
                 return $baseQuery->paginate($perPage)->withQueryString();
             });
         } else {
@@ -409,7 +420,7 @@ class JobController extends Controller
 
         if ($user && method_exists($user, $relation)) {
             $sites = $user->{$relation}();
-            return $sitesQuery->whereIn('id', $sites->pluck('sites.id'));
+            return $sitesQuery->whereIn('id', $sites->select('sites.id'));
         }
 
         return $sitesQuery;

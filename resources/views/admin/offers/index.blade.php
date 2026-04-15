@@ -25,14 +25,14 @@
 <div class="mx-auto w-full max-w-[1440px] px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
   {{-- HEADER dua-tone + FILTER --}}
-  <section class="relative rounded-2xl border bg-white shadow-sm overflow-hidden" style="border-color: {{ $BORD }}">
-    <div class="relative h-20 sm:h-24 rounded-t-2xl overflow-hidden">
-      <div class="absolute inset-0 rounded-t-2xl" style="background: {{ $BLUE }}"></div>
-      <div class="absolute inset-y-0 right-0 rounded-tr-2xl w-24 sm:w-36" style="background: {{ $RED }}"></div>
+  <section class="overflow-hidden rounded-2xl border bg-white shadow-sm" style="border-color: {{ $BORD }}">
+    <div class="relative">
+      <div class="h-20 sm:h-24 w-full" style="background: linear-gradient(90deg, {{ $BLUE }}, {{ $RED }});"></div>
+      <div class="absolute inset-y-0 right-0 w-24 sm:w-36" style="background: linear-gradient(90deg, {{ $RED }}, {{ $BLUE }});"></div>
 
-      <div class="relative h-full px-5 md:px-6 flex items-center">
+      <div class="absolute inset-0 flex flex-col gap-3 px-5 md:px-6 py-4 sm:flex-row sm:items-center sm:justify-between text-white">
         <div class="min-w-0">
-          <h1 class="text-2xl md:text-3xl font-semibold tracking-tight text-white">Offers</h1>
+          <h1 class="text-2xl sm:text-3xl font-semibold tracking-tight text-white">Offers</h1>
           <p class="text-xs sm:text-sm text-white/90">Daftar draft/final offer untuk kandidat.</p>
         </div>
       </div>
@@ -52,7 +52,7 @@
 
 {{-- FILTER FORM --}}
 <form method="GET"
-      class="mt-3 md:mt-4 grid grid-cols-2 md:grid-cols-[1fr_auto_auto] gap-2 md:gap-3 rounded-xl border bg-white px-3 py-3 md:px-4 md:py-4 shadow-sm"
+  class="mt-3 md:mt-4 grid grid-cols-1 gap-2 md:grid-cols-[1fr_auto_auto] px-3 py-3 md:px-4 md:py-4 shadow-sm"
       role="search" aria-label="Filter Offers"
       style="border-color: {{ $BORD }}">
 
@@ -108,7 +108,7 @@
     </a>
   @endif
 
-</form>
+  </section>
   </section>
 
   {{-- FLASH --}}
@@ -261,7 +261,7 @@
   {{-- PAGINATION (kapsul custom) --}}
   @php
     /** @var \Illuminate\Contracts\Pagination\LengthAwarePaginator $offers */
-    $hasData = ($offers->count() ?? 0) > 0;
+    $hasData = (int) $offers->total() > 0;
   @endphp
 
   @if($hasData)

@@ -112,6 +112,7 @@ class ApplicationController extends Controller
             ])
             ->where('user_id', $request->user()->id)
             ->orderByDesc('created_at')
+            ->orderByDesc('id')
             ->paginate(12);
 
         return view('applications.mine', compact('apps'));
@@ -166,9 +167,17 @@ class ApplicationController extends Controller
     /** Admin: daftar semua aplikasi + filter */
     public function adminIndex(Request $request)
     {
-        $q     = (string) $request->query('q', '');
-        $stage = (string) $request->query('stage', '');
-        $site  = (string) $request->query('site', '');
+        $filters = $request->validate([
+            'q' => ['nullable', 'string', 'max:120'],
+            'stage' => ['nullable', 'string', 'max:50'],
+            'site' => ['nullable', 'string', 'max:50'],
+        ]);
+
+        $qRaw  = (string) ($filters['q'] ?? '');
+        $q     = Str::limit(preg_replace('/[\x00-\x1F\x7F]/u', '', trim($qRaw)) ?? '', 120, '');
+        $like  = $q !== '' ? '%'.addcslashes($q, '\\%_').'%' : null;
+        $stage = (string) ($filters['stage'] ?? '');
+        $site  = (string) ($filters['site'] ?? '');
 
         $stage = $this->normalizeStage($stage);
 
@@ -180,20 +189,22 @@ class ApplicationController extends Controller
                 'stages.actor:id,name',
                 'stages.user:id,name',
             ])
-            ->when($q, function ($qq) use ($q) {
-                $qq->where(function ($w) use ($q) {
-                    $w->whereHas('user', fn ($u) => $u->where('name', 'like', "%{$q}%"))
-                      ->orWhereHas('job', function ($j) use ($q) {
-                          $j->where('title', 'like', "%{$q}%")
-                            ->orWhere('division', 'like', "%{$q}%")
-                            ->orWhereHas('site', fn ($s) => $s->where('code', 'like', "%{$q}%"));
+                        ->when($like !== null, function ($qq) use ($like) {
+                                $qq->where(function ($w) use ($like) {
+                                        $w->whereHas('user', fn ($u) => $u->where('name', 'like', $like))
+                                            ->orWhereHas('job', function ($j) use ($like) {
+                                                    $j->where('title', 'like', $like)
+                                                        ->orWhere('division', 'like', $like)
+                                                        ->orWhereHas('site', fn ($s) => $s->where('code', 'like', $like));
                       });
                 });
             })
             ->when($stage, fn ($qq) => $qq->where('current_stage', $stage))
             ->when($site,  fn ($qq) => $qq->whereHas('job.site', fn ($s) => $s->where('code', $site)))
-            ->latest()
-            ->paginate(15);
+                        ->orderByDesc('created_at')
+                        ->orderByDesc('id')
+                        ->paginate(15)
+                        ->withQueryString();
 
         return view('admin.applications.index', compact('apps'));
     }
@@ -220,6 +231,7 @@ class ApplicationController extends Controller
                 return $q->whereIn('current_stage', $only);
             })
             ->orderBy('created_at')
+            ->orderBy('id')
             ->get();
 
         $grouped = collect($stages)->mapWithKeys(fn($s) => [$s => collect()]);
@@ -424,7 +436,7 @@ class ApplicationController extends Controller
                 // === AUTO-GENERATE users.id_employe (sekali saja) ===
                 $user = User::find($application->user_id);
                 if ($user && empty($user->id_employe)) {
-                    // GUNAKAN Algoritma 1; ganti ke 2 jika ingin kebalikannya
+                    // Format NIK: {COMPANY3}{SITE2}{YY}{MM}{SEQ5}
                     $nik = $this->makeNik($job, 1);
 
                     // retry sederhana jika kebetulan tabrakan
@@ -588,52 +600,74 @@ class ApplicationController extends Controller
     /* ========================== UTIL: NIK ========================== */
 
     /**
-     * Buat NIK sesuai skema:
-     *  - Algoritma 1: {CompanyLetter}{SiteNumber}{YY}{MM}{SEQ4}
-     *  - Algoritma 2: {SiteNumber}{CompanyLetter}{YY}{MM}{SEQ4}
-     * - SEQ diambil dari database, direset per tahun berjalan (YY).
+     * Buat NIK sesuai skema foto:
+     * {COMPANY3}{SITE2}{YY}{MM}{SEQ5}
+     *
+     * Contoh: AAP06260400200
      */
     protected function makeNik(Job $job, int $algo = 1): string
     {
-        // 1) Kode perusahaan (1 huruf)
-        $companyLetter = strtoupper(substr((string)($job->company?->code ?? ''), 0, 1)) ?: 'X';
+        // 1) Prefix perusahaan (3 karakter, uppercase alnum)
+        $companyRaw = strtoupper((string) ($job->company?->code ?? ''));
+        $companyRaw = preg_replace('/[^A-Z0-9]/', '', $companyRaw) ?? '';
+        $company3   = str_pad(substr($companyRaw, 0, 3), 3, 'X');
 
-        // 2) Kode site (angka) — ambil dari kolom yang tersedia di tabel sites
-        $site = $job->site;
-        $siteNumber =
-            (string)($site->nik_code
-                ?? $site->code_site
-                ?? $site->nik_number
-                ?? $site->code_number
-                ?? '0');
+        // 2) Kode site 2 digit
+        $siteCodeRaw = strtoupper((string) ($job->site?->code ?? ''));
+        $siteCodeRaw = preg_replace('/[^A-Z0-9]/', '', $siteCodeRaw) ?? '';
 
-        // 3) Tahun & bulan masuk = saat di-HIRED
+        // Mapping default berdasarkan format yang dibagikan user.
+        $siteMap = [
+            'HO'  => '01',
+            'BGG' => '02',
+            'SBS' => '03',
+            'DBK' => '04',
+            'POS' => '05',
+            'IBP' => '06',
+        ];
+
+        if (preg_match('/^\d{2}$/', $siteCodeRaw)) {
+            $site2 = $siteCodeRaw;
+        } else {
+            $site2 = $siteMap[$siteCodeRaw] ?? '00';
+        }
+
+        // 3) Tahun & bulan masuk = saat status HIRED
         $yy = now()->format('y');
         $mm = now()->format('m');
 
-        // 4) Dapatkan nomor urut (reset per tahun); cari max seq dari semua NIK yang YY-nya sama.
-        //    Posisi YY selalu di karakter ke-3..4 untuk kedua algoritma.
-        $candidates = User::query()
-            ->whereRaw('LENGTH(id_employe) >= 9')                 // minimal panjang wajar
-            ->whereRaw('SUBSTRING(id_employe,3,2) = ?', [$yy])    // filter by YY
-            ->pluck('id_employe');
-
+        // 4) Nomor urut 5 digit, reset per tahun join (YY)
         $maxSeq = 0;
-        foreach ($candidates as $nik) {
-            // match kedua algoritma (huruf/angka di posisi 1-2), lalu YYMM + 4 digit di akhir
-            if (preg_match('/^[A-Z]\d\d{2}\d{2}\d{4}$/', $nik) || preg_match('/^\d[A-Z]\d{2}\d{2}\d{4}$/', $nik)) {
-                $seq = (int) substr($nik, -4);
-                if ($seq > $maxSeq) $maxSeq = $seq;
-            }
-        }
-        $nextSeq = str_pad((string)($maxSeq + 1), 4, '0', STR_PAD_LEFT);
+        User::query()
+            ->select(['id', 'id_employe'])
+            ->whereNotNull('id_employe')
+            ->orderBy('id')
+            ->chunkById(1000, function ($users) use (&$maxSeq, $yy) {
+                foreach ($users as $user) {
+                    $nik = $user->id_employe;
+                    if (!is_string($nik)) {
+                        continue;
+                    }
 
-        // 5) Susun NIK
-        if ($algo === 2) {
-            return "{$siteNumber}{$companyLetter}{$yy}{$mm}{$nextSeq}";
-        }
-        // default Algoritma 1
-        return "{$companyLetter}{$siteNumber}{$yy}{$mm}{$nextSeq}";
+                    // Format target: COMPANY3 + SITE2 + YY + MM + SEQ5
+                    if (preg_match('/^[A-Z0-9]{3}\d{2}(\d{2})\d{2}(\d{5})$/', $nik, $m) !== 1) {
+                        continue;
+                    }
+
+                    if (($m[1] ?? '') !== $yy) {
+                        continue;
+                    }
+
+                    $seq = (int) ($m[2] ?? 0);
+                    if ($seq > $maxSeq) {
+                        $maxSeq = $seq;
+                    }
+                }
+            }, 'id');
+
+        $nextSeq = str_pad((string) ($maxSeq + 1), 5, '0', STR_PAD_LEFT);
+
+        return "{$company3}{$site2}{$yy}{$mm}{$nextSeq}";
     }
 
     /**

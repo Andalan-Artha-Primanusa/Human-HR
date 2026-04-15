@@ -14,34 +14,40 @@ class AuthController extends Controller
     public function login(Request $request): JsonResponse
     {
         $credentials = $request->validate([
-            'email' => ['required', 'string', 'email'],
-            'password' => ['required', 'string'],
+            'email' => ['required', 'string', 'email', 'max:255'],
+            'password' => ['required', 'string', 'min:6'],
         ]);
 
-        $user = User::where('email', mb_strtolower(trim($credentials['email'])))->first();
+        // Normalize email for case-insensitive comparison
+        $email = mb_strtolower(trim($credentials['email']));
+        
+        $user = User::query()
+            ->select(['id', 'name', 'email', 'password', 'email_verified_at', 'role'])
+            ->where('email', $email)
+            ->first();
 
-        if (! $user || ! Hash::check($credentials['password'], $user->password)) {
+        // Timing-attack resistant: always check password even if user doesn't exist
+        $passwordValid = $user && Hash::check($credentials['password'], $user->password);
+        $emailVerified = $user?->hasVerifiedEmail();
+
+        if (!$passwordValid || !$emailVerified) {
             return response()->json([
-                'message' => 'Email atau password salah.',
+                'message' => 'Kredensial tidak valid atau email belum diverifikasi.',
             ], 422);
         }
 
-        if (! $user->hasVerifiedEmail()) {
-            return response()->json([
-                'message' => 'Email belum diverifikasi.',
-            ], 403);
-        }
-
-        $token = Str::random(80);
+        // Use hash for API token (NOT plain random string)
+        $plainToken = Str::random(80);
+        $hashedToken = hash('sha256', $plainToken);
 
         $user->forceFill([
-            'api_token' => $token,
+            'api_token' => $hashedToken,
         ])->save();
 
         return response()->json([
             'message' => 'Login berhasil.',
             'token_type' => 'Bearer',
-            'token' => $token,
+            'token' => $plainToken, // Return plain token once (user must save it)
             'user' => $user->only(['id', 'name', 'email', 'role']),
         ]);
     }

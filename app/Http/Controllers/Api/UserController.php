@@ -30,8 +30,20 @@ class UserController extends Controller
 
     private function usersResponse(): JsonResponse
     {
+        // Add pagination to prevent dumping all users at once
+        $users = User::query()
+            ->select(['id', 'name', 'email', 'role'])
+            ->latest('id')
+            ->paginate(50); // Limit to 50 per page
+        
         return response()->json([
-            'users' => User::query()->latest()->get(['id', 'name', 'email', 'role']),
+            'users' => $users->items(),
+            'pagination' => [
+                'total' => $users->total(),
+                'per_page' => $users->perPage(),
+                'current_page' => $users->currentPage(),
+                'last_page' => $users->lastPage(),
+            ],
         ]);
     }
 
@@ -44,8 +56,20 @@ class UserController extends Controller
 
     private function publicUsersResponse(): JsonResponse
     {
+        // Add pagination for public endpoint (prevent scraping)
+        $users = User::query()
+            ->select(['id', 'name', 'role'])
+            ->latest('id')
+            ->paginate(30); // Smaller page size for public
+        
         return response()->json([
-            'users' => User::query()->latest()->get(['id', 'name', 'role']),
+            'users' => $users->items(),
+            'pagination' => [
+                'total' => $users->total(),
+                'per_page' => $users->perPage(),
+                'current_page' => $users->currentPage(),
+                'last_page' => $users->lastPage(),
+            ],
         ]);
     }
 

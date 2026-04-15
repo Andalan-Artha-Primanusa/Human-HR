@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 use App\Models\JobApplication;
 
@@ -19,14 +20,20 @@ class ManpowerRequirementController extends Controller
      */
     public function index(Request $request): View|JsonResponse
     {
-        $q = trim((string) $request->query('q', ''));
+        $qRaw = (string) $request->query('q', '');
+        $q = Str::limit(
+            preg_replace('/[\x00-\x1F\x7F]/u', '', trim($qRaw)) ?? '',
+            120,
+            ''
+        );
+        $like = $q !== '' ? '%'.addcslashes($q, '\\%_').'%' : null;
 
         $jobsForManpower = Job::query()
             ->select(['id', 'code', 'title', 'created_at'])
-            ->when($q !== '', function ($qq) use ($q) {
-                $qq->where(function ($w) use ($q) {
-                    $w->where('code', 'like', "%{$q}%")
-                        ->orWhere('title', 'like', "%{$q}%");
+            ->when($like !== null, function ($qq) use ($like) {
+                $qq->where(function ($w) use ($like) {
+                    $w->where('code', 'like', $like)
+                        ->orWhere('title', 'like', $like);
                 });
             })
             ->latest('created_at')
@@ -51,6 +58,7 @@ class ManpowerRequirementController extends Controller
     {
         // Ambil semua baris manpower untuk job (tanpa site)
         $rows = $job->manpowerRequirements()
+            ->select(['id', 'job_id', 'asset_name', 'assets_count', 'ratio_per_asset', 'budget_headcount', 'filled_headcount'])
             ->orderByRaw('COALESCE(asset_name,"") asc')
             ->get();
 
@@ -199,16 +207,17 @@ class ManpowerRequirementController extends Controller
      */
     public function __invoke()
     {
-        $openJobs   = Job::where('status','open')->count();
-        $activeApps = JobApplication::where('overall_status','active')->count();
+        $openJobs   = Job::query()->where('status','open')->count('id');
+        $activeApps = JobApplication::query()->where('overall_status','active')->count('id');
 
-        $byStage = JobApplication::select('current_stage', DB::raw('count(*) as total'))
-                    ->groupBy('current_stage')
-                    ->pluck('total','current_stage')
+        $byStage = JobApplication::query()
+                ->selectRaw("COALESCE(NULLIF(current_stage, ''), 'unknown') AS stage_key, COUNT(*) AS total")
+                ->groupByRaw("COALESCE(NULLIF(current_stage, ''), 'unknown')")
+                ->pluck('total','stage_key')
                     ->toArray();
 
         $req = DB::table('manpower_requirements')
-            ->selectRaw('SUM(budget_headcount) as budget, SUM(filled_headcount) as filled')
+            ->selectRaw('COALESCE(SUM(budget_headcount), 0) as budget, COALESCE(SUM(filled_headcount), 0) as filled')
             ->first();
 
         $budget = (int)($req->budget ?? 0);
