@@ -123,7 +123,7 @@ $logoutBtn   = 'w-full rounded-lg bg-red-600 hover:bg-red-700 px-3 py-2 font-med
   {{-- ACCOUNT --}}
   <div class="{{ $sectionTitle }} text-center">
     <span class="inline-block w-1.5 h-1.5 rounded-sm bg-slate-900 align-middle mr-2"></span>
-    <span class="text-white align-middle">Account</span>
+    <span class="text-black align-middle">Account</span>
   </div>
 
   @auth
@@ -174,7 +174,7 @@ $logoutBtn   = 'w-full rounded-lg bg-red-600 hover:bg-red-700 px-3 py-2 font-med
   {{-- GENERAL --}}
   <div class="{{ $sectionTitle }} text-center">
     <span class="inline-block w-1.5 h-1.5 rounded-sm bg-[#a77d52] align-middle mr-2"></span>
-    <span class="text-white align-middle">General</span>
+    <span class="text-black align-middle">General</span>
   </div>
 
   <div class="{{ $groupBoxBlue }} {{ $lockVisual }}">
