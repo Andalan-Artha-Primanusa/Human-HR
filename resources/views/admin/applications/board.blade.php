@@ -29,21 +29,9 @@
       'not_qualified'    => 'Not Lolos',
     ];
 
-    // Warna header tiap kolom
-    $stageColors = [
-      'applied'          => 'from-blue-50 to-blue-100 text-blue-800',
-      'screening'        => 'from-sky-50 to-sky-100 text-sky-800',
-      'psychotest'       => 'from-indigo-50 to-indigo-100 text-indigo-800',
-      'hr_iv'            => 'from-amber-50 to-amber-100 text-amber-800',
-      'user_iv'          => 'from-emerald-50 to-emerald-100 text-emerald-800',
-      'user_trainer_iv'  => 'from-lime-50 to-lime-100 text-lime-800',
-      'offer'            => 'from-pink-50 to-pink-100 text-pink-800',
-      'mcu'              => 'from-cyan-50 to-cyan-100 text-cyan-800',
-      'mobilisasi'       => 'from-orange-50 to-orange-100 text-orange-800',
-      'ground_test'      => 'from-purple-50 to-purple-100 text-purple-800',
-      'hired'            => 'from-green-50 to-green-100 text-green-800',
-      'not_qualified'    => 'from-slate-50 to-slate-100 text-slate-700',
-    ];
+    // Warna header tiap kolom (brown theme)
+    $stageColor = 'linear-gradient(90deg, #f5f1ed, #ede8e2)';
+    $stageTextColor = '#8b5e3c';
 
     $badgeOverall = [
       'active'         => 'badge-blue',
@@ -52,37 +40,38 @@
     ];
   @endphp
 
-  {{-- Header panel --}}
-  <div class="relative mb-5 bg-white border shadow-sm rounded-2xl border-slate-200">
-    <div class="h-2 overflow-hidden rounded-t-2xl">
-      <div class="flex w-full h-full">
-        <div class="h-full" style="background: linear-gradient(90deg, #a77d52, #8b5e3c); width: 90%"></div>
-        <div class="h-full" style="background: linear-gradient(90deg, #8b5e3c, #a77d52); width: 10%"></div>
-      </div>
+  {{-- Header panel dengan tema brown seperti halaman admin lain --}}
+  <section class="mb-5 overflow-hidden bg-white border shadow-sm rounded-2xl border-slate-200">
+    <div class="relative">
+      <div class="w-full h-20 sm:h-24" style="background: linear-gradient(90deg, #a77d52, #8b5e3c);"></div>
+      <div class="absolute inset-y-0 right-0 w-24 sm:w-36" style="background: linear-gradient(90deg, #8b5e3c, #a77d52);"></div>
     </div>
+
     <div class="p-6 md:p-7">
-      <div class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-        <div>
-          <h1 class="text-2xl font-semibold tracking-tight md:text-3xl text-slate-900">Kanban Kandidat</h1>
-          <p class="text-sm text-slate-600">
-            Drag & drop kartu antar stage. Klik <b>Schedule</b> untuk kirim undangan interview (ICS).
-          </p>
+      <div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        <div class="min-w-0">
+          <h1 class="text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">Kanban Kandidat</h1>
+          <p class="mt-1 text-xs sm:text-sm text-slate-600">Drag & drop kartu antar stage. Klik <b>Schedule</b> untuk kirim undangan interview (ICS).</p>
         </div>
 
-        {{-- Filter ringkas --}}
-        <form method="GET" class="grid grid-cols-2 gap-2 p-3 shadow-sm glass rounded-xl md:grid-cols-3 md:gap-3">
-          <input name="q" value="{{ request('q') }}" placeholder="Cari nama / posisi..." class="col-span-2 input md:col-span-1"/>
-          <select name="only" class="input">
+        {{-- Filter form --}}
+        <form method="GET" class="grid grid-cols-1 gap-3 md:grid-cols-[minmax(0,200px)_minmax(0,150px)_auto] md:items-end">
+          <label class="sr-only" for="q">Cari</label>
+          <input id="q" name="q" value="{{ request('q') }}" placeholder="Cari nama / posisi..." class="px-4 py-2 text-sm bg-white border rounded-lg border-slate-200 focus:outline-none focus:ring-2" style="--tw-ring-color: #a77d52"/>
+          
+          <label class="sr-only" for="only">Stage</label>
+          <select id="only" name="only" class="px-4 py-2 text-sm bg-white border rounded-lg border-slate-200 focus:outline-none focus:ring-2" style="--tw-ring-color: #a77d52">
             <option value="">Semua Stage</option>
             @foreach(array_keys($stages) as $key)
               <option value="{{ $key }}" @selected(request('only')===$key)>{{ strtoupper(str_replace('_',' ',$key)) }}</option>
             @endforeach
           </select>
-          <button class="btn btn-primary">Filter</button>
+          
+          <button type="submit" class="px-5 py-2 text-sm font-semibold text-white rounded-lg bg-[linear-gradient(90deg,_#a77d52,_#8b5e3c)] hover:brightness-105">Filter</button>
         </form>
       </div>
     </div>
-  </div>
+  </section>
 
   {{-- Kanban --}}
   <div x-data="kanban()" x-init="init()" class="space-y-4">
@@ -101,9 +90,9 @@
             data-stage="{{ $stageKey }}"
           >
             {{-- Header Stage --}}
-            <div class="px-4 py-3 stage-header bg-gradient-to-r {{ $stageColors[$stageKey] ?? '' }} border-b border-slate-200 flex items-center justify-between">
-              <div class="font-semibold tracking-wide">{{ strtoupper($stageLabel) }}</div>
-              <span class="badge badge-blue" x-ref="count-{{ $stageKey }}">{{ $items->count() }}</span>
+            <div class="flex items-center justify-between px-4 py-3 border-b stage-header border-slate-200" style="background: {{ $stageColor }}; color: {{ $stageTextColor }}; font-weight: 600;">
+              <div class="tracking-wide">{{ strtoupper($stageLabel) }}</div>
+              <span x-ref="count-{{ $stageKey }}" class="inline-flex items-center justify-center w-6 h-6 text-xs font-bold border rounded-full" style="background-color: {{ $stageTextColor }}; color: white;">{{ $items->count() }}</span>
             </div>
 
             {{-- Body Stage --}}

@@ -2,10 +2,9 @@
 @extends('layouts.app', [ 'title' => 'Admin · Offers' ])
 
 @php
-  $BLUE = '#a77d52'; // 🔥 ganti dari biru ke coklat
-  $RED  = '#a77d52'; // 🔥 samakan biar konsisten
-  $BORD = '#e5e7eb';
-  $DARK = '#a77d52'; // 🔥 tombol ikut tema
+  $ACCENT = '#a77d52'; // brown
+  $ACCENT_DARK = '#8b5e3c'; // dark brown
+  $BORD = '#e5e7eb'; // slate-200
 @endphp
 
 
@@ -24,15 +23,15 @@
 
 <div class="mx-auto w-full max-w-[1440px] px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
-  {{-- HEADER dua-tone + FILTER --}}
-  <section class="overflow-hidden rounded-2xl border bg-white shadow-sm" style="border-color: {{ $BORD }}">
+  {{-- HEADER + FILTER seperti halaman Sites --}}
+  <section class="overflow-hidden bg-white border shadow-sm rounded-2xl" style="border-color: {{ $BORD }}">
     <div class="relative">
-      <div class="h-20 sm:h-24 w-full" style="background: linear-gradient(90deg, {{ $BLUE }}, {{ $RED }});"></div>
-      <div class="absolute inset-y-0 right-0 w-24 sm:w-36" style="background: linear-gradient(90deg, {{ $RED }}, {{ $BLUE }});"></div>
+      <div class="w-full h-20 sm:h-24" style="background: linear-gradient(90deg, {{ $ACCENT }}, {{ $ACCENT_DARK }});"></div>
+      <div class="absolute inset-y-0 right-0 w-24 sm:w-36" style="background: linear-gradient(90deg, {{ $ACCENT_DARK }}, {{ $ACCENT }});"></div>
 
-      <div class="absolute inset-0 flex flex-col gap-3 px-5 md:px-6 py-4 sm:flex-row sm:items-center sm:justify-between text-white">
+      <div class="absolute inset-0 flex flex-col gap-3 px-5 py-4 text-white md:px-6 sm:flex-row sm:items-center sm:justify-between">
         <div class="min-w-0">
-          <h1 class="text-2xl sm:text-3xl font-semibold tracking-tight text-white">Offers</h1>
+          <h1 class="text-2xl font-semibold tracking-tight text-white sm:text-3xl">Offers</h1>
           <p class="text-xs sm:text-sm text-white/90">Daftar draft/final offer untuk kandidat.</p>
         </div>
       </div>
@@ -50,96 +49,68 @@
       ];
     @endphp
 
-{{-- FILTER FORM --}}
-<form method="GET"
-  class="mt-3 md:mt-4 grid grid-cols-1 gap-2 md:grid-cols-[1fr_auto_auto] px-3 py-3 md:px-4 md:py-4 shadow-sm"
-      role="search" aria-label="Filter Offers"
-      style="border-color: {{ $BORD }}">
+    <div class="p-6 border-t md:p-7 bg-[linear-gradient(180deg,_#faf7f4,_#ffffff)]" style="border-color: {{ $BORD }}">
+      <form method="GET" class="grid grid-cols-1 gap-4 md:grid-cols-[minmax(0,1fr)_200px_auto] md:items-end" role="search" aria-label="Filter Offers">
+        <label class="sr-only" for="q">Cari</label>
+        <input id="q" name="q" value="{{ e($q) }}"
+               class="w-full px-4 py-3 text-sm bg-white border shadow-sm rounded-xl border-slate-200 focus:outline-none focus:ring-2"
+               style="--tw-ring-color: {{ $ACCENT }}" placeholder="Cari kandidat / posisi…" autocomplete="off">
 
-  {{-- SEARCH --}}
-  <div class="col-span-2 md:col-span-1">
-    <label class="sr-only" for="q">Cari</label>
-    <div class="relative">
-      <input id="q" name="q" value="{{ e($q) }}"
-             class="w-full md:max-w-md rounded-lg border border-slate-200 px-3 py-2 pl-9 text-sm focus:outline-none focus:ring-2"
-             style="--tw-ring-color: {{ $BLUE }}"
-             placeholder="Cari kandidat..."
-             autocomplete="off">
+        <label class="sr-only" for="status">Status</label>
+        <select id="status" name="status"
+                class="w-full px-4 py-3 text-sm bg-white border shadow-sm rounded-xl border-slate-200 focus:outline-none focus:ring-2"
+                style="--tw-ring-color: {{ $ACCENT }}">
+          @foreach($opts as $k => $v)
+            <option value="{{ $k }}" @selected($selStatus===$k)>{{ $v }}</option>
+          @endforeach
+        </select>
 
-      {{-- ICON --}}
-      <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
-        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none">
-          <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/>
-          <path d="M21 21l-3.5-3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-        </svg>
-      </span>
+        <div class="flex flex-col gap-2 sm:flex-row sm:justify-end">
+          <button type="submit"
+                  class="inline-flex items-center justify-center gap-2 px-5 py-3 text-sm font-semibold text-white rounded-xl bg-[linear-gradient(90deg,_#a77d52,_#8b5e3c)] shadow-sm hover:brightness-105 focus:outline-none focus:ring-2"
+                  style="--tw-ring-color: {{ $ACCENT }}">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <circle cx="11" cy="11" r="7" stroke="#ffffff" stroke-width="2"/>
+              <path d="M21 21l-3.5-3.5" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            Cari
+          </button>
+
+          @if(request()->filled('q') || request()->filled('status'))
+            <a href="{{ route('admin.offers.index') }}"
+               class="inline-flex items-center justify-center px-5 py-3 text-sm bg-white border shadow-sm rounded-xl border-slate-200 hover:bg-slate-50 text-slate-900">
+              Reset
+            </a>
+          @endif
+        </div>
+      </form>
     </div>
-  </div>
-
-  {{-- STATUS --}}
- <select name="status"
-        class="w-full md:w-[180px] rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2"
-        style="--tw-ring-color: {{ $BLUE }}">
-    @foreach($opts as $k => $v)
-      <option value="{{ $k }}" @selected($selStatus===$k)>{{ $v }}</option>
-    @endforeach
-  </select>
-
-  {{-- BUTTON FILTER --}}
-  <button type="submit"
-          class="inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-white
-                 hover:opacity-95 focus:outline-none focus:ring-2 focus:ring-offset-2 md:shrink-0"
-          style="background-color: {{ $DARK }}; border:1px solid {{ $DARK }}; --tw-ring-color: {{ $BLUE }};"
-          aria-label="Filter">
-
-    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none">
-      <circle cx="11" cy="11" r="7" stroke="#ffffff" stroke-width="2"/>
-      <path d="M21 21l-3.5-3.5" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
-    </svg>
-
-    <span>Filter</span>
-  </button>
-
-  {{-- RESET --}}
-  @if(request()->filled('q') || request()->filled('status'))
-    <a href="{{ route('admin.offers.index') }}"
-       class="rounded-lg border border-slate-200 px-4 py-2 text-sm hover:bg-slate-50 text-slate-900">
-      Reset
-    </a>
-  @endif
-
-  </section>
   </section>
 
   {{-- FLASH --}}
   @if(session('success'))
-    <div class="rounded-xl bg-green-50 text-green-700 px-4 py-3 border border-green-200">{{ session('success') }}</div>
+    <div class="px-4 py-3 text-green-700 border border-green-200 rounded-xl bg-green-50">{{ session('success') }}</div>
   @endif
   @if(session('error'))
-    <div class="rounded-xl bg-red-50 text-red-700 px-4 py-3 border border-red-200">{{ session('error') }}</div>
+    <div class="px-4 py-3 text-red-700 border border-red-200 rounded-xl bg-red-50">{{ session('error') }}</div>
   @endif
 
-{{-- TABEL --}}
-@php
-  $PRIMARY = '#a77d52';
-@endphp
-
-<section class="rounded-2xl border bg-white shadow-md" style="border-color: {{ $BORD }}">
-  <div class="overflow-x-auto">
-    @if(($offers->count() ?? 0) > 0)
-      <table class="min-w-[980px] w-full text-sm">
-        
-        {{-- HEADER --}}
-        <thead class="bg-gradient-to-r from-[#f8f5f2] to-white text-[#6b4f3a]">
+  {{-- TABEL --}}
+  <section class="overflow-hidden bg-white border shadow-sm rounded-2xl" style="border-color: {{ $BORD }}">
+    <div class="overflow-x-auto">
+      @if(($offers->count() ?? 0) > 0)
+        <table class="min-w-full text-sm">
+          {{-- HEADER --}}
+          <thead class="text-white bg-[linear-gradient(90deg,_#a77d52,_#8b5e3c)]">
           <tr>
             <th class="px-4 py-3 text-left">Kandidat</th>
             <th class="px-4 py-3 text-left">Posisi</th>
-            <th class="px-4 py-3 text-left w-24">Site</th>
-            <th class="px-4 py-3 text-center w-32">Gross</th>
+            <th class="w-24 px-4 py-3 text-left">Site</th>
+            <th class="w-32 px-4 py-3 text-center">Gross</th>
             <th class="px-4 py-3 text-center w-36">Allowance</th>
             <th class="px-4 py-3 text-center w-28">Status</th>
-            <th class="px-4 py-3 text-left w-32">Dibuat</th>
-            <th class="px-4 py-3 text-right w-40">Aksi</th>
+            <th class="w-32 px-4 py-3 text-left">Dibuat</th>
+            <th class="w-40 px-4 py-3 text-right">Aksi</th>
           </tr>
         </thead>
 
@@ -165,7 +136,7 @@
               };
             @endphp
 
-            <tr class="align-top hover:bg-[#f8f5f2] transition group">
+            <tr class="align-top hover:bg-[#f8f5f2] transition">
               
               {{-- KANDIDAT --}}
               <td class="px-4 py-3">
@@ -177,7 +148,7 @@
 
               {{-- POSISI --}}
               <td class="px-4 py-3">
-                <div class="text-slate-800 font-medium">{{ e($title) }}</div>
+                <div class="font-medium text-slate-800">{{ e($title) }}</div>
                 @if(!empty($app?->job?->code))
                   <div class="mt-0.5 text-xs text-slate-500">#{{ e($app->job->code) }}</div>
                 @endif
@@ -185,7 +156,7 @@
 
               {{-- SITE --}}
               <td class="px-4 py-3">
-                <span class="font-mono text-slate-700 bg-slate-100 px-2 py-1 rounded-md">
+                <span class="px-2 py-1 font-mono rounded-md text-slate-700 bg-slate-100">
                   {{ e($site) }}
                 </span>
               </td>
@@ -196,7 +167,7 @@
               </td>
 
               {{-- ALLOWANCE --}}
-              <td class="px-4 py-3 text-center font-semibold text-slate-700">
+              <td class="px-4 py-3 font-semibold text-center text-slate-700">
                 Rp {{ $allow }}
               </td>
 
@@ -213,26 +184,17 @@
               </td>
 
               {{-- AKSI --}}
-              <td class="px-4 py-3">
-                <div class="flex justify-end gap-2 opacity-80 group-hover:opacity-100 transition">
-                  
-                  @if(Route::has('admin.offers.pdf'))
-                    <a 
-                      href="{{ route('admin.offers.pdf', $offer) }}"
-                      class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 
-                      hover:border-[{{ $PRIMARY }}] hover:text-[{{ $PRIMARY }}] 
-                      transition text-sm"
-                    >
-                      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
-                          stroke="currentColor" stroke-width="2"/>
-                        <path d="M14 2v6h6" stroke="currentColor" stroke-width="2"/>
-                      </svg>
-                      PDF
-                    </a>
-                  @endif
-
-                </div>
+              <td class="px-4 py-3 text-right">
+                @if(Route::has('admin.offers.pdf'))
+                  <a href="{{ route('admin.offers.pdf', $offer) }}"
+                     class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 text-sm">
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                      <path d="M14 2v6h6"/>
+                    </svg>
+                    PDF
+                  </a>
+                @endif
               </td>
 
             </tr>
@@ -240,23 +202,21 @@
         </tbody>
       </table>
 
-    @else
-
-      {{-- EMPTY STATE --}}
-      <div class="py-16 grid place-content-center text-center">
-        <div class="mx-auto w-12 h-12 rounded-2xl bg-[#f8f5f2] grid place-content-center text-[#a77d52] mb-3">
-          <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round"
-              d="M19.5 7.5 13.5 1.5H7A2.5 2.5 0 0 0 4.5 4v16A2.5 2.5 0 0 0 7 22.5h10A2.5 2.5 0 0 0 19.5 20V7.5Z"/>
-          </svg>
-        </div>
-        <div class="text-slate-700 font-medium">Belum ada offer.</div>
-        <div class="text-slate-500 text-sm mt-1">Coba ubah filter atau buat offer baru.</div>
-      </div>
-
-    @endif
-  </div>
-</section>
+      @else
+        {{-- EMPTY STATE --}}
+        <section class="p-10 text-center bg-white border border-dashed rounded-2xl border-slate-300">
+          <div class="grid w-12 h-12 mx-auto mb-3 rounded-2xl bg-slate-100 place-content-center text-slate-400">
+            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M19.5 7.5 13.5 1.5H7A2.5 2.5 0 0 0 4.5 4v16A2.5 2.5 0 0 0 7 22.5h10A2.5 2.5 0 0 0 19.5 20V7.5Z"/>
+            </svg>
+          </div>
+          <div class="font-medium text-slate-700">Belum ada offer.</div>
+          <div class="mt-1 text-sm text-slate-500">Coba ubah filter atau buat offer baru.</div>
+        </section>
+      @endif
+    </div>
+  </section>
 
   {{-- PAGINATION (kapsul custom) --}}
   @php
@@ -291,8 +251,8 @@
       };
     @endphp
 
-    <section class="rounded-2xl border border-slate-200 bg-white p-3 md:p-4 shadow-sm">
-      <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between text-sm">
+    <section class="p-3 bg-white border shadow-sm rounded-2xl border-slate-200 md:p-4">
+      <div class="flex flex-col gap-3 text-sm md:flex-row md:items-center md:justify-between">
         <div class="text-slate-700">
           Menampilkan <span class="font-semibold text-slate-900">{{ $from }}–{{ $to }}</span>
           dari <span class="font-semibold text-slate-900">{{ $total }}</span>
@@ -304,18 +264,18 @@
         </div>
 
         <nav class="ml-auto" aria-label="Pagination">
-          <ul class="inline-flex items-stretch overflow-hidden rounded-xl border border-slate-200 bg-white">
+          <ul class="inline-flex items-stretch overflow-hidden bg-white border rounded-xl border-slate-200">
             {{-- Prev --}}
             <li>
               @if($current > 1)
                 <a href="{{ $pageUrl($current - 1) }}"
                    class="grid place-items-center px-2.5 h-9 hover:bg-slate-50 focus:outline-none focus:ring-2"
-                   style="--tw-ring-color: {{ $BLUE }}" aria-label="Previous">
-                  <svg class="h-4 w-4 text-slate-700"><use href="#i-chevron-left"/></svg>
+                   style="--tw-ring-color: {{ $ACCENT }}" aria-label="Sebelumnya">
+                  <svg class="w-4 h-4 text-slate-700"><use href="#i-chevron-left"/></svg>
                 </a>
               @else
                 <span class="grid place-items-center px-2.5 h-9 opacity-40 cursor-not-allowed" aria-hidden="true">
-                  <svg class="h-4 w-4 text-slate-700"><use href="#i-chevron-left"/></svg>
+                  <svg class="w-4 h-4 text-slate-700"><use href="#i-chevron-left"/></svg>
                 </span>
               @endif
             </li>
@@ -323,16 +283,16 @@
             {{-- Pages --}}
             @foreach($pages as $p)
               @if($p === '...')
-                <li class="grid place-items-center px-3 h-9 text-slate-500 select-none">…</li>
+                <li class="grid px-3 select-none place-items-center h-9 text-slate-500">…</li>
               @else
                 @php $isCur = ((int)$p === $current); @endphp
                 <li class="grid place-items-center h-9">
                   @if($isCur)
-                    <span class="px-3 h-full inline-flex items-center font-semibold text-slate-900 bg-slate-100 border-l border-slate-200 select-none">{{ $p }}</span>
+                    <span class="inline-flex items-center h-full px-3 font-semibold border-l select-none text-slate-900 bg-slate-100 border-slate-200">{{ $p }}</span>
                   @else
                     <a href="{{ $pageUrl((int)$p) }}"
-                       class="px-3 h-full inline-flex items-center text-slate-700 hover:bg-slate-50 border-l border-slate-200 focus:outline-none focus:ring-2"
-                       style="--tw-ring-color: {{ $BLUE }}" aria-label="Page {{ $p }}">{{ $p }}</a>
+                       class="inline-flex items-center h-full px-3 border-l text-slate-700 hover:bg-slate-50 border-slate-200 focus:outline-none focus:ring-2"
+                       style="--tw-ring-color: {{ $ACCENT }}" aria-label="Halaman {{ $p }}">{{ $p }}</a>
                   @endif
                 </li>
               @endif
@@ -343,12 +303,12 @@
               @if($current < $last)
                 <a href="{{ $pageUrl($current + 1) }}"
                    class="grid place-items-center px-2.5 h-9 hover:bg-slate-50 focus:outline-none focus:ring-2"
-                   style="--tw-ring-color: {{ $BLUE }}" aria-label="Next">
-                  <svg class="h-4 w-4 text-slate-700"><use href="#i-chevron-right"/></svg>
+                   style="--tw-ring-color: {{ $ACCENT }}" aria-label="Berikutnya">
+                  <svg class="w-4 h-4 text-slate-700"><use href="#i-chevron-right"/></svg>
                 </a>
               @else
                 <span class="grid place-items-center px-2.5 h-9 opacity-40 cursor-not-allowed" aria-hidden="true">
-                  <svg class="h-4 w-4 text-slate-700"><use href="#i-chevron-right"/></svg>
+                  <svg class="w-4 h-4 text-slate-700"><use href="#i-chevron-right"/></svg>
                 </span>
               @endif
             </li>

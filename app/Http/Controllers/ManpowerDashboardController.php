@@ -30,9 +30,12 @@ class ManpowerDashboardController extends Controller
                 $openJobs = Job::query()->where('status', 'open')->count('id');
                 $activeApps = JobApplication::query()->where('overall_status', 'active')->count('id');
                 $byStage = JobApplication::query()
-                    ->selectRaw("COALESCE(NULLIF(current_stage, ''), 'unknown') AS stage_key, COUNT(*) AS total")
-                    ->groupByRaw("COALESCE(NULLIF(current_stage, ''), 'unknown')")
-                    ->pluck('total', 'stage_key');
+                    ->select('current_stage', DB::raw('COUNT(*) as total'))
+                    ->groupBy('current_stage')
+                    ->get()
+                    ->mapWithKeys(fn($row) => [
+                        (empty($row->current_stage) ? 'unknown' : $row->current_stage) => $row->total
+                    ]);
 
                 $req = DB::table('manpower_requirements')
                     ->selectRaw('COALESCE(SUM(budget_headcount), 0) as budget, COALESCE(SUM(filled_headcount), 0) as filled')

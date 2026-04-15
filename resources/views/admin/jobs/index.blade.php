@@ -41,8 +41,8 @@
   <section class="overflow-hidden bg-white border shadow-sm rounded-2xl" style="border-color: {{ $BORD }}">
     {{-- Masthead dua-tone --}}
     <div class="relative">
-      <div class="w-full h-20 sm:h-24" style="background: {{ $ACCENT }}"></div>
-      <div class="absolute inset-y-0 right-0 w-24 sm:w-36" style="background: {{ $ACCENT_DARK }}"></div>
+      <div class="w-full h-20 sm:h-24" style="background: linear-gradient(90deg, {{ $ACCENT }}, {{ $ACCENT_DARK }});"></div>
+      <div class="absolute inset-y-0 right-0 w-24 sm:w-36" style="background: linear-gradient(90deg, {{ $ACCENT_DARK }}, {{ $ACCENT }});"></div>
 
       <div class="absolute inset-0 flex flex-col gap-3 px-5 py-4 md:px-6 sm:flex-row sm:items-center sm:justify-between">
         <div class="min-w-0">
@@ -51,7 +51,7 @@
         </div>
 
         <a href="{{ route('admin.jobs.create') }}"
-           class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold bg-white rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-offset-2"
+           class="inline-flex items-center justify-center w-full gap-2 px-4 py-2 text-sm font-semibold bg-white rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-offset-2 sm:w-auto"
            style="--tw-ring-color: {{ $ACCENT }}">
           <svg class="w-4 h-4" style="color: {{ $ACCENT }}"><use href="#i-plus"/></svg>
           Create Job
@@ -60,19 +60,19 @@
     </div>
 
     {{-- FILTER (di dalam kartu header) --}}
-    <div class="p-5 border-t md:p-6" style="border-color: {{ $BORD }}">
-      <form method="GET" class="grid grid-cols-1 gap-2 md:grid-cols-5 md:gap-3" role="search" aria-label="Filter Jobs">
+    <div class="p-6 border-t md:p-7 bg-[linear-gradient(180deg,_#faf7f4,_#ffffff)]" style="border-color: {{ $BORD }}">
+      <form method="GET" class="grid grid-cols-1 gap-4 md:grid-cols-5 md:items-end" role="search" aria-label="Filter Jobs">
         {{-- term --}}
         <label class="sr-only" for="term">Term</label>
         <input id="term" name="term" value="{{ e(request('term','')) }}"
                placeholder="Cari code / title / division…"
-               class="w-full px-3 py-2 text-sm border rounded-lg input md:col-span-2 border-slate-200 focus:outline-none focus:ring-2"
+               class="w-full px-4 py-3 text-sm bg-white border shadow-sm rounded-xl input md:col-span-2 border-slate-200 focus:outline-none focus:ring-2"
                style="--tw-ring-color: {{ $ACCENT }}" autocomplete="off">
 
         {{-- site by code --}}
         <label class="sr-only" for="site">Site</label>
         <select id="site" name="site"
-                class="w-full px-3 py-2 text-sm border rounded-lg input border-slate-200 focus:outline-none focus:ring-2"
+                class="w-full px-4 py-3 text-sm bg-white border shadow-sm rounded-xl input border-slate-200 focus:outline-none focus:ring-2"
                 style="--tw-ring-color: {{ $ACCENT }}">
           <option value="">All Sites</option>
           @foreach(($sites ?? []) as $code => $name)
@@ -83,7 +83,7 @@
         {{-- company by code --}}
         <label class="sr-only" for="company">Company</label>
         <select id="company" name="company"
-                class="w-full px-3 py-2 text-sm border rounded-lg input border-slate-200 focus:outline-none focus:ring-2"
+                class="w-full px-4 py-3 text-sm bg-white border shadow-sm rounded-xl input border-slate-200 focus:outline-none focus:ring-2"
                 style="--tw-ring-color: {{ $ACCENT }}">
           <option value="">All Companies</option>
           @foreach(($companies ?? []) as $code => $name)
@@ -95,22 +95,22 @@
         @php $statuses = ['' => 'All Status', 'open'=>'Open', 'draft'=>'Draft', 'closed'=>'Closed']; @endphp
         <label class="sr-only" for="status">Status</label>
         <select id="status" name="status"
-                class="w-full px-3 py-2 text-sm border rounded-lg input border-slate-200 focus:outline-none focus:ring-2"
+                class="w-full px-4 py-3 text-sm bg-white border shadow-sm rounded-xl input border-slate-200 focus:outline-none focus:ring-2"
                 style="--tw-ring-color: {{ $ACCENT }}">
           @foreach($statuses as $val => $label)
             <option value="{{ $val }}" @selected(request('status')===$val)>{{ $label }}</option>
           @endforeach
         </select>
 
-        <div class="flex gap-2 md:col-span-5">
-          <button class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-lg bg-slate-900 hover:opacity-95 focus:outline-none focus:ring-2"
+        <div class="flex flex-col gap-2 md:col-span-5 sm:flex-row sm:justify-end">
+          <button class="inline-flex items-center justify-center gap-2 px-5 py-3 text-sm font-semibold text-white rounded-xl bg-[linear-gradient(90deg,_#a77d52,_#8b5e3c)] shadow-sm hover:brightness-105 focus:outline-none focus:ring-2"
                   style="--tw-ring-color: {{ $ACCENT }}">
             <svg class="w-4 h-4"><use href="#i-search"/></svg>
             Filter
           </button>
           @if(request()->filled('term') || request()->filled('site') || request()->filled('company') || request()->filled('status'))
             <a href="{{ route('admin.jobs.index') }}"
-               class="px-4 py-2 text-sm border rounded-lg border-slate-200 hover:bg-slate-50">Reset</a>
+               class="inline-flex items-center justify-center px-5 py-3 text-sm bg-white border shadow-sm rounded-xl border-slate-200 hover:bg-slate-50">Reset</a>
           @endif
         </div>
       </form>
@@ -122,7 +122,7 @@
     <div class="p-0 overflow-x-auto">
       @if($jobs->count())
         <table class="min-w-[980px] w-full text-sm">
-          <thead class="text-white bg-slate-800">
+          <thead class="text-white bg-[linear-gradient(90deg,_#a77d52,_#8b5e3c)]">
             <tr>
               <th class="px-4 py-3 text-left w-28">Code</th>
               <th class="px-4 py-3 text-left">Title</th>
@@ -136,7 +136,7 @@
           </thead>
           <tbody class="divide-y divide-slate-100">
             @foreach($jobs as $job)
-              <tr class="align-top hover:bg-slate-50/60">
+              <tr class="transition align-top hover:bg-[#f8f5f2]">
                 {{-- Code --}}
                 <td class="px-4 py-3 font-mono text-slate-700">{{ e($job->code) }}</td>
 
@@ -224,7 +224,7 @@
         </table>
       @else
         {{-- EMPTY STATE --}}
-        <div class="grid py-16 text-center place-content-center">
+        <section class="p-10 text-center bg-white border border-dashed rounded-2xl border-slate-300">
           <div class="grid w-12 h-12 mx-auto mb-3 rounded-2xl bg-slate-100 place-content-center text-slate-400">
             <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" d="M9 7V6a3 3 0 1 1 6 0v1M5 11h14m-1 8H6a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2Z"/>
@@ -232,12 +232,13 @@
           </div>
           <div class="font-medium text-slate-700">Belum ada data yang cocok.</div>
           <div class="mt-1 text-sm text-slate-500">Coba ubah filter atau buat lowongan baru.</div>
-          <a class="inline-flex items-center gap-2 px-4 py-2 mt-3 text-sm font-semibold bg-white border rounded-lg text-slate-900 border-slate-200 hover:bg-slate-50"
+          <a class="inline-flex items-center gap-2 px-4 py-2 mt-4 text-sm font-semibold text-white rounded-lg bg-slate-900 focus:outline-none focus:ring-2"
+             style="--tw-ring-color: {{ $ACCENT }}"
              href="{{ route('admin.jobs.create') }}">
-            <svg class="w-4 h-4" style="color: {{ $ACCENT }}"><use href="#i-plus"/></svg>
+            <svg class="w-4 h-4"><use href="#i-plus"/></svg>
             Create Job
           </a>
-        </div>
+        </section>
       @endif
     </div>
   </section>
@@ -269,18 +270,12 @@
     };
   @endphp
 
-  <section class="p-3 bg-white border shadow-sm rounded-2xl border-slate-200 md:p-4">
+  <section class="p-3 mt-4 bg-white border shadow-sm rounded-2xl border-slate-200 md:p-4">
     <div class="flex flex-col gap-3 text-sm md:flex-row md:items-center md:justify-between">
       <div class="text-slate-700">
         Menampilkan <span class="font-semibold text-slate-900">{{ $from }}–{{ $to }}</span>
         dari <span class="font-semibold text-slate-900">{{ $total }}</span>
       </div>
-      <div class="hidden md:block text-slate-700">
-        Showing <span class="font-semibold text-slate-900">{{ $from }}</span>
-        to <span class="font-semibold text-slate-900">{{ $to }}</span>
-        of <span class="font-semibold text-slate-900">{{ $total }}</span> results
-      </div>
-
       <nav class="ml-auto" aria-label="Pagination">
         <ul class="inline-flex items-stretch overflow-hidden bg-white border rounded-xl border-slate-200">
           {{-- Prev --}}

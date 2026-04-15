@@ -37,46 +37,41 @@
       </div>
     </div>
 
-    {{-- SEARCH FORM (jarak mt-3, bukan -mt) --}}
-        <form method="GET"
-          class="mt-3 md:mt-4 grid grid-cols-1 gap-2 md:grid-cols-[1fr_auto_auto] px-3 py-3 md:px-4 md:py-4 shadow-sm"
-          role="search" aria-label="Cari Interview" style="border-color: {{ $BORD }}">
-      <input
-        name="q"
-        value="{{ e($q ?? request('q','')) }}"
-        class="w-full px-3 py-2 text-sm border rounded-lg input border-slate-200 focus:outline-none focus:ring-2"
-        style="--tw-ring-color: {{ $ACCENT }}"
-        placeholder="Cari kandidat / job…"
-        autocomplete="off"
-      >
+    {{-- SEARCH FORM (matching Sites index style) --}}
+    <div class="p-6 border-t md:p-7 bg-[linear-gradient(180deg,_#faf7f4,_#ffffff)]" style="border-color: {{ $BORD }}">
+      <form method="GET" class="grid grid-cols-1 gap-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-end" role="search" aria-label="Cari Interview">
+        <label class="sr-only" for="q">Cari</label>
+        <input id="q" type="text" name="q" value="{{ e($q ?? request('q','')) }}" placeholder="Cari kandidat / job…"
+               class="w-full px-4 py-3 text-sm bg-white border shadow-sm rounded-xl border-slate-200 focus:outline-none focus:ring-2"
+               style="--tw-ring-color: {{ $ACCENT }}" autocomplete="off">
 
-      {{-- Tombol Filter: gelap + ikon putih (inline, tanpa currentColor) --}}
-      <button type="submit"
-              class="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-lg hover:opacity-95 focus:outline-none focus:ring-2 focus:ring-offset-2 md:shrink-0"
-              style="background-color: {{ $DARK }}; border:1px solid {{ $DARK }}; --tw-ring-color: {{ $ACCENT }};"
-              aria-label="Filter">
-        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <circle cx="11" cy="11" r="7" stroke="#ffffff" stroke-width="2"/>
-          <path d="M21 21l-3.5-3.5" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
-        </svg>
-        <span>Filter</span>
-      </button>
+        <div class="flex flex-col gap-2 sm:flex-row sm:justify-end">
+          <button type="submit" class="inline-flex items-center justify-center gap-2 px-5 py-3 text-sm font-semibold text-white rounded-xl bg-[linear-gradient(90deg,_#a77d52,_#8b5e3c)] shadow-sm hover:brightness-105 focus:outline-none focus:ring-2"
+                  style="--tw-ring-color: {{ $ACCENT }}">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <circle cx="11" cy="11" r="7" stroke="#ffffff" stroke-width="2"/>
+              <path d="M21 21l-3.5-3.5" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <span>Filter</span>
+          </button>
 
-      @if(filled($q ?? request('q')))
-        <a href="{{ route('admin.interviews.index') }}"
-           class="px-4 py-2 text-sm border rounded-lg border-slate-200 hover:bg-slate-50 text-slate-900">
-          Reset
-        </a>
-      @endif
-    </form>
-  </section>
+          @if(filled($q ?? request('q')))
+            <a href="{{ route('admin.interviews.index') }}"
+               class="inline-flex items-center justify-center px-5 py-3 text-sm bg-white border shadow-sm rounded-xl border-slate-200 hover:bg-slate-50">
+              Reset
+            </a>
+          @endif
+        </div>
+      </form>
+    </div>
+  </div>
 
   {{-- TABEL --}}
-  <section class="bg-white border shadow-sm rounded-2xl" style="border-color: {{ $BORD }}">
+  <div class="overflow-hidden bg-white border shadow-sm rounded-2xl" style="border-color: {{ $BORD }}">
     <div class="overflow-x-auto">
       @if(($interviews->count() ?? 0) > 0)
         <table class="min-w-[960px] w-full text-sm">
-          <thead class="bg-slate-50 text-slate-600">
+          <thead class="text-white" style="background: linear-gradient(90deg, {{ $ACCENT }}, {{ $ACCENT_DARK }});">
             <tr>
               <th class="w-56 px-4 py-3 text-left">Tanggal</th>
               <th class="px-4 py-3 text-left w-60">Kandidat</th>
@@ -100,7 +95,7 @@
                 $mode  = strtolower($iv->mode ?? 'online');
                 $badge = $mode === 'onsite' ? 'badge-amber' : 'badge-blue';
               @endphp
-              <tr class="align-top hover:bg-slate-50/60">
+              <tr class="align-top" style="background-color: #faf9f7;" onmouseover="this.style.backgroundColor='#f8f5f2'" onmouseout="this.style.backgroundColor='#faf9f7'">
                 <td class="px-4 py-3">
                   <div class="font-medium text-slate-900">
                     {{ $start->format('d M Y, H:i') }} — {{ $end->format('H:i') }}
@@ -143,8 +138,8 @@
         </table>
       @else
         {{-- EMPTY STATE --}}
-        <div class="grid py-16 text-center place-content-center">
-          <div class="grid w-12 h-12 mx-auto mb-3 rounded-2xl bg-slate-100 place-content-center text-slate-400">
+        <div class="py-12 text-center">
+          <div class="inline-flex items-center justify-center w-12 h-12 mb-3 border border-dashed rounded-2xl border-slate-300 text-slate-400">
             <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round"
                     d="M8 7V5m8 2V5M5 11h14M7 21h10a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2H7A2 2 0 0 0 5 8v11a2 2 0 0 0 2 2Z"/>
@@ -192,18 +187,12 @@
       };
     @endphp
 
-    <section class="p-3 bg-white border shadow-sm rounded-2xl border-slate-200 md:p-4">
+    <section class="p-3 mt-4 bg-white border shadow-sm rounded-2xl border-slate-200 md:p-4">
       <div class="flex flex-col gap-3 text-sm md:flex-row md:items-center md:justify-between">
         <div class="text-slate-700">
           Menampilkan <span class="font-semibold text-slate-900">{{ $from }}–{{ $to }}</span>
           dari <span class="font-semibold text-slate-900">{{ $total }}</span>
         </div>
-        <div class="hidden md:block text-slate-700">
-          Showing <span class="font-semibold text-slate-900">{{ $from }}</span>
-          to <span class="font-semibold text-slate-900">{{ $to }}</span>
-          of <span class="font-semibold text-slate-900">{{ $total }}</span> results
-        </div>
-
         <nav class="ml-auto" aria-label="Pagination">
           <ul class="inline-flex items-stretch overflow-hidden bg-white border rounded-xl border-slate-200">
             {{-- Prev --}}

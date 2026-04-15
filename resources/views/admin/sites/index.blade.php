@@ -63,30 +63,30 @@
   </div>
 
   {{-- FILTER menyatu di dalam kartu header --}}
-  <div class="p-5 border-t md:p-6" style="border-color: {{ $BORD }}">
-    <form method="GET" class="grid grid-cols-1 gap-2 md:grid-cols-[1fr_auto_auto]" role="search" aria-label="Filter Sites">
+  <div class="p-6 border-t md:p-7 bg-[linear-gradient(180deg,_#faf7f4,_#ffffff)]" style="border-color: {{ $BORD }}">
+    <form method="GET" class="grid grid-cols-1 gap-4 md:grid-cols-[minmax(0,1fr)_200px_auto] md:items-end" role="search" aria-label="Filter Sites">
       <label class="sr-only" for="q">Cari</label>
       <input id="q" type="text" name="q" value="{{ e(request('q','')) }}" placeholder="Cari nama / kode…"
-             class="w-full px-3 py-2 text-sm border rounded-lg border-slate-200 focus:outline-none focus:ring-2"
+             class="w-full px-4 py-3 text-sm bg-white border shadow-sm rounded-xl border-slate-200 focus:outline-none focus:ring-2"
              style="--tw-ring-color: {{ $ACCENT }}" autocomplete="off">
 
       <label class="sr-only" for="status">Status</label>
       <select id="status" name="status"
-              class="w-full px-3 py-2 text-sm border rounded-lg border-slate-200 focus:outline-none focus:ring-2"
+              class="w-full px-4 py-3 text-sm bg-white border shadow-sm rounded-xl border-slate-200 focus:outline-none focus:ring-2"
               style="--tw-ring-color: {{ $ACCENT }}">
         <option value="">Semua Status</option>
         <option value="active"   @selected(request('status')==='active')>Active</option>
         <option value="inactive" @selected(request('status')==='inactive')>Inactive</option>
       </select>
 
-      <div class="flex gap-2">
-        <button class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-lg bg-slate-900 hover:opacity-95 focus:outline-none focus:ring-2"
+      <div class="flex flex-col gap-2 sm:flex-row sm:justify-end">
+        <button class="inline-flex items-center justify-center gap-2 px-5 py-3 text-sm font-semibold text-white rounded-xl bg-[linear-gradient(90deg,_#a77d52,_#8b5e3c)] shadow-sm hover:brightness-105 focus:outline-none focus:ring-2"
                 style="--tw-ring-color: {{ $ACCENT }}">
           <svg class="w-4 h-4"><use href="#i-search"/></svg>
           Cari
         </button>
         @if(request()->filled('q') || request()->filled('status'))
-          <a href="{{ route('admin.sites.index') }}" class="px-4 py-2 text-sm border rounded-lg border-slate-200 hover:bg-slate-50">
+          <a href="{{ route('admin.sites.index') }}" class="inline-flex items-center justify-center px-5 py-3 text-sm bg-white border shadow-sm rounded-xl border-slate-200 hover:bg-slate-50">
             Reset
           </a>
         @endif
@@ -112,7 +112,7 @@
   @if(isset($sites) && $sites->count())
     <div class="overflow-hidden bg-white border shadow-sm rounded-2xl border-slate-200">
       <table class="min-w-full text-sm">
-        <thead class="text-white bg-slate-800">
+        <thead class="text-white bg-[linear-gradient(90deg,_#a77d52,_#8b5e3c)]">
           <tr>
             <th class="px-4 py-3 text-left">Nama</th>
             <th class="px-4 py-3 text-left">Kode</th>
@@ -131,7 +131,7 @@
                 ? (bool)$site->is_active
                 : (strtolower((string)($site->status ?? 'active')) === 'active');
             @endphp
-            <tr class="hover:bg-slate-50/60">
+            <tr class="transition hover:bg-[#f8f5f2]">
               {{-- Nama --}}
               <td class="px-4 py-3">
                 <div class="font-medium text-slate-800">

@@ -23,7 +23,7 @@
 
 <div class="mx-auto w-full max-w-[1440px] px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
-  {{-- HEADER dua-tone + FILTER --}}
+  {{-- HEADER + FILTER seperti halaman Sites --}}
   <section class="overflow-hidden bg-white border shadow-sm rounded-2xl" style="border-color: {{ $BORD }}">
     <div class="relative">
       <div class="w-full h-20 sm:h-24" style="background: linear-gradient(90deg, {{ $ACCENT }}, {{ $ACCENT_DARK }});"></div>
@@ -43,48 +43,50 @@
       $opts   = ['' => 'Semua', 'active' => 'Active', 'finished' => 'Finished'];
     @endphp
 
-    {{-- FILTER (punya jarak, bukan nempel) --}}
-        <form method="GET"
-          class="mt-3 md:mt-4 grid grid-cols-1 gap-2 md:grid-cols-[1fr_auto_auto] px-3 py-3 md:px-4 md:py-4 shadow-sm"
-          role="search" aria-label="Filter Psychotests" style="border-color: {{ $BORD }}">
-      <input name="q" value="{{ e($q) }}"
-             class="w-full col-span-2 px-3 py-2 text-sm border rounded-lg input md:col-span-1 border-slate-200 focus:outline-none focus:ring-2"
-             style="--tw-ring-color: {{ $ACCENT }}" placeholder="Cari kandidat / job…" autocomplete="off">
-      <select name="status"
-              class="w-full px-3 py-2 text-sm border rounded-lg input border-slate-200 focus:outline-none focus:ring-2"
-              style="--tw-ring-color: {{ $ACCENT }}">
-        @foreach($opts as $k => $v)
-          <option value="{{ $k }}" @selected($status===$k)>{{ $v }}</option>
-        @endforeach
-      </select>
+    <div class="p-6 border-t md:p-7 bg-[linear-gradient(180deg,_#faf7f4,_#ffffff)]" style="border-color: {{ $BORD }}">
+      <form method="GET" class="grid grid-cols-1 gap-4 md:grid-cols-[minmax(0,1fr)_200px_auto] md:items-end" role="search" aria-label="Filter Psychotests">
+        <label class="sr-only" for="q">Cari</label>
+        <input id="q" name="q" value="{{ e($q) }}"
+               class="w-full px-4 py-3 text-sm bg-white border shadow-sm rounded-xl border-slate-200 focus:outline-none focus:ring-2"
+               style="--tw-ring-color: {{ $ACCENT }}" placeholder="Cari kandidat / job…" autocomplete="off">
 
-      <button type="submit"
-              class="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-lg hover:opacity-95 focus:outline-none focus:ring-2 focus:ring-offset-2 md:shrink-0"
-              style="background-color: {{ $DARK }}; border:1px solid {{ $DARK }}; --tw-ring-color: {{ $ACCENT }};"
-              aria-label="Filter">
-        {{-- ICON inline putih (tanpa currentColor) --}}
-        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <circle cx="11" cy="11" r="7" stroke="#ffffff" stroke-width="2"/>
-          <path d="M21 21l-3.5-3.5" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
-        </svg>
-        <span>Filter</span>
-      </button>
+        <label class="sr-only" for="status">Status</label>
+        <select id="status" name="status"
+                class="w-full px-4 py-3 text-sm bg-white border shadow-sm rounded-xl border-slate-200 focus:outline-none focus:ring-2"
+                style="--tw-ring-color: {{ $ACCENT }}">
+          @foreach($opts as $k => $v)
+            <option value="{{ $k }}" @selected($status===$k)>{{ $v }}</option>
+          @endforeach
+        </select>
 
-      @if(request()->filled('q') || request()->filled('status'))
-        <a href="{{ route('admin.psychotests.index') }}"
-           class="px-4 py-2 text-sm border rounded-lg border-slate-200 hover:bg-slate-50 text-slate-900">
-          Reset
-        </a>
-      @endif
-    </form>
+        <div class="flex flex-col gap-2 sm:flex-row sm:justify-end">
+          <button type="submit"
+                  class="inline-flex items-center justify-center gap-2 px-5 py-3 text-sm font-semibold text-white rounded-xl bg-[linear-gradient(90deg,_#a77d52,_#8b5e3c)] shadow-sm hover:brightness-105 focus:outline-none focus:ring-2"
+                  style="--tw-ring-color: {{ $ACCENT }}">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <circle cx="11" cy="11" r="7" stroke="#ffffff" stroke-width="2"/>
+              <path d="M21 21l-3.5-3.5" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            Cari
+          </button>
+
+          @if(request()->filled('q') || request()->filled('status'))
+            <a href="{{ route('admin.psychotests.index') }}"
+               class="inline-flex items-center justify-center px-5 py-3 text-sm bg-white border shadow-sm rounded-xl border-slate-200 hover:bg-slate-50 text-slate-900">
+              Reset
+            </a>
+          @endif
+        </div>
+      </form>
+    </div>
   </section>
 
   {{-- TABEL --}}
-  <section class="bg-white border shadow-sm rounded-2xl" style="border-color: {{ $BORD }}">
+  <section class="overflow-hidden bg-white border shadow-sm rounded-2xl" style="border-color: {{ $BORD }}">
     <div class="overflow-x-auto">
       @if(($attempts->count() ?? 0) > 0)
-        <table class="min-w-[980px] w-full text-sm">
-          <thead class="bg-slate-50 text-slate-600">
+        <table class="min-w-full text-sm">
+          <thead class="text-white bg-[linear-gradient(90deg,_#a77d52,_#8b5e3c)]">
             <tr>
               <th class="w-48 px-4 py-3 text-left">Tanggal</th>
               <th class="w-56 px-4 py-3 text-left">Kandidat</th>
@@ -112,7 +114,7 @@
                 $isActive  = (bool)($at->is_active ?? false);
                 $badge     = $isActive ? 'badge-blue' : 'badge-green';
               @endphp
-              <tr class="align-top hover:bg-slate-50/60">
+              <tr class="align-top transition hover:bg-[#f8f5f2]">
                 <td class="px-4 py-3">
                   <div class="font-medium text-slate-900">
                     {{ $start?->format('d M Y, H:i') ?? '—' }}
@@ -158,14 +160,15 @@
         </table>
       @else
         {{-- EMPTY STATE --}}
-        <div class="grid py-16 text-center place-content-center">
+        <section class="p-10 text-center bg-white border border-dashed rounded-2xl border-slate-300">
           <div class="grid w-12 h-12 mx-auto mb-3 rounded-2xl bg-slate-100 place-content-center text-slate-400">
             <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" d="M9 7V6a3 3 0 1 1 6 0v1M5 11h14m-1 8H6a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2Z"/>
             </svg>
           </div>
           <div class="font-medium text-slate-700">Belum ada attempt psychotest.</div>
-        </div>
+          <div class="mt-1 text-sm text-slate-500">Coba ubah filter atau tunggu data attempt masuk.</div>
+        </section>
       @endif
     </div>
   </section>
@@ -242,9 +245,9 @@
                   @if($isCur)
                     <span class="inline-flex items-center h-full px-3 font-semibold border-l select-none text-slate-900 bg-slate-100 border-slate-200">{{ $p }}</span>
                   @else
-                    <a href="{{ $pageUrl((int)$p) }}"
-                       class="inline-flex items-center h-full px-3 border-l text-slate-700 hover:bg-slate-50 border-slate-200 focus:outline-none focus:ring-2"
-                       style="--tw-ring-color: {{ $ACCENT }}" aria-label="Page {{ $p }}">{{ $p }}</a>
+                      <a href="{{ $pageUrl((int)$p) }}"
+                        class="inline-flex items-center h-full px-3 border-l text-slate-700 hover:bg-slate-50 border-slate-200 focus:outline-none focus:ring-2"
+                        style="--tw-ring-color: {{ $ACCENT }}" aria-label="Halaman {{ $p }}">{{ $p }}</a>
                   @endif
                 </li>
               @endif
@@ -255,7 +258,7 @@
               @if($current < $last)
                 <a href="{{ $pageUrl($current + 1) }}"
                    class="grid place-items-center px-2.5 h-9 hover:bg-slate-50 focus:outline-none focus:ring-2"
-                   style="--tw-ring-color: {{ $ACCENT }}" aria-label="Next">
+                   style="--tw-ring-color: {{ $ACCENT }}" aria-label="Berikutnya">
                   <svg class="w-4 h-4 text-slate-700"><use href="#i-chevron-right"/></svg>
                 </a>
               @else

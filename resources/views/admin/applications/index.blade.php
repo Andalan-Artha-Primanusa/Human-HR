@@ -104,57 +104,57 @@
     </div>
 
     {{-- ===== FILTER ===== --}}
-    <form method="GET"
-          class="grid grid-cols-1 gap-2 px-3 py-3 mt-4 md:grid-cols-5 md:px-4 md:py-4"
-          style="border-top:1px solid {{ $BORD }}">
-      {{-- q --}}
-      <input name="q"
-             value="{{ e(request('q','')) }}"
-             placeholder="Cari kandidat / posisi / site"
-             class="input md:col-span-2"
-             autocomplete="off" />
+    <div class="p-6 border-t md:p-7" style="border-color: {{ $BORD }}; background: linear-gradient(180deg, #faf7f4, #ffffff);">
+      <form method="GET" class="grid grid-cols-1 gap-3 md:grid-cols-5">
+        {{-- q --}}
+        <input name="q"
+               value="{{ e(request('q','')) }}"
+               placeholder="Cari kandidat / posisi / site"
+               class="input md:col-span-2"
+               autocomplete="off" />
 
-      {{-- stage --}}
-      <select name="stage" class="input">
-        @foreach($stageOptions as $k => $v)
-          <option value="{{ $k }}" @selected(request('stage')===$k)>{{ $v }}</option>
-        @endforeach
-      </select>
-
-      {{-- site --}}
-      @php $siteVal = request('site'); @endphp
-      @if(!empty($sites ?? null) && is_iterable($sites))
-        <select name="site" class="input">
-          <option value="">Semua Site</option>
-          @foreach($sites as $code => $name)
-            <option value="{{ $code }}" @selected($siteVal===$code)>{{ $code }} — {{ $name }}</option>
+        {{-- stage --}}
+        <select name="stage" class="input">
+          @foreach($stageOptions as $k => $v)
+            <option value="{{ $k }}" @selected(request('stage')===$k)>{{ $v }}</option>
           @endforeach
         </select>
-      @else
-        <input name="site" value="{{ e($siteVal) }}" class="input" placeholder="DBK / POS / SBS">
-      @endif
 
-      {{-- actions --}}
-      <div class="flex gap-2">
-        <button type="submit"
-                class="inline-flex items-center justify-center w-full gap-2 px-4 py-2 text-sm font-semibold text-white rounded-lg hover:opacity-95 focus:outline-none focus:ring-2 focus:ring-offset-2 sm:w-auto"
-                style="background-color:#0f172a; border:1px solid #0f172a; --tw-ring-color: {{ $ACCENT }};"
-                aria-label="Filter">
-          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <circle cx="11" cy="11" r="7" stroke="#ffffff" stroke-width="2"/>
-            <path d="M21 21l-3.5-3.5" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
-          </svg>
-          <span>Filter</span>
-        </button>
-
-        @if(request()->hasAny(['q','stage','site']))
-          <a href="{{ route('admin.applications.index') }}"
-             class="w-full px-4 py-2 text-sm text-center border rounded-lg border-slate-200 hover:bg-slate-50 sm:w-auto">
-            Reset
-          </a>
+        {{-- site --}}
+        @php $siteVal = request('site'); @endphp
+        @if(!empty($sites ?? null) && is_iterable($sites))
+          <select name="site" class="input">
+            <option value="">Semua Site</option>
+            @foreach($sites as $code => $name)
+              <option value="{{ $code }}" @selected($siteVal===$code)>{{ $code }} — {{ $name }}</option>
+            @endforeach
+          </select>
+        @else
+          <input name="site" value="{{ e($siteVal) }}" class="input" placeholder="DBK / POS / SBS">
         @endif
-      </div>
-    </form>
+
+        {{-- actions --}}
+        <div class="flex gap-2">
+          <button type="submit"
+                  class="inline-flex items-center justify-center w-full gap-2 px-4 py-2 text-sm font-semibold text-white rounded-lg hover:opacity-95 focus:outline-none focus:ring-2 focus:ring-offset-2"
+                  style="background: linear-gradient(90deg, {{ $ACCENT }}, {{ $ACCENT_DARK }}); --tw-ring-color: {{ $ACCENT }};"
+                  aria-label="Filter">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <circle cx="11" cy="11" r="7" stroke="#ffffff" stroke-width="2"/>
+              <path d="M21 21l-3.5-3.5" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <span>Filter</span>
+          </button>
+
+          @if(request()->hasAny(['q','stage','site']))
+            <a href="{{ route('admin.applications.index') }}"
+               class="w-full px-4 py-2 text-sm text-center border rounded-lg border-slate-200 hover:bg-slate-50">
+              Reset
+            </a>
+          @endif
+        </div>
+      </form>
+    </div>
   </section>
 
   {{-- ===== TABEL ===== --}}
@@ -162,7 +162,7 @@
     <div class="overflow-x-auto">
       @if($apps->count())
 <table class="min-w-[960px] w-full text-sm">
-  <thead class="text-white bg-slate-800">
+  <thead class="text-white" style="background: linear-gradient(90deg, {{ $ACCENT }}, {{ $ACCENT_DARK }});">
     <tr>
       <th class="px-4 py-3 font-semibold text-left">Kandidat</th>
       <th class="px-4 py-3 font-semibold text-left">Posisi</th>
@@ -193,7 +193,7 @@
         $candidate = $app->candidate->name ?? ($app->user->name ?? ($app->name ?? '—'));
       @endphp
 
-      <tr class="align-top hover:bg-slate-50/60">
+      <tr class="align-top" style="background-color: #faf9f7;" onmouseover="this.style.backgroundColor='#f8f5f2'" onmouseout="this.style.backgroundColor='#faf9f7'">
         <td class="px-4 py-3">
           <div class="font-medium text-black">{{ e($candidate) }}</div>
           @if(!empty($app->candidate?->email))
@@ -266,13 +266,13 @@
 
       @else
         {{-- EMPTY STATE --}}
-        <div class="grid py-16 text-center place-content-center">
-          <div class="grid w-12 h-12 mx-auto mb-3 rounded-2xl bg-slate-100 place-content-center text-slate-400">
-            <svg class="w-6 h-6"><use href="#i-plus"/></svg>
+        <div class="py-12 text-center">
+          <div class="inline-flex items-center justify-center w-12 h-12 mb-3 border border-dashed rounded-2xl border-slate-300 text-slate-400">
+            <svg class="w-6 h-6"><use href="#i-search"/></svg>
           </div>
           <div class="font-medium text-slate-700">Belum ada data aplikasi.</div>
           <div class="mt-1 text-sm text-slate-500">Coba ubah filter atau cari lowongan.</div>
-          <a href="{{ route('admin.jobs.index') }}" class="inline-flex items-center gap-2 mt-3 btn btn-primary">
+          <a href="{{ route('admin.jobs.index') }}" class="inline-flex items-center gap-2 mt-4 btn btn-primary">
             <svg class="w-4 h-4"><use href="#i-search"/></svg>
             Cari Lowongan
           </a>
