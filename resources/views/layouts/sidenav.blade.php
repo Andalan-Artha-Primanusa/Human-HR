@@ -6,7 +6,7 @@ use Illuminate\Support\Str;
 $variant      = $variant      ?? 'desktop'; // 'desktop' | 'mobile'
 $closeOnClick = $closeOnClick ?? false;     // untuk mobile drawer
 $offerQuickId = $offerQuickId ?? null;
-$logoUrl      = $logoUrl      ?? asset('assets/logo-andalan.svg');
+$logoUrl      = $logoUrl      ?? asset('assets/logofix.png');
 $appName      = config('app.name', 'Careers Portal');
 
 $closeAttr = $closeOnClick ? ' @click="open=false"' : '';

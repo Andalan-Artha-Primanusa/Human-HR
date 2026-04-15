@@ -38,8 +38,7 @@
       <div class="w-full max-w-md">
         {{-- Brand --}}
         <div class="mb-8 flex flex-col items-center justify-center gap-3">
-          <img src="{{ asset('assets/foto2.png') }}" alt="Andalan"
-               class="h-20 sm:h-24 md:h-28 w-auto" loading="lazy">
+          
           <span class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/70 px-3 py-1 text-xs font-medium shadow-sm backdrop-blur">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-emerald-600" viewBox="0 0 24 24" fill="currentColor"><path d="M10.242 16.313 6.343 12.414l1.414-1.414 2.485 2.485 6.364-6.364 1.414 1.414z"/></svg>
             Verifikasi Email • Human.Careers

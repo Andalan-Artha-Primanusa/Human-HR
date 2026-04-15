@@ -55,7 +55,6 @@
                     <table role="presentation" width="100%">
                       <tr>
                         <td valign="middle" align="left">
-                          <img src="{{ asset('assets/foto2.png') }}" alt="{{ $appName }}" height="28" style="height:28px;">
                         </td>
                         <td valign="middle" align="right">
                           <span class="chip" style="display:inline-block;font-size:12px;font-weight:500;color:#1f2937;background:#eff6ff;border:1px solid #dbeafe;border-radius:9999px;padding:4px 12px;">

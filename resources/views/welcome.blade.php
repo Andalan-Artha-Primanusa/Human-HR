@@ -448,10 +448,12 @@
         <a href="{{ route('welcome') }}"
           class="flex items-center gap-2"
           aria-label="Human Careers — Halaman Beranda PT Andalan Artha Primanusa">
-          <img src="{{ asset('assets/ddd.png') }}"
-            alt="Logo Human Careers PT Andalan Artha Primanusa"
-            class="object-contain w-auto h-20 mt-4 md:h-20"
-            width="160" height="80" loading="eager" decoding="sync">
+       <div class="flex items-center justify-center">
+   <img src="{{ asset('assets/logofix.png') }}"
+     alt="Logo Human Careers PT Andalan Artha Primanusa"
+     class="block object-contain mx-auto mt-2 h-14 md:h-16"
+     width="140" height="70" loading="eager" decoding="sync">
+</div>
         </a>
       </div>
 

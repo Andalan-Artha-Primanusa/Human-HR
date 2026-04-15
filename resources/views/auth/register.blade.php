@@ -10,28 +10,28 @@
 
 <body class="min-h-screen text-slate-800">
 
-<div class="min-h-screen relative overflow-hidden">
+<div class="relative min-h-screen overflow-hidden">
 
   <!-- BACKGROUND -->
   <img src="{{ asset('assets/hr1.jpg') }}"
-       class="absolute inset-0 w-full h-full object-cover"
+       class="absolute inset-0 object-cover w-full h-full"
        alt="bg">
 
   <!-- overlay -->
   <div class="absolute inset-0 bg-black/50"></div>
 
   <!-- TEXT KIRI -->
-  <div class="hidden lg:flex absolute left-0 top-0 h-full items-center pl-20 text-white z-10">
+  <div class="absolute top-0 left-0 z-10 items-center hidden h-full pl-20 text-white lg:flex">
     <div class="max-w-md">
-      <h1 class="text-4xl font-bold mb-3">Human Careers</h1>
-      <p class="text-white/80 text-sm">
+      <h1 class="mb-3 text-4xl font-bold">Human Careers</h1>
+      <p class="text-sm text-white/80">
         Platform rekrutmen resmi Andalan Group untuk membantu Anda menemukan karier terbaik.
       </p>
     </div>
   </div>
 
   <!-- FORM -->
-  <div class="absolute inset-0 flex items-center justify-end pr-6 sm:pr-14 lg:pr-28 z-10">
+  <div class="absolute inset-0 z-10 flex items-center justify-end pr-6 sm:pr-14 lg:pr-28">
 
     <div class="w-full max-w-sm">
 
@@ -42,10 +42,9 @@
         <div class="flex flex-col items-center mb-5 space-y-3">
 
           <img src="{{ asset('assets/logoicon.png') }}"
-            class="h-20 md:h-24 object-contain">
+            class="object-contain h-20 md:h-24">
 
-          <img src="{{ asset('assets/foto2.png') }}"
-            class="h-16 md:h-20 object-contain">
+          
 
         </div>
 
@@ -94,7 +93,7 @@
       </div>
 
       <!-- LOGIN -->
-      <div class="mt-4 text-center text-sm text-white/80">
+      <div class="mt-4 text-sm text-center text-white/80">
         Sudah punya akun?
         <a href="{{ route('login') }}" class="underline">Masuk</a>
       </div>

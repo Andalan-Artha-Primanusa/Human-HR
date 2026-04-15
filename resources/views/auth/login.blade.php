@@ -46,20 +46,20 @@
 
 <body class="min-h-screen text-slate-800">
 
-  <div class="min-h-screen relative overflow-hidden">
+  <div class="relative min-h-screen overflow-hidden">
 
     <!-- BACKGROUND -->
     <img src="{{ asset('assets/hr1.jpg') }}"
-      class="absolute inset-0 w-full h-full object-cover"
+      class="absolute inset-0 object-cover w-full h-full"
       alt="bg">
 
     <!-- overlay -->
     <div class="absolute inset-0 bg-black/50"></div>
 
     <!-- TEXT KIRI -->
-    <div class="hidden lg:flex absolute left-0 top-0 h-full items-center pl-20 text-white z-10">
+    <div class="absolute top-0 left-0 z-10 items-center hidden h-full pl-20 text-white lg:flex">
       <div class="max-w-md">
-        <h1 class="text-4xl font-bold mb-4">Human Careers</h1>
+        <h1 class="mb-4 text-4xl font-bold">Human Careers</h1>
         <p class="text-white/80">
           Platform rekrutmen resmi Andalan Group untuk membantu Anda menemukan karier terbaik.
         </p>
@@ -67,7 +67,7 @@
     </div>
 
     <!-- FORM -->
-    <div class="absolute inset-0 flex items-center justify-end pr-4 sm:pr-10 lg:pr-20 z-10">
+    <div class="absolute inset-0 z-10 flex items-center justify-end pr-4 sm:pr-10 lg:pr-20">
 
       <div class="w-full max-w-md">
 
@@ -76,24 +76,22 @@
         @endphp
 
         @if ($authError)
-        <div class="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-800">
+        <div class="px-3 py-2 mb-4 text-sm border rounded-lg border-rose-200 bg-rose-50 text-rose-800">
           {{ $authError }}
         </div>
         @endif
 
         <!-- CARD -->
         <div class="{{ $authError ? 'shake' : '' }}">
-            <div class="rounded-2xl shadow-2xl p-8 border border-white/20 bg-white/80 backdrop-blur">
+            <div class="p-8 border shadow-2xl rounded-2xl border-white/20 bg-white/80 backdrop-blur">
 
             <!-- LOGO -->
             <div class="flex flex-col items-center mb-6 space-y-3">
               <img src="{{ asset('assets/logoicon.png') }}"
                 alt="Logo Perusahaan"
-                class="h-28 md:h-32 object-contain">
+                class="object-contain h-28 md:h-32">
 
-              <img src="{{ asset('assets/foto2.png') }}"
-                alt="Human Resource Andalan"
-                class="h-20 md:h-24 object-contain">
+              
             </div>
 
             <!-- FORM -->
@@ -143,14 +141,14 @@
 
         <!-- REGISTER -->
         @if (Route::has('register'))
-        <div class="mt-5 text-center text-sm text-white/80">
+        <div class="mt-5 text-sm text-center text-white/80">
           Belum punya akun?
           <a href="{{ route('register') }}" class="underline">Daftar</a>
         </div>
         @endif
 
         <!-- FOOTER -->
-        <div class="mt-6 text-center text-xs text-white/60">
+        <div class="mt-6 text-xs text-center text-white/60">
           © {{ now()->year }} Andalan Group
         </div>
 
