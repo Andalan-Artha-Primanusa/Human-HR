@@ -80,8 +80,8 @@
         </div>
       </div>
 
-      {{-- Region & Timezone --}}
-      <div class="grid sm:grid-cols-2 gap-4">
+      {{-- Region, Timezone, Latitude, Longitude --}}
+      <div class="grid sm:grid-cols-2 md:grid-cols-4 gap-4">
         <div>
           <label class="block text-sm font-medium text-slate-700">Region (opsional)</label>
           <input type="text" name="region" value="{{ old('region', $site->region) }}"
@@ -97,6 +97,22 @@
                  class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2"
                style="--tw-ring-color: {{ $ACCENT }}">
           @error('timezone') <div class="text-sm text-rose-600 mt-1">{{ $message }}</div> @enderror
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-700">Latitude (opsional)</label>
+          <input type="number" step="any" name="latitude" value="{{ old('latitude', $site->latitude) }}"
+                 placeholder="-6.2000000"
+                 class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2"
+               style="--tw-ring-color: {{ $ACCENT }}">
+          @error('latitude') <div class="text-sm text-rose-600 mt-1">{{ $message }}</div> @enderror
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-700">Longitude (opsional)</label>
+          <input type="number" step="any" name="longitude" value="{{ old('longitude', $site->longitude) }}"
+                 placeholder="106.8000000"
+                 class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2"
+               style="--tw-ring-color: {{ $ACCENT }}">
+          @error('longitude') <div class="text-sm text-rose-600 mt-1">{{ $message }}</div> @enderror
         </div>
       </div>
 

@@ -14,14 +14,18 @@ class Site extends Model
     public $incrementing = false;
     protected $keyType = 'string';
 
+
     protected $fillable = [
         'code', 'name', 'region', 'timezone', 'address',
         'is_active', 'meta', 'notes',
+        'latitude', 'longitude',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
         'meta'      => 'array',
+        'latitude'  => 'float',
+        'longitude' => 'float',
     ];
 
     protected static function boot()

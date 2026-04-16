@@ -36,16 +36,13 @@
     <div class="w-full max-w-sm">
 
       <!-- CARD -->
-      <div class="rounded-2xl shadow-2xl p-5 border border-white/20 bg-white/80 backdrop-blur max-h-[90vh] overflow-y-auto">
+      <div class="rounded-2xl shadow-2xl p-8 border border-white/20 bg-[#d1d3c7] backdrop-blur max-h-[90vh] overflow-y-auto">
 
         <!-- LOGO (DIPERBESAR) -->
-        <div class="flex flex-col items-center mb-5 space-y-3">
-
-          <img src="{{ asset('assets/logoicon.png') }}"
-            class="object-contain h-20 md:h-24">
-
-          
-
+        <div class="flex flex-col items-center mb-6 space-y-3">
+          <img src="{{ asset('assets/logologin.png') }}"
+            alt="Logo Perusahaan"
+            class="object-contain h-28 md:h-32">
         </div>
 
         <!-- FORM -->

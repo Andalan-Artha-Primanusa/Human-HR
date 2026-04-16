@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="id" prefix="og: https://ogp.me/ns#">
 
 <head>
@@ -6,7 +6,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  {{-- ===== PRIMARY SEO — lebih deskriptif & keyword-rich ===== --}}
+  {{-- ===== PRIMARY SEO â€” lebih deskriptif & keyword-rich ===== --}}
   <title>Lowongan Kerja PT Andalan Artha Primanusa 2025 | Human Careers</title>
   <meta name="description" content="Temukan lowongan kerja terbaru di PT Andalan Artha Primanusa. Proses rekrutmen transparan, pantau status lamaran secara real-time, dan bergabunglah bersama tim profesional Andalan.">
   <meta name="keywords" content="lowongan kerja Andalan, karier PT Andalan, rekrutmen 2025, Human Careers, loker Jakarta, pekerjaan terbaru Andalan, loker terbuka">
@@ -17,7 +17,7 @@
   <link rel="canonical" href="{{ url()->current() }}">
 
   {{-- ===== OPEN GRAPH ===== --}}
-  <meta property="og:site_name" content="Human Careers — PT Andalan Artha Primanusa">
+  <meta property="og:site_name" content="Human Careers â€” PT Andalan Artha Primanusa">
   <meta property="og:locale" content="id_ID">
   <meta property="og:type" content="website">
   <meta property="og:title" content="Lowongan Kerja PT Andalan Artha Primanusa 2025 | Human Careers">
@@ -26,14 +26,14 @@
   <meta property="og:image" content="{{ asset('storage/media/og-careers.jpg') }}">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="Human Careers — Portal Karier Resmi PT Andalan Artha Primanusa">
+  <meta property="og:image:alt" content="Human Careers â€” Portal Karier Resmi PT Andalan Artha Primanusa">
 
   {{-- ===== TWITTER CARD ===== --}}
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Lowongan Kerja PT Andalan Artha Primanusa | Human Careers">
   <meta name="twitter:description" content="Lamar kerja cepat & pantau status real-time. Lowongan terverifikasi dari PT Andalan Artha Primanusa.">
   <meta name="twitter:image" content="{{ asset('storage/media/og-careers.jpg') }}">
-  <meta name="twitter:image:alt" content="Human Careers — Portal Karier Resmi PT Andalan">
+  <meta name="twitter:image:alt" content="Human Careers â€” Portal Karier Resmi PT Andalan">
 
   {{-- ===== DNS & FONT PRELOAD ===== --}}
   <link rel="dns-prefetch" href="//fonts.googleapis.com">
@@ -75,18 +75,11 @@
 
     $byDivision = isset($byDivision) && $byDivision instanceof \Illuminate\Support\Collection
       ? $byDivision
-      : $filteredJobs->groupBy('division')->map->count()->sortDesc()
+      : $filteredJobs->groupBy('division')
+        ->map(fn($items) => $items->count())
+        ->sortDesc()
         ->mapWithKeys(fn($v, $k) => [$k ?: 'Tanpa Divisi' => (int)$v]);
 
-    // Design tokens
-    $brandBrown    = '#a77d52';
-    $brandBlue     = '#1d4ed8';
-    $brandRed      = '#dc2626';
-    $brandGray     = '#e5e7eb';
-    $brandGrayDark = '#000000';
-    $bgMain        = '#f5efe8';
-    $bgChip        = '#ede5dc';
-    $textSoft      = '#6b4f3a';
   @endphp
 
   {{-- ===== STRUCTURED DATA ===== --}}
@@ -125,12 +118,12 @@
       ]
     ];
 
-    // 2. WebSite — SearchAction format EntryPoint yang benar
+    // 2. WebSite â€” SearchAction format EntryPoint yang benar
     $schema[] = [
       "@context"        => "https://schema.org",
       "@type"           => "WebSite",
       "@id"             => url('/') . "#website",
-      "name"            => "Human Careers — PT Andalan Artha Primanusa",
+      "name"            => "Human Careers â€” PT Andalan Artha Primanusa",
       "url"             => url('/'),
       "inLanguage"      => "id-ID",
       "publisher"       => ["@id" => url('/') . "#organization"],
@@ -220,7 +213,7 @@
       ];
     }
 
-    // 7. FAQPage — boost rich result di Google
+    // 7. FAQPage â€” boost rich result di Google
     $schema[] = [
       "@context"   => "https://schema.org",
       "@type"      => "FAQPage",
@@ -266,18 +259,6 @@
   </script>
 
   <style>
-    /* ===== CSS CUSTOM PROPERTIES ===== */
-    :root {
-      --brand:      #a77d52;
-      --brand-dark: #8a6340;
-      --brand-bg:   #f5efe8;
-      --brand-chip: #ede5dc;
-      --brand-text: #6b4f3a;
-      --blue:       #1d4ed8;
-      --red:        #dc2626;
-      --gray:       #e5e7eb;
-      --gray-dark:  #111827;
-    }
 
     html, body {
       font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, -apple-system, sans-serif;
@@ -288,7 +269,7 @@
 
     /* Aksesibilitas focus */
     *:focus-visible {
-      outline: 3px solid var(--blue);
+      outline: 3px solid #1d4ed8;
       outline-offset: 3px;
       border-radius: 4px;
     }
@@ -370,7 +351,7 @@
 
     /* Quick link cards */
     .qlink-card {
-      border: 1px solid var(--gray);
+      border: 1px solid #e5e7eb;
       border-radius: 1rem;
       padding: 1.25rem 1.5rem;
       background: #fff;
@@ -383,9 +364,9 @@
     .qlink-card:hover {
       transform: translateY(-3px);
       box-shadow: 0 10px 32px rgba(167,125,82,.15);
-      border-color: var(--brand);
+      border-color: #a77d52;
     }
-    .qlink-title { font-size: .95rem; font-weight: 700; color: var(--brand); margin: 0; }
+    .qlink-title { font-size: .95rem; font-weight: 700; color: #a77d52; margin: 0; }
     .qlink-desc  { font-size: .8rem; color: #6b7280; margin: 0; }
 
     /* Badge */
@@ -422,6 +403,7 @@
     <symbol id="i-arrow-right" viewBox="0 0 24 24" fill="none" stroke="currentColor"><g stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></g></symbol>
     <symbol id="i-apply"       viewBox="0 0 24 24" fill="none" stroke="currentColor"><g stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></g></symbol>
     <symbol id="i-globe"       viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9" stroke-width="2"/><path d="M3 12h18M12 3c2.5 2.5 2.5 15 0 18M12 3c-2.5 2.5-2.5 15 0 18" stroke-width="2"/></symbol>
+    <symbol id="i-help"        viewBox="0 0 24 24" fill="none" stroke="currentColor"><g stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.6 9a2.4 2.4 0 1 1 3.76 2c-.86.56-1.36 1.02-1.36 2"/><circle cx="12" cy="17" r=".8" fill="currentColor" stroke="none"/></g></symbol>
     <symbol id="i-map-pin"     viewBox="0 0 24 24" fill="none" stroke="currentColor"><g stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0Z"/><circle cx="12" cy="10" r="3"/></g></symbol>
     <symbol id="i-clock"       viewBox="0 0 24 24" fill="none" stroke="currentColor"><g stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></g></symbol>
     <symbol id="i-arrow-up"    viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 5l-7 7m7-7 7 7M12 5v14" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
@@ -430,7 +412,7 @@
   {{-- ============================================================
        HEADER
   ============================================================ --}}
-  <header class="sticky top-0 z-50 border-b bg-white/95 backdrop-blur-sm" style="border-color: {{ $brandGray }}">
+  <header class="sticky top-0 z-50 border-b bg-white/95 backdrop-blur-sm" style="border-color: #f4f0eb">
 
     {{-- Row utama --}}
     <div class="flex items-center justify-between h-16 px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
@@ -447,7 +429,7 @@
         </button>
         <a href="{{ route('welcome') }}"
           class="flex items-center gap-2"
-          aria-label="Human Careers — Halaman Beranda PT Andalan Artha Primanusa">
+          aria-label="Human Careers â€” Halaman Beranda PT Andalan Artha Primanusa">
        <div class="flex items-center justify-center">
    <img src="{{ asset('assets/logofix.png') }}"
      alt="Logo Human Careers PT Andalan Artha Primanusa"
@@ -463,10 +445,10 @@
         <label for="search-desk" class="sr-only">Cari lowongan kerja</label>
         <div class="relative w-full">
           <input id="search-desk" name="q" type="search"
-            placeholder="Cari posisi, divisi, atau lokasi…"
+            placeholder="Cari posisi, divisi, atau lokasi"
             value="{{ request('q') }}"
             class="w-full px-10 py-2.5 bg-zinc-50 border border-zinc-200 outline-none rounded-xl text-sm text-zinc-800 placeholder-zinc-400 focus:bg-white focus:ring-2 transition"
-            style="--tw-ring-color: var(--brand);"
+            style="--tw-ring-color: #a77d52;"
             inputmode="search">
           <span class="absolute -translate-y-1/2 left-3 top-1/2 text-zinc-400" aria-hidden="true">
             <svg class="w-4 h-4"><use href="#i-search"/></svg>
@@ -478,43 +460,43 @@
       <nav class="items-center hidden gap-5 text-sm md:flex" aria-label="Navigasi utama">
         <a href="{{ route('jobs.index') }}"
           class="font-medium transition hover:opacity-70"
-          style="color: {{ $textSoft }}">Lowongan</a>
+          style="color: #6b4f3a">Lowongan</a>
 
         @auth
           <a href="{{ route('applications.mine') }}"
             class="font-medium transition hover:opacity-70"
-            style="color: {{ $textSoft }}">Lamaran</a>
+            style="color: #6b4f3a">Lamaran</a>
 
           <details class="relative dropdown">
             <summary class="flex items-center gap-2 transition cursor-pointer select-none hover:opacity-70"
-              style="color: {{ $textSoft }}" aria-haspopup="menu">
+              style="color: #6b4f3a" aria-haspopup="menu">
               @php
                 $uname = auth()->user()->name ?? auth()->user()->email ?? 'Pengguna';
                 $ini   = strtoupper(mb_substr($uname, 0, 1));
               @endphp
               <span class="inline-grid text-xs font-bold border rounded-full place-items-center w-9 h-9 shrink-0"
-                style="background: rgba(29,78,216,.08); color: {{ $brandBlue }}; border-color: rgba(29,78,216,.3);"
+                style="background: rgba(29,78,216,.08); color: #1d4ed8; border-color: rgba(29,78,216,.3);"
                 aria-hidden="true">{{ $ini }}</span>
               <svg class="w-4 h-4 chevron-icon" aria-hidden="true"><use href="#i-chevron"/></svg>
             </summary>
             <div class="absolute right-0 w-64 p-2 mt-2 bg-white border shadow-2xl rounded-2xl"
-              style="border-color: {{ $brandGray }}" role="menu" aria-label="Menu pengguna">
+              style="border-color: #f4f0eb" role="menu" aria-label="Menu pengguna">
               <div class="px-3 pt-2 pb-1 text-[11px] text-zinc-400 uppercase tracking-wide">Masuk sebagai</div>
               <div class="px-3 pb-2 text-sm font-semibold truncate text-zinc-800">{{ $uname }}</div>
-              <hr style="border-color: {{ $brandGray }}; margin: .25rem 0">
+              <hr style="border-color: #f4f0eb; margin: .25rem 0">
               <a href="{{ route('profile.edit') }}"
                 class="flex items-center gap-2 px-3 py-2.5 text-sm rounded-xl hover:bg-zinc-50 transition"
-                role="menuitem">👤 Profil Saya</a>
+                role="menuitem">ðŸ‘¤ Profil Saya</a>
               <a href="{{ route('applications.mine') }}"
                 class="flex items-center gap-2 px-3 py-2.5 text-sm rounded-xl hover:bg-zinc-50 transition"
-                role="menuitem">📋 Lamaran Saya</a>
-              <hr style="border-color: {{ $brandGray }}; margin: .25rem 0">
+                role="menuitem">ðŸ“‹ Lamaran Saya</a>
+              <hr style="border-color: #f4f0eb; margin: .25rem 0">
               <form method="POST" action="{{ route('logout') }}" role="none">
                 @csrf
                 <button type="submit"
                   class="w-full flex items-center gap-2 px-3 py-2.5 text-sm rounded-xl hover:bg-red-50 transition text-left"
-                  style="color: {{ $brandRed }}"
-                  role="menuitem">🚪 Keluar</button>
+                  style="color: #dc2626"
+                  role="menuitem">ðŸšª Keluar</button>
               </form>
             </div>
           </details>
@@ -522,30 +504,30 @@
         @else
           <a href="{{ route('login') }}"
             class="inline-flex items-center gap-1.5 font-medium hover:opacity-70 transition"
-            style="color: {{ $textSoft }}">
+            style="color: #6b4f3a">
             <svg class="w-4 h-4" aria-hidden="true"><use href="#i-user"/></svg>
             Masuk
           </a>
           <a href="{{ route('register') }}"
             class="inline-flex items-center px-4 py-2 text-sm font-semibold text-white transition shadow-sm rounded-xl hover:opacity-90"
-            style="background: {{ $brandBlue }};">Daftar Gratis</a>
+            style="background: #1d4ed8;">Daftar Gratis</a>
         @endauth
       </nav>
     </div>
 
     {{-- Nav mobile --}}
     <div id="nav-mobile" class="hidden bg-white border-t md:hidden"
-      style="border-color: {{ $brandGray }}"
+      style="border-color: #f4f0eb"
       aria-label="Menu navigasi mobile">
       <div class="px-4 py-4 space-y-2">
         <form action="{{ route('jobs.index') }}" method="GET" role="search" autocomplete="off">
           <label for="search-mob" class="sr-only">Cari lowongan kerja</label>
           <div class="relative w-full">
             <input id="search-mob" name="q" type="search"
-              placeholder="Cari posisi, divisi, atau lokasi…"
+              placeholder="Cari posisi, divisi, atau lokasiâ€¦"
               value="{{ request('q') }}"
               class="w-full py-2.5 pl-10 pr-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none text-sm text-zinc-800 placeholder-zinc-400 focus:ring-2 transition"
-              style="--tw-ring-color: var(--brand);"
+              style="--tw-ring-color: #a77d52;"
               inputmode="search">
             <span class="absolute -translate-y-1/2 left-3 top-1/2 text-zinc-400" aria-hidden="true">
               <svg class="w-4 h-4"><use href="#i-search"/></svg>
@@ -554,38 +536,38 @@
         </form>
 
         <a href="{{ route('jobs.index') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-xl hover:bg-zinc-100 transition text-sm font-medium">
-          💼 Lowongan
+          ðŸ’¼ Lowongan
         </a>
 
         @auth
           <a href="{{ route('applications.mine') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-xl hover:bg-zinc-100 transition text-sm font-medium">
-            📋 Lamaran Saya
+            ðŸ“‹ Lamaran Saya
           </a>
-          <hr style="border-color: {{ $brandGray }}">
+          <hr style="border-color: #f4f0eb">
           <a href="{{ route('profile.edit') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-xl hover:bg-zinc-100 transition text-sm font-medium">
-            👤 Profil
+            ðŸ‘¤ Profil
           </a>
           <form method="POST" action="{{ route('logout') }}">
             @csrf
             <button type="submit"
               class="flex items-center gap-2 w-full px-3 py-2.5 rounded-xl hover:bg-red-50 transition text-sm font-medium text-left"
-              style="color: {{ $brandRed }}">🚪 Keluar</button>
+              style="color: #dc2626">ðŸšª Keluar</button>
           </form>
         @else
           <div class="flex items-center gap-3 pt-1">
             <a href="{{ route('login') }}"
               class="flex-1 text-center px-3 py-2.5 border rounded-xl text-sm font-medium hover:bg-zinc-50 transition"
-              style="border-color: {{ $brandGray }}; color: {{ $textSoft }}">Masuk</a>
+              style="border-color: #f4f0eb; color: #6b4f3a">Masuk</a>
             <a href="{{ route('register') }}"
               class="flex-1 text-center px-3 py-2.5 rounded-xl text-sm font-semibold text-white hover:opacity-90 transition shadow-sm"
-              style="background: {{ $brandBlue }};">Daftar Gratis</a>
+              style="background: #1d4ed8;">Daftar Gratis</a>
           </div>
         @endauth
       </div>
     </div>
 
     {{-- Breadcrumb --}}
-    <div class="bg-white border-t" style="border-color: {{ $brandGray }}">
+    <div class="bg-white border-t" style="border-color: #f4f0eb">
       <nav class="flex items-center px-4 mx-auto text-xs h-9 max-w-7xl sm:px-6 lg:px-8 text-zinc-500"
         aria-label="Breadcrumb">
         <ol class="inline-flex items-center gap-1.5" itemscope itemtype="https://schema.org/BreadcrumbList">
@@ -619,32 +601,35 @@
           width="1440" height="440"
           fetchpriority="high"
           decoding="async">
-        <div class="absolute inset-0 flex items-center justify-end"
+        <div class="absolute inset-0 flex items-start justify-end pt-8 md:pt-12"
           style="background: linear-gradient(to right, transparent 15%, rgba(0,0,0,.65) 100%)">
           <div class="max-w-2xl px-8 text-right text-white md:px-14">
-            <p class="mb-2 text-xs font-semibold tracking-widest uppercase opacity-70">Portal Karier Resmi</p>
-            <h1 id="hero-heading" class="mb-4 text-3xl font-extrabold leading-tight md:text-5xl">
-              Welcome to<br>
-              <span style="color: #f5c583">Andalan Career</span>
-            </h1>
-            <p class="text-sm leading-relaxed md:text-base opacity-90">
-              Bergabunglah bersama tim yang berkomitmen pada pertumbuhan, profesionalisme, dan keunggulan.
-            </p>
-            <p class="mt-2 text-sm leading-relaxed opacity-75 md:text-base">
-              Temukan peluang karier yang sesuai dengan aspirasi Anda bersama PT Andalan Artha Primanusa.
-            </p>
+            <div class="mb-0 -mt-4 md:-mt-6">
+              <h1 id="hero-heading" class="text-3xl font-extrabold leading-tight md:text-5xl">
+                WELCOME TO<br>
+                <span class="text-2xl md:text-4xl" style="color: #a57c50">ANDALAN CARRER</span>
+              </h1>
+            </div>
+            <div class="mt-12 space-y-2">
+              <p class="text-sm leading-relaxed md:text-base opacity-90">
+                Bergabunglah bersama tim yang berkomitmen pada pertumbuhan, profesionalisme, dan keunggulan.
+              </p>
+              <p class="text-sm leading-relaxed opacity-75 md:text-base">
+                Temukan peluang karier yang sesuai dengan aspirasi Anda bersama PT Andalan Artha Primanusa.
+              </p>
+            </div>
             <div class="flex flex-wrap justify-end gap-3 mt-6">
               <a href="{{ route('jobs.index') }}"
                 class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm bg-white hover:bg-zinc-100 transition shadow"
-                style="color: {{ $brandBrown }}">
+                style="color: #a77d52">
                 <svg class="w-4 h-4" aria-hidden="true"><use href="#i-briefcase"/></svg>
                 Lihat Lowongan
               </a>
               @guest
               <a href="{{ route('register') }}"
                 class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm text-white hover:opacity-90 transition shadow"
-                style="background: {{ $brandBlue }}">
-                Daftar Sekarang →
+                style="background: #1d4ed8">
+                Daftar Sekarang
               </a>
               @endguest
             </div>
@@ -654,36 +639,48 @@
     </section>
 
     {{-- ===== QUICK LINKS ===== --}}
-    <section aria-label="Menu cepat" style="padding: 2.5rem 1.5rem; background: {{ $bgMain }}">
+    <section aria-label="Menu cepat" style="padding: 2.5rem 1.5rem; background: #dfe6da">
       <div class="mx-auto max-w-7xl">
         <h2 class="sr-only">Menu Cepat</h2>
         <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:1rem">
           <a href="{{ route('login') }}" class="qlink-card">
-            <span class="qlink-title">🔐 Masuk</span>
+            <span class="inline-flex items-center gap-2 qlink-title">
+              <svg class="w-4 h-4" aria-hidden="true"><use href="#i-user"/></svg>
+              Masuk
+            </span>
             <span class="qlink-desc">Akses akun Anda</span>
           </a>
           <a href="{{ route('register') }}" class="qlink-card">
-            <span class="qlink-title">📝 Daftar</span>
+            <span class="inline-flex items-center gap-2 qlink-title">
+              <svg class="w-4 h-4" aria-hidden="true"><use href="#i-apply"/></svg>
+              Daftar
+            </span>
             <span class="qlink-desc">Buat akun baru gratis</span>
           </a>
           <a href="{{ route('jobs.index') }}" class="qlink-card">
-            <span class="qlink-title">💼 Lowongan</span>
+            <span class="inline-flex items-center gap-2 qlink-title">
+              <svg class="w-4 h-4" aria-hidden="true"><use href="#i-briefcase"/></svg>
+              Lowongan
+            </span>
             <span class="qlink-desc">Lihat semua posisi terbuka</span>
           </a>
           <a href="/faq" class="qlink-card">
-            <span class="qlink-title">❓ FAQ</span>
+            <span class="inline-flex items-center gap-2 qlink-title">
+              <svg class="w-4 h-4" aria-hidden="true"><use href="#i-help"/></svg>
+              FAQ
+            </span>
             <span class="qlink-desc">Panduan &amp; pertanyaan umum</span>
           </a>
         </div>
       </div>
     </section>
 
-    {{-- ===== MARQUEE LOKASI SITE ===== --}}
+    {{-- ===== LOKASI SITE DENGAN PETA INTERAKTIF ===== --}}
     @php
       $sitesCol  = ($sitesSimple instanceof \Illuminate\Support\Collection) ? $sitesSimple : collect($sitesSimple ?? []);
       $sitesNorm = $sitesCol->filter(fn($s) => !empty($s['name']))
         ->map(function ($s) {
-          $name  = (string)($s['name'] ?? '—');
+          $name  = (string)($s['name'] ?? 'â€”');
           $dot   = preg_match('/^#([0-9a-f]{3}|[0-9a-f]{6})$/i', (string)($s['dot'] ?? '')) ? $s['dot'] : '#a77d52';
           $param = $s['code'] ?? $s['id'] ?? $name;
           return ['name' => $name, 'dot' => $dot, 'param' => $param];
@@ -691,19 +688,24 @@
       $sitesDup = $sitesNorm->concat($sitesNorm);
     @endphp
 
-    <section class="border-b" style="border-color: {{ $brandGray }}; background: {{ $bgMain }}"
+    <section class="border-b" style="border-color: #f4f0eb; background: #dfe6da"
       aria-labelledby="sites-heading">
       <div class="px-6 py-8 mx-auto max-w-7xl lg:px-8">
         <h2 id="sites-heading" class="mb-4 text-base font-semibold" style="color: #1f2937">Lokasi Site</h2>
 
-        @if($sitesNorm->isNotEmpty())
+        @if($sitesWithCoords->isNotEmpty())
+          {{-- PETA INTERAKTIF --}}
+          <div id="sites-map" class="w-full mb-6 overflow-hidden border shadow-md h-96 rounded-2xl"
+            style="border-color: #f4f0eb" role="region" aria-label="Peta lokasi site PT Andalan Artha Primanusa">
+          </div>
+
           {{-- Marquee animasi (aria-hidden, navigasi lewat list di bawah) --}}
           <div class="marquee" role="presentation" aria-hidden="true">
             <div class="marquee__track">
               @foreach($sitesDup as $s)
               <div class="shrink-0">
                 <span class="inline-flex items-center gap-2 px-4 py-2 border rounded-full"
-                  style="border-color: {{ $brandGray }}; background: {{ $bgChip }}; color: {{ $textSoft }};">
+                  style="border-color: #f4f0eb; background: #ede5dc; color: #6b4f3a;">
                   <span class="inline-block w-2.5 h-2.5 rounded-full shrink-0"
                     style="background: {{ $s['dot'] }}"></span>
                   <span class="text-sm whitespace-nowrap">{{ $s['name'] }}</span>
@@ -718,7 +720,7 @@
             <li>
               <a href="{{ route('jobs.index', ['site' => $s['param']]) }}"
                 class="inline-flex items-center gap-2 px-4 py-2 transition border rounded-full hover:shadow-md"
-                style="border-color: {{ $brandGray }}; background: {{ $bgChip }}; color: {{ $textSoft }};"
+                style="border-color: #f4f0eb; background: #ede5dc; color: #6b4f3a;"
                 aria-label="Filter lowongan di site {{ $s['name'] }}">
                 <span class="inline-block w-2.5 h-2.5 rounded-full shrink-0"
                   style="background: {{ $s['dot'] }}" aria-hidden="true"></span>
@@ -728,16 +730,72 @@
             @endforeach
           </ul>
         @else
-          <p class="text-sm" style="color: {{ $textSoft }}">Belum ada data site.</p>
+          <p class="text-sm" style="color: #6b4f3a">Belum ada data site.</p>
         @endif
       </div>
     </section>
+
+    {{-- LEAFLET MAPS SCRIPT & STYLE --}}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        const sitesData = @json($sitesWithCoords ?? []);
+        const mapContainer = document.getElementById('sites-map');
+
+        if (!mapContainer || sitesData.length === 0) return;
+
+        // Hitung center peta dari rata-rata semua koordinat
+        const avgLat = sitesData.reduce((sum, s) => sum + s.latitude, 0) / sitesData.length;
+        const avgLng = sitesData.reduce((sum, s) => sum + s.longitude, 0) / sitesData.length;
+
+        // Inisialisasi peta
+        const map = L.map('sites-map').setView([avgLat, avgLng], 5);
+
+        // Tambahkan tile layer (OpenStreetMap)
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+          maxZoom: 19,
+        }).addTo(map);
+
+        // Tambahkan marker untuk setiap site
+        const markers = [];
+        sitesData.forEach(function (site) {
+          const marker = L.circleMarker([site.latitude, site.longitude], {
+            radius: 10,
+            fillColor: site.dot || '#a77d52',
+            color: '#fff',
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.8,
+          })
+          .bindPopup(
+            `<div style="font-size: 13px; font-weight: 500; color: #1f2937;">
+              ${site.name}
+            </div>
+            ${site.address ? `<p style="font-size: 12px; color: #6b7280; margin: 4px 0 0 0;">${site.address}</p>` : ''}
+            <a href="{{ route('jobs.index') }}?site=${site.param}"
+              style="display: inline-block; margin-top: 6px; padding: 4px 8px; background: #a77d52; color: white; border-radius: 4px; text-decoration: none; font-size: 11px; font-weight: 600;">
+              Lihat Lowongan
+            </a>`
+          )
+          .addTo(map);
+          markers.push(marker);
+        });
+
+        // Zoom otomatis ke semua marker
+        if (markers.length > 0) {
+          const group = new L.featureGroup(markers);
+          map.fitBounds(group.getBounds(), { padding: [50, 50] });
+        }
+      });
+    </script>
 
     {{-- ===== TAHAPAN REKRUTMEN ===== --}}
     <section class="py-12 bg-white" aria-labelledby="rekrutmen-heading">
       <div class="px-6 mx-auto max-w-7xl lg:px-8">
         <div class="overflow-hidden transition duration-300 border shadow-sm rounded-2xl hover:shadow-md"
-          style="border-color: {{ $brandGray }}">
+          style="border-color: #f4f0eb">
           <div class="grid md:grid-cols-2">
 
             {{-- Gambar --}}
@@ -767,10 +825,10 @@
 
               @php
                 $steps = [
-                  ['Pengajuan Lamaran', 'Kirim CV & data diri melalui sistem kami.',        '1–2 hari'],
-                  ['Penyaringan CV',    'Tim HR akan meninjau kesesuaian kandidat.',         '2–3 hari'],
-                  ['Wawancara / Tes',   'Interview HR & user + tes kemampuan (jika ada).',  '3–5 hari'],
-                  ['Penawaran Kerja',   'Kandidat terpilih menerima offering letter.',       '1–2 hari'],
+                  ['Pengajuan Lamaran', 'Kirim CV & data diri melalui sistem kami.',        '1-2 hari'],
+                  ['Penyaringan CV',    'Tim HR akan meninjau kesesuaian kandidat.',         '2-3 hari'],
+                  ['Wawancara / Tes',   'Interview HR & user + tes kemampuan (jika ada).',  '3-5 hari'],
+                  ['Penawaran Kerja',   'Kandidat terpilih menerima offering letter.',       '1-2 hari'],
                   ['Onboarding',        'Mulai bekerja & orientasi perusahaan.',             'Hari pertama'],
                 ];
               @endphp
@@ -779,12 +837,12 @@
                 @foreach($steps as $i => [$title, $desc, $time])
                 <li class="flex gap-4 p-3 transition rounded-xl hover:bg-amber-50">
                   <div class="flex items-center justify-center text-xs font-bold text-white rounded-full shadow w-8 h-8 shrink-0 mt-0.5"
-                    style="background: {{ $brandBrown }}" aria-hidden="true">{{ $i + 1 }}</div>
+                    style="background: #a77d52" aria-hidden="true">{{ $i + 1 }}</div>
                   <div class="flex-1 min-w-0">
                     <div class="flex flex-wrap items-center justify-between gap-2">
                       <p class="text-sm font-semibold" style="color:#1f2937">{{ $title }}</p>
                       <span class="text-xs shrink-0 whitespace-nowrap px-2 py-0.5 rounded-full"
-                        style="background: {{ $bgChip }}; color: {{ $textSoft }}">{{ $time }}</span>
+                        style="background: #ede5dc; color: #6b4f3a">{{ $time }}</span>
                     </div>
                     <p class="mt-0.5 text-xs leading-relaxed" style="color:#6b7280">{{ $desc }}</p>
                   </div>
@@ -804,14 +862,14 @@
     {{-- ===== LOWONGAN TERBARU ===== --}}
     <section class="px-6 py-10 mx-auto max-w-7xl lg:px-8" aria-labelledby="jobs-heading">
       <div class="overflow-hidden border shadow-sm rounded-2xl"
-        style="border-color: {{ $brandGray }}; background: {{ $bgMain }}">
+        style="border-color: #f4f0eb; background: #dfe6da">
 
         {{-- Header --}}
-        <div class="flex items-center justify-between p-6 border-b" style="border-color: {{ $brandGray }}">
+        <div class="flex items-center justify-between p-6 border-b" style="border-color: #f4f0eb">
           <h2 id="jobs-heading" class="text-base font-bold" style="color: #1f2937">Lowongan Terbaru</h2>
           <a href="{{ route('jobs.index') }}"
             class="inline-flex items-center gap-1 text-sm font-semibold transition hover:opacity-70"
-            style="color: {{ $brandBrown }}">
+            style="color: #a77d52">
             Lihat semua
             <svg class="w-4 h-4" aria-hidden="true"><use href="#i-arrow-right"/></svg>
           </a>
@@ -824,7 +882,6 @@
 
           @if(!$hasJobs)
             <div class="py-16 text-center">
-              <p class="mb-3 text-4xl" aria-hidden="true">📭</p>
               <p class="font-semibold text-zinc-700">Belum ada lowongan saat ini</p>
               <p class="mt-1 text-sm text-zinc-500">Pantau terus halaman ini untuk update terbaru.</p>
             </div>
@@ -843,7 +900,7 @@
                 @endphp
 
                 <article class="flex flex-col overflow-hidden border rounded-2xl card-hover"
-                  style="border-color: {{ $brandGray }}; background: {{ $bgChip }}"
+                  style="border-color: #f4f0eb; background: #ede5dc"
                   itemscope itemtype="https://schema.org/JobPosting">
                   <meta itemprop="title" content="{{ $job->title }}">
                   <meta itemprop="datePosted" content="{{ optional($job->created_at)->toDateString() }}">
@@ -852,7 +909,7 @@
 
                     {{-- Header kartu --}}
                     <div class="flex items-start gap-3">
-                      <div class="p-2.5 rounded-xl text-white shrink-0" style="background: {{ $brandBrown }}">
+                      <div class="p-2.5 rounded-xl text-white shrink-0" style="background: #a77d52">
                         <svg class="w-5 h-5" aria-hidden="true"><use href="#i-briefcase"/></svg>
                       </div>
                       <div class="flex-1 min-w-0">
@@ -868,15 +925,14 @@
                           @endif
                         </div>
 
-                        {{-- Lokasi — PERBAIKAN: tidak tampilkan region dua kali --}}
-                        <p class="text-[11px] mt-1 leading-relaxed" style="color: {{ $textSoft }}">
+                        {{-- Lokasi â€” PERBAIKAN: tidak tampilkan region dua kali --}}
+                        <p class="text-[11px] mt-1 leading-relaxed" style="color: #6b4f3a">
                           @if($siteName)
                             <svg class="w-3 h-3 inline-block mr-0.5 -mt-px" aria-hidden="true"><use href="#i-map-pin"/></svg>
                             <span class="font-medium">{{ $siteName }}</span>@if($showRegion)<span class="opacity-60">, {{ $siteRegion }}</span>@endif
                           @else
                             <span class="opacity-50">Lokasi belum tersedia</span>
                           @endif
-                          <span class="mx-1 opacity-40">·</span>
                           <svg class="w-3 h-3 inline-block mr-0.5 -mt-px" aria-hidden="true"><use href="#i-clock"/></svg>
                           {{ optional($job->created_at)->diffForHumans() }}
                         </p>
@@ -885,7 +941,7 @@
 
                     {{-- Deskripsi --}}
                     @if(!empty($excerpt))
-                      <p class="flex-1 mt-3 text-xs leading-relaxed line-clamp-2" style="color: {{ $textSoft }}">
+                      <p class="flex-1 mt-3 text-xs leading-relaxed line-clamp-2" style="color: #6b4f3a">
                         {{ $excerpt }}
                       </p>
                     @endif
@@ -895,7 +951,7 @@
                       style="border-color: rgba(167,125,82,.2)">
                       <a href="{{ route('jobs.show', $job) }}"
                         class="inline-flex items-center gap-1 text-xs font-semibold transition hover:opacity-70"
-                        style="color: {{ $brandBrown }}">
+                        style="color: #a77d52">
                         Lihat Detail
                         <svg class="w-3.5 h-3.5" aria-hidden="true"><use href="#i-arrow-right"/></svg>
                       </a>
@@ -905,7 +961,7 @@
                           @csrf
                           <button type="submit"
                             class="inline-flex items-center gap-1.5 text-xs font-bold px-3.5 py-2 rounded-xl text-white hover:opacity-90 active:scale-95 transition shadow-sm"
-                            style="background: {{ $brandBrown }}"
+                            style="background: #a77d52"
                             onclick="return confirm('Yakin ingin melamar posisi ini?')">
                             <svg class="w-3.5 h-3.5" aria-hidden="true"><use href="#i-apply"/></svg>
                             Lamar Sekarang
@@ -914,7 +970,7 @@
                       @else
                         <a href="{{ route('login') }}?intended={{ urlencode(route('jobs.show', $job)) }}"
                           class="inline-flex items-center gap-1.5 text-xs font-bold px-3.5 py-2 rounded-xl text-white hover:opacity-90 transition shadow-sm"
-                          style="background: {{ $brandBrown }}">
+                          style="background: #a77d52">
                           <svg class="w-3.5 h-3.5" aria-hidden="true"><use href="#i-user"/></svg>
                           Masuk &amp; Lamar
                         </a>
@@ -955,7 +1011,7 @@
             ['Apakah proses rekrutmen PT Andalan gratis?',
              'Ya, sepenuhnya gratis. PT Andalan Artha Primanusa tidak memungut biaya apapun dari pelamar dalam setiap tahapan rekrutmen.'],
             ['Berapa lama proses seleksi berlangsung?',
-             'Umumnya 7–14 hari kerja, mulai dari pengajuan lamaran hingga penawaran kerja. Durasi dapat berbeda tergantung posisi dan jumlah pelamar.'],
+             'Umumnya 7-14 hari kerja, mulai dari pengajuan lamaran hingga penawaran kerja. Durasi dapat berbeda tergantung posisi dan jumlah pelamar.'],
             ['Bagaimana cara memantau status lamaran saya?',
              'Setelah login, buka menu "Lamaran Saya" untuk melihat status terkini lamaran Anda secara real-time.'],
           ];
@@ -964,17 +1020,17 @@
         <div class="space-y-3" itemscope itemtype="https://schema.org/FAQPage">
           @foreach($faqs as [$q, $a])
           <details class="overflow-hidden border rounded-2xl"
-            style="border-color: {{ $brandGray }}"
+            style="border-color: #e5e7eb"
             itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
-            <summary class="flex items-center justify-between gap-4 p-5 text-sm font-semibold transition cursor-pointer hover:bg-amber-50"
+            <summary class="flex items-center justify-between gap-4 p-5 text-sm font-semibold transition cursor-pointer bg-[#dfe6da] hover:bg-[#d5ddcf]"
               style="color:#1f2937" itemprop="name">
               {{ $q }}
-              <svg class="w-4 h-4 shrink-0 chevron-icon" style="color: {{ $brandBrown }}" aria-hidden="true">
+              <svg class="w-4 h-4 shrink-0 chevron-icon" style="color: #a77d52" aria-hidden="true">
                 <use href="#i-chevron"/>
               </svg>
             </summary>
             <div class="px-5 pb-5 text-sm leading-relaxed border-t"
-              style="color:#6b7280; border-color: {{ $brandGray }}"
+              style="color:#6b7280; border-color: #e5e7eb"
               itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
               <p class="pt-4" itemprop="text">{{ $a }}</p>
             </div>
@@ -985,7 +1041,7 @@
         <div class="mt-6 text-center">
           <a href="/faq"
             class="inline-flex items-center gap-1 text-sm font-semibold transition hover:opacity-70"
-            style="color: {{ $brandBrown }}">
+            style="color: #a77d52">
             Lihat semua FAQ
             <svg class="w-4 h-4" aria-hidden="true"><use href="#i-arrow-right"/></svg>
           </a>
@@ -998,14 +1054,14 @@
   {{-- ============================================================
        FOOTER
   ============================================================ --}}
-  <footer style="background: {{ $brandGrayDark }};" aria-label="Footer Human Careers PT Andalan Artha Primanusa">
+  <footer style="background: #000000;" aria-label="Footer Human Careers PT Andalan Artha Primanusa">
     <div class="px-6 mx-auto text-white max-w-7xl lg:px-8 py-14">
       <div class="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
 
         {{-- Brand --}}
         <div>
           <img src="{{ asset('assets/dddd.png') }}"
-            alt="Logo Human Careers — PT Andalan Artha Primanusa"
+            alt="Logo Human Careers â€” PT Andalan Artha Primanusa"
             class="object-contain w-auto h-32 mb-4 md:h-40"
             width="160" height="160" loading="lazy" decoding="async">
           <p class="text-sm leading-relaxed text-zinc-400">
@@ -1095,9 +1151,9 @@
   {{-- Back to top --}}
   <button id="toTop"
     class="p-3 transition bg-white border rounded-full shadow-lg hover:shadow-xl hover:scale-105"
-    style="border-color: {{ $brandGray }}"
+    style="border-color: #f4f0eb"
     aria-label="Kembali ke atas halaman">
-    <svg class="w-5 h-5" style="color: {{ $brandBrown }}" aria-hidden="true">
+    <svg class="w-5 h-5" style="color: #a77d52" aria-hidden="true">
       <use href="#i-arrow-up"/>
     </svg>
   </button>
@@ -1105,15 +1161,13 @@
   {{-- Toast --}}
   <div id="toast"
     class="p-4 text-sm font-medium bg-white border shadow-2xl toast rounded-2xl"
-    style="border-color: {{ $brandGray }}; color:#1f2937"
+    style="border-color: #f4f0eb; color:#1f2937"
     role="status" aria-live="polite" aria-atomic="true">
   </div>
 
   <script>
     (function () {
       'use strict';
-
-      // ── Mobile nav toggle ──────────────────────────────────
       var btnNav = document.getElementById('btn-nav');
       var navMob = document.getElementById('nav-mobile');
       if (btnNav && navMob) {
@@ -1139,7 +1193,7 @@
         });
       }
 
-      // ── Back to top ────────────────────────────────────────
+      // â”€â”€ Back to top â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
       var toTop = document.getElementById('toTop');
       if (toTop) {
         window.addEventListener('scroll', function () {
@@ -1150,7 +1204,7 @@
         });
       }
 
-      // ── Toast helper ───────────────────────────────────────
+      // â”€â”€ Toast helper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
       window.showToast = function (msg, duration) {
         var t = document.getElementById('toast');
         if (!t) return;

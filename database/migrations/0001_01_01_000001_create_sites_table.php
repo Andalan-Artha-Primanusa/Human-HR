@@ -14,12 +14,18 @@ return new class extends Migration {
             $table->string('region', 100)->nullable();        // Kalimantan Timur, dsb
             $table->string('timezone', 64)->nullable();       // Asia/Makassar (opsional)
             $table->string('address', 255)->nullable();       // opsional
+
             $table->boolean('is_active')->default(true);      // default aktif
             $table->json('meta')->nullable();                 // bebas, untuk konfigurasi tambahan
             $table->text('notes')->nullable();                // dipakai di view show (opsional)
 
+            // Koordinat lokasi (opsional, untuk peta)
+            $table->decimal('latitude', 10, 7)->nullable();   // presisi cukup untuk peta
+            $table->decimal('longitude', 10, 7)->nullable();  // presisi cukup untuk peta
+
             $table->timestamps();
             $table->index(['region', 'is_active']);
+            $table->index(['latitude', 'longitude']);
         });
     }
 

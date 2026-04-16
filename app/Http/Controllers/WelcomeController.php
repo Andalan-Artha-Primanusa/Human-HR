@@ -86,13 +86,30 @@ class WelcomeController extends Controller
                                      ->keyBy('application_id');
         }
 
+        // ===== Sites with coordinates for map (no cache, always fresh) =====
+        $sitesWithCoords = Site::query()
+            ->select(['id','code','name','latitude','longitude'])
+            ->whereNotNull('latitude')
+            ->whereNotNull('longitude')
+            ->get()
+            ->map(function ($s) {
+                return [
+                    'id'        => $s->id,
+                    'code'      => $s->code,
+                    'name'      => $s->name,
+                    'latitude'  => (float) $s->latitude,
+                    'longitude' => (float) $s->longitude,
+                ];
+            });
+
         return view('welcome', compact(
             'jobs',
             'myApps',
             'myAppsSummary',
             'myAppsProgress',
             'sitesSimple',
-            'byDivision'
+            'byDivision',
+            'sitesWithCoords'
         ));
     }
 

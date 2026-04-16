@@ -83,15 +83,13 @@
 
         <!-- CARD -->
         <div class="{{ $authError ? 'shake' : '' }}">
-            <div class="p-8 border shadow-2xl rounded-2xl border-white/20 bg-white/80 backdrop-blur">
+            <div class="p-8 border shadow-2xl rounded-2xl border-white/20 bg-[#d1d3c7] backdrop-blur">
 
             <!-- LOGO -->
             <div class="flex flex-col items-center mb-6 space-y-3">
-              <img src="{{ asset('assets/logoicon.png') }}"
+              <img src="{{ asset('assets/logologin.png') }}"
                 alt="Logo Perusahaan"
                 class="object-contain h-28 md:h-32">
-
-              
             </div>
 
             <!-- FORM -->

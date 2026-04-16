@@ -164,11 +164,12 @@ $logoutBtn   = 'w-full rounded-lg bg-red-600 hover:bg-red-700 px-3 py-2 font-med
     </div>
   @endif
   @else
-    <div class="px-3 mb-1 text-xs login-hint text-white/80">Belum masuk (login)</div>
-    <a href="{{ route('login') }}" class="{{ $linkDeskBlue }} {{ $activeBlue('login') }}">
-      <span class="{{ $iconBlue }}"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15V18.75A2.25 2.25 0 0010.5 21h6.75A2.25 2.25 0 0019.5 18.75v-13.5A2 2 0 0017.25 3H10.5A2.25 2.25 0 008.25 5.25V9M15 12H3m0 0 3-3m-3 3 3 3"/></svg></span>
-      <span class="label">Login</span>
-    </a>
+    <div class="{{ $groupBoxBlue }} {{ $lockVisual }}">
+      <a href="{{ route('login') }}" class="{{ $linkDeskBlue }} {{ $activeBlue('login') }}">
+        <span class="{{ $iconBlue }}"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15V18.75A2.25 2.25 0 0010.5 21h6.75A2.25 2.25 0 0019.5 18.75v-13.5A2 2 0 0017.25 3H10.5A2.25 2.25 0 008.25 5.25V9M15 12H3m0 0 3-3m-3 3 3 3"/></svg></span>
+        <span class="label">Login</span>
+      </a>
+    </div>
   @endauth
 
   {{-- GENERAL --}}
@@ -356,11 +357,12 @@ $logoutBtn   = 'w-full rounded-lg bg-red-600 hover:bg-red-700 px-3 py-2 font-med
   </div>
   @endif
   @else
-    <div class="px-3 mb-1 text-xs login-hint text-white/80">Belum masuk (login)</div>
-    <a href="{{ route('login') }}" {!! $closeAttr !!} class="{{ $linkMobileBlue }} {{ $activeBlue('login') }}">
-      <span class="{{ $iconBlue }}"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15V18.75A2.25 2.25 0 0010.5 21h6.75A2.25 2.25 0 0019.5 18.75v-13.5A2 2 0 0017.25 3H10.5A2.25 2.25 0 008.25 5.25V9M15 12H3m0 0 3-3m-3 3 3 3"/></svg></span>
-      <span>Login</span>
-    </a>
+    <div class="{{ $groupBoxBlue }} {{ $lockVisual }}">
+      <a href="{{ route('login') }}" {!! $closeAttr !!} class="{{ $linkMobileBlue }} {{ $activeBlue('login') }}">
+        <span class="{{ $iconBlue }}"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15V18.75A2.25 2.25 0 0010.5 21h6.75A2.25 2.25 0 0019.5 18.75v-13.5A2 2 0 0017.25 3H10.5A2.25 2.25 0 008.25 5.25V9M15 12H3m0 0 3-3m-3 3 3 3"/></svg></span>
+        <span>Login</span>
+      </a>
+    </div>
   @endauth
 
   <div class="{{ $sectionTitle }} text-center">
