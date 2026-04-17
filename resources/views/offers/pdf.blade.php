@@ -30,7 +30,7 @@
       $signerName = 'Roy Hansen C Saragih';
       $signerTitle = 'General Manager';
     }
-    $deptName = $m['dept_name'] ?? 'HR Department';
+    $deptName = $m['dept_name'] ?? 'GENERAL MANAGER';
 
     // SIGNATURE: meta['sign_image'] > storage/app/public/ttdmahya.png > public/assets/sign_ceo.png
     $signImage = $m['sign_image']
@@ -90,7 +90,7 @@
     }
 
     /* Konten center */
-    .page{ width:98%; max-width:900px; margin:0 auto; }
+    .page{ width:98%; max-width:900px; margin:0 auto; margin-top:-18px; }
 
     .right{ text-align:right; }
     .muted{ color:var(--mut); }
@@ -102,11 +102,11 @@
       margin-bottom:6px;
       margin-top:0;                /* normal, tidak terlalu ke atas */
     }
-    .brand{ flex:0 0 auto; text-align:center; margin-top:12px; } /* diturunkan */
+    .brand{ flex:0 0 auto; text-align:center; margin-top:0; } /* dinaikkan */
     .logo{
-      height:80px;
+      height:110px;
       width:auto;
-      max-width:200px; /* lebih besar lagi */
+      max-width:320px; /* jauh lebih besar */
       object-fit:contain;
       display:block;
       margin:0 auto;
@@ -179,16 +179,16 @@
   <div class="page">
     {{-- HEADER: logo kiri + nomor di bawah; teks di kanan --}}
     <!-- HEADER: Logo tengah atas, judul kiri, nomor kanan -->
-    <div style="width:100%; margin-bottom:8px;">
+    <div style="width:100%; margin-bottom:8px; margin-top:-12px;">
       <div style="width:100%; text-align:center;">
         <img class="logo" src="{{ $logoPath }}" alt="Logo">
       </div>
-      <div style="width:100%; display:flex; flex-direction:row; justify-content:space-between; align-items:flex-start; margin-top:0;">
+      <div style="width:100%; display:flex; flex-direction:row; justify-content:space-between; align-items:flex-start; margin-top:-10px;">
         <div style="flex:1; text-align:left;">
-          <div class="title small" style="font-weight:800; letter-spacing:.4px; color:#111;">OFFERING LETTER</div>
-          <div class="priv small" style="color:#b91c1c; font-weight:800; margin-top:2px;">PRIBADI &amp; RAHASIA</div>
+          <div class="title small" style="font-weight:800; letter-spacing:.4px; color:#111; margin-top:-6px;">OFFERING LETTER</div>
+          <div class="priv small" style="color:#b91c1c; font-weight:800; margin-top:0;">PRIBADI &amp; RAHASIA</div>
         </div>
-        <div style="flex:1; text-align:center; font-size:12px; line-height:1;">
+        <div style="flex:1; text-align:center; font-size:12px; line-height:1; margin-top:-6px;">
           No : {!! $fmt($docNo) !!}
         </div>
         <div style="flex:1;"></div>

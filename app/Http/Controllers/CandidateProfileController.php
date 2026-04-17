@@ -59,16 +59,6 @@ class CandidateProfileController extends Controller
 
         // ===== VALIDASI UTAMA =====
         $validated = $request->validate([
-                /**
-                 * Helper: parse string currency format titik ke float
-                 */
-                private function parseCurrency($value)
-                {
-                    if (is_null($value) || $value === '') return null;
-                    if (is_numeric($value)) return $value;
-                    $value = str_replace('.', '', $value);
-                    return is_numeric($value) ? (float) $value : null;
-                }
             'poh_id' => ['required', 'uuid', 'exists:pohs,id'],
             'full_name' => 'bail|required|string|max:190',
             'gender' => ['bail', 'required', Rule::in(['male', 'female'])],
@@ -150,9 +140,9 @@ class CandidateProfileController extends Controller
             'last_medical_checkup' => 'nullable|string|max:255'
         ]);
 
+
         // ===== VALIDASI MANUAL RANGE TANGGAL DI REPEATER =====
         $errors = [];
-
         foreach ((array) $request->input('trainings', []) as $i => $t) {
             $start = $t['period_start'] ?? null;
             $end = $t['period_end'] ?? null;
@@ -445,12 +435,22 @@ class CandidateProfileController extends Controller
         abort(404, 'File CV tidak ditemukan.');
     }
 
+    /**
+     * Helper: parse string currency format titik ke float
+     */
+    private function parseCurrency($value)
+    {
+        if (is_null($value) || $value === '') return null;
+        if (is_numeric($value)) return $value;
+        $value = str_replace('.', '', $value);
+        return is_numeric($value) ? (float) $value : null;
+    }
+
     private function isSafeRelativePath(string $path): bool
     {
         if ($path === '' || str_starts_with($path, '/') || str_starts_with($path, '\\')) {
             return false;
         }
-
         return !str_contains($path, '..');
     }
 
