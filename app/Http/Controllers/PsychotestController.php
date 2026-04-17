@@ -25,27 +25,27 @@ class PsychotestController extends Controller
             120,
             ''
         );
-        $like = $q !== '' ? '%'.addcslashes($q, '\\%_').'%' : null;
+        $like = $q !== '' ? '%' . addcslashes($q, '\\%_') . '%' : null;
         // nilai status di query opsional: 'active' | 'finished'
         $status = (string) ($payload['status'] ?? '');
 
         // definisi status aktif & selesai berbasis kolom status (bukan is_active)
-        $ACTIVE_STATUSES   = ['pending','in_progress'];
-        $FINISHED_STATUSES = ['submitted','scored','expired','cancelled'];
+        $ACTIVE_STATUSES = ['pending', 'in_progress'];
+        $FINISHED_STATUSES = ['submitted', 'scored', 'expired', 'cancelled'];
 
         $attempts = PsychotestAttempt::with([
-                'application.user:id,name',
-                'application.job:id,title,site_id',
-                'application.job.site:id,code',
-                'test:id,name',
-            ])
+            'application.user:id,name',
+            'application.job:id,title,site_id',
+            'application.job.site:id,code',
+            'test:id,name',
+        ])
             ->when($like !== null, function ($qq) use ($like) {
                 $qq->where(function ($w) use ($like) {
                     $w->whereHas('application.user', fn($u) => $u->where('name', 'like', $like))
-                      ->orWhereHas('application.job', fn($j) => $j->where('title', 'like', $like));
+                        ->orWhereHas('application.job', fn($j) => $j->where('title', 'like', $like));
                 });
             })
-            ->when($status === 'active',   fn($qq) => $qq->whereIn('status', $ACTIVE_STATUSES))
+            ->when($status === 'active', fn($qq) => $qq->whereIn('status', $ACTIVE_STATUSES))
             ->when($status === 'finished', fn($qq) => $qq->whereIn('status', $FINISHED_STATUSES))
             ->latest()
             ->paginate(15)
@@ -61,7 +61,7 @@ class PsychotestController extends Controller
         abort_unless($attempt->application->user_id === $request->user()->id, 403);
 
         // cegah retake kalau sudah selesai/expired/cancelled
-        $finished = in_array($attempt->status, ['submitted','scored','expired','cancelled'], true);
+        $finished = in_array($attempt->status, ['submitted', 'scored', 'expired', 'cancelled'], true);
         if ($finished) {
             return redirect()
                 ->route('applications.mine')
@@ -78,7 +78,7 @@ class PsychotestController extends Controller
         if (is_null($attempt->started_at)) {
             $attempt->update([
                 'started_at' => now(),
-                'status'     => 'in_progress',
+                'status' => 'in_progress',
             ]);
         }
 
@@ -94,7 +94,7 @@ class PsychotestController extends Controller
         abort_unless($attempt->application->user_id === $request->user()->id, 403);
 
         // cegah submit ulang
-        if (in_array($attempt->status, ['submitted','scored','expired','cancelled'], true)) {
+        if (in_array($attempt->status, ['submitted', 'scored', 'expired', 'cancelled'], true)) {
             return redirect()->route('applications.mine')
                 ->with('warn', 'Tes ini sudah diselesaikan.');
         }
@@ -114,66 +114,67 @@ class PsychotestController extends Controller
         $questions = $attempt->test->questions;
 
         $maxScore = 0.0;
-        $score    = 0.0;
+        $score = 0.0;
 
-        DB::transaction(function() use ($attempt, $questions, $data, &$score, &$maxScore) {
+        DB::transaction(function () use ($attempt, $questions, $data, &$score, &$maxScore) {
             foreach ($questions as $q) {
                 $userAns = $data['answers'][$q->id] ?? null;
                 $correct = null;
 
                 if (!is_null($userAns)) {
                     if ($q->type === 'mcq' || $q->type === 'truefalse') {
-                        $correct = strcmp((string)$userAns, (string)$q->answer_key) === 0;
+                        $correct = strcmp((string) $userAns, (string) $q->answer_key) === 0;
                     }
                 }
 
                 PsychotestAnswer::updateOrCreate(
                     ['attempt_id' => $attempt->id, 'question_id' => $q->id],
                     [
-                        'answer'     => is_scalar($userAns) ? (string)$userAns : null,
+                        'answer' => is_scalar($userAns) ? (string) $userAns : null,
                         'is_correct' => $correct,
                     ]
                 );
 
-                $w = (float)$q->weight;
+                $w = (float) $q->weight;
                 $maxScore += $w;
-                if ($correct === true) $score += $w;
+                if ($correct === true)
+                    $score += $w;
             }
 
             // FINALISASI: JANGAN set is_active=false agar tidak bentrok unique lama
             $attempt->update([
-                'started_at'   => $attempt->started_at ?? now(),
-                'finished_at'  => now(),
+                'started_at' => $attempt->started_at ?? now(),
+                'finished_at' => now(),
                 'submitted_at' => now(),
-                'status'       => 'scored', // atau 'submitted' lalu proses skor async
-                'score'        => $score,
+                'status' => 'scored', // atau 'submitted' lalu proses skor async
+                'score' => $score,
                 // 'is_active'  => ...  <-- sengaja tidak disentuh
             ]);
 
             // catat / update stage psychotest
             $stage = $attempt->application->stages()
-                ->where('stage_key','psychotest')
+                ->where('stage_key', 'psychotest')
                 ->latest()
                 ->first();
 
             $payload = ['max_score' => $maxScore];
 
-            $cfg   = $attempt->test->scoring ?? [];
-            $ratio = is_array($cfg) && isset($cfg['pass_ratio']) ? (float)$cfg['pass_ratio'] : 0.6;
+            $cfg = $attempt->test->scoring ?? [];
+            $ratio = is_array($cfg) && isset($cfg['pass_ratio']) ? (float) $cfg['pass_ratio'] : 0.6;
             $isPassed = $maxScore > 0 && ($score / $maxScore) >= $ratio;
 
             if ($stage) {
                 $stage->update([
-                    'score'   => $score,
-                    'status'  => $isPassed ? 'passed' : 'failed',
+                    'score' => $score,
+                    'status' => $isPassed ? 'passed' : 'failed',
                     'payload' => $payload
                 ]);
             } else {
                 $attempt->application->stages()->create([
                     'stage_key' => 'psychotest',
-                    'status'    => $isPassed ? 'passed' : 'failed',
-                    'score'     => $score,
-                    'payload'   => $payload,
+                    'status' => $isPassed ? 'passed' : 'failed',
+                    'score' => $score,
+                    'payload' => $payload,
                 ]);
             }
 
@@ -185,6 +186,6 @@ class PsychotestController extends Controller
 
         return redirect()
             ->route('applications.mine')
-            ->with('ok','Psikotes selesai. Skor: '.number_format($score,2));
+            ->with('ok', 'Psikotes selesai. Skor: ' . number_format($score, 2));
     }
 }

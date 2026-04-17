@@ -13,7 +13,7 @@ class CandidateEmployment extends Model
 
     /** UUID primary key */
     public $incrementing = false;
-    protected $keyType   = 'string';
+    protected $keyType = 'string';
 
     protected $fillable = [
         'candidate_profile_id',
@@ -29,7 +29,7 @@ class CandidateEmployment extends Model
 
     protected $casts = [
         'period_start' => 'date',
-        'period_end'   => 'date',
+        'period_end' => 'date',
     ];
 
     public function profile(): BelongsTo
@@ -46,7 +46,7 @@ class CandidateEmployment extends Model
     public function getPeriodLabelAttribute(): string
     {
         $start = $this->period_start?->format('M Y');
-        $end   = $this->period_end?->format('M Y') ?? 'Sekarang';
+        $end = $this->period_end?->format('M Y') ?? 'Sekarang';
         return trim(($start ?: '-') . ' - ' . $end);
     }
 }

@@ -33,10 +33,10 @@ class VerifyCodeController extends Controller
 
     public function verify(Request $request)
     {
-        $request->validate(['code' => ['required','digits:6']]);
+        $request->validate(['code' => ['required', 'digits:6']]);
 
         $user = $request->user();
-        $row  = EmailVerificationCode::where('user_id', $user->id)->first();
+        $row = EmailVerificationCode::where('user_id', $user->id)->first();
 
         if (!$row) {
             $this->ensureCode($user, true);
@@ -90,13 +90,14 @@ class VerifyCodeController extends Controller
      */
     private function ensureCode($user, bool $sendMail = true): EmailVerificationCode
     {
-        $ttl      = (int) (config('auth.verify_code_ttl', env('VERIFY_CODE_TTL', 10)));
+        $ttl = (int) (config('auth.verify_code_ttl', env('VERIFY_CODE_TTL', 10)));
         $cooldown = (int) (config('auth.verify_resend_cooldown', env('VERIFY_RESEND_COOLDOWN', 60)));
 
         $row = EmailVerificationCode::firstOrNew(['user_id' => $user->id]);
 
         // Jika masih valid & dalam window cooldown → cukup return
-        if ($row->exists &&
+        if (
+            $row->exists &&
             $row->expires_at && now()->lessThan($row->expires_at) &&
             $row->last_sent_at && now()->diffInSeconds($row->last_sent_at) < $cooldown
         ) {
@@ -106,9 +107,9 @@ class VerifyCodeController extends Controller
         $plain = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
 
         $row->fill([
-            'code_hash'    => Hash::make($plain),
-            'expires_at'   => now()->addMinutes($ttl),
-            'attempts'     => 0,
+            'code_hash' => Hash::make($plain),
+            'expires_at' => now()->addMinutes($ttl),
+            'attempts' => 0,
             'last_sent_at' => now(),
         ])->save();
 

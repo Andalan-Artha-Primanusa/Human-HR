@@ -87,7 +87,7 @@
           </div>
         </div>
         <div class="flex items-center gap-2">
-          <a href="{{ route('jobs.show',$job) }}" class="px-3 py-2 text-sm font-medium rounded-lg bg-white/10 ring-1 ring-inset ring-white/30 hover:bg-white/15">Kembali ke Lowongan</a>
+          <a href="{{ route('jobs.show', $job) }}" class="px-3 py-2 text-sm font-medium rounded-lg bg-white/10 ring-1 ring-inset ring-white/30 hover:bg-white/15">Kembali ke Lowongan</a>
         </div>
       </div>
     </div>
@@ -98,20 +98,20 @@
 
     {{-- Alerts --}}
     @if(session('info'))
-      <div class="px-4 py-3 mb-4 border rounded-xl border-brand-200 bg-brand-50 text-brand-800">{{ session('info') }}</div>
+          <div class="px-4 py-3 mb-4 border rounded-xl border-brand-200 bg-brand-50 text-brand-800">{{ session('info') }}</div>
     @endif
     @if(session('success'))
-      <div class="px-4 py-3 mb-4 border rounded-xl border-brand-200 bg-brand-50 text-brand-800">{{ session('success') }}</div>
+          <div class="px-4 py-3 mb-4 border rounded-xl border-brand-200 bg-brand-50 text-brand-800">{{ session('success') }}</div>
     @endif
     @if($errors->any())
-      <div class="px-4 py-3 mb-4 border rounded-xl border-brand-200 bg-[#fbf3ea] text-brand-900">
-        <div class="mb-1 font-semibold">Periksa kembali isian kamu:</div>
-        <ul class="pl-5 text-sm list-disc">
-          @foreach($errors->all() as $e)
-            <li>{{ $e }}</li>
-          @endforeach
-        </ul>
-      </div>
+          <div class="px-4 py-3 mb-4 border rounded-xl border-brand-200 bg-[#fbf3ea] text-brand-900">
+            <div class="mb-1 font-semibold">Periksa kembali isian kamu:</div>
+            <ul class="pl-5 text-sm list-disc">
+              @foreach($errors->all() as $e)
+                <li>{{ $e }}</li>
+              @endforeach
+            </ul>
+          </div>
     @endif
 
     {{-- Stepper --}}
@@ -165,7 +165,7 @@
     {{-- IMPORTANT: novalidate to disable native HTML validation --}}
     <form x-ref="form"
           method="POST"
-          action="{{ route('candidate.profiles.update',$job) }}"
+          action="{{ route('candidate.profiles.update', $job) }}"
           enctype="multipart/form-data"
           novalidate>
       @csrf
@@ -180,68 +180,95 @@
           <div class="grid gap-4 mt-4 sm:grid-cols-2">
             <div>
               <label class="text-sm text-slate-600">Nama Lengkap <span class="text-red-600">*</span></label>
-              <input required name="full_name" value="{{ old('full_name',$profile->full_name) }}" class="w-full px-3 py-2 mt-1 border rounded-lg">
+              <input required name="full_name" value="{{ old('full_name', $profile->full_name) }}" class="w-full px-3 py-2 mt-1 border rounded-lg">
+            </div>
+            <div>
+              <label class="text-sm text-slate-600">Pilih POH (Tempat Penempatan) <span class="text-red-600">*</span></label>
+              <select required name="poh_id" class="w-full px-3 py-2 mt-1 border rounded-lg">
+                <option value="">— Pilih POH —</option>
+                @foreach($pohs as $poh)
+                  <option value="{{ $poh->id }}" @selected(old('poh_id', $profile->poh_id ?? null) == $poh->id)>{{ $poh->name }}</option>
+                @endforeach
+              </select>
             </div>
             <div>
               <label class="text-sm text-slate-600">Nama Panggilan</label>
-              <input name="nickname" value="{{ old('nickname',$profile->nickname) }}" class="w-full px-3 py-2 mt-1 border rounded-lg">
+              <input name="nickname" value="{{ old('nickname', $profile->nickname) }}" class="w-full px-3 py-2 mt-1 border rounded-lg">
             </div>
             <div>
               <label class="text-sm text-slate-600">Jenis Kelamin <span class="text-red-600">*</span></label>
               <select required name="gender" class="w-full px-3 py-2 mt-1 border rounded-lg">
                 <option value="">—</option>
-                <option value="male"   @selected(old('gender',$profile->gender)==='male')>Laki-laki</option>
-                <option value="female" @selected(old('gender',$profile->gender)==='female')>Perempuan</option>
+                <option value="male"   @selected(old('gender', $profile->gender) === 'male')>Laki-laki</option>
+                <option value="female" @selected(old('gender', $profile->gender) === 'female')>Perempuan</option>
               </select>
             </div>
             <div>
-              <label class="text-sm text-slate-600">Usia <span class="text-red-600">*</span></label>
-              <input required type="number" min="15" max="80" name="age" value="{{ old('age',$profile->age) }}" class="w-full px-3 py-2 mt-1 border rounded-lg">
-            </div>
-            <div>
               <label class="text-sm text-slate-600">Tempat Lahir <span class="text-red-600">*</span></label>
-              <input required name="birthplace" value="{{ old('birthplace',$profile->birthplace) }}" class="w-full px-3 py-2 mt-1 border rounded-lg">
+              <input required name="birthplace" value="{{ old('birthplace', $profile->birthplace) }}" class="w-full px-3 py-2 mt-1 border rounded-lg">
             </div>
             <div>
               <label class="text-sm text-slate-600">Tanggal Lahir <span class="text-red-600">*</span></label>
-              <input required type="date" name="birthdate" value="{{ old('birthdate', optional($profile->birthdate)->format('Y-m-d')) }}" class="w-full px-3 py-2 mt-1 border rounded-lg">
+              <input required type="date" name="birthdate" value="{{ old('birthdate', optional($profile->birthdate)->format('Y-m-d')) }}" class="w-full px-3 py-2 mt-1 border rounded-lg" @input="const ageField = $el.form.elements['age']; if(ageField){ const val = $el.value; if(val){ const d = new Date(val); const now = new Date(); let age = now.getFullYear() - d.getFullYear(); const m = now.getMonth() - d.getMonth(); if(m < 0 || (m === 0 && now.getDate() < d.getDate())) age--; ageField.value = age; } }">
+            </div>
+            <div>
+              <label class="text-sm text-slate-600">Usia <span class="text-red-600">*</span></label>
+              <input required type="number" min="15" max="80" name="age" value="{{ old('age', $profile->age) }}" class="w-full px-3 py-2 mt-1 border rounded-lg" readonly>
             </div>
             <div>
               <label class="text-sm text-slate-600">NIK KTP <span class="text-red-600">*</span></label>
-              <input required name="nik" value="{{ old('nik',$profile->nik) }}" maxlength="16" class="w-full px-3 py-2 mt-1 border rounded-lg">
+              <input required name="nik" value="{{ old('nik', $profile->nik) }}" maxlength="16" class="w-full px-3 py-2 mt-1 border rounded-lg">
             </div>
             <div>
               <label class="text-sm text-slate-600">Email <span class="text-red-600">*</span></label>
-              <input required type="email" name="email" value="{{ old('email',$profile->email ?? auth()->user()->email) }}" class="w-full px-3 py-2 mt-1 border rounded-lg">
+              <input required type="email" name="email" value="{{ old('email', $profile->email ?? auth()->user()->email) }}" class="w-full px-3 py-2 mt-1 border rounded-lg">
             </div>
             <div>
               <label class="text-sm text-slate-600">Nomor HP <span class="text-red-600">*</span></label>
-              <input required name="phone" value="{{ old('phone',$profile->phone) }}" class="w-full px-3 py-2 mt-1 border rounded-lg">
+              <input required name="phone" pattern="[0-9]{12,13}" maxlength="13" minlength="12" value="{{ old('phone', $profile->phone) }}" class="w-full px-3 py-2 mt-1 border rounded-lg" title="Nomor HP harus 12-13 digit angka" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
             </div>
             <div>
               <label class="text-sm text-slate-600">Nomor WhatsApp</label>
-              <input name="whatsapp" value="{{ old('whatsapp',$profile->whatsapp) }}" class="w-full px-3 py-2 mt-1 border rounded-lg">
+              <input name="whatsapp" value="{{ old('whatsapp', $profile->whatsapp) }}" class="w-full px-3 py-2 mt-1 border rounded-lg">
             </div>
           </div>
 
           <div class="grid gap-4 mt-4 sm:grid-cols-3">
             <div>
               <label class="text-sm text-slate-600">Pendidikan Terakhir <span class="text-red-600">*</span></label>
-              @php $ed = old('last_education',$profile->last_education); @endphp
-              <select required name="last_education" class="w-full px-3 py-2 mt-1 border rounded-lg">
+              @php $ed = old('last_education', $profile->last_education); @endphp
+              <select required name="last_education" id="last_education" class="w-full px-3 py-2 mt-1 border rounded-lg" onchange="document.getElementById('sma-smk-group').style.display = this.value === 'SMA_SMK' ? 'flex' : 'none'; document.getElementById('lainnya-group').style.display = this.value === 'LAINNYA' ? 'block' : 'none';">
                 <option value="">—</option>
-                @foreach(['SD','SMP','SMA_SMK','D1','D2','D3','D4','S1','S2','S3','LAINNYA'] as $e)
-                  <option value="{{ $e }}" @selected($ed===$e)>{{ $e }}</option>
+                @foreach(['SD', 'SMP', 'SMA_SMK', 'D1', 'D2', 'D3', 'D4', 'S1', 'S2', 'S3', 'LAINNYA'] as $e)
+                      <option value="{{ $e }}" @selected($ed === $e)>{{ $e }}</option>
                 @endforeach
               </select>
             </div>
+            <div id="sma-smk-group" class="gap-2 mt-2" style="display: {{ (old('last_education', $profile->last_education) === 'SMA_SMK') ? 'flex' : 'none' }};">
+              <div class="flex items-center gap-2">
+                <label class="text-sm text-slate-600">Jenis</label>
+                @php $jenis = old('sma_smk_type', $profile->extras['sma_smk_type'] ?? 'SMA'); @endphp
+                <select name="sma_smk_type" class="px-3 py-2 border rounded-lg">
+                  <option value="SMA" @selected($jenis === 'SMA')>SMA</option>
+                  <option value="SMK" @selected($jenis === 'SMK')>SMK</option>
+                </select>
+              </div>
+              <div class="flex-1">
+                <label class="text-sm text-slate-600">Nama Sekolah</label>
+                <input name="sma_smk_school" value="{{ old('sma_smk_school', $profile->extras['sma_smk_school'] ?? '') }}" class="w-full px-3 py-2 border rounded-lg">
+              </div>
+            </div>
+            <div id="lainnya-group" class="gap-2 mt-2" style="display: {{ (old('last_education', $profile->last_education) === 'LAINNYA') ? 'block' : 'none' }};">
+              <label class="text-sm text-slate-600">Nama Pendidikan Lainnya</label>
+              <input name="other_education" value="{{ old('other_education', $profile->extras['other_education'] ?? '') }}" class="w-full px-3 py-2 border rounded-lg">
+            </div>
             <div>
               <label class="text-sm text-slate-600">Jurusan <span class="text-red-600">*</span></label>
-              <input required name="education_major" value="{{ old('education_major',$profile->education_major) }}" class="w-full px-3 py-2 mt-1 border rounded-lg">
+              <input required name="education_major" value="{{ old('education_major', $profile->education_major) }}" class="w-full px-3 py-2 mt-1 border rounded-lg">
             </div>
             <div>
               <label class="text-sm text-slate-600">Sekolah/Kampus <span class="text-red-600">*</span></label>
-              <input required name="education_school" value="{{ old('education_school',$profile->education_school) }}" class="w-full px-3 py-2 mt-1 border rounded-lg">
+              <input required name="education_school" value="{{ old('education_school', $profile->education_school) }}" class="w-full px-3 py-2 mt-1 border rounded-lg">
             </div>
           </div>
         </div>
@@ -254,22 +281,22 @@
 
           <div class="grid gap-3 mt-4">
             <label class="text-sm text-slate-600">Alamat KTP <span class="text-red-600">*</span></label>
-            <textarea required name="ktp_address" class="w-full px-3 py-2 border rounded-lg" rows="2">{{ old('ktp_address',$profile->ktp_address) }}</textarea>
+            <textarea required name="ktp_address" class="w-full px-3 py-2 border rounded-lg" rows="2">{{ old('ktp_address', $profile->ktp_address) }}</textarea>
             <div class="grid gap-3 sm:grid-cols-6">
-              <input name="ktp_rt"  placeholder="RT"  value="{{ old('ktp_rt',$profile->ktp_rt) }}"  class="px-3 py-2 border rounded-lg">
-              <input name="ktp_rw"  placeholder="RW"  value="{{ old('ktp_rw',$profile->ktp_rw) }}"  class="px-3 py-2 border rounded-lg">
-              <input required name="ktp_village"  placeholder="Desa/Kelurahan" value="{{ old('ktp_village',$profile->ktp_village) }}" class="px-3 py-2 border rounded-lg">
-              <input required name="ktp_district" placeholder="Kecamatan" value="{{ old('ktp_district',$profile->ktp_district) }}" class="px-3 py-2 border rounded-lg">
-              <input required name="ktp_city"     placeholder="Kab/Kota" value="{{ old('ktp_city',$profile->ktp_city) }}" class="px-3 py-2 border rounded-lg">
-              <input required name="ktp_province" placeholder="Provinsi" value="{{ old('ktp_province',$profile->ktp_province) }}" class="px-3 py-2 border rounded-lg">
+              <input name="ktp_rt"  placeholder="RT"  value="{{ old('ktp_rt', $profile->ktp_rt) }}"  class="px-3 py-2 border rounded-lg">
+              <input name="ktp_rw"  placeholder="RW"  value="{{ old('ktp_rw', $profile->ktp_rw) }}"  class="px-3 py-2 border rounded-lg">
+              <input required name="ktp_village"  placeholder="Desa/Kelurahan" value="{{ old('ktp_village', $profile->ktp_village) }}" class="px-3 py-2 border rounded-lg">
+              <input required name="ktp_district" placeholder="Kecamatan" value="{{ old('ktp_district', $profile->ktp_district) }}" class="px-3 py-2 border rounded-lg">
+              <input required name="ktp_city"     placeholder="Kab/Kota" value="{{ old('ktp_city', $profile->ktp_city) }}" class="px-3 py-2 border rounded-lg">
+              <input required name="ktp_province" placeholder="Provinsi" value="{{ old('ktp_province', $profile->ktp_province) }}" class="px-3 py-2 border rounded-lg">
             </div>
             <div class="grid gap-3 sm:grid-cols-3">
-              <input required name="ktp_postal_code" placeholder="Kode Pos" value="{{ old('ktp_postal_code',$profile->ktp_postal_code) }}" class="px-3 py-2 border rounded-lg">
-              @php $s = old('ktp_residence_status',$profile->ktp_residence_status); @endphp
+              <input required name="ktp_postal_code" placeholder="Kode Pos" value="{{ old('ktp_postal_code', $profile->ktp_postal_code) }}" class="px-3 py-2 border rounded-lg">
+              @php $s = old('ktp_residence_status', $profile->ktp_residence_status); @endphp
               <select name="ktp_residence_status" class="px-3 py-2 border rounded-lg">
                 <option value="">Status Tempat Tinggal</option>
-                @foreach(['OWN'=>'Milik','RENT'=>'Sewa','DORM'=>'Kost','FAMILY'=>'Keluarga','COMPANY'=>'Dinas','OTHER'=>'Lainnya'] as $k=>$v)
-                  <option value="{{ $k }}" @selected($s===$k)>{{ $v }}</option>
+                @foreach(['OWN' => 'Milik', 'RENT' => 'Sewa', 'DORM' => 'Kost', 'FAMILY' => 'Keluarga', 'COMPANY' => 'Dinas', 'OTHER' => 'Lainnya'] as $k => $v)
+                      <option value="{{ $k }}" @selected($s === $k)>{{ $v }}</option>
                 @endforeach
               </select>
             </div>
@@ -277,7 +304,7 @@
             <label class="inline-flex items-center gap-2 mt-4 text-sm"><input type="checkbox" x-model="sameAsKtp" class="rounded"> <span>Domisili sama dengan Alamat KTP</span></label>
 
             <label class="mt-1 text-sm text-slate-600">Alamat Domisili <span class="text-red-600">*</span></label>
-            <textarea required name="domicile_address" x-model="domicile_address" class="w-full px-3 py-2 border rounded-lg" rows="2">{{ old('domicile_address',$profile->domicile_address) }}</textarea>
+            <textarea required name="domicile_address" x-model="domicile_address" class="w-full px-3 py-2 border rounded-lg" rows="2">{{ old('domicile_address', $profile->domicile_address) }}</textarea>
             <div class="grid gap-3 sm:grid-cols-6">
               <input name="domicile_rt"  placeholder="RT"  x-model="domicile_rt"  class="px-3 py-2 border rounded-lg">
               <input name="domicile_rw"  placeholder="RW"  x-model="domicile_rw"  class="px-3 py-2 border rounded-lg">
@@ -288,11 +315,11 @@
             </div>
             <div class="grid gap-3 sm:grid-cols-3">
               <input required name="domicile_postal_code" placeholder="Kode Pos" x-model="domicile_postal_code" class="px-3 py-2 border rounded-lg">
-              @php $s2 = old('domicile_residence_status',$profile->domicile_residence_status); @endphp
+              @php $s2 = old('domicile_residence_status', $profile->domicile_residence_status); @endphp
               <select name="domicile_residence_status" x-model="domicile_residence_status" class="px-3 py-2 border rounded-lg">
                 <option value="">Status Tempat Tinggal</option>
-                @foreach(['OWN'=>'Milik','RENT'=>'Sewa','DORM'=>'Kost','FAMILY'=>'Keluarga','COMPANY'=>'Dinas','OTHER'=>'Lainnya'] as $k=>$v)
-                  <option value="{{ $k }}" @selected($s2===$k)>{{ $v }}</option>
+                @foreach(['OWN' => 'Milik', 'RENT' => 'Sewa', 'DORM' => 'Kost', 'FAMILY' => 'Keluarga', 'COMPANY' => 'Dinas', 'OTHER' => 'Lainnya'] as $k => $v)
+                      <option value="{{ $k }}" @selected($s2 === $k)>{{ $v }}</option>
                 @endforeach
               </select>
             </div>
@@ -458,20 +485,16 @@
           <div class="flex items-center justify-between">
             <h2 class="flex items-center gap-2 text-lg font-semibold">
               <svg class="w-5 h-5 text-brand-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a4 4 0 00-4-4h-1M9 20H4v-2a4 4 0 014-4h1M12 12a5 5 0 100-10 5 5 0 000 10z"/></svg>
-              Referensi (bukan keluarga)
+              Referensi (bukan keluarga, 1 orang saja)
             </h2>
-            <button type="button" class="rounded-xl border border-brand-200 px-3 py-1.5 text-sm text-brand-800 hover:bg-brand-50" @click="items.push({name:'',job_title:'',company:'',contact:''})">+ Tambah</button>
           </div>
-          <p class="mt-1 text-xs text-slate-500">Minimal isi 3 referensi.</p>
-          <template x-for="(it,idx) in items" :key="idx">
+          <p class="mt-1 text-xs text-slate-500">Isi minimal 1 referensi.</p>
+          <template x-for="(it,idx) in items.slice(0,1)" :key="idx">
             <div class="grid gap-3 p-3 mt-4 border rounded-xl sm:grid-cols-2">
               <input class="px-3 py-2 border rounded-lg" :name="`references[${idx}][name]`" x-model="it.name" placeholder="Nama *" required>
               <input class="px-3 py-2 border rounded-lg" :name="`references[${idx}][job_title]`" x-model="it.job_title" placeholder="Jabatan *" required>
               <input class="px-3 py-2 border rounded-lg" :name="`references[${idx}][company]`" x-model="it.company" placeholder="Perusahaan *" required>
               <input class="px-3 py-2 border rounded-lg" :name="`references[${idx}][contact]`" x-model="it.contact" placeholder="Kontak (HP/Email) *" required>
-              <div class="text-right sm:col-span-2">
-                <button type="button" class="text-sm text-brand-700 hover:underline" @click="items.splice(idx,1)">Hapus</button>
-              </div>
             </div>
           </template>
         </div>
@@ -479,12 +502,12 @@
         <div class="p-5 bg-white shadow-sm card rounded-2xl">
           <h2 class="flex items-center gap-2 text-lg font-semibold">
             <svg class="w-5 h-5 text-brand-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 12v7m-6 0h12a2 2 0 002-2V7a2 2 0 00-2-2H6a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-            Berkas
+            CV & Certificate (PDF, maks 4MB)
           </h2>
           <div class="grid gap-4 mt-3 sm:grid-cols-2">
             <div>
-              <label class="text-sm text-slate-600">CV (PDF/DOC, maks 4MB) <span class="text-red-600" x-show="!hasCv">*</span></label>
-              <input :required="!hasCv" type="file" name="cv" class="w-full px-3 py-2 mt-1 border rounded-lg">
+              <label class="text-sm text-slate-600">CV (PDF, maks 4MB) <span class="text-red-600" x-show="!hasCv">*</span></label>
+              <input :required="!hasCv" type="file" name="cv" accept="application/pdf" class="w-full px-3 py-2 mt-1 border rounded-lg">
               @if($profile->cv_path)
                 <div class="mt-1 text-xs text-slate-600">Terunggah: <a class="underline text-brand-700" href="{{ asset('storage/' . ltrim($profile->cv_path, '/')) }}" target="_blank">Lihat CV</a></div>
               @endif
@@ -563,15 +586,15 @@
       hasCv: {{ $profile->cv_path ? 'true' : 'false' }},
 
       // domisili (buat copy KTP + restore draft)
-      domicile_address: @json(old('domicile_address',$profile->domicile_address)),
-      domicile_rt: @json(old('domicile_rt',$profile->domicile_rt)),
-      domicile_rw: @json(old('domicile_rw',$profile->domicile_rw)),
-      domicile_village: @json(old('domicile_village',$profile->domicile_village)),
-      domicile_district: @json(old('domicile_district',$profile->domicile_district)),
-      domicile_city: @json(old('domicile_city',$profile->domicile_city)),
-      domicile_province: @json(old('domicile_province',$profile->domicile_province)),
-      domicile_postal_code: @json(old('domicile_postal_code',$profile->domicile_postal_code)),
-      domicile_residence_status: @json(old('domicile_residence_status',$profile->domicile_residence_status)),
+      domicile_address: @json(old('domicile_address', $profile->domicile_address)),
+      domicile_rt: @json(old('domicile_rt', $profile->domicile_rt)),
+      domicile_rw: @json(old('domicile_rw', $profile->domicile_rw)),
+      domicile_village: @json(old('domicile_village', $profile->domicile_village)),
+      domicile_district: @json(old('domicile_district', $profile->domicile_district)),
+      domicile_city: @json(old('domicile_city', $profile->domicile_city)),
+      domicile_province: @json(old('domicile_province', $profile->domicile_province)),
+      domicile_postal_code: @json(old('domicile_postal_code', $profile->domicile_postal_code)),
+      domicile_residence_status: @json(old('domicile_residence_status', $profile->domicile_residence_status)),
 
       // === DRAFT KEY PER USER x JOB ===
       get DRAFT_KEY(){ return `cand_wizard:{{ auth()->id() }}:{{ $job->id }}`; },

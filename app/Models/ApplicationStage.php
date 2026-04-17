@@ -29,7 +29,7 @@ class ApplicationStage extends Model
     ];
 
     protected $casts = [
-        'score'   => 'decimal:2',
+        'score' => 'decimal:2',
         'payload' => 'array',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
@@ -75,11 +75,13 @@ class ApplicationStage extends Model
         // fallback query ringan bila belum eager-load (hindari N+1: tetap disarankan eager-load dari controller)
         if ($this->acted_by) {
             $u = User::query()->select('name')->find($this->acted_by);
-            if ($u && $u->name) return $u->name;
+            if ($u && $u->name)
+                return $u->name;
         }
         if ($this->user_id) {
             $u = User::query()->select('name')->find($this->user_id);
-            if ($u && $u->name) return $u->name;
+            if ($u && $u->name)
+                return $u->name;
         }
         return 'Sistem/Unknown';
     }

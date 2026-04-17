@@ -18,18 +18,18 @@
             <nav class="hidden md:flex items-center gap-6">
                 <a class="nav-link" href="{{ route('jobs.index') }}">Lowongan</a>
                 @auth
-                <a class="nav-link" href="{{ route('applications.mine') }}">Lamaran Saya</a>
-                @role('hr|superadmin')
-                <a class="nav-link" href="{{ route('admin.jobs.index') }}">Admin</a>
-                @endrole
+                    <a class="nav-link" href="{{ route('applications.mine') }}">Lamaran Saya</a>
+                    @role('hr|superadmin')
+                    <a class="nav-link" href="{{ route('admin.jobs.index') }}">Admin</a>
+                    @endrole
                 @endauth
             </nav>
             <div class="flex items-center gap-3">
                 @auth
-                <a href="{{ route('profile.edit') }}" class="btn btn-ghost">Profil</a>
-                <form method="POST" action="{{ route('logout') }}">@csrf<button class="btn btn-accent">Logout</button></form>
+                    <a href="{{ route('profile.edit') }}" class="btn btn-ghost">Profil</a>
+                    <form method="POST" action="{{ route('logout') }}">@csrf<button class="btn btn-accent">Logout</button></form>
                 @else
-                <a href="{{ route('login') }}" class="btn btn-primary">Login</a>
+                    <a href="{{ route('login') }}" class="btn btn-primary">Login</a>
                 @endauth
             </div>
         </div>
@@ -38,25 +38,25 @@
 
     {{-- Flash messages --}}
     @if(session('ok') || session('warn'))
-    <div class="container-page mt-4">
-        @if(session('ok'))<div class="card">
-            <div class="card-body text-emerald-700">✅ {{ session('ok') }}</div>
-        </div>@endif
-        @if(session('warn'))<div class="card">
-            <div class="card-body text-amber-700">⚠️ {{ session('warn') }}</div>
-        </div>@endif
-    </div>
+        <div class="container-page mt-4">
+            @if(session('ok'))<div class="card">
+                <div class="card-body text-emerald-700">✅ {{ session('ok') }}</div>
+            </div>@endif
+            @if(session('warn'))<div class="card">
+                <div class="card-body text-amber-700">⚠️ {{ session('warn') }}</div>
+            </div>@endif
+        </div>
     @endif
 
 
     <main class="container-page py-8">
         @isset($header)
-        <div class="mb-6 hero rounded-2xl p-6">
-            <h1 class="text-xl md:text-2xl font-semibold text-slate-900">{{ $header }}</h1>
-            @isset($sub)
-            <p class="mt-1 text-slate-600">{{ $sub }}</p>
-            @endisset
-        </div>
+            <div class="mb-6 hero rounded-2xl p-6">
+                <h1 class="text-xl md:text-2xl font-semibold text-slate-900">{{ $header }}</h1>
+                @isset($sub)
+                    <p class="mt-1 text-slate-600">{{ $sub }}</p>
+                @endisset
+            </div>
         @endisset
 
 
@@ -66,7 +66,7 @@
 
 
     <footer class="mt-10 border-t border-slate-200 py-8 text-center text-sm text-slate-500">
-        © {{ date('Y') }} {{ config('app.name','Careers') }} · Built with ❤️
+        © {{ date('Y') }} {{ config('app.name', 'Careers') }} · Built with ❤️
     </footer>
 
 

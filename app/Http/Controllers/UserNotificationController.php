@@ -32,48 +32,48 @@ class UserNotificationController extends Controller
             $unreadCount = (int) $user->unreadNotifications()->count();
 
             $items = $user->notifications()
-                ->select(['id','data','created_at','read_at'])
+                ->select(['id', 'data', 'created_at', 'read_at'])
                 ->latest()
                 ->limit(self::TOPBAR_LIMIT)
                 ->get()
                 ->map(function ($n) {
-                    $data  = (array) ($n->data ?? []);
+                    $data = (array) ($n->data ?? []);
                     $title = $data['title'] ?? ($data['message'] ?? 'Notifikasi');
-                    $body  = $data['body']  ?? ($data['excerpt'] ?? null);
-                    $url   = $this->sanitizeNotificationUrl($data['url'] ?? null);
+                    $body = $data['body'] ?? ($data['excerpt'] ?? null);
+                    $url = $this->sanitizeNotificationUrl($data['url'] ?? null);
 
                     return [
-                        'id'         => (string) $n->id,
-                        'title'      => Str::limit((string) $title, 120, '…'),
-                        'body'       => $body ? Str::limit((string) $body, 180, '…') : null,
-                        'url'        => $url,
+                        'id' => (string) $n->id,
+                        'title' => Str::limit((string) $title, 120, '…'),
+                        'body' => $body ? Str::limit((string) $body, 180, '…') : null,
+                        'url' => $url,
                         'created_at' => optional($n->created_at)->diffForHumans(),
-                        'unread'     => is_null($n->read_at),
+                        'unread' => is_null($n->read_at),
                     ];
                 });
 
             return response()->json([
                 'unread' => $unreadCount,
-                'items'  => $items,
+                'items' => $items,
             ]);
         }
 
         // === HTML ===
         // Unread dibatasi agar tidak berat jika akun punya notifikasi sangat banyak.
         $unread = $user->unreadNotifications()
-            ->select(['id','data','created_at','read_at'])
+            ->select(['id', 'data', 'created_at', 'read_at'])
             ->latest()
             ->limit(self::HTML_UNREAD_LIMIT)
             ->get();
 
         // Read: batasi 50 terakhir agar tidak berat
         $read = $user->readNotifications()
-            ->select(['id','data','created_at','read_at'])
+            ->select(['id', 'data', 'created_at', 'read_at'])
             ->latest()
             ->limit(self::HTML_READ_LIMIT)
             ->get();
 
-        return view('me.notifications.index', compact('unread','read'));
+        return view('me.notifications.index', compact('unread', 'read'));
     }
 
     /**

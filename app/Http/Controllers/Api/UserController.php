@@ -35,7 +35,7 @@ class UserController extends Controller
             ->select(['id', 'name', 'email', 'role'])
             ->latest('id')
             ->paginate(50); // Limit to 50 per page
-        
+
         return response()->json([
             'users' => $users->items(),
             'pagination' => [
@@ -61,7 +61,7 @@ class UserController extends Controller
             ->select(['id', 'name', 'role'])
             ->latest('id')
             ->paginate(30); // Smaller page size for public
-        
+
         return response()->json([
             'users' => $users->items(),
             'pagination' => [

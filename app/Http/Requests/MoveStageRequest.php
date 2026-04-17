@@ -8,16 +8,16 @@ class MoveStageRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->hasAnyRole(['hr','superadmin']) ?? false;
+        return $this->user()?->hasAnyRole(['hr', 'superadmin']) ?? false;
     }
 
     public function rules(): array
     {
         return [
             'to_stage' => 'required|in:applied,psychotest,hr_iv,user_iv,final,offer,hired,not_qualified',
-            'status'   => 'nullable|in:pending,passed,failed,no-show,reschedule',
-            'note'     => 'nullable|string',
-            'score'    => 'nullable|numeric',
+            'status' => 'nullable|in:pending,passed,failed,no-show,reschedule',
+            'note' => 'nullable|string',
+            'score' => 'nullable|numeric',
         ];
     }
 }

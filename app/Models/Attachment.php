@@ -11,8 +11,11 @@ class Attachment extends Model
 {
     use HasFactory, HasUuidPrimaryKey;
 
-    protected $fillable = ['label','path','mime','size_bytes'];
+    protected $fillable = ['label', 'path', 'mime', 'size_bytes'];
 
     /** @return MorphTo */
-    public function attachable(): MorphTo { return $this->morphTo(); }
+    public function attachable(): MorphTo
+    {
+        return $this->morphTo();
+    }
 }

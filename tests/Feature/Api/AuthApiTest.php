@@ -47,7 +47,7 @@ class AuthApiTest extends TestCase
 
         $token = $response->json('token');
 
-        $meResponse = $this->withHeader('Authorization', 'Bearer '.$token)
+        $meResponse = $this->withHeader('Authorization', 'Bearer ' . $token)
             ->getJson('/api/me');
 
         $meResponse->assertOk()
@@ -59,7 +59,7 @@ class AuthApiTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $response = $this->getJson('/api/public/users/'.$user->id);
+        $response = $this->getJson('/api/public/users/' . $user->id);
 
         $response->assertOk()
             ->assertJsonPath('user.id', $user->id)
@@ -89,7 +89,7 @@ class AuthApiTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $response = $this->getJson('/api/users/'.$user->id);
+        $response = $this->getJson('/api/users/' . $user->id);
 
         $response->assertUnauthorized();
     }
@@ -107,7 +107,7 @@ class AuthApiTest extends TestCase
 
         $token = $login->json('token');
 
-        $response = $this->withHeader('Authorization', 'Bearer '.$token)
+        $response = $this->withHeader('Authorization', 'Bearer ' . $token)
             ->getJson('/api/users');
 
         $response->assertForbidden();
@@ -126,7 +126,7 @@ class AuthApiTest extends TestCase
 
         $token = $login->json('token');
 
-        $response = $this->withHeader('Authorization', 'Bearer '.$token)
+        $response = $this->withHeader('Authorization', 'Bearer ' . $token)
             ->getJson('/api/users');
 
         $response->assertOk();

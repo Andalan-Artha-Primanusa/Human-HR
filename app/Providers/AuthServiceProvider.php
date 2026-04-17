@@ -11,7 +11,9 @@ use App\Policies\JobApplicationPolicy;
 
 class AuthServiceProvider extends ServiceProvider
 {
-    public function register(): void {}
+    public function register(): void
+    {
+    }
 
     public function boot(): void
     {

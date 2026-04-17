@@ -58,7 +58,7 @@
         <div class="flex flex-col items-center justify-center gap-3 mb-8">
           <a href="{{ url('/') }}" class="inline-flex items-center justify-center">
             @if (class_exists(\App\View\Components\ApplicationLogo::class))
-            <x-application-logo class="w-20 h-20 text-slate-500" />
+                <x-application-logo class="w-20 h-20 text-slate-500" />
             @else
             @endif
           </a>
@@ -69,12 +69,12 @@
 
         {{-- Status --}}
         @if (session('status') == 'verification-link-sent')
-        <div class="px-3 py-2 mb-4 text-sm border rounded-lg border-emerald-200 bg-emerald-50 text-emerald-800">
-          Kode verifikasi baru telah dikirim ke email Anda.
-        </div>
+            <div class="px-3 py-2 mb-4 text-sm border rounded-lg border-emerald-200 bg-emerald-50 text-emerald-800">
+              Kode verifikasi baru telah dikirim ke email Anda.
+            </div>
         @endif
         @error('resend')
-        <div class="px-3 py-2 mb-4 text-sm border rounded-lg border-amber-200 bg-amber-50 text-amber-800">{{ $message }}</div>
+            <div class="px-3 py-2 mb-4 text-sm border rounded-lg border-amber-200 bg-amber-50 text-amber-800">{{ $message }}</div>
         @enderror
 
         {{-- Kartu --}}

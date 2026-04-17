@@ -1,11 +1,11 @@
 {{-- resources/views/offers/_fallback.blade.php --}}
 @php
-  $app   = $offer->application ?? null;
-  $user  = $app?->user?->name ?? '—';
-  $title = $app?->job?->title ?? '—';
-  $site  = $app?->job?->site?->code ?? '—';
-  $gross = number_format((float)($offer->salary['gross'] ?? 0), 0, ',', '.');
-  $allow = number_format((float)($offer->salary['allowance'] ?? 0), 0, ',', '.');
+    $app = $offer->application ?? null;
+    $user = $app?->user?->name ?? '—';
+    $title = $app?->job?->title ?? '—';
+    $site = $app?->job?->site?->code ?? '—';
+    $gross = number_format((float) ($offer->salary['gross'] ?? 0), 0, ',', '.');
+    $allow = number_format((float) ($offer->salary['allowance'] ?? 0), 0, ',', '.');
 @endphp
 <!doctype html>
 <html>
@@ -50,8 +50,8 @@
     </table>
 
     @if(!empty($offer->body_template))
-      <h2>Notes</h2>
-      {!! $offer->body_template !!}
+          <h2>Notes</h2>
+          {!! $offer->body_template !!}
     @endif
 
     <div class="sign">

@@ -14,7 +14,7 @@ class EnsureApiToken
     {
         $token = $request->bearerToken();
 
-        if (! $token) {
+        if (!$token) {
             return response()->json([
                 'message' => 'Token tidak ditemukan.',
             ], 401);
@@ -22,13 +22,13 @@ class EnsureApiToken
 
         $user = User::where('api_token', $token)->first();
 
-        if (! $user) {
+        if (!$user) {
             return response()->json([
                 'message' => 'Token tidak valid.',
             ], 401);
         }
 
-        $request->setUserResolver(fn () => $user);
+        $request->setUserResolver(fn() => $user);
         Auth::setUser($user);
 
         return $next($request);

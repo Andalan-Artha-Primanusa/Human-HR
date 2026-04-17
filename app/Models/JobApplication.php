@@ -13,23 +13,46 @@ class JobApplication extends Model
 {
     use HasFactory, HasUuidPrimaryKey;
 
-    protected $fillable = ['job_id','user_id','current_stage','overall_status'];
+    protected $fillable = ['job_id', 'user_id', 'poh_id', 'current_stage', 'overall_status'];
+    /** @return BelongsTo<Poh,JobApplication> */
+    public function poh(): BelongsTo
+    {
+        return $this->belongsTo(\App\Models\Poh::class, 'poh_id');
+    }
 
     /** @return BelongsTo<Job,JobApplication> */
-    public function job(): BelongsTo { return $this->belongsTo(Job::class); }
+    public function job(): BelongsTo
+    {
+        return $this->belongsTo(Job::class);
+    }
 
     /** @return BelongsTo<User,JobApplication> */
-    public function user(): BelongsTo { return $this->belongsTo(User::class); }
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
 
     /** @return HasMany<ApplicationStage> */
-    public function stages(): HasMany { return $this->hasMany(ApplicationStage::class, 'application_id'); }
+    public function stages(): HasMany
+    {
+        return $this->hasMany(ApplicationStage::class, 'application_id');
+    }
 
     /** @return HasMany<Interview> */
-    public function interviews(): HasMany { return $this->hasMany(Interview::class, 'application_id'); }
+    public function interviews(): HasMany
+    {
+        return $this->hasMany(Interview::class, 'application_id');
+    }
 
     /** @return HasMany<PsychotestAttempt> */
-    public function psychotestAttempts(): HasMany { return $this->hasMany(PsychotestAttempt::class, 'application_id'); }
+    public function psychotestAttempts(): HasMany
+    {
+        return $this->hasMany(PsychotestAttempt::class, 'application_id');
+    }
 
     /** @return HasOne<Offer> */
-    public function offer(): HasOne { return $this->hasOne(Offer::class, 'application_id'); }
+    public function offer(): HasOne
+    {
+        return $this->hasOne(Offer::class, 'application_id');
+    }
 }

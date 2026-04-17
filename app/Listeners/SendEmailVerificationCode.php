@@ -13,15 +13,17 @@ class SendEmailVerificationCode
     public function handle(Registered $event): void
     {
         $user = $event->user;
-        if ($user->email_verified_at) return;
+        if ($user->email_verified_at)
+            return;
 
-        $ttl      = (int) config('auth.verify_code_ttl', (int) env('VERIFY_CODE_TTL', 10));     // menit
+        $ttl = (int) config('auth.verify_code_ttl', (int) env('VERIFY_CODE_TTL', 10));     // menit
         $cooldown = (int) config('auth.verify_resend_cooldown', (int) env('VERIFY_RESEND_COOLDOWN', 60)); // detik
-        $now      = now();
+        $now = now();
 
         // Anti dobel: lock 30 detik
-        $lock = Cache::lock('reg-otp:'.$user->id, 30);
-        if (!$lock->get()) return;
+        $lock = Cache::lock('reg-otp:' . $user->id, 30);
+        if (!$lock->get())
+            return;
 
         try {
             DB::transaction(function () use ($user, $ttl, $cooldown, $now) {
@@ -35,9 +37,9 @@ class SendEmailVerificationCode
                 $plain = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
 
                 $data = [
-                    'code_hash'    => Hash::make($plain),
-                    'expires_at'   => $now->copy()->addMinutes($ttl),
-                    'attempts'     => 0,
+                    'code_hash' => Hash::make($plain),
+                    'expires_at' => $now->copy()->addMinutes($ttl),
+                    'attempts' => 0,
                     'last_sent_at' => $now,
                 ];
 

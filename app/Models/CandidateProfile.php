@@ -58,6 +58,7 @@ class CandidateProfile extends Model
         'not_willing_reason',
 
         // ===== TAMBAHAN WAJIB (INI YANG BIKIN NULL) =====
+        'poh_id',
         'current_salary',
         'expected_salary',
         'expected_facilities',
@@ -76,7 +77,7 @@ class CandidateProfile extends Model
     protected $casts = [
         'birthdate' => 'date',
 
-        'current_salary'  => 'decimal:2',
+        'current_salary' => 'decimal:2',
         'expected_salary' => 'decimal:2',
         'available_start_date' => 'date',
 

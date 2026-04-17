@@ -53,7 +53,7 @@
         'variant' => 'desktop',
         'closeOnClick' => false,
         'offerQuickId' => $offerQuickId ?? null
-      ])
+    ])
     </div>
   </aside>
 
@@ -76,9 +76,9 @@
       </div>
       <div class="flex-1 p-2 overflow-y-auto">
         @include('layouts.sidenav', [
-          'variant' => 'mobile',
-          'closeOnClick' => true,
-          'offerQuickId' => $offerQuickId ?? null
+            'variant' => 'mobile',
+            'closeOnClick' => true,
+            'offerQuickId' => $offerQuickId ?? null
         ])
       </div>
     </aside>
@@ -103,7 +103,7 @@
         </svg>
       </button>
 
-      <div class="font-semibold">@yield('title','Dashboard')</div>
+      <div class="font-semibold">@yield('title', 'Dashboard')</div>
 
       {{-- Right actions (dipisah ke partial) --}}
       @include('layouts.partials.topbar-actions')
@@ -196,17 +196,17 @@
 
 {{-- Hanya jalankan polling notifikasi saat user login, agar halaman publik tidak 401 --}}
 @auth
-  @push('scripts')
-  <script>
-    (function(){
-      const url = @json(route('me.notifications.index', ['format'=>'json']));
-      fetch(url, { headers: { 'X-Requested-With':'XMLHttpRequest' } })
-        .then(r => (r.ok ? r.json() : null))
-        .then(json => {  })
-        .catch(() => { /* jangan ganggu UI di halaman publik */ });
-    })();
-  </script>
-  @endpush
+      @push('scripts')
+          <script>
+            (function(){
+              const url = @json(route('me.notifications.index', ['format' => 'json']));
+              fetch(url, { headers: { 'X-Requested-With':'XMLHttpRequest' } })
+                .then(r => (r.ok ? r.json() : null))
+                .then(json => {  })
+                .catch(() => { /* jangan ganggu UI di halaman publik */ });
+            })();
+          </script>
+      @endpush
 @endauth
 
 @stack('scripts')

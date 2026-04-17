@@ -23,7 +23,7 @@ class SitePublicController extends Controller
             80,
             ''
         );
-        $like = $q !== '' ? '%'.addcslashes($q, '\\%_').'%' : null;
+        $like = $q !== '' ? '%' . addcslashes($q, '\\%_') . '%' : null;
 
         $sites = Site::query()
             ->select(['id', 'code', 'name', 'region', 'timezone', 'address'])
@@ -31,10 +31,10 @@ class SitePublicController extends Controller
             ->when($like !== null, function ($qq) use ($like) {
                 $qq->where(function ($w) use ($like) {
                     $w->where('code', 'like', $like)
-                      ->orWhere('name', 'like', $like)
-                      ->orWhere('region', 'like', $like)
-                      ->orWhere('timezone', 'like', $like)
-                      ->orWhere('address', 'like', $like);
+                        ->orWhere('name', 'like', $like)
+                        ->orWhere('region', 'like', $like)
+                        ->orWhere('timezone', 'like', $like)
+                        ->orWhere('address', 'like', $like);
                 });
             })
             ->orderBy('code')
@@ -60,17 +60,17 @@ class SitePublicController extends Controller
             'jobs as open_jobs_count' => fn($q) => $q->where('status', 'open'),
         ]);
         $site->load([
-            'jobs' => fn($q) => $q->select(['id','title','status','site_id','created_at'])
-                                  ->where('status', 'open')
-                                  ->latest('created_at')
-                                  ->limit(5),
+            'jobs' => fn($q) => $q->select(['id', 'title', 'status', 'site_id', 'created_at'])
+                ->where('status', 'open')
+                ->latest('created_at')
+                ->limit(5),
         ]);
 
         if ($request->wantsJson()) {
             return response()->json([
                 'site' => $site->only(['id', 'code', 'name', 'region', 'timezone', 'address']),
                 'open_jobs_count' => (int) $site->open_jobs_count,
-                'jobs' => $site->jobs->map(fn ($job) => [
+                'jobs' => $site->jobs->map(fn($job) => [
                     'id' => $job->id,
                     'title' => $job->title,
                     'status' => $job->status,

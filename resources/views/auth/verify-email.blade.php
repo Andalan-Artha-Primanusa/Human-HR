@@ -54,19 +54,19 @@
         {{-- Info email yang digunakan --}}
         @php $userEmail = auth()->user()->email ?? null; @endphp
         @if ($userEmail)
-          <div class="mb-4 rounded-lg border border-slate-200 bg-white/70 px-3 py-2 text-xs text-slate-700 backdrop-blur">
-            Dikirim ke: <span class="font-medium">{{ $userEmail }}</span>
-          </div>
+              <div class="mb-4 rounded-lg border border-slate-200 bg-white/70 px-3 py-2 text-xs text-slate-700 backdrop-blur">
+                Dikirim ke: <span class="font-medium">{{ $userEmail }}</span>
+              </div>
         @endif
 
         {{-- Status sukses kirim ulang --}}
         @if (session('status') == 'verification-link-sent')
-          <div class="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800" role="status" aria-live="polite">
-            <div class="flex items-start gap-2">
-              <svg class="mt-0.5 h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><path d="M10 15.172 6.414 11.586 5 13l5 5 9-9-1.414-1.414L10 15.172Z"/></svg>
-              <div>Tautan verifikasi baru telah dikirim ke email yang Anda gunakan saat pendaftaran.</div>
-            </div>
-          </div>
+              <div class="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800" role="status" aria-live="polite">
+                <div class="flex items-start gap-2">
+                  <svg class="mt-0.5 h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><path d="M10 15.172 6.414 11.586 5 13l5 5 9-9-1.414-1.414L10 15.172Z"/></svg>
+                  <div>Tautan verifikasi baru telah dikirim ke email yang Anda gunakan saat pendaftaran.</div>
+                </div>
+              </div>
         @endif
 
         <div class="relative">

@@ -12,15 +12,26 @@ class Interview extends Model
     use HasFactory, HasUuidPrimaryKey;
 
     protected $fillable = [
-        'application_id','title','mode','location','meeting_link','start_at','end_at','panel','notes'
+        'application_id',
+        'title',
+        'mode',
+        'location',
+        'meeting_link',
+        'start_at',
+        'end_at',
+        'panel',
+        'notes'
     ];
 
     protected $casts = [
         'start_at' => 'datetime',
-        'end_at'   => 'datetime',
-        'panel'    => 'array',
+        'end_at' => 'datetime',
+        'panel' => 'array',
     ];
 
     /** @return BelongsTo<JobApplication,Interview> */
-    public function application(): BelongsTo { return $this->belongsTo(JobApplication::class, 'application_id'); }
+    public function application(): BelongsTo
+    {
+        return $this->belongsTo(JobApplication::class, 'application_id');
+    }
 }

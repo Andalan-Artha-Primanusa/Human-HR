@@ -13,7 +13,7 @@ class CandidateTraining extends Model
     use HasFactory, HasUuids;
 
     public $incrementing = false;
-    protected $keyType   = 'string';
+    protected $keyType = 'string';
 
     protected $fillable = [
         'candidate_profile_id',
@@ -27,7 +27,7 @@ class CandidateTraining extends Model
 
     protected $casts = [
         'period_start' => 'date',
-        'period_end'   => 'date',
+        'period_end' => 'date',
     ];
 
     public function profile(): BelongsTo

@@ -20,7 +20,7 @@ class MyInterviewController extends Controller
         abort_if(!$u, 401);
 
         return Interview::query()
-            ->select(['id','application_id','title','mode','start_at','end_at','location','meeting_link','notes'])
+            ->select(['id', 'application_id', 'title', 'mode', 'start_at', 'end_at', 'location', 'meeting_link', 'notes'])
             ->with([
                 'application:id,user_id,job_id',
                 'application.user:id,name,email',
@@ -43,7 +43,7 @@ class MyInterviewController extends Controller
         abort_if(!$u, 401);
 
         $interviews = Interview::query()
-            ->select(['id','application_id','title','mode','start_at','end_at','location','meeting_link'])
+            ->select(['id', 'application_id', 'title', 'mode', 'start_at', 'end_at', 'location', 'meeting_link'])
             ->with([
                 'application:id,job_id,user_id',
                 'application.job:id,title,division,site_id',
@@ -76,31 +76,32 @@ class MyInterviewController extends Controller
         abort_if(is_null($iv->start_at) || is_null($iv->end_at), 422, 'Jadwal interview belum lengkap.');
         abort_if($iv->end_at->lessThanOrEqualTo($iv->start_at), 422, 'Rentang waktu interview tidak valid.');
 
-        $uid     = Str::uuid().'@andalan-careers';
+        $uid = Str::uuid() . '@andalan-careers';
         $dtStart = $iv->start_at->copy()->setTimezone('UTC')->format('Ymd\THis\Z');
-        $dtEnd   = $iv->end_at->copy()->setTimezone('UTC')->format('Ymd\THis\Z');
+        $dtEnd = $iv->end_at->copy()->setTimezone('UTC')->format('Ymd\THis\Z');
         $dtStamp = now()->setTimezone('UTC')->format('Ymd\THis\Z');
 
-        $summary = $iv->title ?: ('Interview: '.$iv->application->job->title);
-        $loc     = $iv->mode === 'online'
+        $summary = $iv->title ?: ('Interview: ' . $iv->application->job->title);
+        $loc = $iv->mode === 'online'
             ? ($iv->meeting_link ?: 'Online')
             : ($iv->location ?: 'TBD');
 
-        $desc = trim(($iv->notes ?: '') . "\n\n"
-            .'Job: '.$iv->application->job->title
-            .($iv->application->job->site?->name ? ' @ '.$iv->application->job->site->name : '')
+        $desc = trim(
+            ($iv->notes ?: '') . "\n\n"
+            . 'Job: ' . $iv->application->job->title
+            . ($iv->application->job->site?->name ? ' @ ' . $iv->application->job->site->name : '')
         );
 
         // Sanitize & escape untuk ICS
         $e = fn(string $v) => str_replace(
             ["\\", "\r\n", "\n", "\r", ",", ";"],
-            ["\\\\","\\n","\\n","\\n","\\,", "\\;"],
+            ["\\\\", "\\n", "\\n", "\\n", "\\,", "\\;"],
             $v
         );
 
         $summary = $e($summary);
-        $loc     = $e($loc);
-        $desc    = $e($desc);
+        $loc = $e($loc);
+        $desc = $e($desc);
 
         // Folding baris panjang (<=75 chars) agar kompat
         $fold = function (string $line): string {
@@ -119,13 +120,13 @@ class MyInterviewController extends Controller
             'CALSCALE:GREGORIAN',
             'METHOD:PUBLISH',
             'BEGIN:VEVENT',
-            'UID:'.$uid,
-            'DTSTAMP:'.$dtStamp,
-            'DTSTART:'.$dtStart,
-            'DTEND:'.$dtEnd,
-            'SUMMARY:'.$summary,
-            'LOCATION:'.$loc,
-            'DESCRIPTION:'.$desc,
+            'UID:' . $uid,
+            'DTSTAMP:' . $dtStamp,
+            'DTSTART:' . $dtStart,
+            'DTEND:' . $dtEnd,
+            'SUMMARY:' . $summary,
+            'LOCATION:' . $loc,
+            'DESCRIPTION:' . $desc,
             'END:VEVENT',
             'END:VCALENDAR',
             '',
@@ -136,7 +137,7 @@ class MyInterviewController extends Controller
 
         // Filename aman
         $safeId = preg_replace('/[^A-Za-z0-9\-_.]/', '', (string) $iv->id) ?: 'interview';
-        $filename = 'interview-'.$safeId.'.ics';
+        $filename = 'interview-' . $safeId . '.ics';
 
         return response()->streamDownload(function () use ($ics) {
             echo $ics;

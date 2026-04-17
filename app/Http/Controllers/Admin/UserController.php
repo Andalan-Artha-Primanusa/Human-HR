@@ -25,21 +25,18 @@ class UserController extends Controller
     {
         $staffRoles = ['superadmin', 'admin', 'hr'];
 
-        $hasUsersRole   = Schema::hasColumn('users', 'role');
+        $hasUsersRole = Schema::hasColumn('users', 'role');
         $hasUsersStatus = Schema::hasColumn('users', 'status');
-        $hasUsersHired  = Schema::hasColumn('users', 'hired_at');
+        $hasUsersHired = Schema::hasColumn('users', 'hired_at');
 
-        $hasJA          = DB::getSchemaBuilder()->hasTable('job_applications');
-        $hasJAUserId    = $hasJA && Schema::hasColumn('job_applications', 'user_id');
-        $hasJACurStage  = $hasJA && Schema::hasColumn('job_applications', 'current_stage');
-        $hasJAOverall   = $hasJA && Schema::hasColumn('job_applications', 'overall_status');
+        $hasJA = DB::getSchemaBuilder()->hasTable('job_applications');
+        $hasJAUserId = $hasJA && Schema::hasColumn('job_applications', 'user_id');
+        $hasJACurStage = $hasJA && Schema::hasColumn('job_applications', 'current_stage');
+        $hasJAOverall = $hasJA && Schema::hasColumn('job_applications', 'overall_status');
 
         $shouldFallbackPelamar = !($hasJA && $hasJAUserId && ($hasJACurStage || $hasJAOverall));
 
-        return User::query()->where(function ($base) use (
-            $staffRoles,$hasUsersRole,$hasUsersStatus,$hasUsersHired,
-            $hasJA,$hasJAUserId,$hasJACurStage,$hasJAOverall,$shouldFallbackPelamar
-        ) {
+        return User::query()->where(function ($base) use ($staffRoles, $hasUsersRole, $hasUsersStatus, $hasUsersHired, $hasJA, $hasJAUserId, $hasJACurStage, $hasJAOverall, $shouldFallbackPelamar) {
             // 1) STAFF
             if ($hasUsersRole) {
                 $base->whereIn('users.role', $staffRoles);
@@ -48,33 +45,35 @@ class UserController extends Controller
             }
 
             // 2) PELAMAR HIRED
-            $base->orWhere(function ($hired) use (
-                $hasUsersStatus,$hasUsersHired,$hasJA,$hasJAUserId,$hasJACurStage,$hasJAOverall,$shouldFallbackPelamar,$hasUsersRole
-            ) {
-                $hired->where(function ($sig) use ($hasUsersStatus,$hasUsersHired,$hasJA,$hasJAUserId,$hasJACurStage,$hasJAOverall,$shouldFallbackPelamar,$hasUsersRole) {
+            $base->orWhere(function ($hired) use ($hasUsersStatus, $hasUsersHired, $hasJA, $hasJAUserId, $hasJACurStage, $hasJAOverall, $shouldFallbackPelamar, $hasUsersRole) {
+                $hired->where(function ($sig) use ($hasUsersStatus, $hasUsersHired, $hasJA, $hasJAUserId, $hasJACurStage, $hasJAOverall, $shouldFallbackPelamar, $hasUsersRole) {
                     $sig->whereRaw('1=0'); // seed supaya OR valid di dalam grup
 
                     // via kolom users
-                    if ($hasUsersStatus) $sig->orWhereRaw("LOWER(users.status)='hired'");
-                    if ($hasUsersHired)  $sig->orWhereNotNull('users.hired_at');
+                    if ($hasUsersStatus)
+                        $sig->orWhereRaw("LOWER(users.status)='hired'");
+                    if ($hasUsersHired)
+                        $sig->orWhereNotNull('users.hired_at');
 
                     // via job_applications
                     if ($hasJA && $hasJAUserId && ($hasJACurStage || $hasJAOverall)) {
-                        $sig->orWhereExists(function ($sub) use ($hasJACurStage,$hasJAOverall) {
+                        $sig->orWhereExists(function ($sub) use ($hasJACurStage, $hasJAOverall) {
                             $sub->from('job_applications')
                                 ->select(DB::raw(1))
-                                ->whereColumn('job_applications.user_id','users.id')
-                                ->where(function ($w) use ($hasJACurStage,$hasJAOverall) {
+                                ->whereColumn('job_applications.user_id', 'users.id')
+                                ->where(function ($w) use ($hasJACurStage, $hasJAOverall) {
                                     $w->whereRaw('1=0');
-                                    if ($hasJACurStage) $w->orWhereRaw("LOWER(job_applications.current_stage)='hired'");
-                                    if ($hasJAOverall)  $w->orWhereRaw("LOWER(job_applications.overall_status)='hired'");
+                                    if ($hasJACurStage)
+                                        $w->orWhereRaw("LOWER(job_applications.current_stage)='hired'");
+                                    if ($hasJAOverall)
+                                        $w->orWhereRaw("LOWER(job_applications.overall_status)='hired'");
                                 });
                         });
                     }
 
                     // fallback: tampilkan pelamar juga jika sinyal HIRED tak tersedia
                     if ($shouldFallbackPelamar && $hasUsersRole) {
-                        $sig->orWhere('users.role','pelamar');
+                        $sig->orWhere('users.role', 'pelamar');
                     }
                 });
             });
@@ -92,15 +91,15 @@ class UserController extends Controller
             'status' => ['nullable', Rule::in(['active', 'inactive'])],
         ]);
 
-        $qRaw   = (string) ($filters['q'] ?? '');
-        $q      = Str::limit(preg_replace('/[\x00-\x1F\x7F]/u', '', trim($qRaw)) ?? '', 120, '');
-        $like   = $q !== '' ? '%'.addcslashes($q, '\\%_').'%' : null;
-        $role   = (string) ($filters['role'] ?? '');
+        $qRaw = (string) ($filters['q'] ?? '');
+        $q = Str::limit(preg_replace('/[\x00-\x1F\x7F]/u', '', trim($qRaw)) ?? '', 120, '');
+        $like = $q !== '' ? '%' . addcslashes($q, '\\%_') . '%' : null;
+        $role = (string) ($filters['role'] ?? '');
         $status = (string) ($filters['status'] ?? '');
 
-        $hasUsersRole   = Schema::hasColumn('users','role');
-        $hasUsersActive = Schema::hasColumn('users','active');
-        $hasIdEmploye   = Schema::hasColumn('users','id_employe');
+        $hasUsersRole = Schema::hasColumn('users', 'role');
+        $hasUsersActive = Schema::hasColumn('users', 'active');
+        $hasIdEmploye = Schema::hasColumn('users', 'id_employe');
 
         $selectColumns = ['users.id', 'users.name', 'users.email', 'users.created_at'];
         if ($hasUsersRole) {
@@ -117,18 +116,20 @@ class UserController extends Controller
             ->select($selectColumns)
             ->when($like !== null, function ($qq) use ($like, $hasIdEmploye) {
                 $qq->where(function ($w) use ($like, $hasIdEmploye) {
-                    $w->where('users.name','like',$like)
-                      ->orWhere('users.email','like',$like);
+                    $w->where('users.name', 'like', $like)
+                        ->orWhere('users.email', 'like', $like);
                     if ($hasIdEmploye) {
-                        $w->orWhere('users.id_employe','like',$like);
+                        $w->orWhere('users.id_employe', 'like', $like);
                     }
                 });
             })
-            ->when($status === 'active'   && $hasUsersActive, fn($qq)=>$qq->where('users.active',true))
-            ->when($status === 'inactive' && $hasUsersActive, fn($qq)=>$qq->where('users.active',false))
+            ->when($status === 'active' && $hasUsersActive, fn($qq) => $qq->where('users.active', true))
+            ->when($status === 'inactive' && $hasUsersActive, fn($qq) => $qq->where('users.active', false))
             ->when($role !== '', function ($qq) use ($role, $hasUsersRole) {
-                if ($hasUsersRole) $qq->where('users.role',$role);
-                elseif (method_exists(User::class,'role')) $qq->role($role);
+                if ($hasUsersRole)
+                    $qq->where('users.role', $role);
+                elseif (method_exists(User::class, 'role'))
+                    $qq->role($role);
             })
             ->orderByDesc('users.created_at')
             ->orderByDesc('users.id')
@@ -142,7 +143,7 @@ class UserController extends Controller
             $roleOptions = \Spatie\Permission\Models\Role::query()->orderBy('name')->pluck('name')->all();
         }
 
-        return view('admin.users.index', compact('users','q','role','status','roleOptions'));
+        return view('admin.users.index', compact('users', 'q', 'role', 'status', 'roleOptions'));
     }
 
     public function create()
@@ -153,79 +154,92 @@ class UserController extends Controller
 
     public function store(Request $request)
     {
-        $roleRules = ['nullable','string','max:100'];
+        $roleRules = ['nullable', 'string', 'max:100'];
         if (Schema::hasColumn('users', 'role')) {
             $roleRules[] = Rule::in($this->allowedRoles());
         }
 
         $data = $request->validate([
-            'name'       => ['required','string','max:255'],
-            'email'      => ['required','email','max:255','unique:users,email'],
-            'password'   => ['nullable','string','min:8'],
-            'role'       => $roleRules,
-            'active'     => ['nullable','boolean'],
-            'id_employe' => ['nullable','string','max:50', Rule::unique('users','id_employe')],
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
+            'password' => ['nullable', 'string', 'min:8'],
+            'role' => $roleRules,
+            'active' => ['nullable', 'boolean'],
+            'id_employe' => ['nullable', 'string', 'max:50', Rule::unique('users', 'id_employe')],
         ]);
 
         $requestedRole = isset($data['role']) ? strtolower(trim((string) $data['role'])) : null;
         $this->ensureCanAssignRole($requestedRole);
 
         $u = new User();
-        $u->name       = $data['name'];
-        $u->email      = $data['email'];
-        $u->password   = Hash::make($data['password'] ?? Str::random(12));
-        if (Schema::hasColumn('users','active')) $u->active = (bool)($data['active'] ?? true);
-        if (Schema::hasColumn('users','role') && $requestedRole) $u->role = $requestedRole;
-        if (Schema::hasColumn('users','id_employe') && array_key_exists('id_employe',$data)) $u->id_employe = $data['id_employe'];
+        $u->name = $data['name'];
+        $u->email = $data['email'];
+        $u->password = Hash::make($data['password'] ?? Str::random(12));
+        if (Schema::hasColumn('users', 'active'))
+            $u->active = (bool) ($data['active'] ?? true);
+        if (Schema::hasColumn('users', 'role') && $requestedRole)
+            $u->role = $requestedRole;
+        if (Schema::hasColumn('users', 'id_employe') && array_key_exists('id_employe', $data))
+            $u->id_employe = $data['id_employe'];
         $u->save();
 
-        if (!Schema::hasColumn('users','role') && $requestedRole && method_exists($u,'syncRoles')) {
-            try { $u->syncRoles([$requestedRole]); } catch (\Throwable $e) {}
+        if (!Schema::hasColumn('users', 'role') && $requestedRole && method_exists($u, 'syncRoles')) {
+            try {
+                $u->syncRoles([$requestedRole]);
+            } catch (\Throwable $e) {
+            }
         }
 
-        return redirect()->route('admin.users.index')->with('ok','User created.');
+        return redirect()->route('admin.users.index')->with('ok', 'User created.');
     }
 
     public function edit(User $user)
     {
         $roleOptions = $this->roleOptions();
-        return view('admin.users.edit', compact('user','roleOptions'));
+        return view('admin.users.edit', compact('user', 'roleOptions'));
     }
 
     public function update(Request $request, User $user)
     {
         $this->ensureCanMutateUser($user);
 
-        $roleRules = ['nullable','string','max:100'];
+        $roleRules = ['nullable', 'string', 'max:100'];
         if (Schema::hasColumn('users', 'role')) {
             $roleRules[] = Rule::in($this->allowedRoles());
         }
 
         $data = $request->validate([
-            'name'       => ['required','string','max:255'],
-            'email'      => ['required','email','max:255', Rule::unique('users','email')->ignore($user->id)],
-            'password'   => ['nullable','string','min:8'],
-            'role'       => $roleRules,
-            'active'     => ['nullable','boolean'],
-            'id_employe' => ['nullable','string','max:50', Rule::unique('users','id_employe')->ignore($user->id)],
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
+            'password' => ['nullable', 'string', 'min:8'],
+            'role' => $roleRules,
+            'active' => ['nullable', 'boolean'],
+            'id_employe' => ['nullable', 'string', 'max:50', Rule::unique('users', 'id_employe')->ignore($user->id)],
         ]);
 
         $requestedRole = isset($data['role']) ? strtolower(trim((string) $data['role'])) : null;
         $this->ensureCanAssignRole($requestedRole);
 
-        $user->name  = $data['name'];
+        $user->name = $data['name'];
         $user->email = $data['email'];
-        if (!empty($data['password'])) $user->password = Hash::make($data['password']);
-        if (Schema::hasColumn('users','active') && array_key_exists('active',$data)) $user->active = (bool)$data['active'];
-        if (Schema::hasColumn('users','role') && $requestedRole) $user->role = $requestedRole;
-        if (Schema::hasColumn('users','id_employe') && array_key_exists('id_employe',$data)) $user->id_employe = $data['id_employe'];
+        if (!empty($data['password']))
+            $user->password = Hash::make($data['password']);
+        if (Schema::hasColumn('users', 'active') && array_key_exists('active', $data))
+            $user->active = (bool) $data['active'];
+        if (Schema::hasColumn('users', 'role') && $requestedRole)
+            $user->role = $requestedRole;
+        if (Schema::hasColumn('users', 'id_employe') && array_key_exists('id_employe', $data))
+            $user->id_employe = $data['id_employe'];
         $user->save();
 
-        if (!Schema::hasColumn('users','role') && method_exists($user,'syncRoles')) {
-            try { $requestedRole ? $user->syncRoles([$requestedRole]) : $user->syncRoles([]); } catch (\Throwable $e) {}
+        if (!Schema::hasColumn('users', 'role') && method_exists($user, 'syncRoles')) {
+            try {
+                $requestedRole ? $user->syncRoles([$requestedRole]) : $user->syncRoles([]);
+            } catch (\Throwable $e) {
+            }
         }
 
-        return redirect()->route('admin.users.index')->with('ok','User updated.');
+        return redirect()->route('admin.users.index')->with('ok', 'User updated.');
     }
 
     public function destroy(User $user)
@@ -233,10 +247,10 @@ class UserController extends Controller
         $this->ensureCanMutateUser($user);
 
         if (Auth::id() === $user->id) {
-            return back()->with('warn','Tidak bisa menghapus akun sendiri.');
+            return back()->with('warn', 'Tidak bisa menghapus akun sendiri.');
         }
         $user->delete();
-        return redirect()->route('admin.users.index')->with('ok','User deleted.');
+        return redirect()->route('admin.users.index')->with('ok', 'User deleted.');
     }
 
     /**
@@ -246,17 +260,20 @@ class UserController extends Controller
     public function import(Request $request)
     {
         $request->validate([
-            'file' => ['required','file','mimes:csv,txt','max:10240'],
+            'file' => ['required', 'file', 'mimes:csv,txt', 'max:10240'],
         ]);
 
         $file = $request->file('file');
-        $created = 0; $updated = 0; $errors = [];
+        $created = 0;
+        $updated = 0;
+        $errors = [];
 
         if (($handle = fopen($file->getRealPath(), 'r')) !== false) {
             $header = fgetcsv($handle);
-            if (!$header) return back()->with('err','CSV kosong.');
+            if (!$header)
+                return back()->with('err', 'CSV kosong.');
 
-            $header = array_map(fn($h)=>strtolower(trim($h)), $header);
+            $header = array_map(fn($h) => strtolower(trim($h)), $header);
             $idx = fn($key) => array_search($key, $header);
 
             $iName = $idx('name');
@@ -267,64 +284,72 @@ class UserController extends Controller
             $iEmp = $idx('id_employe');
 
             if ($iName === false || $iEmail === false) {
-                return back()->with('err','Header minimal: name,email');
+                return back()->with('err', 'Header minimal: name,email');
             }
 
             DB::beginTransaction();
             try {
                 while (($row = fgetcsv($handle)) !== false) {
-                    if (count($row) === 1 && trim($row[0]) === '') continue;
+                    if (count($row) === 1 && trim($row[0]) === '')
+                        continue;
 
-                    $name  = Str::limit(trim((string) ($row[$iName] ?? '')), 255, '');
+                    $name = Str::limit(trim((string) ($row[$iName] ?? '')), 255, '');
                     $email = strtolower(trim((string) ($row[$iEmail] ?? '')));
-                    $pass  = $iPass !== false ? trim((string)($row[$iPass] ?? '')) : '';
-                    $role  = $iRole !== false ? strtolower(trim((string)($row[$iRole] ?? ''))) : '';
-                    $actIn = $iActive !== false ? trim((string)($row[$iActive] ?? '')) : null;
-                    $empId = $iEmp !== false ? Str::limit(trim((string)($row[$iEmp] ?? '')), 50, '') : '';
+                    $pass = $iPass !== false ? trim((string) ($row[$iPass] ?? '')) : '';
+                    $role = $iRole !== false ? strtolower(trim((string) ($row[$iRole] ?? ''))) : '';
+                    $actIn = $iActive !== false ? trim((string) ($row[$iActive] ?? '')) : null;
+                    $empId = $iEmp !== false ? Str::limit(trim((string) ($row[$iEmp] ?? '')), 50, '') : '';
 
                     if ($name === '' || $email === '') {
-                        $errors[] = 'Skip: name/email kosong -> '.implode(',',$row);
+                        $errors[] = 'Skip: name/email kosong -> ' . implode(',', $row);
                         continue;
                     }
 
                     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                        $errors[] = 'Skip: email tidak valid -> '.$email;
+                        $errors[] = 'Skip: email tidak valid -> ' . $email;
                         continue;
                     }
 
                     if ($role !== '' && !in_array($role, $this->allowedRoles(), true)) {
-                        $errors[] = 'Skip: role tidak valid untuk email '.$email;
+                        $errors[] = 'Skip: role tidak valid untuk email ' . $email;
                         continue;
                     }
 
                     if ($role !== '' && !$this->canAssignRole($role)) {
-                        $errors[] = 'Skip: tidak berwenang assign role '.$role.' untuk '.$email;
+                        $errors[] = 'Skip: tidak berwenang assign role ' . $role . ' untuk ' . $email;
                         continue;
                     }
 
-                    $user = User::where('email',$email)->first();
+                    $user = User::where('email', $email)->first();
 
                     $activeVal = null;
-                    if ($actIn !== null && Schema::hasColumn('users','active')) {
-                        $activeVal = in_array(strtolower($actIn), ['1','true','yes','y'], true);
+                    if ($actIn !== null && Schema::hasColumn('users', 'active')) {
+                        $activeVal = in_array(strtolower($actIn), ['1', 'true', 'yes', 'y'], true);
                     }
 
                     if ($user) {
                         $user->name = $name;
-                        if ($pass !== '') $user->password = Hash::make($pass);
-                        if ($activeVal !== null) $user->active = $activeVal;
-                        if (Schema::hasColumn('users','role') && $role !== '') $user->role = $role;
-                        if (Schema::hasColumn('users','id_employe') && $empId !== '') $user->id_employe = $empId;
+                        if ($pass !== '')
+                            $user->password = Hash::make($pass);
+                        if ($activeVal !== null)
+                            $user->active = $activeVal;
+                        if (Schema::hasColumn('users', 'role') && $role !== '')
+                            $user->role = $role;
+                        if (Schema::hasColumn('users', 'id_employe') && $empId !== '')
+                            $user->id_employe = $empId;
                         $user->save();
                         $updated++;
                     } else {
                         $user = new User();
-                        $user->name  = $name;
+                        $user->name = $name;
                         $user->email = $email;
                         $user->password = Hash::make($pass !== '' ? $pass : Str::random(12));
-                        if ($activeVal !== null) $user->active = $activeVal;
-                        if (Schema::hasColumn('users','role') && $role !== '') $user->role = $role;
-                        if (Schema::hasColumn('users','id_employe') && $empId !== '') $user->id_employe = $empId;
+                        if ($activeVal !== null)
+                            $user->active = $activeVal;
+                        if (Schema::hasColumn('users', 'role') && $role !== '')
+                            $user->role = $role;
+                        if (Schema::hasColumn('users', 'id_employe') && $empId !== '')
+                            $user->id_employe = $empId;
                         $user->save();
                         $created++;
                     }
@@ -333,7 +358,7 @@ class UserController extends Controller
             } catch (\Throwable $e) {
                 DB::rollBack();
                 fclose($handle);
-                return back()->with('err','Import gagal: '.$e->getMessage());
+                return back()->with('err', 'Import gagal: ' . $e->getMessage());
             }
 
             fclose($handle);
@@ -342,10 +367,10 @@ class UserController extends Controller
         $msg = "Import selesai. Created: {$created}, Updated: {$updated}";
         if (!empty($errors)) {
             session()->flash('import_warnings', $errors);
-            $msg .= ' (beberapa baris di-skip: '.count($errors).')';
+            $msg .= ' (beberapa baris di-skip: ' . count($errors) . ')';
         }
 
-        return redirect()->route('admin.users.index')->with('ok',$msg);
+        return redirect()->route('admin.users.index')->with('ok', $msg);
     }
 
     /**
@@ -353,48 +378,55 @@ class UserController extends Controller
      */
     public function export(Request $request): StreamedResponse
     {
-        $filename = 'users-export-'.now()->format('Ymd-His').'.csv';
-        $hasRoleCol   = Schema::hasColumn('users','role');
-        $hasActiveCol = Schema::hasColumn('users','active');
-        $hasEmpIdCol  = Schema::hasColumn('users','id_employe');
+        $filename = 'users-export-' . now()->format('Ymd-His') . '.csv';
+        $hasRoleCol = Schema::hasColumn('users', 'role');
+        $hasActiveCol = Schema::hasColumn('users', 'active');
+        $hasEmpIdCol = Schema::hasColumn('users', 'id_employe');
 
-        $selectColumns = ['users.id','users.name','users.email','users.created_at'];
-        if ($hasEmpIdCol) $selectColumns[] = 'users.id_employe';
-        if ($hasRoleCol) $selectColumns[] = 'users.role';
-        if ($hasActiveCol) $selectColumns[] = 'users.active';
+        $selectColumns = ['users.id', 'users.name', 'users.email', 'users.created_at'];
+        if ($hasEmpIdCol)
+            $selectColumns[] = 'users.id_employe';
+        if ($hasRoleCol)
+            $selectColumns[] = 'users.role';
+        if ($hasActiveCol)
+            $selectColumns[] = 'users.active';
 
         $query = $this->staffOrHiredQuery()
             ->select($selectColumns)
             ->orderBy('users.id');
 
         return response()->streamDownload(function () use ($query, $hasRoleCol, $hasActiveCol, $hasEmpIdCol) {
-            $out = fopen('php://output','w');
+            $out = fopen('php://output', 'w');
 
-            $headers = ['id','name','email'];
-            if ($hasEmpIdCol) $headers[] = 'id_employe';
+            $headers = ['id', 'name', 'email'];
+            if ($hasEmpIdCol)
+                $headers[] = 'id_employe';
             $headers[] = 'role';
-            if ($hasActiveCol) $headers[] = 'active';
+            if ($hasActiveCol)
+                $headers[] = 'active';
             $headers[] = 'created_at';
             fputcsv($out, $headers);
 
-            $query->chunkById(500, function ($chunk) use ($out,$hasRoleCol,$hasActiveCol,$hasEmpIdCol) {
+            $query->chunkById(500, function ($chunk) use ($out, $hasRoleCol, $hasActiveCol, $hasEmpIdCol) {
                 foreach ($chunk as $u) {
-                    $row = [$u->id,$u->name,$u->email];
-                    if ($hasEmpIdCol) $row[] = $u->id_employe ?? '';
-                    $row[] = $hasRoleCol ? ($u->role ?? '') : (method_exists($u,'getRoleNames') ? $u->getRoleNames()->implode('|') : '');
-                    if ($hasActiveCol) $row[] = (int)($u->active ?? 0);
+                    $row = [$u->id, $u->name, $u->email];
+                    if ($hasEmpIdCol)
+                        $row[] = $u->id_employe ?? '';
+                    $row[] = $hasRoleCol ? ($u->role ?? '') : (method_exists($u, 'getRoleNames') ? $u->getRoleNames()->implode('|') : '');
+                    if ($hasActiveCol)
+                        $row[] = (int) ($u->active ?? 0);
                     $row[] = optional($u->created_at)->toDateTimeString();
                     fputcsv($out, $row);
                 }
             }, 'users.id', 'users.id');
 
             fclose($out);
-        }, $filename, ['Content-Type'=>'text/csv; charset=UTF-8']);
+        }, $filename, ['Content-Type' => 'text/csv; charset=UTF-8']);
     }
 
     private function roleOptions(): array
     {
-        if (Schema::hasColumn('users','role')) {
+        if (Schema::hasColumn('users', 'role')) {
             return User::query()->select('role')->whereNotNull('role')->distinct()->orderBy('role')->pluck('role')->all();
         }
         if (class_exists(\Spatie\Permission\Models\Role::class)) {

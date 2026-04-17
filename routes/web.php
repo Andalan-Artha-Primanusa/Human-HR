@@ -38,18 +38,18 @@
     | Global route parameter patterns (UUID)
     |--------------------------------------------------------------------------
     */
-    Route::pattern('company',     '[0-9a-fA-F-]{36}');
-    Route::pattern('job',         '[0-9a-fA-F-]{36}');
-    Route::pattern('site',        '[0-9a-fA-F-]{36}');
-    Route::pattern('offer',       '[0-9a-fA-F-]{36}');
-    Route::pattern('profile',     '[0-9a-fA-F-]{36}');
-    Route::pattern('log',         '[0-9a-fA-F-]{36}');
-    Route::pattern('manpower',    '[0-9a-fA-F-]{36}');
+    Route::pattern('company', '[0-9a-fA-F-]{36}');
+    Route::pattern('job', '[0-9a-fA-F-]{36}');
+    Route::pattern('site', '[0-9a-fA-F-]{36}');
+    Route::pattern('offer', '[0-9a-fA-F-]{36}');
+    Route::pattern('profile', '[0-9a-fA-F-]{36}');
+    Route::pattern('log', '[0-9a-fA-F-]{36}');
+    Route::pattern('manpower', '[0-9a-fA-F-]{36}');
     Route::pattern('application', '[0-9a-fA-F-]{36}');
-    Route::pattern('interview',   '[0-9a-fA-F-]{36}');
-    Route::pattern('attempt',     '[0-9a-fA-F-]{36}');
-    Route::pattern('notification','[0-9a-fA-F-]{36}'); // << tambah: id notifikasi
-
+    Route::pattern('interview', '[0-9a-fA-F-]{36}');
+    Route::pattern('attempt', '[0-9a-fA-F-]{36}');
+    Route::pattern('notification', '[0-9a-fA-F-]{36}'); // << tambah: id notifikasi
+    
     /*
     |--------------------------------------------------------------------------
     | Public
@@ -154,10 +154,12 @@
         ->middleware(['auth', 'verified', 'role:hr|superadmin'])
         ->group(function () {
             // ================= Manpower =================
-            Route::get('manpower',                     [ManpowerRequirementController::class, 'index'])->name('manpower.index');
-            Route::post('manpower/preview',            [ManpowerRequirementController::class, 'preview'])->name('manpower.preview');
-            Route::get('manpower/{job}/edit',          [ManpowerRequirementController::class, 'edit'])->name('manpower.edit');
-            Route::put('manpower/{job}',               [ManpowerRequirementController::class, 'update'])->name('manpower.update');
+                        // ================= POH (admin) =================
+                        Route::resource('pohs', \App\Http\Controllers\Admin\PohController::class);
+            Route::get('manpower', [ManpowerRequirementController::class, 'index'])->name('manpower.index');
+            Route::post('manpower/preview', [ManpowerRequirementController::class, 'preview'])->name('manpower.preview');
+            Route::get('manpower/{job}/edit', [ManpowerRequirementController::class, 'edit'])->name('manpower.edit');
+            Route::put('manpower/{job}', [ManpowerRequirementController::class, 'update'])->name('manpower.update');
             Route::delete('manpower/{job}/{manpower}', [ManpowerRequirementController::class, 'destroy'])->name('manpower.destroy');
 
             // ================= Manpower Dashboard =================
@@ -173,7 +175,7 @@
             Route::resource('companies', CompanyController::class);
 
             // ================= Applications / Kanban =================
-            Route::get('applications',       [ApplicationController::class, 'adminIndex'])->name('applications.index');
+            Route::get('applications', [ApplicationController::class, 'adminIndex'])->name('applications.index');
             Route::get('applications/board', [ApplicationController::class, 'board'])->name('applications.board');
 
             Route::post('applications/{application}/move', [ApplicationController::class, 'moveStage'])
@@ -189,30 +191,30 @@
             Route::post('applications/board/move', [ApplicationController::class, 'moveStageAjax'])->name('applications.board.move');
 
             // ================= Interviews / Psychotest / Offers =================
-            Route::get('interviews',  [AdminInterviewController::class, 'index'])->name('interviews.index');
+            Route::get('interviews', [AdminInterviewController::class, 'index'])->name('interviews.index');
             Route::post('interviews/{application}', [AdminInterviewController::class, 'store'])
                 ->name('interviews.store');
 
             Route::get('psychotests', [PsychotestController::class, 'index'])->name('psychotests.index');
 
-            Route::get('offers',      [OfferController::class, 'index'])->name('offers.index');
+            Route::get('offers', [OfferController::class, 'index'])->name('offers.index');
             Route::post('offers/{application}', [OfferController::class, 'store'])
                 ->name('offers.store');
             Route::get('offers/{offer}/pdf', [OfferController::class, 'pdf'])
                 ->name('offers.pdf');
 
             // ================= Candidates (read-only admin) =================
-            Route::get('candidates',              [CandidateProfileController::class, 'adminIndex'])->name('candidates.index');
-            Route::get('candidates/{profile}',    [CandidateProfileController::class, 'adminShow'])->name('candidates.show');
+            Route::get('candidates', [CandidateProfileController::class, 'adminIndex'])->name('candidates.index');
+            Route::get('candidates/{profile}', [CandidateProfileController::class, 'adminShow'])->name('candidates.show');
             Route::get('candidates/{profile}/cv', [CandidateProfileController::class, 'adminCv'])->name('candidates.cv');
 
             // ================= Users & Audit Logs =================
             Route::resource('users', UserController::class)->except(['show']);
-            Route::get('users-export',  [UserController::class, 'export'])->name('users.export');
+            Route::get('users-export', [UserController::class, 'export'])->name('users.export');
             Route::post('users-import', [UserController::class, 'import'])->name('users.import');
 
-            Route::get('audit-logs',        [AuditLogController::class, 'index'])->name('audit_logs.index');
-            Route::get('audit-logs/{log}',  [AuditLogController::class, 'show'])->name('audit_logs.show');
+            Route::get('audit-logs', [AuditLogController::class, 'index'])->name('audit_logs.index');
+            Route::get('audit-logs/{log}', [AuditLogController::class, 'show'])->name('audit_logs.show');
             Route::get('audit-logs-export', [AuditLogController::class, 'export'])->name('audit_logs.export');
         });
 

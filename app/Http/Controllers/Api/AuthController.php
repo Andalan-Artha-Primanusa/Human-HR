@@ -20,7 +20,7 @@ class AuthController extends Controller
 
         // Normalize email for case-insensitive comparison
         $email = mb_strtolower(trim($credentials['email']));
-        
+
         $user = User::query()
             ->select(['id', 'name', 'email', 'password', 'email_verified_at', 'role'])
             ->where('email', $email)

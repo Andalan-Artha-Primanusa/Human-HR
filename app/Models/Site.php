@@ -16,15 +16,22 @@ class Site extends Model
 
 
     protected $fillable = [
-        'code', 'name', 'region', 'timezone', 'address',
-        'is_active', 'meta', 'notes',
-        'latitude', 'longitude',
+        'code',
+        'name',
+        'region',
+        'timezone',
+        'address',
+        'is_active',
+        'meta',
+        'notes',
+        'latitude',
+        'longitude',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
-        'meta'      => 'array',
-        'latitude'  => 'float',
+        'meta' => 'array',
+        'latitude' => 'float',
         'longitude' => 'float',
     ];
 
@@ -45,7 +52,7 @@ class Site extends Model
     {
         return $this->hasMany(Job::class);
     }
-    
+
     /* ===== Scopes ===== */
     public function scopeActive($q)
     {

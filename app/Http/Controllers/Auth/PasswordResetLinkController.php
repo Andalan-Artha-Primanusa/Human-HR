@@ -35,7 +35,7 @@ class PasswordResetLinkController extends Controller
 
         // Normalisasi dan key throttle
         $email = Str::of($request->string('email'))->trim()->lower()->toString();
-        $key   = 'pwd-reset:'.sha1($request->ip().'|'.$email);
+        $key = 'pwd-reset:' . sha1($request->ip() . '|' . $email);
 
         // Batasi 5x/menit
         if (RateLimiter::tooManyAttempts($key, 5)) {

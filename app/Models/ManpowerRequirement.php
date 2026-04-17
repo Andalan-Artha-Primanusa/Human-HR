@@ -19,8 +19,8 @@ class ManpowerRequirement extends Model
     ];
 
     protected $casts = [
-        'assets_count'     => 'integer',
-        'ratio_per_asset'  => 'float',
+        'assets_count' => 'integer',
+        'ratio_per_asset' => 'float',
         'budget_headcount' => 'integer',
         'filled_headcount' => 'integer',
     ];
@@ -35,7 +35,7 @@ class ManpowerRequirement extends Model
     public function getComputedBudgetAttribute(): int
     {
         $assets = max(0, (int) $this->assets_count);
-        $ratio  = max(0.0, (float) $this->ratio_per_asset);
+        $ratio = max(0.0, (float) $this->ratio_per_asset);
         return (int) ceil($assets * $ratio);
     }
 
@@ -49,7 +49,8 @@ class ManpowerRequirement extends Model
 
         // Setelah simpan/hapus: hitung total semua baris lalu sync ke jobs.openings
         $recalc = function (self $m) {
-            if (!$m->job_id) return;
+            if (!$m->job_id)
+                return;
 
             $sum = static::query()
                 ->where('job_id', $m->job_id)

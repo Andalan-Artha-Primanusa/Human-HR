@@ -6,16 +6,21 @@ use Illuminate\Contracts\Auth\MustVerifyEmail; // ⬅️ penting utk verified
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-
 use App\Models\Concerns\HasUuidPrimaryKey; // UUID PK
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-
-class User extends Authenticatable
-    implements MustVerifyEmail
+class User extends Authenticatable implements MustVerifyEmail
 {
     use HasFactory, Notifiable, HasUuidPrimaryKey;
+
+    /**
+     * Relasi: Semua lamaran yang diajukan user ini.
+     */
+    public function jobApplications()
+    {
+        return $this->hasMany(\App\Models\JobApplication::class, 'user_id');
+    }
 
     /** Mass assignable */
     protected $fillable = [
@@ -34,7 +39,7 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
-            'password'          => 'hashed',
+            'password' => 'hashed',
         ];
     }
 
@@ -42,9 +47,7 @@ class User extends Authenticatable
     |--------------------------------------------------------------------------
     | Mutators / Normalizers
     |--------------------------------------------------------------------------
-    */
-    // Pastikan email selalu lowercase (biar login case-insensitive & unik)
-    public function setEmailAttribute(?string $value): void
+    <?php
     {
         $this->attributes['email'] = is_null($value) ? null : mb_strtolower(trim($value));
     }
@@ -59,8 +62,14 @@ class User extends Authenticatable
         $roles = is_array($roles) ? $roles : explode('|', $roles);
         return in_array($this->role, array_map('trim', $roles), true);
     }
-    public function isHr(): bool         { return $this->role === 'hr'; }
-    public function isSuperadmin(): bool { return $this->role === 'superadmin'; }
+    public function isHr(): bool
+    {
+        return $this->role === 'hr';
+    }
+    public function isSuperadmin(): bool
+    {
+        return $this->role === 'superadmin';
+    }
 
     /*
     |--------------------------------------------------------------------------

@@ -31,19 +31,19 @@ class JobController extends Controller
 
         // 1) Validasi & normalisasi query params (whitelist)
         $data = $request->validate([
-            'division'   => ['nullable', 'string', 'max:100'],
-            'site'       => ['nullable', 'string', 'max:50'], // site code
-            'company'    => ['nullable', 'string', 'max:50', 'prohibits:company_id'], // company code
+            'division' => ['nullable', 'string', 'max:100'],
+            'site' => ['nullable', 'string', 'max:50'], // site code
+            'company' => ['nullable', 'string', 'max:50', 'prohibits:company_id'], // company code
             'company_id' => ['nullable', 'uuid', 'exists:companies,id', 'prohibits:company'],
-            'type'       => ['nullable', Rule::in(['intern', 'contract', 'fulltime'])], // enum DB
-            'term'       => ['nullable', 'string', 'max:200'],
-            'sort'       => ['nullable', Rule::in(['latest', 'oldest', 'title'])],
-            'page'       => ['nullable', 'integer', 'min:1'],
-            'per_page'   => ['nullable', 'integer', 'min:1', 'max:50'],
+            'type' => ['nullable', Rule::in(['intern', 'contract', 'fulltime'])], // enum DB
+            'term' => ['nullable', 'string', 'max:200'],
+            'sort' => ['nullable', Rule::in(['latest', 'oldest', 'title'])],
+            'page' => ['nullable', 'integer', 'min:1'],
+            'per_page' => ['nullable', 'integer', 'min:1', 'max:50'],
         ]);
 
         $perPage = $data['per_page'] ?? 12;
-        $sort    = $data['sort']     ?? 'latest';
+        $sort = $data['sort'] ?? 'latest';
         $division = isset($data['division'])
             ? Str::limit(preg_replace('/[\x00-\x1F\x7F]/u', '', trim((string) $data['division'])) ?? '', 100, '')
             : null;
@@ -111,22 +111,22 @@ class JobController extends Controller
         // 3) Sorting
         match ($sort) {
             'oldest' => $baseQuery->orderBy('created_at', 'asc')->orderBy('id', 'asc'),
-            'title'  => $baseQuery->orderBy('title')->orderByDesc('created_at'),
-            default  => $baseQuery->orderBy('created_at', 'desc')->orderBy('id', 'desc'), // latest
+            'title' => $baseQuery->orderBy('title')->orderByDesc('created_at'),
+            default => $baseQuery->orderBy('created_at', 'desc')->orderBy('id', 'desc'), // latest
         };
 
         // 4) Micro-cache untuk publik
         if (!$isAdminRoute) {
             $cacheKey = 'jobs.public.' . md5(json_encode([
-                'division'   => $division,
-                'site'       => $siteCode,
-                'company'    => $companyCode,
+                'division' => $division,
+                'site' => $siteCode,
+                'company' => $companyCode,
                 'company_id' => $data['company_id'] ?? null,
-                'type'       => $data['type'] ?? null,
-                'term'       => $term,
-                'sort'       => $sort,
-                'page'       => $data['page'] ?? 1,
-                'per_page'   => $perPage,
+                'type' => $data['type'] ?? null,
+                'term' => $term,
+                'sort' => $sort,
+                'page' => $data['page'] ?? 1,
+                'per_page' => $perPage,
             ]));
 
             $jobs = Cache::remember($cacheKey, 30, function () use ($baseQuery, $perPage) {
@@ -152,7 +152,14 @@ class JobController extends Controller
             'company:id,code,name',
         ])->loadCount('applications');
 
-        return view('jobs.show', compact('job'));
+        // Ambil POH hanya jika user superadmin/hr/admin
+        $user = auth()->user();
+        $pohs = null;
+        if ($user && in_array($user->role, ['superadmin', 'hr', 'admin'])) {
+            $pohs = \App\Models\Poh::query()->orderBy('name')->get(['id', 'name']);
+        }
+
+        return view('jobs.show', compact('job', 'pohs'));
     }
 
     /**
@@ -178,26 +185,26 @@ class JobController extends Controller
     public function store(Request $request)
     {
         $payload = $request->validate([
-            'code'            => ['required', 'string', 'max:50'],
-            'title'           => ['required', 'string', 'max:200'],
-            'division'        => ['nullable', 'string', 'max:100'],
-            'level'           => ['nullable', 'string', 'max:100'],
+            'code' => ['required', 'string', 'max:50'],
+            'title' => ['required', 'string', 'max:200'],
+            'division' => ['nullable', 'string', 'max:100'],
+            'level' => ['nullable', 'string', 'max:100'],
             'employment_type' => ['required', Rule::in(['intern', 'contract', 'fulltime'])], // enum DB
-            'status'          => ['required', Rule::in(['draft', 'open', 'closed'])],
-            'description'     => ['nullable', 'string'],
+            'status' => ['required', Rule::in(['draft', 'open', 'closed'])],
+            'description' => ['nullable', 'string'],
 
             // NEW (opsional)
-            'skills'          => ['nullable'], // boleh array/string; dinormalisasi di mutator model
-            'keywords'        => ['nullable', 'string', 'max:500'],
+            'skills' => ['nullable'], // boleh array/string; dinormalisasi di mutator model
+            'keywords' => ['nullable', 'string', 'max:500'],
 
-            'site_id'         => ['nullable', 'uuid', 'exists:sites,id', 'required_without:site_code'],
-            'site_code'       => ['nullable', 'string', 'exists:sites,code', 'required_without:site_id'],
+            'site_id' => ['nullable', 'uuid', 'exists:sites,id', 'required_without:site_code'],
+            'site_code' => ['nullable', 'string', 'exists:sites,code', 'required_without:site_id'],
 
-            'company_id'      => ['nullable', 'uuid', 'exists:companies,id', 'prohibits:company_code'],
-            'company_code'    => ['nullable', 'string', 'exists:companies,code', 'prohibits:company_id'],
+            'company_id' => ['nullable', 'uuid', 'exists:companies,id', 'prohibits:company_code'],
+            'company_code' => ['nullable', 'string', 'exists:companies,code', 'prohibits:company_id'],
         ]);
 
-        $siteId    = $this->resolveSiteId($payload['site_id'] ?? null, $payload['site_code'] ?? null);
+        $siteId = $this->resolveSiteId($payload['site_id'] ?? null, $payload['site_code'] ?? null);
         $companyId = $this->resolveCompanyId($payload['company_id'] ?? null, $payload['company_code'] ?? null);
 
         // Validasi: code unik per company
@@ -208,11 +215,11 @@ class JobController extends Controller
         $job = DB::transaction(function () use ($payload, $siteId, $companyId) {
             unset($payload['site_id'], $payload['site_code'], $payload['company_id'], $payload['company_code']);
 
-            $payload['site_id']     = $siteId;
-            $payload['company_id']  = $companyId; // boleh null
-            $payload['openings']    = 0;          // disinkron dari manpower
-            $payload['created_by']  = Auth::id();
-            $payload['updated_by']  = Auth::id();
+            $payload['site_id'] = $siteId;
+            $payload['company_id'] = $companyId; // boleh null
+            $payload['openings'] = 0;          // disinkron dari manpower
+            $payload['created_by'] = Auth::id();
+            $payload['updated_by'] = Auth::id();
 
             /** @var Job $job */
             $job = Job::create($payload);
@@ -228,8 +235,8 @@ class JobController extends Controller
 
         if ($request->wantsJson()) {
             return response()->json([
-                'message'  => 'Job created (openings disinkron dari manpower).',
-                'job'      => $job,
+                'message' => 'Job created (openings disinkron dari manpower).',
+                'job' => $job,
                 'redirect' => route('admin.jobs.index'),
             ], 201);
         }
@@ -261,26 +268,26 @@ class JobController extends Controller
     public function update(Request $request, Job $job)
     {
         $payload = $request->validate([
-            'code'            => ['required', 'string', 'max:50'],
-            'title'           => ['required', 'string', 'max:200'],
-            'division'        => ['nullable', 'string', 'max:100'],
-            'level'           => ['nullable', 'string', 'max:100'],
+            'code' => ['required', 'string', 'max:50'],
+            'title' => ['required', 'string', 'max:200'],
+            'division' => ['nullable', 'string', 'max:100'],
+            'level' => ['nullable', 'string', 'max:100'],
             'employment_type' => ['required', Rule::in(['intern', 'contract', 'fulltime'])],
-            'status'          => ['required', Rule::in(['draft', 'open', 'closed'])],
-            'description'     => ['nullable', 'string'],
+            'status' => ['required', Rule::in(['draft', 'open', 'closed'])],
+            'description' => ['nullable', 'string'],
 
             // NEW (opsional)
-            'skills'          => ['nullable'], // array/string/JSON → normalisasi di mutator
-            'keywords'        => ['nullable', 'string', 'max:500'],
+            'skills' => ['nullable'], // array/string/JSON → normalisasi di mutator
+            'keywords' => ['nullable', 'string', 'max:500'],
 
-            'site_id'         => ['nullable', 'uuid', 'exists:sites,id', 'required_without:site_code'],
-            'site_code'       => ['nullable', 'string', 'exists:sites,code', 'required_without:site_id'],
+            'site_id' => ['nullable', 'uuid', 'exists:sites,id', 'required_without:site_code'],
+            'site_code' => ['nullable', 'string', 'exists:sites,code', 'required_without:site_id'],
 
-            'company_id'      => ['nullable', 'uuid', 'exists:companies,id', 'prohibits:company_code'],
-            'company_code'    => ['nullable', 'string', 'exists:companies,code', 'prohibits:company_id'],
+            'company_id' => ['nullable', 'uuid', 'exists:companies,id', 'prohibits:company_code'],
+            'company_code' => ['nullable', 'string', 'exists:companies,code', 'prohibits:company_id'],
         ]);
 
-        $siteId    = $this->resolveSiteId($payload['site_id'] ?? null, $payload['site_code'] ?? null);
+        $siteId = $this->resolveSiteId($payload['site_id'] ?? null, $payload['site_code'] ?? null);
         $companyId = $this->resolveCompanyId($payload['company_id'] ?? null, $payload['company_code'] ?? null);
 
         // Validasi: code unik per company (abaikan baris saat ini)
@@ -311,8 +318,8 @@ class JobController extends Controller
 
         if ($request->wantsJson()) {
             return response()->json([
-                'message'  => 'Job updated (openings disinkron dari manpower).',
-                'job'      => $job->fresh()->loadMissing('site:id,code,name', 'company:id,code,name'),
+                'message' => 'Job updated (openings disinkron dari manpower).',
+                'job' => $job->fresh()->loadMissing('site:id,code,name', 'company:id,code,name'),
                 'redirect' => route('admin.jobs.index'),
             ]);
         }
@@ -329,7 +336,7 @@ class JobController extends Controller
 
         if ($request->wantsJson()) {
             return response()->json([
-                'message'  => 'Job deleted.',
+                'message' => 'Job deleted.',
                 'redirect' => route('admin.jobs.index'),
             ]);
         }
@@ -350,7 +357,8 @@ class JobController extends Controller
             return $siteId;
         }
 
-        if ($siteId) return $siteId;
+        if ($siteId)
+            return $siteId;
 
         if ($siteCode) {
             $found = Site::where('code', $siteCode)->value('id');
@@ -371,7 +379,8 @@ class JobController extends Controller
             return $companyId;
         }
 
-        if ($companyId) return $companyId;
+        if ($companyId)
+            return $companyId;
 
         if ($companyCode) {
             $found = Company::where('code', $companyCode)->value('id');

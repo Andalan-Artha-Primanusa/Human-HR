@@ -52,12 +52,12 @@
 
         {{-- Error global (mis. salah password) --}}
         @if ($errors->has('password'))
-          <div class="px-3 py-2 mb-4 text-sm border rounded-lg border-rose-200 bg-rose-50 text-rose-800" role="alert" aria-live="assertive">
-            <div class="flex items-start gap-2">
-              <svg class="mt-0.5 h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 1 21h22L12 2Zm1 15h-2v2h2v-2Zm0-8h-2v6h2V9Z"/></svg>
-              <div>Password tidak sesuai. Periksa tombol Caps Lock dan coba lagi.</div>
-            </div>
-          </div>
+              <div class="px-3 py-2 mb-4 text-sm border rounded-lg border-rose-200 bg-rose-50 text-rose-800" role="alert" aria-live="assertive">
+                <div class="flex items-start gap-2">
+                  <svg class="mt-0.5 h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 1 21h22L12 2Zm1 15h-2v2h2v-2Zm0-8h-2v6h2V9Z"/></svg>
+                  <div>Password tidak sesuai. Periksa tombol Caps Lock dan coba lagi.</div>
+                </div>
+              </div>
         @endif
 
         <div class="relative">
@@ -101,11 +101,11 @@
               {{-- Aksi --}}
               <div class="flex items-center justify-between">
                 @if (Route::has('password.request'))
-                  <a class="inline-flex items-center gap-1 text-sm font-medium text-blue-700 rounded-md hover:text-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-700"
-                     href="{{ route('password.request') }}">
-                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 8a4 4 0 1 1-4 4H6a6 6 0 1 0 6-6v2Zm1 5h-2v6h2v-6Z"/></svg>
-                    Lupa password?
-                  </a>
+                      <a class="inline-flex items-center gap-1 text-sm font-medium text-blue-700 rounded-md hover:text-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-700"
+                         href="{{ route('password.request') }}">
+                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 8a4 4 0 1 1-4 4H6a6 6 0 1 0 6-6v2Zm1 5h-2v6h2v-6Z"/></svg>
+                        Lupa password?
+                      </a>
                 @endif>
 
                 <button id="submitBtn" type="submit"

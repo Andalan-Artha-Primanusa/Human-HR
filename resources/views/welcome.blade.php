@@ -57,28 +57,28 @@
 
   {{-- ===== BLADE VARIABLES ===== --}}
   @php
-    $jobs           = $jobs          ?? collect();
-    $myApps         = $myApps        ?? collect();
-    $myAppsSummary  = $myAppsSummary ?? ['total' => 0, 'byStatus' => collect()];
+    $jobs = $jobs ?? collect();
+    $myApps = $myApps ?? collect();
+    $myAppsSummary = $myAppsSummary ?? ['total' => 0, 'byStatus' => collect()];
     $myAppsProgress = $myAppsProgress ?? collect();
-    $sitesSimple    = $sitesSimple   ?? collect();
+    $sitesSimple = $sitesSimple ?? collect();
 
     $jobsCollection = ($jobs instanceof \Illuminate\Pagination\LengthAwarePaginator)
-      ? $jobs->getCollection()
-      : collect($jobs);
+        ? $jobs->getCollection()
+        : collect($jobs);
 
     $filteredJobs = $jobsCollection->when(
-      ($jobsCollection->first()?->getAttributes() ?? null) && array_key_exists('status', $jobsCollection->first()->getAttributes()),
-      fn($c) => $c->where('status', 'open'),
-      fn($c) => $c
+        ($jobsCollection->first()?->getAttributes() ?? null) && array_key_exists('status', $jobsCollection->first()->getAttributes()),
+        fn($c) => $c->where('status', 'open'),
+        fn($c) => $c
     );
 
     $byDivision = isset($byDivision) && $byDivision instanceof \Illuminate\Support\Collection
-      ? $byDivision
-      : $filteredJobs->groupBy('division')
-        ->map(fn($items) => $items->count())
-        ->sortDesc()
-        ->mapWithKeys(fn($v, $k) => [$k ?: 'Tanpa Divisi' => (int)$v]);
+        ? $byDivision
+        : $filteredJobs->groupBy('division')
+            ->map(fn($items) => $items->count())
+            ->sortDesc()
+            ->mapWithKeys(fn($v, $k) => [$k ?: 'Tanpa Divisi' => (int) $v]);
 
   @endphp
 
@@ -88,169 +88,169 @@
 
     // 1. Organization
     $schema[] = [
-      "@context"      => "https://schema.org",
-      "@type"         => "Organization",
-      "@id"           => url('/') . "#organization",
-      "name"          => "PT Andalan Artha Primanusa",
-      "alternateName" => "Andalan",
-      "url"           => url('/'),
-      "logo"          => [
-        "@type"  => "ImageObject",
-        "url"    => asset('assets/ddd.png'),
-        "width"  => 400,
-        "height" => 160
-      ],
-      "image"       => asset('storage/media/og-careers.jpg'),
-      "description" => "Portal karier resmi PT Andalan Artha Primanusa. Lowongan terverifikasi dan proses rekrutmen transparan.",
-      "email"       => "hr@andalan.co.id",
-      "address"     => [
-        "@type"           => "PostalAddress",
-        "streetAddress"   => "Jl. Plaju No.11, Kebon Melati, Tanah Abang",
-        "addressLocality" => "Jakarta Pusat",
-        "postalCode"      => "10230",
-        "addressRegion"   => "DKI Jakarta",
-        "addressCountry"  => "ID"
-      ],
-      "sameAs" => [
-        "https://andalan.co.id",
-        "https://www.linkedin.com/company/andalan",
-        "https://www.instagram.com/andalan"
-      ]
+        "@context" => "https://schema.org",
+        "@type" => "Organization",
+        "@id" => url('/') . "#organization",
+        "name" => "PT Andalan Artha Primanusa",
+        "alternateName" => "Andalan",
+        "url" => url('/'),
+        "logo" => [
+            "@type" => "ImageObject",
+            "url" => asset('assets/ddd.png'),
+            "width" => 400,
+            "height" => 160
+        ],
+        "image" => asset('storage/media/og-careers.jpg'),
+        "description" => "Portal karier resmi PT Andalan Artha Primanusa. Lowongan terverifikasi dan proses rekrutmen transparan.",
+        "email" => "hr@andalan.co.id",
+        "address" => [
+            "@type" => "PostalAddress",
+            "streetAddress" => "Jl. Plaju No.11, Kebon Melati, Tanah Abang",
+            "addressLocality" => "Jakarta Pusat",
+            "postalCode" => "10230",
+            "addressRegion" => "DKI Jakarta",
+            "addressCountry" => "ID"
+        ],
+        "sameAs" => [
+            "https://andalan.co.id",
+            "https://www.linkedin.com/company/andalan",
+            "https://www.instagram.com/andalan"
+        ]
     ];
 
     // 2. WebSite â€” SearchAction format EntryPoint yang benar
     $schema[] = [
-      "@context"        => "https://schema.org",
-      "@type"           => "WebSite",
-      "@id"             => url('/') . "#website",
-      "name"            => "Human Careers â€” PT Andalan Artha Primanusa",
-      "url"             => url('/'),
-      "inLanguage"      => "id-ID",
-      "publisher"       => ["@id" => url('/') . "#organization"],
-      "potentialAction" => [
-        "@type"       => "SearchAction",
-        "target"      => [
-          "@type"       => "EntryPoint",
-          "urlTemplate" => url('/jobs') . "?q={search_term_string}"
-        ],
-        "query-input" => "required name=search_term_string"
-      ]
+        "@context" => "https://schema.org",
+        "@type" => "WebSite",
+        "@id" => url('/') . "#website",
+        "name" => "Human Careers â€” PT Andalan Artha Primanusa",
+        "url" => url('/'),
+        "inLanguage" => "id-ID",
+        "publisher" => ["@id" => url('/') . "#organization"],
+        "potentialAction" => [
+            "@type" => "SearchAction",
+            "target" => [
+                "@type" => "EntryPoint",
+                "urlTemplate" => url('/jobs') . "?q={search_term_string}"
+            ],
+            "query-input" => "required name=search_term_string"
+        ]
     ];
 
     // 3. WebPage
     $schema[] = [
-      "@context"     => "https://schema.org",
-      "@type"        => "WebPage",
-      "@id"          => url()->current() . "#webpage",
-      "url"          => url()->current(),
-      "name"         => "Lowongan Kerja PT Andalan Artha Primanusa 2025 | Human Careers",
-      "description"  => "Temukan lowongan kerja terbaru di PT Andalan Artha Primanusa. Proses rekrutmen transparan dan profesional.",
-      "inLanguage"   => "id-ID",
-      "isPartOf"     => ["@id" => url('/') . "#website"],
-      "about"        => ["@id" => url('/') . "#organization"],
-      "breadcrumb"   => ["@id" => url()->current() . "#breadcrumb"],
-      "dateModified" => now()->toIso8601String()
+        "@context" => "https://schema.org",
+        "@type" => "WebPage",
+        "@id" => url()->current() . "#webpage",
+        "url" => url()->current(),
+        "name" => "Lowongan Kerja PT Andalan Artha Primanusa 2025 | Human Careers",
+        "description" => "Temukan lowongan kerja terbaru di PT Andalan Artha Primanusa. Proses rekrutmen transparan dan profesional.",
+        "inLanguage" => "id-ID",
+        "isPartOf" => ["@id" => url('/') . "#website"],
+        "about" => ["@id" => url('/') . "#organization"],
+        "breadcrumb" => ["@id" => url()->current() . "#breadcrumb"],
+        "dateModified" => now()->toIso8601String()
     ];
 
     // 4. BreadcrumbList
     $schema[] = [
-      "@context"        => "https://schema.org",
-      "@type"           => "BreadcrumbList",
-      "@id"             => url()->current() . "#breadcrumb",
-      "itemListElement" => [
-        ["@type" => "ListItem", "position" => 1, "name" => "Beranda",        "item" => route('welcome')],
-        ["@type" => "ListItem", "position" => 2, "name" => "Lowongan Kerja", "item" => url()->current()]
-      ]
+        "@context" => "https://schema.org",
+        "@type" => "BreadcrumbList",
+        "@id" => url()->current() . "#breadcrumb",
+        "itemListElement" => [
+            ["@type" => "ListItem", "position" => 1, "name" => "Beranda", "item" => route('welcome')],
+            ["@type" => "ListItem", "position" => 2, "name" => "Lowongan Kerja", "item" => url()->current()]
+        ]
     ];
 
     // 5. SiteNavigationElement
     $schema[] = [
-      "@context" => "https://schema.org",
-      "@type"    => "SiteNavigationElement",
-      "name"     => ["Lowongan", "Masuk", "Daftar", "FAQ"],
-      "url"      => [url('/jobs'), url('/login'), url('/register'), url('/faq')]
+        "@context" => "https://schema.org",
+        "@type" => "SiteNavigationElement",
+        "name" => ["Lowongan", "Masuk", "Daftar", "FAQ"],
+        "url" => [url('/jobs'), url('/login'), url('/register'), url('/faq')]
     ];
 
     // 6. ItemList JobPosting
     if (isset($filteredJobs) && $filteredJobs->isNotEmpty()) {
-      $jobsList = $filteredJobs->take(10)->values()->map(function ($job, $i) {
-        return [
-          "@type"    => "ListItem",
-          "position" => $i + 1,
-          "item"     => [
-            "@type"              => "JobPosting",
-            "@id"                => route('jobs.show', $job),
-            "title"              => $job->title ?? '',
-            "description"        => \Illuminate\Support\Str::limit(strip_tags($job->description ?? ''), 250),
-            "datePosted"         => optional($job->created_at)->toDateString(),
-            "validThrough"       => optional($job->deadline_at ?? $job->created_at?->addMonths(3))->toDateString(),
-            "employmentType"     => "FULL_TIME",
-            "hiringOrganization" => [
-              "@type"  => "Organization",
-              "name"   => "PT Andalan Artha Primanusa",
-              "sameAs" => url('/')
-            ],
-            "jobLocation" => [
-              "@type"   => "Place",
-              "address" => [
-                "@type"           => "PostalAddress",
-                "addressLocality" => $job->site?->name ?? 'Jakarta',
-                "addressCountry"  => "ID"
-              ]
-            ],
-            "url" => route('jobs.show', $job)
-          ]
-        ];
-      });
+        $jobsList = $filteredJobs->take(10)->values()->map(function ($job, $i) {
+            return [
+                "@type" => "ListItem",
+                "position" => $i + 1,
+                "item" => [
+                    "@type" => "JobPosting",
+                    "@id" => route('jobs.show', $job),
+                    "title" => $job->title ?? '',
+                    "description" => \Illuminate\Support\Str::limit(strip_tags($job->description ?? ''), 250),
+                    "datePosted" => optional($job->created_at)->toDateString(),
+                    "validThrough" => optional($job->deadline_at ?? $job->created_at?->addMonths(3))->toDateString(),
+                    "employmentType" => "FULL_TIME",
+                    "hiringOrganization" => [
+                        "@type" => "Organization",
+                        "name" => "PT Andalan Artha Primanusa",
+                        "sameAs" => url('/')
+                    ],
+                    "jobLocation" => [
+                        "@type" => "Place",
+                        "address" => [
+                            "@type" => "PostalAddress",
+                            "addressLocality" => $job->site?->name ?? 'Jakarta',
+                            "addressCountry" => "ID"
+                        ]
+                    ],
+                    "url" => route('jobs.show', $job)
+                ]
+            ];
+        });
 
-      $schema[] = [
-        "@context"        => "https://schema.org",
-        "@type"           => "ItemList",
-        "name"            => "Lowongan Kerja Terbaru PT Andalan Artha Primanusa",
-        "url"             => url('/jobs'),
-        "numberOfItems"   => $filteredJobs->count(),
-        "itemListElement" => $jobsList
-      ];
+        $schema[] = [
+            "@context" => "https://schema.org",
+            "@type" => "ItemList",
+            "name" => "Lowongan Kerja Terbaru PT Andalan Artha Primanusa",
+            "url" => url('/jobs'),
+            "numberOfItems" => $filteredJobs->count(),
+            "itemListElement" => $jobsList
+        ];
     }
 
     // 7. FAQPage â€” boost rich result di Google
     $schema[] = [
-      "@context"   => "https://schema.org",
-      "@type"      => "FAQPage",
-      "mainEntity" => [
-        [
-          "@type"          => "Question",
-          "name"           => "Bagaimana cara melamar kerja di PT Andalan Artha Primanusa?",
-          "acceptedAnswer" => [
-            "@type" => "Answer",
-            "text"  => "Daftarkan akun Anda di Human Careers, pilih posisi yang sesuai, lalu klik tombol Lamar. Proses sepenuhnya online dan transparan."
-          ]
-        ],
-        [
-          "@type"          => "Question",
-          "name"           => "Apakah proses rekrutmen PT Andalan gratis?",
-          "acceptedAnswer" => [
-            "@type" => "Answer",
-            "text"  => "Ya, seluruh proses rekrutmen di PT Andalan Artha Primanusa sepenuhnya gratis. Kami tidak memungut biaya apapun dari pelamar."
-          ]
-        ],
-        [
-          "@type"          => "Question",
-          "name"           => "Berapa lama proses seleksi berlangsung?",
-          "acceptedAnswer" => [
-            "@type" => "Answer",
-            "text"  => "Proses seleksi umumnya berlangsung 7-14 hari kerja, mulai dari pengajuan lamaran hingga penawaran kerja, tergantung posisi dan jumlah pelamar."
-          ]
-        ],
-        [
-          "@type"          => "Question",
-          "name"           => "Bagaimana cara memantau status lamaran?",
-          "acceptedAnswer" => [
-            "@type" => "Answer",
-            "text"  => "Setelah login, buka menu Lamaran Saya untuk melihat status terkini lamaran Anda secara real-time."
-          ]
+        "@context" => "https://schema.org",
+        "@type" => "FAQPage",
+        "mainEntity" => [
+            [
+                "@type" => "Question",
+                "name" => "Bagaimana cara melamar kerja di PT Andalan Artha Primanusa?",
+                "acceptedAnswer" => [
+                    "@type" => "Answer",
+                    "text" => "Daftarkan akun Anda di Human Careers, pilih posisi yang sesuai, lalu klik tombol Lamar. Proses sepenuhnya online dan transparan."
+                ]
+            ],
+            [
+                "@type" => "Question",
+                "name" => "Apakah proses rekrutmen PT Andalan gratis?",
+                "acceptedAnswer" => [
+                    "@type" => "Answer",
+                    "text" => "Ya, seluruh proses rekrutmen di PT Andalan Artha Primanusa sepenuhnya gratis. Kami tidak memungut biaya apapun dari pelamar."
+                ]
+            ],
+            [
+                "@type" => "Question",
+                "name" => "Berapa lama proses seleksi berlangsung?",
+                "acceptedAnswer" => [
+                    "@type" => "Answer",
+                    "text" => "Proses seleksi umumnya berlangsung 7-14 hari kerja, mulai dari pengajuan lamaran hingga penawaran kerja, tergantung posisi dan jumlah pelamar."
+                ]
+            ],
+            [
+                "@type" => "Question",
+                "name" => "Bagaimana cara memantau status lamaran?",
+                "acceptedAnswer" => [
+                    "@type" => "Answer",
+                    "text" => "Setelah login, buka menu Lamaran Saya untuk melihat status terkini lamaran Anda secara real-time."
+                ]
+            ]
         ]
-      ]
     ];
   @endphp
 
@@ -463,54 +463,54 @@
           style="color: #6b4f3a">Lowongan</a>
 
         @auth
-          <a href="{{ route('applications.mine') }}"
-            class="font-medium transition hover:opacity-70"
-            style="color: #6b4f3a">Lamaran</a>
-
-          <details class="relative dropdown">
-            <summary class="flex items-center gap-2 transition cursor-pointer select-none hover:opacity-70"
-              style="color: #6b4f3a" aria-haspopup="menu">
-              @php
-                $uname = auth()->user()->name ?? auth()->user()->email ?? 'Pengguna';
-                $ini   = strtoupper(mb_substr($uname, 0, 1));
-              @endphp
-              <span class="inline-grid text-xs font-bold border rounded-full place-items-center w-9 h-9 shrink-0"
-                style="background: rgba(29,78,216,.08); color: #1d4ed8; border-color: rgba(29,78,216,.3);"
-                aria-hidden="true">{{ $ini }}</span>
-              <svg class="w-4 h-4 chevron-icon" aria-hidden="true"><use href="#i-chevron"/></svg>
-            </summary>
-            <div class="absolute right-0 w-64 p-2 mt-2 bg-white border shadow-2xl rounded-2xl"
-              style="border-color: #f4f0eb" role="menu" aria-label="Menu pengguna">
-              <div class="px-3 pt-2 pb-1 text-[11px] text-zinc-400 uppercase tracking-wide">Masuk sebagai</div>
-              <div class="px-3 pb-2 text-sm font-semibold truncate text-zinc-800">{{ $uname }}</div>
-              <hr style="border-color: #f4f0eb; margin: .25rem 0">
-              <a href="{{ route('profile.edit') }}"
-                class="flex items-center gap-2 px-3 py-2.5 text-sm rounded-xl hover:bg-zinc-50 transition"
-                role="menuitem">ðŸ‘¤ Profil Saya</a>
               <a href="{{ route('applications.mine') }}"
-                class="flex items-center gap-2 px-3 py-2.5 text-sm rounded-xl hover:bg-zinc-50 transition"
-                role="menuitem">ðŸ“‹ Lamaran Saya</a>
-              <hr style="border-color: #f4f0eb; margin: .25rem 0">
-              <form method="POST" action="{{ route('logout') }}" role="none">
-                @csrf
-                <button type="submit"
-                  class="w-full flex items-center gap-2 px-3 py-2.5 text-sm rounded-xl hover:bg-red-50 transition text-left"
-                  style="color: #dc2626"
-                  role="menuitem">ðŸšª Keluar</button>
-              </form>
-            </div>
-          </details>
+                class="font-medium transition hover:opacity-70"
+                style="color: #6b4f3a">Lamaran</a>
+
+              <details class="relative dropdown">
+                <summary class="flex items-center gap-2 transition cursor-pointer select-none hover:opacity-70"
+                  style="color: #6b4f3a" aria-haspopup="menu">
+                  @php
+                    $uname = auth()->user()->name ?? auth()->user()->email ?? 'Pengguna';
+                    $ini = strtoupper(mb_substr($uname, 0, 1));
+                  @endphp
+                  <span class="inline-grid text-xs font-bold border rounded-full place-items-center w-9 h-9 shrink-0"
+                    style="background: rgba(29,78,216,.08); color: #1d4ed8; border-color: rgba(29,78,216,.3);"
+                    aria-hidden="true">{{ $ini }}</span>
+                  <svg class="w-4 h-4 chevron-icon" aria-hidden="true"><use href="#i-chevron"/></svg>
+                </summary>
+                <div class="absolute right-0 w-64 p-2 mt-2 bg-white border shadow-2xl rounded-2xl"
+                  style="border-color: #f4f0eb" role="menu" aria-label="Menu pengguna">
+                  <div class="px-3 pt-2 pb-1 text-[11px] text-zinc-400 uppercase tracking-wide">Masuk sebagai</div>
+                  <div class="px-3 pb-2 text-sm font-semibold truncate text-zinc-800">{{ $uname }}</div>
+                  <hr style="border-color: #f4f0eb; margin: .25rem 0">
+                  <a href="{{ route('profile.edit') }}"
+                    class="flex items-center gap-2 px-3 py-2.5 text-sm rounded-xl hover:bg-zinc-50 transition"
+                    role="menuitem">ðŸ‘¤ Profil Saya</a>
+                  <a href="{{ route('applications.mine') }}"
+                    class="flex items-center gap-2 px-3 py-2.5 text-sm rounded-xl hover:bg-zinc-50 transition"
+                    role="menuitem">ðŸ“‹ Lamaran Saya</a>
+                  <hr style="border-color: #f4f0eb; margin: .25rem 0">
+                  <form method="POST" action="{{ route('logout') }}" role="none">
+                    @csrf
+                    <button type="submit"
+                      class="w-full flex items-center gap-2 px-3 py-2.5 text-sm rounded-xl hover:bg-red-50 transition text-left"
+                      style="color: #dc2626"
+                      role="menuitem">ðŸšª Keluar</button>
+                  </form>
+                </div>
+              </details>
 
         @else
-          <a href="{{ route('login') }}"
-            class="inline-flex items-center gap-1.5 font-medium hover:opacity-70 transition"
-            style="color: #6b4f3a">
-            <svg class="w-4 h-4" aria-hidden="true"><use href="#i-user"/></svg>
-            Masuk
-          </a>
-          <a href="{{ route('register') }}"
-            class="inline-flex items-center px-4 py-2 text-sm font-semibold text-white transition shadow-sm rounded-xl hover:opacity-90"
-            style="background: #1d4ed8;">Daftar Gratis</a>
+              <a href="{{ route('login') }}"
+                class="inline-flex items-center gap-1.5 font-medium hover:opacity-70 transition"
+                style="color: #6b4f3a">
+                <svg class="w-4 h-4" aria-hidden="true"><use href="#i-user"/></svg>
+                Masuk
+              </a>
+              <a href="{{ route('register') }}"
+                class="inline-flex items-center px-4 py-2 text-sm font-semibold text-white transition shadow-sm rounded-xl hover:opacity-90"
+                style="background: #1d4ed8;">Daftar Gratis</a>
         @endauth
       </nav>
     </div>
@@ -540,28 +540,28 @@
         </a>
 
         @auth
-          <a href="{{ route('applications.mine') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-xl hover:bg-zinc-100 transition text-sm font-medium">
-            ðŸ“‹ Lamaran Saya
-          </a>
-          <hr style="border-color: #f4f0eb">
-          <a href="{{ route('profile.edit') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-xl hover:bg-zinc-100 transition text-sm font-medium">
-            ðŸ‘¤ Profil
-          </a>
-          <form method="POST" action="{{ route('logout') }}">
-            @csrf
-            <button type="submit"
-              class="flex items-center gap-2 w-full px-3 py-2.5 rounded-xl hover:bg-red-50 transition text-sm font-medium text-left"
-              style="color: #dc2626">ðŸšª Keluar</button>
-          </form>
+              <a href="{{ route('applications.mine') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-xl hover:bg-zinc-100 transition text-sm font-medium">
+                ðŸ“‹ Lamaran Saya
+              </a>
+              <hr style="border-color: #f4f0eb">
+              <a href="{{ route('profile.edit') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-xl hover:bg-zinc-100 transition text-sm font-medium">
+                ðŸ‘¤ Profil
+              </a>
+              <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <button type="submit"
+                  class="flex items-center gap-2 w-full px-3 py-2.5 rounded-xl hover:bg-red-50 transition text-sm font-medium text-left"
+                  style="color: #dc2626">ðŸšª Keluar</button>
+              </form>
         @else
-          <div class="flex items-center gap-3 pt-1">
-            <a href="{{ route('login') }}"
-              class="flex-1 text-center px-3 py-2.5 border rounded-xl text-sm font-medium hover:bg-zinc-50 transition"
-              style="border-color: #f4f0eb; color: #6b4f3a">Masuk</a>
-            <a href="{{ route('register') }}"
-              class="flex-1 text-center px-3 py-2.5 rounded-xl text-sm font-semibold text-white hover:opacity-90 transition shadow-sm"
-              style="background: #1d4ed8;">Daftar Gratis</a>
-          </div>
+              <div class="flex items-center gap-3 pt-1">
+                <a href="{{ route('login') }}"
+                  class="flex-1 text-center px-3 py-2.5 border rounded-xl text-sm font-medium hover:bg-zinc-50 transition"
+                  style="border-color: #f4f0eb; color: #6b4f3a">Masuk</a>
+                <a href="{{ route('register') }}"
+                  class="flex-1 text-center px-3 py-2.5 rounded-xl text-sm font-semibold text-white hover:opacity-90 transition shadow-sm"
+                  style="background: #1d4ed8;">Daftar Gratis</a>
+              </div>
         @endauth
       </div>
     </div>
@@ -626,11 +626,11 @@
                 Lihat Lowongan
               </a>
               @guest
-              <a href="{{ route('register') }}"
-                class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm text-white hover:opacity-90 transition shadow"
-                style="background: #1d4ed8">
-                Daftar Sekarang
-              </a>
+                  <a href="{{ route('register') }}"
+                    class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm text-white hover:opacity-90 transition shadow"
+                    style="background: #1d4ed8">
+                    Daftar Sekarang
+                  </a>
               @endguest
             </div>
           </div>
@@ -677,15 +677,15 @@
 
     {{-- ===== LOKASI SITE DENGAN PETA INTERAKTIF ===== --}}
     @php
-      $sitesCol  = ($sitesSimple instanceof \Illuminate\Support\Collection) ? $sitesSimple : collect($sitesSimple ?? []);
-      $sitesNorm = $sitesCol->filter(fn($s) => !empty($s['name']))
-        ->map(function ($s) {
-          $name  = (string)($s['name'] ?? 'â€”');
-          $dot   = preg_match('/^#([0-9a-f]{3}|[0-9a-f]{6})$/i', (string)($s['dot'] ?? '')) ? $s['dot'] : '#a77d52';
-          $param = $s['code'] ?? $s['id'] ?? $name;
-          return ['name' => $name, 'dot' => $dot, 'param' => $param];
-        })->values();
-      $sitesDup = $sitesNorm->concat($sitesNorm);
+        $sitesCol = ($sitesSimple instanceof \Illuminate\Support\Collection) ? $sitesSimple : collect($sitesSimple ?? []);
+        $sitesNorm = $sitesCol->filter(fn($s) => !empty($s['name']))
+            ->map(function ($s) {
+                $name = (string) ($s['name'] ?? 'â€”');
+                $dot = preg_match('/^#([0-9a-f]{3}|[0-9a-f]{6})$/i', (string) ($s['dot'] ?? '')) ? $s['dot'] : '#a77d52';
+                $param = $s['code'] ?? $s['id'] ?? $name;
+                return ['name' => $name, 'dot' => $dot, 'param' => $param];
+            })->values();
+        $sitesDup = $sitesNorm->concat($sitesNorm);
     @endphp
 
     <section class="border-b" style="border-color: #f4f0eb; background: #dfe6da"
@@ -694,43 +694,43 @@
         <h2 id="sites-heading" class="mb-4 text-base font-semibold" style="color: #1f2937">Lokasi Site</h2>
 
         @if($sitesWithCoords->isNotEmpty())
-          {{-- PETA INTERAKTIF --}}
-          <div id="sites-map" class="w-full mb-6 overflow-hidden border shadow-md h-96 rounded-2xl"
-            style="border-color: #f4f0eb" role="region" aria-label="Peta lokasi site PT Andalan Artha Primanusa">
-          </div>
-
-          {{-- Marquee animasi (aria-hidden, navigasi lewat list di bawah) --}}
-          <div class="marquee" role="presentation" aria-hidden="true">
-            <div class="marquee__track">
-              @foreach($sitesDup as $s)
-              <div class="shrink-0">
-                <span class="inline-flex items-center gap-2 px-4 py-2 border rounded-full"
-                  style="border-color: #f4f0eb; background: #ede5dc; color: #6b4f3a;">
-                  <span class="inline-block w-2.5 h-2.5 rounded-full shrink-0"
-                    style="background: {{ $s['dot'] }}"></span>
-                  <span class="text-sm whitespace-nowrap">{{ $s['name'] }}</span>
-                </span>
+              {{-- PETA INTERAKTIF --}}
+              <div id="sites-map" class="w-full mb-6 overflow-hidden border shadow-md h-96 rounded-2xl"
+                style="border-color: #f4f0eb" role="region" aria-label="Peta lokasi site PT Andalan Artha Primanusa">
               </div>
-              @endforeach
-            </div>
-          </div>
-          {{-- List yang bisa difokus untuk aksesibilitas --}}
-          <ul class="flex flex-wrap gap-2 mt-3" role="list" aria-label="Filter lowongan berdasarkan lokasi site">
-            @foreach($sitesNorm as $s)
-            <li>
-              <a href="{{ route('jobs.index', ['site' => $s['param']]) }}"
-                class="inline-flex items-center gap-2 px-4 py-2 transition border rounded-full hover:shadow-md"
-                style="border-color: #f4f0eb; background: #ede5dc; color: #6b4f3a;"
-                aria-label="Filter lowongan di site {{ $s['name'] }}">
-                <span class="inline-block w-2.5 h-2.5 rounded-full shrink-0"
-                  style="background: {{ $s['dot'] }}" aria-hidden="true"></span>
-                <span class="text-sm">{{ $s['name'] }}</span>
-              </a>
-            </li>
-            @endforeach
-          </ul>
+
+              {{-- Marquee animasi (aria-hidden, navigasi lewat list di bawah) --}}
+              <div class="marquee" role="presentation" aria-hidden="true">
+                <div class="marquee__track">
+                  @foreach($sitesDup as $s)
+                      <div class="shrink-0">
+                        <span class="inline-flex items-center gap-2 px-4 py-2 border rounded-full"
+                          style="border-color: #f4f0eb; background: #ede5dc; color: #6b4f3a;">
+                          <span class="inline-block w-2.5 h-2.5 rounded-full shrink-0"
+                            style="background: {{ $s['dot'] }}"></span>
+                          <span class="text-sm whitespace-nowrap">{{ $s['name'] }}</span>
+                        </span>
+                      </div>
+                  @endforeach
+                </div>
+              </div>
+              {{-- List yang bisa difokus untuk aksesibilitas --}}
+              <ul class="flex flex-wrap gap-2 mt-3" role="list" aria-label="Filter lowongan berdasarkan lokasi site">
+                @foreach($sitesNorm as $s)
+                    <li>
+                      <a href="{{ route('jobs.index', ['site' => $s['param']]) }}"
+                        class="inline-flex items-center gap-2 px-4 py-2 transition border rounded-full hover:shadow-md"
+                        style="border-color: #f4f0eb; background: #ede5dc; color: #6b4f3a;"
+                        aria-label="Filter lowongan di site {{ $s['name'] }}">
+                        <span class="inline-block w-2.5 h-2.5 rounded-full shrink-0"
+                          style="background: {{ $s['dot'] }}" aria-hidden="true"></span>
+                        <span class="text-sm">{{ $s['name'] }}</span>
+                      </a>
+                    </li>
+                @endforeach
+              </ul>
         @else
-          <p class="text-sm" style="color: #6b4f3a">Belum ada data site.</p>
+              <p class="text-sm" style="color: #6b4f3a">Belum ada data site.</p>
         @endif
       </div>
     </section>
@@ -825,28 +825,28 @@
 
               @php
                 $steps = [
-                  ['Pengajuan Lamaran', 'Kirim CV & data diri melalui sistem kami.',        '1-2 hari'],
-                  ['Penyaringan CV',    'Tim HR akan meninjau kesesuaian kandidat.',         '2-3 hari'],
-                  ['Wawancara / Tes',   'Interview HR & user + tes kemampuan (jika ada).',  '3-5 hari'],
-                  ['Penawaran Kerja',   'Kandidat terpilih menerima offering letter.',       '1-2 hari'],
-                  ['Onboarding',        'Mulai bekerja & orientasi perusahaan.',             'Hari pertama'],
+                    ['Pengajuan Lamaran', 'Kirim CV & data diri melalui sistem kami.', '1-2 hari'],
+                    ['Penyaringan CV', 'Tim HR akan meninjau kesesuaian kandidat.', '2-3 hari'],
+                    ['Wawancara / Tes', 'Interview HR & user + tes kemampuan (jika ada).', '3-5 hari'],
+                    ['Penawaran Kerja', 'Kandidat terpilih menerima offering letter.', '1-2 hari'],
+                    ['Onboarding', 'Mulai bekerja & orientasi perusahaan.', 'Hari pertama'],
                 ];
               @endphp
 
               <ol class="space-y-3" aria-label="Langkah-langkah rekrutmen PT Andalan">
                 @foreach($steps as $i => [$title, $desc, $time])
-                <li class="flex gap-4 p-3 transition rounded-xl hover:bg-amber-50">
-                  <div class="flex items-center justify-center text-xs font-bold text-white rounded-full shadow w-8 h-8 shrink-0 mt-0.5"
-                    style="background: #a77d52" aria-hidden="true">{{ $i + 1 }}</div>
-                  <div class="flex-1 min-w-0">
-                    <div class="flex flex-wrap items-center justify-between gap-2">
-                      <p class="text-sm font-semibold" style="color:#1f2937">{{ $title }}</p>
-                      <span class="text-xs shrink-0 whitespace-nowrap px-2 py-0.5 rounded-full"
-                        style="background: #ede5dc; color: #6b4f3a">{{ $time }}</span>
-                    </div>
-                    <p class="mt-0.5 text-xs leading-relaxed" style="color:#6b7280">{{ $desc }}</p>
-                  </div>
-                </li>
+                    <li class="flex gap-4 p-3 transition rounded-xl hover:bg-amber-50">
+                      <div class="flex items-center justify-center text-xs font-bold text-white rounded-full shadow w-8 h-8 shrink-0 mt-0.5"
+                        style="background: #a77d52" aria-hidden="true">{{ $i + 1 }}</div>
+                      <div class="flex-1 min-w-0">
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                          <p class="text-sm font-semibold" style="color:#1f2937">{{ $title }}</p>
+                          <span class="text-xs shrink-0 whitespace-nowrap px-2 py-0.5 rounded-full"
+                            style="background: #ede5dc; color: #6b4f3a">{{ $time }}</span>
+                        </div>
+                        <p class="mt-0.5 text-xs leading-relaxed" style="color:#6b7280">{{ $desc }}</p>
+                      </div>
+                    </li>
                 @endforeach
               </ol>
 
@@ -890,13 +890,13 @@
             <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               @foreach ($jobs as $job)
                 @php
-                  $excerpt    = \Illuminate\Support\Str::limit(strip_tags($job->description ?? ''), 120);
-                  $site       = $job->site ?? null;
-                  $siteName   = $site?->name ?? null;
-                  $siteRegion = $site?->region ?? null;
-                  // Perbaikan bug: jangan tampilkan region dua kali jika sama dengan name
-                  $showRegion = $siteRegion && $siteRegion !== $siteName;
-                  $isNew      = $job->created_at && $job->created_at->diffInDays(now()) <= 7;
+                    $excerpt = \Illuminate\Support\Str::limit(strip_tags($job->description ?? ''), 120);
+                    $site = $job->site ?? null;
+                    $siteName = $site?->name ?? null;
+                    $siteRegion = $site?->region ?? null;
+                    // Perbaikan bug: jangan tampilkan region dua kali jika sama dengan name
+                    $showRegion = $siteRegion && $siteRegion !== $siteName;
+                    $isNew = $job->created_at && $job->created_at->diffInDays(now()) <= 7;
                 @endphp
 
                 <article class="flex flex-col overflow-hidden border rounded-2xl card-hover"
@@ -941,9 +941,9 @@
 
                     {{-- Deskripsi --}}
                     @if(!empty($excerpt))
-                      <p class="flex-1 mt-3 text-xs leading-relaxed line-clamp-2" style="color: #6b4f3a">
-                        {{ $excerpt }}
-                      </p>
+                          <p class="flex-1 mt-3 text-xs leading-relaxed line-clamp-2" style="color: #6b4f3a">
+                            {{ $excerpt }}
+                          </p>
                     @endif
 
                     {{-- CTA --}}
@@ -984,9 +984,9 @@
 
             {{-- Pagination --}}
             @if(method_exists($jobs, 'withQueryString'))
-              <div class="mt-8">
-                {{ $jobs->withQueryString()->links() }}
-              </div>
+                  <div class="mt-8">
+                    {{ $jobs->withQueryString()->links() }}
+                  </div>
             @endif
 
           @endif
@@ -1005,36 +1005,44 @@
         </p>
 
         @php
-          $faqs = [
-            ['Bagaimana cara melamar kerja di PT Andalan Artha Primanusa?',
-             'Daftarkan akun Anda di Human Careers, pilih posisi yang sesuai, lalu klik tombol "Lamar Sekarang". Seluruh proses dilakukan secara online dan transparan.'],
-            ['Apakah proses rekrutmen PT Andalan gratis?',
-             'Ya, sepenuhnya gratis. PT Andalan Artha Primanusa tidak memungut biaya apapun dari pelamar dalam setiap tahapan rekrutmen.'],
-            ['Berapa lama proses seleksi berlangsung?',
-             'Umumnya 7-14 hari kerja, mulai dari pengajuan lamaran hingga penawaran kerja. Durasi dapat berbeda tergantung posisi dan jumlah pelamar.'],
-            ['Bagaimana cara memantau status lamaran saya?',
-             'Setelah login, buka menu "Lamaran Saya" untuk melihat status terkini lamaran Anda secara real-time.'],
-          ];
+            $faqs = [
+                [
+                    'Bagaimana cara melamar kerja di PT Andalan Artha Primanusa?',
+                    'Daftarkan akun Anda di Human Careers, pilih posisi yang sesuai, lalu klik tombol "Lamar Sekarang". Seluruh proses dilakukan secara online dan transparan.'
+                ],
+                [
+                    'Apakah proses rekrutmen PT Andalan gratis?',
+                    'Ya, sepenuhnya gratis. PT Andalan Artha Primanusa tidak memungut biaya apapun dari pelamar dalam setiap tahapan rekrutmen.'
+                ],
+                [
+                    'Berapa lama proses seleksi berlangsung?',
+                    'Umumnya 7-14 hari kerja, mulai dari pengajuan lamaran hingga penawaran kerja. Durasi dapat berbeda tergantung posisi dan jumlah pelamar.'
+                ],
+                [
+                    'Bagaimana cara memantau status lamaran saya?',
+                    'Setelah login, buka menu "Lamaran Saya" untuk melihat status terkini lamaran Anda secara real-time.'
+                ],
+            ];
         @endphp
 
         <div class="space-y-3" itemscope itemtype="https://schema.org/FAQPage">
           @foreach($faqs as [$q, $a])
-          <details class="overflow-hidden border rounded-2xl"
-            style="border-color: #e5e7eb"
-            itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
-            <summary class="flex items-center justify-between gap-4 p-5 text-sm font-semibold transition cursor-pointer bg-[#dfe6da] hover:bg-[#d5ddcf]"
-              style="color:#1f2937" itemprop="name">
-              {{ $q }}
-              <svg class="w-4 h-4 shrink-0 chevron-icon" style="color: #a77d52" aria-hidden="true">
-                <use href="#i-chevron"/>
-              </svg>
-            </summary>
-            <div class="px-5 pb-5 text-sm leading-relaxed border-t"
-              style="color:#6b7280; border-color: #e5e7eb"
-              itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
-              <p class="pt-4" itemprop="text">{{ $a }}</p>
-            </div>
-          </details>
+              <details class="overflow-hidden border rounded-2xl"
+                style="border-color: #e5e7eb"
+                itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+                <summary class="flex items-center justify-between gap-4 p-5 text-sm font-semibold transition cursor-pointer bg-[#dfe6da] hover:bg-[#d5ddcf]"
+                  style="color:#1f2937" itemprop="name">
+                  {{ $q }}
+                  <svg class="w-4 h-4 shrink-0 chevron-icon" style="color: #a77d52" aria-hidden="true">
+                    <use href="#i-chevron"/>
+                  </svg>
+                </summary>
+                <div class="px-5 pb-5 text-sm leading-relaxed border-t"
+                  style="color:#6b7280; border-color: #e5e7eb"
+                  itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+                  <p class="pt-4" itemprop="text">{{ $a }}</p>
+                </div>
+              </details>
           @endforeach
         </div>
 
@@ -1075,11 +1083,11 @@
           <ul class="space-y-2.5 text-sm text-zinc-400">
             <li><a href="{{ route('jobs.index') }}" class="transition hover:text-white">Lowongan Kerja</a></li>
             @auth
-              <li><a href="{{ route('applications.mine') }}" class="transition hover:text-white">Lamaran Saya</a></li>
-              <li><a href="{{ route('profile.edit') }}" class="transition hover:text-white">Profil</a></li>
+                  <li><a href="{{ route('applications.mine') }}" class="transition hover:text-white">Lamaran Saya</a></li>
+                  <li><a href="{{ route('profile.edit') }}" class="transition hover:text-white">Profil</a></li>
             @else
-              <li><a href="{{ route('login') }}" class="transition hover:text-white">Masuk</a></li>
-              <li><a href="{{ route('register') }}" class="transition hover:text-white">Daftar Gratis</a></li>
+                  <li><a href="{{ route('login') }}" class="transition hover:text-white">Masuk</a></li>
+                  <li><a href="{{ route('register') }}" class="transition hover:text-white">Daftar Gratis</a></li>
             @endauth
             <li><a href="/faq" class="transition hover:text-white">FAQ</a></li>
           </ul>

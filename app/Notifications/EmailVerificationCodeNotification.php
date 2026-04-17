@@ -22,10 +22,10 @@ class EmailVerificationCodeNotification extends Notification
 
     public function toMail($notifiable): MailMessage
     {
-        $app      = config('app.name', 'HUMAN Careers');
+        $app = config('app.name', 'HUMAN Careers');
         $fromAddr = config('mail.from.address');
         $fromName = config('mail.from.name', $app);
-        $replyTo  = config('mail.reply_to.address', $fromAddr);
+        $replyTo = config('mail.reply_to.address', $fromAddr);
 
         $displayCode = trim(chunk_split($this->code, 3, ' ')); // "123 456"
 
@@ -34,12 +34,12 @@ class EmailVerificationCodeNotification extends Notification
             ->replyTo($replyTo, $fromName)
             ->subject("Kode Verifikasi Anda • {$app}")
             ->view('mail.verify-code', [
-                'appName'     => $app,
-                'userName'    => $notifiable->name ?? null,
-                'code'        => $this->code,
-                'codePretty'  => $displayCode,
-                'ttlMinutes'  => $this->ttlMinutes,
-                'support'     => $fromAddr,
+                'appName' => $app,
+                'userName' => $notifiable->name ?? null,
+                'code' => $this->code,
+                'codePretty' => $displayCode,
+                'ttlMinutes' => $this->ttlMinutes,
+                'support' => $fromAddr,
             ]);
     }
 }

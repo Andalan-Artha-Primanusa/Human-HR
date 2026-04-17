@@ -19,7 +19,7 @@ class AuditLogController extends Controller
     public function index(Request $request)
     {
         // Jika tabel belum ada → halaman kosong, tidak 500
-        if (! Schema::hasTable('audit_logs')) {
+        if (!Schema::hasTable('audit_logs')) {
             return view('admin.audit_logs.index', [
                 'items' => collect(),
                 'tableMissing' => true,
@@ -28,34 +28,34 @@ class AuditLogController extends Controller
         }
 
         // === Ambil & sanitasi filter ===
-        $q          = $this->sanitizeFilter((string) $request->query('q', ''), 120);
-        $event      = $this->sanitizeFilter((string) $request->query('event', ''), 100);
-        $userId     = $this->sanitizeFilter((string) $request->query('user_id', ''), 64);
+        $q = $this->sanitizeFilter((string) $request->query('q', ''), 120);
+        $event = $this->sanitizeFilter((string) $request->query('event', ''), 100);
+        $userId = $this->sanitizeFilter((string) $request->query('user_id', ''), 64);
         $targetType = $this->sanitizeFilter((string) $request->query('target_type', ''), 150);
-        $dateFrom   = (string) $request->query('from', '');
-        $dateTo     = (string) $request->query('to', '');
-        $like       = $q !== '' ? '%'.addcslashes($q, '\\%_').'%' : null;
+        $dateFrom = (string) $request->query('from', '');
+        $dateTo = (string) $request->query('to', '');
+        $like = $q !== '' ? '%' . addcslashes($q, '\\%_') . '%' : null;
 
         // parse tanggal aman (opsional)
         [$fromAt, $toAt] = $this->parseDateRange($dateFrom, $dateTo);
 
         // === Query ORM: select kolom secukupnya + eager user (hindari N+1) ===
         $items = AuditLog::query()
-            ->select(['id','created_at','user_id','event','target_type','target_id','ip']) // kolom minimal untuk listing
+            ->select(['id', 'created_at', 'user_id', 'event', 'target_type', 'target_id', 'ip']) // kolom minimal untuk listing
             ->with(['user:id,name']) // hanya id & name
             // cari bebas: bungkus OR dalam group agar precedence benar
-                        ->when($like !== null, function ($qq) use ($like) {
+            ->when($like !== null, function ($qq) use ($like) {
                 $qq->where(function ($w) use ($like) {
                     $w->where('target_id', 'like', $like)
-                      ->orWhere('ip', 'like', $like)
-                      ->orWhere('user_agent', 'like', $like);
+                        ->orWhere('ip', 'like', $like)
+                        ->orWhere('user_agent', 'like', $like);
                 });
             })
             ->when($event !== '', fn($qq) => $qq->where('event', $event))
             ->when($userId !== '', fn($qq) => $qq->where('user_id', $userId))
             ->when($targetType !== '', fn($qq) => $qq->where('target_type', $targetType))
             ->when($fromAt, fn($qq) => $qq->where('created_at', '>=', $fromAt))
-            ->when($toAt,   fn($qq) => $qq->where('created_at', '<=', $toAt))
+            ->when($toAt, fn($qq) => $qq->where('created_at', '<=', $toAt))
             // cursorPaginate → stabil & irit pada tabel besar (pakai key stabil)
             ->orderByDesc('id')
             ->cursorPaginate(30)
@@ -64,7 +64,7 @@ class AuditLogController extends Controller
         return view('admin.audit_logs.index', [
             'items' => $items,
             'tableMissing' => false,
-            'filters' => compact('q','event','userId','targetType','dateFrom','dateTo'),
+            'filters' => compact('q', 'event', 'userId', 'targetType', 'dateFrom', 'dateTo'),
         ]);
     }
 
@@ -73,15 +73,22 @@ class AuditLogController extends Controller
      */
     public function show(string $id)
     {
-        if (! Schema::hasTable('audit_logs')) {
+        if (!Schema::hasTable('audit_logs')) {
             abort(404);
         }
 
         // findOrFail dengan eager user, pilih kolom yang relevan saja
         $log = AuditLog::with('user:id,name,email')
             ->findOrFail($id, [
-                'id','created_at','user_id','event','target_type','target_id',
-                'ip','user_agent','meta',
+                'id',
+                'created_at',
+                'user_id',
+                'event',
+                'target_type',
+                'target_id',
+                'ip',
+                'user_agent',
+                'meta',
             ]);
 
         return view('admin.audit_logs.show', compact('log'));
@@ -92,42 +99,42 @@ class AuditLogController extends Controller
      */
     public function export(Request $request): StreamedResponse
     {
-        if (! Schema::hasTable('audit_logs')) {
+        if (!Schema::hasTable('audit_logs')) {
             abort(404);
         }
 
         // Ambil filter yang sama dengan index
-        $q          = $this->sanitizeFilter((string) $request->query('q', ''), 120);
-        $event      = $this->sanitizeFilter((string) $request->query('event', ''), 100);
-        $userId     = $this->sanitizeFilter((string) $request->query('user_id', ''), 64);
+        $q = $this->sanitizeFilter((string) $request->query('q', ''), 120);
+        $event = $this->sanitizeFilter((string) $request->query('event', ''), 100);
+        $userId = $this->sanitizeFilter((string) $request->query('user_id', ''), 64);
         $targetType = $this->sanitizeFilter((string) $request->query('target_type', ''), 150);
-        $dateFrom   = (string) $request->query('from', '');
-        $dateTo     = (string) $request->query('to', '');
-        $like       = $q !== '' ? '%'.addcslashes($q, '\\%_').'%' : null;
+        $dateFrom = (string) $request->query('from', '');
+        $dateTo = (string) $request->query('to', '');
+        $like = $q !== '' ? '%' . addcslashes($q, '\\%_') . '%' : null;
         [$fromAt, $toAt] = $this->parseDateRange($dateFrom, $dateTo);
 
-        $file = 'audit_logs_'.now()->format('Ymd_His').'.csv';
+        $file = 'audit_logs_' . now()->format('Ymd_His') . '.csv';
 
         $callback = function () use ($like, $event, $userId, $targetType, $fromAt, $toAt) {
             @set_time_limit(0);
             $out = fopen('php://output', 'w');
-            fputcsv($out, ['id','created_at','user_id','event','target_type','target_id','ip']);
+            fputcsv($out, ['id', 'created_at', 'user_id', 'event', 'target_type', 'target_id', 'ip']);
 
             // Query Builder untuk stream ringan; apply filter yang sama
             $builder = DB::table('audit_logs')
-                ->select(['id','created_at','user_id','event','target_type','target_id','ip'])
-                                ->when($like !== null, function ($qq) use ($like) {
+                ->select(['id', 'created_at', 'user_id', 'event', 'target_type', 'target_id', 'ip'])
+                ->when($like !== null, function ($qq) use ($like) {
                     $qq->where(function ($w) use ($like) {
-                        $w->where('target_id','like',$like)
-                          ->orWhere('ip','like',$like)
-                          ->orWhere('user_agent','like',$like);
+                        $w->where('target_id', 'like', $like)
+                            ->orWhere('ip', 'like', $like)
+                            ->orWhere('user_agent', 'like', $like);
                     });
                 })
                 ->when($event !== '', fn($qq) => $qq->where('event', $event))
                 ->when($userId !== '', fn($qq) => $qq->where('user_id', $userId))
                 ->when($targetType !== '', fn($qq) => $qq->where('target_type', $targetType))
                 ->when($fromAt, fn($qq) => $qq->where('created_at', '>=', $fromAt))
-                ->when($toAt,   fn($qq) => $qq->where('created_at', '<=', $toAt))
+                ->when($toAt, fn($qq) => $qq->where('created_at', '<=', $toAt))
                 // chunkById stabil dengan urutan id ASC.
                 ->orderBy('id');
 
@@ -160,13 +167,20 @@ class AuditLogController extends Controller
      */
     private function parseDateRange(?string $from, ?string $to): array
     {
-        $fromAt = null; $toAt = null;
+        $fromAt = null;
+        $toAt = null;
 
         if ($from) {
-            try { $fromAt = Carbon::parse($from)->startOfDay(); } catch (\Throwable $e) {}
+            try {
+                $fromAt = Carbon::parse($from)->startOfDay();
+            } catch (\Throwable $e) {
+            }
         }
         if ($to) {
-            try { $toAt = Carbon::parse($to)->endOfDay(); } catch (\Throwable $e) {}
+            try {
+                $toAt = Carbon::parse($to)->endOfDay();
+            } catch (\Throwable $e) {
+            }
         }
 
         if ($fromAt && $toAt && $fromAt->greaterThan($toAt)) {

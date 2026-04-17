@@ -1,9 +1,9 @@
 {{-- resources/views/mail/verify-code-inline.blade.php --}}
 @php
-  $appName  = $appName  ?? config('app.name', 'HUMAN Careers');
-  $support  = $support  ?? config('mail.reply_to.address', config('mail.from.address'));
-  $userName = $userName ?? null;
-  // Pastikan $code (string 6 digit) & $ttlMinutes (int) dikirim dari Notification/Mailable
+    $appName = $appName ?? config('app.name', 'HUMAN Careers');
+    $support = $support ?? config('mail.reply_to.address', config('mail.from.address'));
+    $userName = $userName ?? null;
+    // Pastikan $code (string 6 digit) & $ttlMinutes (int) dikirim dari Notification/Mailable
 @endphp
 <!doctype html>
 <html lang="id">

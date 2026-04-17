@@ -29,9 +29,9 @@ class EmailVerificationCode extends Model
     protected $keyType = 'string';
 
     protected $casts = [
-        'expires_at'   => 'datetime',
+        'expires_at' => 'datetime',
         'last_sent_at' => 'datetime',
-        'attempts'     => 'integer',
+        'attempts' => 'integer',
     ];
 
     protected static function booted(): void

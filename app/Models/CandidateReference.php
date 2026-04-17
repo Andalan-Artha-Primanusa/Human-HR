@@ -13,7 +13,7 @@ class CandidateReference extends Model
 
     /** UUID primary key */
     public $incrementing = false;
-    protected $keyType   = 'string';
+    protected $keyType = 'string';
 
     protected $fillable = [
         'candidate_profile_id',

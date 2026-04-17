@@ -24,7 +24,7 @@ return new class extends Migration {
             $t->string('province')->nullable();
             $t->string('country')->nullable();
 
-            $t->enum('status', ['active','inactive'])->default('active');
+            $t->enum('status', ['active', 'inactive'])->default('active');
             $t->json('meta')->nullable();
 
             $t->timestamps();

@@ -20,35 +20,46 @@ class Job extends Model
 
     /** Label Level untuk tampilan */
     public const LEVEL_LABELS = [
-        'bod'        => 'BOD',
-        'manager'    => 'Manager',
+        'bod' => 'BOD',
+        'manager' => 'Manager',
         'supervisor' => 'Supervisor',
-        'spv'        => 'SPV',
-        'staff'      => 'Staff',
-        'non_staff'  => 'Non staff',
+        'spv' => 'SPV',
+        'staff' => 'Staff',
+        'non_staff' => 'Non staff',
     ];
 
     /** DIVISIONS (canonical slug => label) */
     public const DIVISIONS = [
         'engineering' => 'Engineering',
-        'hr'          => 'Human Resources',
-        'it'          => 'Information Technology',
-        'finance'     => 'Finance',
-        'marketing'   => 'Marketing',
-        'sales'       => 'Sales',
-        'operations'  => 'Operations',
-        'admin'       => 'Administration',
+        'hr' => 'Human Resources',
+        'it' => 'Information Technology',
+        'finance' => 'Finance',
+        'marketing' => 'Marketing',
+        'sales' => 'Sales',
+        'operations' => 'Operations',
+        'admin' => 'Administration',
     ];
 
     protected $fillable = [
-        'company_id','code','title','site_id','division','level',
-        'employment_type','openings','status','description',
-        'skills','keywords','created_by','updated_by',
+        'company_id',
+        'code',
+        'title',
+        'site_id',
+        'division',
+        'level',
+        'employment_type',
+        'openings',
+        'status',
+        'description',
+        'skills',
+        'keywords',
+        'created_by',
+        'updated_by',
     ];
 
     protected $casts = [
         'openings' => 'integer',
-        'skills'   => 'array',
+        'skills' => 'array',
         // HAPUS cast keywords => array (biar kita kontrol via accessor+mutator)
     ];
 
@@ -57,13 +68,14 @@ class Job extends Model
      |=====================*/
     public static function normalizeLevel(?string $raw): ?string
     {
-        if (!$raw) return null;
+        if (!$raw)
+            return null;
         $s = strtolower(trim($raw));
         $s = str_replace([" ", "\xC2\xA0"], '_', $s);
         $aliases = [
             'board_of_directors' => 'bod',
             'non-staff' => 'non_staff',
-            'nonstaff'  => 'non_staff',
+            'nonstaff' => 'non_staff',
         ];
         $s = $aliases[$s] ?? $s;
         return in_array($s, self::LEVELS, true) ? $s : null;
@@ -86,14 +98,15 @@ class Job extends Model
      |=====================*/
     public static function normalizeDivision(?string $raw): ?string
     {
-        if (!$raw) return null;
+        if (!$raw)
+            return null;
         $s = strtolower(trim($raw));
         $s = str_replace([" ", "\xC2\xA0"], '_', $s);
         $aliases = [
-            'human_resources'        => 'hr',
-            'people'                 => 'hr',
+            'human_resources' => 'hr',
+            'people' => 'hr',
             'information_technology' => 'it',
-            'ops'                    => 'operations',
+            'ops' => 'operations',
         ];
         $s = $aliases[$s] ?? $s;
         return array_key_exists($s, self::DIVISIONS) ? $s : null;
@@ -147,7 +160,8 @@ class Job extends Model
             $arr = $value;
         } elseif (is_string($value)) {
             $s = trim($value);
-            if ($s === '') return [];
+            if ($s === '')
+                return [];
             $decoded = json_decode($s, true);
             if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
                 $arr = $decoded;
@@ -198,11 +212,11 @@ class Job extends Model
 
     public function creator(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'created_by')->select(['id','name','email']);
+        return $this->belongsTo(User::class, 'created_by')->select(['id', 'name', 'email']);
     }
     public function updater(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'updated_by')->select(['id','name','email']);
+        return $this->belongsTo(User::class, 'updated_by')->select(['id', 'name', 'email']);
     }
 
     /** @return HasMany<JobApplication> */
@@ -260,13 +274,14 @@ class Job extends Model
 
     public function scopeSearch($q, ?string $term)
     {
-        if (!$term) return $q;
+        if (!$term)
+            return $q;
         $like = "%{$term}%";
 
         return $q->where(function ($qq) use ($like, $term) {
             $qq->where('code', 'like', $like)
-               ->orWhere('title', 'like', $like)
-               ->orWhere('description', 'like', $like);
+                ->orWhere('title', 'like', $like)
+                ->orWhere('description', 'like', $like);
 
             // Keywords (JSON array)
             try {

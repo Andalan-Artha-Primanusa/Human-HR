@@ -31,7 +31,10 @@ class CandidateProfileController extends Controller
 
         $references = $profile->references()->orderBy('order_no')->get(['name', 'job_title', 'company', 'contact'])->toArray();
 
-        return view('candidates.profile_wizard', compact('job', 'profile', 'trainings', 'employments', 'references'));
+        // Ambil POH untuk dropdown (hanya yang aktif)
+        $pohs = \App\Models\Poh::query()->orderBy('name')->get(['id', 'name']);
+
+        return view('candidates.profile_wizard', compact('job', 'profile', 'trainings', 'employments', 'references', 'pohs'));
     }
 
     /**
@@ -49,15 +52,87 @@ class CandidateProfileController extends Controller
         $maxDocuments = 20;
 
         // ===== VALIDASI UTAMA =====
-        $validated = $request->validate(['full_name' => 'bail|required|string|max:190', 'gender' => ['bail', 'required', Rule::in(['male', 'female'])], 'age' => 'bail|required|integer|between:15,80', 'birthplace' => 'bail|required|string|max:190', 'birthdate' => 'bail|required|date', 'nik' => ['bail', 'required', 'digits:16'], 'email' => 'bail|required|email:rfc,dns', 'phone' => 'bail|required|string|max:50', 'whatsapp' => 'nullable|string|max:50', 'last_education' => 'bail|required|string|max:30', 'education_major' => 'bail|required|string|max:190', 'education_school' => 'bail|required|string|max:190', 'ktp_address' => 'bail|required|string', 'ktp_village' => 'bail|required|string|max:190', 'ktp_district' => 'bail|required|string|max:190', 'ktp_city' => 'bail|required|string|max:190', 'ktp_province' => 'bail|required|string|max:190', 'ktp_postal_code' => 'bail|required|string|max:20', 'ktp_rt' => 'nullable|string|max:10', 'ktp_rw' => 'nullable|string|max:10', 'ktp_residence_status' => ['nullable', Rule::in(['OWN', 'RENT', 'DORM', 'FAMILY', 'COMPANY', 'OTHER'])], 'domicile_address' => 'bail|required|string', 'domicile_village' => 'bail|required|string|max:190', 'domicile_district' => 'bail|required|string|max:190', 'domicile_city' => 'bail|required|string|max:190', 'domicile_province' => 'bail|required|string|max:190', 'domicile_postal_code' => 'bail|required|string|max:20', 'domicile_rt' => 'nullable|string|max:10', 'domicile_rw' => 'nullable|string|max:10', 'domicile_residence_status' => ['nullable', Rule::in(['OWN', 'RENT', 'DORM', 'FAMILY', 'COMPANY', 'OTHER'])], 'motivation' => 'nullable|string', 'has_relatives' => 'nullable|boolean', 'relatives_detail' => 'nullable|string|max:255', 'worked_before' => 'nullable|boolean', 'worked_before_position' => 'nullable|string|max:190', 'worked_before_duration' => 'nullable|string|max:190', 'applied_before' => 'nullable|boolean', 'applied_before_position' => 'nullable|string|max:190', 'willing_out_of_town' => 'nullable|boolean', 'not_willing_reason' => 'nullable|string|max:255',
-            // File (4MB)
-            'cv' => 'nullable|file|mimes:pdf,doc,docx|max:4096', 'documents' => "nullable|array|max:{$maxDocuments}", 'documents.*' => 'nullable|file|max:4096|mimetypes:application/pdf,image/jpeg,image/png,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        $validated = $request->validate([
+            'poh_id' => ['required', 'uuid', 'exists:pohs,id'],
+            'full_name' => 'bail|required|string|max:190',
+            'gender' => ['bail', 'required', Rule::in(['male', 'female'])],
+            'age' => 'bail|required|integer|between:15,80',
+            'birthplace' => 'bail|required|string|max:190',
+            'birthdate' => 'bail|required|date',
+            'nik' => ['bail', 'required', 'digits:16'],
+            'email' => 'bail|required|email:rfc,dns',
+            'phone' => [
+                'bail',
+                'required',
+                'regex:/^[0-9]{12,13}$/',
+                'max:13',
+                'min:12',
+            ],
+            'whatsapp' => 'nullable|string|max:50',
+            'last_education' => 'bail|required|string|max:30',
+            'education_major' => 'bail|required|string|max:190',
+            'education_school' => 'bail|required|string|max:190',
+            'ktp_address' => 'bail|required|string',
+            'ktp_village' => 'bail|required|string|max:190',
+            'ktp_district' => 'bail|required|string|max:190',
+            'ktp_city' => 'bail|required|string|max:190',
+            'ktp_province' => 'bail|required|string|max:190',
+            'ktp_postal_code' => 'bail|required|string|max:20',
+            'ktp_rt' => 'nullable|string|max:10',
+            'ktp_rw' => 'nullable|string|max:10',
+            'ktp_residence_status' => ['nullable', Rule::in(['OWN', 'RENT', 'DORM', 'FAMILY', 'COMPANY', 'OTHER'])],
+            'domicile_address' => 'bail|required|string',
+            'domicile_village' => 'bail|required|string|max:190',
+            'domicile_district' => 'bail|required|string|max:190',
+            'domicile_city' => 'bail|required|string|max:190',
+            'domicile_province' => 'bail|required|string|max:190',
+            'domicile_postal_code' => 'bail|required|string|max:20',
+            'domicile_rt' => 'nullable|string|max:10',
+            'domicile_rw' => 'nullable|string|max:10',
+            'domicile_residence_status' => ['nullable', Rule::in(['OWN', 'RENT', 'DORM', 'FAMILY', 'COMPANY', 'OTHER'])],
+            'motivation' => 'nullable|string',
+            'has_relatives' => 'nullable|boolean',
+            'relatives_detail' => 'nullable|string|max:255',
+            'worked_before' => 'nullable|boolean',
+            'worked_before_position' => 'nullable|string|max:190',
+            'worked_before_duration' => 'nullable|string|max:190',
+            'applied_before' => 'nullable|boolean',
+            'applied_before_position' => 'nullable|string|max:190',
+            'willing_out_of_town' => 'nullable|boolean',
+            'not_willing_reason' => 'nullable|string|max:255',
+            // File (4MB, PDF only)
+            'cv' => 'nullable|file|mimes:pdf|max:4096',
+            'documents' => "nullable|array|max:{$maxDocuments}",
+            'documents.*' => 'nullable|file|max:4096|mimetypes:application/pdf,image/jpeg,image/png,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document',
             // Repeater
-            'trainings' => "bail|required|array|min:1|max:{$maxTrainings}", 'trainings.*.title' => 'required|string|max:190', 'trainings.*.institution' => 'required|string|max:190', 'trainings.*.period_start' => 'required|date', 'trainings.*.period_end' => 'nullable|date', 'employments' => "bail|required|array|min:1|max:{$maxEmployments}", 'employments.*.company' => 'required|string|max:190', 'employments.*.position_start' => 'required|string|max:190', 'employments.*.position_end' => 'nullable|string|max:190', 'employments.*.period_start' => 'required|date', 'employments.*.period_end' => 'nullable|date', 'employments.*.reason_for_leaving' => 'nullable|string|max:255', 'employments.*.job_description' => 'nullable|string', 'references' => "bail|required|array|min:3|max:{$maxReferences}", 'references.*.name' => 'required|string|max:190', 'references.*.job_title' => 'required|string|max:190', 'references.*.company' => 'required|string|max:190', 'references.*.contact' => 'required|string|max:190',
+            'trainings' => "bail|required|array|min:1|max:{$maxTrainings}",
+            'trainings.*.title' => 'required|string|max:190',
+            'trainings.*.institution' => 'required|string|max:190',
+            'trainings.*.period_start' => 'required|date',
+            'trainings.*.period_end' => 'nullable|date',
+            'employments' => "bail|required|array|min:1|max:{$maxEmployments}",
+            'employments.*.company' => 'required|string|max:190',
+            'employments.*.position_start' => 'required|string|max:190',
+            'employments.*.position_end' => 'nullable|string|max:190',
+            'employments.*.period_start' => 'required|date',
+            'employments.*.period_end' => 'nullable|date',
+            'employments.*.reason_for_leaving' => 'nullable|string|max:255',
+            'employments.*.job_description' => 'nullable|string',
+            'references' => "bail|required|array|min:1|max:1",
+            'references.*.name' => 'required|string|max:190',
+            'references.*.job_title' => 'required|string|max:190',
+            'references.*.company' => 'required|string|max:190',
+            'references.*.contact' => 'required|string|max:190',
             // === Gaji & Kesiapan Kerja ===
-            'current_salary' => 'nullable|numeric|min:0|max:999999999999.99', 'expected_salary' => 'nullable|numeric|min:0|max:999999999999.99', 'expected_facilities' => 'nullable|string', 'available_start_date' => 'nullable|date|after_or_equal:today', 'work_motivation' => 'nullable|string',
+            'current_salary' => 'nullable|numeric|min:0|max:999999999999.99',
+            'expected_salary' => 'nullable|numeric|min:0|max:999999999999.99',
+            'expected_facilities' => 'nullable|string',
+            'available_start_date' => 'nullable|date|after_or_equal:today',
+            'work_motivation' => 'nullable|string',
             // === Kesehatan ===
-            'medical_history' => 'nullable|string', 'last_medical_checkup' => 'nullable|string|max:255']);
+            'medical_history' => 'nullable|string',
+            'last_medical_checkup' => 'nullable|string|max:255'
+        ]);
 
         // ===== VALIDASI MANUAL RANGE TANGGAL DI REPEATER =====
         $errors = [];
@@ -94,6 +169,7 @@ class CandidateProfileController extends Controller
 
             // Isi field profil
             $profile->fill([
+                'poh_id' => $validated['poh_id'],
                 'full_name' => $validated['full_name'],
                 'nickname' => $request->input('nickname'),
                 'gender' => $validated['gender'],
@@ -146,6 +222,21 @@ class CandidateProfileController extends Controller
                 'medical_history' => $validated['medical_history'] ?? null,
                 'last_medical_checkup' => $validated['last_medical_checkup'] ?? null,
             ]);
+
+            // Handle SMA/SMK and other education extras
+            $extras = $profile->extras ?? [];
+            if ($validated['last_education'] === 'SMA_SMK') {
+                $extras['sma_smk_type'] = $request->input('sma_smk_type', 'SMA');
+                $extras['sma_smk_school'] = $request->input('sma_smk_school', '');
+            } else {
+                unset($extras['sma_smk_type'], $extras['sma_smk_school']);
+            }
+            if ($validated['last_education'] === 'LAINNYA') {
+                $extras['other_education'] = $request->input('other_education', '');
+            } else {
+                unset($extras['other_education']);
+            }
+            $profile->extras = $extras;
 
             // Upload aman
             $userFolder = 'candidates/u_' . $user->id;
@@ -263,13 +354,36 @@ class CandidateProfileController extends Controller
         $q = Str::limit(preg_replace('/[\x00-\x1F\x7F]/u', '', trim($qRaw)) ?? '', 120, '');
         $like = $q !== '' ? '%' . addcslashes($q, '\%_') . '%' : null;
 
-        $profiles = CandidateProfile::query()->select(['id', 'user_id', 'full_name', 'email', 'phone', 'nik', 'updated_at'])->withCount(['trainings', 'employments', 'references'])->when($like !== null, function ($w) use ($like) {
-            $w->where(function ($s) use ($like) {
-                $s->where('full_name', 'like', $like)->orWhere('email', 'like', $like)->orWhere('phone', 'like', $like)->orWhere('nik', 'like', $like);
-            });
-        })->orderByDesc('updated_at')->paginate(20)->withQueryString();
+        // Ambil daftar posisi (job) untuk filter
+        $jobs = \App\Models\Job::orderBy('title')->pluck('title', 'id');
 
-        return view('admin.candidates.index', compact('profiles', 'q'));
+        $jobId = $request->query('job_id');
+
+        $profiles = CandidateProfile::query()
+            ->select(['candidate_profiles.id', 'candidate_profiles.user_id', 'candidate_profiles.full_name', 'candidate_profiles.email', 'candidate_profiles.phone', 'candidate_profiles.nik', 'candidate_profiles.updated_at'])
+            ->withCount(['trainings', 'employments', 'references'])
+            ->with(['user.jobApplications' => function ($q) use ($jobId) {
+                if ($jobId) $q->where('job_id', $jobId);
+                $q->with('job:id,title');
+            }])
+            ->when($like !== null, function ($w) use ($like) {
+                $w->where(function ($s) use ($like) {
+                    $s->where('full_name', 'like', $like)
+                        ->orWhere('email', 'like', $like)
+                        ->orWhere('phone', 'like', $like)
+                        ->orWhere('nik', 'like', $like);
+                });
+            })
+            ->when($jobId, function ($q) use ($jobId) {
+                $q->whereHas('user.jobApplications', function ($a) use ($jobId) {
+                    $a->where('job_id', $jobId);
+                });
+            })
+            ->orderByDesc('updated_at')
+            ->paginate(20)
+            ->withQueryString();
+
+        return view('admin.candidates.index', compact('profiles', 'q', 'jobs', 'jobId'));
     }
 
     /**

@@ -34,14 +34,14 @@ class PsychotestAttempt extends Model
      * Casting kolom.
      */
     protected $casts = [
-        'attempt_no'   => 'integer',
-        'started_at'   => 'datetime',
-        'finished_at'  => 'datetime',
+        'attempt_no' => 'integer',
+        'started_at' => 'datetime',
+        'finished_at' => 'datetime',
         'submitted_at' => 'datetime',
-        'expires_at'   => 'datetime',
-        'score'        => 'decimal:2',
-        'is_active'    => 'boolean',
-        'meta'         => 'array',   // penting utk hindari "Array to string conversion"
+        'expires_at' => 'datetime',
+        'score' => 'decimal:2',
+        'is_active' => 'boolean',
+        'meta' => 'array',   // penting utk hindari "Array to string conversion"
     ];
 
     /**
@@ -50,9 +50,9 @@ class PsychotestAttempt extends Model
     protected static function booted(): void
     {
         static::creating(function (self $m) {
-            $m->attempt_no  ??= 1;
-            $m->is_active   ??= true;
-            $m->status      ??= 'pending'; // allowed: pending|in_progress|submitted|scored|expired|cancelled
+            $m->attempt_no ??= 1;
+            $m->is_active ??= true;
+            $m->status ??= 'pending'; // allowed: pending|in_progress|submitted|scored|expired|cancelled
         });
     }
 

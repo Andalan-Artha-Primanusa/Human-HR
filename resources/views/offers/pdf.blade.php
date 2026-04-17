@@ -1,59 +1,59 @@
 {{-- resources/views/offers/pdf.blade.php --}}
 @php
-  /** @var \App\Models\Offer $offer */
-  $app  = $offer->application;
-  $user = $app?->user;
-  $job  = $app?->job;
-  $site = $job?->site;
+    /** @var \App\Models\Offer $offer */
+    $app = $offer->application;
+    $user = $app?->user;
+    $job = $app?->job;
+    $site = $job?->site;
 
-  $m = (array) ($offer->meta ?? []);
+    $m = (array) ($offer->meta ?? []);
 
-  $company       = $m['company']       ?? 'ANDALAN BHUMI NUSANTARA'; // dipakai di paragraf saja
-  $logoPath      = public_path('assets/logo-abn.png');
+    $company = $m['company'] ?? 'ANDALAN BHUMI NUSANTARA'; // dipakai di paragraf saja
+    $logoPath = public_path('assets/logo-abn.png');
 
-  $docNo         = $m['doc_no']        ?? '';
-  $candidateNik  = $m['candidate_nik'] ?? '';
-  $gradeLevel    = $m['level']         ?? '';
-  $poh           = $m['poh']           ?? '';
-  $lokasiDisplay = $m['lokasi']        ?? ( ($site?->code ? 'Site '.$site->code.' – ' : '').($site?->name ?: 'Site HO – Head Office') );
-  $joinDate      = $m['join_date']     ?? null;
-  $overtimeRate  = $m['overtime_rate'] ?? null;
-  $bonusBulanan  = $m['bonus_bulanan'] ?? 'Bonus diatur sesuai ketentuan perusahaan';
+    $docNo = $m['doc_no'] ?? '';
+    $candidateNik = $m['candidate_nik'] ?? '';
+    $gradeLevel = $m['level'] ?? '';
+    $poh = $m['poh'] ?? '';
+    $lokasiDisplay = $m['lokasi'] ?? (($site?->code ? 'Site ' . $site->code . ' – ' : '') . ($site?->name ?: 'Site HO – Head Office'));
+    $joinDate = $m['join_date'] ?? null;
+    $overtimeRate = $m['overtime_rate'] ?? null;
+    $bonusBulanan = $m['bonus_bulanan'] ?? 'Bonus diatur sesuai ketentuan perusahaan';
 
-  $signerName  = $m['signer_name']  ?? 'RAUL MAHYA KOMARAN';
-  $signerTitle = $m['signer_title'] ?? 'General Manager';
-  $deptName    = $m['dept_name']    ?? 'HR Department';
+    $signerName = $m['signer_name'] ?? 'RAUL MAHYA KOMARAN';
+    $signerTitle = $m['signer_title'] ?? 'General Manager';
+    $deptName = $m['dept_name'] ?? 'HR Department';
 
-  // SIGNATURE: meta['sign_image'] > storage/app/public/ttdmahya.png > public/assets/sign_ceo.png
-  $signImage = $m['sign_image']
-               ?? (is_file(storage_path('app/public/ttdmahya.png')) ? storage_path('app/public/ttdmahya.png')
-                  : (is_file(public_path('assets/sign_ceo.png')) ? public_path('assets/sign_ceo.png') : null));
+    // SIGNATURE: meta['sign_image'] > storage/app/public/ttdmahya.png > public/assets/sign_ceo.png
+    $signImage = $m['sign_image']
+        ?? (is_file(storage_path('app/public/ttdmahya.png')) ? storage_path('app/public/ttdmahya.png')
+            : (is_file(public_path('assets/sign_ceo.png')) ? public_path('assets/sign_ceo.png') : null));
 
-  $gajiPokok = data_get($offer->salary, 'gross', 3912000);
-  $insLap    = data_get($offer->salary, 'allowance', null);
+    $gajiPokok = data_get($offer->salary, 'gross', 3912000);
+    $insLap = data_get($offer->salary, 'allowance', null);
 
-  $candidateName = $user?->name ?: 'Calon Karyawan';
-  $position      = $job?->title ?: 'Plant Engineer';
+    $candidateName = $user?->name ?: 'Calon Karyawan';
+    $position = $job?->title ?: 'Plant Engineer';
 
-  $today     = now()->timezone(config('app.timezone','Asia/Jakarta'));
-  $todayText = $today->translatedFormat('j F Y');
-  $joinText  = $joinDate ? \Illuminate\Support\Carbon::parse($joinDate)->translatedFormat('j F Y') : '';
+    $today = now()->timezone(config('app.timezone', 'Asia/Jakarta'));
+    $todayText = $today->translatedFormat('j F Y');
+    $joinText = $joinDate ? \Illuminate\Support\Carbon::parse($joinDate)->translatedFormat('j F Y') : '';
 
-  $fmt = fn($v)=>filled($v)?e($v):'&nbsp;';
-  $idr = fn($n)=>is_numeric($n)?'Rp. '.number_format((float)$n,0,',','.'):($n??'');
+    $fmt = fn($v) => filled($v) ? e($v) : '&nbsp;';
+    $idr = fn($n) => is_numeric($n) ? 'Rp. ' . number_format((float) $n, 0, ',', '.') : ($n ?? '');
 
-  // Pengurangan Penghasilan (dipisah " • ")
-  $bpjsText  = $m['bpjs_employee'] ?? 'BPJS JHT 2% • BPJS JP 1% • BPJS Kesehatan 1% (sesuai ketentuan)';
-  $bpjsItems = preg_split('/\s*•\s*/u', (string) $bpjsText, -1, PREG_SPLIT_NO_EMPTY);
+    // Pengurangan Penghasilan (dipisah " • ")
+    $bpjsText = $m['bpjs_employee'] ?? 'BPJS JHT 2% • BPJS JP 1% • BPJS Kesehatan 1% (sesuai ketentuan)';
+    $bpjsItems = preg_split('/\s*•\s*/u', (string) $bpjsText, -1, PREG_SPLIT_NO_EMPTY);
 
-  // Benefit
-  $benefit = [
-    'BPJS Kesehatan & BPJS Ketenagakerjaan.',
-    'BPJS Kesehatan untuk karyawan, pasangan, & maks. 3 anak (<21 th).',
-    'THR prorata sesuai peraturan perundang-undangan.',
-    'Transport & akomodasi saat field break mengikuti regulasi perusahaan.',
-    'Akomodasi: Mess, Laundry, Catering 3x.',
-  ];
+    // Benefit
+    $benefit = [
+        'BPJS Kesehatan & BPJS Ketenagakerjaan.',
+        'BPJS Kesehatan untuk karyawan, pasangan, & maks. 3 anak (<21 th).',
+        'THR prorata sesuai peraturan perundang-undangan.',
+        'Transport & akomodasi saat field break mengikuti regulasi perusahaan.',
+        'Akomodasi: Mess, Laundry, Catering 3x.',
+    ];
 @endphp
 <!doctype html>
 <html>
@@ -192,9 +192,9 @@
       <tr><td class="key">d. Roster Kerja</td><td class="sep">:</td><td class="val">12 Minggu On Site : 2 Minggu Field Break</td></tr>
 
       <tr><td class="sec" colspan="3">4. Gaji, Bonus, &amp; Pengurangan Penghasilan</td></tr>
-      <tr><td class="key">a. Gaji Pokok</td><td class="sep">:</td><td class="val"><strong>{!! $fmt($idr($gajiPokok)) !!}</strong> <span class="muted">{{ $gajiPokok!==null ? 'Gross/bulan' : '' }}</span></td></tr>
-      <tr><td class="key">b. Insentif Lapangan</td><td class="sep">:</td><td class="val">{!! $fmt($idr($insLap)) !!} <span class="muted">{{ $insLap!==null ? 'Nett/hari' : '' }}</span></td></tr>
-      <tr><td class="key">c. Overtime</td><td class="sep">:</td><td class="val">{!! $fmt($overtimeRate ? $idr($overtimeRate).' Jam/hari' : '') !!}</td></tr>
+      <tr><td class="key">a. Gaji Pokok</td><td class="sep">:</td><td class="val"><strong>{!! $fmt($idr($gajiPokok)) !!}</strong> <span class="muted">{{ $gajiPokok !== null ? 'Gross/bulan' : '' }}</span></td></tr>
+      <tr><td class="key">b. Insentif Lapangan</td><td class="sep">:</td><td class="val">{!! $fmt($idr($insLap)) !!} <span class="muted">{{ $insLap !== null ? 'Nett/hari' : '' }}</span></td></tr>
+      <tr><td class="key">c. Overtime</td><td class="sep">:</td><td class="val">{!! $fmt($overtimeRate ? $idr($overtimeRate) . ' Jam/hari' : '') !!}</td></tr>
       <tr><td class="key">d. Bonus Bulanan</td><td class="sep">:</td><td class="val">{!! $fmt($bonusBulanan) !!}</td></tr>
       <tr><td class="key">e. Pajak Penghasilan</td><td class="sep">:</td><td class="val">Ditanggung Perusahaan</td></tr>
       <tr>
@@ -207,9 +207,11 @@
       </tr>
 
       @php
-        $labels = ['a','b','c','d','e'];
+        $labels = ['a', 'b', 'c', 'd', 'e'];
         $benefitLines = [];
-        foreach ($benefit as $i => $text) { $benefitLines[] = $labels[$i].'. '.e($text); }
+        foreach ($benefit as $i => $text) {
+            $benefitLines[] = $labels[$i] . '. ' . e($text);
+        }
       @endphp
       <tr><td class="sec no5-head" colspan="3">5. Benefit</td></tr>
       <tr><td class="no5-full" colspan="3"><div style="margin:1px 0 0 0; padding:0; line-height:1.15;">{!! implode('<br>', $benefitLines) !!}</div></td></tr>

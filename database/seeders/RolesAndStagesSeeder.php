@@ -9,8 +9,8 @@ class RolesAndStagesSeeder extends Seeder
 {
     public function run(): void
     {
-        foreach (['pelamar','hr','superadmin'] as $r) {
-            Role::firstOrCreate(['name'=>$r, 'guard_name'=>'web']);
+        foreach (['pelamar', 'hr', 'superadmin'] as $r) {
+            Role::firstOrCreate(['name' => $r, 'guard_name' => 'web']);
         }
     }
 }

@@ -52,22 +52,22 @@
 
         {{-- Status sukses (link reset terkirim) --}}
         @if (session('status'))
-          <div class="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800" role="status" aria-live="polite">
-            <div class="flex items-start gap-2">
-              <svg class="mt-0.5 h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><path d="M10 15.172 6.414 11.586 5 13l5 5 9-9-1.414-1.414L10 15.172Z"/></svg>
-              <div>
-                {{ session('status') }}
-                <div class="text-[11px] text-emerald-700/80 mt-1">Jika tidak terlihat di inbox, periksa folder Spam/Promosi.</div>
+              <div class="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800" role="status" aria-live="polite">
+                <div class="flex items-start gap-2">
+                  <svg class="mt-0.5 h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><path d="M10 15.172 6.414 11.586 5 13l5 5 9-9-1.414-1.414L10 15.172Z"/></svg>
+                  <div>
+                    {{ session('status') }}
+                    <div class="text-[11px] text-emerald-700/80 mt-1">Jika tidak terlihat di inbox, periksa folder Spam/Promosi.</div>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
         @endif
 
         {{-- Error global (mis. throttle) --}}
         @if ($errors->any())
-          <div class="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-800" role="alert" aria-live="assertive">
-            {{ $errors->first() }}
-          </div>
+              <div class="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-800" role="alert" aria-live="assertive">
+                {{ $errors->first() }}
+              </div>
         @endif
 
         <div class="relative">
@@ -116,10 +116,10 @@
               <div class="text-center text-sm text-slate-600">
                 Ingat kata sandi Anda?
                 @if (Route::has('login'))
-                  <a class="font-medium text-blue-700 hover:text-blue-800 underline" href="{{ route('login') }}">Masuk</a>
+                      <a class="font-medium text-blue-700 hover:text-blue-800 underline" href="{{ route('login') }}">Masuk</a>
                 @endif
                 @if (Route::has('register'))
-                  • Belum punya akun? <a class="font-medium text-emerald-700 hover:text-emerald-800 underline" href="{{ route('register') }}">Daftar</a>
+                      • Belum punya akun? <a class="font-medium text-emerald-700 hover:text-emerald-800 underline" href="{{ route('register') }}">Daftar</a>
                 @endif
               </div>
             </form>

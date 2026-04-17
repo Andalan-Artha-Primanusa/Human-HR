@@ -40,9 +40,9 @@
 
         {{-- Alert global (error throttle/umum) --}}
         @if ($errors->any())
-          <div class="px-3 py-2 mb-4 text-sm border rounded-lg border-rose-200 bg-rose-50 text-rose-800">
-            {{ $errors->first() }}
-          </div>
+              <div class="px-3 py-2 mb-4 text-sm border rounded-lg border-rose-200 bg-rose-50 text-rose-800">
+                {{ $errors->first() }}
+              </div>
         @endif
 
         <div class="p-6 shadow-xl rounded-2xl bg-white/80 ring-1 ring-slate-200/80 backdrop-blur">

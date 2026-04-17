@@ -12,7 +12,7 @@ class EnsureRole
     {
         $allowed = array_map('trim', explode('|', $roles));
 
-        if (! $request->user() || ! in_array($request->user()->role, $allowed, true)) {
+        if (!$request->user() || !in_array($request->user()->role, $allowed, true)) {
             abort(403, 'Forbidden.');
         }
 

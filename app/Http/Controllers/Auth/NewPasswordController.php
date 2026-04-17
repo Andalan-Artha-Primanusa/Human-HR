@@ -31,14 +31,14 @@ class NewPasswordController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $request->validate([
-            'token'                 => ['required', 'string'],
-            'email'                 => ['required', 'email'],
-            'password'              => ['required', 'confirmed', Rules\Password::defaults()],
+            'token' => ['required', 'string'],
+            'email' => ['required', 'email'],
+            'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
         // Normalisasi + throttle key
         $email = Str::of($request->string('email'))->trim()->lower()->toString();
-        $key   = 'pwd-set:'.sha1($request->ip().'|'.$email);
+        $key = 'pwd-set:' . sha1($request->ip() . '|' . $email);
 
         // Batasi 5x/menit
         if (RateLimiter::tooManyAttempts($key, 5)) {
@@ -52,14 +52,14 @@ class NewPasswordController extends Controller
         // Jalankan reset: validasi token + set password
         $status = Password::reset(
             [
-                'email'                 => $email,
-                'password'              => $request->password,
+                'email' => $email,
+                'password' => $request->password,
                 'password_confirmation' => $request->password_confirmation,
-                'token'                 => $request->token,
+                'token' => $request->token,
             ],
             function (User $user) use ($request) {
                 $user->forceFill([
-                    'password'       => Hash::make($request->password),
+                    'password' => Hash::make($request->password),
                     'remember_token' => Str::random(60),
                     // Opsional: auto-verify email jika kebijakan mengizinkan
                     // 'email_verified_at' => $user->email_verified_at ?? now(),

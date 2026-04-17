@@ -26,7 +26,7 @@ class ManpowerRequirementController extends Controller
             120,
             ''
         );
-        $like = $q !== '' ? '%'.addcslashes($q, '\\%_').'%' : null;
+        $like = $q !== '' ? '%' . addcslashes($q, '\\%_') . '%' : null;
 
         $jobsForManpower = Job::query()
             ->select(['id', 'code', 'title', 'created_at'])
@@ -65,18 +65,18 @@ class ManpowerRequirementController extends Controller
         // JSON (opsional)
         if (request()->wantsJson()) {
             return response()->json([
-                'job'   => [
-                    'id'       => $job->id,
-                    'code'     => $job->code,
-                    'title'    => $job->title,
+                'job' => [
+                    'id' => $job->id,
+                    'code' => $job->code,
+                    'title' => $job->title,
                     'openings' => (int) $job->openings,
                 ],
-                'rows'  => $rows->map(function (ManpowerRequirement $m) {
+                'rows' => $rows->map(function (ManpowerRequirement $m) {
                     return [
-                        'id'               => $m->id,
-                        'asset_name'       => $m->asset_name,
-                        'assets_count'     => (int) $m->assets_count,
-                        'ratio_per_asset'  => (float) $m->ratio_per_asset,
+                        'id' => $m->id,
+                        'asset_name' => $m->asset_name,
+                        'assets_count' => (int) $m->assets_count,
+                        'ratio_per_asset' => (float) $m->ratio_per_asset,
                         'budget_headcount' => (int) $m->budget_headcount,
                         'filled_headcount' => (int) $m->filled_headcount,
                     ];
@@ -96,11 +96,11 @@ class ManpowerRequirementController extends Controller
     public function update(Request $request, Job $job): RedirectResponse|JsonResponse
     {
         $data = $request->validate([
-            'asset_name'      => ['nullable','string','max:120'],
-            'assets_count'    => ['required','integer','min:0'],
-            'ratio_per_asset' => ['required','numeric','between:0,9.99'],
+            'asset_name' => ['nullable', 'string', 'max:120'],
+            'assets_count' => ['required', 'integer', 'min:0'],
+            'ratio_per_asset' => ['required', 'numeric', 'between:0,9.99'],
             // jika update baris existing by id:
-            'row_id'          => ['nullable','uuid'],
+            'row_id' => ['nullable', 'uuid'],
         ]);
 
         /** @var ManpowerRequirement $row */
@@ -114,18 +114,18 @@ class ManpowerRequirementController extends Controller
                     ->firstOrFail();
 
                 $row->fill([
-                    'asset_name'      => $data['asset_name'] ?? null,
-                    'assets_count'    => (int) $data['assets_count'],
+                    'asset_name' => $data['asset_name'] ?? null,
+                    'assets_count' => (int) $data['assets_count'],
                     'ratio_per_asset' => (float) $data['ratio_per_asset'],
                 ])->save();
             } else {
                 $row = ManpowerRequirement::updateOrCreate(
                     [
-                        'job_id'     => $job->id,
+                        'job_id' => $job->id,
                         'asset_name' => $data['asset_name'] ?? null,
                     ],
                     [
-                        'assets_count'    => (int) $data['assets_count'],
+                        'assets_count' => (int) $data['assets_count'],
                         'ratio_per_asset' => (float) $data['ratio_per_asset'],
                     ]
                 );
@@ -134,16 +134,16 @@ class ManpowerRequirementController extends Controller
         });
 
         $payload = [
-            'message'  => 'Manpower tersimpan & openings tersinkron.',
-            'job'      => [
-                'id'       => $job->id,
+            'message' => 'Manpower tersimpan & openings tersinkron.',
+            'job' => [
+                'id' => $job->id,
                 'openings' => (int) $job->fresh()->openings,
             ],
             'row' => [
-                'id'               => $row->id,
-                'asset_name'       => $row->asset_name,
-                'assets_count'     => (int) $row->assets_count,
-                'ratio_per_asset'  => (float) $row->ratio_per_asset,
+                'id' => $row->id,
+                'asset_name' => $row->asset_name,
+                'assets_count' => (int) $row->assets_count,
+                'ratio_per_asset' => (float) $row->ratio_per_asset,
                 'budget_headcount' => (int) $row->budget_headcount,
             ],
         ];
@@ -181,23 +181,23 @@ class ManpowerRequirementController extends Controller
     public function preview(Request $request): JsonResponse
     {
         $data = $request->validate([
-            'assets_count'    => ['required','integer','min:0'],
-            'ratio_per_asset' => ['required','numeric','between:0,9.99'],
+            'assets_count' => ['required', 'integer', 'min:0'],
+            'ratio_per_asset' => ['required', 'numeric', 'between:0,9.99'],
         ]);
 
         $assets = (int) $data['assets_count'];
-        $ratio  = (float) $data['ratio_per_asset'];
+        $ratio = (float) $data['ratio_per_asset'];
         $budget = (int) ceil($assets * $ratio);
 
         return response()->json([
-            'input'  => [
-                'assets_count'    => $assets,
+            'input' => [
+                'assets_count' => $assets,
                 'ratio_per_asset' => $ratio,
             ],
             'result' => [
                 'budget_headcount' => $budget,
             ],
-            'note'   => 'Ini hanya preview. Untuk menyimpan & menyinkronkan openings, gunakan endpoint update.',
+            'note' => 'Ini hanya preview. Untuk menyimpan & menyinkronkan openings, gunakan endpoint update.',
         ]);
     }
 
@@ -207,31 +207,37 @@ class ManpowerRequirementController extends Controller
      */
     public function __invoke()
     {
-        $openJobs   = Job::query()->where('status','open')->count('id');
-        $activeApps = JobApplication::query()->where('overall_status','active')->count('id');
+        $openJobs = Job::query()->where('status', 'open')->count('id');
+        $activeApps = JobApplication::query()->where('overall_status', 'active')->count('id');
 
         $byStage = JobApplication::query()
-                ->selectRaw("COALESCE(NULLIF(current_stage, ''), 'unknown') AS stage_key, COUNT(*) AS total")
-                ->groupByRaw("COALESCE(NULLIF(current_stage, ''), 'unknown')")
-                ->pluck('total','stage_key')
-                    ->toArray();
+            ->selectRaw("COALESCE(NULLIF(current_stage, ''), 'unknown') AS stage_key, COUNT(*) AS total")
+            ->groupByRaw("COALESCE(NULLIF(current_stage, ''), 'unknown')")
+            ->pluck('total', 'stage_key')
+            ->toArray();
 
         $req = DB::table('manpower_requirements')
             ->selectRaw('COALESCE(SUM(budget_headcount), 0) as budget, COALESCE(SUM(filled_headcount), 0) as filled')
             ->first();
 
-        $budget = (int)($req->budget ?? 0);
-        $filled = (int)($req->filled ?? 0);
+        $budget = (int) ($req->budget ?? 0);
+        $filled = (int) ($req->filled ?? 0);
         $fulfillment = $budget > 0 ? round($filled / $budget * 100, 1) : 0;
 
         $jobsForManpower = Job::query()
-            ->select('id','code','title')
-            ->orderBy('created_at','desc')
+            ->select('id', 'code', 'title')
+            ->orderBy('created_at', 'desc')
             ->limit(100)
             ->get();
 
         return view('admin.dashboard.manpower', compact(
-            'openJobs','activeApps','byStage','budget','filled','fulfillment','jobsForManpower'
+            'openJobs',
+            'activeApps',
+            'byStage',
+            'budget',
+            'filled',
+            'fulfillment',
+            'jobsForManpower'
         ));
     }
 }

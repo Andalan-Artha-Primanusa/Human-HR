@@ -34,7 +34,7 @@ class InterviewController extends Controller
             120,
             ''
         );
-        $like = $q !== '' ? '%'.addcslashes($q, '\\%_').'%' : null;
+        $like = $q !== '' ? '%' . addcslashes($q, '\\%_') . '%' : null;
 
         $interviews = Interview::query()
             ->select(['id', 'application_id', 'title', 'mode', 'start_at', 'end_at', 'location', 'meeting_link', 'notes'])
@@ -46,7 +46,7 @@ class InterviewController extends Controller
             ->when($like !== null, function ($qq) use ($like) {
                 $qq->where(function ($w) use ($like) {
                     $w->whereHas('application.job', fn($j) => $j->where('title', 'like', $like))
-                      ->orWhereHas('application.user', fn($u) => $u->where('name', 'like', $like));
+                        ->orWhereHas('application.user', fn($u) => $u->where('name', 'like', $like));
                 });
             })
             ->orderBy('start_at')
@@ -73,15 +73,15 @@ class InterviewController extends Controller
             ->firstOrFail();
 
         $data = $request->validate([
-            'title'         => ['required', 'string', 'max:200'],
-            'mode'          => ['required', Rule::in(['online', 'onsite'])],
-            'location'      => ['nullable', 'string', 'max:255', 'required_if:mode,onsite'],
-            'meeting_link'  => ['nullable', 'url', 'max:255', 'required_if:mode,online'],
-            'start_at'      => ['required', 'date'],
-            'end_at'        => ['required', 'date', 'after:start_at'],
-            'panel'         => ['nullable', 'array', 'max:20'],
-            'panel.*'       => ['nullable', 'string', 'max:120'], // nama/role interviewer
-            'notes'         => ['nullable', 'string'],
+            'title' => ['required', 'string', 'max:200'],
+            'mode' => ['required', Rule::in(['online', 'onsite'])],
+            'location' => ['nullable', 'string', 'max:255', 'required_if:mode,onsite'],
+            'meeting_link' => ['nullable', 'url', 'max:255', 'required_if:mode,online'],
+            'start_at' => ['required', 'date'],
+            'end_at' => ['required', 'date', 'after:start_at'],
+            'panel' => ['nullable', 'array', 'max:20'],
+            'panel.*' => ['nullable', 'string', 'max:120'], // nama/role interviewer
+            'notes' => ['nullable', 'string'],
         ]);
 
         $panel = collect((array) ($data['panel'] ?? []))
@@ -92,16 +92,16 @@ class InterviewController extends Controller
 
         // Simpan
         $iv = new Interview();
-        $iv->id             = (string) Str::uuid();
+        $iv->id = (string) Str::uuid();
         $iv->application_id = $app->id;
-        $iv->title          = $data['title'];
-        $iv->mode           = $data['mode'];
-        $iv->location       = $data['location'] ?? null;
-        $iv->meeting_link   = $data['meeting_link'] ?? null;
-        $iv->start_at       = $data['start_at'];
-        $iv->end_at         = $data['end_at'];
-        $iv->panel          = !empty($panel) ? $panel : null;
-        $iv->notes          = $data['notes'] ?? null;
+        $iv->title = $data['title'];
+        $iv->mode = $data['mode'];
+        $iv->location = $data['location'] ?? null;
+        $iv->meeting_link = $data['meeting_link'] ?? null;
+        $iv->start_at = $data['start_at'];
+        $iv->end_at = $data['end_at'];
+        $iv->panel = !empty($panel) ? $panel : null;
+        $iv->notes = $data['notes'] ?? null;
         $iv->save();
 
         // Kirim notifikasi ke kandidat (database notification)
@@ -124,15 +124,15 @@ class InterviewController extends Controller
         $iv = Interview::query()->whereKey($interview)->firstOrFail();
 
         $data = $request->validate([
-            'title'         => ['required', 'string', 'max:200'],
-            'mode'          => ['required', Rule::in(['online', 'onsite'])],
-            'location'      => ['nullable', 'string', 'max:255', 'required_if:mode,onsite'],
-            'meeting_link'  => ['nullable', 'url', 'max:255', 'required_if:mode,online'],
-            'start_at'      => ['required', 'date'],
-            'end_at'        => ['required', 'date', 'after:start_at'],
-            'panel'         => ['nullable', 'array', 'max:20'],
-            'panel.*'       => ['nullable', 'string', 'max:120'],
-            'notes'         => ['nullable', 'string'],
+            'title' => ['required', 'string', 'max:200'],
+            'mode' => ['required', Rule::in(['online', 'onsite'])],
+            'location' => ['nullable', 'string', 'max:255', 'required_if:mode,onsite'],
+            'meeting_link' => ['nullable', 'url', 'max:255', 'required_if:mode,online'],
+            'start_at' => ['required', 'date'],
+            'end_at' => ['required', 'date', 'after:start_at'],
+            'panel' => ['nullable', 'array', 'max:20'],
+            'panel.*' => ['nullable', 'string', 'max:120'],
+            'notes' => ['nullable', 'string'],
         ]);
 
         $panel = collect((array) ($data['panel'] ?? []))
@@ -142,14 +142,14 @@ class InterviewController extends Controller
             ->all();
 
         $iv->fill([
-            'title'        => $data['title'],
-            'mode'         => $data['mode'],
-            'location'     => $data['location'] ?? null,
+            'title' => $data['title'],
+            'mode' => $data['mode'],
+            'location' => $data['location'] ?? null,
             'meeting_link' => $data['meeting_link'] ?? null,
-            'start_at'     => $data['start_at'],
-            'end_at'       => $data['end_at'],
-            'panel'        => !empty($panel) ? $panel : null,
-            'notes'        => $data['notes'] ?? null,
+            'start_at' => $data['start_at'],
+            'end_at' => $data['end_at'],
+            'panel' => !empty($panel) ? $panel : null,
+            'notes' => $data['notes'] ?? null,
         ])->save();
 
         return back()->with('ok', 'Jadwal interview diperbarui.');

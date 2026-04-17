@@ -12,10 +12,10 @@ return new class extends Migration {
 
             // Company (opsional)
             $t->foreignUuid('company_id')
-              ->nullable()
-              ->constrained('companies')
-              ->nullOnDelete()
-              ->cascadeOnUpdate();
+                ->nullable()
+                ->constrained('companies')
+                ->nullOnDelete()
+                ->cascadeOnUpdate();
 
             // Kode unik per company
             $t->string('code');
@@ -23,10 +23,10 @@ return new class extends Migration {
             // Info utama
             $t->string('title');
             $t->foreignUuid('site_id')
-              ->nullable()
-              ->constrained('sites')
-              ->nullOnDelete()
-              ->cascadeOnUpdate();
+                ->nullable()
+                ->constrained('sites')
+                ->nullOnDelete()
+                ->cascadeOnUpdate();
 
             $t->string('division')->nullable()->index();
             $t->string('level')->nullable();
@@ -47,9 +47,9 @@ return new class extends Migration {
 
             // Audit: siapa buat & update (opsional)
             $t->foreignUuid('created_by')->nullable()
-              ->constrained('users')->nullOnDelete()->cascadeOnUpdate();
+                ->constrained('users')->nullOnDelete()->cascadeOnUpdate();
             $t->foreignUuid('updated_by')->nullable()
-              ->constrained('users')->nullOnDelete()->cascadeOnUpdate();
+                ->constrained('users')->nullOnDelete()->cascadeOnUpdate();
 
             $t->timestamps();
 

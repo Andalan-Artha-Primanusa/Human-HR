@@ -48,54 +48,74 @@ class ApplicationController extends Controller
     /** Alias masuk -> canonical (biar input bebas, key-nya konsisten) */
     protected array $ALIASES_IN = [
         // dasar
-        'apply' => 'applied','applied' => 'applied',
+        'apply' => 'applied',
+        'applied' => 'applied',
 
         // screening / seleksi berkas
         'screening' => 'screening',
-        'screening_cv' => 'screening','screening-berkas' => 'screening',
-        'screening_berkas' => 'screening','seleksi_berkas' => 'screening',
+        'screening_cv' => 'screening',
+        'screening-berkas' => 'screening',
+        'screening_berkas' => 'screening',
+        'seleksi_berkas' => 'screening',
 
         // psikotes
-        'psychotest' => 'psychotest','psikotest' => 'psychotest',
+        'psychotest' => 'psychotest',
+        'psikotest' => 'psychotest',
 
         // interview
-        'hr_iv' => 'hr_iv','hriv'=>'hr_iv','hr-interview' => 'hr_iv',
-        'user_iv'=>'user_iv','useriv'=>'user_iv','user-interview' => 'user_iv',
-        'user_trainer_iv' => 'user_trainer_iv','user-trainer' => 'user_trainer_iv',
-        'trainer_iv' => 'user_trainer_iv','trainer-interview' => 'user_trainer_iv',
+        'hr_iv' => 'hr_iv',
+        'hriv' => 'hr_iv',
+        'hr-interview' => 'hr_iv',
+        'user_iv' => 'user_iv',
+        'useriv' => 'user_iv',
+        'user-interview' => 'user_iv',
+        'user_trainer_iv' => 'user_trainer_iv',
+        'user-trainer' => 'user_trainer_iv',
+        'trainer_iv' => 'user_trainer_iv',
+        'trainer-interview' => 'user_trainer_iv',
 
         // offering letter
-        'offering'=>'offer','offer'=>'offer','ol' => 'offer',
+        'offering' => 'offer',
+        'offer' => 'offer',
+        'ol' => 'offer',
 
         // medis & mobilisasi
-        'mcu' => 'mcu','medical_checkup' => 'mcu',
-        'mobilisasi' => 'mobilisasi','mobilization' => 'mobilisasi',
+        'mcu' => 'mcu',
+        'medical_checkup' => 'mcu',
+        'mobilisasi' => 'mobilisasi',
+        'mobilization' => 'mobilisasi',
 
         // ground test
-        'ground_test' => 'ground_test','ground-test' => 'ground_test',
+        'ground_test' => 'ground_test',
+        'ground-test' => 'ground_test',
 
         // hasil akhir
-        'diterima'=>'hired','hired'=>'hired',
-        'rejected'=>'not_qualified','not_qualified'=>'not_qualified','not-qualified'=>'not_qualified','notqualified'=>'not_qualified',
+        'diterima' => 'hired',
+        'hired' => 'hired',
+        'rejected' => 'not_qualified',
+        'not_qualified' => 'not_qualified',
+        'not-qualified' => 'not_qualified',
+        'notqualified' => 'not_qualified',
 
         // kompat lama (tidak tampil sebagai kolom, tapi masih diterima)
-        'final'=>'user_iv','final_interview'=>'user_iv',
+        'final' => 'user_iv',
+        'final_interview' => 'user_iv',
     ];
 
     /** Label cantik (untuk UI) */
     protected array $PRETTY = [
-        'applied'         => 'Applied',
-        'screening'       => 'Screening CV/Berkas Lamaran',
-        'psychotest'      => 'Psikotest',
-        'hr_iv'           => 'HR Interview',
-        'user_iv'         => 'User Interview',
+        'applied' => 'Applied',
+        'screening' => 'Screening CV/Berkas Lamaran',
+        'psychotest' => 'Psikotest',
+        'hr_iv' => 'HR Interview',
+        'user_iv' => 'User Interview',
         'user_trainer_iv' => 'User/Trainer Interview',
-        'offer'           => 'OL',
-        'mcu'             => 'MCU',
-        'mobilisasi'      => 'Mobilisasi',
-        'ground_test'     => 'Ground Test',
-        'hired'           => 'Hired',
-        'not_qualified'   => 'Tidak Lolos',
+        'offer' => 'OL',
+        'mcu' => 'MCU',
+        'mobilisasi' => 'Mobilisasi',
+        'ground_test' => 'Ground Test',
+        'hired' => 'Hired',
+        'not_qualified' => 'Tidak Lolos',
     ];
 
     /** Offer yang baru dibuat (untuk redirect ke PDF) */
@@ -105,11 +125,11 @@ class ApplicationController extends Controller
     public function index(Request $request)
     {
         $apps = JobApplication::with([
-                'job:id,title,division,site_id',
-                'job.site:id,code,name',
-                'stages.actor:id,name',
-                'stages.user:id,name',
-            ])
+            'job:id,title,division,site_id',
+            'job.site:id,code,name',
+            'stages.actor:id,name',
+            'stages.user:id,name',
+        ])
             ->where('user_id', $request->user()->id)
             ->orderByDesc('created_at')
             ->orderByDesc('id')
@@ -125,32 +145,38 @@ class ApplicationController extends Controller
 
         $already = JobApplication::where('job_id', $job->id)
             ->where('user_id', $request->user()->id)
-            ->exists();
+            ->first();
 
         if ($already) {
+            // Sudah pernah melamar, langsung redirect ke profil (tanpa isi form lagi)
             return redirect()
                 ->route('candidate.profiles.edit', ['job' => $job->id])
                 ->with('info', 'Kamu sudah melamar. Silakan lengkapi/cek data profil.');
         }
 
-        DB::transaction(function () use ($request, $job) {
+        $data = $request->validate([
+            'poh_id' => ['nullable', 'uuid', 'exists:pohs,id'],
+        ]);
+
+        DB::transaction(function () use ($request, $job, $data) {
             /** @var JobApplication $app */
             $app = JobApplication::create([
-                'job_id'         => $job->id,
-                'user_id'        => $request->user()->id,
-                'current_stage'  => 'applied',
+                'job_id' => $job->id,
+                'user_id' => $request->user()->id,
+                'poh_id' => $data['poh_id'] ?? null,
+                'current_stage' => 'applied',
                 'overall_status' => 'active',
             ]);
 
             ApplicationStage::create([
                 'application_id' => $app->id,
-                'stage_key'      => 'applied',
-                'status'         => 'pending',
-                'score'          => null,
-                'payload'        => ['note' => 'Initial application submitted'],
-                'acted_by'       => $request->user()->id,
-                'user_id'        => $request->user()->id,
-                'notes'          => null,
+                'stage_key' => 'applied',
+                'status' => 'pending',
+                'score' => null,
+                'payload' => ['note' => 'Initial application submitted'],
+                'acted_by' => $request->user()->id,
+                'user_id' => $request->user()->id,
+                'notes' => null,
             ]);
 
             CandidateProfile::firstOrCreate(
@@ -173,11 +199,11 @@ class ApplicationController extends Controller
             'site' => ['nullable', 'string', 'max:50'],
         ]);
 
-        $qRaw  = (string) ($filters['q'] ?? '');
-        $q     = Str::limit(preg_replace('/[\x00-\x1F\x7F]/u', '', trim($qRaw)) ?? '', 120, '');
-        $like  = $q !== '' ? '%'.addcslashes($q, '\\%_').'%' : null;
+        $qRaw = (string) ($filters['q'] ?? '');
+        $q = Str::limit(preg_replace('/[\x00-\x1F\x7F]/u', '', trim($qRaw)) ?? '', 120, '');
+        $like = $q !== '' ? '%' . addcslashes($q, '\\%_') . '%' : null;
         $stage = (string) ($filters['stage'] ?? '');
-        $site  = (string) ($filters['site'] ?? '');
+        $site = (string) ($filters['site'] ?? '');
 
         $stage = $this->normalizeStage($stage);
 
@@ -189,22 +215,22 @@ class ApplicationController extends Controller
                 'stages.actor:id,name',
                 'stages.user:id,name',
             ])
-                        ->when($like !== null, function ($qq) use ($like) {
-                                $qq->where(function ($w) use ($like) {
-                                        $w->whereHas('user', fn ($u) => $u->where('name', 'like', $like))
-                                            ->orWhereHas('job', function ($j) use ($like) {
-                                                    $j->where('title', 'like', $like)
-                                                        ->orWhere('division', 'like', $like)
-                                                        ->orWhereHas('site', fn ($s) => $s->where('code', 'like', $like));
-                      });
+            ->when($like !== null, function ($qq) use ($like) {
+                $qq->where(function ($w) use ($like) {
+                    $w->whereHas('user', fn($u) => $u->where('name', 'like', $like))
+                        ->orWhereHas('job', function ($j) use ($like) {
+                            $j->where('title', 'like', $like)
+                                ->orWhere('division', 'like', $like)
+                                ->orWhereHas('site', fn($s) => $s->where('code', 'like', $like));
+                        });
                 });
             })
-            ->when($stage, fn ($qq) => $qq->where('current_stage', $stage))
-            ->when($site,  fn ($qq) => $qq->whereHas('job.site', fn ($s) => $s->where('code', $site)))
-                        ->orderByDesc('created_at')
-                        ->orderByDesc('id')
-                        ->paginate(15)
-                        ->withQueryString();
+            ->when($stage, fn($qq) => $qq->where('current_stage', $stage))
+            ->when($site, fn($qq) => $qq->whereHas('job.site', fn($s) => $s->where('code', $site)))
+            ->orderByDesc('created_at')
+            ->orderByDesc('id')
+            ->paginate(15)
+            ->withQueryString();
 
         return view('admin.applications.index', compact('apps'));
     }
@@ -215,14 +241,14 @@ class ApplicationController extends Controller
         $stages = $this->STAGES;
 
         $apps = JobApplication::with([
-                'job:id,title,division,site_id',
-                'job.site:id,code,name',
-                'user:id,name',
-                'stages.actor:id,name',
-                'stages.user:id,name',
-            ])
-            ->when($request->filled('job_id'), fn ($q) => $q->where('job_id', $request->job_id))
-            ->when($request->filled('only'),  function ($q) use ($request) {
+            'job:id,title,division,site_id',
+            'job.site:id,code,name',
+            'user:id,name',
+            'stages.actor:id,name',
+            'stages.user:id,name',
+        ])
+            ->when($request->filled('job_id'), fn($q) => $q->where('job_id', $request->job_id))
+            ->when($request->filled('only'), function ($q) use ($request) {
                 $only = collect(explode(',', $request->only))
                     ->map(fn($s) => $this->normalizeStage($s))
                     ->filter()
@@ -237,11 +263,12 @@ class ApplicationController extends Controller
         $grouped = collect($stages)->mapWithKeys(fn($s) => [$s => collect()]);
         foreach ($apps as $a) {
             $key = $this->normalizeStage($a->current_stage) ?: 'applied';
-            if (!in_array($key, $stages, true)) $key = 'applied';
+            if (!in_array($key, $stages, true))
+                $key = 'applied';
             $grouped[$key]->push($a);
         }
 
-        return view('admin.applications.board', compact('stages','grouped'));
+        return view('admin.applications.board', compact('stages', 'grouped'));
     }
 
     /** Admin: pindahkan stage aplikasi (via tombol/POST) */
@@ -267,10 +294,10 @@ class ApplicationController extends Controller
         $attempt = $this->applyTransition($application, $to, $status, $note, $score);
 
         return response()->json([
-            'ok'       => true,
+            'ok' => true,
             'moved_to' => $to,
-            'id'       => $application->id,
-            'attempt'  => $attempt?->id ?? null,
+            'id' => $application->id,
+            'attempt' => $attempt?->id ?? null,
         ]);
     }
 
@@ -278,7 +305,8 @@ class ApplicationController extends Controller
 
     protected function normalizeStage(?string $s): ?string
     {
-        if (!$s) return null;
+        if (!$s)
+            return null;
         $key = strtolower(trim($s));
         return $this->ALIASES_IN[$key] ?? (in_array($key, $this->STAGES, true) ? $key : null);
     }
@@ -294,11 +322,14 @@ class ApplicationController extends Controller
     protected function isBackwardBeforeOffer(string $from, string $to): bool
     {
         $offerIdx = $this->stageIndex('offer');
-        $fromIdx  = $this->stageIndex($from);
-        $toIdx    = $this->stageIndex($to);
-        if ($offerIdx < 0) return false;
-        if ($fromIdx < 0)  return false;
-        if ($toIdx   < 0)  return false;
+        $fromIdx = $this->stageIndex($from);
+        $toIdx = $this->stageIndex($to);
+        if ($offerIdx < 0)
+            return false;
+        if ($fromIdx < 0)
+            return false;
+        if ($toIdx < 0)
+            return false;
         return $toIdx < $offerIdx && $fromIdx >= $offerIdx;
     }
 
@@ -307,7 +338,8 @@ class ApplicationController extends Controller
     {
         /** @var Offer|null $offer */
         $offer = $application->offer()->first();
-        if (!$offer) return;
+        if (!$offer)
+            return;
 
         $this->purgeOfferFiles($offer);
         $offer->delete();
@@ -340,22 +372,22 @@ class ApplicationController extends Controller
     protected function validateMove(Request $request): array
     {
         $allowedStages = array_unique(array_merge($this->STAGES, array_values($this->ALIASES_IN)));
-        $allowedStatus = ['pending','passed','failed','no-show','reschedule'];
+        $allowedStatus = ['pending', 'passed', 'failed', 'no-show', 'reschedule'];
 
         $toRaw = $request->input('to') ?? $request->input('to_stage');
 
         $validated = $request->validate([
-            'to'        => ['nullable', Rule::in($allowedStages)],
-            'to_stage'  => ['nullable', Rule::in($allowedStages)],
-            'status'    => ['nullable', Rule::in($allowedStatus)],
-            'note'      => ['nullable', 'string'],
-            'score'     => ['nullable', 'numeric'],
+            'to' => ['nullable', Rule::in($allowedStages)],
+            'to_stage' => ['nullable', Rule::in($allowedStages)],
+            'status' => ['nullable', Rule::in($allowedStatus)],
+            'note' => ['nullable', 'string'],
+            'score' => ['nullable', 'numeric'],
         ]);
 
-        $to     = $this->normalizeStage($toRaw) ?: 'applied';
+        $to = $this->normalizeStage($toRaw) ?: 'applied';
         $status = $validated['status'] ?? 'pending';
-        $note   = $validated['note']   ?? null;
-        $score  = isset($validated['score']) ? (float) $validated['score'] : null;
+        $note = $validated['note'] ?? null;
+        $score = isset($validated['score']) ? (float) $validated['score'] : null;
 
         return [$to, $status, $note, $score];
     }
@@ -372,7 +404,7 @@ class ApplicationController extends Controller
         $actor = $actorUser?->name ?? 'System';
 
         DB::transaction(function () use ($application, $to, $status, $note, $score, &$attempt, $userId, $actor) {
-            $from     = $application->current_stage;
+            $from = $application->current_stage;
             $prevOverall = $application->overall_status;
 
             // === Jika mundur ke sebelum 'offer', hapus Offer + file ===
@@ -384,13 +416,13 @@ class ApplicationController extends Controller
             // timeline
             ApplicationStage::create([
                 'application_id' => $application->id,
-                'stage_key'      => $to,
-                'status'         => $status ?: 'pending',
-                'score'          => $score,
-                'payload'        => ['note' => $note],
-                'acted_by'       => $userId,
-                'user_id'        => $userId,
-                'notes'          => $note,
+                'stage_key' => $to,
+                'status' => $status ?: 'pending',
+                'score' => $score,
+                'payload' => ['note' => $note],
+                'acted_by' => $userId,
+                'user_id' => $userId,
+                'notes' => $note,
             ]);
 
             // current stage
@@ -403,15 +435,15 @@ class ApplicationController extends Controller
 
                 if (!$existing) {
                     // (opsional) prefill dari job
-                    $job   = $application->job()->with(['site:id,code'])->first();
-                    $gross = (float) ($job->default_gross     ?? 0);
+                    $job = $application->job()->with(['site:id,code'])->first();
+                    $gross = (float) ($job->default_gross ?? 0);
                     $allow = (float) ($job->default_allowance ?? 0);
 
                     $existing = $application->offer()->create([
-                        'status'        => 'draft',
-                        'salary'        => ['gross' => $gross, 'allowance' => $allow],
+                        'status' => 'draft',
+                        'salary' => ['gross' => $gross, 'allowance' => $allow],
                         'body_template' => null, // gunakan Blade offers.pdf
-                        'meta'          => [
+                        'meta' => [
                             'job_title' => $job?->title,
                             'site_code' => $job?->site?->code,
                         ],
@@ -424,7 +456,7 @@ class ApplicationController extends Controller
 
             // overall status & headcount
             if ($to === 'hired') {
-                $job = $application->job()->with('manpowerRequirement','site:id,code','company:id,code')->first();
+                $job = $application->job()->with('manpowerRequirement', 'site:id,code', 'company:id,code')->first();
                 if ($job && $job->manpowerRequirement) {
                     $job->manpowerRequirement->increment('filled_headcount');
                     if ($job->manpowerRequirement->filled_headcount >= $job->manpowerRequirement->budget_headcount) {
@@ -461,10 +493,10 @@ class ApplicationController extends Controller
                 $test = PsychotestTest::where('is_active', true)->latest('updated_at')->first();
                 if (!$test) {
                     $test = PsychotestTest::create([
-                        'name'             => 'Tes Dasar (Auto)',
+                        'name' => 'Tes Dasar (Auto)',
                         'duration_minutes' => 20,
-                        'scoring'          => ['pass_ratio' => 0.6],
-                        'is_active'        => true,
+                        'scoring' => ['pass_ratio' => 0.6],
+                        'is_active' => true,
                     ]);
                 }
 
@@ -475,25 +507,25 @@ class ApplicationController extends Controller
                 if (!$attempt) {
                     $attempt = PsychotestAttempt::create([
                         'application_id' => $application->id,
-                        'test_id'        => $test->id,
-                        'user_id'        => $application->user_id,
-                        'attempt_no'     => 1,
-                        'status'         => 'pending',
-                        'is_active'      => true,
-                        'started_at'     => null,
-                        'submitted_at'   => null,
-                        'expires_at'     => now()->addDays(3),
-                        'score'          => null,
-                        'meta'           => ['note' => 'auto-created on stage move'],
+                        'test_id' => $test->id,
+                        'user_id' => $application->user_id,
+                        'attempt_no' => 1,
+                        'status' => 'pending',
+                        'is_active' => true,
+                        'started_at' => null,
+                        'submitted_at' => null,
+                        'expires_at' => now()->addDays(3),
+                        'score' => null,
+                        'meta' => ['note' => 'auto-created on stage move'],
                     ]);
                 }
             }
 
             // Notifikasi ke pelamar
             $appReload = $application->fresh(['job:id,title', 'user:id,name']);
-            $jobTitle  = $appReload->job?->title ?? '—';
-            $toPretty  = $this->PRETTY[$to] ?? strtoupper($to);
-            $fromPretty= $from ? ($this->PRETTY[$from] ?? strtoupper($from)) : null;
+            $jobTitle = $appReload->job?->title ?? '—';
+            $toPretty = $this->PRETTY[$to] ?? strtoupper($to);
+            $fromPretty = $from ? ($this->PRETTY[$from] ?? strtoupper($from)) : null;
 
             $title = 'Perubahan Proses Lamaran';
             if ($appReload->overall_status === 'hired' && $prevOverall !== 'hired') {
@@ -508,32 +540,32 @@ class ApplicationController extends Controller
             $url = route('applications.mine');
 
             DatabaseNotification::create([
-                'id'              => (string) Str::uuid(),
-                'type'            => 'app:application.stage_changed',
+                'id' => (string) Str::uuid(),
+                'type' => 'app:application.stage_changed',
                 'notifiable_type' => User::class,
-                'notifiable_id'   => $appReload->user_id,
-                'data'            => [
-                    'title'           => $title,
-                    'body'            => $body,
-                    'job_title'       => $jobTitle,
-                    'application_id'  => $appReload->id,
-                    'job_id'          => $appReload->job_id,
-                    'stage_from'      => $from,
-                    'stage_to'        => $to,
-                    'stage_from_label'=> $fromPretty,
-                    'stage_to_label'  => $toPretty,
-                    'overall_status'  => $appReload->overall_status,
-                    'status_label'    => strtoupper($appReload->overall_status ?? 'ACTIVE'),
-                    'actor_id'        => $userId,
-                    'actor_name'      => $actor,
-                    'note'            => $note,
-                    'score'           => $score,
-                    'when_wib'        => Carbon::now('Asia/Jakarta')->format('d M Y, H:i').' WIB',
-                    'url'             => $url,
+                'notifiable_id' => $appReload->user_id,
+                'data' => [
+                    'title' => $title,
+                    'body' => $body,
+                    'job_title' => $jobTitle,
+                    'application_id' => $appReload->id,
+                    'job_id' => $appReload->job_id,
+                    'stage_from' => $from,
+                    'stage_to' => $to,
+                    'stage_from_label' => $fromPretty,
+                    'stage_to_label' => $toPretty,
+                    'overall_status' => $appReload->overall_status,
+                    'status_label' => strtoupper($appReload->overall_status ?? 'ACTIVE'),
+                    'actor_id' => $userId,
+                    'actor_name' => $actor,
+                    'note' => $note,
+                    'score' => $score,
+                    'when_wib' => Carbon::now('Asia/Jakarta')->format('d M Y, H:i') . ' WIB',
+                    'url' => $url,
                 ],
-                'read_at'         => null,
-                'created_at'      => now(),
-                'updated_at'      => now(),
+                'read_at' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
             ]);
         });
 
@@ -543,7 +575,7 @@ class ApplicationController extends Controller
     /** Redirect pintar setelah perpindahan stage */
     protected function redirectAfterMove(Request $request, JobApplication $application, string $to, $attempt = null)
     {
-        $isOwner = $request->user() && (string)$request->user()->id === (string)$application->user_id;
+        $isOwner = $request->user() && (string) $request->user()->id === (string) $application->user_id;
 
         switch ($to) {
             case 'psychotest':
@@ -558,7 +590,7 @@ class ApplicationController extends Controller
             case 'user_iv':
             case 'user_trainer_iv':
                 return redirect()->route('admin.interviews.index', ['focus' => $application->id])
-                    ->with('ok', 'Stage dipindah ke '.strtoupper($this->PRETTY[$to] ?? $to).'.');
+                    ->with('ok', 'Stage dipindah ke ' . strtoupper($this->PRETTY[$to] ?? $to) . '.');
 
             case 'offer': {
                 $offer = $this->offerJustCreated ?: $application->offer()->first();
@@ -574,7 +606,7 @@ class ApplicationController extends Controller
             case 'mobilisasi':
             case 'ground_test':
                 return redirect()->route('admin.applications.index', ['focus' => $application->id])
-                    ->with('ok', 'Stage dipindah ke '.strtoupper($this->PRETTY[$to] ?? $to).'.');
+                    ->with('ok', 'Stage dipindah ke ' . strtoupper($this->PRETTY[$to] ?? $to) . '.');
 
             case 'hired': {
                 $offer = $this->offerJustCreated ?: $application->offer()->first();
@@ -588,12 +620,12 @@ class ApplicationController extends Controller
 
             case 'not_qualified':
                 return redirect()->route('admin.applications.index', ['focus' => $application->id])
-                    ->with('ok', 'Stage dipindah ke '.strtoupper($this->PRETTY[$to] ?? $to).'.');
+                    ->with('ok', 'Stage dipindah ke ' . strtoupper($this->PRETTY[$to] ?? $to) . '.');
 
             case 'applied':
             case 'screening':
             default:
-                return redirect()->back(303)->with('ok', 'Stage dipindah ke: '.strtoupper($this->PRETTY[$to] ?? $to));
+                return redirect()->back(303)->with('ok', 'Stage dipindah ke: ' . strtoupper($this->PRETTY[$to] ?? $to));
         }
     }
 
@@ -610,7 +642,7 @@ class ApplicationController extends Controller
         // 1) Prefix perusahaan (3 karakter, uppercase alnum)
         $companyRaw = strtoupper((string) ($job->company?->code ?? ''));
         $companyRaw = preg_replace('/[^A-Z0-9]/', '', $companyRaw) ?? '';
-        $company3   = str_pad(substr($companyRaw, 0, 3), 3, 'X');
+        $company3 = str_pad(substr($companyRaw, 0, 3), 3, 'X');
 
         // 2) Kode site 2 digit
         $siteCodeRaw = strtoupper((string) ($job->site?->code ?? ''));
@@ -618,7 +650,7 @@ class ApplicationController extends Controller
 
         // Mapping default berdasarkan format yang dibagikan user.
         $siteMap = [
-            'HO'  => '01',
+            'HO' => '01',
             'BGG' => '02',
             'SBS' => '03',
             'DBK' => '04',
@@ -678,7 +710,7 @@ class ApplicationController extends Controller
     {
         $prefix = strtoupper(preg_replace('/[^A-Z0-9]/i', '', $prefix)) ?: 'EMP';
         $period = now()->format('ym'); // YYMM
-        $rand   = strtoupper(Str::random(5));
+        $rand = strtoupper(Str::random(5));
         return "{$prefix}-{$period}-{$rand}";
     }
 }

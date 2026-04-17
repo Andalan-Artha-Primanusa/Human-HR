@@ -10,7 +10,7 @@ class JobPolicy
     /** helper kecil */
     private function isAdmin(?User $user): bool
     {
-        return $user && in_array($user->role, ['hr','superadmin'], true);
+        return $user && in_array($user->role, ['hr', 'superadmin'], true);
     }
 
     private function isSuperAdmin(?User $user): bool
@@ -32,7 +32,8 @@ class JobPolicy
     public function view(?User $user, Job $job): bool
     {
         // Admin boleh semua
-        if ($this->isAdmin($user)) return true;
+        if ($this->isAdmin($user))
+            return true;
 
         // Guest / user biasa: hanya job open
         return $job->status === 'open';

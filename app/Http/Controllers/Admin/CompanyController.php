@@ -33,10 +33,10 @@ class CompanyController extends Controller
         ]);
 
         // Sanitize pencarian
-        $qRaw   = (string) ($filters['q'] ?? '');
+        $qRaw = (string) ($filters['q'] ?? '');
         $qClean = trim(preg_replace('/[^\pL\pN\s\-\_\.]/u', '', $qRaw) ?? '');
-        $q      = Str::limit($qClean, 80, '');
-        $like   = $q !== '' ? '%'.addcslashes($q, '\\%_').'%' : null;
+        $q = Str::limit($qClean, 80, '');
+        $like = $q !== '' ? '%' . addcslashes($q, '\\%_') . '%' : null;
         $status = (string) ($filters['status'] ?? '');
 
         // Deteksi dukungan FULLTEXT (cache 1 hari)
@@ -45,23 +45,25 @@ class CompanyController extends Controller
                 $rows = DB::select("SHOW INDEX FROM companies");
                 foreach ($rows as $r) {
                     $type = $r->Index_type ?? ($r->Index_type ?? null);
-                    if ($type === 'FULLTEXT') return true;
+                    if ($type === 'FULLTEXT')
+                        return true;
                 }
-            } catch (\Throwable $e) { /* fallback */ }
+            } catch (\Throwable $e) { /* fallback */
+            }
             return false;
         });
 
         $items = Company::query()
-            ->select(['id','name','code','status','created_at'])
+            ->select(['id', 'name', 'code', 'status', 'created_at'])
             ->when($status, fn($q2) => $q2->where('status', $status))
             ->when($like !== null, function ($q2) use ($like, $hasFulltext) {
                 if ($hasFulltext) {
                     return $q2->whereRaw("MATCH(name, code, alias) AGAINST (? IN NATURAL LANGUAGE MODE)", [trim($like, '%')]);
                 }
                 return $q2->where(function ($w) use ($like) {
-                    $w->where('name','like',$like)
-                      ->orWhere('code','like',$like)
-                      ->orWhere('alias','like',$like);
+                    $w->where('name', 'like', $like)
+                        ->orWhere('code', 'like', $like)
+                        ->orWhere('alias', 'like', $like);
                 });
             })
             ->orderBy('name')
@@ -69,7 +71,7 @@ class CompanyController extends Controller
             ->cursorPaginate(20)
             ->withQueryString();
 
-        return view('admin.companies.index', compact('items','q','status'));
+        return view('admin.companies.index', compact('items', 'q', 'status'));
     }
 
     public function create(): View

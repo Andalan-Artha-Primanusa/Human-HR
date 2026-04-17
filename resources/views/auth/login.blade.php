@@ -72,13 +72,13 @@
       <div class="w-full max-w-md">
 
         @php
-        $authError = $errors->first('email');
+            $authError = $errors->first('email');
         @endphp
 
         @if ($authError)
-        <div class="px-3 py-2 mb-4 text-sm border rounded-lg border-rose-200 bg-rose-50 text-rose-800">
-          {{ $authError }}
-        </div>
+            <div class="px-3 py-2 mb-4 text-sm border rounded-lg border-rose-200 bg-rose-50 text-rose-800">
+              {{ $authError }}
+            </div>
         @endif
 
         <!-- CARD -->
@@ -120,9 +120,9 @@
                 </label>
 
                 @if (Route::has('password.request'))
-                <a href="{{ route('password.request') }}" class="hover:underline">
-                  Lupa password?
-                </a>
+                    <a href="{{ route('password.request') }}" class="hover:underline">
+                      Lupa password?
+                    </a>
                 @endif
               </div>
 
@@ -139,10 +139,10 @@
 
         <!-- REGISTER -->
         @if (Route::has('register'))
-        <div class="mt-5 text-sm text-center text-white/80">
-          Belum punya akun?
-          <a href="{{ route('register') }}" class="underline">Daftar</a>
-        </div>
+            <div class="mt-5 text-sm text-center text-white/80">
+              Belum punya akun?
+              <a href="{{ route('register') }}" class="underline">Daftar</a>
+            </div>
         @endif
 
         <!-- FOOTER -->

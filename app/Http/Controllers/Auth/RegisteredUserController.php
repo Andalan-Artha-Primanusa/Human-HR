@@ -30,19 +30,19 @@ class RegisteredUserController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $request->validate([
-            'name'     => ['required', 'string', 'max:255'],
-            'email'    => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             // 'agree'  => ['accepted'], // jika ada checkbox persetujuan
         ]);
 
         // Catatan: $request->string(...) mengembalikan Stringable; cast ke string.
         $user = User::create([
-            'name'       => (string) $request->string('name'),
-            'email'      => (string) $request->string('email'),
-            'password'   => Hash::make((string) $request->string('password')),
+            'name' => (string) $request->string('name'),
+            'email' => (string) $request->string('email'),
+            'password' => Hash::make((string) $request->string('password')),
             // Registrasi publik selalu jadi pelamar.
-            'role'       => 'pelamar',
+            'role' => 'pelamar',
         ]);
 
         // Trigger event standar → listener SendEmailVerificationCode akan generate & kirim OTP

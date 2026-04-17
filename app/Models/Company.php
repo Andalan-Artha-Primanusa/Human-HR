@@ -13,8 +13,19 @@ class Company extends Model
     use HasFactory, HasUuidPrimaryKey, SoftDeletes;
 
     protected $fillable = [
-        'code','name','legal_name','email','phone','website','logo_path',
-        'address','city','province','country','status','meta',
+        'code',
+        'name',
+        'legal_name',
+        'email',
+        'phone',
+        'website',
+        'logo_path',
+        'address',
+        'city',
+        'province',
+        'country',
+        'status',
+        'meta',
     ];
 
     protected $casts = [
@@ -31,14 +42,18 @@ class Company extends Model
     public function scopeSearch($q, ?string $term)
     {
         $term = trim((string) $term);
-        if ($term === '') return $q;
+        if ($term === '')
+            return $q;
 
-        return $q->where(function($w) use ($term) {
-            $w->where('name','like',"%{$term}%")
-              ->orWhere('code','like',"%{$term}%")
-              ->orWhere('legal_name','like',"%{$term}%");
+        return $q->where(function ($w) use ($term) {
+            $w->where('name', 'like', "%{$term}%")
+                ->orWhere('code', 'like', "%{$term}%")
+                ->orWhere('legal_name', 'like', "%{$term}%");
         });
     }
 
-    public function scopeActive($q) { return $q->where('status','active'); }
+    public function scopeActive($q)
+    {
+        return $q->where('status', 'active');
+    }
 }

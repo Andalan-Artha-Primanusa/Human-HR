@@ -11,13 +11,16 @@ class PsychotestTest extends Model
 {
     use HasFactory, HasUuidPrimaryKey;
 
-    protected $fillable = ['name','duration_minutes','scoring'];
+    protected $fillable = ['name', 'duration_minutes', 'scoring'];
 
     protected $casts = [
         'duration_minutes' => 'integer',
-        'scoring'          => 'array',
+        'scoring' => 'array',
     ];
 
     /** @return HasMany<PsychotestQuestion> */
-    public function questions(): HasMany { return $this->hasMany(PsychotestQuestion::class, 'test_id'); }
+    public function questions(): HasMany
+    {
+        return $this->hasMany(PsychotestQuestion::class, 'test_id');
+    }
 }

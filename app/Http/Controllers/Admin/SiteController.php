@@ -23,24 +23,24 @@ class SiteController extends Controller
         ]);
 
         // === Ambil & sanitasi input ===
-        $qRaw   = (string) ($filters['q'] ?? '');
-        $q      = Str::limit(preg_replace('/[\x00-\x1F\x7F]/u', '', trim($qRaw)) ?? '', 120, '');
-        $like   = $q !== '' ? '%'.addcslashes($q, '\\%_').'%' : null;
+        $qRaw = (string) ($filters['q'] ?? '');
+        $q = Str::limit(preg_replace('/[\x00-\x1F\x7F]/u', '', trim($qRaw)) ?? '', 120, '');
+        $like = $q !== '' ? '%' . addcslashes($q, '\\%_') . '%' : null;
 
         $status = (string) ($filters['status'] ?? '');
-        $sort   = (string) ($filters['sort'] ?? 'code');
-        $order  = (string) ($filters['order'] ?? 'asc');
+        $sort = (string) ($filters['sort'] ?? 'code');
+        $order = (string) ($filters['order'] ?? 'asc');
 
         // === Query: pilih kolom minimal + filter aman + cursor paginate ===
         $sites = Site::query()
-            ->select(['id','code','name','region','timezone','address','is_active','created_at'])
+            ->select(['id', 'code', 'name', 'region', 'timezone', 'address', 'is_active', 'created_at'])
             ->when($like !== null, function ($qq) use ($like) {
                 $qq->where(function ($w) use ($like) {
                     $w->where('code', 'like', $like)
-                      ->orWhere('name', 'like', $like)
-                      ->orWhere('region', 'like', $like)
-                      ->orWhere('timezone', 'like', $like)
-                      ->orWhere('address', 'like', $like);
+                        ->orWhere('name', 'like', $like)
+                        ->orWhere('region', 'like', $like)
+                        ->orWhere('timezone', 'like', $like)
+                        ->orWhere('address', 'like', $like);
                 });
             })
             ->when($status === 'active', fn($qq) => $qq->where('is_active', true))
@@ -159,7 +159,7 @@ class SiteController extends Controller
         $site->loadCount('jobs');
 
         if ($site->jobs_count > 0) {
-            $msg = 'Tidak dapat menghapus: masih terkait ke '.$site->jobs_count.' job(s).';
+            $msg = 'Tidak dapat menghapus: masih terkait ke ' . $site->jobs_count . ' job(s).';
             if ($request->wantsJson()) {
                 return response()->json(['message' => $msg], 422);
             }
@@ -182,13 +182,13 @@ class SiteController extends Controller
     protected function validatedStore(Request $request): array
     {
         return $request->validate([
-            'code'      => ['required','string','max:20','regex:/^[A-Za-z0-9._-]+$/','unique:sites,code'],
-            'name'      => ['required','string','max:150'],
-            'region'    => ['nullable','string','max:100'],
-            'timezone'  => ['nullable','string','max:64'],
-            'address'   => ['nullable','string','max:255'],
-            'notes'     => ['nullable','string'],
-            'meta'      => ['nullable','array'], // bila ada submit langsung (bukan meta_json)
+            'code' => ['required', 'string', 'max:20', 'regex:/^[A-Za-z0-9._-]+$/', 'unique:sites,code'],
+            'name' => ['required', 'string', 'max:150'],
+            'region' => ['nullable', 'string', 'max:100'],
+            'timezone' => ['nullable', 'string', 'max:64'],
+            'address' => ['nullable', 'string', 'max:255'],
+            'notes' => ['nullable', 'string'],
+            'meta' => ['nullable', 'array'], // bila ada submit langsung (bukan meta_json)
             // is_active tidak diterima di create (dipaksa true)
         ], [
             'code.regex' => 'Kode hanya boleh huruf, angka, titik, strip, dan underscore.',
@@ -198,13 +198,13 @@ class SiteController extends Controller
     protected function validatedUpdate(Request $request, Site $site): array
     {
         return $request->validate([
-            'code'      => ['required','string','max:20','regex:/^[A-Za-z0-9._-]+$/', Rule::unique('sites','code')->ignore($site->id)],
-            'name'      => ['required','string','max:150'],
-            'region'    => ['nullable','string','max:100'],
-            'timezone'  => ['nullable','string','max:64'],
-            'address'   => ['nullable','string','max:255'],
-            'notes'     => ['nullable','string'],
-            'meta'      => ['nullable','array'],
+            'code' => ['required', 'string', 'max:20', 'regex:/^[A-Za-z0-9._-]+$/', Rule::unique('sites', 'code')->ignore($site->id)],
+            'name' => ['required', 'string', 'max:150'],
+            'region' => ['nullable', 'string', 'max:100'],
+            'timezone' => ['nullable', 'string', 'max:64'],
+            'address' => ['nullable', 'string', 'max:255'],
+            'notes' => ['nullable', 'string'],
+            'meta' => ['nullable', 'array'],
             // is_active tidak diterima di update standar
         ], [
             'code.regex' => 'Kode hanya boleh huruf, angka, titik, strip, dan underscore.',

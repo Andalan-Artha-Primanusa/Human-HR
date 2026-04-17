@@ -1,17 +1,17 @@
 @php
-  $app   = $offer->application ?? null;
-  $user  = $app?->user?->name ?? '—';
-  $title = $app?->job?->title ?? '—';
-  $site  = $app?->job?->site?->code ?? '—';
-  $gross = number_format((float)($offer->salary['gross'] ?? 0), 0, ',', '.');
-  $allow = number_format((float)($offer->salary['allowance'] ?? 0), 0, ',', '.');
+    $app = $offer->application ?? null;
+    $user = $app?->user?->name ?? '—';
+    $title = $app?->job?->title ?? '—';
+    $site = $app?->job?->site?->code ?? '—';
+    $gross = number_format((float) ($offer->salary['gross'] ?? 0), 0, ',', '.');
+    $allow = number_format((float) ($offer->salary['allowance'] ?? 0), 0, ',', '.');
 
-  $badge = match($offer->status){
-    'accepted' => 'badge-green',
-    'rejected' => 'badge-rose',
-    'sent'     => 'badge-blue',
-    default    => 'badge-amber',
-  };
+    $badge = match ($offer->status) {
+        'accepted' => 'badge-green',
+        'rejected' => 'badge-rose',
+        'sent' => 'badge-blue',
+        default => 'badge-amber',
+    };
 @endphp
 
 <tr class="align-top">
