@@ -16,16 +16,35 @@ class Job extends Model
     use HasFactory, HasUuidPrimaryKey;
 
     /** LEVELS (canonical slug) */
-    public const LEVELS = ['bod', 'manager', 'supervisor', 'spv', 'staff', 'non_staff'];
+    public const LEVELS = [
+        'foreman',
+        'supervisor',
+        'superintendent',
+        'manager',
+        'analyst',
+        'specialist',
+        'expert',
+        'lead_of',
+        'section_head',
+        'dept_head',
+        'project_manager',
+        'pjo',
+    ];
 
     /** Label Level untuk tampilan */
     public const LEVEL_LABELS = [
-        'bod' => 'BOD',
-        'manager' => 'Manager',
-        'supervisor' => 'Supervisor',
-        'spv' => 'SPV',
-        'staff' => 'Staff',
-        'non_staff' => 'Non staff',
+        'foreman'         => 'Foreman',
+        'supervisor'      => 'Supervisor',
+        'superintendent'  => 'Superintendent',
+        'manager'         => 'Manager',
+        'analyst'         => 'Analyst',
+        'specialist'      => 'Specialist',
+        'expert'          => 'Expert',
+        'lead_of'         => 'Lead Of',
+        'section_head'    => 'Section Head',
+        'dept_head'       => 'Dept Head',
+        'project_manager' => 'Project Manager',
+        'pjo'             => 'PJO',
     ];
 
     /** DIVISIONS (canonical slug => label) */
@@ -38,6 +57,8 @@ class Job extends Model
         'sales' => 'Sales',
         'operations' => 'Operations',
         'admin' => 'Administration',
+        'scm' => 'SCM',
+        'plant' => 'Plant',
     ];
 
     protected $fillable = [

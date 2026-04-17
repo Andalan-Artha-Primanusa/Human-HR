@@ -51,8 +51,24 @@ class CandidateProfileController extends Controller
         $maxReferences = 100;
         $maxDocuments = 20;
 
+        // Parse gaji: string format 1.000.000 → 1000000
+        $request->merge([
+            'current_salary' => $this->parseCurrency($request->input('current_salary')),
+            'expected_salary' => $this->parseCurrency($request->input('expected_salary')),
+        ]);
+
         // ===== VALIDASI UTAMA =====
         $validated = $request->validate([
+                /**
+                 * Helper: parse string currency format titik ke float
+                 */
+                private function parseCurrency($value)
+                {
+                    if (is_null($value) || $value === '') return null;
+                    if (is_numeric($value)) return $value;
+                    $value = str_replace('.', '', $value);
+                    return is_numeric($value) ? (float) $value : null;
+                }
             'poh_id' => ['required', 'uuid', 'exists:pohs,id'],
             'full_name' => 'bail|required|string|max:190',
             'gender' => ['bail', 'required', Rule::in(['male', 'female'])],

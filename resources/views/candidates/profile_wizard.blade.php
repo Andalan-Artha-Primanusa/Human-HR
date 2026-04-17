@@ -402,12 +402,13 @@
     <div>
       <label class="text-sm text-slate-600">Gaji Saat Ini</label>
       <input
-        type="number"
+        type="text"
+        inputmode="numeric"
         name="current_salary"
-        step="0.01"
-        class="w-full px-3 py-2 mt-1 border rounded-lg"
-        placeholder="Contoh: 5000000"
-        value="{{ old('current_salary', $profile->current_salary) }}"
+        class="w-full px-3 py-2 mt-1 border rounded-lg format-currency"
+        placeholder="Contoh: 5.000.000"
+        value="{{ old('current_salary', $profile->current_salary ? number_format($profile->current_salary, 0, ',', '.') : '') }}"
+        autocomplete="off"
       >
     </div>
 
@@ -415,14 +416,30 @@
     <div>
       <label class="text-sm text-slate-600">Gaji Yang Diharapkan</label>
       <input
-        type="number"
+        type="text"
+        inputmode="numeric"
         name="expected_salary"
-        step="0.01"
-        class="w-full px-3 py-2 mt-1 border rounded-lg"
-        placeholder="Contoh: 7000000"
-        value="{{ old('expected_salary', $profile->expected_salary) }}"
+        class="w-full px-3 py-2 mt-1 border rounded-lg format-currency"
+        placeholder="Contoh: 7.000.000"
+        value="{{ old('expected_salary', $profile->expected_salary ? number_format($profile->expected_salary, 0, ',', '.') : '') }}"
+        autocomplete="off"
       >
     </div>
+  <script>
+    // Format input currency (titik ribuan, tanpa nol otomatis)
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('input.format-currency').forEach(function(input) {
+        input.addEventListener('input', function(e) {
+          let value = this.value.replace(/[^\d]/g, '');
+          if (value) {
+            this.value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+          } else {
+            this.value = '';
+          }
+        });
+      });
+    });
+  </script>
 
     {{-- Fasilitas --}}
     <div class="sm:col-span-2">

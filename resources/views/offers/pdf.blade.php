@@ -20,8 +20,16 @@
     $overtimeRate = $m['overtime_rate'] ?? null;
     $bonusBulanan = $m['bonus_bulanan'] ?? 'Bonus diatur sesuai ketentuan perusahaan';
 
-    $signerName = $m['signer_name'] ?? 'RAUL MAHYA KOMARAN';
-    $signerTitle = $m['signer_title'] ?? 'General Manager';
+
+    // Penandatangan otomatis sesuai level
+    $jobLevel = $job?->level ?? '';
+    if ($jobLevel === 'non_staff') {
+      $signerName = 'Hendy Fardiansyah';
+      $signerTitle = 'Manager HRGA';
+    } else {
+      $signerName = 'Roy Hansen C Saragih';
+      $signerTitle = 'General Manager';
+    }
     $deptName = $m['dept_name'] ?? 'HR Department';
 
     // SIGNATURE: meta['sign_image'] > storage/app/public/ttdmahya.png > public/assets/sign_ceo.png
@@ -61,7 +69,8 @@
   <meta charset="utf-8">
   <title>Offering Letter</title>
   <style>
-    @page { size: A4; margin: 4px 16px 32px; } /* TOP makin kecil */
+    /* Ganti ukuran kertas ke Legal (8.5in x 14in) agar lebih lebar */
+    @page { size: 8.5in 14in; margin: 4px 16px 32px; }
 
     *{ box-sizing:border-box; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
 
@@ -81,7 +90,7 @@
     }
 
     /* Konten center */
-    .page{ width:86%; max-width:620px; margin:0 auto; }
+    .page{ width:98%; max-width:900px; margin:0 auto; }
 
     .right{ text-align:right; }
     .muted{ color:var(--mut); }
@@ -91,17 +100,16 @@
     .hdr{
       display:flex; align-items:flex-start; gap:12px;
       margin-bottom:6px;
-      margin-top:-25px;            /* tarik header lebih ke atas */
+      margin-top:0;                /* normal, tidak terlalu ke atas */
     }
-    .brand{ flex:0 0 auto; text-align:center; margin-top:-8px; } /* ikut naik */
+    .brand{ flex:0 0 auto; text-align:center; margin-top:12px; } /* diturunkan */
     .logo{
-      height:180px;                /* lebih tinggi */
-      width:300px;                 /* lebih lebar */
-      max-width:300px;
+      height:80px;
+      width:auto;
+      max-width:200px; /* lebih besar lagi */
       object-fit:contain;
       display:block;
-      margin:0 auto 0;
-      margin-top:-10px; 
+      margin:0 auto;
     }
     .no{
       font-size:12px; line-height:1;
@@ -115,14 +123,28 @@
     /* ===== Tabel utama ===== */
     table.sheet{
       width:100%;
+      max-width:880px;
+      margin-left:auto;
+      margin-right:auto;
       border-collapse:separate;
       border-spacing:0;
-      border:1.6px solid var(--bd);
-      margin-top:6px;
+      border:2.2px solid var(--bd); /* lebih tebal */
+      /* border-radius:8px; sudut membulat dihapus */
+      margin-top:8px;
+      background:#fff;
+      box-shadow:0 1px 4px 0 #ddd;
     }
     .sheet td{
-      padding:2px 4px; vertical-align:top; border:0;
-      line-height:1.28; word-spacing:1px;
+      padding:6px 10px; /* lebih lega */
+      vertical-align:top;
+      border:0;
+      line-height:1.32;
+      word-spacing:1px;
+    }
+    .sheet .sec{
+      font-weight:800;
+      text-transform:uppercase;
+      padding:6px 12px;
     }
     .sheet .sec{ font-weight:800; text-transform:uppercase; padding:2px 6px; }
     .key{ width:200px; }
@@ -147,7 +169,7 @@
     .sigbox .hcell{ text-align:center; font-size:14px; line-height:1.25; font-weight:600; }
 
     /* ===== FOOTER ===== */
-    .footer{ position:fixed; left:0; right:0; bottom:6px; width:100%; }
+    .footer{ position:fixed; left:0; right:0; bottom:0; width:100%; }
     .footer-table{ width:100%; border-collapse:separate; border-spacing:0; font-size:12px; color:#111; }
     .foot-left{ text-align:left; } .foot-mid{ text-align:center; } .foot-right{ text-align:right; }
   </style>
@@ -156,55 +178,54 @@
 
   <div class="page">
     {{-- HEADER: logo kiri + nomor di bawah; teks di kanan --}}
-    <div class="hdr">
-      <div class="brand">
-        <img class="logo" src="{{ $logoPath }}" alt="Logo" onerror="this.style.display='none'">
-        {{-- Selalu tampilkan baris nomor (kalau kosong akan jadi "No : ") --}}
-        <div class="no">No : {!! $fmt($docNo) !!}</div>
+    <!-- HEADER: Logo tengah atas, judul kiri, nomor kanan -->
+    <div style="width:100%; margin-bottom:8px;">
+      <div style="width:100%; text-align:center;">
+        <img class="logo" src="{{ $logoPath }}" alt="Logo">
       </div>
-      <div class="head">
-        <div class="title small">OFFERING LETTER</div>
-        <div class="priv small">PRIBADI &amp; RAHASIA</div>
+      <div style="width:100%; display:flex; flex-direction:row; justify-content:space-between; align-items:flex-start; margin-top:0;">
+        <div style="flex:1; text-align:left;">
+          <div class="title small" style="font-weight:800; letter-spacing:.4px; color:#111;">OFFERING LETTER</div>
+          <div class="priv small" style="color:#b91c1c; font-weight:800; margin-top:2px;">PRIBADI &amp; RAHASIA</div>
+        </div>
+        <div style="flex:1; text-align:center; font-size:12px; line-height:1;">
+          No : {!! $fmt($docNo) !!}
+        </div>
+        <div style="flex:1;"></div>
       </div>
     </div>
 
     <p style="margin:0 0 4px">
-      Dear Saudara/i <strong>{{ $fmt($candidateName) }}</strong>@if(filled($candidateNik)), ({{ $fmt($candidateNik) }})@endif —
+      Dear Saudara/i <strong>{{ $fmt($candidateName) }}</strong>@if(filled($candidateNik)), ({{ $fmt($candidateNik) }})@endif —<br>
       Dengan senang hati kami memberikan penawaran untuk bergabung dengan PT {{ $fmt($company) }} dengan ketentuan berikut:
     </p>
 
-    {{-- Tabel utama (1–5) --}}
     <table class="sheet">
-      <tr><td class="sec" colspan="3">1. Jabatan &amp; Tempat Penerimaan</td></tr>
-      <tr><td class="key">a. Jabatan</td><td class="sep">:</td><td class="val">{!! $fmt($position) !!}</td></tr>
-      <tr><td class="key">b. Grade/Level</td><td class="sep">:</td><td class="val">{!! $fmt($gradeLevel) !!}</td></tr>
-      <tr><td class="key">c. Tempat Penerimaan (PoH)</td><td class="sep">:</td><td class="val">{!! $fmt($poh) !!}</td></tr>
+      <tr><td class="sec" colspan="3">1. JABATAN & TEMPAT PENERIMAAN</td></tr>
+      <tr><td class="key">a. Jabatan</td><td class="sep">:</td><td class="val">{{ $fmt($position) }}</td></tr>
+      <tr><td class="key">b. Grade/Level</td><td class="sep">:</td><td class="val">{{ $fmt($gradeLevel) }}</td></tr>
+      <tr><td class="key">c. Tempat Penerimaan (PoH)</td><td class="sep">:</td><td class="val">{{ $fmt($poh) }}</td></tr>
 
-      <tr><td class="sec" colspan="3">2. Lokasi &amp; Status Kekaryawanan</td></tr>
-      <tr><td class="key">a. Lokasi</td><td class="sep">:</td><td class="val">{!! $fmt($lokasiDisplay) !!}</td></tr>
+      <tr><td class="sec" colspan="3">2. LOKASI & STATUS KEKARYAWANAN</td></tr>
+      <tr><td class="key">a. Lokasi</td><td class="sep">:</td><td class="val">{{ $fmt($lokasiDisplay) }}</td></tr>
       <tr><td class="key">b. Status Perjanjian Kerja</td><td class="sep">:</td><td class="val">Perjanjian Kerja Waktu Tertentu (PKWT) masa kontrak 6 bulan dan direview sebelum berakhir.</td></tr>
-      <tr><td class="key">c. Estimasi Tanggal Bergabung</td><td class="sep">:</td><td class="val">{!! $fmt($joinText) !!}</td></tr>
+      <tr><td class="key">c. Estimasi Tanggal Bergabung</td><td class="sep">:</td><td class="val">{{ $fmt($joinText) }}</td></tr>
 
-      <tr><td class="sec" colspan="3">3. Waktu Kerja &amp; Istirahat</td></tr>
-      <tr><td class="key">a. Regular</td><td class="sep">:</td><td class="val">Senin – Minggu : Shift 1 (06.00–18.00 WIB) &amp; Shift 2 (18.00–06.00 WIB)</td></tr>
-      <tr><td class="key">b. Istirahat</td><td class="sep">:</td><td class="val">Senin – Minggu : Shift 1 (12.00–13.00 WIB) &amp; Shift 2 (00.00–01.00 WIB)</td></tr>
-      <tr><td class="key">c. Sistem Rotasi</td><td class="sep">:</td><td class="val">13 Hari Kerja : 1 Hari Libur</td></tr>
-      <tr><td class="key">d. Roster Kerja</td><td class="sep">:</td><td class="val">12 Minggu On Site : 2 Minggu Field Break</td></tr>
+      <tr><td class="sec" colspan="3">3. WAKTU KERJA & ISTIRAHAT</td></tr>
+      <tr><td class="key">a. Waktu Kerja</td><td class="sep">:</td><td class="val">Senin – Minggu : Shift 1 (06.00–18.00 WIB) & Shift 2 (18.00–06.00 WIB)</td></tr>
+      <tr><td class="key">b. Jadwal Kerja</td><td class="sep">:</td><td class="val">{{ $fmt($m['roster_kerja'] ?? '<Roster Kerja>') }}</td></tr>
 
-      <tr><td class="sec" colspan="3">4. Gaji, Bonus, &amp; Pengurangan Penghasilan</td></tr>
-      <tr><td class="key">a. Gaji Pokok</td><td class="sep">:</td><td class="val"><strong>{!! $fmt($idr($gajiPokok)) !!}</strong> <span class="muted">{{ $gajiPokok !== null ? 'Gross/bulan' : '' }}</span></td></tr>
-      <tr><td class="key">b. Insentif Lapangan</td><td class="sep">:</td><td class="val">{!! $fmt($idr($insLap)) !!} <span class="muted">{{ $insLap !== null ? 'Nett/hari' : '' }}</span></td></tr>
-      <tr><td class="key">c. Overtime</td><td class="sep">:</td><td class="val">{!! $fmt($overtimeRate ? $idr($overtimeRate) . ' Jam/hari' : '') !!}</td></tr>
-      <tr><td class="key">d. Bonus Bulanan</td><td class="sep">:</td><td class="val">{!! $fmt($bonusBulanan) !!}</td></tr>
+      <tr><td class="sec" colspan="3">4. GAJI, BONUS, & PENGURANGAN PENGHASILAN</td></tr>
+      <tr><td class="key">a. Gaji Pokok</td><td class="sep">:</td><td class="val"><strong>{{ $fmt($idr($gajiPokok)) }}</strong> <span class="muted">{{ $gajiPokok !== null ? 'Gross/bulan' : '' }}</span></td></tr>
+      <tr><td class="key">b. Insentif / Site Allowance</td><td class="sep">:</td><td class="val">{{ $fmt($idr($insLap)) }} <span class="muted">{{ $insLap !== null ? 'Nett/hari' : '' }}</span></td></tr>
+      <tr><td class="key">c. Meals Allowance</td><td class="sep">:</td><td class="val"></td></tr>
+      <tr><td class="key">d. Overtime/Lembur</td><td class="sep">:</td><td class="val">{{ $fmt($overtimeRate ? $idr($overtimeRate) . ' Jam/hari' : '') }}</td></tr>
       <tr><td class="key">e. Pajak Penghasilan</td><td class="sep">:</td><td class="val">Ditanggung Perusahaan</td></tr>
-      <tr>
-        <td class="key">f. Pengurangan Penghasilan</td><td class="sep">:</td>
-        <td class="val">
-          <ul style="margin:0; padding-left:14px; list-style:disc; line-height:1.25;">
-            @foreach ($bpjsItems as $it) <li>{{ trim($it) }}</li> @endforeach
-          </ul>
-        </td>
-      </tr>
+      <tr><td class="key">f. Pengurangan Penghasilan</td><td class="sep">:</td><td class="val">
+        <ul style="margin:0; padding-left:14px; list-style:disc; line-height:1.25;">
+          @foreach ($bpjsItems as $it) <li>{{ trim($it) }}</li> @endforeach
+        </ul>
+      </td></tr>
 
       @php
         $labels = ['a', 'b', 'c', 'd', 'e'];
@@ -213,8 +234,20 @@
             $benefitLines[] = $labels[$i] . '. ' . e($text);
         }
       @endphp
-      <tr><td class="sec no5-head" colspan="3">5. Benefit</td></tr>
+      <tr><td class="sec no5-head" colspan="3">5. BENEFIT</td></tr>
       <tr><td class="no5-full" colspan="3"><div style="margin:1px 0 0 0; padding:0; line-height:1.15;">{!! implode('<br>', $benefitLines) !!}</div></td></tr>
+
+      <tr><td class="sec" colspan="3">6. OTHERS</td></tr>
+      <tr>
+        <td colspan="3" style="font-size:11px; line-height:1.4; padding:8px 18px;">
+          <ol type="a" style="margin:0 0 0 18px; padding:0 0 0 0;">
+            <li>Jika Saudara menyetujui dan menerima Surat Penawaran Kerja (Offering Letter) ini, maka mohon di cantumkan tanggal bergabung dan silahkan tuliskan nama lengkap serta tanda tangan pada kolom yang telah disediakan.</li>
+            <li>Mohon untuk dapat mengirimkan kembali Surat Penawaran Kerja (Offering Letter) yang telah Saudara setujui kepada kami, paling lambat 2 hari setelah Surat Penawaran Kerja (Offering Letter) ini Saudara terima.</li>
+            <li>Surat Penawaran Kerja (Offering Letter) hanya berlaku jika calon karyawan dinyatakan <b>Fit To Work</b> pada Hasil MCU (Medical Check Up) dan atau Hasil <b>Soliuog MCU</b> dinyatakan <b>Fit To Work</b>.</li>
+            <li>Apabila Saudara tidak mengembalikan Surat Penawaran Kerja (Offering Letter) dalam waktu yang telah ditentukan, maka penawaran ini dianggap batal.</li>
+          </ol>
+        </td>
+      </tr>
     </table>
 
     {{-- TTD --}}
