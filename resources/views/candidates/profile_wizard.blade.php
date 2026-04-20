@@ -729,8 +729,8 @@
         }
         if(s===3){
           const R = Alpine.store('form').references || [];
-          if(R.length<3) this.errors.push('Minimal 3 referensi');
-          R.forEach((r,i)=>{ if(!r.name?.trim()) this.errors.push(`Referensi #${i+1}: Nama`); if(!r.job_title?.trim()) this.errors.push(`Referensi #${i+1}: Jabatan`); if(!r.company?.trim()) this.errors.push(`Referensi #${i+1}: Perusahaan`); if(!r.contact?.trim()) this.errors.push(`Referensi #${i+1}: Kontak`); });
+          if(R.length<1) this.errors.push('Minimal 1 referensi');
+          R.slice(0,1).forEach((r,i)=>{ if(!r.name?.trim()) this.errors.push(`Referensi #${i+1}: Nama`); if(!r.job_title?.trim()) this.errors.push(`Referensi #${i+1}: Jabatan`); if(!r.company?.trim()) this.errors.push(`Referensi #${i+1}: Perusahaan`); if(!r.contact?.trim()) this.errors.push(`Referensi #${i+1}: Kontak`); });
           if(!this.hasCv){ const f=this.$refs.form; if(!f.cv?.files?.length){ this.errors.push('CV'); } }
         }
         return this.errors.length===0;
