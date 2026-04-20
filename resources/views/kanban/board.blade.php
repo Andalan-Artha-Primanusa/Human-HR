@@ -1,165 +1,516 @@
+{{-- resources/views/kanban/mine.blade.php --}}
+{{-- Kanban untuk: pelamar, karyawan, trainer (bukan admin/hr/superadmin) --}}
 @extends('layouts.app', ['title' => 'Kanban Kandidat'])
 
 @section('content')
 <style>
-  .glass{backdrop-filter:blur(8px);background:rgba(255,255,255,.75)}
-  .card-hover{transition:transform .15s, box-shadow .15s}
-  .card-hover:hover{transform:translateY(-2px); box-shadow:0 6px 20px -10px rgba(0,0,0,.35)}
-  .dragging{opacity:.6; transform:scale(.98)}
-  .stage-header{position:sticky; top:0; z-index:10}
-  .h-scroll{overflow-x:auto; -webkit-overflow-scrolling:touch}
-  .cols{display:grid; grid-auto-flow:column; grid-auto-columns:minmax(280px, 1fr); gap:1rem}
+/* ===== BASE ===== */
+:root {
+  --br-dark: #6b3f1f;
+  --br-mid: #8b5e3c;
+  --br-light: #a77d52;
+  --br-pale: #c9a882;
+  --br-bg: #f7f3ef;
+}
+
+/* ===== PAGE HEADER ===== */
+.kn-header {
+  background: linear-gradient(135deg, #8b5e3c 0%, #a77d52 60%, #c9a882 100%);
+  padding: 1.5rem 2rem 1.25rem;
+  border-radius: 0 0 1.25rem 1.25rem;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 1.25rem;
+}
+.kn-header::after {
+  content: '';
+  position: absolute;
+  right: -40px; top: -40px;
+  width: 200px; height: 200px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.08);
+}
+.kn-header h1 { font-size: 1.5rem; font-weight: 700; letter-spacing: -.4px; }
+.kn-header p  { font-size: .82rem; opacity: .85; margin-top: .3rem; }
+
+/* ===== BOARD ===== */
+.kn-board-wrap { overflow-x: auto; padding: 1rem 1.25rem 3rem; -webkit-overflow-scrolling: touch; }
+.kn-board { display: flex; gap: .9rem; align-items: flex-start; min-width: max-content; }
+
+/* ===== COLUMN ===== */
+.kn-col {
+  width: 272px;
+  background: #fff;
+  border-radius: 1rem;
+  border: 1px solid #e2d9cf;
+  display: flex; flex-direction: column;
+  max-height: 80vh;
+  box-shadow: 0 2px 14px rgba(107,63,31,.06);
+}
+.kn-col-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: .7rem 1rem;
+  background: linear-gradient(90deg, #f5f0ea, #ede6dc);
+  border-bottom: 1px solid #ddd3c4;
+  border-radius: 1rem 1rem 0 0;
+  position: sticky; top: 0; z-index: 2;
+}
+.kn-col-title {
+  font-size: .68rem; font-weight: 800;
+  text-transform: uppercase; letter-spacing: .7px;
+  color: #7a4f2a;
+}
+.kn-col-badge {
+  background: #8b5e3c; color: #fff;
+  font-size: .65rem; font-weight: 700;
+  border-radius: 999px; padding: .12rem .5rem;
+  min-width: 22px; text-align: center;
+}
+.kn-col-body {
+  padding: .7rem .6rem;
+  overflow-y: auto; flex: 1;
+  display: flex; flex-direction: column; gap: .6rem;
+}
+
+/* ===== CARD ===== */
+.kn-card {
+  background: #fff; border: 1px solid #e8dfd4;
+  border-radius: .875rem; padding: .875rem;
+  position: relative;
+  transition: transform .15s, box-shadow .15s, border-color .2s;
+}
+.kn-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(107,63,31,.13);
+  border-color: #c9a882;
+}
+.kn-card-name  { font-weight: 700; font-size: .87rem; color: #3d1f08; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.kn-card-job   { font-size: .72rem; color: #9a7558; margin-top: .1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.kn-card-meta  { font-size: .7rem; color: #b89070; margin-top: .25rem; }
+
+.kn-pill { display: inline-flex; align-items: center; gap: .25rem; font-size: .65rem; font-weight: 700; padding: .18rem .55rem; border-radius: 999px; letter-spacing: .2px; margin-top: .4rem; }
+.pill-active { background: #fef3e2; color: #92580b; }
+.pill-hired  { background: #e6f4ea; color: #256629; }
+.pill-nq     { background: #fdeaea; color: #9b2525; }
+
+.kn-card-actions {
+  display: flex; flex-wrap: wrap; gap: .4rem;
+  margin-top: .65rem; padding-top: .6rem;
+  border-top: 1px solid #f0e9df;
+}
+
+/* ===== BUTTONS ===== */
+.btn-xs {
+  font-size: .67rem; font-weight: 700; padding: .26rem .62rem;
+  border-radius: .45rem; border: 1.5px solid; cursor: pointer;
+  transition: all .12s; white-space: nowrap; line-height: 1.4;
+  font-family: inherit; text-decoration: none; display: inline-flex; align-items: center;
+}
+.btn-outline  { background: #fff; border-color: #c9a882; color: #7a4f2a; }
+.btn-outline:hover { background: #f7f0e8; border-color: #a77d52; }
+.btn-primary  { background: linear-gradient(135deg,#a77d52,#7a4f2a); border-color: transparent; color: #fff; }
+.btn-primary:hover { opacity: .9; }
+
+/* ===== FEEDBACK INLINE CHIPS ===== */
+.fb-row { margin-top: .5rem; display: flex; flex-direction: column; gap: .4rem; }
+.fb-chip {
+  display: flex; align-items: flex-start; gap: .55rem;
+  padding: .6rem .75rem;
+  background: #faf6f1; border: 1px solid #e8dfd4;
+  border-radius: .65rem; font-size: .73rem;
+}
+.fb-icon {
+  width: 28px; height: 28px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .65rem; font-weight: 700; flex-shrink: 0;
+}
+.fb-hr   { background: #e8f0fe; color: #1a56db; }
+.fb-user { background: #e6f4ea; color: #256629; }
+.fb-tr   { background: #fef3e2; color: #92580b; }
+.fb-label { font-size: .65rem; font-weight: 700; color: #9a7558; text-transform: uppercase; letter-spacing: .3px; }
+.fb-note  { font-size: .78rem; color: #3d1f08; margin-top: .15rem; line-height: 1.4; }
+.fb-badge { display: inline-flex; align-items: center; gap: .2rem; font-size: .65rem; font-weight: 700; margin-top: .25rem; padding: .15rem .45rem; border-radius: 999px; }
+.fb-yes   { background: #e6f4ea; color: #256629; }
+.fb-no    { background: #fdeaea; color: #9b2525; }
+
+/* ===== FORM FEEDBACK INLINE ===== */
+.fb-form { margin-top: .7rem; padding-top: .7rem; border-top: 1px solid #f0e9df; display: flex; flex-direction: column; gap: .55rem; }
+.fm-label { font-size: .68rem; font-weight: 700; color: #7a4f2a; text-transform: uppercase; letter-spacing: .4px; display: block; margin-bottom: .2rem; }
+.fm-ctrl {
+  border: 1.5px solid #ddd3c4; border-radius: .55rem;
+  padding: .45rem .7rem; font-size: .8rem; color: #3d1f08;
+  background: #faf7f4; outline: none; width: 100%;
+  font-family: inherit; transition: border-color .15s, box-shadow .15s;
+}
+.fm-ctrl:focus { border-color: var(--br-light); box-shadow: 0 0 0 3px rgba(167,125,82,.18); }
+textarea.fm-ctrl { resize: vertical; min-height: 68px; }
+
+/* ===== MODAL OVERLAY ===== */
+.kn-overlay {
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(40,18,5,.5);
+  backdrop-filter: blur(3px);
+  display: flex; align-items: center; justify-content: center; padding: 1rem;
+}
+.kn-overlay.hidden { display: none; }
+.kn-modal {
+  background: #fff; border-radius: 1.25rem;
+  width: 100%; max-width: 480px;
+  box-shadow: 0 24px 64px rgba(40,18,5,.35);
+  overflow: hidden;
+  animation: modalIn .18s ease;
+}
+@keyframes modalIn { from { opacity:0; transform:scale(.95) translateY(10px); } }
+.kn-modal-head {
+  padding: 1rem 1.4rem .85rem;
+  border-bottom: 1px solid #ede6dc;
+  background: linear-gradient(90deg,#faf6f1,#f4ece1);
+  display: flex; align-items: flex-start; justify-content: space-between;
+}
+.kn-modal-title { font-size: .95rem; font-weight: 700; color: #4a2b0e; }
+.kn-modal-sub   { font-size: .75rem; color: #9a7558; margin-top: .12rem; }
+.kn-modal-close { background: none; border: none; cursor: pointer; font-size: 1.2rem; color: #9a7558; padding: .1rem .3rem; border-radius: .3rem; }
+.kn-modal-close:hover { background: #f0e8df; color: #6b3f1f; }
+.kn-modal-body   { padding: 1.1rem 1.4rem; }
+.kn-modal-footer { padding: .85rem 1.4rem; border-top: 1px solid #ede6dc; background: #faf6f1; display: flex; justify-content: flex-end; gap: .6rem; }
+
+/* ===== RIWAYAT ===== */
+.riwayat-item {
+  padding: .55rem .75rem;
+  background: #fdf9f5; border: 1px solid #ede6dc;
+  border-radius: .6rem; font-size: .75rem; color: #5a3e28;
+  margin-bottom: .4rem;
+}
+.riwayat-item:last-child { margin-bottom: 0; }
+.riwayat-stage { font-weight: 700; color: #8b5e3c; font-size: .68rem; text-transform: uppercase; letter-spacing: .4px; }
+
+/* ===== TOAST ===== */
+.kn-toast {
+  position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 2000;
+  background: #3d1f08; color: #fff;
+  padding: .65rem 1.2rem; border-radius: .75rem;
+  font-size: .82rem; font-weight: 600;
+  box-shadow: 0 8px 24px rgba(40,18,5,.35);
+  transition: all .3s;
+}
+.kn-toast.hidden { opacity: 0; transform: translateY(12px); pointer-events: none; }
+.kn-toast.ok  { background: #1f6b35; }
+.kn-toast.err { background: #9b2525; }
+
+/* ===== EMPTY STATE ===== */
+.kn-empty { text-align: center; padding: 1.5rem .5rem; color: #c0a080; font-size: .75rem; }
 </style>
 
-<section class="mb-5 overflow-hidden bg-white border shadow-sm rounded-2xl border-slate-200">
-  <div class="relative">
-    <div class="w-full h-20 sm:h-24" style="background: linear-gradient(90deg, #a77d52, #8b5e3c);"></div>
-    <div class="absolute inset-y-0 right-0 w-24 sm:w-36" style="background: linear-gradient(90deg, #8b5e3c, #a77d52);"></div>
-  </div>
-  <div class="p-6 md:p-7">
-    <div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-      <div class="min-w-0">
-        <h1 class="text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">Kanban Kandidat</h1>
-        <p class="mt-1 text-xs sm:text-sm text-slate-600">Lihat progres seluruh kandidat dan jadwal interview di sini.</p>
-      </div>
-    </div>
-  </div>
-</section>
+@php
+  $stages = [
+    'applied'         => 'Applied',
+    'screening'       => 'Screening CV',
+    'psychotest'      => 'Psikotest',
+    'hr_iv'           => 'HR Interview',
+    'user_iv'         => 'User Interview',
+    'user_trainer_iv' => 'User/Trainer IV',
+    'offer'           => 'OL',
+    'mcu'             => 'MCU',
+    'mobilisasi'      => 'Mobilisasi',
+    'ground_test'     => 'Ground Test',
+    'hired'           => 'Hired',
+    'not_qualified'   => 'Not Lolos',
+  ];
 
-<div class="space-y-4">
-  <div class="h-scroll">
-    <div class="cols">
-      @foreach($stages as $stageKey => $stageLabel)
-        @php $items = $grouped[$stageKey] ?? collect(); @endphp
-        <section class="card overflow-hidden min-h-[40vh] flex flex-col" data-stage="{{ $stageKey }}">
-          <div class="flex items-center justify-between px-4 py-3 border-b stage-header border-slate-200" style="background: linear-gradient(90deg, #f5f1ed, #ede8e2); color: #8b5e3c; font-weight: 600;">
-            <div class="tracking-wide">{{ strtoupper($stageLabel) }}</div>
-            <span class="inline-flex items-center justify-center w-6 h-6 text-xs font-bold border rounded-full" style="background-color: #8b5e3c; color: white;">{{ $items->count() }}</span>
-          </div>
-          <div class="p-3 space-y-3 overflow-auto">
-            @forelse($items as $a)
-              <article class="relative p-4 bg-white border card card-hover border-slate-200 rounded-xl">
-                <div class="flex items-center justify-between gap-2">
-                  <div class="font-semibold truncate text-slate-900">{{ $a->job->title ?? '-' }}</div>
-                  <div class="text-xs truncate text-slate-500">{{ $a->job->site->name ?? '-' }}</div>
+  $authUser   = auth()->user();
+  $authRole   = $authUser->role ?? 'pelamar';
+  $isSuperHR  = in_array($authRole, ['admin','hr','superadmin']);
+  $isKaryawan = $authRole === 'karyawan';
+  $isTrainer  = $authRole === 'trainer';
+
+  // Stage-stage yg tampilkan form feedback langsung di kartu
+  $feedbackStages = ['hr_iv', 'user_iv', 'user_trainer_iv'];
+@endphp
+
+{{-- HEADER --}}
+<div class="kn-header">
+  <h1>Kanban Kandidat Saya</h1>
+  <p>
+    @if($isKaryawan)
+      Isi feedback di stage <strong>User Interview</strong> untuk melanjutkan kandidat.
+    @elseif($isTrainer)
+      Isi feedback di stage <strong>User/Trainer Interview</strong> untuk melanjutkan kandidat.
+    @else
+      Lihat progres lamaran kamu di setiap stage rekrutmen.
+    @endif
+  </p>
+</div>
+
+{{-- BOARD --}}
+<div class="kn-board-wrap">
+  <div class="kn-board">
+
+    @foreach($stages as $stageKey => $stageLabel)
+      @php $items = $grouped[$stageKey] ?? collect(); @endphp
+
+      <div class="kn-col">
+        <div class="kn-col-head">
+          <span class="kn-col-title">{{ $stageLabel }}</span>
+          <span class="kn-col-badge">{{ $items->count() }}</span>
+        </div>
+        <div class="kn-col-body">
+
+          @forelse($items as $a)
+            @php
+              $fbHR      = $a->feedbacks->where('role','hr')->sortByDesc('created_at')->first();
+              $fbUser    = $a->feedbacks->whereIn('role',['karyawan','pelamar'])->sortByDesc('created_at')->first();
+              $fbTrainer = $a->feedbacks->where('role','trainer')->sortByDesc('created_at')->first();
+
+              // Apakah user ini yang sedang login adalah si pelamar
+              $isOwner = (string)$authUser->id === (string)$a->user_id;
+
+              // Karyawan boleh isi feedback di user_iv HANYA jika belum ada feedback user
+              $canKaryawanFeedback = $isKaryawan && $stageKey === 'user_iv' && !$fbUser;
+
+              // Trainer boleh isi feedback di user_trainer_iv HANYA jika belum ada feedback trainer
+              $canTrainerFeedback  = $isTrainer && $stageKey === 'user_trainer_iv' && !$fbTrainer;
+            @endphp
+
+            <div class="kn-card" data-id="{{ $a->id }}">
+
+              {{-- INFO UTAMA --}}
+              <div class="kn-card-name">{{ $a->job->title ?? '-' }}</div>
+              <div class="kn-card-job">{{ $a->job->site->name ?? '-' }}</div>
+
+              {{-- Tampilkan nama kandidat untuk karyawan/trainer --}}
+              @if($isKaryawan || $isTrainer)
+                <div class="kn-card-meta">{{ $a->user->name ?? '-' }} &middot; {{ $a->user->email ?? '-' }}</div>
+              @endif
+
+              <div class="kn-card-meta">Status: {{ $a->current_stage }}</div>
+
+              {{-- PILL STATUS --}}
+              @if($a->overall_status === 'hired')
+                <span class="kn-pill pill-hired">✓ Hired</span>
+              @elseif($a->overall_status === 'not_qualified')
+                <span class="kn-pill pill-nq">✕ Not Lolos</span>
+              @else
+                <span class="kn-pill pill-active">● Active</span>
+              @endif
+
+              {{-- ====================================================
+                   FEEDBACK CHIPS (tampil jika sudah ada data)
+                   ==================================================== --}}
+              @if($fbHR || $fbUser || $fbTrainer)
+                <div class="fb-row">
+                  @if($fbHR)
+                    <div class="fb-chip">
+                      <div class="fb-icon fb-hr">HR</div>
+                      <div style="flex:1">
+                        <div class="fb-label">Feedback HR</div>
+                        <div class="fb-note">{{ $fbHR->feedback }}</div>
+                        @if($fbHR->approve === 'yes')
+                          <span class="fb-badge fb-yes">✓ Setuju</span>
+                        @elseif($fbHR->approve === 'no')
+                          <span class="fb-badge fb-no">✕ Tidak Setuju</span>
+                        @endif
+                      </div>
+                    </div>
+                  @endif
+                  @if($fbUser)
+                    <div class="fb-chip">
+                      <div class="fb-icon fb-user">US</div>
+                      <div style="flex:1">
+                        <div class="fb-label">Feedback Karyawan</div>
+                        <div class="fb-note">{{ $fbUser->feedback }}</div>
+                        @if($fbUser->approve === 'yes')
+                          <span class="fb-badge fb-yes">✓ Setuju</span>
+                        @elseif($fbUser->approve === 'no')
+                          <span class="fb-badge fb-no">✕ Tidak Setuju</span>
+                        @endif
+                      </div>
+                    </div>
+                  @endif
+                  @if($fbTrainer)
+                    <div class="fb-chip">
+                      <div class="fb-icon fb-tr">TR</div>
+                      <div style="flex:1">
+                        <div class="fb-label">Feedback Trainer</div>
+                        <div class="fb-note">{{ $fbTrainer->feedback }}</div>
+                        @if($fbTrainer->approve === 'yes')
+                          <span class="fb-badge fb-yes">✓ Setuju</span>
+                        @elseif($fbTrainer->approve === 'no')
+                          <span class="fb-badge fb-no">✕ Tidak Setuju</span>
+                        @endif
+                      </div>
+                    </div>
+                  @endif
                 </div>
-                @if(isset($isKaryawanOrTrainer) && $isKaryawanOrTrainer)
-                  <div class="mt-1 text-xs text-slate-700">Nama: {{ $a->user->name ?? '-' }}</div>
-                  <div class="text-xs text-slate-500">Email: {{ $a->user->email ?? '-' }}</div>
-                  <div class="text-xs text-slate-500">Role: {{ $a->user->role ?? '-' }}</div>
-                @endif
-                <div class="mt-2 text-xs text-slate-500">Status: {{ $a->current_stage }}</div>
-                {{-- Form feedback karyawan --}}
-                @if($stageKey === 'user_iv' && auth()->user()->role === 'karyawan' && empty($a->stages->where('stage_key','user_trainer_iv')->last()?->notes))
-                  <form method="POST" action="{{ route('admin.applications.move', $a) }}" class="mt-3 space-y-2">
-                    @csrf
-                    <input type="hidden" name="to" value="user_trainer_iv">
-                    <div>
-                      <label class="label">Feedback Karyawan</label>
-                      <textarea name="feedback_user" class="input" required placeholder="Catatan/feedback karyawan..."></textarea>
-                    </div>
-                    <div>
-                      <label class="label">Setuju Lanjut?</label>
-                      <select name="approve_user" class="input" required>
-                        <option value="">Pilih</option>
-                        <option value="yes">Setuju</option>
-                        <option value="no">Tidak Setuju</option>
-                      </select>
-                    </div>
-                    <button type="submit" class="w-full btn btn-primary btn-sm">Submit Feedback</button>
-                  </form>
+              @endif
+
+              {{-- ====================================================
+                   FORM FEEDBACK KARYAWAN (user_iv, jika belum diisi)
+                   ==================================================== --}}
+              @if($canKaryawanFeedback)
+                <form method="POST"
+                      action="{{ route('admin.applications.move', $a) }}"
+                      class="fb-form">
+                  @csrf
+                  <input type="hidden" name="to" value="user_trainer_iv">
+                  <div>
+                    <label class="fm-label">Feedback Karyawan</label>
+                    <textarea name="feedback_user" class="fm-ctrl" required
+                              placeholder="Tulis penilaian kandidat..."></textarea>
+                  </div>
+                  <div>
+                    <label class="fm-label">Setuju Lanjut ke User/Trainer IV?</label>
+                    <select name="approve_user" class="fm-ctrl" required>
+                      <option value="">— Pilih —</option>
+                      <option value="yes">✓ Setuju</option>
+                      <option value="no">✕ Tidak Setuju</option>
+                    </select>
+                  </div>
+                  <button type="submit" class="btn-xs btn-primary" style="width:100%;justify-content:center">
+                    Submit Feedback & Lanjutkan
+                  </button>
+                </form>
+              @endif
+
+              {{-- ====================================================
+                   FORM FEEDBACK TRAINER (user_trainer_iv, jika belum diisi)
+                   ==================================================== --}}
+              @if($canTrainerFeedback)
+                <form method="POST"
+                      action="{{ route('admin.applications.move', $a) }}"
+                      class="fb-form">
+                  @csrf
+                  <input type="hidden" name="to" value="offer">
+                  <div>
+                    <label class="fm-label">Feedback Trainer</label>
+                    <textarea name="feedback_trainer" class="fm-ctrl" required
+                              placeholder="Tulis penilaian kandidat..."></textarea>
+                  </div>
+                  <div>
+                    <label class="fm-label">Setuju Lanjut ke OL?</label>
+                    <select name="approve_trainer" class="fm-ctrl" required>
+                      <option value="">— Pilih —</option>
+                      <option value="yes">✓ Setuju</option>
+                      <option value="no">✕ Tidak Setuju</option>
+                    </select>
+                  </div>
+                  <button type="submit" class="btn-xs btn-primary" style="width:100%;justify-content:center">
+                    Submit Feedback & Lanjutkan
+                  </button>
+                </form>
+              @endif
+
+              {{-- ====================================================
+                   RIWAYAT STAGE (klik buka modal)
+                   ==================================================== --}}
+              @php
+                $stageHistory = $a->stages->whereIn('stage_key', ['hr_iv','user_iv','user_trainer_iv'])->values();
+              @endphp
+
+              {{-- ACTIONS --}}
+              <div class="kn-card-actions">
+                @if($stageHistory->count())
+                  <button type="button" class="btn-xs btn-outline"
+                    onclick="openRiwayat({{ $stageHistory->map(fn($s) => ['stage'=>$s->stage_key,'notes'=>$s->notes,'actor'=>optional($s->actor)->name ?? 'System','created_at'=>$s->created_at?->format('d M Y H:i')])->toJson() }})">
+                    Riwayat Interview
+                  </button>
                 @endif
 
-                {{-- Form feedback trainer --}}
-                @if($stageKey === 'user_trainer_iv' && auth()->user()->role === 'trainer' && empty($a->stages->where('stage_key','user_trainer_iv')->where('notes','!=',null)->last()?->notes) )
-                                  {{-- Tombol pindah stage untuk admin/hr/superadmin hanya di user_iv dan user_trainer_iv --}}
-                                  @if(in_array(auth()->user()->role, ['admin','hr','superadmin']) && in_array($stageKey, ['user_iv','user_trainer_iv']))
-                                    <form method="POST" action="{{ route('admin.applications.move', $a) }}" class="mt-3 space-y-2">
-                                      @csrf
-                                      <input type="hidden" name="from_stage" value="{{ $stageKey }}">
-                                      <label class="label">Pindah ke Stage:</label>
-                                      <select name="to" class="input" required>
-                                        @foreach($stages as $key => $label)
-                                          @if($key !== $stageKey)
-                                            <option value="{{ $key }}">{{ $label }}</option>
-                                          @endif
-                                        @endforeach
-                                      </select>
-                                      <label class="label">Catatan (opsional):</label>
-                                      <textarea name="note" class="input" placeholder="Catatan pindah stage..."></textarea>
-                                      <button type="submit" class="w-full btn btn-primary btn-sm">Pindah Stage</button>
-                                    </form>
-                                  @endif
-                  <form method="POST" action="{{ route('admin.applications.move', $a) }}" class="mt-3 space-y-2">
-                    @csrf
-                    <input type="hidden" name="to" value="user_trainer_iv">
-                    <div>
-                      <label class="label">Feedback Trainer</label>
-                      <textarea name="feedback_trainer" class="input" required placeholder="Catatan/feedback trainer..."></textarea>
-                    </div>
-                    <div>
-                      <label class="label">Setuju Lanjut?</label>
-                      <select name="approve_trainer" class="input" required>
-                        <option value="">Pilih</option>
-                        <option value="yes">Setuju</option>
-                        <option value="no">Tidak Setuju</option>
-                      </select>
-                    </div>
-                    <button type="submit" class="w-full btn btn-primary btn-sm">Submit Feedback</button>
-                  </form>
+                @if($a->interviews && $a->interviews->count())
+                  <a href="{{ route('me.interviews.show', $a->interviews->first()) }}"
+                     class="btn-xs btn-outline">
+                    Lihat Jadwal
+                  </a>
                 @endif
 
-                {{-- Tampilkan feedback jika sudah ada --}}
-                @if($a->feedback_hr || $a->approve_hr)
-                  <div class="p-2 mt-2 text-xs rounded text-slate-700 bg-slate-50">
-                    <b>Feedback HR:</b> {{ $a->feedback_hr ?? '-' }}<br>
-                    <b>Setuju HR:</b> {{ $a->approve_hr === 'yes' ? 'Setuju' : ($a->approve_hr === 'no' ? 'Tidak Setuju' : '-') }}
-                  </div>
-                @endif
-                @if(property_exists($a, 'feedback_user') && $a->feedback_user)
-                  <div class="p-2 mt-2 text-xs rounded text-slate-700 bg-slate-50">
-                    <b>Feedback Karyawan:</b> {{ $a->feedback_user }}<br>
-                    <b>Setuju Karyawan:</b> {{ $a->approve_user === 'yes' ? 'Setuju' : ($a->approve_user === 'no' ? 'Tidak Setuju' : '-') }}
-                  </div>
-                @endif
-                @if(property_exists($a, 'feedback_trainer') && $a->feedback_trainer)
-                  <div class="p-2 mt-2 text-xs rounded text-slate-700 bg-slate-50">
-                    <b>Feedback Trainer:</b> {{ $a->feedback_trainer }}<br>
-                    <b>Setuju Trainer:</b> {{ $a->approve_trainer === 'yes' ? 'Setuju' : ($a->approve_trainer === 'no' ? 'Tidak Setuju' : '-') }}
-                  </div>
-                @endif
-                {{-- Riwayat Feedback Interview --}}
-                @php
-                  $feedbackStages = $a->stages->whereIn('stage_key', ['hr_iv','user_iv','user_trainer_iv']);
-                @endphp
-                @if($feedbackStages->count())
-                  <div class="p-2 mt-2 text-xs rounded bg-slate-100">
-                    <b>Riwayat Feedback Interview:</b>
-                    <ul class="mt-1 space-y-1">
-                      @foreach($feedbackStages as $stage)
-                        <li>
-                          <span class="font-semibold">{{ strtoupper(str_replace('_iv',' Interview', $stage->stage_key)) }}</span>:
-                          <span>{{ $stage->notes ?? '-' }}</span>
-                          <span class="text-slate-500">({{ $stage->actor_name ?? '-' }})</span>
-                        </li>
-                      @endforeach
-                    </ul>
-                  </div>
-                @endif
-                @if($a->interviews && count($a->interviews))
-                  <div class="mt-2 text-xs text-blue-700">Interview: {{ $a->interviews->first()->start_at ?? '-' }}</div>
-                @endif
                 @if($a->offer)
-                  <div class="mt-2 text-xs text-green-700">Ditawari: {{ $a->offer->created_at ?? '-' }}</div>
+                  <span class="btn-xs" style="background:#e6f4ea;border-color:#b0d9b5;color:#256629;cursor:default;">
+                    ✓ Offering Letter
+                  </span>
                 @endif
-              </article>
-            @empty
-              <div class="text-xs text-slate-400">Belum ada lamaran di stage ini.</div>
-            @endforelse
-          </div>
-        </section>
-      @endforeach
+
+                <a href="{{ route('jobs.show', $a->job) }}" target="_blank" class="btn-xs btn-outline">Job</a>
+              </div>
+
+            </div>{{-- /kn-card --}}
+          @empty
+            <div class="kn-empty">Belum ada lamaran di stage ini.</div>
+          @endforelse
+
+        </div>
+      </div>
+    @endforeach
+
+  </div>
+</div>
+
+
+{{-- ============================= MODAL: RIWAYAT INTERVIEW ============================= --}}
+<div class="hidden kn-overlay" id="overlay-riwayat">
+  <div class="kn-modal">
+    <div class="kn-modal-head">
+      <div>
+        <div class="kn-modal-title">Riwayat Interview</div>
+        <div class="kn-modal-sub">Catatan per tahap interview yang sudah dilalui</div>
+      </div>
+      <button class="kn-modal-close" onclick="document.getElementById('overlay-riwayat').classList.add('hidden')">✕</button>
+    </div>
+    <div class="kn-modal-body" id="riwayat-body"></div>
+    <div class="kn-modal-footer">
+      <button class="btn-xs btn-outline" onclick="document.getElementById('overlay-riwayat').classList.add('hidden')">Tutup</button>
     </div>
   </div>
 </div>
+
+{{-- TOAST --}}
+<div class="hidden kn-toast" id="kn-toast"></div>
+
+@if(session('ok'))
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const t = document.getElementById('kn-toast');
+      t.textContent = '{{ session('ok') }}';
+      t.className = 'kn-toast ok';
+      setTimeout(() => t.classList.add('hidden'), 3000);
+    });
+  </script>
+@endif
+
+@if(session('error') || $errors->any())
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const t = document.getElementById('kn-toast');
+      t.textContent = '{{ session('error') ?? $errors->first() }}';
+      t.className = 'kn-toast err';
+      setTimeout(() => t.classList.add('hidden'), 4000);
+    });
+  </script>
+@endif
+
+<script>
+const stageLabels = {
+  applied:'Applied', screening:'Screening CV', psychotest:'Psikotest',
+  hr_iv:'HR Interview', user_iv:'User Interview', user_trainer_iv:'User/Trainer IV',
+  offer:'OL', mcu:'MCU', mobilisasi:'Mobilisasi', ground_test:'Ground Test',
+  hired:'Hired', not_qualified:'Not Lolos'
+};
+
+function openRiwayat(data) {
+  const body = document.getElementById('riwayat-body');
+  if (!data || !data.length) {
+    body.innerHTML = '<p style="color:#aaa;font-size:.8rem;text-align:center">Belum ada riwayat.</p>';
+  } else {
+    body.innerHTML = data.map(item => `
+      <div class="riwayat-item">
+        <div class="riwayat-stage">${stageLabels[item.stage] || item.stage}</div>
+        <div style="margin-top:.2rem">${item.notes || '<span style="color:#aaa">Tidak ada catatan</span>'}</div>
+        <div style="margin-top:.25rem;font-size:.68rem;color:#9a7558">
+          Oleh: ${item.actor} &middot; ${item.created_at}
+        </div>
+      </div>
+    `).join('');
+  }
+  document.getElementById('overlay-riwayat').classList.remove('hidden');
+}
+</script>
 @endsection

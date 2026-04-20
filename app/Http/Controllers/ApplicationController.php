@@ -4,16 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Models\Job;
 use App\Models\User;
-use App\Models\Offer; // +++
+use App\Models\Offer;
 use App\Models\JobApplication;
 use App\Models\ApplicationStage;
+use App\Models\ApplicationFeedback;
 use App\Models\PsychotestAttempt;
 use App\Models\PsychotestTest;
 use App\Models\CandidateProfile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage; // +++ untuk hapus file
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Support\Carbon;
@@ -21,15 +22,10 @@ use Illuminate\Support\Str;
 
 class ApplicationController extends Controller
 {
-    /**
-     * === Canonical stage keys (SELARAS DENGAN BLADE/KANBAN) ===
-     * HO:   Applied → Screening → Psikotest → HR Interview → User Interview → OL → Hired
-     * Site: (Staff) sama, ditambah MCU → Mobilisasi sebelum Hired
-     *       (Non-Staff Equipment/Non-Equipment) tanpa Psikotest, tambah User/Trainer Interview + Ground Test
-     *
-     * Kolom Kanban disatukan agar bisa menampung semua jalur: 
-     * applied, screening, psychotest, hr_iv, user_iv, user_trainer_iv, offer(OL), mcu, mobilisasi, ground_test, hired, not_qualified
-     */
+    /* ================================================================
+     * STAGE DEFINITIONS
+     * ================================================================ */
+
     protected array $STAGES = [
         'applied',
         'screening',
@@ -37,7 +33,7 @@ class ApplicationController extends Controller
         'hr_iv',
         'user_iv',
         'user_trainer_iv',
-        'offer',        // tampil sebagai "OL"
+        'offer',
         'mcu',
         'mobilisasi',
         'ground_test',
@@ -45,81 +41,82 @@ class ApplicationController extends Controller
         'not_qualified',
     ];
 
-    /** Alias masuk -> canonical (biar input bebas, key-nya konsisten) */
     protected array $ALIASES_IN = [
-        // dasar
-        'apply' => 'applied',
-        'applied' => 'applied',
-
-        // screening / seleksi berkas
-        'screening' => 'screening',
-        'screening_cv' => 'screening',
-        'screening-berkas' => 'screening',
-        'screening_berkas' => 'screening',
-        'seleksi_berkas' => 'screening',
-
-        // psikotes
-        'psychotest' => 'psychotest',
-        'psikotest' => 'psychotest',
-
-        // interview
-        'hr_iv' => 'hr_iv',
-        'hriv' => 'hr_iv',
-        'hr-interview' => 'hr_iv',
-        'user_iv' => 'user_iv',
-        'useriv' => 'user_iv',
-        'user-interview' => 'user_iv',
-        'user_trainer_iv' => 'user_trainer_iv',
-        'user-trainer' => 'user_trainer_iv',
-        'trainer_iv' => 'user_trainer_iv',
-        'trainer-interview' => 'user_trainer_iv',
-
-        // offering letter
-        'offering' => 'offer',
-        'offer' => 'offer',
-        'ol' => 'offer',
-
-        // medis & mobilisasi
-        'mcu' => 'mcu',
-        'medical_checkup' => 'mcu',
-        'mobilisasi' => 'mobilisasi',
-        'mobilization' => 'mobilisasi',
-
-        // ground test
-        'ground_test' => 'ground_test',
-        'ground-test' => 'ground_test',
-
-        // hasil akhir
-        'diterima' => 'hired',
-        'hired' => 'hired',
-        'rejected' => 'not_qualified',
-        'not_qualified' => 'not_qualified',
-        'not-qualified' => 'not_qualified',
-        'notqualified' => 'not_qualified',
-
-        // kompat lama (tidak tampil sebagai kolom, tapi masih diterima)
-        'final' => 'user_iv',
-        'final_interview' => 'user_iv',
+        'apply'              => 'applied',
+        'applied'            => 'applied',
+        'screening'          => 'screening',
+        'screening_cv'       => 'screening',
+        'screening-berkas'   => 'screening',
+        'screening_berkas'   => 'screening',
+        'seleksi_berkas'     => 'screening',
+        'psychotest'         => 'psychotest',
+        'psikotest'          => 'psychotest',
+        'hr_iv'              => 'hr_iv',
+        'hriv'               => 'hr_iv',
+        'hr-interview'       => 'hr_iv',
+        'user_iv'            => 'user_iv',
+        'useriv'             => 'user_iv',
+        'user-interview'     => 'user_iv',
+        'user_trainer_iv'    => 'user_trainer_iv',
+        'user-trainer'       => 'user_trainer_iv',
+        'trainer_iv'         => 'user_trainer_iv',
+        'trainer-interview'  => 'user_trainer_iv',
+        'offering'           => 'offer',
+        'offer'              => 'offer',
+        'ol'                 => 'offer',
+        'mcu'                => 'mcu',
+        'medical_checkup'    => 'mcu',
+        'mobilisasi'         => 'mobilisasi',
+        'mobilization'       => 'mobilisasi',
+        'ground_test'        => 'ground_test',
+        'ground-test'        => 'ground_test',
+        'diterima'           => 'hired',
+        'hired'              => 'hired',
+        'rejected'           => 'not_qualified',
+        'not_qualified'      => 'not_qualified',
+        'not-qualified'      => 'not_qualified',
+        'notqualified'       => 'not_qualified',
+        'final'              => 'user_iv',
+        'final_interview'    => 'user_iv',
     ];
 
-    /** Label cantik (untuk UI) */
     protected array $PRETTY = [
-        'applied' => 'Applied',
-        'screening' => 'Screening CV/Berkas Lamaran',
-        'psychotest' => 'Psikotest',
-        'hr_iv' => 'HR Interview',
-        'user_iv' => 'User Interview',
+        'applied'         => 'Applied',
+        'screening'       => 'Screening CV/Berkas Lamaran',
+        'psychotest'      => 'Psikotest',
+        'hr_iv'           => 'HR Interview',
+        'user_iv'         => 'User Interview',
         'user_trainer_iv' => 'User/Trainer Interview',
-        'offer' => 'OL',
-        'mcu' => 'MCU',
-        'mobilisasi' => 'Mobilisasi',
-        'ground_test' => 'Ground Test',
-        'hired' => 'Hired',
-        'not_qualified' => 'Tidak Lolos',
+        'offer'           => 'OL',
+        'mcu'             => 'MCU',
+        'mobilisasi'      => 'Mobilisasi',
+        'ground_test'     => 'Ground Test',
+        'hired'           => 'Hired',
+        'not_qualified'   => 'Tidak Lolos',
     ];
 
-    /** Offer yang baru dibuat (untuk redirect ke PDF) */
-    protected ?Offer $offerJustCreated = null; // +++
+    /**
+     * Stage-stage yang boleh dipindah SECARA BEBAS oleh admin/hr/superadmin
+     * (yaitu semua stage setelah user_trainer_iv)
+     */
+    protected array $FREE_MOVE_STAGES = [
+        'offer',
+        'mcu',
+        'mobilisasi',
+        'ground_test',
+        'hired',
+        'not_qualified',
+    ];
+
+    /** Roles yang boleh melakukan free move */
+    protected array $FREE_MOVE_ROLES = ['admin', 'hr', 'superadmin'];
+
+    protected ?Offer $offerJustCreated = null;
+
+
+    /* ================================================================
+     * PUBLIC ENDPOINTS
+     * ================================================================ */
 
     /** Pelamar: daftar lamaran saya */
     public function index(Request $request)
@@ -148,7 +145,6 @@ class ApplicationController extends Controller
             ->first();
 
         if ($already) {
-            // Sudah pernah melamar, langsung redirect ke profil (tanpa isi form lagi)
             return redirect()
                 ->route('candidate.profiles.edit', ['job' => $job->id])
                 ->with('info', 'Kamu sudah melamar. Silakan lengkapi/cek data profil.');
@@ -159,24 +155,23 @@ class ApplicationController extends Controller
         ]);
 
         DB::transaction(function () use ($request, $job, $data) {
-            /** @var JobApplication $app */
             $app = JobApplication::create([
-                'job_id' => $job->id,
-                'user_id' => $request->user()->id,
-                'poh_id' => $data['poh_id'] ?? null,
-                'current_stage' => 'applied',
+                'job_id'         => $job->id,
+                'user_id'        => $request->user()->id,
+                'poh_id'         => $data['poh_id'] ?? null,
+                'current_stage'  => 'applied',
                 'overall_status' => 'active',
             ]);
 
             ApplicationStage::create([
                 'application_id' => $app->id,
-                'stage_key' => 'applied',
-                'status' => 'pending',
-                'score' => null,
-                'payload' => ['note' => 'Initial application submitted'],
-                'acted_by' => $request->user()->id,
-                'user_id' => $request->user()->id,
-                'notes' => null,
+                'stage_key'      => 'applied',
+                'status'         => 'pending',
+                'score'          => null,
+                'payload'        => ['note' => 'Initial application submitted'],
+                'acted_by'       => $request->user()->id,
+                'user_id'        => $request->user()->id,
+                'notes'          => null,
             ]);
 
             CandidateProfile::firstOrCreate(
@@ -194,18 +189,15 @@ class ApplicationController extends Controller
     public function adminIndex(Request $request)
     {
         $filters = $request->validate([
-            'q' => ['nullable', 'string', 'max:120'],
+            'q'     => ['nullable', 'string', 'max:120'],
             'stage' => ['nullable', 'string', 'max:50'],
-            'site' => ['nullable', 'string', 'max:50'],
+            'site'  => ['nullable', 'string', 'max:50'],
         ]);
 
-        $qRaw = (string) ($filters['q'] ?? '');
-        $q = Str::limit(preg_replace('/[\x00-\x1F\x7F]/u', '', trim($qRaw)) ?? '', 120, '');
+        $q    = Str::limit(preg_replace('/[\x00-\x1F\x7F]/u', '', trim((string) ($filters['q'] ?? ''))) ?? '', 120, '');
         $like = $q !== '' ? '%' . addcslashes($q, '\\%_') . '%' : null;
-        $stage = (string) ($filters['stage'] ?? '');
-        $site = (string) ($filters['site'] ?? '');
-
-        $stage = $this->normalizeStage($stage);
+        $stage = $this->normalizeStage($filters['stage'] ?? '');
+        $site  = (string) ($filters['site'] ?? '');
 
         $apps = JobApplication::query()
             ->with([
@@ -215,18 +207,16 @@ class ApplicationController extends Controller
                 'stages.actor:id,name',
                 'stages.user:id,name',
             ])
-            ->when($like !== null, function ($qq) use ($like) {
-                $qq->where(function ($w) use ($like) {
+            ->when($like !== null, function ($q) use ($like) {
+                $q->where(function ($w) use ($like) {
                     $w->whereHas('user', fn($u) => $u->where('name', 'like', $like))
-                        ->orWhereHas('job', function ($j) use ($like) {
-                            $j->where('title', 'like', $like)
-                                ->orWhere('division', 'like', $like)
-                                ->orWhereHas('site', fn($s) => $s->where('code', 'like', $like));
-                        });
+                      ->orWhereHas('job', fn($j) => $j->where('title', 'like', $like)
+                          ->orWhere('division', 'like', $like)
+                          ->orWhereHas('site', fn($s) => $s->where('code', 'like', $like)));
                 });
             })
-            ->when($stage, fn($qq) => $qq->where('current_stage', $stage))
-            ->when($site, fn($qq) => $qq->whereHas('job.site', fn($s) => $s->where('code', $site)))
+            ->when($stage, fn($q) => $q->where('current_stage', $stage))
+            ->when($site,  fn($q) => $q->whereHas('job.site', fn($s) => $s->where('code', $site)))
             ->orderByDesc('created_at')
             ->orderByDesc('id')
             ->paginate(15)
@@ -235,23 +225,22 @@ class ApplicationController extends Controller
         return view('admin.applications.index', compact('apps'));
     }
 
-    /** Kanban board: admin, hr, karyawan, pelamar, trainer */
+    /** Kanban board */
     public function board(Request $request)
     {
-        $user = auth()->user();
+        $user   = auth()->user();
         $stages = $this->STAGES;
 
-        // Jika ingin filter data berdasarkan role, bisa tambahkan di sini
         $query = JobApplication::with([
             'job:id,title,division,site_id',
             'job.site:id,code,name',
-            'user:id,name',
+            'user:id,name,role',
             'stages.actor:id,name',
             'stages.user:id,name',
+            'feedbacks',                   // load semua feedback sekaligus
         ]);
 
-        // Jika bukan admin/hr/superadmin, hanya tampilkan lamaran milik user
-        if (!in_array($user->role, ['admin','hr','superadmin'])) {
+        if (!in_array($user->role, ['admin', 'hr', 'superadmin'])) {
             $query->where('user_id', $user->id);
         }
 
@@ -265,6 +254,13 @@ class ApplicationController extends Controller
                     ->all();
                 return $q->whereIn('current_stage', $only);
             })
+            ->when($request->filled('q'), function ($q) use ($request) {
+                $like = '%' . addcslashes(trim($request->q), '\\%_') . '%';
+                return $q->where(function ($w) use ($like) {
+                    $w->whereHas('user', fn($u) => $u->where('name', 'like', $like))
+                      ->orWhereHas('job', fn($j) => $j->where('title', 'like', $like));
+                });
+            })
             ->orderBy('created_at')
             ->orderBy('id')
             ->get();
@@ -272,113 +268,210 @@ class ApplicationController extends Controller
         $grouped = collect($stages)->mapWithKeys(fn($s) => [$s => collect()]);
         foreach ($apps as $a) {
             $key = $this->normalizeStage($a->current_stage) ?: 'applied';
-            if (!in_array($key, $stages, true))
-                $key = 'applied';
+            if (!in_array($key, $stages, true)) $key = 'applied';
             $grouped[$key]->push($a);
         }
 
         return view('admin.applications.board', compact('stages', 'grouped'));
     }
 
-    /** Admin: pindahkan stage aplikasi (via tombol/POST) */
+    /**
+     * ================================================================
+     * FEEDBACK STORE (AJAX)
+     * Endpoint: POST /admin/applications/feedback
+     * Dipakai oleh modal "Isi Feedback" di kanban
+     * ================================================================
+     */
+    public function storeFeedback(Request $request)
+    {
+        $validated = $request->validate([
+            'application_id' => ['required', 'uuid', 'exists:job_applications,id'],
+            'stage_key'      => ['required', 'string'],
+            'role'           => ['required', 'in:hr,karyawan,trainer,pelamar'],
+            'feedback'       => ['required', 'string', 'max:2000'],
+            'approve'        => ['required', 'in:yes,no'],
+        ]);
+
+        /** @var \App\Models\User $actor */
+        $actor = auth()->user();
+
+        // Validasi: hanya HR/admin/superadmin boleh simpan feedback HR
+        if ($validated['role'] === 'hr' && !in_array($actor->role, ['admin', 'hr', 'superadmin'])) {
+            abort(403, 'Hanya HR, Admin, atau Superadmin yang dapat mengisi feedback HR.');
+        }
+
+        $feedback = DB::transaction(function () use ($validated, $actor) {
+            $fb = ApplicationFeedback::create([
+                'application_id' => $validated['application_id'],
+                'stage_key'      => $validated['stage_key'],
+                'role'           => $validated['role'],
+                'feedback'       => $validated['feedback'],
+                'approve'        => $validated['approve'],
+                'user_id'        => $actor->id,
+            ]);
+
+            // Mirror ke kolom langsung di job_applications untuk kompatibilitas backward
+            /** @var JobApplication $app */
+            $app = JobApplication::find($validated['application_id']);
+            if ($app) {
+                if ($validated['role'] === 'hr') {
+                    $app->feedback_hr  = $validated['feedback'];
+                    $app->approve_hr   = $validated['approve'];
+                    $app->save();
+                } elseif (in_array($validated['role'], ['karyawan', 'pelamar'])) {
+                    $app->feedback_user  = $validated['feedback'];
+                    $app->approve_user   = $validated['approve'];
+                    $app->save();
+                } elseif ($validated['role'] === 'trainer') {
+                    $app->feedback_trainer  = $validated['feedback'];
+                    $app->approve_trainer   = $validated['approve'];
+                    $app->save();
+                }
+            }
+
+            return $fb;
+        });
+
+        return response()->json([
+            'ok'       => true,
+            'feedback' => $feedback->only(['id', 'role', 'feedback', 'approve']),
+        ]);
+    }
+
+    /**
+     * ================================================================
+     * MOVE STAGE via POST form (tombol/form)
+     * ================================================================
+     */
     public function moveStage(Request $request, JobApplication $application)
     {
-        [$to, $status, $note, $score] = $this->validateMove($request);
+        [$to, $status, $note, $score] = $this->validateMove($request, $application);
         $attempt = $this->applyTransition($application, $to, $status, $note, $score);
         return $this->redirectAfterMove($request, $application, $to, $attempt);
     }
 
-    /** Admin: AJAX pindah stage dari Kanban */
+    /**
+     * ================================================================
+     * MOVE STAGE via AJAX (Kanban drag & drop, free move dropdown)
+     * Endpoint: POST /admin/applications/board/move?id={uuid}
+     * ================================================================
+     */
     public function moveStageAjax(Request $request)
     {
         $request->validate([
             'id' => ['required', 'uuid', 'exists:job_applications,id'],
         ]);
 
-        [$to, $status, $note, $score] = $this->validateMove($request);
-
         /** @var JobApplication $application */
         $application = JobApplication::with(['job.manpowerRequirement'])->findOrFail($request->input('id'));
+
+        $actor = auth()->user();
+
+        // Cek apakah ini adalah FREE MOVE (setelah user_trainer_iv)
+        $toRaw    = $request->input('to') ?? $request->input('to_stage');
+        $toStage  = $this->normalizeStage($toRaw) ?: 'applied';
+        $fromStage = $application->current_stage;
+
+        $isFreeMoveAllowed = $this->canFreeMoveFrom($fromStage, $actor->role ?? '');
+
+        // Jika bukan free move, validasi normal
+        if (!$isFreeMoveAllowed) {
+            [$to, $status, $note, $score] = $this->validateMove($request, $application);
+        } else {
+            // Free move: validasi minimal
+            $to     = $toStage;
+            $status = $request->input('status', 'pending');
+            $note   = $request->input('note');
+            $score  = $request->input('score') ? (float) $request->input('score') : null;
+        }
 
         $attempt = $this->applyTransition($application, $to, $status, $note, $score);
 
         return response()->json([
-            'ok' => true,
+            'ok'       => true,
             'moved_to' => $to,
-            'id' => $application->id,
-            'attempt' => $attempt?->id ?? null,
+            'id'       => $application->id,
+            'attempt'  => $attempt?->id ?? null,
         ]);
     }
 
-    /* ============================== Helpers ============================== */
+
+    /* ================================================================
+     * HELPERS
+     * ================================================================ */
+
+    /**
+     * Apakah perpindahan dari $fromStage termasuk "free move"
+     * yang diperbolehkan untuk role tertentu?
+     *
+     * Free move aktif jika:
+     * 1. User adalah admin/hr/superadmin
+     * 2. Stage asal SUDAH MELEWATI user_trainer_iv (index > index user_trainer_iv)
+     *    ATAU stage asal sendiri adalah user_trainer_iv
+     */
+    protected function canFreeMoveFrom(string $fromStage, string $role): bool
+    {
+        if (!in_array($role, $this->FREE_MOVE_ROLES)) {
+            return false;
+        }
+
+        $trainerIdx = $this->stageIndex('user_trainer_iv');
+        $fromIdx    = $this->stageIndex($fromStage);
+
+        // Boleh free move jika dari user_trainer_iv ke atas
+        return $fromIdx !== -1 && $fromIdx >= $trainerIdx;
+    }
 
     protected function normalizeStage(?string $s): ?string
     {
-        if (!$s)
-            return null;
+        if (!$s) return null;
         $key = strtolower(trim($s));
         return $this->ALIASES_IN[$key] ?? (in_array($key, $this->STAGES, true) ? $key : null);
     }
 
-    /** Urutan stage sebagai indeks numerik */
     protected function stageIndex(string $s): int
     {
         $idx = array_search($s, $this->STAGES, true);
         return $idx === false ? -1 : $idx;
     }
 
-    /** Apakah perpindahan ini mundur ke sebelum 'offer'? */
     protected function isBackwardBeforeOffer(string $from, string $to): bool
     {
         $offerIdx = $this->stageIndex('offer');
-        $fromIdx = $this->stageIndex($from);
-        $toIdx = $this->stageIndex($to);
-        if ($offerIdx < 0)
-            return false;
-        if ($fromIdx < 0)
-            return false;
-        if ($toIdx < 0)
-            return false;
+        $fromIdx  = $this->stageIndex($from);
+        $toIdx    = $this->stageIndex($to);
+        if ($offerIdx < 0 || $fromIdx < 0 || $toIdx < 0) return false;
         return $toIdx < $offerIdx && $fromIdx >= $offerIdx;
     }
 
-    /** Hapus Offer + file PDF (jika ada tersimpan) */
     protected function purgeOffer(JobApplication $application): void
     {
-        /** @var Offer|null $offer */
         $offer = $application->offer()->first();
-        if (!$offer)
-            return;
-
+        if (!$offer) return;
         $this->purgeOfferFiles($offer);
         $offer->delete();
     }
 
-    /** Hapus file-file fisik Offer jika ada (file_path atau meta[pdf_path]) */
     protected function purgeOfferFiles(Offer $offer): void
     {
         $paths = [];
-
-        // skema 1: kolom langsung
-        if (!empty($offer->file_path)) {
-            $paths[] = $offer->file_path;
-        }
-        // skema 2: di meta
-        $meta = is_array($offer->meta ?? null) ? $offer->meta : [];
-        if (!empty($meta['pdf_path'])) {
-            $paths[] = $meta['pdf_path'];
-        }
-
+        if (!empty($offer->file_path)) $paths[] = $offer->file_path;
+        $meta  = is_array($offer->meta ?? null) ? $offer->meta : [];
+        if (!empty($meta['pdf_path'])) $paths[] = $meta['pdf_path'];
         foreach ($paths as $p) {
-            // asumsikan disk 'public'; ganti jika perlu
             if (Storage::disk('public')->exists($p)) {
                 Storage::disk('public')->delete($p);
             }
         }
     }
 
-    /** @return array{string,string,?string,?float} */
-    protected function validateMove(Request $request): array
+    /**
+     * Validasi input perpindahan stage.
+     * Untuk FREE MOVE, validasi ini di-skip (lihat moveStageAjax).
+     *
+     * @return array{string,string,?string,?float}
+     */
+    protected function validateMove(Request $request, ?JobApplication $application = null): array
     {
         $allowedStages = array_unique(array_merge($this->STAGES, array_values($this->ALIASES_IN)));
         $allowedStatus = ['pending', 'passed', 'failed', 'no-show', 'reschedule'];
@@ -386,44 +479,55 @@ class ApplicationController extends Controller
         $toRaw = $request->input('to') ?? $request->input('to_stage');
 
         $validated = $request->validate([
-            'to' => ['nullable', Rule::in($allowedStages)],
-            'to_stage' => ['nullable', Rule::in($allowedStages)],
-            'status' => ['nullable', Rule::in($allowedStatus)],
-            'note' => ['nullable', 'string'],
-            'score' => ['nullable', 'numeric'],
-            // Tambahan untuk feedback dan persetujuan
-            'feedback_hr' => ['nullable', 'string'],
-            'approve_hr' => ['nullable', 'in:yes,no'],
+            'to'               => ['nullable', Rule::in($allowedStages)],
+            'to_stage'         => ['nullable', Rule::in($allowedStages)],
+            'status'           => ['nullable', Rule::in($allowedStatus)],
+            'note'             => ['nullable', 'string'],
+            'score'            => ['nullable', 'numeric'],
+            'feedback_hr'      => ['nullable', 'string'],
+            'approve_hr'       => ['nullable', 'in:yes,no'],
             'feedback_trainer' => ['nullable', 'string'],
-            'approve_trainer' => ['nullable', 'in:yes,no'],
-            'feedback_user' => ['nullable', 'string'],
-            'approve_user' => ['nullable', 'in:yes,no'],
+            'approve_trainer'  => ['nullable', 'in:yes,no'],
+            'feedback_user'    => ['nullable', 'string'],
+            'approve_user'     => ['nullable', 'in:yes,no'],
         ]);
 
-        $to = $this->normalizeStage($toRaw) ?: 'applied';
+        $to     = $this->normalizeStage($toRaw) ?: 'applied';
         $status = $validated['status'] ?? 'pending';
-        $note = $validated['note'] ?? null;
-        $score = isset($validated['score']) ? (float) $validated['score'] : null;
+        $note   = $validated['note']   ?? null;
+        $score  = isset($validated['score']) ? (float) $validated['score'] : null;
 
-        // Validasi wajib feedback dan persetujuan HR hanya saat PINDAH DARI hr_iv ke stage berikutnya
-        $from = $request->input('from_stage') ?? $request->input('from') ?? $application->current_stage ?? null;
-        if ($from === 'hr_iv' && $to !== 'hr_iv' && in_array(auth()->user()->role, ['admin','hr','superadmin'])) {
+        $fromStage = $application?->current_stage
+                   ?? $request->input('from_stage')
+                   ?? $request->input('from');
+
+        // Wajib feedback HR saat pindah dari hr_iv
+        if (
+            $fromStage === 'hr_iv'
+            && $to !== 'hr_iv'
+            && in_array(auth()->user()?->role, ['admin', 'hr', 'superadmin'])
+        ) {
             if (empty($validated['feedback_hr']) || ($validated['approve_hr'] ?? null) === null) {
                 abort(422, 'HR wajib mengisi feedback dan setuju/tidak setuju sebelum lanjut dari HR Interview.');
             }
         }
 
-        // Validasi wajib feedback dan persetujuan trainer HANYA jika user login adalah trainer
-        if (in_array($to, ['user_trainer_iv'], true) && auth()->user() && auth()->user()->role === 'trainer') {
+        // Wajib feedback trainer (jika role trainer)
+        if (
+            in_array($to, ['user_trainer_iv'], true)
+            && auth()->user()?->role === 'trainer'
+        ) {
             if (empty($validated['feedback_trainer']) || ($validated['approve_trainer'] ?? null) === null) {
                 abort(422, 'Trainer wajib mengisi feedback dan setuju/tidak setuju sebelum lanjut.');
             }
         }
 
-        // Validasi wajib feedback dan persetujuan user/karyawan
-        // Hanya wajib jika memindahkan DARI user_iv ke user_trainer_iv dan user login adalah karyawan
-        $from = $request->input('from_stage') ?? $request->input('from') ?? null;
-        if ($from === 'user_iv' && $to === 'user_trainer_iv' && auth()->user() && auth()->user()->role === 'karyawan') {
+        // Wajib feedback karyawan (jika role karyawan, pindah dari user_iv ke user_trainer_iv)
+        if (
+            $fromStage === 'user_iv'
+            && $to === 'user_trainer_iv'
+            && auth()->user()?->role === 'karyawan'
+        ) {
             if (empty($validated['feedback_user']) || ($validated['approve_user'] ?? null) === null) {
                 abort(422, 'Karyawan wajib mengisi feedback dan setuju/tidak setuju sebelum lanjut.');
             }
@@ -433,86 +537,93 @@ class ApplicationController extends Controller
     }
 
     /**
-     * Terapkan perpindahan stage + side-effects (atomic)
-     * return: attempt psikotes (jika dibuat), selain itu null
+     * Terapkan perpindahan stage (atomic transaction).
+     * Return: PsychotestAttempt jika dibuat, selain itu null.
      */
-    protected function applyTransition(JobApplication $application, string $to, string $status = 'pending', ?string $note = null, ?float $score = null)
-    {
-        $attempt = null;
+    protected function applyTransition(
+        JobApplication $application,
+        string $to,
+        string $status = 'pending',
+        ?string $note = null,
+        ?float $score = null
+    ) {
+        $attempt  = null;
+        $userId   = Auth::id();
         $actorUser = Auth::user();
-        $userId = Auth::id();
-        $actor = $actorUser?->name ?? 'System';
+        $actor    = $actorUser?->name ?? 'System';
 
-        DB::transaction(function () use ($application, $to, $status, $note, $score, &$attempt, $userId, $actor) {
-            $from = $application->current_stage;
+        DB::transaction(function () use ($application, $to, $status, $note, $score, &$attempt, $userId, $actor, $actorUser) {
+            $from        = $application->current_stage;
             $prevOverall = $application->overall_status;
 
-            // === Jika mundur ke sebelum 'offer', hapus Offer + file ===
+            // Jika mundur sebelum 'offer', hapus Offer + file
             if ($this->isBackwardBeforeOffer($from, $to)) {
                 $this->purgeOffer($application);
-                $this->offerJustCreated = null; // reset
+                $this->offerJustCreated = null;
             }
 
-            // timeline
+            // Timeline entry
             ApplicationStage::create([
                 'application_id' => $application->id,
-                'stage_key' => $to,
-                'status' => $status ?: 'pending',
-                'score' => $score,
-                'payload' => ['note' => $note],
-                'acted_by' => $userId,
-                'user_id' => $userId,
-                'notes' => $note,
+                'stage_key'      => $to,
+                'status'         => $status ?: 'pending',
+                'score'          => $score,
+                'payload'        => ['note' => $note],
+                'acted_by'       => $userId,
+                'user_id'        => $userId,
+                'notes'          => $note,
             ]);
 
-            // Simpan feedback HR jika PINDAH DARI hr_iv ke stage lain
-            $actorUser = \Auth::user();
-            if ($from === 'hr_iv' && $to !== 'hr_iv' && in_array($actorUser?->role, ['admin','hr','superadmin'])) {
+            // Simpan feedback HR jika dari hr_iv
+            if (
+                $from === 'hr_iv'
+                && $to !== 'hr_iv'
+                && in_array($actorUser?->role, ['admin', 'hr', 'superadmin'])
+                && (request('feedback_hr') !== null || request('approve_hr') !== null)
+            ) {
                 $application->feedback_hr = request('feedback_hr');
-                $application->approve_hr = request('approve_hr');
+                $application->approve_hr  = request('approve_hr');
                 $application->save();
-                // Simpan juga ke tabel riwayat feedbacks
-                if (request('feedback_hr') !== null || request('approve_hr') !== null) {
-                    \App\Models\ApplicationFeedback::create([
+
+                ApplicationFeedback::firstOrCreate(
+                    [
                         'application_id' => $application->id,
-                        'stage_key' => 'hr_iv',
-                        'role' => 'hr',
+                        'stage_key'      => 'hr_iv',
+                        'role'           => 'hr',
+                        'user_id'        => $userId,
+                    ],
+                    [
                         'feedback' => request('feedback_hr'),
-                        'approve' => request('approve_hr'),
-                        'user_id' => $userId,
-                    ]);
-                }
+                        'approve'  => request('approve_hr'),
+                    ]
+                );
             }
-            // current stage
+
+            // Update stage
             $application->update(['current_stage' => $to]);
 
-            // === OFFER: buat 1x jika masuk ke 'offer' atau 'hired' (idempotent) ===
+            // Buat/ambil Offer saat masuk ke 'offer' atau 'hired'
             if (in_array($to, ['offer', 'hired'], true)) {
-                /** @var \App\Models\Offer|null $existing */
                 $existing = $application->offer()->first();
-
                 if (!$existing) {
-                    // (opsional) prefill dari job
-                    $job = $application->job()->with(['site:id,code'])->first();
-                    $gross = (float) ($job->default_gross ?? 0);
-                    $allow = (float) ($job->default_allowance ?? 0);
+                    $job   = $application->job()->with(['site:id,code'])->first();
+                    $gross = (float) ($job->default_gross      ?? 0);
+                    $allow = (float) ($job->default_allowance  ?? 0);
 
                     $existing = $application->offer()->create([
-                        'status' => 'draft',
-                        'salary' => ['gross' => $gross, 'allowance' => $allow],
-                        'body_template' => null, // gunakan Blade offers.pdf
-                        'meta' => [
+                        'status'        => 'draft',
+                        'salary'        => ['gross' => $gross, 'allowance' => $allow],
+                        'body_template' => null,
+                        'meta'          => [
                             'job_title' => $job?->title,
                             'site_code' => $job?->site?->code,
                         ],
                     ]);
                 }
-
-                // simpan untuk redirect setelah transaksi
                 $this->offerJustCreated = $existing;
             }
 
-            // overall status & headcount
+            // Overall status & headcount
             if ($to === 'hired') {
                 $job = $application->job()->with('manpowerRequirement', 'site:id,code', 'company:id,code')->first();
                 if ($job && $job->manpowerRequirement) {
@@ -523,19 +634,15 @@ class ApplicationController extends Controller
                 }
                 $application->update(['overall_status' => 'hired']);
 
-                // === AUTO-GENERATE users.id_employe (sekali saja) ===
+                // Auto-generate NIK
                 $user = User::find($application->user_id);
                 if ($user && empty($user->id_employe)) {
-                    // Format NIK: {COMPANY3}{SITE2}{YY}{MM}{SEQ5}
-                    $nik = $this->makeNik($job, 1);
-
-                    // retry sederhana jika kebetulan tabrakan
+                    $nik   = $this->makeNik($job, 1);
                     $tries = 0;
                     while (User::where('id_employe', $nik)->exists() && $tries < 5) {
                         $nik = $this->makeNik($job, 1);
                         $tries++;
                     }
-
                     $user->forceFill(['id_employe' => $nik])->save();
                 }
             } elseif ($to === 'not_qualified') {
@@ -546,43 +653,41 @@ class ApplicationController extends Controller
                 }
             }
 
-            // Psikotes (auto attempt)
+            // Auto-buat attempt psikotes
             if ($to === 'psychotest') {
                 $test = PsychotestTest::where('is_active', true)->latest('updated_at')->first();
                 if (!$test) {
                     $test = PsychotestTest::create([
-                        'name' => 'Tes Dasar (Auto)',
+                        'name'             => 'Tes Dasar (Auto)',
                         'duration_minutes' => 20,
-                        'scoring' => ['pass_ratio' => 0.6],
-                        'is_active' => true,
+                        'scoring'          => ['pass_ratio' => 0.6],
+                        'is_active'        => true,
                     ]);
                 }
-
                 $attempt = PsychotestAttempt::where('application_id', $application->id)
                     ->where('test_id', $test->id)
                     ->first();
-
                 if (!$attempt) {
                     $attempt = PsychotestAttempt::create([
                         'application_id' => $application->id,
-                        'test_id' => $test->id,
-                        'user_id' => $application->user_id,
-                        'attempt_no' => 1,
-                        'status' => 'pending',
-                        'is_active' => true,
-                        'started_at' => null,
-                        'submitted_at' => null,
-                        'expires_at' => now()->addDays(3),
-                        'score' => null,
-                        'meta' => ['note' => 'auto-created on stage move'],
+                        'test_id'        => $test->id,
+                        'user_id'        => $application->user_id,
+                        'attempt_no'     => 1,
+                        'status'         => 'pending',
+                        'is_active'      => true,
+                        'started_at'     => null,
+                        'submitted_at'   => null,
+                        'expires_at'     => now()->addDays(3),
+                        'score'          => null,
+                        'meta'           => ['note' => 'auto-created on stage move'],
                     ]);
                 }
             }
 
             // Notifikasi ke pelamar
-            $appReload = $application->fresh(['job:id,title', 'user:id,name']);
-            $jobTitle = $appReload->job?->title ?? '—';
-            $toPretty = $this->PRETTY[$to] ?? strtoupper($to);
+            $appReload  = $application->fresh(['job:id,title', 'user:id,name']);
+            $jobTitle   = $appReload->job?->title ?? '—';
+            $toPretty   = $this->PRETTY[$to]   ?? strtoupper($to);
             $fromPretty = $from ? ($this->PRETTY[$from] ?? strtoupper($from)) : null;
 
             $title = 'Perubahan Proses Lamaran';
@@ -595,33 +700,31 @@ class ApplicationController extends Controller
                 $body = "Tahap lamaran kamu untuk posisi \"{$jobTitle}\" diperbarui menjadi: {$stagePart}.";
             }
 
-            $url = route('applications.mine');
-
             DatabaseNotification::create([
-                'id' => (string) Str::uuid(),
-                'type' => 'app:application.stage_changed',
+                'id'             => (string) Str::uuid(),
+                'type'           => 'app:application.stage_changed',
                 'notifiable_type' => User::class,
-                'notifiable_id' => $appReload->user_id,
-                'data' => [
-                    'title' => $title,
-                    'body' => $body,
-                    'job_title' => $jobTitle,
-                    'application_id' => $appReload->id,
-                    'job_id' => $appReload->job_id,
-                    'stage_from' => $from,
-                    'stage_to' => $to,
+                'notifiable_id'  => $appReload->user_id,
+                'data'           => [
+                    'title'            => $title,
+                    'body'             => $body,
+                    'job_title'        => $jobTitle,
+                    'application_id'   => $appReload->id,
+                    'job_id'           => $appReload->job_id,
+                    'stage_from'       => $from,
+                    'stage_to'         => $to,
                     'stage_from_label' => $fromPretty,
-                    'stage_to_label' => $toPretty,
-                    'overall_status' => $appReload->overall_status,
-                    'status_label' => strtoupper($appReload->overall_status ?? 'ACTIVE'),
-                    'actor_id' => $userId,
-                    'actor_name' => $actor,
-                    'note' => $note,
-                    'score' => $score,
-                    'when_wib' => Carbon::now('Asia/Jakarta')->format('d M Y, H:i') . ' WIB',
-                    'url' => $url,
+                    'stage_to_label'   => $toPretty,
+                    'overall_status'   => $appReload->overall_status,
+                    'status_label'     => strtoupper($appReload->overall_status ?? 'ACTIVE'),
+                    'actor_id'         => $userId,
+                    'actor_name'       => $actor,
+                    'note'             => $note,
+                    'score'            => $score,
+                    'when_wib'         => Carbon::now('Asia/Jakarta')->format('d M Y, H:i') . ' WIB',
+                    'url'              => route('applications.mine'),
                 ],
-                'read_at' => null,
+                'read_at'    => null,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
@@ -630,16 +733,10 @@ class ApplicationController extends Controller
         return $attempt;
     }
 
-    /** Redirect pintar setelah perpindahan stage */
     protected function redirectAfterMove(Request $request, JobApplication $application, string $to, $attempt = null)
     {
-        // Jika request expects JSON (AJAX/drag & drop), return JSON saja
         if ($request->expectsJson()) {
-            return response()->json([
-                'ok' => true,
-                'moved_to' => $to,
-                'id' => $application->id,
-            ]);
+            return response()->json(['ok' => true, 'moved_to' => $to, 'id' => $application->id]);
         }
 
         $isOwner = $request->user() && (string) $request->user()->id === (string) $application->user_id;
@@ -647,99 +744,64 @@ class ApplicationController extends Controller
         switch ($to) {
             case 'psychotest':
                 if ($isOwner && $attempt) {
-                    return redirect()->route('psychotest.show', $attempt)
-                        ->with('ok', 'Silakan mulai Psikotes.');
+                    return redirect()->route('psychotest.show', $attempt)->with('ok', 'Silakan mulai Psikotes.');
                 }
-                return redirect()->route('admin.psychotests.index', ['focus' => $application->id])
-                    ->with('ok', 'Stage dipindah ke PSIKOTEST.');
+                return redirect()->route('admin.psychotests.index', ['focus' => $application->id])->with('ok', 'Stage dipindah ke PSIKOTEST.');
 
             case 'hr_iv':
             case 'user_iv':
             case 'user_trainer_iv':
-                // Jika karyawan atau trainer, redirect ke Kanban Kandidat
-                if (auth()->user() && in_array(auth()->user()->role, ['karyawan','trainer'])) {
+                if (auth()->user() && in_array(auth()->user()->role, ['karyawan', 'trainer'])) {
                     return redirect()->route('kanban.mine')->with('ok', 'Feedback berhasil, stage dipindah ke ' . strtoupper($this->PRETTY[$to] ?? $to) . '.');
                 }
-                return redirect()->route('admin.interviews.index', ['focus' => $application->id])
-                    ->with('ok', 'Stage dipindah ke ' . strtoupper($this->PRETTY[$to] ?? $to) . '.');
+                return redirect()->route('admin.interviews.index', ['focus' => $application->id])->with('ok', 'Stage dipindah ke ' . strtoupper($this->PRETTY[$to] ?? $to) . '.');
 
             case 'offer': {
                 $offer = $this->offerJustCreated ?: $application->offer()->first();
                 if ($offer) {
-                    return redirect()->route('admin.offers.pdf', $offer)
-                        ->with('ok', 'Stage dipindah ke OL. Menampilkan Offering Letter.');
+                    return redirect()->route('admin.offers.pdf', $offer)->with('ok', 'Stage dipindah ke OL. Menampilkan Offering Letter.');
                 }
-                return redirect()->route('admin.offers.index', ['focus' => $application->id])
-                    ->with('ok', 'Stage dipindah ke OL.');
+                return redirect()->route('admin.offers.index', ['focus' => $application->id])->with('ok', 'Stage dipindah ke OL.');
             }
 
             case 'mcu':
             case 'mobilisasi':
             case 'ground_test':
-                return redirect()->route('admin.applications.index', ['focus' => $application->id])
-                    ->with('ok', 'Stage dipindah ke ' . strtoupper($this->PRETTY[$to] ?? $to) . '.');
+                return redirect()->route('admin.applications.index', ['focus' => $application->id])->with('ok', 'Stage dipindah ke ' . strtoupper($this->PRETTY[$to] ?? $to) . '.');
 
             case 'hired': {
                 $offer = $this->offerJustCreated ?: $application->offer()->first();
                 if ($offer) {
-                    return redirect()->route('admin.offers.pdf', $offer)
-                        ->with('ok', 'DITERIMA. Menampilkan Offering Letter.');
+                    return redirect()->route('admin.offers.pdf', $offer)->with('ok', 'DITERIMA. Menampilkan Offering Letter.');
                 }
-                return redirect()->route('admin.applications.index', ['focus' => $application->id])
-                    ->with('ok', 'Stage dipindah ke DITERIMA.');
+                return redirect()->route('admin.applications.index', ['focus' => $application->id])->with('ok', 'Stage dipindah ke DITERIMA.');
             }
 
             case 'not_qualified':
-                return redirect()->route('admin.applications.index', ['focus' => $application->id])
-                    ->with('ok', 'Stage dipindah ke ' . strtoupper($this->PRETTY[$to] ?? $to) . '.');
+                return redirect()->route('admin.applications.index', ['focus' => $application->id])->with('ok', 'Stage dipindah ke TIDAK LOLOS.');
 
-            case 'applied':
-            case 'screening':
             default:
                 return redirect()->back(303)->with('ok', 'Stage dipindah ke: ' . strtoupper($this->PRETTY[$to] ?? $to));
         }
     }
 
-    /* ========================== UTIL: NIK ========================== */
 
-    /**
-     * Buat NIK sesuai skema foto:
-     * {COMPANY3}{SITE2}{YY}{MM}{SEQ5}
-     *
-     * Contoh: AAP06260400200
-     */
+    /* ================================================================
+     * NIK GENERATOR
+     * ================================================================ */
+
     protected function makeNik(Job $job, int $algo = 1): string
     {
-        // 1) Prefix perusahaan (3 karakter, uppercase alnum)
-        $companyRaw = strtoupper((string) ($job->company?->code ?? ''));
-        $companyRaw = preg_replace('/[^A-Z0-9]/', '', $companyRaw) ?? '';
-        $company3 = str_pad(substr($companyRaw, 0, 3), 3, 'X');
+        $companyRaw = strtoupper(preg_replace('/[^A-Z0-9]/', '', (string) ($job->company?->code ?? '')) ?? '');
+        $company3   = str_pad(substr($companyRaw, 0, 3), 3, 'X');
 
-        // 2) Kode site 2 digit
-        $siteCodeRaw = strtoupper((string) ($job->site?->code ?? ''));
-        $siteCodeRaw = preg_replace('/[^A-Z0-9]/', '', $siteCodeRaw) ?? '';
+        $siteCodeRaw = strtoupper(preg_replace('/[^A-Z0-9]/', '', (string) ($job->site?->code ?? '')) ?? '');
+        $siteMap     = ['HO' => '01', 'BGG' => '02', 'SBS' => '03', 'DBK' => '04', 'POS' => '05', 'IBP' => '06'];
+        $site2       = preg_match('/^\d{2}$/', $siteCodeRaw) ? $siteCodeRaw : ($siteMap[$siteCodeRaw] ?? '00');
 
-        // Mapping default berdasarkan format yang dibagikan user.
-        $siteMap = [
-            'HO' => '01',
-            'BGG' => '02',
-            'SBS' => '03',
-            'DBK' => '04',
-            'POS' => '05',
-            'IBP' => '06',
-        ];
-
-        if (preg_match('/^\d{2}$/', $siteCodeRaw)) {
-            $site2 = $siteCodeRaw;
-        } else {
-            $site2 = $siteMap[$siteCodeRaw] ?? '00';
-        }
-
-        // 3) Tahun & bulan masuk = saat status HIRED
         $yy = now()->format('y');
         $mm = now()->format('m');
 
-        // 4) Nomor urut 5 digit, reset per tahun join (YY)
         $maxSeq = 0;
         User::query()
             ->select(['id', 'id_employe'])
@@ -748,40 +810,15 @@ class ApplicationController extends Controller
             ->chunkById(1000, function ($users) use (&$maxSeq, $yy) {
                 foreach ($users as $user) {
                     $nik = $user->id_employe;
-                    if (!is_string($nik)) {
-                        continue;
-                    }
-
-                    // Format target: COMPANY3 + SITE2 + YY + MM + SEQ5
-                    if (preg_match('/^[A-Z0-9]{3}\d{2}(\d{2})\d{2}(\d{5})$/', $nik, $m) !== 1) {
-                        continue;
-                    }
-
-                    if (($m[1] ?? '') !== $yy) {
-                        continue;
-                    }
-
+                    if (!is_string($nik)) continue;
+                    if (preg_match('/^[A-Z0-9]{3}\d{2}(\d{2})\d{2}(\d{5})$/', $nik, $m) !== 1) continue;
+                    if (($m[1] ?? '') !== $yy) continue;
                     $seq = (int) ($m[2] ?? 0);
-                    if ($seq > $maxSeq) {
-                        $maxSeq = $seq;
-                    }
+                    if ($seq > $maxSeq) $maxSeq = $seq;
                 }
             }, 'id');
 
         $nextSeq = str_pad((string) ($maxSeq + 1), 5, '0', STR_PAD_LEFT);
-
         return "{$company3}{$site2}{$yy}{$mm}{$nextSeq}";
-    }
-
-    /**
-     * (Opsional) Generator lama — tidak dipakai lagi.
-     * Dibiarkan bila masih ada referensi lama.
-     */
-    protected function makeEmployeeCode(string $prefix): string
-    {
-        $prefix = strtoupper(preg_replace('/[^A-Z0-9]/i', '', $prefix)) ?: 'EMP';
-        $period = now()->format('ym'); // YYMM
-        $rand = strtoupper(Str::random(5));
-        return "{$prefix}-{$period}-{$rand}";
     }
 }

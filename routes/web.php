@@ -1,261 +1,270 @@
 <?php
 
-    use Illuminate\Support\Facades\Route;
-    use App\Http\Controllers\ProfileController;
-    use App\Http\Controllers\Admin\CompanyController;
-    // === Public / Careers Controllers ===
-    use App\Http\Controllers\WelcomeController;
-    use App\Http\Controllers\JobController;
-    use App\Http\Controllers\ApplicationController;
-    use App\Http\Controllers\PsychotestController;
-    use App\Http\Controllers\OfferController;
-    use App\Http\Controllers\ManpowerDashboardController;
-    use App\Http\Controllers\CandidateProfileController;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Admin\CompanyController;
+// === Public / Careers Controllers ===
+use App\Http\Controllers\WelcomeController;
+use App\Http\Controllers\JobController;
+use App\Http\Controllers\ApplicationController;
+use App\Http\Controllers\PsychotestController;
+use App\Http\Controllers\OfferController;
+use App\Http\Controllers\ManpowerDashboardController;
+use App\Http\Controllers\CandidateProfileController;
 
-    // === Admin Controllers
-    use App\Http\Controllers\Admin\SiteController as AdminSiteController;
-    use App\Http\Controllers\InterviewController as AdminInterviewController;
-    use App\Http\Controllers\Admin\UserController;
-    use App\Http\Controllers\Admin\AuditLogController;
+// === Admin Controllers
+use App\Http\Controllers\Admin\SiteController as AdminSiteController;
+use App\Http\Controllers\InterviewController as AdminInterviewController;
+use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\AuditLogController;
 
-    // === Public Sites Controller
-    use App\Http\Controllers\SitePublicController;
+// === Public Sites Controller
+use App\Http\Controllers\SitePublicController;
 
-    // === OTP Verify Code Controller
-    use App\Http\Controllers\Auth\VerifyCodeController;
+// === OTP Verify Code Controller
+use App\Http\Controllers\Auth\VerifyCodeController;
 
-    // === NEW: pusat notifikasi & interview milik user
-    use App\Http\Controllers\UserNotificationController;
-    use App\Http\Controllers\MyInterviewController;
+// === NEW: pusat notifikasi & interview milik user
+use App\Http\Controllers\UserNotificationController;
+use App\Http\Controllers\MyInterviewController;
 
-    // === NEW: Manpower Requirement Controller (sinkron openings)
-    use App\Http\Controllers\Admin\ManpowerRequirementController;
-    use App\Http\Controllers\Auth\PasswordResetLinkController;
-    use App\Http\Controllers\Auth\NewPasswordController;
+// === NEW: Manpower Requirement Controller (sinkron openings)
+use App\Http\Controllers\Admin\ManpowerRequirementController;
+use App\Http\Controllers\Auth\PasswordResetLinkController;
+use App\Http\Controllers\Auth\NewPasswordController;
 
-    // === NEW: Kanban Controller
-    use App\Http\Controllers\KanbanController;
+// === NEW: Kanban Controller
+use App\Http\Controllers\KanbanController;
 
-    /*
-    |--------------------------------------------------------------------------
-    | Global route parameter patterns (UUID)
-    |--------------------------------------------------------------------------
-    */
-    Route::pattern('company', '[0-9a-fA-F-]{36}');
-    Route::pattern('job', '[0-9a-fA-F-]{36}');
-    Route::pattern('site', '[0-9a-fA-F-]{36}');
-    Route::pattern('offer', '[0-9a-fA-F-]{36}');
-    Route::pattern('profile', '[0-9a-fA-F-]{36}');
-    Route::pattern('log', '[0-9a-fA-F-]{36}');
-    Route::pattern('manpower', '[0-9a-fA-F-]{36}');
-    Route::pattern('application', '[0-9a-fA-F-]{36}');
-    Route::pattern('interview', '[0-9a-fA-F-]{36}');
-    Route::pattern('attempt', '[0-9a-fA-F-]{36}');
-    Route::pattern('notification', '[0-9a-fA-F-]{36}'); // << tambah: id notifikasi
-    
-    /*
-    |--------------------------------------------------------------------------
-    | Public
-    |--------------------------------------------------------------------------
-    */
+/*
+|--------------------------------------------------------------------------
+| Global route parameter patterns (UUID)
+|--------------------------------------------------------------------------
+*/
+Route::pattern('company',      '[0-9a-fA-F-]{36}');
+Route::pattern('job',          '[0-9a-fA-F-]{36}');
+Route::pattern('site',         '[0-9a-fA-F-]{36}');
+Route::pattern('offer',        '[0-9a-fA-F-]{36}');
+Route::pattern('profile',      '[0-9a-fA-F-]{36}');
+Route::pattern('log',          '[0-9a-fA-F-]{36}');
+Route::pattern('manpower',     '[0-9a-fA-F-]{36}');
+Route::pattern('application',  '[0-9a-fA-F-]{36}');
+Route::pattern('interview',    '[0-9a-fA-F-]{36}');
+Route::pattern('attempt',      '[0-9a-fA-F-]{36}');
+Route::pattern('notification', '[0-9a-fA-F-]{36}');
 
-    Route::get('/', WelcomeController::class)->name('welcome');
+/*
+|--------------------------------------------------------------------------
+| Public
+|--------------------------------------------------------------------------
+*/
 
-    Route::get('/jobs', [JobController::class, 'index'])->name('jobs.index');
-    Route::get('/jobs/{job}', [JobController::class, 'show'])->name('jobs.show');
+Route::get('/', WelcomeController::class)->name('welcome');
 
-    /*
-    |--------------------------------------------------------------------------
-    | Public Sites (read-only)
-    |--------------------------------------------------------------------------
-    */
-    Route::get('/sites', [SitePublicController::class, 'index'])->name('sites.index');
-    Route::get('/sites/{site}', [SitePublicController::class, 'show'])->name('sites.show');
+Route::get('/jobs', [JobController::class, 'index'])->name('jobs.index');
+Route::get('/jobs/{job}', [JobController::class, 'show'])->name('jobs.show');
 
-    /*
-    |--------------------------------------------------------------------------
-    | Email Verification via Kode (OTP) — butuh login (belum perlu verified)
-    |--------------------------------------------------------------------------
-    */
-    Route::middleware(['auth'])->group(function () {
-        Route::get('/email/verify', [VerifyCodeController::class, 'notice'])
-            ->name('verification.notice');
+/*
+|--------------------------------------------------------------------------
+| Public Sites (read-only)
+|--------------------------------------------------------------------------
+*/
+Route::get('/sites', [SitePublicController::class, 'index'])->name('sites.index');
+Route::get('/sites/{site}', [SitePublicController::class, 'show'])->name('sites.show');
 
-        Route::get('/email/verify/code', [VerifyCodeController::class, 'showForm'])
-            ->name('verification.code.form');
+/*
+|--------------------------------------------------------------------------
+| Email Verification via Kode (OTP) — butuh login (belum perlu verified)
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth'])->group(function () {
+    Route::get('/email/verify', [VerifyCodeController::class, 'notice'])
+        ->name('verification.notice');
 
-        Route::post('/email/verify/code', [VerifyCodeController::class, 'verify'])
-            ->middleware('throttle:6,1')
-            ->name('verification.code.verify');
+    Route::get('/email/verify/code', [VerifyCodeController::class, 'showForm'])
+        ->name('verification.code.form');
 
-        Route::post('/email/verify/resend', [VerifyCodeController::class, 'resend'])
-            ->middleware('throttle:6,1')
-            ->name('verification.code.resend');
-    });
+    Route::post('/email/verify/code', [VerifyCodeController::class, 'verify'])
+        ->middleware('throttle:6,1')
+        ->name('verification.code.verify');
 
-    /*
-    |--------------------------------------------------------------------------
-    | Authenticated (SEMUA wajib verified)
-    |--------------------------------------------------------------------------
-    */
-    Route::get('/dashboard', fn() => view('dashboard'))
-        ->middleware(['auth', 'verified'])
-        ->name('dashboard');
+    Route::post('/email/verify/resend', [VerifyCodeController::class, 'resend'])
+        ->middleware('throttle:6,1')
+        ->name('verification.code.resend');
+});
 
-    Route::middleware(['auth', 'verified'])->group(function () {
-        // Profile (Breeze)
-        Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-        Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-        Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+/*
+|--------------------------------------------------------------------------
+| Authenticated (SEMUA wajib verified)
+|--------------------------------------------------------------------------
+*/
+Route::get('/dashboard', fn() => view('dashboard'))
+    ->middleware(['auth', 'verified'])
+    ->name('dashboard');
 
-        // Apply job (form profile & submit)
-        Route::get('/jobs/{job}/apply/profile', [CandidateProfileController::class, 'edit'])
-            ->name('candidate.profiles.edit');
-        Route::post('/jobs/{job}/apply/profile', [CandidateProfileController::class, 'update'])
-            ->name('candidate.profiles.update');
+Route::middleware(['auth', 'verified'])->group(function () {
+    // Profile (Breeze)
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-        Route::post('/jobs/{job}/apply', [ApplicationController::class, 'store'])
-            ->name('applications.store');
+    // Apply job (form profile & submit)
+    Route::get('/jobs/{job}/apply/profile', [CandidateProfileController::class, 'edit'])
+        ->name('candidate.profiles.edit');
+    Route::post('/jobs/{job}/apply/profile', [CandidateProfileController::class, 'update'])
+        ->name('candidate.profiles.update');
 
-        // Lamaran saya
-        Route::get('/me/applications', [ApplicationController::class, 'index'])
-            ->name('applications.mine');
+    Route::post('/jobs/{job}/apply', [ApplicationController::class, 'store'])
+        ->name('applications.store');
 
-        // Psikotes
-        Route::get('/me/psychotest/{attempt}', [PsychotestController::class, 'show'])
-            ->name('psychotest.show');
-        Route::post('/me/psychotest/{attempt}', [PsychotestController::class, 'submit'])
-            ->name('psychotest.submit');
+    // Lamaran saya
+    Route::get('/me/applications', [ApplicationController::class, 'index'])
+        ->name('applications.mine');
 
-        // Notifikasi user
-        Route::get('/me/notifications', [UserNotificationController::class, 'index'])
-            ->name('me.notifications.index');
-        Route::post('/me/notifications/read-all', [UserNotificationController::class, 'markAllRead'])
-            ->name('me.notifications.read_all');
-        Route::post('/me/notifications/{notification}/read', [UserNotificationController::class, 'markRead'])
-            ->name('me.notifications.read');
-        Route::delete('/me/notifications/{notification}', [UserNotificationController::class, 'destroy'])
-            ->name('me.notifications.destroy');
+    // Psikotes
+    Route::get('/me/psychotest/{attempt}', [PsychotestController::class, 'show'])
+        ->name('psychotest.show');
+    Route::post('/me/psychotest/{attempt}', [PsychotestController::class, 'submit'])
+        ->name('psychotest.submit');
 
-        // Interview user
-        Route::get('/me/interviews', [MyInterviewController::class, 'index'])
-            ->name('me.interviews.index');
-        Route::get('/me/interviews/{interview}', [MyInterviewController::class, 'show'])
-            ->name('me.interviews.show');
-        Route::get('/me/interviews/{interview}/ics', [MyInterviewController::class, 'ics'])
-            ->name('me.interviews.ics');
-    });
+    // Notifikasi user
+    Route::get('/me/notifications', [UserNotificationController::class, 'index'])
+        ->name('me.notifications.index');
+    Route::post('/me/notifications/read-all', [UserNotificationController::class, 'markAllRead'])
+        ->name('me.notifications.read_all');
+    Route::post('/me/notifications/{notification}/read', [UserNotificationController::class, 'markRead'])
+        ->name('me.notifications.read');
+    Route::delete('/me/notifications/{notification}', [UserNotificationController::class, 'destroy'])
+        ->name('me.notifications.destroy');
 
-    /*
-    |--------------------------------------------------------------------------
-    | Admin (HR & Superadmin) — wajib verified
-    | NOTE: middleware 'role' kamu alias ke EnsureRole, jadi tidak perlu Spatie.
-    |--------------------------------------------------------------------------
-    */
-    Route::prefix('admin')
-        ->as('admin.')
-        ->middleware(['auth', 'verified', 'role:hr|superadmin|trainer|karyawan'])
-        ->group(function () {
-            // ================= Manpower =================
-                        // ================= POH (admin) =================
-                        Route::resource('pohs', \App\Http\Controllers\Admin\PohController::class);
-            Route::get('manpower', [ManpowerRequirementController::class, 'index'])->name('manpower.index');
-            Route::post('manpower/preview', [ManpowerRequirementController::class, 'preview'])->name('manpower.preview');
-            Route::get('manpower/{job}/edit', [ManpowerRequirementController::class, 'edit'])->name('manpower.edit');
-            Route::put('manpower/{job}', [ManpowerRequirementController::class, 'update'])->name('manpower.update');
-            Route::delete('manpower/{job}/{manpower}', [ManpowerRequirementController::class, 'destroy'])->name('manpower.destroy');
+    // Interview user
+    Route::get('/me/interviews', [MyInterviewController::class, 'index'])
+        ->name('me.interviews.index');
+    Route::get('/me/interviews/{interview}', [MyInterviewController::class, 'show'])
+        ->name('me.interviews.show');
+    Route::get('/me/interviews/{interview}/ics', [MyInterviewController::class, 'ics'])
+        ->name('me.interviews.ics');
 
-            // ================= Manpower Dashboard =================
-            Route::get('dashboard/manpower', ManpowerDashboardController::class)->name('dashboard.manpower');
+    // =========================================================
+    // Kanban untuk user/karyawan/trainer/pelamar
+    // =========================================================
+    Route::get('/kanban', [KanbanController::class, 'mine'])->name('kanban.mine');
+});
 
-            // ================= Jobs (admin) =================
-            Route::resource('jobs', JobController::class)->except(['show']);
+/*
+|--------------------------------------------------------------------------
+| Admin (HR & Superadmin) — wajib verified
+|--------------------------------------------------------------------------
+*/
+Route::prefix('admin')
+    ->as('admin.')
+    ->middleware(['auth', 'verified', 'role:hr|superadmin|trainer|karyawan'])
+    ->group(function () {
 
-            // ================= Sites (admin) =================
-            Route::resource('sites', AdminSiteController::class);
+        // ================= Manpower =================
+        Route::resource('pohs', \App\Http\Controllers\Admin\PohController::class);
 
-            // ================= Companies (admin) =================
-            Route::resource('companies', CompanyController::class);
+        Route::get('manpower', [ManpowerRequirementController::class, 'index'])->name('manpower.index');
+        Route::post('manpower/preview', [ManpowerRequirementController::class, 'preview'])->name('manpower.preview');
+        Route::get('manpower/{job}/edit', [ManpowerRequirementController::class, 'edit'])->name('manpower.edit');
+        Route::put('manpower/{job}', [ManpowerRequirementController::class, 'update'])->name('manpower.update');
+        Route::delete('manpower/{job}/{manpower}', [ManpowerRequirementController::class, 'destroy'])->name('manpower.destroy');
 
-            // ================= Applications / Kanban =================
-            Route::get('applications', [ApplicationController::class, 'adminIndex'])->name('applications.index');
-            Route::get('applications/board', [ApplicationController::class, 'board'])->name('applications.board');
+        // ================= Manpower Dashboard =================
+        Route::get('dashboard/manpower', ManpowerDashboardController::class)->name('dashboard.manpower');
 
-            Route::post('applications/{application}/move', [ApplicationController::class, 'moveStage'])
-                ->name('applications.move');
+        // ================= Jobs (admin) =================
+        Route::resource('jobs', JobController::class)->except(['show']);
 
-            // Legacy GET -> redirect aman
-            Route::get('applications/{application}/move', function () {
-                return redirect()->route('admin.applications.index')
-                    ->with('warn', 'Aksi pindah stage harus via POST. Tombol lama masih pakai GET — diarahkan ulang.');
-            });
+        // ================= Sites (admin) =================
+        Route::resource('sites', AdminSiteController::class);
 
-            // AJAX Kanban
-            Route::post('applications/board/move', [ApplicationController::class, 'moveStageAjax'])->name('applications.board.move');
+        // ================= Companies (admin) =================
+        Route::resource('companies', CompanyController::class);
 
-            // ================= Interviews / Psychotest / Offers =================
-            Route::get('interviews', [AdminInterviewController::class, 'index'])->name('interviews.index');
-            Route::post('interviews/{application}', [AdminInterviewController::class, 'store'])
-                ->name('interviews.store');
+        // ================= Applications / Kanban =================
+        Route::get('applications', [ApplicationController::class, 'adminIndex'])->name('applications.index');
 
-            Route::get('psychotests', [PsychotestController::class, 'index'])->name('psychotests.index');
+        // PENTING: route spesifik harus SEBELUM route dengan {application} wildcard
+        // agar 'board', 'board/move', 'feedback' tidak tertangkap sebagai UUID
+        Route::get('applications/board', [ApplicationController::class, 'board'])->name('applications.board');
 
-            Route::get('offers', [OfferController::class, 'index'])->name('offers.index');
-            Route::post('offers/{application}', [OfferController::class, 'store'])
-                ->name('offers.store');
-            Route::get('offers/{offer}/pdf', [OfferController::class, 'pdf'])
-                ->name('offers.pdf');
+        // AJAX Kanban drag & drop + free move dropdown
+        Route::post('applications/board/move', [ApplicationController::class, 'moveStageAjax'])
+            ->name('applications.board.move');
 
-            // ================= Candidates (read-only admin) =================
-            Route::get('candidates', [CandidateProfileController::class, 'adminIndex'])->name('candidates.index');
-            Route::get('candidates/{profile}', [CandidateProfileController::class, 'adminShow'])->name('candidates.show');
-            Route::get('candidates/{profile}/cv', [CandidateProfileController::class, 'adminCv'])->name('candidates.cv');
+        // AJAX Simpan Feedback (dari modal Kanban — HR, Karyawan, Trainer)
+        Route::post('applications/feedback', [ApplicationController::class, 'storeFeedback'])
+            ->name('applications.feedback.store');
 
-            // ================= Users & Audit Logs =================
-            Route::resource('users', UserController::class)->except(['show']);
-            Route::get('users-export', [UserController::class, 'export'])->name('users.export');
-            Route::post('users-import', [UserController::class, 'import'])->name('users.import');
+        // Move via form POST (tombol blade)
+        Route::post('applications/{application}/move', [ApplicationController::class, 'moveStage'])
+            ->name('applications.move');
 
-            Route::get('audit-logs', [AuditLogController::class, 'index'])->name('audit_logs.index');
-            Route::get('audit-logs/{log}', [AuditLogController::class, 'show'])->name('audit_logs.show');
-            Route::get('audit-logs-export', [AuditLogController::class, 'export'])->name('audit_logs.export');
+        // Legacy GET -> redirect aman
+        Route::get('applications/{application}/move', function () {
+            return redirect()->route('admin.applications.index')
+                ->with('warn', 'Aksi pindah stage harus via POST.');
         });
 
-    /*
-    |--------------------------------------------------------------------------
-    | Reset Password (guest only)
-    |--------------------------------------------------------------------------
-    */
-    Route::middleware('guest')->group(function () {
-        Route::get('/forgot-password', [PasswordResetLinkController::class, 'create'])
-            ->name('password.request');
-        Route::post('/forgot-password', [PasswordResetLinkController::class, 'store'])
-            ->name('password.email');
+        // ================= Interviews / Psychotest / Offers =================
+        Route::get('interviews', [AdminInterviewController::class, 'index'])->name('interviews.index');
+        Route::post('interviews/{application}', [AdminInterviewController::class, 'store'])
+            ->name('interviews.store');
 
-        Route::get('/reset-password/{token}', [NewPasswordController::class, 'create'])
-            ->name('password.reset');
+        Route::get('psychotests', [PsychotestController::class, 'index'])->name('psychotests.index');
 
-        Route::post('/reset-password', [NewPasswordController::class, 'store'])
-            ->name('password.store');
+        Route::get('offers', [OfferController::class, 'index'])->name('offers.index');
+        Route::post('offers/{application}', [OfferController::class, 'store'])
+            ->name('offers.store');
+        Route::get('offers/{offer}/pdf', [OfferController::class, 'pdf'])
+            ->name('offers.pdf');
+
+        // ================= Candidates (read-only admin) =================
+        Route::get('candidates', [CandidateProfileController::class, 'adminIndex'])->name('candidates.index');
+        Route::get('candidates/{profile}', [CandidateProfileController::class, 'adminShow'])->name('candidates.show');
+        Route::get('candidates/{profile}/cv', [CandidateProfileController::class, 'adminCv'])->name('candidates.cv');
+
+        // ================= Users & Audit Logs =================
+        Route::resource('users', UserController::class)->except(['show']);
+        Route::get('users-export', [UserController::class, 'export'])->name('users.export');
+        Route::post('users-import', [UserController::class, 'import'])->name('users.import');
+
+        Route::get('audit-logs', [AuditLogController::class, 'index'])->name('audit_logs.index');
+        Route::get('audit-logs/{log}', [AuditLogController::class, 'show'])->name('audit_logs.show');
+        Route::get('audit-logs-export', [AuditLogController::class, 'export'])->name('audit_logs.export');
     });
 
-    /*
-    |--------------------------------------------------------------------------
-    | Extra SEO Pages (WAJIB BUAT SITELINKS)
-    |--------------------------------------------------------------------------
-    */
+/*
+|--------------------------------------------------------------------------
+| Reset Password (guest only)
+|--------------------------------------------------------------------------
+*/
+Route::middleware('guest')->group(function () {
+    Route::get('/forgot-password', [PasswordResetLinkController::class, 'create'])
+        ->name('password.request');
+    Route::post('/forgot-password', [PasswordResetLinkController::class, 'store'])
+        ->name('password.email');
 
-    Route::view('/faq', 'faq')->name('faq');
-    Route::view('/blog', 'blog')->name('blog');
-    Route::get('/search', [JobController::class, 'index'])->name('search');
-    /*
-    |--------------------------------------------------------------------------
-    | Auth scaffolding routes (Breeze/Fortify)
-    |--------------------------------------------------------------------------
-    */
-    require __DIR__ . '/auth.php';
+    Route::get('/reset-password/{token}', [NewPasswordController::class, 'create'])
+        ->name('password.reset');
 
-    // Kanban untuk user/trainer/karyawan
-    Route::middleware(['auth', 'verified'])->group(function () {
-        Route::get('/kanban', [KanbanController::class, 'mine'])->name('kanban.mine');
-    });
+    Route::post('/reset-password', [NewPasswordController::class, 'store'])
+        ->name('password.store');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Extra SEO Pages
+|--------------------------------------------------------------------------
+*/
+Route::view('/faq', 'faq')->name('faq');
+Route::view('/blog', 'blog')->name('blog');
+Route::get('/search', [JobController::class, 'index'])->name('search');
+
+/*
+|--------------------------------------------------------------------------
+| Auth scaffolding routes (Breeze/Fortify)
+|--------------------------------------------------------------------------
+*/
+require __DIR__ . '/auth.php';
