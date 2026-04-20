@@ -254,7 +254,7 @@ class CandidateProfileController extends Controller
                 $profile->cv_path = $path;
             }
 
-            $docs = is_array($profile->documents ?? []) ? $profile->documents : [];
+            $docs = (array) ($profile->documents ?? []);
             if ($request->hasFile('documents')) {
                 $incomingDocs = array_values(array_filter((array) $request->file('documents')));
                 if (count($docs) + count($incomingDocs) > $maxDocuments) {
