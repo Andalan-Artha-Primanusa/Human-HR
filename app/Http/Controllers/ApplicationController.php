@@ -507,7 +507,9 @@ class ApplicationController extends Controller
             && $to !== 'hr_iv'
             && in_array(auth()->user()?->role, ['admin', 'hr', 'superadmin'])
         ) {
-            if (empty($validated['feedback_hr']) || ($validated['approve_hr'] ?? null) === null) {
+            $feedback = $validated['feedback_hr'] ?? $application->feedback_hr;
+            $approve = $validated['approve_hr'] ?? $application->approve_hr;
+            if (empty($feedback) || ($approve === null)) {
                 abort(422, 'HR wajib mengisi feedback dan setuju/tidak setuju sebelum lanjut dari HR Interview.');
             }
         }
