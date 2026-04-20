@@ -5,239 +5,171 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Job;
 use App\Models\ManpowerRequirement;
+use App\Models\JobApplication;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
-use App\Models\JobApplication;
 
 class ManpowerRequirementController extends Controller
 {
-    /**
-     * Daftar job untuk entry point pengaturan manpower.
-     */
     public function index(Request $request): View|JsonResponse
     {
-        $qRaw = (string) $request->query('q', '');
-        $q = Str::limit(
-            preg_replace('/[\x00-\x1F\x7F]/u', '', trim($qRaw)) ?? '',
-            120,
-            ''
-        );
-        $like = $q !== '' ? '%' . addcslashes($q, '\\%_') . '%' : null;
+        $q = trim((string) $request->query('q', ''));
+        $like = $q ? '%' . addcslashes($q, '\\%_') . '%' : null;
 
         $jobsForManpower = Job::query()
             ->select(['id', 'code', 'title', 'created_at'])
-            ->when($like !== null, function ($qq) use ($like) {
-                $qq->where(function ($w) use ($like) {
-                    $w->where('code', 'like', $like)
-                        ->orWhere('title', 'like', $like);
-                });
-            })
-            ->latest('created_at')
+            ->when($like, fn($qq) =>
+                $qq->where('code', 'like', $like)
+                   ->orWhere('title', 'like', $like)
+            )
+            ->latest()
             ->limit(100)
             ->get();
 
-        if ($request->wantsJson()) {
-            return response()->json([
-                'jobs' => $jobsForManpower,
-            ]);
-        }
-
-        return view('admin.manpower.index', compact('jobsForManpower', 'q'));
+        return $request->wantsJson()
+            ? response()->json(['jobs' => $jobsForManpower])
+            : view('admin.manpower.index', compact('jobsForManpower', 'q'));
     }
 
-    /**
-     * Tampilkan form untuk mengelola manpower per Job (tanpa site):
-     * - List baris per asset_name (opsional)
-     * - Form tambah/ubah baris
-     */
     public function edit(Job $job): View|JsonResponse
     {
-        // Ambil semua baris manpower untuk job (tanpa site)
-        $rows = $job->manpowerRequirements()
-            ->select(['id', 'job_id', 'asset_name', 'assets_count', 'ratio_per_asset', 'budget_headcount', 'filled_headcount'])
-            ->orderByRaw('COALESCE(asset_name,"") asc')
-            ->get();
+        $rows = $job->manpowerRequirements()->get();
 
-        // JSON (opsional)
-        if (request()->wantsJson()) {
-            return response()->json([
-                'job' => [
-                    'id' => $job->id,
-                    'code' => $job->code,
-                    'title' => $job->title,
-                    'openings' => (int) $job->openings,
-                ],
-                'rows' => $rows->map(function (ManpowerRequirement $m) {
-                    return [
-                        'id' => $m->id,
-                        'asset_name' => $m->asset_name,
-                        'assets_count' => (int) $m->assets_count,
-                        'ratio_per_asset' => (float) $m->ratio_per_asset,
-                        'budget_headcount' => (int) $m->budget_headcount,
-                        'filled_headcount' => (int) $m->filled_headcount,
-                    ];
-                }),
-            ]);
-        }
-
-        // View: resources/views/admin/manpower/edit.blade.php (form + tabel)
-        // (Pastikan view-nya juga diubah: hapus dropdown Site)
-        return view('admin.manpower.edit', compact('job', 'rows'));
+        return request()->wantsJson()
+            ? response()->json(['job' => $job, 'rows' => $rows])
+            : view('admin.manpower.edit', compact('job', 'rows'));
     }
 
-    /**
-     * Upsert satu baris manpower per (job, asset_name).
-     * Recalc budget via model hook; openings job ikut tersinkron otomatis.
-     */
     public function update(Request $request, Job $job): RedirectResponse|JsonResponse
     {
         $data = $request->validate([
-            'asset_name' => ['nullable', 'string', 'max:120'],
+            'asset_name' => ['nullable', 'string'],
             'assets_count' => ['required', 'integer', 'min:0'],
-            'ratio_per_asset' => ['required', 'numeric', 'between:0,9.99'],
-            // jika update baris existing by id:
+            'ratio_per_asset' => ['required', 'numeric'],
             'row_id' => ['nullable', 'uuid'],
         ]);
 
-        /** @var ManpowerRequirement $row */
-        $row = null;
-
-        DB::transaction(function () use ($job, $data, &$row) {
-            // Jika ada row_id -> update by id; jika tidak, upsert by unique key (job_id, asset_name)
-            if (!empty($data['row_id'])) {
-                $row = ManpowerRequirement::where('job_id', $job->id)
-                    ->where('id', $data['row_id'])
-                    ->firstOrFail();
-
-                $row->fill([
+        DB::transaction(function () use ($job, $data) {
+            ManpowerRequirement::updateOrCreate(
+                [
+                    'job_id' => $job->id,
                     'asset_name' => $data['asset_name'] ?? null,
-                    'assets_count' => (int) $data['assets_count'],
-                    'ratio_per_asset' => (float) $data['ratio_per_asset'],
-                ])->save();
-            } else {
-                $row = ManpowerRequirement::updateOrCreate(
-                    [
-                        'job_id' => $job->id,
-                        'asset_name' => $data['asset_name'] ?? null,
-                    ],
-                    [
-                        'assets_count' => (int) $data['assets_count'],
-                        'ratio_per_asset' => (float) $data['ratio_per_asset'],
-                    ]
-                );
-            }
-            // Model hook akan set budget_headcount & sync jobs.openings
+                ],
+                [
+                    'assets_count' => $data['assets_count'],
+                    'ratio_per_asset' => $data['ratio_per_asset'],
+                ]
+            );
         });
 
-        $payload = [
-            'message' => 'Manpower tersimpan & openings tersinkron.',
-            'job' => [
-                'id' => $job->id,
-                'openings' => (int) $job->fresh()->openings,
-            ],
-            'row' => [
-                'id' => $row->id,
-                'asset_name' => $row->asset_name,
-                'assets_count' => (int) $row->assets_count,
-                'ratio_per_asset' => (float) $row->ratio_per_asset,
-                'budget_headcount' => (int) $row->budget_headcount,
-            ],
-        ];
-
-        if ($request->wantsJson()) {
-            return response()->json($payload);
-        }
-
-        return redirect()
-            ->route('admin.manpower.edit', $job)
-            ->with('success', $payload['message']);
+        return $request->wantsJson()
+            ? response()->json(['message' => 'Saved'])
+            : back()->with('success', 'Saved');
     }
 
-    /**
-     * Hapus satu baris manpower (tanpa site).
-     * Recalc openings job otomatis via model hook.
-     */
-    public function destroy(Request $request, Job $job, ManpowerRequirement $manpower): RedirectResponse|JsonResponse
+    public function destroy(Request $request, Job $job, ManpowerRequirement $manpower)
     {
         abort_if($manpower->job_id !== $job->id, 404);
         $manpower->delete();
 
-        $message = 'Baris manpower dihapus & openings tersinkron.';
-        if ($request->wantsJson()) {
-            return response()->json(['message' => $message]);
-        }
-
-        return redirect()->route('admin.manpower.edit', $job)->with('success', $message);
+        return $request->wantsJson()
+            ? response()->json(['message' => 'Deleted'])
+            : back()->with('success', 'Deleted');
     }
 
-    /**
-     * Preview perhitungan tanpa menyimpan ke DB.
-     * Body: { assets_count:int, ratio_per_asset:float }
-     */
     public function preview(Request $request): JsonResponse
     {
         $data = $request->validate([
-            'assets_count' => ['required', 'integer', 'min:0'],
-            'ratio_per_asset' => ['required', 'numeric', 'between:0,9.99'],
+            'assets_count' => ['required', 'integer'],
+            'ratio_per_asset' => ['required', 'numeric'],
         ]);
 
-        $assets = (int) $data['assets_count'];
-        $ratio = (float) $data['ratio_per_asset'];
-        $budget = (int) ceil($assets * $ratio);
-
         return response()->json([
-            'input' => [
-                'assets_count' => $assets,
-                'ratio_per_asset' => $ratio,
-            ],
-            'result' => [
-                'budget_headcount' => $budget,
-            ],
-            'note' => 'Ini hanya preview. Untuk menyimpan & menyinkronkan openings, gunakan endpoint update.',
+            'budget_headcount' => ceil($data['assets_count'] * $data['ratio_per_asset'])
         ]);
     }
 
-    /**
-     * (Opsional) Dashboard manpower — tidak terkait site.
-     * Boleh kamu pindahkan ke controller khusus Dashboard jika mau.
-     */
+    // =========================
+    // 🔥 DASHBOARD FIX
+    // =========================
     public function __invoke()
     {
-        $openJobs = Job::query()->where('status', 'open')->count('id');
-        $activeApps = JobApplication::query()->where('overall_status', 'active')->count('id');
+        // fallback kalau tabel belum ada
+        if (!Schema::hasTable('job_applications')) {
+            return view('admin.dashboard.manpower', [
+                'openJobs' => 0,
+                'activeApps' => 0,
+                'byStage' => collect(),
+                'budget' => 0,
+                'filled' => 0,
+                'fulfillment' => 0,
+                'genderBreakdown' => ['male'=>0,'female'=>0,'other'=>0],
+                'slaPerStage' => collect(),
+                'ageGroups' => ['<25'=>0,'25-34'=>0,'35-44'=>0,'45+'=>0],
+                'acceptanceRate' => 0,
+            ]);
+        }
 
-        $byStage = JobApplication::query()
-            ->selectRaw("COALESCE(NULLIF(current_stage, ''), 'unknown') AS stage_key, COUNT(*) AS total")
-            ->groupByRaw("COALESCE(NULLIF(current_stage, ''), 'unknown')")
-            ->pluck('total', 'stage_key')
-            ->toArray();
+        $data = Cache::remember('dashboard.manpower', 30, function () {
 
-        $req = DB::table('manpower_requirements')
-            ->selectRaw('COALESCE(SUM(budget_headcount), 0) as budget, COALESCE(SUM(filled_headcount), 0) as filled')
-            ->first();
+            $openJobs = Job::where('status','open')->count();
+            $activeApps = JobApplication::where('overall_status','active')->count();
 
-        $budget = (int) ($req->budget ?? 0);
-        $filled = (int) ($req->filled ?? 0);
-        $fulfillment = $budget > 0 ? round($filled / $budget * 100, 1) : 0;
+            $byStage = JobApplication::select('current_stage', DB::raw('count(*) as total'))
+                ->groupBy('current_stage')
+                ->pluck('total','current_stage');
 
-        $jobsForManpower = Job::query()
-            ->select('id', 'code', 'title')
-            ->orderBy('created_at', 'desc')
-            ->limit(100)
-            ->get();
+            $req = DB::table('manpower_requirements')->selectRaw('SUM(budget_headcount) as budget, SUM(filled_headcount) as filled')->first();
 
-        return view('admin.dashboard.manpower', compact(
-            'openJobs',
-            'activeApps',
-            'byStage',
-            'budget',
-            'filled',
-            'fulfillment',
-            'jobsForManpower'
-        ));
+            $budget = (int) ($req->budget ?? 0);
+            $filled = (int) ($req->filled ?? 0);
+            $fulfillment = $budget ? round($filled/$budget*100) : 0;
+
+            // gender (AMAN)
+            $genderBreakdown = ['male'=>0,'female'=>0,'other'=>0];
+
+            if (Schema::hasColumn('candidate_profiles','gender')) {
+                $g = DB::table('candidate_profiles')->select('gender', DB::raw('count(*) as total'))->groupBy('gender')->pluck('total','gender');
+                $genderBreakdown = [
+                    'male'=>$g['male']??0,
+                    'female'=>$g['female']??0,
+                    'other'=>$g->except(['male','female'])->sum()
+                ];
+            }
+
+            // SLA
+            $slaPerStage = JobApplication::selectRaw('current_stage as stage_key, AVG(DATEDIFF(updated_at,created_at)) as avg_sla_days')
+                ->groupBy('current_stage')
+                ->get();
+
+            // AGE
+            $ageGroups = ['<25'=>0,'25-34'=>0,'35-44'=>0,'45+'=>0];
+
+            if (Schema::hasColumn('candidate_profiles','birthdate')) {
+                $ageGroups = [
+                    '<25'=>DB::table('candidate_profiles')->whereRaw('TIMESTAMPDIFF(YEAR,birthdate,CURDATE())<25')->count(),
+                    '25-34'=>DB::table('candidate_profiles')->whereRaw('TIMESTAMPDIFF(YEAR,birthdate,CURDATE()) BETWEEN 25 AND 34')->count(),
+                    '35-44'=>DB::table('candidate_profiles')->whereRaw('TIMESTAMPDIFF(YEAR,birthdate,CURDATE()) BETWEEN 35 AND 44')->count(),
+                    '45+'=>DB::table('candidate_profiles')->whereRaw('TIMESTAMPDIFF(YEAR,birthdate,CURDATE())>=45')->count(),
+                ];
+            }
+
+            $total = JobApplication::count();
+            $accepted = JobApplication::where('current_stage','hired')->count();
+            $acceptanceRate = $total ? round($accepted/$total*100) : 0;
+
+            return compact(
+                'openJobs','activeApps','byStage','budget','filled','fulfillment',
+                'genderBreakdown','slaPerStage','ageGroups','acceptanceRate'
+            );
+        });
+
+        return view('admin.dashboard.manpower', $data);
     }
 }

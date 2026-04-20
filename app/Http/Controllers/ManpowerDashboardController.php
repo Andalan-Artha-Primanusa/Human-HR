@@ -13,85 +13,107 @@ class ManpowerDashboardController extends Controller
     public function __invoke()
     {
         if (!Schema::hasTable('jobs') || !Schema::hasTable('job_applications') || !Schema::hasTable('manpower_requirements')) {
-            $openJobs = 0;
-            $activeApps = 0;
-            $byStage = collect();
-            $budget = 0;
-            $filled = 0;
-            $fulfillment = 0;
-
-            return view('admin.dashboard.manpower', compact('openJobs', 'activeApps', 'byStage', 'budget', 'filled', 'fulfillment'));
+            return view('admin.dashboard.manpower', [
+                'openJobs' => 0,
+                'activeApps' => 0,
+                'byStage' => collect(),
+                'budget' => 0,
+                'filled' => 0,
+                'fulfillment' => 0,
+                'genderBreakdown' => ['male'=>0,'female'=>0,'other'=>0],
+                'ageGroups' => ['<25'=>0,'25-34'=>0,'35-44'=>0,'45+'=>0],
+                'acceptanceRate' => 0,
+                'slaPerStage' => collect(),
+            ]);
         }
 
-        $metrics = Cache::remember(
-            'admin.manpower.dashboard.metrics.v2',
-            30,
-            function () {
-                $openJobs = Job::query()->where('status', 'open')->count('id');
-                $activeApps = JobApplication::query()->where('overall_status', 'active')->count('id');
-                $byStage = JobApplication::query()
-                    ->select('current_stage', DB::raw('COUNT(*) as total'))
-                    ->groupBy('current_stage')
-                    ->get()
-                    ->mapWithKeys(fn($row) => [
-                        (empty($row->current_stage) ? 'unknown' : $row->current_stage) => $row->total
-                    ]);
+        $metrics = Cache::remember('dashboard.manpower', 30, function () {
 
-                $req = DB::table('manpower_requirements')
-                    ->selectRaw('COALESCE(SUM(budget_headcount), 0) as budget, COALESCE(SUM(filled_headcount), 0) as filled')
-                    ->first();
-                $budget = (int) ($req->budget ?? 0);
-                $filled = (int) ($req->filled ?? 0);
-                $fulfillment = $budget > 0 ? round($filled / $budget * 100, 1) : 0;
+            // KPI
+            $openJobs = Job::where('status', 'open')->count();
+            $activeApps = JobApplication::where('overall_status', 'active')->count();
 
-                // --- METRIK LANJUTAN ---
-                // Total kandidat, breakdown JK, distribusi usia, count per POH
-                $candidates = \App\Models\CandidateProfile::query();
-                $totalCandidates = $candidates->count('id');
-                $genderBreakdown = [
-                    'male' => \App\Models\CandidateProfile::where('gender', 'male')->count(),
-                    'female' => \App\Models\CandidateProfile::where('gender', 'female')->count(),
-                    'other' => \App\Models\CandidateProfile::whereNotIn('gender', ['male', 'female'])->count(),
-                ];
-                // Distribusi usia (kelompok: <25, 25-34, 35-44, 45+)
-                $ageNow = now();
-                $ageGroups = [
-                    '<25' => \App\Models\CandidateProfile::whereNotNull('birthdate')->whereRaw('TIMESTAMPDIFF(YEAR, birthdate, ?) < 25', [$ageNow])->count(),
-                    '25-34' => \App\Models\CandidateProfile::whereNotNull('birthdate')->whereRaw('TIMESTAMPDIFF(YEAR, birthdate, ?) BETWEEN 25 AND 34', [$ageNow])->count(),
-                    '35-44' => \App\Models\CandidateProfile::whereNotNull('birthdate')->whereRaw('TIMESTAMPDIFF(YEAR, birthdate, ?) BETWEEN 35 AND 44', [$ageNow])->count(),
-                    '45+' => \App\Models\CandidateProfile::whereNotNull('birthdate')->whereRaw('TIMESTAMPDIFF(YEAR, birthdate, ?) >= 45', [$ageNow])->count(),
-                ];
-                // Count per POH
-                $byPoh = \App\Models\CandidateProfile::query()
-                    ->select('poh_id', DB::raw('COUNT(*) as total'))
-                    ->groupBy('poh_id')
-                    ->get();
+            // PIPELINE
+            $byStage = JobApplication::select('current_stage', DB::raw('COUNT(*) as total'))
+                ->groupBy('current_stage')
+                ->get()
+                ->mapWithKeys(fn($r) => [
+                    $r->current_stage ?: 'unknown' => $r->total
+                ]);
 
-                // Acceptance rate (offer accepted / total offer)
-                $totalOffers = \App\Models\Offer::count('id');
-                $acceptedOffers = \App\Models\Offer::where('status', 'accepted')->count('id');
-                $acceptanceRate = $totalOffers > 0 ? round($acceptedOffers / $totalOffers * 100, 1) : 0;
+            // BUDGET
+            $req = DB::table('manpower_requirements')
+                ->selectRaw('SUM(budget_headcount) as budget, SUM(filled_headcount) as filled')
+                ->first();
 
-                // Offer rate staff (jumlah offer untuk job level staff)
-                $staffJobIds = \App\Models\Job::where('level', 'staff')->pluck('id');
-                $staffOffers = \App\Models\Offer::whereHas('application.job', function($q) use ($staffJobIds) {
-                    $q->whereIn('id', $staffJobIds);
-                })->count('id');
+            $budget = (int) ($req->budget ?? 0);
+            $filled = (int) ($req->filled ?? 0);
+            $fulfillment = $budget > 0 ? round($filled / $budget * 100) : 0;
 
-                // SLA rata-rata per stage (dalam hari)
-                $slaPerStage = \App\Models\ApplicationStage::query()
-                    ->select('stage_key', DB::raw('AVG(TIMESTAMPDIFF(DAY, created_at, updated_at)) as avg_sla_days'), DB::raw('COUNT(*) as total'))
-                    ->groupBy('stage_key')
-                    ->get();
+            // =========================
+            // GENDER
+            // =========================
+            $genderRaw = DB::table('candidate_profiles')
+                ->select('gender', DB::raw('COUNT(*) as total'))
+                ->groupBy('gender')
+                ->pluck('total', 'gender');
 
-                return compact(
-                    'openJobs', 'activeApps', 'byStage', 'budget', 'filled', 'fulfillment',
-                    'totalCandidates', 'genderBreakdown', 'ageGroups', 'byPoh',
-                    'acceptanceRate', 'staffOffers', 'slaPerStage'
-                );
-            }
-        );
+            $genderBreakdown = [
+                'male' => $genderRaw['male'] ?? 0,
+                'female' => $genderRaw['female'] ?? 0,
+                'other' => $genderRaw->except(['male','female'])->sum(),
+            ];
+
+            // =========================
+            // AGE GROUP
+            // =========================
+            $ageGroups = [
+                '<25' => DB::table('candidate_profiles')->whereRaw('TIMESTAMPDIFF(YEAR, birthdate, CURDATE()) < 25')->count(),
+                '25-34' => DB::table('candidate_profiles')->whereRaw('TIMESTAMPDIFF(YEAR, birthdate, CURDATE()) BETWEEN 25 AND 34')->count(),
+                '35-44' => DB::table('candidate_profiles')->whereRaw('TIMESTAMPDIFF(YEAR, birthdate, CURDATE()) BETWEEN 35 AND 44')->count(),
+                '45+' => DB::table('candidate_profiles')->whereRaw('TIMESTAMPDIFF(YEAR, birthdate, CURDATE()) >= 45')->count(),
+            ];
+
+            // =========================
+            // ACCEPTANCE RATE
+            // =========================
+            $totalOffers = DB::table('offers')->count();
+            $acceptedOffers = DB::table('offers')->where('status','accepted')->count();
+
+            $acceptanceRate = $totalOffers > 0
+                ? round(($acceptedOffers / $totalOffers) * 100)
+                : 0;
+
+            // =========================
+            // SLA
+            // =========================
+            $slaPerStage = DB::table('application_stages')
+                ->select('stage_key', DB::raw('AVG(TIMESTAMPDIFF(DAY, created_at, updated_at)) as avg_sla_days'))
+                ->groupBy('stage_key')
+                ->get();
+
+            return compact(
+                'openJobs',
+                'activeApps',
+                'byStage',
+                'budget',
+                'filled',
+                'fulfillment',
+                'genderBreakdown',
+                'ageGroups',
+                'acceptanceRate',
+                'slaPerStage'
+            );
+        });
 
         return view('admin.dashboard.manpower', $metrics);
+    }
+
+    // =========================
+    // OPTIONAL API (JSON)
+    // =========================
+    public function data()
+    {
+        return response()->json(Cache::get('dashboard.manpower'));
     }
 }

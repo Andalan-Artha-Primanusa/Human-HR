@@ -9,6 +9,15 @@ class CandidateProfile extends Model
 {
     use HasUuids;
 
+    /**
+     * Mutator: always store gender as lowercased and trimmed string
+     */
+    public function setGenderAttribute($value)
+    {
+        $this->attributes['gender'] = is_null($value) ? null : mb_strtolower(trim($value));
+    }
+    use HasUuids;
+
     protected $fillable = [
         'user_id',
         'full_name',
