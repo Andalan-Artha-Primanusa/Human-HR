@@ -12,7 +12,7 @@ Route::apiResource('pohs', PohController::class);
 
 Route::middleware(['api.token', 'verified'])->group(function () {
     Route::get('/me', [AuthController::class, 'me']);
-    Route::middleware('role:hr|superadmin')->group(function () {
+    Route::middleware('role:hr|superadmin|trainer')->group(function () {
         Route::get('/users', [UserController::class, 'index'])
             ->middleware('throttle:60,1');
         Route::get('/users/{user}', [UserController::class, 'show'])

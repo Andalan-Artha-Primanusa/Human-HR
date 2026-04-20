@@ -1,6 +1,6 @@
 {{-- resources/views/admin/sites/show.blade.php --}}
 @extends('layouts.app')
-@section('title', 'Detail Site · ' . ($site->code ?? 'Site'))
+@section('title', 'Detail Site · ' . ($site->code ?? 'Site') . ' • karir-andalan')
 
 @php
     $ACCENT = '#a77d52'; // brown

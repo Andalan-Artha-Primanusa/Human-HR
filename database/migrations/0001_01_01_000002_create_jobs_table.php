@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-        Schema::create('jobs', function (Blueprint $t) {
+        Schema::create('job_listings', function (Blueprint $t) {
             $t->uuid('id')->primary();
 
             // Company (opsional)
@@ -63,6 +63,6 @@ return new class extends Migration {
 
     public function down(): void
     {
-        Schema::dropIfExists('jobs');
+        Schema::dropIfExists('job_listings');
     }
 };

@@ -45,10 +45,23 @@ class DemoDataSeeder extends Seeder
                 'password' => 'rizal.abu'
             ],
             [
-                'email' => 'virgiawan.arya@pt-aap.com',
+                'email' => 'virginia.tumiwan@pt-aap.com',
                 'name' => 'HR Senior',
                 'role' => 'hr',
-                'password' => 'virgiawan.arya'
+                'password' => 'virginia.tumiwan'
+            ],
+
+            [
+                'email' => 'trainer.demo@pt-aap.com',
+                'name' => 'Trainer Demo',
+                'role' => 'trainer',
+                'password' => 'trainer.demo'
+            ],
+            [
+                'email' => 'karyawan.demo@pt-aap.com',
+                'name' => 'Karyawan Demo',
+                'role' => 'karyawan',
+                'password' => 'karyawan.demo'
             ],
         ];
 
@@ -59,6 +72,7 @@ class DemoDataSeeder extends Seeder
                     'name' => $user['name'],
                     'role' => $user['role'],
                     'password' => Hash::make($user['password']),
+                    'email_verified_at' => now(), // pastikan verified
                 ]
             );
         }

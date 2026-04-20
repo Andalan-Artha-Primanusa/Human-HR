@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Edit User')
+@section('title', 'Edit User • karir-andalan')
 
 @section('content')
     @php

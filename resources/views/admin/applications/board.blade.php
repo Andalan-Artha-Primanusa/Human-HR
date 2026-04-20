@@ -97,60 +97,152 @@
 
                     {{-- Body Stage --}}
                     <div class="p-3 space-y-3 overflow-auto" x-ref="col-{{ $stageKey }}">
-                      @if($items->isEmpty())
-                        <div class="empty-{{ $stageKey }} rounded-xl border border-dashed border-slate-300/70 p-6 text-center text-slate-500 bg-white/70">
-                          Belum ada kandidat di stage ini
-                        </div>
-                      @endif
 
                       @foreach($items as $a)
-                        @php
-                            $candidateName = $a->user->name ?? $a->candidate->name ?? $a->name ?? '—';
-                            $jobTitle = $a->job->title ?? '—';
-                            $last = $a->stages->sortByDesc('created_at')->first();
-                            $overall = strtolower($a->overall_status ?? 'active');
-                            $overallClass = $badgeOverall[$overall] ?? 'badge-blue';
-                        @endphp
-
-                        <article
-                          id="card-{{ $a->id }}"
-                          draggable="true"
-                          @dragstart="onDragStart('{{ $a->id }}', '{{ route('admin.applications.move', $a) }}', '{{ csrf_token() }}') ; $el.classList.add('dragging')"
-                          @dragend="$el.classList.remove('dragging')"
-                          class="bg-white card card-hover"
-                          data-move-url="{{ route('admin.applications.move', $a) }}"
+                        <article id="card-{{ $a->id }}"
+                          class="relative p-4 bg-white border card card-hover border-slate-200 rounded-xl @if($stageKey==='hr_iv' && empty($a->feedback_hr)) opacity-50 cursor-not-allowed @endif"
+                          draggable="@if($stageKey==='hr_iv' && empty($a->feedback_hr))false @else true @endif"
+                          data-current-stage="{{ $stageKey }}"
                           data-schedule-url="{{ route('admin.interviews.store', $a) }}"
-                          data-current-stage="{{ $a->current_stage ?? 'applied' }}"
+                          data-move-url="{{ route('admin.applications.board.move') }}?id={{ $a->id }}"
+                          @if($stageKey==='hr_iv' && empty($a->feedback_hr))
+                            title="Isi feedback HR dulu sebelum bisa drag & drop ke stage berikutnya"
+                          @else
+                            @dragstart="onDragStart('{{ $a->id }}', '{{ route('admin.applications.board.move') }}?id={{ $a->id }}', '{{ csrf_token() }}')"
+                          @endif
                         >
-                          <div class="py-3 card-body">
-                            <div class="flex items-start justify-between gap-3">
-                              <div class="min-w-0">
-                                <div class="font-medium truncate text-slate-900">{{ $candidateName }}</div>
-                                <div class="text-xs truncate text-slate-500">{{ $jobTitle }}</div>
-                              </div>
-                              <div class="text-right shrink-0">
-                                <div class="text-[11px] text-slate-400">{{ optional($a->created_at)->format('d M') }}</div>
-                              </div>
-                            </div>
+                          <div class="flex items-center justify-between gap-2">
+                            <div class="font-semibold truncate text-slate-900">{{ $a->user->name }}</div>
+                            <div class="text-xs truncate text-slate-500">{{ $a->job->title }}</div>
+                          </div>
+                          <div class="mt-2 text-xs text-slate-500">{{ $a->user->email }}</div>
+                          <div class="mt-2 text-xs text-slate-500">{{ $a->user->role }}</div>
+                          <div class="mt-2 text-xs text-slate-500">Status: {{ $a->status }}</div>
 
-                            <div class="flex flex-wrap items-center gap-2 mt-2">
-                              @if($last && !is_null($last->score))
-                                <span class="badge badge-green">Score {{ number_format($last->score, 1) }}</span>
-                              @endif
-                              <span class="badge {{ $overallClass }}">{{ strtoupper(str_replace('_', ' ', $overall)) }}</span>
-                            </div>
+                          {{-- === FEEDBACK HISTORY TABLE (DISABLED, hanya pakai tombol pop-up) === --}}
+                          {{-- <div class="mt-2">
+                            ... (tabel feedback disembunyikan)
+                          </div> --}}
 
-                            <div class="flex items-center justify-end gap-2 mt-3">
-                              @if(in_array($stageKey, ['hr_iv', 'user_iv', 'user_trainer_iv']))
-                                <button
-                                  type="button"
-                                  class="btn btn-primary btn-sm"
-                                  @click="openSchedule($event)">
-                                  Schedule
-                                </button>
-                              @endif
-                              <a class="btn btn-outline btn-sm" target="_blank" href="{{ route('jobs.show', $a->job) }}">Job</a>
-                            </div>
+                          {{-- === FEEDBACK/APPROVAL FORM === --}}
+                          <div class="flex flex-wrap gap-2 mt-2">
+                            @php
+                              $fb_hr = $a->feedbacks->where('role','hr')->sortByDesc('created_at')->first();
+                              $fb_user = $a->feedbacks->where('role','karyawan')->sortByDesc('created_at')->first();
+                              if (!$fb_user) $fb_user = $a->feedbacks->where('role','pelamar')->sortByDesc('created_at')->first();
+                              $fb_trainer = $a->feedbacks->where('role','trainer')->sortByDesc('created_at')->first();
+                            @endphp
+                            @if($fb_hr)
+                              <button type="button" class="btn btn-outline btn-xs" @click="$dispatch('show-feedback', {role: 'hr', notes: {{ json_encode($fb_hr->feedback) }}, approve: {{ json_encode($fb_hr->approve) }}})">View Feedback HR</button>
+                            @endif
+                            @if($fb_user)
+                              <button type="button" class="btn btn-outline btn-xs" @click="$dispatch('show-feedback', {role: 'user', notes: {{ json_encode($fb_user->feedback) }}, approve: {{ json_encode($fb_user->approve) }}})">View Feedback Karyawan</button>
+                            @endif
+                            @if($fb_trainer)
+                              <button type="button" class="btn btn-outline btn-xs" @click="$dispatch('show-feedback', {role: 'trainer', notes: {{ json_encode($fb_trainer->feedback) }}, approve: {{ json_encode($fb_trainer->approve) }}})">View Feedback Trainer</button>
+                            @endif
+                          </div>
+                          @if($stageKey === 'hr_iv')
+                            <form method="POST" action="{{ route('admin.applications.move', $a) }}" class="mt-3 space-y-2">
+                              @csrf
+                              <input type="hidden" name="to" value="user_iv">
+                              <div>
+                                <label class="label">Feedback HR</label>
+                                <textarea name="feedback_hr" class="input" required placeholder="Catatan/feedback HR..."></textarea>
+                              </div>
+                              <div>
+                                <label class="label">Setuju Lanjut?</label>
+                                <select name="approve_hr" class="input" required>
+                                  <option value="">Pilih</option>
+                                  <option value="yes">Setuju</option>
+                                  <option value="no">Tidak Setuju</option>
+                                </select>
+                              </div>
+                              <button type="submit" class="w-full btn btn-primary btn-sm">Submit Feedback</button>
+                            </form>
+                          @elseif($stageKey === 'user_iv')
+                            @php $currentUser = auth()->user(); @endphp
+                            @if($currentUser && $currentUser->role === 'pelamar' && $a->user_id === $currentUser->id)
+                              <form method="POST" action="{{ route('admin.applications.move', $a) }}" class="mt-3 space-y-2">
+                                @csrf
+                                <input type="hidden" name="to" value="user_trainer_iv">
+                                <div>
+                                  <label class="label">Feedback Karyawan</label>
+                                  <textarea name="feedback_user" class="input" required placeholder="Catatan/feedback karyawan..."></textarea>
+                                </div>
+                                <div>
+                                  <label class="label">Setuju Lanjut?</label>
+                                  <select name="approve_user" class="input" required>
+                                    <option value="">Pilih</option>
+                                    <option value="yes">Setuju</option>
+                                    <option value="no">Tidak Setuju</option>
+                                  </select>
+                                </div>
+                                <button type="submit" class="w-full btn btn-primary btn-sm">Submit Feedback</button>
+                              </form>
+                            @else
+                              <div class="flex flex-wrap gap-2 mt-3">
+                                <button type="button" class="btn btn-outline btn-sm" @click="showFeedback('user', {{ json_encode($a->feedback_user) }}, {{ json_encode($a->approve_user) }})">View Feedback Karyawan</button>
+                                @php
+                                  $fb_hr = $a->feedbacks->where('role','hr')->sortByDesc('created_at')->first();
+                                @endphp
+                                @if($fb_hr)
+                                  <button type="button" class="btn btn-outline btn-sm" @click="showFeedback('hr', {{ json_encode($fb_hr->feedback) }}, {{ json_encode($fb_hr->approve) }})">View Feedback HR</button>
+                                @endif
+                              </div>
+                            @endif
+                            {{-- Tidak ada dropdown pindah stage untuk admin/hr/superadmin, drag & drop saja --}}
+                          @elseif($stageKey === 'user_trainer_iv')
+                            @php $currentUser = auth()->user(); @endphp
+                            @if($currentUser && $currentUser->role === 'trainer')
+                              <form method="POST" action="{{ route('admin.applications.move', $a) }}" class="mt-3 space-y-2">
+                                @csrf
+                                <input type="hidden" name="to" value="final">
+                                <div>
+                                  <label class="label">Feedback Trainer</label>
+                                  <textarea name="feedback_trainer" class="input" required placeholder="Catatan/feedback trainer..."></textarea>
+                                </div>
+                                <div>
+                                  <label class="label">Setuju Lanjut?</label>
+                                  <select name="approve_trainer" class="input" required>
+                                    <option value="">Pilih</option>
+                                    <option value="yes">Setuju</option>
+                                    <option value="no">Tidak Setuju</option>
+                                  </select>
+                                </div>
+                                <button type="submit" class="w-full btn btn-primary btn-sm">Submit Feedback</button>
+                              </form>
+                            @else
+                              <button type="button" class="mt-3 btn btn-outline btn-sm" @click="showFeedback('trainer', {{ json_encode($a->feedback_trainer) }}, {{ json_encode($a->approve_trainer) }})">View Feedback Trainer</button>
+                              <button type="button" class="mt-3 btn btn-outline btn-sm" @click="showFeedback('user', {{ json_encode($a->feedback_user) }}, {{ json_encode($a->approve_user) }})">View Feedback Karyawan</button>
+                              <button type="button" class="mt-3 btn btn-outline btn-sm" @click="showFeedback('hr', {{ json_encode($a->feedback_hr) }}, {{ json_encode($a->approve_hr) }})">View Feedback HR</button>
+                            @endif
+                            {{-- Tidak ada dropdown pindah stage untuk admin/hr/superadmin, drag & drop saja --}}
+                                <div x-show="feedbackModal.open" x-transition.opacity class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40" style="display:none"
+                                     @show-feedback.window="showFeedback($event.detail.role, $event.detail.notes, $event.detail.approve)">
+                                  <div x-show="feedbackModal.open" x-transition.scale.origin.center class="w-full max-w-md card">
+                                    <div class="flex items-center justify-between px-5 py-4 bg-white border-b border-slate-200">
+                                      <div class="font-semibold text-slate-900">Feedback <span x-text="feedbackModal.roleLabel"></span></div>
+                                      <button type="button" class="btn btn-ghost" @click="feedbackModal.open=false">Close</button>
+                                    </div>
+                                    <div class="p-5">
+                                      <div class="mb-2"><b>Catatan:</b> <span x-text="feedbackModal.notes"></span></div>
+                                      <div><b>Setuju Lanjut:</b> <span x-text="feedbackModal.approve"></span></div>
+                                    </div>
+                                  </div>
+                                </div>
+                          @endif
+
+                          <div class="flex items-center justify-end gap-2 mt-3">
+                            @if(in_array($stageKey, ['hr_iv', 'user_iv', 'user_trainer_iv']))
+                              <button
+                                type="button"
+                                class="btn btn-primary btn-sm"
+                                @click="openSchedule($event)">
+                                Schedule
+                              </button>
+                            @endif
+                            <a class="btn btn-outline btn-sm" target="_blank" href="{{ route('jobs.show', $a->job) }}">Job</a>
                           </div>
                         </article>
                       @endforeach
@@ -237,6 +329,7 @@
             csrf: null,
             toast: { show:false, msg:'', type:'ok' },
             modal: { open:false, action:'', candidate:'', title:'', mode:'online' },
+            feedbackModal: { open:false, roleLabel:'', notes:'', approve:'' },
 
             init(){},
 
@@ -245,11 +338,22 @@
               setTimeout(()=> this.toast.show=false, 2200);
             },
 
+            showFeedback(role, notes, approve) {
+              let label = '';
+              if(role==='user') label = 'Karyawan';
+              else if(role==='hr') label = 'HR';
+              else if(role==='trainer') label = 'Trainer';
+              this.feedbackModal.roleLabel = label;
+              this.feedbackModal.notes = notes || '-';
+              this.feedbackModal.approve = approve === 'yes' ? 'Ya' : (approve === 'no' ? 'Tidak' : '-');
+              this.feedbackModal.open = true;
+            },
+
             onDragStart(id, url, csrf){
               this.draggingId = id;
-              this.moveUrl = url;
-              this.csrf = csrf;
               this.draggingEl = document.getElementById('card-'+id);
+              this.moveUrl = this.draggingEl?.dataset?.moveUrl || url;
+              this.csrf = csrf;
               this.draggingFrom = this.draggingEl?.closest('section')?.dataset?.stage ?? null;
             },
 

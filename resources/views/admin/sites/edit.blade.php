@@ -1,7 +1,7 @@
 {{-- resources/views/admin/sites/edit.blade.php --}}
 @extends('layouts.app')
 
-@section('title', 'Admin · Sites · Edit')
+@section('title', 'Admin · Sites · Edit • karir-andalan')
 
 @php
     $ACCENT = '#a77d52'; // brown

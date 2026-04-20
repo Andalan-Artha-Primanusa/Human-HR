@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'Detail Interview')
+@section('title', 'Detail Interview • karir-andalan')
 
 @section('content')
     @php

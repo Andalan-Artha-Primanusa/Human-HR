@@ -1,6 +1,6 @@
 {{-- resources/views/sites/show.blade.php --}}
 @extends('layouts.app')
-@section('title', 'Site · ' . $site->code)
+@section('title', 'Site · ' . $site->code . ' • karir-andalan')
 
 @php
     $BORD = '#e5e7eb';

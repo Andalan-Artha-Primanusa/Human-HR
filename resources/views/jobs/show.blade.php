@@ -327,7 +327,7 @@
                       <form method="POST" action="{{ route('applications.store', $job) }}">@csrf
                         @if(isset($pohs) && $pohs->count())
                           <div class="mb-2">
-                            <label for="poh_id" class="block text-xs font-medium text-slate-700 mb-1">Pilih POH (Tempat Penempatan)</label>
+                            <label for="poh_id" class="block mb-1 text-xs font-medium text-slate-700">Pilih POH (Tempat Penempatan)</label>
                             <select name="poh_id" id="poh_id" class="block w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#a77d52]/30 focus:border-[#a77d52]/40 bg-white">
                               <option value="">-- Pilih POH --</option>
                               @foreach($pohs as $poh)
@@ -854,12 +854,48 @@
                         @endif
                       </div>
                 @else
-                      <p class="mt-2 text-sm text-slate-600">Profil kandidat belum diisi.</p>
-                      @if(Route::has('candidate.profiles.edit'))
-                        <a href="{{ route('candidate.profiles.edit', $job) }}" class="mt-3 inline-flex items-center rounded-lg bg-[linear-gradient(90deg,_#a77d52,_#8b5e3c)] px-3 py-2 text-sm font-semibold text-white">
-                          Lengkapi Sekarang
-                        </a>
-                      @endif
+                      {{-- ALERT MODAL KELENGKAPAN PROFIL --}}
+                      <div x-data="{ open: true }">
+                        <template x-if="open">
+                          <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+                            <div class="relative w-full max-w-md p-6 text-center bg-white border shadow-xl rounded-2xl border-amber-300">
+                              <button @click="open=false" class="absolute top-3 right-3 text-slate-400 hover:text-slate-700" aria-label="Tutup">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                              </button>
+                              <div class="mb-2 text-2xl font-bold text-amber-700">Lengkapi Data Profil</div>
+                              <div class="mb-4 text-sm text-slate-700">Lengkapi isian berikut sebelum lanjut apply:</div>
+                              <ul class="pl-5 mb-4 text-sm text-left list-disc text-slate-700">
+                                <li>Jenis Kelamin</li>
+                                <li>Usia</li>
+                                <li>Tempat Lahir</li>
+                                <li>Tanggal Lahir</li>
+                                <li>NIK KTP</li>
+                                <li>Nomor HP</li>
+                                <li>Pendidikan Terakhir</li>
+                                <li>Jurusan</li>
+                                <li>Sekolah/Kampus</li>
+                                <li>Alamat KTP</li>
+                                <li>Desa/Kelurahan (KTP)</li>
+                                <li>Kecamatan (KTP)</li>
+                                <li>Kab/Kota (KTP)</li>
+                                <li>Provinsi (KTP)</li>
+                                <li>Kode Pos (KTP)</li>
+                                <li>Alamat Domisili</li>
+                                <li>Desa/Kelurahan (Domisili)</li>
+                                <li>Kecamatan (Domisili)</li>
+                                <li>Kab/Kota (Domisili)</li>
+                                <li>Provinsi (Domisili)</li>
+                                <li>Kode Pos (Domisili)</li>
+                              </ul>
+                              @if(Route::has('candidate.profiles.edit'))
+                                <a href="{{ route('candidate.profiles.edit', $job) }}" class="inline-flex items-center rounded-lg bg-[linear-gradient(90deg,_#a77d52,_#8b5e3c)] px-4 py-2 text-sm font-semibold text-white">
+                                  Lengkapi Sekarang
+                                </a>
+                              @endif
+                            </div>
+                          </div>
+                        </template>
+                      </div>
                 @endif
               </div>
           @endauth

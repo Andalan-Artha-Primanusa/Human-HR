@@ -57,7 +57,9 @@
     });
   </script>
 </head>
-<body class="min-h-screen text-slate-900 bg-[linear-gradient(180deg,_#f8f5f1,_#fefcf9)]">
+<body x-data="wizard()" x-init="init()" class="min-h-screen text-slate-900 bg-[linear-gradient(180deg,_#f8f5f1,_#fefcf9)]">
+  <!-- DEBUG: tampilkan isi errors[] -->
+  <span x-text="JSON.stringify(errors)" style="position:fixed;top:0;left:0;z-index:99999;background:#fff1;border:1px solid #ccc;padding:2px 8px;font-size:12px;"></span>
 
   {{-- HEADER --}}
   <header class="relative overflow-hidden isolate bg-gradient-to-r from-brand-700 via-brand-600 to-brand-800">
@@ -94,7 +96,7 @@
   </header>
 
   {{-- MAIN --}}
-  <main x-data="wizard()" x-init="init()" class="max-w-6xl px-4 py-8 mx-auto sm:px-6 lg:px-8">
+  <main class="max-w-6xl px-4 py-8 mx-auto sm:px-6 lg:px-8">
 
     {{-- Alerts --}}
     @if(session('info'))
@@ -579,15 +581,29 @@
       </div>
     </form>
 
-    {{-- Error bubble --}}
-    <template x-if="errors.length">
-      <div class="p-4 mt-6 text-sm border rounded-xl border-brand-200 bg-[#fbf3ea] text-brand-900">
-        <div class="font-semibold">Lengkapi isian berikut sebelum lanjut:</div>
-        <ul class="pl-5 mt-2 list-disc">
-          <template x-for="(e,i) in errors" :key="i"><li x-text="e"></li></template>
-        </ul>
-      </div>
-    </template>
+
+
+</main>
+
+{{-- Error Modal: kelengkapan wajib, render di akhir body agar floating di atas semua konten --}}
+<template x-if="errors.length">
+  <div class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40">
+    <div class="relative w-full max-w-md p-6 text-center bg-white border shadow-xl rounded-2xl border-amber-300">
+      <button @click="errors=[]" class="absolute top-3 right-3 text-slate-400 hover:text-slate-700" aria-label="Tutup">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+      <div class="mb-2 text-2xl font-bold text-amber-700">Lengkapi Isian Berikut</div>
+      <div class="mb-4 text-sm text-slate-700">Sebelum lanjut, mohon lengkapi data berikut:</div>
+      <ul class="pl-5 mb-4 text-sm text-left list-disc text-slate-700">
+        <template x-for="(e,i) in errors" :key="i"><li x-text="e"></li></template>
+      </ul>
+      <button @click="errors=[]" class="mt-2 inline-flex items-center rounded-lg bg-[linear-gradient(90deg,_#a77d52,_#8b5e3c)] px-4 py-2 text-sm font-semibold text-white">Tutup</button>
+    </div>
+  </div>
+</template>
+
+</body>
+</html>
 
   </main>
 

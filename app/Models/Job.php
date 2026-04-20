@@ -13,6 +13,10 @@ use Illuminate\Support\Facades\DB;
 
 class Job extends Model
 {
+    /**
+     * Set table name to job_listings (bukan jobs)
+     */
+    protected $table = 'job_listings';
     use HasFactory, HasUuidPrimaryKey;
 
     /** LEVELS (canonical slug) */

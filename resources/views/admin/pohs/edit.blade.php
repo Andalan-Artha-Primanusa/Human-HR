@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Edit POH')
+@section('title', 'Edit POH • karir-andalan')
 
 @php
     $ACCENT = '#a77d52';

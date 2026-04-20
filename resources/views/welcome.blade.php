@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   {{-- ===== PRIMARY SEO â€” lebih deskriptif & keyword-rich ===== --}}
-  <title>Lowongan Kerja PT Andalan Artha Primanusa 2025 | Human Careers</title>
+  <title>@yield('title', 'karir-andalan')</title>
   <meta name="description" content="Temukan lowongan kerja terbaru di PT Andalan Artha Primanusa. Proses rekrutmen transparan, pantau status lamaran secara real-time, dan bergabunglah bersama tim profesional Andalan.">
   <meta name="keywords" content="lowongan kerja Andalan, karier PT Andalan, rekrutmen 2025, Human Careers, loker Jakarta, pekerjaan terbaru Andalan, loker terbuka">
   <meta name="author" content="PT Andalan Artha Primanusa">

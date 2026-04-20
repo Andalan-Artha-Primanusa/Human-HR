@@ -115,6 +115,7 @@ class JobController extends Controller
             default => $baseQuery->orderBy('created_at', 'desc')->orderBy('id', 'desc'), // latest
         };
 
+
         // 4) Micro-cache untuk publik
         if (!$isAdminRoute) {
             $cacheKey = 'jobs.public.' . md5(json_encode([

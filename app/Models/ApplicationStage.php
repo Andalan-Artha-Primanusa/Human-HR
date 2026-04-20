@@ -11,6 +11,12 @@ class ApplicationStage extends Model
 {
     use HasFactory, HasUuidPrimaryKey;
 
+    public function feedbacks()
+    {
+        return $this->hasMany(\App\Models\ApplicationFeedback::class, 'application_id', 'application_id')
+            ->where('stage_key', $this->stage_key);
+    }
+
     /**
      * Catatan:
      * - Tambah kolom 'acted_by' (UUID user yang terakhir mengubah stage)

@@ -1,4 +1,4 @@
-    <?php
+<?php
 
     use Illuminate\Support\Facades\Route;
     use App\Http\Controllers\ProfileController;
@@ -32,6 +32,9 @@
     use App\Http\Controllers\Admin\ManpowerRequirementController;
     use App\Http\Controllers\Auth\PasswordResetLinkController;
     use App\Http\Controllers\Auth\NewPasswordController;
+
+    // === NEW: Kanban Controller
+    use App\Http\Controllers\KanbanController;
 
     /*
     |--------------------------------------------------------------------------
@@ -151,7 +154,7 @@
     */
     Route::prefix('admin')
         ->as('admin.')
-        ->middleware(['auth', 'verified', 'role:hr|superadmin'])
+        ->middleware(['auth', 'verified', 'role:hr|superadmin|trainer|karyawan'])
         ->group(function () {
             // ================= Manpower =================
                         // ================= POH (admin) =================
@@ -251,3 +254,8 @@
     |--------------------------------------------------------------------------
     */
     require __DIR__ . '/auth.php';
+
+    // Kanban untuk user/trainer/karyawan
+    Route::middleware(['auth', 'verified'])->group(function () {
+        Route::get('/kanban', [KanbanController::class, 'mine'])->name('kanban.mine');
+    });

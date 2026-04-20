@@ -27,7 +27,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'name',
         'email',
         'password',
-        'role',       // pelamar|hr|superadmin
+        'role',       // pelamar|hr|superadmin|trainer
         'id_employe', // Nomor/NIK karyawan (ikuti ejaan kolom di DB)
     ];
 

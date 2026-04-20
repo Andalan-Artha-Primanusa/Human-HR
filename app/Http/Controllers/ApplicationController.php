@@ -235,18 +235,27 @@ class ApplicationController extends Controller
         return view('admin.applications.index', compact('apps'));
     }
 
-    /** Admin: Kanban board */
+    /** Kanban board: admin, hr, karyawan, pelamar, trainer */
     public function board(Request $request)
     {
+        $user = auth()->user();
         $stages = $this->STAGES;
 
-        $apps = JobApplication::with([
+        // Jika ingin filter data berdasarkan role, bisa tambahkan di sini
+        $query = JobApplication::with([
             'job:id,title,division,site_id',
             'job.site:id,code,name',
             'user:id,name',
             'stages.actor:id,name',
             'stages.user:id,name',
-        ])
+        ]);
+
+        // Jika bukan admin/hr/superadmin, hanya tampilkan lamaran milik user
+        if (!in_array($user->role, ['admin','hr','superadmin'])) {
+            $query->where('user_id', $user->id);
+        }
+
+        $apps = $query
             ->when($request->filled('job_id'), fn($q) => $q->where('job_id', $request->job_id))
             ->when($request->filled('only'), function ($q) use ($request) {
                 $only = collect(explode(',', $request->only))
@@ -382,12 +391,43 @@ class ApplicationController extends Controller
             'status' => ['nullable', Rule::in($allowedStatus)],
             'note' => ['nullable', 'string'],
             'score' => ['nullable', 'numeric'],
+            // Tambahan untuk feedback dan persetujuan
+            'feedback_hr' => ['nullable', 'string'],
+            'approve_hr' => ['nullable', 'in:yes,no'],
+            'feedback_trainer' => ['nullable', 'string'],
+            'approve_trainer' => ['nullable', 'in:yes,no'],
+            'feedback_user' => ['nullable', 'string'],
+            'approve_user' => ['nullable', 'in:yes,no'],
         ]);
 
         $to = $this->normalizeStage($toRaw) ?: 'applied';
         $status = $validated['status'] ?? 'pending';
         $note = $validated['note'] ?? null;
         $score = isset($validated['score']) ? (float) $validated['score'] : null;
+
+        // Validasi wajib feedback dan persetujuan HR hanya saat PINDAH DARI hr_iv ke stage berikutnya
+        $from = $request->input('from_stage') ?? $request->input('from') ?? $application->current_stage ?? null;
+        if ($from === 'hr_iv' && $to !== 'hr_iv' && in_array(auth()->user()->role, ['admin','hr','superadmin'])) {
+            if (empty($validated['feedback_hr']) || ($validated['approve_hr'] ?? null) === null) {
+                abort(422, 'HR wajib mengisi feedback dan setuju/tidak setuju sebelum lanjut dari HR Interview.');
+            }
+        }
+
+        // Validasi wajib feedback dan persetujuan trainer HANYA jika user login adalah trainer
+        if (in_array($to, ['user_trainer_iv'], true) && auth()->user() && auth()->user()->role === 'trainer') {
+            if (empty($validated['feedback_trainer']) || ($validated['approve_trainer'] ?? null) === null) {
+                abort(422, 'Trainer wajib mengisi feedback dan setuju/tidak setuju sebelum lanjut.');
+            }
+        }
+
+        // Validasi wajib feedback dan persetujuan user/karyawan
+        // Hanya wajib jika memindahkan DARI user_iv ke user_trainer_iv dan user login adalah karyawan
+        $from = $request->input('from_stage') ?? $request->input('from') ?? null;
+        if ($from === 'user_iv' && $to === 'user_trainer_iv' && auth()->user() && auth()->user()->role === 'karyawan') {
+            if (empty($validated['feedback_user']) || ($validated['approve_user'] ?? null) === null) {
+                abort(422, 'Karyawan wajib mengisi feedback dan setuju/tidak setuju sebelum lanjut.');
+            }
+        }
 
         return [$to, $status, $note, $score];
     }
@@ -425,6 +465,24 @@ class ApplicationController extends Controller
                 'notes' => $note,
             ]);
 
+            // Simpan feedback HR jika PINDAH DARI hr_iv ke stage lain
+            $actorUser = \Auth::user();
+            if ($from === 'hr_iv' && $to !== 'hr_iv' && in_array($actorUser?->role, ['admin','hr','superadmin'])) {
+                $application->feedback_hr = request('feedback_hr');
+                $application->approve_hr = request('approve_hr');
+                $application->save();
+                // Simpan juga ke tabel riwayat feedbacks
+                if (request('feedback_hr') !== null || request('approve_hr') !== null) {
+                    \App\Models\ApplicationFeedback::create([
+                        'application_id' => $application->id,
+                        'stage_key' => 'hr_iv',
+                        'role' => 'hr',
+                        'feedback' => request('feedback_hr'),
+                        'approve' => request('approve_hr'),
+                        'user_id' => $userId,
+                    ]);
+                }
+            }
             // current stage
             $application->update(['current_stage' => $to]);
 
@@ -575,6 +633,15 @@ class ApplicationController extends Controller
     /** Redirect pintar setelah perpindahan stage */
     protected function redirectAfterMove(Request $request, JobApplication $application, string $to, $attempt = null)
     {
+        // Jika request expects JSON (AJAX/drag & drop), return JSON saja
+        if ($request->expectsJson()) {
+            return response()->json([
+                'ok' => true,
+                'moved_to' => $to,
+                'id' => $application->id,
+            ]);
+        }
+
         $isOwner = $request->user() && (string) $request->user()->id === (string) $application->user_id;
 
         switch ($to) {
@@ -589,6 +656,10 @@ class ApplicationController extends Controller
             case 'hr_iv':
             case 'user_iv':
             case 'user_trainer_iv':
+                // Jika karyawan atau trainer, redirect ke Kanban Kandidat
+                if (auth()->user() && in_array(auth()->user()->role, ['karyawan','trainer'])) {
+                    return redirect()->route('kanban.mine')->with('ok', 'Feedback berhasil, stage dipindah ke ' . strtoupper($this->PRETTY[$to] ?? $to) . '.');
+                }
                 return redirect()->route('admin.interviews.index', ['focus' => $application->id])
                     ->with('ok', 'Stage dipindah ke ' . strtoupper($this->PRETTY[$to] ?? $to) . '.');
 

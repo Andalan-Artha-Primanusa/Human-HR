@@ -9,7 +9,7 @@ return new class extends Migration {
     {
         Schema::create('job_applications', function (Blueprint $t) {
             $t->uuid('id')->primary();
-            $t->foreignUuid('job_id')->constrained('jobs')->cascadeOnDelete();
+            $t->foreignUuid('job_id')->constrained('job_listings')->cascadeOnDelete();
             $t->foreignUuid('user_id')->constrained('users')->cascadeOnDelete();
             $t->string('current_stage')->default('applied'); // applied, psychotest, hr_iv, user_iv, final, offer, hired, not_qualified
             $t->enum('overall_status', ['active', 'hired', 'not_qualified'])->default('active');

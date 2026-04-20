@@ -13,7 +13,12 @@ class JobApplication extends Model
 {
     use HasFactory, HasUuidPrimaryKey;
 
-    protected $fillable = ['job_id', 'user_id', 'poh_id', 'current_stage', 'overall_status'];
+    protected $fillable = ['job_id', 'user_id', 'poh_id', 'current_stage', 'overall_status', 'feedback_hr', 'approve_hr'];
+
+    public function feedbacks()
+    {
+        return $this->hasMany(\App\Models\ApplicationFeedback::class, 'application_id');
+    }
     /** @return BelongsTo<Poh,JobApplication> */
     public function poh(): BelongsTo
     {

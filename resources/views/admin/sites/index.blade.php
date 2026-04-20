@@ -1,7 +1,7 @@
 {{-- resources/views/admin/sites/index.blade.php --}}
 @extends('layouts.app')
 
-@section('title', 'Admin · Sites')
+@section('title', 'Admin · Sites • karir-andalan')
 
 @php
     // THEME (solid)

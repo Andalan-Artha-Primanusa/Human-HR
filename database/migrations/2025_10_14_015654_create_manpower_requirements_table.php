@@ -11,7 +11,7 @@ return new class extends Migration {
             $t->uuid('id')->primary();
 
             // Relasi ke job & site (per-site requirement)
-            $t->foreignUuid('job_id')->constrained('jobs')->cascadeOnDelete();
+            $t->foreignUuid('job_id')->constrained('job_listings')->cascadeOnDelete();
             $t->foreignUuid('site_id')->nullable()->constrained('sites')->nullOnDelete();
 
             // Identitas aset (baru)

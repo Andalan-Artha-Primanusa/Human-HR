@@ -1,5 +1,7 @@
 {{-- resources/views/jobs/index.blade.php --}}
-@extends('layouts.app', ['title' => 'Lowongan'])
+@extends('layouts.app')
+
+@section('title', 'Lowongan • karir-andalan')
 
 @php
     use Illuminate\Support\Str;

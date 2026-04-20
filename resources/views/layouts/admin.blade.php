@@ -1,8 +1,6 @@
 @extends('layouts.app')
 
-@section('title')
-    @yield('title', 'Admin Panel')
-@endsection
+@section('title', 'Admin • karir-andalan')
 
 @section('content')
     @yield('content')

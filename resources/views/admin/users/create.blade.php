@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Create User')
+@section('title', 'Create User • karir-andalan')
 
 @section('content')
     <h1 class="text-xl font-semibold text-slate-800 mb-4">Create User</h1>
