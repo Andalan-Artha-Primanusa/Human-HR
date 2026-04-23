@@ -91,6 +91,10 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/email/verify/resend', [VerifyCodeController::class, 'resend'])
         ->middleware('throttle:6,1')
         ->name('verification.code.resend');
+
+    // Mencegah error "Route [verification.verify] not defined." dari default behavior Laravel
+    Route::get('/email/verify/{id}/{hash}', [VerifyCodeController::class, 'showForm'])
+        ->name('verification.verify');
 });
 
 /*
