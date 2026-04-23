@@ -49,6 +49,7 @@ class Job extends Model
         'dept_head'       => 'Dept Head',
         'project_manager' => 'Project Manager',
         'pjo'             => 'PJO',
+        'non_staff'       => 'Non Staff',
     ];
 
     /** DIVISIONS (canonical slug => label) */
