@@ -297,7 +297,7 @@
               @php $s = old('ktp_residence_status', $profile->ktp_residence_status); @endphp
               <select name="ktp_residence_status" class="px-3 py-2 border rounded-lg">
                 <option value="">Status Tempat Tinggal</option>
-                @foreach(['OWN' => 'Milik', 'RENT' => 'Sewa', 'DORM' => 'Kost', 'FAMILY' => 'Keluarga', 'COMPANY' => 'Dinas', 'OTHER' => 'Lainnya'] as $k => $v)
+                @foreach(['OWN' => 'Milik Sendiri', 'RENTAL' => 'Sewa', 'DORM' => 'Kost', 'FAMILY' => 'Keluarga', 'COMPANY' => 'Dinas', 'OTHER' => 'Lainnya'] as $k => $v)
                       <option value="{{ $k }}" @selected($s === $k)>{{ $v }}</option>
                 @endforeach
               </select>
