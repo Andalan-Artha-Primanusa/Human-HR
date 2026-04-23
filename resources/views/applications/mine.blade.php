@@ -259,17 +259,26 @@
                     </svg>
                     {{ optional($app->created_at)->format('d M Y') }}
                   </span>
-                  <a href="{{ route('jobs.show', $app->job_id) }}"
-                     class="px-3 py-1.5 rounded-lg text-white text-xs font-medium flex items-center gap-1 hover:opacity-90 transition"
-                     style="background: {{ $PRIMARY }}">
-                    Detail
-                    {{-- ICON ARROW --}}
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4"
-                         fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M9 5l7 7-7 7"/>
-                    </svg>
-                  </a>
+                  <div class="flex items-center gap-2">
+                    @if($app->interviews && $app->interviews->count())
+                      <a href="{{ route('me.interviews.show', $app->interviews->first()) }}"
+                         class="px-3 py-1.5 rounded-lg text-[#a77d52] border border-[#a77d52] text-xs font-medium flex items-center gap-1 hover:bg-[#a77d52] hover:text-white transition"
+                         title="Lihat Jadwal Interview">
+                        Interview
+                      </a>
+                    @endif
+                    <a href="{{ route('jobs.show', $app->job_id) }}"
+                       class="px-3 py-1.5 rounded-lg text-white text-xs font-medium flex items-center gap-1 hover:opacity-90 transition"
+                       style="background: {{ $PRIMARY }}">
+                      Detail
+                      {{-- ICON ARROW --}}
+                      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4"
+                           fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M9 5l7 7-7 7"/>
+                      </svg>
+                    </a>
+                  </div>
                 </div>
                 @if($app->poh)
                   <div class="flex items-center gap-1 mt-1 text-xs text-slate-600">

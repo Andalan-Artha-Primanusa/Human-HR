@@ -45,10 +45,10 @@
           </span>
         </div>
 
+
         {{-- Intro --}}
         <div class="mb-4 text-sm text-slate-600">
-          Terima kasih telah mendaftar! Sebelum mulai, mohon verifikasi alamat email Anda dengan mengklik tautan yang baru saja kami kirim.
-          Jika belum menerima email, Anda dapat mengirim ulang tautan verifikasi.
+          Terima kasih telah mendaftar! Sebelum mulai, mohon verifikasi alamat email Anda dengan memasukkan kode 6 digit yang telah dikirim ke email Anda.
         </div>
 
         {{-- Info email yang digunakan --}}
@@ -59,15 +59,17 @@
               </div>
         @endif
 
+
         {{-- Status sukses kirim ulang --}}
         @if (session('status') == 'verification-link-sent')
               <div class="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800" role="status" aria-live="polite">
                 <div class="flex items-start gap-2">
                   <svg class="mt-0.5 h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><path d="M10 15.172 6.414 11.586 5 13l5 5 9-9-1.414-1.414L10 15.172Z"/></svg>
-                  <div>Tautan verifikasi baru telah dikirim ke email yang Anda gunakan saat pendaftaran.</div>
+                  <div>Kode verifikasi baru telah dikirim ke email yang Anda gunakan saat pendaftaran.</div>
                 </div>
               </div>
         @endif
+
 
         <div class="relative">
           {{-- Ring luar animasi --}}
@@ -81,19 +83,6 @@
               </div>
 
               <div class="flex items-center justify-between gap-3">
-                {{-- Form kirim ulang --}}
-                <form id="resendForm" method="POST" action="{{ route('verification.send') }}" class="inline-flex">
-                  @csrf
-                  <button id="resendBtn" type="submit"
-                          class="group inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-teal-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:from-blue-700 hover:to-teal-700 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed transition">
-                    <svg id="resendSpinner" class="hidden h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
-                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"></circle>
-                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 0 1 8-8v3a5 5 0 0 0-5 5H4z"></path>
-                    </svg>
-                    <span id="resendLabel">Kirim Ulang Tautan</span>
-                  </button>
-                </form>
-
                 {{-- Form logout --}}
                 <form method="POST" action="{{ route('logout') }}" class="inline-flex">
                   @csrf
@@ -108,7 +97,7 @@
               {{-- Opsi ubah email (opsional, jika ada route/profile) --}}
               @if (Route::has('profile.edit'))
                 <div class="text-xs text-slate-600">
-                  Salah alamat? <a href="{{ route('profile.edit') }}" class="font-medium text-blue-700 hover:text-blue-800 underline">Ubah email akun</a>, lalu kirim ulang.
+                  Salah alamat? <a href="{{ route('profile.edit') }}" class="font-medium text-blue-700 hover:text-blue-800 underline">Ubah email akun</a>, lalu daftar ulang.
                 </div>
               @endif
             </div>

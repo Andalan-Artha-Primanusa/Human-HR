@@ -89,17 +89,22 @@ class WelcomeController extends Controller
 
         // ===== Sites with coordinates for map (no cache, always fresh) =====
         $sitesWithCoords = Site::query()
-            ->select(['id', 'code', 'name', 'latitude', 'longitude'])
+            ->select(['id', 'code', 'name', 'latitude', 'longitude', 'address'])
             ->whereNotNull('latitude')
             ->whereNotNull('longitude')
             ->get()
             ->map(function ($s) {
+                $name = $s->name ?: ($s->code ?: 'Tanpa Nama');
+                $seed = $s->code ?: $name ?: (string) $s->id;
                 return [
                     'id' => $s->id,
                     'code' => $s->code,
-                    'name' => $s->name,
+                    'name' => $name,
+                    'param' => $s->code ?? $s->id ?? $name,
+                    'dot' => $this->colorFromString($seed),
                     'latitude' => (float) $s->latitude,
                     'longitude' => (float) $s->longitude,
+                    'address' => $s->address,
                 ];
             });
 

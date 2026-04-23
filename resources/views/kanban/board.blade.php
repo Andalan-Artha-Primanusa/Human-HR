@@ -127,6 +127,7 @@
 }
 .fb-hr   { background: #e8f0fe; color: #1a56db; }
 .fb-user { background: #e6f4ea; color: #256629; }
+.fb-employee { background: #fdeaea; color: #9b2525; }
 .fb-tr   { background: #fef3e2; color: #92580b; }
 .fb-label { font-size: .65rem; font-weight: 700; color: #9a7558; text-transform: uppercase; letter-spacing: .3px; }
 .fb-note  { font-size: .78rem; color: #3d1f08; margin-top: .15rem; line-height: 1.4; }
@@ -208,14 +209,13 @@ textarea.fm-ctrl { resize: vertical; min-height: 68px; }
     'screening'       => 'Screening CV',
     'psychotest'      => 'Psikotest',
     'hr_iv'           => 'HR Interview',
-    'user_iv'         => 'User Interview',
-    'user_trainer_iv' => 'User/Trainer IV',
+    'user_trainer_iv' => 'User & Trainer Interview',
     'offer'           => 'OL',
     'mcu'             => 'MCU',
     'mobilisasi'      => 'Mobilisasi',
     'ground_test'     => 'Ground Test',
     'hired'           => 'Hired',
-    'not_qualified'   => 'Not Lolos',
+    'not_qualified'   => 'TIDAK lOLOS',
   ];
 
   $authUser   = auth()->user();
@@ -225,17 +225,15 @@ textarea.fm-ctrl { resize: vertical; min-height: 68px; }
   $isTrainer  = $authRole === 'trainer';
 
   // Stage-stage yg tampilkan form feedback langsung di kartu
-  $feedbackStages = ['hr_iv', 'user_iv', 'user_trainer_iv'];
+  $feedbackStages = ['hr_iv', 'user_trainer_iv'];
 @endphp
 
 {{-- HEADER --}}
 <div class="kn-header">
-  <h1>Kanban Kandidat Saya</h1>
+  <h1>Kanban proses saya</h1>
   <p>
-    @if($isKaryawan)
-      Isi feedback di stage <strong>User Interview</strong> untuk melanjutkan kandidat.
-    @elseif($isTrainer)
-      Isi feedback di stage <strong>User/Trainer Interview</strong> untuk melanjutkan kandidat.
+    @if($isKaryawan || $isTrainer)
+      Isi feedback di stage <strong>User & Trainer Interview</strong> untuk melanjutkan kandidat.
     @else
       Lihat progres lamaran kamu di setiap stage rekrutmen.
     @endif
@@ -258,15 +256,16 @@ textarea.fm-ctrl { resize: vertical; min-height: 68px; }
 
           @forelse($items as $a)
             @php
-              $fbHR      = $a->feedbacks->where('role','hr')->sortByDesc('created_at')->first();
-              $fbUser    = $a->feedbacks->whereIn('role',['karyawan','pelamar'])->sortByDesc('created_at')->first();
-              $fbTrainer = $a->feedbacks->where('role','trainer')->sortByDesc('created_at')->first();
+              $fbHR       = $a->feedbacks->where('role','hr')->sortByDesc('created_at')->first();
+              $fbUser     = $a->feedbacks->where('role','karyawan')->sortByDesc('created_at')->first();
+              $fbTrainer  = $a->feedbacks->where('role','trainer')->sortByDesc('created_at')->first();
+              $fbEmployee = $a->feedbacks->where('role','pelamar')->sortByDesc('created_at')->first();
 
               // Apakah user ini yang sedang login adalah si pelamar
               $isOwner = (string)$authUser->id === (string)$a->user_id;
 
-              // Karyawan boleh isi feedback di user_iv HANYA jika belum ada feedback user
-              $canKaryawanFeedback = $isKaryawan && $stageKey === 'user_iv' && !$fbUser;
+              // Karyawan boleh isi feedback di user_trainer_iv HANYA jika belum ada feedback user
+              $canKaryawanFeedback = $isKaryawan && $stageKey === 'user_trainer_iv' && !$fbUser;
 
               // Trainer boleh isi feedback di user_trainer_iv HANYA jika belum ada feedback trainer
               $canTrainerFeedback  = $isTrainer && $stageKey === 'user_trainer_iv' && !$fbTrainer;
@@ -289,7 +288,7 @@ textarea.fm-ctrl { resize: vertical; min-height: 68px; }
               @if($a->overall_status === 'hired')
                 <span class="kn-pill pill-hired">✓ Hired</span>
               @elseif($a->overall_status === 'not_qualified')
-                <span class="kn-pill pill-nq">✕ Not Lolos</span>
+                <span class="kn-pill pill-nq">✕ TIDAK lOLOS</span>
               @else
                 <span class="kn-pill pill-active">● Active</span>
               @endif
@@ -317,11 +316,25 @@ textarea.fm-ctrl { resize: vertical; min-height: 68px; }
                     <div class="fb-chip">
                       <div class="fb-icon fb-user">US</div>
                       <div style="flex:1">
-                        <div class="fb-label">Feedback Karyawan</div>
+                        <div class="fb-label">Feedback User</div>
                         <div class="fb-note">{{ $fbUser->feedback }}</div>
                         @if($fbUser->approve === 'yes')
                           <span class="fb-badge fb-yes">✓ Setuju</span>
                         @elseif($fbUser->approve === 'no')
+                          <span class="fb-badge fb-no">✕ Tidak Setuju</span>
+                        @endif
+                      </div>
+                    </div>
+                  @endif
+                  @if($fbEmployee)
+                    <div class="fb-chip">
+                      <div class="fb-icon fb-employee">PL</div>
+                      <div style="flex:1">
+                        <div class="fb-label">Feedback Pelamar</div>
+                        <div class="fb-note">{{ $fbEmployee->feedback }}</div>
+                        @if($fbEmployee->approve === 'yes')
+                          <span class="fb-badge fb-yes">✓ Setuju</span>
+                        @elseif($fbEmployee->approve === 'no')
                           <span class="fb-badge fb-no">✕ Tidak Setuju</span>
                         @endif
                       </div>
@@ -345,7 +358,7 @@ textarea.fm-ctrl { resize: vertical; min-height: 68px; }
               @endif
 
               {{-- ====================================================
-                   FORM FEEDBACK KARYAWAN (user_iv, jika belum diisi)
+                   FORM FEEDBACK KARYAWAN (user_trainer_iv, jika belum diisi)
                    ==================================================== --}}
               @if($canKaryawanFeedback)
                 <form method="POST"
@@ -354,7 +367,7 @@ textarea.fm-ctrl { resize: vertical; min-height: 68px; }
                   @csrf
                   <input type="hidden" name="to" value="user_trainer_iv">
                   <div>
-                    <label class="fm-label">Feedback Karyawan</label>
+                    <label class="fm-label">Feedback User</label>
                     <textarea name="feedback_user" class="fm-ctrl" required
                               placeholder="Tulis penilaian kandidat..."></textarea>
                   </div>
@@ -404,14 +417,14 @@ textarea.fm-ctrl { resize: vertical; min-height: 68px; }
                    RIWAYAT STAGE (klik buka modal)
                    ==================================================== --}}
               @php
-                $stageHistory = $a->stages->whereIn('stage_key', ['hr_iv','user_iv','user_trainer_iv'])->values();
+                $stageHistory = $a->stages->whereIn('stage_key', ['hr_iv','user_trainer_iv'])->values();
               @endphp
 
               {{-- ACTIONS --}}
               <div class="kn-card-actions">
                 @if($stageHistory->count())
                   <button type="button" class="btn-xs btn-outline"
-                    onclick="openRiwayat({{ $stageHistory->map(fn($s) => ['stage'=>$s->stage_key,'notes'=>$s->notes,'actor'=>optional($s->actor)->name ?? 'System','created_at'=>$s->created_at?->format('d M Y H:i')])->toJson() }})">
+                    onclick="openRiwayat({{ $stageHistory->map(fn($s) => ['stage'=>$s->stage_key,'notes'=>($authRole === 'pelamar' ? '' : $s->notes),'actor'=>optional($s->actor)->name ?? 'System','created_at'=>$s->created_at?->format('d M Y H:i')])->toJson() }})">
                     Riwayat Interview
                   </button>
                 @endif
@@ -490,10 +503,32 @@ textarea.fm-ctrl { resize: vertical; min-height: 68px; }
 <script>
 const stageLabels = {
   applied:'Applied', screening:'Screening CV', psychotest:'Psikotest',
-  hr_iv:'HR Interview', user_iv:'User Interview', user_trainer_iv:'User/Trainer IV',
+  hr_iv:'HR Interview', user_trainer_iv:'User & Trainer Interview',
   offer:'OL', mcu:'MCU', mobilisasi:'Mobilisasi', ground_test:'Ground Test',
-  hired:'Hired', not_qualified:'Not Lolos'
+  hired:'Hired', not_qualified:'TIDAK lOLOS'
 };
+
+function roleLabel(r) { 
+  if(r === 'hr') return 'HR';
+  if(r === 'user' || r === 'karyawan') return 'User';
+  if(r === 'trainer') return 'Trainer';
+  if(r === 'pelamar' || r === 'employee') return 'Pelamar';
+  return r;
+}
+function roleIcon(r) { 
+  if(r === 'hr') return 'HR';
+  if(r === 'user' || r === 'karyawan') return 'US';
+  if(r === 'trainer') return 'TR';
+  if(r === 'pelamar' || r === 'employee') return 'PL';
+  return '??';
+}
+function roleCls(r) { 
+  if(r === 'hr') return 'fb-hr';
+  if(r === 'user' || r === 'karyawan') return 'fb-user';
+  if(r === 'trainer') return 'fb-tr';
+  if(r === 'pelamar' || r === 'employee') return 'fb-employee';
+  return '';
+}
 
 function openRiwayat(data) {
   const body = document.getElementById('riwayat-body');

@@ -27,7 +27,7 @@
 
       {{-- FORM (tanpa nested form) --}}
       <section class="bg-white border shadow-sm rounded-2xl" style="border-color: {{ $BORD }}">
-        <form method="POST" action="{{ route('admin.companies.update', $record) }}" class="p-6 space-y-6 md:p-7 bg-[linear-gradient(180deg,_#faf7f4,_#ffffff)]">
+        <form method="POST" action="{{ route('admin.companies.update', $record) }}" enctype="multipart/form-data" class="p-6 space-y-6 md:p-7 bg-[linear-gradient(180deg,_#faf7f4,_#ffffff)]">
           @csrf
           @method('PUT')
 
@@ -86,13 +86,18 @@
               @error('website')<div class="mt-1 text-sm text-rose-600">{{ $message }}</div>@enderror
             </div>
 
-            {{-- Logo Path --}}
+            {{-- Logo Upload --}}
             <div>
-              <label class="block text-sm font-medium text-slate-700">Logo Path</label>
-              <input name="logo_path" value="{{ old('logo_path', $record->logo_path) }}"
+              <label class="block text-sm font-medium text-slate-700">Logo Perusahaan</label>
+              <input type="file" name="logo" accept="image/*"
                      class="w-full px-3 py-2 mt-1 text-sm border rounded-lg border-slate-200 focus:outline-none focus:ring-2"
-                     style="--tw-ring-color: {{ $ACCENT }}" placeholder="storage/logos/acme.png">
-              @error('logo_path')<div class="mt-1 text-sm text-rose-600">{{ $message }}</div>@enderror
+                     style="--tw-ring-color: {{ $ACCENT }}">
+              @if ($record->logo_path)
+                <div class="mt-2">
+                  <img src="{{ asset($record->logo_path) }}" alt="Logo" class="h-16 rounded shadow border">
+                </div>
+              @endif
+              @error('logo')<div class="mt-1 text-sm text-rose-600">{{ $message }}</div>@enderror
             </div>
 
             {{-- Address --}}

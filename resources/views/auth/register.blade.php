@@ -75,10 +75,16 @@
               class="w-full mt-1 px-3 py-2 rounded-lg bg-[#f3e7d9] text-gray-800 border border-[#a77d52]/30 focus:ring-2 focus:ring-[#a77d52] focus:outline-none">
           </div>
 
+
           <div class="flex items-start gap-2 text-xs text-gray-600">
-            <input type="checkbox" class="mt-1 rounded">
-            <label>Saya menyetujui Ketentuan & Privasi</label>
+            <input type="checkbox" name="agree" id="agree" class="mt-1 rounded" value="1" {{ old('agree') ? 'checked' : '' }} required>
+            <label for="agree">
+              Saya menyetujui <a href="/terms" target="_blank" class="underline">Ketentuan & Privasi</a>
+            </label>
           </div>
+          @error('agree')
+            <div class="text-xs text-red-600">{{ $message }}</div>
+          @enderror
 
           <button type="submit"
             class="w-full bg-[#a77d52] text-white py-2 rounded-lg font-semibold hover:opacity-90 transition">

@@ -339,14 +339,14 @@
             </h2>
             <button type="button" class="rounded-xl border border-brand-200 px-3 py-1.5 text-sm text-brand-800 hover:bg-brand-50" @click="items.push({title:'',institution:'',period_start:'',period_end:''})">+ Tambah</button>
           </div>
-          <p class="mt-1 text-xs text-slate-500">Minimal 1 pelatihan diisi.</p>
+          <p class="mt-1 text-xs text-slate-500">Opsional.</p>
           <template x-for="(it,idx) in items" :key="idx">
             <div class="grid gap-3 p-3 mt-4 border rounded-xl">
-              <input class="px-3 py-2 border rounded-lg" :name="`trainings[${idx}][title]`" x-model="it.title" placeholder="Nama Training/Sertifikasi *" required>
+              <input class="px-3 py-2 border rounded-lg" :name="`trainings[${idx}][title]`" x-model="it.title" placeholder="Nama Training/Sertifikasi">
               <div class="grid gap-3 sm:grid-cols-2">
-                <input class="px-3 py-2 border rounded-lg" :name="`trainings[${idx}][institution]`" x-model="it.institution" placeholder="Institusi/Penyelenggara *" required>
+                <input class="px-3 py-2 border rounded-lg" :name="`trainings[${idx}][institution]`" x-model="it.institution" placeholder="Institusi/Penyelenggara">
                 <div class="grid gap-3 sm:grid-cols-2">
-                  <input type="date" class="px-3 py-2 border rounded-lg" :name="`trainings[${idx}][period_start]`" x-model="it.period_start" required>
+                  <input type="date" class="px-3 py-2 border rounded-lg" :name="`trainings[${idx}][period_start]`" x-model="it.period_start">
                   <input type="date" class="px-3 py-2 border rounded-lg" :name="`trainings[${idx}][period_end]`"   x-model="it.period_end">
                 </div>
               </div>
@@ -532,8 +532,8 @@
               @endif
             </div>
             <div>
-              <label class="text-sm text-slate-600">Dokumen pendukung (bisa pilih banyak)</label>
-              <input type="file" name="documents[]" multiple class="w-full px-3 py-2 mt-1 border rounded-lg">
+              <label class="text-sm text-slate-600">Dokumen pendukung (PDF only, bisa pilih banyak)</label>
+              <input type="file" name="documents[]" multiple accept="application/pdf" class="w-full px-3 py-2 mt-1 border rounded-lg">
               @if(is_array($profile->documents) && count($profile->documents))
                 <ul class="pl-5 mt-1 text-xs list-disc">
                   @foreach($profile->documents as $d)
@@ -738,9 +738,8 @@
         if(s===2){
           const T = Alpine.store('form').trainings || [];
           const E = Alpine.store('form').employments || [];
-          if(T.length<1) this.errors.push('Minimal 1 pelatihan/sertifikasi');
           if(E.length<1) this.errors.push('Minimal 1 riwayat pekerjaan');
-          T.forEach((r,i)=>{ if(!r.title?.trim()) this.errors.push(`Pelatihan #${i+1}: Nama`); if(!r.institution?.trim()) this.errors.push(`Pelatihan #${i+1}: Institusi`); if(!r.period_start?.trim()) this.errors.push(`Pelatihan #${i+1}: Tanggal Mulai`); });
+          T.forEach((r,i)=>{ if(r.title?.trim() || r.institution?.trim() || r.period_start?.trim()){ if(!r.title?.trim()) this.errors.push(`Pelatihan #${i+1}: Nama`); if(!r.institution?.trim()) this.errors.push(`Pelatihan #${i+1}: Institusi`); if(!r.period_start?.trim()) this.errors.push(`Pelatihan #${i+1}: Tanggal Mulai`); } });
           E.forEach((r,i)=>{ if(!r.company?.trim()) this.errors.push(`Pekerjaan #${i+1}: Perusahaan`); if(!r.position_start?.trim()) this.errors.push(`Pekerjaan #${i+1}: Jabatan Awal`); if(!r.period_start?.trim()) this.errors.push(`Pekerjaan #${i+1}: Tanggal Mulai`); });
         }
         if(s===3){

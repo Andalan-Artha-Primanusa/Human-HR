@@ -83,7 +83,13 @@ class CompanyController extends Controller
     public function store(StoreCompanyRequest $request): RedirectResponse
     {
         DB::transaction(function () use ($request) {
-            Company::create($request->validated());
+            $data = $request->validated();
+            if ($request->hasFile('logo')) {
+                $file = $request->file('logo');
+                $path = $file->store('logos', 'public');
+                $data['logo_path'] = 'storage/' . $path;
+            }
+            Company::create($data);
         });
 
         return redirect()
@@ -107,7 +113,13 @@ class CompanyController extends Controller
     public function update(UpdateCompanyRequest $request, Company $company): RedirectResponse
     {
         DB::transaction(function () use ($request, $company) {
-            $company->update($request->validated());
+            $data = $request->validated();
+            if ($request->hasFile('logo')) {
+                $file = $request->file('logo');
+                $path = $file->store('logos', 'public');
+                $data['logo_path'] = 'storage/' . $path;
+            }
+            $company->update($data);
         });
 
         return redirect()

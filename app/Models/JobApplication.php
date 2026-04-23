@@ -13,7 +13,18 @@ class JobApplication extends Model
 {
     use HasFactory, HasUuidPrimaryKey;
 
-    protected $fillable = ['job_id', 'user_id', 'poh_id', 'current_stage', 'overall_status', 'feedback_hr', 'approve_hr'];
+    protected $fillable = [
+        'job_id', 'user_id', 'poh_id', 'current_stage', 'overall_status', 
+        'feedback_hr', 'approve_hr', 
+        'feedback_trainer', 'approve_trainer', 
+        'feedback_user', 'approve_user', 
+        'feedback_employee', 'approve_employee',
+        'mcu_meta'
+    ];
+
+    protected $casts = [
+        'mcu_meta' => 'array'
+    ];
 
     public function feedbacks()
     {

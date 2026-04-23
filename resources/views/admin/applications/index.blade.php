@@ -60,7 +60,7 @@
             'mobilisasi' => 'Mobilisasi',
             'ground_test' => 'Ground Test',
             'hired' => 'Hired',
-            'not_qualified' => 'Not Lolos',
+            'not_qualified' => 'TIDAK lOLOS',
         ];
 
         // === Options filter stage

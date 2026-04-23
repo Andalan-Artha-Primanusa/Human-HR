@@ -8,6 +8,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\OfferLetterMail;
+use App\Models\Poh;
+use App\Models\Site;
 
 class OfferController extends Controller
 {
@@ -37,14 +41,86 @@ class OfferController extends Controller
                 'gross' => (float) $data['gross_salary'],
                 'allowance' => isset($data['allowance']) ? (float) $data['allowance'] : 0,
             ],
-            'body_template' => $data['html'] ?? null,
+            'body_template' => $data['html'] ?? $data['notes'] ?? null,
             'meta' => $data['meta'] ?? [],
         ]);
 
         // opsional: ubah stage ke 'offer'
         $application->update(['current_stage' => 'offer']);
 
+        if ($application->user && $application->user->email) {
+            try {
+                $mail = new OfferLetterMail($offer);
+                $mail->bodyContent = $data['html'] ?? $data['notes'] ?? "Terlampir adalah dokumen Offering Letter Anda.";
+                Mail::to($application->user->email)->send($mail);
+            } catch (\Exception $e) {
+                \Log::error('Failed to send OfferLetterMail: ' . $e->getMessage());
+            }
+        }
+
         return redirect()->route('admin.applications.index')->with('ok', 'Draft offer dibuat.');
+    }
+
+    /**
+     * Update existing offer
+     */
+    public function update(Request $request, Offer $offer)
+    {
+        $this->ensureAdmin($request);
+
+        $data = $request->validate([
+            'gross' => 'required|numeric|min:0',
+            'allowance' => 'required|numeric|min:0',
+            'body' => 'required|string',
+            'status' => ['nullable', Rule::in(['draft', 'sent', 'accepted', 'rejected'])],
+            
+            // Meta fields
+            'doc_no'          => 'nullable|string',
+            'grade_level'     => 'nullable|string',
+            'poh'             => 'nullable|string',
+            'lokasi'          => 'nullable|string',
+            'contract_status' => 'nullable|string',
+            'join_date'       => 'nullable|date',
+            'working_hours'   => 'nullable|string',
+            'working_schedule'=> 'nullable|string',
+            'meals_allowance' => 'nullable|string',
+            'overtime'        => 'nullable|string',
+            'tax_borne_by'    => 'nullable|string',
+            'deductions'      => 'nullable|string',
+            'signer_name'     => 'nullable|string',
+            'signer_title'    => 'nullable|string',
+            'company'         => 'nullable|string',
+            'footer_code'     => 'nullable|string',
+            'footer_version'  => 'nullable|string',
+            'footer_page_text'=> 'nullable|string',
+        ]);
+
+        $meta = $offer->meta ?? [];
+        $metaFields = [
+            'doc_no', 'grade_level', 'poh', 'lokasi', 'contract_status', 
+            'join_date', 'working_hours', 'working_schedule', 
+            'meals_allowance', 'overtime', 'tax_borne_by', 'deductions',
+            'signer_name', 'signer_title', 'company', 'footer_code', 'footer_version',
+            'footer_page_text'
+        ];
+
+        foreach ($metaFields as $f) {
+            if ($request->has($f)) {
+                $meta[$f] = $data[$f];
+            }
+        }
+
+        $offer->update([
+            'salary' => [
+                'gross' => (float) $data['gross'],
+                'allowance' => (float) $data['allowance'],
+            ],
+            'body_template' => $data['body'],
+            'status' => $data['status'] ?? $offer->status,
+            'meta' => $meta,
+        ]);
+
+        return back()->with('ok', 'Offer berhasil diperbarui.');
     }
 
     /**
@@ -134,8 +210,10 @@ HTML;
             ->select(['id', 'application_id', 'status', 'salary', 'created_at'])
             ->with([
                 'application.user:id,name',
-                'application.job:id,title,site_id',
+                'application.job:id,title,site_id,company_id,level',
                 'application.job.site:id,code,name',
+                'application.job.company:id,name',
+                'application.poh:id,name',
             ])
             ->when($like !== null, function ($qq) use ($like) {
                 $qq->where(function ($w) use ($like) {
@@ -148,6 +226,9 @@ HTML;
             ->paginate(15)
             ->withQueryString();
 
-        return view('admin.offers.index', compact('offers', 'q', 'status'));
+        $pohs = Poh::all(['id', 'name']);
+        $sites = Site::all(['id', 'code', 'name']);
+
+        return view('admin.offers.index', compact('offers', 'q', 'status', 'pohs', 'sites'));
     }
 }

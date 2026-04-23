@@ -28,7 +28,9 @@ class MyInterviewController extends Controller
                 'application.job.site:id,code,name',
             ])
             ->whereKey($id)
-            ->whereRelation('application', 'user_id', $u->id)
+            ->when(!in_array($u->role, ['karyawan', 'trainer', 'admin', 'hr', 'superadmin']), function ($q) use ($u) {
+                $q->whereRelation('application', 'user_id', $u->id);
+            })
             ->firstOrFail();
     }
 

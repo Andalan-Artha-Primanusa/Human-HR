@@ -6,6 +6,7 @@ use App\Models\Job;
 use App\Models\User;
 use App\Models\Offer;
 use App\Models\JobApplication;
+use App\Models\McuTemplate;
 use App\Models\ApplicationStage;
 use App\Models\ApplicationFeedback;
 use App\Models\PsychotestAttempt;
@@ -18,7 +19,12 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Support\Carbon;
+use App\Models\Poh;
+use App\Models\Site;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\OfferLetterMail;
+use App\Mail\McuMail;
 
 class ApplicationController extends Controller
 {
@@ -31,7 +37,6 @@ class ApplicationController extends Controller
         'screening',
         'psychotest',
         'hr_iv',
-        'user_iv',
         'user_trainer_iv',
         'offer',
         'mcu',
@@ -85,8 +90,7 @@ class ApplicationController extends Controller
         'screening'       => 'Screening CV/Berkas Lamaran',
         'psychotest'      => 'Psikotest',
         'hr_iv'           => 'HR Interview',
-        'user_iv'         => 'User Interview',
-        'user_trainer_iv' => 'User/Trainer Interview',
+        'user_trainer_iv' => 'User & Trainer Interview',
         'offer'           => 'OL',
         'mcu'             => 'MCU',
         'mobilisasi'      => 'Mobilisasi',
@@ -126,6 +130,7 @@ class ApplicationController extends Controller
             'job.site:id,code,name',
             'stages.actor:id,name',
             'stages.user:id,name',
+            'interviews',
         ])
             ->where('user_id', $request->user()->id)
             ->orderByDesc('created_at')
@@ -237,7 +242,9 @@ class ApplicationController extends Controller
             'user:id,name,role',
             'stages.actor:id,name',
             'stages.user:id,name',
-            'feedbacks',                   // load semua feedback sekaligus
+            'feedbacks',
+            'interviews',
+            'offer',
         ]);
 
         if (!in_array($user->role, ['admin', 'hr', 'superadmin'])) {
@@ -268,11 +275,16 @@ class ApplicationController extends Controller
         $grouped = collect($stages)->mapWithKeys(fn($s) => [$s => collect()]);
         foreach ($apps as $a) {
             $key = $this->normalizeStage($a->current_stage) ?: 'applied';
+            if ($key === 'user_iv') $key = 'user_trainer_iv';
             if (!in_array($key, $stages, true)) $key = 'applied';
             $grouped[$key]->push($a);
         }
 
-        return view('admin.applications.board', compact('stages', 'grouped'));
+        $pohs = Poh::all(['id', 'name']);
+        $sites = Site::all(['id', 'code', 'name']);
+        $mcuTemplate = McuTemplate::where('is_active', true)->first() ?: McuTemplate::first();
+
+        return view('admin.applications.board', compact('stages', 'grouped', 'pohs', 'sites', 'mcuTemplate'));
     }
 
     /**
@@ -318,7 +330,11 @@ class ApplicationController extends Controller
                     $app->feedback_hr  = $validated['feedback'];
                     $app->approve_hr   = $validated['approve'];
                     $app->save();
-                } elseif (in_array($validated['role'], ['karyawan', 'pelamar'])) {
+                } elseif ($validated['role'] === 'pelamar') {
+                    $app->feedback_employee  = $validated['feedback'];
+                    $app->approve_employee   = $validated['approve'];
+                    $app->save();
+                } elseif ($validated['role'] === 'karyawan') {
                     $app->feedback_user  = $validated['feedback'];
                     $app->approve_user   = $validated['approve'];
                     $app->save();
@@ -336,6 +352,45 @@ class ApplicationController extends Controller
             'ok'       => true,
             'feedback' => $feedback->only(['id', 'role', 'feedback', 'approve']),
         ]);
+    }
+
+    public function deleteFeedback(Request $request)
+    {
+        $validated = $request->validate([
+            'application_id' => ['required', 'uuid', 'exists:job_applications,id'],
+            'role'           => ['required', 'in:hr,karyawan,trainer,pelamar'],
+        ]);
+
+        $actor = auth()->user();
+        if ($validated['role'] === 'hr' && !in_array($actor->role, ['admin', 'hr', 'superadmin'])) {
+            abort(403, 'Hanya HR, Admin, atau Superadmin yang dapat menghapus feedback HR.');
+        }
+
+        DB::transaction(function () use ($validated) {
+            ApplicationFeedback::where('application_id', $validated['application_id'])
+                ->where('role', $validated['role'])
+                ->delete();
+
+            $app = JobApplication::find($validated['application_id']);
+            if ($app) {
+                if ($validated['role'] === 'hr') {
+                    $app->feedback_hr  = null;
+                    $app->approve_hr   = null;
+                } elseif ($validated['role'] === 'pelamar') {
+                    $app->feedback_employee  = null;
+                    $app->approve_employee   = null;
+                } elseif ($validated['role'] === 'karyawan') {
+                    $app->feedback_user  = null;
+                    $app->approve_user   = null;
+                } elseif ($validated['role'] === 'trainer') {
+                    $app->feedback_trainer  = null;
+                    $app->approve_trainer   = null;
+                }
+                $app->save();
+            }
+        });
+
+        return response()->json(['ok' => true]);
     }
 
     /**
@@ -531,7 +586,7 @@ class ApplicationController extends Controller
             && auth()->user()?->role === 'karyawan'
         ) {
             if (empty($validated['feedback_user']) || ($validated['approve_user'] ?? null) === null) {
-                abort(422, 'Karyawan wajib mengisi feedback dan setuju/tidak setuju sebelum lanjut.');
+                abort(422, 'User wajib mengisi feedback dan setuju/tidak setuju sebelum lanjut.');
             }
         }
 
@@ -601,6 +656,75 @@ class ApplicationController extends Controller
                 );
             }
 
+            // Simpan feedback Pelamar (Employee)
+            if (
+                $actorUser?->role === 'pelamar'
+                && (request('feedback_user') !== null || request('approve_user') !== null)
+            ) {
+                $application->feedback_employee = request('feedback_user');
+                $application->approve_employee  = request('approve_user');
+                $application->save();
+
+                ApplicationFeedback::firstOrCreate(
+                    [
+                        'application_id' => $application->id,
+                        'stage_key'      => $from,
+                        'role'           => 'pelamar',
+                        'user_id'        => $userId,
+                    ],
+                    [
+                        'feedback' => request('feedback_user'),
+                        'approve'  => request('approve_user'),
+                    ]
+                );
+            }
+
+            // Simpan feedback Karyawan (User)
+            if (
+                $actorUser?->role === 'karyawan'
+                && (request('feedback_user') !== null || request('approve_user') !== null)
+            ) {
+                $application->feedback_user = request('feedback_user');
+                $application->approve_user  = request('approve_user');
+                $application->save();
+
+                ApplicationFeedback::firstOrCreate(
+                    [
+                        'application_id' => $application->id,
+                        'stage_key'      => $from,
+                        'role'           => 'karyawan',
+                        'user_id'        => $userId,
+                    ],
+                    [
+                        'feedback' => request('feedback_user'),
+                        'approve'  => request('approve_user'),
+                    ]
+                );
+            }
+
+            // Simpan feedback Trainer
+            if (
+                $actorUser?->role === 'trainer'
+                && (request('feedback_trainer') !== null || request('approve_trainer') !== null)
+            ) {
+                $application->feedback_trainer = request('feedback_trainer');
+                $application->approve_trainer  = request('approve_trainer');
+                $application->save();
+
+                ApplicationFeedback::firstOrCreate(
+                    [
+                        'application_id' => $application->id,
+                        'stage_key'      => $from,
+                        'role'           => 'trainer',
+                        'user_id'        => $userId,
+                    ],
+                    [
+                        'feedback' => request('feedback_trainer'),
+                        'approve'  => request('approve_trainer'),
+                    ]
+                );
+            }
+
             // Update stage
             $application->update(['current_stage' => $to]);
 
@@ -621,9 +745,13 @@ class ApplicationController extends Controller
                             'site_code' => $job?->site?->code,
                         ],
                     ]);
+                    // Email dikirim secara manual melalui tombol di Kanban
                 }
                 $this->offerJustCreated = $existing;
             }
+
+            // MCU Notifikasi
+            // Email MCU dikirim secara manual melalui tombol di Kanban
 
             // Overall status & headcount
             if ($to === 'hired') {
@@ -822,5 +950,150 @@ class ApplicationController extends Controller
 
         $nextSeq = str_pad((string) ($maxSeq + 1), 5, '0', STR_PAD_LEFT);
         return "{$company3}{$site2}{$yy}{$mm}{$nextSeq}";
+    }
+
+    /**
+     * Send Offer Email with customizable body and salary.
+     */
+    public function sendOfferEmail(Request $request, JobApplication $application)
+    {
+        \Log::info("sendOfferEmail started for app: {$application->id}");
+        abort_unless(in_array($request->user()?->role, ['admin', 'hr', 'superadmin']), 403);
+
+        try {
+            $data = $request->validate([
+                'gross' => 'required|numeric|min:0',
+                'allowance' => 'required|numeric|min:0',
+                'email_body' => 'required|string',
+                'doc_no'          => 'nullable|string',
+                'grade_level'     => 'nullable|string',
+                'poh'             => 'nullable|string',
+                'lokasi'          => 'nullable|string',
+                'contract_status' => 'nullable|string',
+                'join_date'       => 'nullable', 
+                'working_hours'   => 'nullable|string',
+                'working_schedule'=> 'nullable|string',
+                'meals_allowance' => 'nullable|string',
+                'overtime'        => 'nullable|string',
+                'tax_borne_by'    => 'nullable|string',
+                'deductions'      => 'nullable|string',
+                'signer_name'     => 'nullable|string',
+                'signer_title'    => 'nullable|string',
+                'company'         => 'nullable|string',
+                'footer_code'     => 'nullable|string',
+                'footer_version'  => 'nullable|string',
+                'footer_page_text'=> 'nullable|string',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            \Log::error("Validation failed for sendOfferEmail: " . json_encode($e->errors()));
+            throw $e;
+        }
+
+        \Log::info("Validation passed for app: {$application->id}");
+
+        $offer = $application->offer()->first();
+        $meta = $offer ? ($offer->meta ?? []) : [];
+        $metaFields = [
+            'doc_no', 'grade_level', 'poh', 'lokasi', 'contract_status', 
+            'join_date', 'working_hours', 'working_schedule', 
+            'meals_allowance', 'overtime', 'tax_borne_by', 'deductions',
+            'signer_name', 'signer_title', 'company', 'footer_code', 'footer_version',
+            'footer_page_text'
+        ];
+        foreach ($metaFields as $f) {
+            if ($request->has($f)) {
+                $meta[$f] = $data[$f];
+            }
+        }
+
+        if ($offer) {
+            $offer->update([
+                'salary' => ['gross' => (float)$data['gross'], 'allowance' => (float)$data['allowance']],
+                'body_template' => $data['email_body'],
+                'meta' => $meta,
+                'status' => 'sent',
+            ]);
+        } else {
+            $offer = $application->offer()->create([
+                'status' => 'sent',
+                'salary' => ['gross' => (float)$data['gross'], 'allowance' => (float)$data['allowance']],
+                'body_template' => $data['email_body'],
+                'meta' => $meta,
+            ]);
+        }
+
+        if ($application->user && $application->user->email) {
+            \Log::info("Target email: " . $application->user->email);
+            try {
+                $mail = new OfferLetterMail($offer);
+                $mail->bodyContent = $data['email_body'];
+                Mail::to($application->user->email)->send($mail);
+                \Log::info("Mail sent successfully for app: {$application->id}");
+                return back()->with('ok', 'Email Offer Letter berhasil dikirim.');
+            } catch (\Exception $e) {
+                \Log::error('Failed to send OfferLetterMail: ' . $e->getMessage());
+                return back()->with('error', 'Gagal mengirim email: ' . $e->getMessage());
+            }
+        }
+        return back()->with('error', 'Kandidat tidak memiliki email valid.');
+    }
+
+    /**
+     * Send MCU Email with customizable body and document metadata.
+     */
+    public function sendMcuEmail(Request $request, JobApplication $application)
+    {
+        \Log::info("sendMcuEmail started for app: {$application->id}");
+        abort_unless(in_array($request->user()?->role, ['admin', 'hr', 'superadmin']), 403);
+
+        try {
+            $data = $request->validate([
+                'email_body'          => 'required|string',
+                'doc_no'              => 'nullable|string',
+                'company_name'        => 'nullable|string',
+                'city'                => 'nullable|string',
+                'project_name'        => 'nullable|string',
+                'clinic_name'         => 'required|string',
+                'clinic_address'      => 'required|string',
+                'clinic_city'         => 'nullable|string',
+                'mcu_date'            => 'required|date',
+                'mcu_time'            => 'required|string',
+                'for_text'            => 'nullable|string',
+                'bu_name'             => 'nullable|string',
+                'matrix_owner'        => 'nullable|string',
+                'package'             => 'nullable|string',
+                'notes'               => 'nullable|string',
+                'result_emails'       => 'nullable|string',
+                'signer_name'         => 'nullable|string',
+                'signer_title'        => 'nullable|string',
+                'footer_company_name' => 'nullable|string',
+                'footer_address'      => 'nullable|string',
+                'footer_email'        => 'nullable|string',
+                'footer_website'      => 'nullable|string',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            \Log::error("Validation failed for sendMcuEmail: " . json_encode($e->errors()));
+            throw $e;
+        }
+
+        // Save metadata to application
+        $application->update([
+            'mcu_meta' => $data
+        ]);
+
+        if ($application->user && $application->user->email) {
+            \Log::info("Target MCU email: " . $application->user->email);
+            try {
+                $mail = new McuMail($application);
+                $mail->bodyContent = $data['email_body'];
+                \Mail::to($application->user->email)->send($mail);
+                \Log::info("MCU Mail sent successfully for app: {$application->id}");
+                return back()->with('ok', 'Undangan MCU berhasil dikirim.');
+            } catch (\Exception $e) {
+                \Log::error('Failed to send McuMail: ' . $e->getMessage());
+                return back()->with('error', 'Gagal mengirim email MCU: ' . $e->getMessage());
+            }
+        }
+        return back()->with('error', 'Kandidat tidak memiliki email valid.');
     }
 }

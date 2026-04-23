@@ -163,6 +163,7 @@ Route::prefix('admin')
 
         // ================= Manpower =================
         Route::resource('pohs', \App\Http\Controllers\Admin\PohController::class);
+        Route::resource('mcu-templates', \App\Http\Controllers\Admin\McuTemplateController::class);
 
         Route::get('manpower', [ManpowerRequirementController::class, 'index'])->name('manpower.index');
         Route::post('manpower/preview', [ManpowerRequirementController::class, 'preview'])->name('manpower.preview');
@@ -194,8 +195,11 @@ Route::prefix('admin')
             ->name('applications.board.move');
 
         // AJAX Simpan Feedback (dari modal Kanban — HR, Karyawan, Trainer)
-        Route::post('applications/feedback', [ApplicationController::class, 'storeFeedback'])
-            ->name('applications.feedback.store');
+        Route::post('applications/feedback', [ApplicationController::class, 'storeFeedback'])->name('applications.feedback.store');
+        Route::delete('applications/feedback', [ApplicationController::class, 'deleteFeedback'])->name('applications.feedback.delete');
+        
+        Route::post('applications/{application}/send-offer', [ApplicationController::class, 'sendOfferEmail'])->name('applications.send-offer');
+        Route::post('applications/{application}/send-mcu', [ApplicationController::class, 'sendMcuEmail'])->name('applications.send-mcu');
 
         // Move via form POST (tombol blade)
         Route::post('applications/{application}/move', [ApplicationController::class, 'moveStage'])
@@ -217,6 +221,8 @@ Route::prefix('admin')
         Route::get('offers', [OfferController::class, 'index'])->name('offers.index');
         Route::post('offers/{application}', [OfferController::class, 'store'])
             ->name('offers.store');
+        Route::patch('offers/{offer}', [OfferController::class, 'update'])
+            ->name('offers.update');
         Route::get('offers/{offer}/pdf', [OfferController::class, 'pdf'])
             ->name('offers.pdf');
 

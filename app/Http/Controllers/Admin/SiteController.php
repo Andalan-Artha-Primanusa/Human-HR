@@ -195,19 +195,20 @@ class SiteController extends Controller
         ]);
     }
 
-    protected function validatedUpdate(Request $request, Site $site): array
-    {
-        return $request->validate([
-            'code' => ['required', 'string', 'max:20', 'regex:/^[A-Za-z0-9._-]+$/', Rule::unique('sites', 'code')->ignore($site->id)],
-            'name' => ['required', 'string', 'max:150'],
-            'region' => ['nullable', 'string', 'max:100'],
-            'timezone' => ['nullable', 'string', 'max:64'],
-            'address' => ['nullable', 'string', 'max:255'],
-            'notes' => ['nullable', 'string'],
-            'meta' => ['nullable', 'array'],
-            // is_active tidak diterima di update standar
-        ], [
-            'code.regex' => 'Kode hanya boleh huruf, angka, titik, strip, dan underscore.',
-        ]);
-    }
+   protected function validatedUpdate(Request $request, Site $site): array
+{
+    return $request->validate([
+        'code' => ['required', 'string', 'max:20', 'regex:/^[A-Za-z0-9._-]+$/', Rule::unique('sites', 'code')->ignore($site->id)],
+        'name' => ['required', 'string', 'max:150'],
+        'region' => ['nullable', 'string', 'max:100'],
+        'timezone' => ['nullable', 'string', 'max:64'],
+        'address' => ['nullable', 'string', 'max:255'],
+        'notes' => ['nullable', 'string'],
+        'meta' => ['nullable', 'array'],
+
+        // ✅ TAMBAH INI
+        'latitude' => ['nullable', 'numeric'],
+        'longitude' => ['nullable', 'numeric'],
+    ]);
+}
 }

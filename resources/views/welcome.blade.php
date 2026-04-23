@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id" prefix="og: https://ogp.me/ns#">
 
 <head>
@@ -6,7 +6,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  {{-- ===== PRIMARY SEO â€” lebih deskriptif & keyword-rich ===== --}}
+  {{-- ===== PRIMARY SEO - lebih deskriptif & keyword-rich ===== --}}
   <title>@yield('title', 'karir-andalan')</title>
   <meta name="description" content="Temukan lowongan kerja terbaru di PT Andalan Artha Primanusa. Proses rekrutmen transparan, pantau status lamaran secara real-time, dan bergabunglah bersama tim profesional Andalan.">
   <meta name="keywords" content="lowongan kerja Andalan, karier PT Andalan, rekrutmen 2025, Human Careers, loker Jakarta, pekerjaan terbaru Andalan, loker terbuka">
@@ -17,7 +17,7 @@
   <link rel="canonical" href="{{ url()->current() }}">
 
   {{-- ===== OPEN GRAPH ===== --}}
-  <meta property="og:site_name" content="Human Careers â€” PT Andalan Artha Primanusa">
+  <meta property="og:site_name" content="Human Careers - PT Andalan Artha Primanusa">
   <meta property="og:locale" content="id_ID">
   <meta property="og:type" content="website">
   <meta property="og:title" content="Lowongan Kerja PT Andalan Artha Primanusa 2025 | Human Careers">
@@ -26,14 +26,14 @@
   <meta property="og:image" content="{{ asset('storage/media/og-careers.jpg') }}">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="Human Careers â€” Portal Karier Resmi PT Andalan Artha Primanusa">
+  <meta property="og:image:alt" content="Human Careers - Portal Karier Resmi PT Andalan Artha Primanusa">
 
   {{-- ===== TWITTER CARD ===== --}}
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Lowongan Kerja PT Andalan Artha Primanusa | Human Careers">
   <meta name="twitter:description" content="Lamar kerja cepat & pantau status real-time. Lowongan terverifikasi dari PT Andalan Artha Primanusa.">
   <meta name="twitter:image" content="{{ asset('storage/media/og-careers.jpg') }}">
-  <meta name="twitter:image:alt" content="Human Careers â€” Portal Karier Resmi PT Andalan">
+  <meta name="twitter:image:alt" content="Human Careers - Portal Karier Resmi PT Andalan">
 
   {{-- ===== DNS & FONT PRELOAD ===== --}}
   <link rel="dns-prefetch" href="//fonts.googleapis.com">
@@ -118,12 +118,12 @@
         ]
     ];
 
-    // 2. WebSite â€” SearchAction format EntryPoint yang benar
+    // 2. WebSite - SearchAction format EntryPoint yang benar
     $schema[] = [
         "@context" => "https://schema.org",
         "@type" => "WebSite",
         "@id" => url('/') . "#website",
-        "name" => "Human Careers â€” PT Andalan Artha Primanusa",
+        "name" => "Human Careers - PT Andalan Artha Primanusa",
         "url" => url('/'),
         "inLanguage" => "id-ID",
         "publisher" => ["@id" => url('/') . "#organization"],
@@ -213,7 +213,7 @@
         ];
     }
 
-    // 7. FAQPage â€” boost rich result di Google
+    // 7. FAQPage - boost rich result di Google
     $schema[] = [
         "@context" => "https://schema.org",
         "@type" => "FAQPage",
@@ -412,178 +412,158 @@
   {{-- ============================================================
        HEADER
   ============================================================ --}}
-  <header class="sticky top-0 z-50 border-b bg-white/95 backdrop-blur-sm" style="border-color: #f4f0eb">
-
-    {{-- Row utama --}}
-    <div class="flex items-center justify-between h-16 px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
-
-      {{-- Hamburger + Logo --}}
-      <div class="flex items-center gap-2">
-        <button id="btn-nav"
-          class="p-2 transition rounded-lg md:hidden text-zinc-700 hover:bg-zinc-100"
-          aria-label="Buka menu navigasi"
-          aria-expanded="false"
-          aria-controls="nav-mobile"
-          aria-haspopup="true">
-          <svg class="w-5 h-5" aria-hidden="true"><use href="#i-menu"/></svg>
-        </button>
-        <a href="{{ route('welcome') }}"
-          class="flex items-center gap-2"
-          aria-label="Human Careers â€” Halaman Beranda PT Andalan Artha Primanusa">
-       <div class="flex items-center justify-center">
-   <img src="{{ asset('assets/logofix.png') }}"
-     alt="Logo Human Careers PT Andalan Artha Primanusa"
-     class="block object-contain mx-auto mt-2 h-14 md:h-16"
-     width="140" height="70" loading="eager" decoding="sync">
-</div>
-        </a>
-      </div>
-
-      {{-- Search bar desktop --}}
-      <form action="{{ route('jobs.index') }}" method="GET" role="search" autocomplete="off"
-        class="items-center flex-1 hidden max-w-lg mx-6 md:flex">
-        <label for="search-desk" class="sr-only">Cari lowongan kerja</label>
-        <div class="relative w-full">
-          <input id="search-desk" name="q" type="search"
-            placeholder="Cari posisi, divisi, atau lokasi"
-            value="{{ request('q') }}"
-            class="w-full px-10 py-2.5 bg-zinc-50 border border-zinc-200 outline-none rounded-xl text-sm text-zinc-800 placeholder-zinc-400 focus:bg-white focus:ring-2 transition"
-            style="--tw-ring-color: #a77d52;"
-            inputmode="search">
-          <span class="absolute -translate-y-1/2 left-3 top-1/2 text-zinc-400" aria-hidden="true">
-            <svg class="w-4 h-4"><use href="#i-search"/></svg>
-          </span>
+  {{-- ============================================================
+       HEADER
+  ============================================================ --}}
+  <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200/60 transition-all duration-300" id="site-header">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-16 md:h-20">
+        
+        {{-- Logo & Mobile Trigger --}}
+        <div class="flex items-center gap-4">
+          <button id="btn-nav-toggle" class="md:hidden p-2 rounded-xl text-slate-600 hover:bg-slate-100 transition-colors" aria-label="Toggle menu">
+            <svg class="w-6 h-6"><use href="#i-menu"/></svg>
+          </button>
+          <a href="{{ route('welcome') }}" class="flex items-center group">
+            <img src="{{ asset('assets/logofix.png') }}" alt="Logo" class="h-10 md:h-12 w-auto object-contain group-hover:scale-105 transition-transform duration-300">
+          </a>
         </div>
-      </form>
 
-      {{-- Nav desktop --}}
-      <nav class="items-center hidden gap-5 text-sm md:flex" aria-label="Navigasi utama">
-        <a href="{{ route('jobs.index') }}"
-          class="font-medium transition hover:opacity-70"
-          style="color: #6b4f3a">Lowongan</a>
-
-        @auth
-              <a href="{{ route('applications.mine') }}"
-                class="font-medium transition hover:opacity-70"
-                style="color: #6b4f3a">Lamaran</a>
-
-              <details class="relative dropdown">
-                <summary class="flex items-center gap-2 transition cursor-pointer select-none hover:opacity-70"
-                  style="color: #6b4f3a" aria-haspopup="menu">
-                  @php
-                    $uname = auth()->user()->name ?? auth()->user()->email ?? 'Pengguna';
-                    $ini = strtoupper(mb_substr($uname, 0, 1));
-                  @endphp
-                  <span class="inline-grid text-xs font-bold border rounded-full place-items-center w-9 h-9 shrink-0"
-                    style="background: rgba(29,78,216,.08); color: #1d4ed8; border-color: rgba(29,78,216,.3);"
-                    aria-hidden="true">{{ $ini }}</span>
-                  <svg class="w-4 h-4 chevron-icon" aria-hidden="true"><use href="#i-chevron"/></svg>
-                </summary>
-                <div class="absolute right-0 w-64 p-2 mt-2 bg-white border shadow-2xl rounded-2xl"
-                  style="border-color: #f4f0eb" role="menu" aria-label="Menu pengguna">
-                  <div class="px-3 pt-2 pb-1 text-[11px] text-zinc-400 uppercase tracking-wide">Masuk sebagai</div>
-                  <div class="px-3 pb-2 text-sm font-semibold truncate text-zinc-800">{{ $uname }}</div>
-                  <hr style="border-color: #f4f0eb; margin: .25rem 0">
-                  <a href="{{ route('profile.edit') }}"
-                    class="flex items-center gap-2 px-3 py-2.5 text-sm rounded-xl hover:bg-zinc-50 transition"
-                    role="menuitem">ðŸ‘¤ Profil Saya</a>
-                  <a href="{{ route('applications.mine') }}"
-                    class="flex items-center gap-2 px-3 py-2.5 text-sm rounded-xl hover:bg-zinc-50 transition"
-                    role="menuitem">ðŸ“‹ Lamaran Saya</a>
-                  <hr style="border-color: #f4f0eb; margin: .25rem 0">
-                  <form method="POST" action="{{ route('logout') }}" role="none">
-                    @csrf
-                    <button type="submit"
-                      class="w-full flex items-center gap-2 px-3 py-2.5 text-sm rounded-xl hover:bg-red-50 transition text-left"
-                      style="color: #dc2626"
-                      role="menuitem">ðŸšª Keluar</button>
-                  </form>
-                </div>
-              </details>
-
-        @else
-              <a href="{{ route('login') }}"
-                class="inline-flex items-center gap-1.5 font-medium hover:opacity-70 transition"
-                style="color: #6b4f3a">
-                <svg class="w-4 h-4" aria-hidden="true"><use href="#i-user"/></svg>
-                Masuk
-              </a>
-              <a href="{{ route('register') }}"
-                class="inline-flex items-center px-4 py-2 text-sm font-semibold text-white transition shadow-sm rounded-xl hover:opacity-90"
-                style="background: #1d4ed8;">Daftar Gratis</a>
-        @endauth
-      </nav>
-    </div>
-
-    {{-- Nav mobile --}}
-    <div id="nav-mobile" class="hidden bg-white border-t md:hidden"
-      style="border-color: #f4f0eb"
-      aria-label="Menu navigasi mobile">
-      <div class="px-4 py-4 space-y-2">
-        <form action="{{ route('jobs.index') }}" method="GET" role="search" autocomplete="off">
-          <label for="search-mob" class="sr-only">Cari lowongan kerja</label>
-          <div class="relative w-full">
-            <input id="search-mob" name="q" type="search"
-              placeholder="Cari posisi, divisi, atau lokasiâ€¦"
-              value="{{ request('q') }}"
-              class="w-full py-2.5 pl-10 pr-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none text-sm text-zinc-800 placeholder-zinc-400 focus:ring-2 transition"
-              style="--tw-ring-color: #a77d52;"
-              inputmode="search">
-            <span class="absolute -translate-y-1/2 left-3 top-1/2 text-zinc-400" aria-hidden="true">
+        {{-- Desktop Search (Premium) --}}
+        <div class="hidden md:flex flex-1 max-w-md mx-8">
+          <form action="{{ route('jobs.index') }}" method="GET" class="w-full relative group">
+            <input type="search" name="q" placeholder="Cari posisi atau lokasi..." 
+              class="w-full pl-11 pr-4 py-2.5 bg-slate-100/50 border border-slate-200/60 rounded-2xl text-sm focus:bg-white focus:ring-2 focus:ring-[#a77d52]/20 focus:border-[#a77d52] transition-all outline-none"
+              value="{{ request('q') }}">
+            <div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#a77d52] transition-colors">
               <svg class="w-4 h-4"><use href="#i-search"/></svg>
-            </span>
-          </div>
-        </form>
+            </div>
+          </form>
+        </div>
 
-        <a href="{{ route('jobs.index') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-xl hover:bg-zinc-100 transition text-sm font-medium">
-          ðŸ’¼ Lowongan
-        </a>
-
-        @auth
-              <a href="{{ route('applications.mine') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-xl hover:bg-zinc-100 transition text-sm font-medium">
-                ðŸ“‹ Lamaran Saya
-              </a>
-              <hr style="border-color: #f4f0eb">
-              <a href="{{ route('profile.edit') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-xl hover:bg-zinc-100 transition text-sm font-medium">
-                ðŸ‘¤ Profil
-              </a>
-              <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <button type="submit"
-                  class="flex items-center gap-2 w-full px-3 py-2.5 rounded-xl hover:bg-red-50 transition text-sm font-medium text-left"
-                  style="color: #dc2626">ðŸšª Keluar</button>
-              </form>
-        @else
-              <div class="flex items-center gap-3 pt-1">
-                <a href="{{ route('login') }}"
-                  class="flex-1 text-center px-3 py-2.5 border rounded-xl text-sm font-medium hover:bg-zinc-50 transition"
-                  style="border-color: #f4f0eb; color: #6b4f3a">Masuk</a>
-                <a href="{{ route('register') }}"
-                  class="flex-1 text-center px-3 py-2.5 rounded-xl text-sm font-semibold text-white hover:opacity-90 transition shadow-sm"
-                  style="background: #1d4ed8;">Daftar Gratis</a>
+        {{-- Desktop Nav --}}
+        <nav class="hidden md:flex items-center gap-1">
+          <a href="{{ route('jobs.index') }}" class="px-4 py-2 text-sm font-semibold text-slate-600 hover:text-[#a77d52] transition-colors rounded-xl hover:bg-slate-50">Lowongan</a>
+          
+          @auth
+            <div class="h-6 w-px bg-slate-200 mx-2"></div>
+            <details class="relative group">
+              <summary class="flex items-center gap-3 pl-2 pr-1 py-1 rounded-2xl cursor-pointer hover:bg-slate-50 transition-colors list-none">
+                <div class="text-right hidden lg:block">
+                  <div class="text-xs font-bold text-slate-900 leading-none">{{ auth()->user()->name }}</div>
+                  <div class="text-[10px] text-slate-500 mt-0.5 capitalize">{{ auth()->user()->role ?? 'Pelamar' }}</div>
+                </div>
+                <div class="w-9 h-9 rounded-xl bg-[linear-gradient(135deg,#a77d52,#8b5e3c)] flex items-center justify-center text-white font-bold shadow-sm">
+                  {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                </div>
+                <svg class="w-4 h-4 text-slate-400 transition-transform group-open:rotate-180"><use href="#i-chevron"/></svg>
+              </summary>
+              <div class="absolute right-0 mt-2 w-56 bg-white border border-slate-200 rounded-2xl shadow-xl py-2 z-50 animate-in fade-in slide-in-from-top-2">
+                <a href="{{ route('profile.edit') }}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
+                  <svg class="w-4 h-4 text-slate-400"><use href="#i-user"/></svg>
+                  Profil Saya
+                </a>
+                <a href="{{ route('applications.mine') }}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
+                  <svg class="w-4 h-4 text-slate-400"><use href="#i-briefcase"/></svg>
+                  Lamaran Saya
+                </a>
+                <div class="my-2 border-t border-slate-100"></div>
+                <form action="{{ route('logout') }}" method="POST">
+                  @csrf
+                  <button type="submit" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors">
+                    <svg class="w-4 h-4"><path d="M15.75 9V5.25A2.25 2.25 0 0013.5 3H6.75A2.25 2.25 0 004.5 5.25v13.5A2.25 2.25 0 006.75 21H13.5a2.25 2.25 0 002.25-2.25V15M9.75 12h10.5m0 0-3-3m3 3-3 3" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    Keluar
+                  </button>
+                </form>
               </div>
-        @endauth
+            </details>
+          @else
+            <a href="{{ route('login') }}" class="px-4 py-2 text-sm font-semibold text-slate-600 hover:text-[#a77d52] transition-colors rounded-xl hover:bg-slate-50">Masuk</a>
+            <a href="{{ route('register') }}" class="ml-2 px-5 py-2.5 text-sm font-bold text-white bg-[linear-gradient(135deg,#a77d52,#8b5e3c)] rounded-2xl shadow-md hover:shadow-lg hover:brightness-110 transition-all">Daftar Gratis</a>
+          @endauth
+        </nav>
+
+        {{-- Mobile Search Trigger (Hidden on Desktop) --}}
+        <div class="md:hidden">
+          <button id="btn-search-mobile" class="p-2 text-slate-600">
+            <svg class="w-6 h-6"><use href="#i-search"/></svg>
+          </button>
+        </div>
       </div>
     </div>
 
-    {{-- Breadcrumb --}}
-    <div class="bg-white border-t" style="border-color: #f4f0eb">
-      <nav class="flex items-center px-4 mx-auto text-xs h-9 max-w-7xl sm:px-6 lg:px-8 text-zinc-500"
-        aria-label="Breadcrumb">
-        <ol class="inline-flex items-center gap-1.5" itemscope itemtype="https://schema.org/BreadcrumbList">
-          <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-            <a href="{{ route('welcome') }}" class="transition hover:text-zinc-800" itemprop="item">
-              <span itemprop="name">Beranda</span>
+    {{-- Mobile Menu (Premium Slide-out) --}}
+    <div id="mobile-menu" class="fixed inset-0 z-[100] pointer-events-none opacity-0 transition-all duration-300">
+      <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity" id="mobile-menu-overlay"></div>
+      <div class="absolute inset-y-0 left-0 w-80 max-w-[85vw] bg-white shadow-2xl transition-transform -translate-x-full flex flex-col" id="mobile-menu-panel">
+        <div class="p-4 border-b flex items-center justify-between">
+          <img src="{{ asset('assets/logofix.png') }}" alt="Logo" class="h-8 w-auto">
+          <button id="btn-menu-close" class="p-2 rounded-lg hover:bg-slate-100 transition-colors">
+            <svg class="w-6 h-6 text-slate-600"><path d="M6 18L18 6M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+        
+        <div class="flex-1 overflow-y-auto p-4 space-y-2">
+          <div class="mb-6">
+            <form action="{{ route('jobs.index') }}" method="GET" class="relative">
+              <input type="search" name="q" placeholder="Cari lowongan..." class="w-full pl-10 pr-4 py-3 bg-slate-100 border-none rounded-2xl text-sm focus:ring-2 focus:ring-[#a77d52]/30 outline-none">
+              <div class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">
+                <svg class="w-4 h-4"><use href="#i-search"/></svg>
+              </div>
+            </form>
+          </div>
+
+          <a href="{{ route('jobs.index') }}" class="flex items-center gap-3 px-4 py-3.5 rounded-2xl text-slate-700 font-semibold hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100">
+            <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-[#a77d52]">
+              <svg class="w-5 h-5"><use href="#i-briefcase"/></svg>
+            </div>
+            Lowongan Kerja
+          </a>
+
+          @auth
+            <a href="{{ route('applications.mine') }}" class="flex items-center gap-3 px-4 py-3.5 rounded-2xl text-slate-700 font-semibold hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100">
+              <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-[#a77d52]">
+                <svg class="w-5 h-5"><use href="#i-briefcase"/></svg>
+              </div>
+              Lamaran Saya
             </a>
-            <meta itemprop="position" content="1">
-          </li>
-          <li aria-hidden="true" class="text-zinc-300">/</li>
-          <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-            <span class="font-medium text-zinc-700" aria-current="page" itemprop="name">Lowongan Kerja</span>
-            <meta itemprop="position" content="2">
-          </li>
-        </ol>
-      </nav>
+            <a href="{{ route('profile.edit') }}" class="flex items-center gap-3 px-4 py-3.5 rounded-2xl text-slate-700 font-semibold hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100">
+              <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-[#a77d52]">
+                <svg class="w-5 h-5"><use href="#i-user"/></svg>
+              </div>
+              Profil Saya
+            </a>
+            <div class="my-4 border-t border-slate-100"></div>
+            <form action="{{ route('logout') }}" method="POST">
+              @csrf
+              <button type="submit" class="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-red-600 font-semibold hover:bg-red-50 transition-colors text-left">
+                <div class="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center text-red-600">
+                  <svg class="w-5 h-5"><path d="M15.75 9V5.25A2.25 2.25 0 0013.5 3H6.75A2.25 2.25 0 004.5 5.25v13.5A2.25 2.25 0 006.75 21H13.5a2.25 2.25 0 002.25-2.25V15M9.75 12h10.5m0 0-3-3m3 3-3 3" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+                Keluar Akun
+              </button>
+            </form>
+          @else
+            <div class="grid grid-cols-2 gap-3 mt-8">
+              <a href="{{ route('login') }}" class="flex items-center justify-center py-3.5 rounded-2xl border border-slate-200 font-bold text-slate-600 hover:bg-slate-50 transition-colors">Masuk</a>
+              <a href="{{ route('register') }}" class="flex items-center justify-center py-3.5 rounded-2xl bg-[linear-gradient(135deg,#a77d52,#8b5e3c)] font-bold text-white shadow-lg">Daftar</a>
+            </div>
+          @endauth
+        </div>
+      </div>
+    </div>
+
+    {{-- Breadcrumb (Simplified Premium) --}}
+    <div class="bg-slate-50/50 border-b border-slate-200/40 py-2">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <nav class="flex text-[11px] font-medium text-slate-400 uppercase tracking-widest">
+          <ol class="flex items-center gap-2">
+            <li><a href="{{ route('welcome') }}" class="hover:text-[#a77d52] transition-colors">Beranda</a></li>
+            <li><span class="text-slate-300">/</span></li>
+            <li class="text-slate-600">Lowongan Kerja</li>
+          </ol>
+        </nav>
+      </div>
     </div>
   </header>
 
@@ -680,7 +660,7 @@
         $sitesCol = ($sitesSimple instanceof \Illuminate\Support\Collection) ? $sitesSimple : collect($sitesSimple ?? []);
         $sitesNorm = $sitesCol->filter(fn($s) => !empty($s['name']))
             ->map(function ($s) {
-                $name = (string) ($s['name'] ?? 'â€”');
+                $name = (string) ($s['name'] ?? '-');
                 $dot = preg_match('/^#([0-9a-f]{3}|[0-9a-f]{6})$/i', (string) ($s['dot'] ?? '')) ? $s['dot'] : '#a77d52';
                 $param = $s['code'] ?? $s['id'] ?? $name;
                 return ['name' => $name, 'dot' => $dot, 'param' => $param];
@@ -773,7 +753,7 @@
             `<div style="font-size: 13px; font-weight: 500; color: #1f2937;">
               ${site.name}
             </div>
-            ${site.address ? `<p style="font-size: 12px; color: #6b7280; margin: 4px 0 0 0;">${site.address}</p>` : ''}
+            <p style="font-size: 12px; color: #6b7280; margin: 4px 0 0 0;">Lat: ${site.latitude}, Long: ${site.longitude}</p>
             <a href="{{ route('jobs.index') }}?site=${site.param}"
               style="display: inline-block; margin-top: 6px; padding: 4px 8px; background: #a77d52; color: white; border-radius: 4px; text-decoration: none; font-size: 11px; font-weight: 600;">
               Lihat Lowongan
@@ -925,7 +905,7 @@
                           @endif
                         </div>
 
-                        {{-- Lokasi â€” PERBAIKAN: tidak tampilkan region dua kali --}}
+                        {{-- Lokasi - PERBAIKAN: tidak tampilkan region dua kali --}}
                         <p class="text-[11px] mt-1 leading-relaxed" style="color: #6b4f3a">
                           @if($siteName)
                             <svg class="w-3 h-3 inline-block mr-0.5 -mt-px" aria-hidden="true"><use href="#i-map-pin"/></svg>
@@ -1069,7 +1049,7 @@
         {{-- Brand --}}
         <div>
           <img src="{{ asset('assets/dddd.png') }}"
-            alt="Logo Human Careers â€” PT Andalan Artha Primanusa"
+            alt="Logo Human Careers - PT Andalan Artha Primanusa"
             class="object-contain w-auto h-32 mb-4 md:h-40"
             width="160" height="160" loading="lazy" decoding="async">
           <p class="text-sm leading-relaxed text-zinc-400">
@@ -1176,32 +1156,9 @@
   <script>
     (function () {
       'use strict';
-      var btnNav = document.getElementById('btn-nav');
-      var navMob = document.getElementById('nav-mobile');
-      if (btnNav && navMob) {
-        btnNav.addEventListener('click', function () {
-          var expanded = this.getAttribute('aria-expanded') === 'true';
-          this.setAttribute('aria-expanded', String(!expanded));
-          navMob.classList.toggle('hidden');
-        });
-        // Tutup saat klik di luar area nav
-        document.addEventListener('click', function (e) {
-          if (!btnNav.contains(e.target) && !navMob.contains(e.target)) {
-            navMob.classList.add('hidden');
-            btnNav.setAttribute('aria-expanded', 'false');
-          }
-        });
-        // Tutup saat tekan Escape
-        document.addEventListener('keydown', function (e) {
-          if (e.key === 'Escape' && !navMob.classList.contains('hidden')) {
-            navMob.classList.add('hidden');
-            btnNav.setAttribute('aria-expanded', 'false');
-            btnNav.focus();
-          }
-        });
-      }
 
-      // â”€â”€ Back to top â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+
+      // -- Back to top --
       var toTop = document.getElementById('toTop');
       if (toTop) {
         window.addEventListener('scroll', function () {
@@ -1212,7 +1169,7 @@
         });
       }
 
-      // â”€â”€ Toast helper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+      // -- Toast helper --
       window.showToast = function (msg, duration) {
         var t = document.getElementById('toast');
         if (!t) return;

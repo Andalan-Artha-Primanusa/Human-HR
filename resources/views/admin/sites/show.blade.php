@@ -155,6 +155,20 @@
             <div class="text-sm text-slate-500">Timezone</div>
             <div class="mt-1 text-lg font-medium text-slate-800">{{ $site->timezone ?: '—' }}</div>
           </div>
+
+          <div>
+  <div class="text-sm text-slate-500">Latitude</div>
+  <div class="mt-1 text-lg font-medium text-slate-800">
+    {{ $site->latitude ?? '—' }}
+  </div>
+</div>
+
+<div>
+  <div class="text-sm text-slate-500">Longitude</div>
+  <div class="mt-1 text-lg font-medium text-slate-800">
+    {{ $site->longitude ?? '—' }}
+  </div>
+</div>
           @if(!empty($site->address))
             <div class="sm:col-span-2 lg:col-span-3">
               <div class="text-sm text-slate-500">Alamat</div>

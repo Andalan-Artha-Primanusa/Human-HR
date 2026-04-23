@@ -23,7 +23,7 @@ class KanbanController extends Controller
             'mobilisasi' => 'Mobilisasi',
             'ground_test' => 'Ground Test',
             'hired' => 'Hired',
-            'not_qualified' => 'Not Lolos',
+            'not_qualified' => 'TIDAK lOLOS',
         ];
 
         // Untuk trainer/karyawan/pelamar: tampilkan semua kandidat, bukan hanya milik user
@@ -33,6 +33,9 @@ class KanbanController extends Controller
             'user:id,name,email,role',
             'stages.actor:id,name',
             'stages.user:id,name',
+            'feedbacks',
+            'interviews',
+            'offer',
         ])
             ->orderBy('created_at')
             ->orderBy('id')

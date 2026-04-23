@@ -185,16 +185,28 @@
 
                       {{-- AKSI --}}
                       <td class="px-4 py-3 text-right">
-                        @if(Route::has('admin.offers.pdf'))
-                              <a href="{{ route('admin.offers.pdf', $offer) }}"
-                                 class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 text-sm">
-                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                                  <path d="M14 2v6h6"/>
-                                </svg>
-                                PDF
-                              </a>
-                        @endif
+                        <div class="flex justify-end gap-2">
+                          <button type="button" 
+                            onclick="openEditOfferModal('{{ $offer->id }}', '{{ addslashes($user) }}', '{{ $grossV }}', '{{ $allowV }}', `{{ addslashes($offer->body_template ?? '') }}`, '{{ $offer->status }}', {{ json_encode($offer->meta ?? []) }}, '{{ optional($offer->application->job->company)->name }}', '{{ $offer->application->job->level_label }}', '{{ optional($offer->application->poh)->name }}')"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 text-sm text-amber-600 font-medium">
+                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                            </svg>
+                            Edit
+                          </button>
+
+                          @if(Route::has('admin.offers.pdf'))
+                                <a href="{{ route('admin.offers.pdf', $offer) }}"
+                                   class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 text-sm">
+                                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                    <path d="M14 2v6h6"/>
+                                  </svg>
+                                  PDF
+                                </a>
+                          @endif
+                        </div>
                       </td>
 
                     </tr>
@@ -321,4 +333,231 @@
         </section>
       @endif
     </div>
+    </div>
+    
+    {{-- MODAL: EDIT OFFER --}}
+    <div id="modal-edit-offer" class="fixed inset-0 z-50 flex items-center justify-center hidden p-4 bg-slate-900/50 backdrop-blur-sm">
+        <div class="w-full max-w-lg overflow-hidden bg-white shadow-2xl rounded-2xl animate-in fade-in zoom-in duration-200">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/50">
+                <div>
+                    <h3 class="text-lg font-semibold text-slate-900" id="edit-offer-title">Edit Offer</h3>
+                    <p class="text-xs text-slate-500">Sesuaikan detail gaji dan pesan penawaran.</p>
+                </div>
+                <button type="button" onclick="closeEditOfferModal()" class="p-2 transition rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
+            </div>
+            
+            <form id="form-edit-offer" method="POST" class="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
+                @csrf
+                @method('PATCH')
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-bold tracking-wider text-slate-500 uppercase">Perusahaan (PT)</label>
+                        <input type="text" name="company" id="edit-company" class="w-full px-4 py-2 text-sm border rounded-xl border-slate-200">
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-bold tracking-wider text-slate-500 uppercase">Nomor Surat</label>
+                        <input type="text" name="doc_no" id="edit-doc-no" class="w-full px-4 py-2 text-sm border rounded-xl border-slate-200">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-bold tracking-wider text-slate-500 uppercase">Grade / Level</label>
+                        <select name="grade_level" id="edit-grade" class="w-full px-4 py-2 text-sm border rounded-xl border-slate-200">
+                            <option value="">-- Pilih Level --</option>
+                            @foreach(\App\Models\Job::LEVEL_LABELS as $slug => $label)
+                                <option value="{{ $label }}">{{ $label }}</option>
+                            @endforeach
+                            <option value="Non Staff">Non Staff</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-bold tracking-wider text-slate-500 uppercase">PoH (Tempat Penerimaan)</label>
+                        <select name="poh" id="edit-poh" class="w-full px-4 py-2 text-sm border rounded-xl border-slate-200">
+                            <option value="">-- Pilih PoH --</option>
+                            @foreach($pohs as $p)
+                                <option value="{{ $p->name }}">{{ $p->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-bold tracking-wider text-slate-500 uppercase">Lokasi Kerja</label>
+                        <select name="lokasi" id="edit-lokasi" class="w-full px-4 py-2 text-sm border rounded-xl border-slate-200">
+                            <option value="">-- Pilih Lokasi --</option>
+                            @foreach($sites as $s)
+                                @php $val = "Site " . $s->code . " – " . $s->name; @endphp
+                                <option value="{{ $val }}">{{ $val }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-bold tracking-wider text-slate-500 uppercase">Status Kontrak</label>
+                        <input type="text" name="contract_status" id="edit-contract" class="w-full px-4 py-2 text-sm border rounded-xl border-slate-200">
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-bold tracking-wider text-slate-500 uppercase">Tgl Bergabung</label>
+                        <input type="date" name="join_date" id="edit-join-date" class="w-full px-4 py-2 text-sm border rounded-xl border-slate-200">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-bold tracking-wider text-slate-500 uppercase">Waktu Kerja</label>
+                        <input type="text" name="working_hours" id="edit-hours" class="w-full px-4 py-2 text-sm border rounded-xl border-slate-200">
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-bold tracking-wider text-slate-500 uppercase">Jadwal Kerja / Roster</label>
+                        <input type="text" name="working_schedule" id="edit-schedule" class="w-full px-4 py-2 text-sm border rounded-xl border-slate-200">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-bold tracking-wider text-slate-500 uppercase">Footer: Kode Dokumen</label>
+                        <input type="text" name="footer_code" id="edit-footer-code" class="w-full px-4 py-2 text-sm border rounded-xl border-slate-200">
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-bold tracking-wider text-slate-500 uppercase">Footer: Versi / Tgl</label>
+                        <input type="text" name="footer_version" id="edit-footer-version" class="w-full px-4 py-2 text-sm border rounded-xl border-slate-200">
+                    </div>
+                </div>
+
+                <div class="space-y-1.5">
+                    <label class="text-xs font-bold tracking-wider text-slate-500 uppercase">Footer: Teks Halaman</label>
+                    <input type="text" name="footer_page_text" id="edit-footer-page" class="w-full px-4 py-2 text-sm border rounded-xl border-slate-200">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-bold tracking-wider text-slate-500 uppercase">Nama Penandatangan</label>
+                        <input type="text" name="signer_name" id="edit-signer-name" class="w-full px-4 py-2 text-sm border rounded-xl border-slate-200">
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-bold tracking-wider text-slate-500 uppercase">Jabatan Penandatangan</label>
+                        <input type="text" name="signer_title" id="edit-signer-title" class="w-full px-4 py-2 text-sm border rounded-xl border-slate-200">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-1.5">
+                        <label for="edit-gross" class="text-xs font-bold tracking-wider text-slate-500 uppercase">Gaji Pokok (Rp)</label>
+                        <input type="number" name="gross" id="edit-gross" required min="0"
+                            class="w-full px-4 py-2 text-sm border rounded-xl border-slate-200 focus:outline-none focus:ring-2" style="--tw-ring-color: {{ $ACCENT }}">
+                    </div>
+                    <div class="space-y-1.5">
+                        <label for="edit-allowance" class="text-xs font-bold tracking-wider text-slate-500 uppercase">Site Allowance (Rp)</label>
+                        <input type="number" name="allowance" id="edit-allowance" required min="0"
+                            class="w-full px-4 py-2 text-sm border rounded-xl border-slate-200 focus:outline-none focus:ring-2" style="--tw-ring-color: {{ $ACCENT }}">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-bold tracking-wider text-slate-500 uppercase">Uang Makan</label>
+                        <input type="text" name="meals_allowance" id="edit-meals" class="w-full px-4 py-2 text-sm border rounded-xl border-slate-200">
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-bold tracking-wider text-slate-500 uppercase">Lembur</label>
+                        <input type="text" name="overtime" id="edit-overtime" class="w-full px-4 py-2 text-sm border rounded-xl border-slate-200">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-bold tracking-wider text-slate-500 uppercase">Pajak Penghasilan</label>
+                        <input type="text" name="tax_borne_by" id="edit-tax" class="w-full px-4 py-2 text-sm border rounded-xl border-slate-200">
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-bold tracking-wider text-slate-500 uppercase">Status Offer</label>
+                        <select name="status" id="edit-status" class="w-full px-4 py-2 text-sm border rounded-xl border-slate-200 focus:outline-none focus:ring-2" style="--tw-ring-color: {{ $ACCENT }}">
+                            <option value="draft">DRAFT</option>
+                            <option value="sent">SENT</option>
+                            <option value="accepted">ACCEPTED</option>
+                            <option value="rejected">REJECTED</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="space-y-1.5">
+                    <label class="text-xs font-bold tracking-wider text-slate-500 uppercase">Pengurangan Penghasilan (BPJS dll)</label>
+                    <input type="text" name="deductions" id="edit-deductions" class="w-full px-4 py-2 text-sm border rounded-xl border-slate-200">
+                </div>
+
+                <div class="space-y-1.5">
+                    <label for="edit-body" class="text-xs font-bold tracking-wider text-slate-500 uppercase">Pesan Email / Template</label>
+                    <textarea name="body" id="edit-body" rows="6" required
+                        class="w-full px-4 py-2.5 text-sm border rounded-xl border-slate-200 focus:outline-none focus:ring-2 min-h-[120px]" style="--tw-ring-color: {{ $ACCENT }}"></textarea>
+                </div>
+
+                <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-50">
+                    <button type="button" onclick="closeEditOfferModal()"
+                        class="px-5 py-2.5 text-sm font-semibold transition bg-white border border-slate-200 rounded-xl text-slate-700 hover:bg-slate-50">
+                        Batal
+                    </button>
+                    <button type="submit"
+                        class="px-5 py-2.5 text-sm font-semibold text-white transition rounded-xl bg-[linear-gradient(90deg,_#a77d52,_#8b5e3c)] shadow-md hover:brightness-105">
+                        Simpan Perubahan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openEditOfferModal(offerId, candidateName, gross, allowance, body, status, meta, defCompany, defLevel, defPoh) {
+            const modal = document.getElementById('modal-edit-offer');
+            const form = document.getElementById('form-edit-offer');
+            
+            document.getElementById('edit-offer-title').textContent = 'Edit Offer — ' + candidateName;
+            document.getElementById('edit-gross').value = gross;
+            document.getElementById('edit-allowance').value = allowance;
+            document.getElementById('edit-body').value = body;
+            document.getElementById('edit-status').value = status;
+            
+            // Populate meta fields
+            document.getElementById('edit-company').value = meta.company || defCompany || 'ANDALAN BHUMI NUSANTARA';
+            document.getElementById('edit-doc-no').value = meta.doc_no || '';
+            document.getElementById('edit-grade').value = meta.grade_level || defLevel || '';
+            document.getElementById('edit-poh').value = meta.poh || defPoh || '';
+            document.getElementById('edit-lokasi').value = meta.lokasi || '';
+            document.getElementById('edit-contract').value = meta.contract_status || '';
+            document.getElementById('edit-join-date').value = meta.join_date || '';
+            document.getElementById('edit-hours').value = meta.working_hours || 'Senin – Minggu : Shift 1 & 2';
+            document.getElementById('edit-schedule').value = meta.working_schedule || '<Roster Kerja>';
+            document.getElementById('edit-meals').value = meta.meals_allowance || '&nbsp;';
+            document.getElementById('edit-overtime').value = meta.overtime || 'Ditanggung Perusahaan';
+            document.getElementById('edit-tax').value = meta.tax_borne_by || 'Ditanggung Perusahaan';
+            document.getElementById('edit-deductions').value = meta.deductions || 'BPJS JHT 2% • BPJS JP 1% • BPJS Kesehatan 1%';
+            document.getElementById('edit-signer-name').value = meta.signer_name || '';
+            document.getElementById('edit-signer-title').value = meta.signer_title || '';
+            document.getElementById('edit-footer-code').value = meta.footer_code || 'AAP-HRM-SDF-003';
+            document.getElementById('edit-footer-version').value = meta.footer_version || 'v01/01/2022';
+            document.getElementById('edit-footer-page').value = meta.footer_page_text || 'Page {PAGE_NUM} of {PAGE_COUNT}';
+            
+            form.action = `/admin/offers/${offerId}`;
+            
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeEditOfferModal() {
+            const modal = document.getElementById('modal-edit-offer');
+            modal.classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+
+        // Close on ESC
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeEditOfferModal();
+        });
+    </script>
 @endsection

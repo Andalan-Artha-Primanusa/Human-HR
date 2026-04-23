@@ -21,7 +21,7 @@ class StoreCompanyRequest extends FormRequest
             'email' => ['nullable', 'email', 'max:255'],
             'phone' => ['nullable', 'string', 'max:100'],
             'website' => ['nullable', 'url', 'max:255'],
-            'logo_path' => ['nullable', 'string', 'max:255'],
+            'logo' => ['nullable', 'image', 'max:2048'],
             'address' => ['nullable', 'string'],
             'city' => ['nullable', 'string', 'max:100'],
             'province' => ['nullable', 'string', 'max:100'],

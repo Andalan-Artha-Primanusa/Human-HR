@@ -104,7 +104,7 @@
             </div>
             <div>
               <label class="block text-sm font-medium text-slate-700">Latitude (opsional)</label>
-              <input type="number" step="any" name="latitude" value="{{ old('latitude') }}"
+              <input type="number" step="any" id="latInput" name="latitude" value="{{ old('latitude') }}"
                      placeholder="-6.2000000"
                      class="w-full px-3 py-2 mt-1 text-sm border rounded-lg input border-slate-200 focus:outline-none focus:ring-2"
                    style="--tw-ring-color: {{ $ACCENT }}">
@@ -112,12 +112,19 @@
             </div>
             <div>
               <label class="block text-sm font-medium text-slate-700">Longitude (opsional)</label>
-              <input type="number" step="any" name="longitude" value="{{ old('longitude') }}"
+              <input type="number" step="any" id="lngInput" name="longitude" value="{{ old('longitude') }}"
                      placeholder="106.8000000"
                      class="w-full px-3 py-2 mt-1 text-sm border rounded-lg input border-slate-200 focus:outline-none focus:ring-2"
                    style="--tw-ring-color: {{ $ACCENT }}">
               @error('longitude') <div class="mt-1 text-xs text-rose-600">{{ $message }}</div> @enderror
             </div>
+          </div>
+
+          {{-- Interactive Map --}}
+          <div class="space-y-2">
+            <label class="block text-sm font-medium text-slate-700">Pilih Lokasi di Map</label>
+            <div id="map" class="w-full h-72 rounded-xl border border-slate-200 z-0"></div>
+            <p class="text-[11px] text-slate-500 italic">Klik pada peta untuk memindahkan marker.</p>
           </div>
 
           {{-- Address --}}
@@ -153,6 +160,72 @@
               @error('notes') <div class="mt-1 text-xs text-rose-600">{{ $message }}</div> @enderror
             </div>
           </div>
+        </form>
+      </section>
+    </div>
+
+    {{-- Leaflet CSS & JS --}}
+    @push('head')
+      <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    @endpush
+
+    @push('scripts')
+      <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+      <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const latInput = document.getElementById('latInput');
+            const lngInput = document.getElementById('lngInput');
+
+            // Default: Jakarta center if empty
+            let defaultLat = -6.2000000;
+            let defaultLng = 106.816666;
+
+            if (latInput.value && lngInput.value) {
+                defaultLat = parseFloat(latInput.value);
+                defaultLng = parseFloat(lngInput.value);
+            }
+
+            const map = L.map('map').setView([defaultLat, defaultLng], 13);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+
+            let marker = L.marker([defaultLat, defaultLng], {
+                draggable: true
+            }).addTo(map);
+
+            // Update inputs on marker drag
+            marker.on('dragend', function(e) {
+                const position = marker.getLatLng();
+                latInput.value = position.lat.toFixed(7);
+                lngInput.value = position.lng.toFixed(7);
+            });
+
+            // Update marker on click map
+            map.on('click', function(e) {
+                const position = e.latlng;
+                marker.setLatLng(position);
+                latInput.value = position.lat.toFixed(7);
+                lngInput.value = position.lng.toFixed(7);
+            });
+
+            // Sync marker with manual input
+            const syncMarker = () => {
+                const lat = parseFloat(latInput.value);
+                const lng = parseFloat(lngInput.value);
+                if (!isNaN(lat) && !isNaN(lng)) {
+                    const newPos = new L.LatLng(lat, lng);
+                    marker.setLatLng(newPos);
+                    map.panTo(newPos);
+                }
+            };
+
+            latInput.addEventListener('change', syncMarker);
+            lngInput.addEventListener('change', syncMarker);
+        });
+      </script>
+    @endpush
         </form>
       </section>
     </div>

@@ -8,37 +8,48 @@
 
     $m = (array) ($offer->meta ?? []);
 
-    $company = $m['company'] ?? 'ANDALAN BHUMI NUSANTARA'; // dipakai di paragraf saja
+    $company = $m['company'] ?? ($job?->company?->name ?? 'ANDALAN BHUMI NUSANTARA'); 
+    $footerCode = $m['footer_code'] ?? 'AAP-HRM-SDF-003';
+    $footerVersion = $m['footer_version'] ?? 'v01/01/2022';
     $logoPath = public_path('assets/logo-abn.png');
 
     $docNo = $m['doc_no'] ?? '';
     $candidateNik = $m['candidate_nik'] ?? '';
-    $gradeLevel = $m['level'] ?? '';
-    $poh = $m['poh'] ?? '';
+    $gradeLevel = $m['grade_level'] ?? $m['level'] ?? ($job?->level_label ?? '');
+    $poh = $m['poh'] ?? ($app?->poh?->name ?? '');
     $lokasiDisplay = $m['lokasi'] ?? (($site?->code ? 'Site ' . $site->code . ' – ' : '') . ($site?->name ?: 'Site HO – Head Office'));
     $joinDate = $m['join_date'] ?? null;
-    $overtimeRate = $m['overtime_rate'] ?? null;
+    $contractStatus = $m['contract_status'] ?? 'Perjanjian Kerja Waktu Tertentu (PKWT) masa kontrak 6 bulan dan direview sebelum berakhir.';
+    $footerPageText = $m['footer_page_text'] ?? 'Page {PAGE_NUM} of {PAGE_COUNT}';
+    $workingHours = $m['working_hours'] ?? 'Senin – Minggu : Shift 1 (06.00–18.00 WIB) & Shift 2 (18.00–06.00 WIB)';
+    $workingSchedule = $m['working_schedule'] ?? $m['roster_kerja'] ?? '<Roster Kerja>';
+    
+    $overtimeRate = $m['overtime'] ?? $m['overtime_rate'] ?? 'Ditanggung Perusahaan';
+    $mealsAllowance = $m['meals_allowance'] ?? '&nbsp;';
+    $taxBorneBy = $m['tax_borne_by'] ?? 'Ditanggung Perusahaan';
     $bonusBulanan = $m['bonus_bulanan'] ?? 'Bonus diatur sesuai ketentuan perusahaan';
-
 
     // Penandatangan otomatis sesuai level
     $jobLevel = $job?->level ?? '';
     if ($jobLevel === 'non_staff') {
-      $signerName = 'Hendy Fardiansyah';
-      $signerTitle = 'Manager HRGA';
+      $defSigner = 'Hendy Fardiansyah';
+      $defTitle = 'Manager HRGA';
     } else {
-      $signerName = 'Roy Hansen C Saragih';
-      $signerTitle = 'General Manager';
+      $defSigner = 'Roy Hansen C Saragih';
+      $defTitle = 'General Manager';
     }
-    $deptName = $m['dept_name'] ?? 'GENERAL MANAGER';
+    
+    $signerName = $m['signer_name'] ?? $defSigner;
+    $signerTitle = $m['signer_title'] ?? $defTitle;
+    $deptName = $m['signer_title'] ?? $defTitle; // Gunakan jabatan sebagai penawaran oleh
 
     // SIGNATURE: meta['sign_image'] > storage/app/public/ttdmahya.png > public/assets/sign_ceo.png
     $signImage = $m['sign_image']
         ?? (is_file(storage_path('app/public/ttdmahya.png')) ? storage_path('app/public/ttdmahya.png')
             : (is_file(public_path('assets/sign_ceo.png')) ? public_path('assets/sign_ceo.png') : null));
 
-    $gajiPokok = data_get($offer->salary, 'gross', 3912000);
-    $insLap = data_get($offer->salary, 'allowance', null);
+    $gajiPokok = data_get($offer->salary, 'gross', 0);
+    $insLap = data_get($offer->salary, 'allowance', 0);
 
     $candidateName = $user?->name ?: 'Calon Karyawan';
     $position = $job?->title ?: 'Plant Engineer';
@@ -48,11 +59,15 @@
     $joinText = $joinDate ? \Illuminate\Support\Carbon::parse($joinDate)->translatedFormat('j F Y') : '';
 
     $fmt = fn($v) => filled($v) ? e($v) : '&nbsp;';
-    $idr = fn($n) => is_numeric($n) ? 'Rp. ' . number_format((float) $n, 0, ',', '.') : ($n ?? '');
+    $idr = function($n) {
+        if (is_numeric($n) && $n > 0) return 'Rp. ' . number_format((float) $n, 0, ',', '.');
+        if (is_numeric($n) && (float)$n === 0.0) return 'Rp. 0';
+        return $n ?: '&nbsp;';
+    };
 
     // Pengurangan Penghasilan (dipisah " • ")
-    $bpjsText = $m['bpjs_employee'] ?? 'BPJS JHT 2% • BPJS JP 1% • BPJS Kesehatan 1% (sesuai ketentuan)';
-    $bpjsItems = preg_split('/\s*•\s*/u', (string) $bpjsText, -1, PREG_SPLIT_NO_EMPTY);
+    $bpjsText = $m['deductions'] ?? $m['bpjs_employee'] ?? 'BPJS JHT 2% • BPJS JP 1% • BPJS Kesehatan 1% (sesuai ketentuan)';
+    $bpjsItems = preg_split('/\s*[•|]\s*/u', (string) $bpjsText, -1, PREG_SPLIT_NO_EMPTY);
 
     // Benefit
     $benefit = [
@@ -208,19 +223,19 @@
 
       <tr><td class="sec" colspan="3">2. LOKASI & STATUS KEKARYAWANAN</td></tr>
       <tr><td class="key">a. Lokasi</td><td class="sep">:</td><td class="val">{{ $fmt($lokasiDisplay) }}</td></tr>
-      <tr><td class="key">b. Status Perjanjian Kerja</td><td class="sep">:</td><td class="val">Perjanjian Kerja Waktu Tertentu (PKWT) masa kontrak 6 bulan dan direview sebelum berakhir.</td></tr>
+      <tr><td class="key">b. Status Perjanjian Kerja</td><td class="sep">:</td><td class="val">{{ $fmt($contractStatus) }}</td></tr>
       <tr><td class="key">c. Estimasi Tanggal Bergabung</td><td class="sep">:</td><td class="val">{{ $fmt($joinText) }}</td></tr>
 
       <tr><td class="sec" colspan="3">3. WAKTU KERJA & ISTIRAHAT</td></tr>
-      <tr><td class="key">a. Waktu Kerja</td><td class="sep">:</td><td class="val">Senin – Minggu : Shift 1 (06.00–18.00 WIB) & Shift 2 (18.00–06.00 WIB)</td></tr>
-      <tr><td class="key">b. Jadwal Kerja</td><td class="sep">:</td><td class="val">{{ $fmt($m['roster_kerja'] ?? '<Roster Kerja>') }}</td></tr>
+      <tr><td class="key">a. Waktu Kerja</td><td class="sep">:</td><td class="val">{{ $fmt($workingHours) }}</td></tr>
+      <tr><td class="key">b. Jadwal Kerja</td><td class="sep">:</td><td class="val">{{ $fmt($workingSchedule) }}</td></tr>
 
       <tr><td class="sec" colspan="3">4. GAJI, BONUS, & PENGURANGAN PENGHASILAN</td></tr>
-      <tr><td class="key">a. Gaji Pokok</td><td class="sep">:</td><td class="val"><strong>{{ $fmt($idr($gajiPokok)) }}</strong> <span class="muted">{{ $gajiPokok !== null ? 'Gross/bulan' : '' }}</span></td></tr>
-      <tr><td class="key">b. Insentif / Site Allowance</td><td class="sep">:</td><td class="val">{{ $fmt($idr($insLap)) }} <span class="muted">{{ $insLap !== null ? 'Nett/hari' : '' }}</span></td></tr>
-      <tr><td class="key">c. Meals Allowance</td><td class="sep">:</td><td class="val"></td></tr>
-      <tr><td class="key">d. Overtime/Lembur</td><td class="sep">:</td><td class="val">{{ $fmt($overtimeRate ? $idr($overtimeRate) . ' Jam/hari' : '') }}</td></tr>
-      <tr><td class="key">e. Pajak Penghasilan</td><td class="sep">:</td><td class="val">Ditanggung Perusahaan</td></tr>
+      <tr><td class="key">a. Gaji Pokok</td><td class="sep">:</td><td class="val"><strong>{{ $fmt($idr($gajiPokok)) }}</strong> <span class="muted">{{ is_numeric($gajiPokok) ? 'Gross/bulan' : '' }}</span></td></tr>
+      <tr><td class="key">b. Insentif / Site Allowance</td><td class="sep">:</td><td class="val">{{ $fmt($idr($insLap)) }} <span class="muted">{{ is_numeric($insLap) ? 'Nett/hari' : '' }}</span></td></tr>
+      <tr><td class="key">c. Uang Makan</td><td class="sep">:</td><td class="val">{{ $fmt($mealsAllowance) }}</td></tr>
+      <tr><td class="key">d. Overtime/Lembur</td><td class="sep">:</td><td class="val">{{ $fmt($overtimeRate) }}</td></tr>
+      <tr><td class="key">e. Pajak Penghasilan</td><td class="sep">:</td><td class="val">{{ $fmt($taxBorneBy) }}</td></tr>
       <tr><td class="key">f. Pengurangan Penghasilan</td><td class="sep">:</td><td class="val">
         <ul style="margin:0; padding-left:14px; list-style:disc; line-height:1.25;">
           @foreach ($bpjsItems as $it) <li>{{ trim($it) }}</li> @endforeach
@@ -274,9 +289,9 @@
   <div class="footer">
     <table class="footer-table">
       <tr>
-        <td class="foot-left">AAP-HRM-SDF-003</td>
-        <td class="foot-mid">Page {PAGE_NUM} of {PAGE_COUNT}</td>
-        <td class="foot-right">v01/01/2022</td>
+        <td class="foot-left">{{ $footerCode }}</td>
+        <td class="foot-mid">{{ str_replace(['{PAGE_NUM}', '{PAGE_COUNT}'], ['{PAGE_NUM}', '{PAGE_COUNT}'], $footerPageText) }}</td>
+        <td class="foot-right">{{ $footerVersion }}</td>
       </tr>
     </table>
   </div>
