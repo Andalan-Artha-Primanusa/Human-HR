@@ -1029,7 +1029,28 @@ class ApplicationController extends Controller
                 $mail->bodyContent = $data['email_body'];
                 Mail::to($application->user->email)->send($mail);
                 \Log::info("Mail sent successfully for app: {$application->id}");
-                return back()->with('ok', 'Email Offer Letter berhasil dikirim.');
+
+                // Tambahkan in-app notification
+                \Illuminate\Notifications\DatabaseNotification::create([
+                    'id'             => (string) \Illuminate\Support\Str::uuid(),
+                    'type'           => 'app:application.offer_sent',
+                    'notifiable_type' => \App\Models\User::class,
+                    'notifiable_id'  => $application->user_id,
+                    'data'           => [
+                        'title'            => 'Offering Letter Diterima',
+                        'body'             => 'Kamu menerima email Offering Letter (OL) untuk posisi "' . ($application->job->title ?? '-') . '". Silakan cek kotak masuk atau folder spam di email kamu.',
+                        'job_title'        => $application->job->title ?? '-',
+                        'application_id'   => $application->id,
+                        'job_id'           => $application->job_id,
+                        'url'              => route('applications.mine'),
+                        'when_wib'         => \Carbon\Carbon::now('Asia/Jakarta')->format('d M Y, H:i') . ' WIB',
+                    ],
+                    'read_at'    => null,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+
+                return back()->with('ok', 'Email Offer Letter berhasil dikirim beserta notifikasi.');
             } catch (\Exception $e) {
                 \Log::error('Failed to send OfferLetterMail: ' . $e->getMessage());
                 return back()->with('error', 'Gagal mengirim email: ' . $e->getMessage());
@@ -1088,7 +1109,28 @@ class ApplicationController extends Controller
                 $mail->bodyContent = $data['email_body'];
                 \Mail::to($application->user->email)->send($mail);
                 \Log::info("MCU Mail sent successfully for app: {$application->id}");
-                return back()->with('ok', 'Undangan MCU berhasil dikirim.');
+
+                // Tambahkan in-app notification
+                \Illuminate\Notifications\DatabaseNotification::create([
+                    'id'             => (string) \Illuminate\Support\Str::uuid(),
+                    'type'           => 'app:application.mcu_sent',
+                    'notifiable_type' => \App\Models\User::class,
+                    'notifiable_id'  => $application->user_id,
+                    'data'           => [
+                        'title'            => 'Undangan MCU',
+                        'body'             => 'Kamu menerima email Undangan Medical Check Up (MCU) untuk posisi "' . ($application->job->title ?? '-') . '". Silakan cek kotak masuk atau folder spam di email kamu untuk instruksi lebih lanjut.',
+                        'job_title'        => $application->job->title ?? '-',
+                        'application_id'   => $application->id,
+                        'job_id'           => $application->job_id,
+                        'url'              => route('applications.mine'),
+                        'when_wib'         => \Carbon\Carbon::now('Asia/Jakarta')->format('d M Y, H:i') . ' WIB',
+                    ],
+                    'read_at'    => null,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+
+                return back()->with('ok', 'Undangan MCU berhasil dikirim beserta notifikasi.');
             } catch (\Exception $e) {
                 \Log::error('Failed to send McuMail: ' . $e->getMessage());
                 return back()->with('error', 'Gagal mengirim email MCU: ' . $e->getMessage());

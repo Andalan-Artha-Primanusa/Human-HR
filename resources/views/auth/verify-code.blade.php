@@ -108,7 +108,7 @@
             </form>
 
             {{-- FORM RESEND (TERPISAH, AMAN) --}}
-            <form method="POST" action="{{ route('verification.code.resend') }}" class="mt-4 text-center">
+            <form method="POST" action="{{ route('verification.send') }}" class="mt-4 text-center">
               @csrf
               <button type="submit"
                 class="text-sm text-blue-700 underline hover:text-blue-800">

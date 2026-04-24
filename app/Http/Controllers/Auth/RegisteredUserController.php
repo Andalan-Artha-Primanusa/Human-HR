@@ -14,19 +14,11 @@ use Illuminate\View\View;
 
 class RegisteredUserController extends Controller
 {
-    /**
-     * Tampilkan halaman register.
-     */
     public function create(): View
     {
         return view('auth.register');
     }
 
-    /**
-     * Proses registrasi (verifikasi via OTP/Kode, tanpa link).
-     *
-     * @throws \Illuminate\Validation\ValidationException
-     */
     public function store(Request $request): RedirectResponse
     {
         $request->validate([
@@ -36,23 +28,19 @@ class RegisteredUserController extends Controller
             'agree'  => ['accepted'],
         ]);
 
-        // Catatan: $request->string(...) mengembalikan Stringable; cast ke string.
         $user = User::create([
             'name' => (string) $request->string('name'),
             'email' => (string) $request->string('email'),
             'password' => Hash::make((string) $request->string('password')),
-            // Registrasi publik selalu jadi pelamar.
             'role' => 'pelamar',
         ]);
 
-        // Trigger event standar → listener SendEmailVerificationCode akan generate & kirim OTP
+        // 🔥 ini kirim EMAIL VERIFICATION LINK
         event(new Registered($user));
 
-        // Login user supaya bisa akses form OTP
         Auth::login($user);
 
-        // >>> TANPA verifikasi link. Langsung ke form input kode OTP.
-        return redirect()->route('verification.code.form')
-            ->with('status', 'verification-link-sent'); // opsional: ubah pesan jika mau
+        return redirect()->route('verification.notice')
+            ->with('status', 'verification-link-sent');
     }
 }

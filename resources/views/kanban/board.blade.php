@@ -372,7 +372,7 @@ textarea.fm-ctrl { resize: vertical; min-height: 68px; }
                               placeholder="Tulis penilaian kandidat..."></textarea>
                   </div>
                   <div>
-                    <label class="fm-label">Setuju Lanjut ke User/Trainer IV?</label>
+                    <label class="fm-label">Rekomendasi / Setuju Lanjut?</label>
                     <select name="approve_user" class="fm-ctrl" required>
                       <option value="">— Pilih —</option>
                       <option value="yes">✓ Setuju</option>
@@ -380,7 +380,7 @@ textarea.fm-ctrl { resize: vertical; min-height: 68px; }
                     </select>
                   </div>
                   <button type="submit" class="btn-xs btn-primary" style="width:100%;justify-content:center">
-                    Submit Feedback & Lanjutkan
+                    Simpan Feedback
                   </button>
                 </form>
               @endif
@@ -393,14 +393,14 @@ textarea.fm-ctrl { resize: vertical; min-height: 68px; }
                       action="{{ route('admin.applications.move', $a) }}"
                       class="fb-form">
                   @csrf
-                  <input type="hidden" name="to" value="offer">
+                  <input type="hidden" name="to" value="user_trainer_iv">
                   <div>
                     <label class="fm-label">Feedback Trainer</label>
                     <textarea name="feedback_trainer" class="fm-ctrl" required
                               placeholder="Tulis penilaian kandidat..."></textarea>
                   </div>
                   <div>
-                    <label class="fm-label">Setuju Lanjut ke OL?</label>
+                    <label class="fm-label">Rekomendasi / Setuju Lanjut?</label>
                     <select name="approve_trainer" class="fm-ctrl" required>
                       <option value="">— Pilih —</option>
                       <option value="yes">✓ Setuju</option>
@@ -408,7 +408,7 @@ textarea.fm-ctrl { resize: vertical; min-height: 68px; }
                     </select>
                   </div>
                   <button type="submit" class="btn-xs btn-primary" style="width:100%;justify-content:center">
-                    Submit Feedback & Lanjutkan
+                    Simpan Feedback
                   </button>
                 </form>
               @endif

@@ -22,7 +22,7 @@ use App\Http\Controllers\Admin\AuditLogController;
 use App\Http\Controllers\SitePublicController;
 
 // === OTP Verify Code Controller
-use App\Http\Controllers\Auth\VerifyCodeController;
+// use App\Http\Controllers\Auth\VerifyCodeController;
 
 // === NEW: pusat notifikasi & interview milik user
 use App\Http\Controllers\UserNotificationController;
@@ -77,25 +77,25 @@ Route::get('/sites/{site}', [SitePublicController::class, 'show'])->name('sites.
 | Email Verification via Kode (OTP) — butuh login (belum perlu verified)
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth'])->group(function () {
-    Route::get('/email/verify', [VerifyCodeController::class, 'notice'])
-        ->name('verification.notice');
+// Route::middleware(['auth'])->group(function () {
+//     Route::get('/email/verify', [VerifyCodeController::class, 'notice'])
+//         ->name('verification.notice');
 
-    Route::get('/email/verify/code', [VerifyCodeController::class, 'showForm'])
-        ->name('verification.code.form');
+//     Route::get('/email/verify/code', [VerifyCodeController::class, 'showForm'])
+//         ->name('verification.code.form');
 
-    Route::post('/email/verify/code', [VerifyCodeController::class, 'verify'])
-        ->middleware('throttle:6,1')
-        ->name('verification.code.verify');
+//     Route::post('/email/verify/code', [VerifyCodeController::class, 'verify'])
+//         ->middleware('throttle:6,1')
+//         ->name('verification.code.verify');
 
-    Route::post('/email/verify/resend', [VerifyCodeController::class, 'resend'])
-        ->middleware('throttle:6,1')
-        ->name('verification.code.resend');
+//     Route::post('/email/verify/resend', [VerifyCodeController::class, 'resend'])
+//         ->middleware('throttle:6,1')
+//         ->name('verification.code.resend');
 
-    // Mencegah error "Route [verification.verify] not defined." dari default behavior Laravel
-    Route::get('/email/verify/{id}/{hash}', [VerifyCodeController::class, 'showForm'])
-        ->name('verification.verify');
-});
+//     // Mencegah error "Route [verification.verify] not defined." dari default behavior Laravel
+//     Route::get('/email/verify/{id}/{hash}', [VerifyCodeController::class, 'showForm'])
+//         ->name('verification.verify');
+// });
 
 /*
 |--------------------------------------------------------------------------

@@ -9,7 +9,9 @@ use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvi
 class EventServiceProvider extends ServiceProvider
 {
     protected $listen = [
-        Registered::class => [SendEmailVerificationCode::class],
+        Registered::class => [
+            \Illuminate\Auth\Listeners\SendEmailVerificationNotification::class,
+        ],
     ];
 
     // Pastikan discovery dimatikan jika Anda pakai $listen

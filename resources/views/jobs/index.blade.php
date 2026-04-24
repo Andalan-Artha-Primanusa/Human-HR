@@ -477,7 +477,29 @@
                           </div>
 
                           <div>
-                            @if(strtolower((string) $status) === 'open')
+                            @php
+                                $myApp = Auth::check() ? ($job->applications->first() ?? null) : null;
+                                $prettyStage = [
+                                    'applied' => 'Pengajuan Berkas',
+                                    'screening' => 'Screening',
+                                    'psychotest' => 'Psikotes',
+                                    'hr_iv' => 'HR Interview',
+                                    'user_iv' => 'User Interview',
+                                    'user_trainer_iv' => 'Trainer Interview',
+                                    'offer' => 'Offering',
+                                    'mcu' => 'MCU',
+                                    'mobilisasi' => 'Mobilisasi',
+                                    'ground_test' => 'Ground Test',
+                                    'hired' => 'Diterima',
+                                    'not_qualified' => 'Tidak Lolos',
+                                    'rejected' => 'Tidak Lolos',
+                                ];
+                            @endphp
+                            @if($myApp)
+                                <span class="inline-flex rounded-full border border-blue-200 bg-blue-50 px-2 py-0.5 text-[10.5px] font-semibold text-blue-700">
+                                  DILAMAR: {{ strtoupper($prettyStage[$myApp->current_stage ?? 'applied'] ?? $myApp->current_stage ?? 'APPLIED') }}
+                                </span>
+                            @elseif(strtolower((string) $status) === 'open')
                                 <span class="inline-flex rounded-full border border-emerald-200 bg-emerald-500/10 px-2 py-0.5 text-[10.5px] font-semibold text-emerald-700">
                                   OPEN {{ $year }}
                                 </span>

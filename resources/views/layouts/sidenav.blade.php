@@ -142,7 +142,7 @@
             <div class="p-3 mx-0 mb-2 border border-red-200 rounded-lg bg-red-50">
               <div class="text-[12px] text-red-800 mb-2">Akun belum terverifikasi. Selesaikan verifikasi untuk akses menu.</div>
               @if (Route::has('verification.code.resend'))
-                  <form method="POST" action="{{ route('verification.code.resend') }}">
+                  <form method="POST" action="{{ route('verification.send') }}">
                     @csrf
                     <button class="inline-flex items-center gap-2 rounded-md bg-red-600 text-white px-3 py-1.5 text-xs font-semibold hover:bg-red-700">
                       Kirim Ulang Email Verifikasi
@@ -359,7 +359,7 @@
               <div class="p-3 mx-0 mb-2 border border-red-200 rounded-lg bg-red-50">
                 <div class="text-[12px] text-red-800 mb-2">Akun belum terverifikasi. Selesaikan verifikasi untuk akses menu.</div>
                 @if (Route::has('verification.code.resend'))
-                    <form method="POST" action="{{ route('verification.code.resend') }}" {!! $closeAttr !!}>
+                    <form method="POST" action="{{ route('verification.send') }}" {!! $closeAttr !!}>
                       @csrf
                       <button class="inline-flex items-center gap-2 rounded-md bg-red-600 text-white px-3 py-1.5 text-xs font-semibold hover:bg-red-700">
                         Kirim Ulang Email Verifikasi
@@ -403,6 +403,17 @@
               <span class="{{ $iconWrap }}"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6M9 16h6M9 8h6m-3-5h-1a2 2 0 00-2 2H7a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2z"/></svg></span>
               <span>Lamaran Saya</span>
             </a>
+
+            @if(in_array($u->role ?? '', ['pelamar', 'trainer', 'karyawan']))
+              <a href="{{ route('kanban.mine') }}" {!! $closeAttr !!} class="{{ $linkMobile }} {{ $activeMenu('kanban.mine') }}">
+                <span class="{{ $iconWrap }}"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 5.25h4.5v13.5h-4.5zM9.75 5.25h4.5v13.5h-4.5zM15.75 5.25h4.5v13.5h-4.5z"/></svg></span>
+                <span>Kanban Board</span>
+              </a>
+              <a href="{{ $href('me.interviews.index') }}" {!! $closeAttr !!} class="{{ $linkMobile }} {{ $activeMenu('me.interviews.*') }}">
+                <span class="{{ $iconWrap }}"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.5 12.75A6.25 6.25 0 018.75 6.5h6.5A6.25 6.25 0 0121.5 12.75v.25a4.75 4.75 0 01-4.75 4.75h-3L9 21.5l.75-3.75H8.75A4.75 4.75 0 014 13v-.25Z"/></svg></span>
+                <span>Schedule Interview</span>
+              </a>
+            @endif
         @endauth
       </div>
 

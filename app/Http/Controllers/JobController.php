@@ -83,6 +83,11 @@ class JobController extends Controller
 
         if (!$isAdminRoute) {
             $baseQuery->where('status', 'open');
+            if (Auth::check()) {
+                $baseQuery->with(['applications' => function ($q) {
+                    $q->where('user_id', Auth::id())->select('id', 'job_id', 'user_id', 'current_stage');
+                }]);
+            }
         }
 
         if (!empty($division)) {
@@ -116,8 +121,8 @@ class JobController extends Controller
         };
 
 
-        // 4) Micro-cache untuk publik
-        if (!$isAdminRoute) {
+        // 4) Micro-cache untuk publik (hanya untuk guest)
+        if (!$isAdminRoute && !Auth::check()) {
             $cacheKey = 'jobs.public.' . md5(json_encode([
                 'division' => $division,
                 'site' => $siteCode,

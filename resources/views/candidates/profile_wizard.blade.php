@@ -237,9 +237,9 @@
 
           <div class="grid gap-4 mt-4 sm:grid-cols-3">
             <div>
-              <label class="text-sm text-slate-600">Pendidikan Terakhir <span class="text-red-600">*</span></label>
+              <label class="text-sm text-slate-600">Pendidikan Terakhir</label>
               @php $ed = old('last_education', $profile->last_education); @endphp
-              <select required name="last_education" id="last_education" class="w-full px-3 py-2 mt-1 border rounded-lg" onchange="document.getElementById('sma-smk-group').style.display = this.value === 'SMA_SMK' ? 'flex' : 'none'; document.getElementById('lainnya-group').style.display = this.value === 'LAINNYA' ? 'block' : 'none';">
+              <select name="last_education" id="last_education" class="w-full px-3 py-2 mt-1 border rounded-lg" onchange="document.getElementById('sma-smk-group').style.display = this.value === 'SMA_SMK' ? 'flex' : 'none'; document.getElementById('lainnya-group').style.display = this.value === 'LAINNYA' ? 'block' : 'none';">
                 <option value="">—</option>
                 @foreach(['SD', 'SMP', 'SMA_SMK', 'D1', 'D2', 'D3', 'D4', 'S1', 'S2', 'S3', 'LAINNYA'] as $e)
                       <option value="{{ $e }}" @selected($ed === $e)>{{ $e }}</option>
@@ -265,12 +265,12 @@
               <input name="other_education" value="{{ old('other_education', $profile->extras['other_education'] ?? '') }}" class="w-full px-3 py-2 border rounded-lg">
             </div>
             <div>
-              <label class="text-sm text-slate-600">Jurusan <span class="text-red-600">*</span></label>
-              <input required name="education_major" value="{{ old('education_major', $profile->education_major) }}" class="w-full px-3 py-2 mt-1 border rounded-lg">
+              <label class="text-sm text-slate-600">Jurusan</label>
+              <input name="education_major" value="{{ old('education_major', $profile->education_major) }}" class="w-full px-3 py-2 mt-1 border rounded-lg">
             </div>
             <div>
-              <label class="text-sm text-slate-600">Sekolah/Kampus <span class="text-red-600">*</span></label>
-              <input required name="education_school" value="{{ old('education_school', $profile->education_school) }}" class="w-full px-3 py-2 mt-1 border rounded-lg">
+              <label class="text-sm text-slate-600">Sekolah/Kampus</label>
+              <input name="education_school" value="{{ old('education_school', $profile->education_school) }}" class="w-full px-3 py-2 mt-1 border rounded-lg">
             </div>
           </div>
         </div>
@@ -547,9 +547,9 @@
       </section>
 
       {{-- Right Action Rail --}}
-      <div class="fixed z-20 pointer-events-none right-4 bottom-6 md:top-1/2 md:bottom-auto md:-translate-y-1/2">
-        <div class="w-48 p-3 border shadow-lg pointer-events-auto rounded-2xl border-brand-200/70 bg-white/95 backdrop-blur">
-          <div class="px-1 pb-2 text-xs text-slate-600">Langkah <span class="font-semibold text-slate-900" x-text="step"></span> / 3 · <span x-text="progress+'%'"></span></div>
+      <div class="fixed z-20 pointer-events-none inset-x-0 bottom-0 p-3 md:inset-x-auto md:p-0 md:right-4 md:top-1/2 md:-translate-y-1/2">
+        <div class="w-full max-w-sm mx-auto md:mx-0 md:w-48 p-3 border shadow-[0_-4px_20px_rgba(0,0,0,0.1)] md:shadow-lg pointer-events-auto rounded-2xl md:rounded-2xl rounded-b-none md:border-brand-200/70 border-brand-200 bg-white/95 backdrop-blur">
+          <div class="px-1 pb-2 text-xs text-center md:text-left text-slate-600">Langkah <span class="font-semibold text-slate-900" x-text="step"></span> / 3 · <span x-text="progress+'%'"></span></div>
           <div class="space-y-2">
             <button type="button" @click.prevent="prev()" :disabled="step===1" class="inline-flex items-center justify-center w-full gap-2 px-3 py-2 text-sm font-medium border rounded-xl border-brand-200 text-brand-800 hover:bg-brand-50 disabled:opacity-50">
               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
@@ -584,6 +584,9 @@
 
 
 </main>
+
+  <!-- Beri jarak bawah ekstra untuk mobile agar konten tidak tertutup Action Rail -->
+  <div class="h-24 md:h-0"></div>
 
 {{-- Error Modal: kelengkapan wajib, render di akhir body agar floating di atas semua konten --}}
 <template x-if="errors.length">
@@ -728,8 +731,7 @@
           const f = this.$refs.form;
           const req = [
             ['full_name','Nama Lengkap'], ['gender','Jenis Kelamin'], ['age','Usia'], ['birthplace','Tempat Lahir'], ['birthdate','Tanggal Lahir'],
-            ['nik','NIK KTP'], ['email','Email'], ['phone','Nomor HP'], ['last_education','Pendidikan Terakhir'],
-            ['education_major','Jurusan'], ['education_school','Sekolah/Kampus'],
+            ['nik','NIK KTP'], ['email','Email'], ['phone','Nomor HP'],
             ['ktp_address','Alamat KTP'], ['ktp_village','Desa/Kelurahan (KTP)'], ['ktp_district','Kecamatan (KTP)'], ['ktp_city','Kab/Kota (KTP)'], ['ktp_province','Provinsi (KTP)'], ['ktp_postal_code','Kode Pos (KTP)'],
             ['domicile_address','Alamat Domisili'], ['domicile_village','Desa/Kelurahan (Domisili)'], ['domicile_district','Kecamatan (Domisili)'], ['domicile_city','Kab/Kota (Domisili)'], ['domicile_province','Provinsi (Domisili)'], ['domicile_postal_code','Kode Pos (Domisili)']
           ];

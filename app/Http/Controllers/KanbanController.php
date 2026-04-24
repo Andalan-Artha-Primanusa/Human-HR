@@ -26,7 +26,9 @@ class KanbanController extends Controller
             'not_qualified' => 'TIDAK lOLOS',
         ];
 
-        // Untuk trainer/karyawan/pelamar: tampilkan semua kandidat, bukan hanya milik user
+        // Filter khusus:
+        // Pelamar -> lihat lamaran sendiri
+        // Karyawan/Trainer -> lihat lamaran di mana mereka diassign sebagai panel interview
         $apps = JobApplication::with([
             'job:id,title,division,site_id',
             'job.site:id,code,name',
@@ -37,6 +39,17 @@ class KanbanController extends Controller
             'interviews',
             'offer',
         ])
+            ->where(function ($query) use ($user) {
+                if (in_array($user->role, ['karyawan', 'trainer'])) {
+                    // Karyawan/Trainer -> lihat lamaran di mana mereka diassign sebagai panel interview
+                    $query->whereHas('interviews', function ($q) use ($user) {
+                        $q->whereJsonContains('panel', $user->name);
+                    });
+                } else {
+                    // Pelamar (dan role lainnya jika nyasar) -> wajib hanya lihat milik sendiri
+                    $query->where('user_id', $user->id);
+                }
+            })
             ->orderBy('created_at')
             ->orderBy('id')
             ->get();

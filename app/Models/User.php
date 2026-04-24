@@ -2,11 +2,11 @@
 
 namespace App\Models;
 
-use Illuminate\Contracts\Auth\MustVerifyEmail; // ⬅️ penting utk verified
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use App\Models\Concerns\HasUuidPrimaryKey; // UUID PK
+use App\Models\Concerns\HasUuidPrimaryKey;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -14,27 +14,20 @@ class User extends Authenticatable implements MustVerifyEmail
 {
     use HasFactory, Notifiable, HasUuidPrimaryKey;
 
-    /**
-     * Relasi: Semua lamaran yang diajukan user ini.
-     */
-    public function jobApplications()
-    {
-        return $this->hasMany(\App\Models\JobApplication::class, 'user_id');
-    }
-
-    /** Mass assignable */
     protected $fillable = [
         'name',
         'email',
         'password',
-        'role',       // pelamar|hr|superadmin|trainer
-        'id_employe', // Nomor/NIK karyawan (ikuti ejaan kolom di DB)
+        'role',
+        'id_employe',
     ];
 
-    /** Hidden */
-    protected $hidden = ['password', 'remember_token', 'api_token'];
+    protected $hidden = [
+        'password',
+        'remember_token',
+        'api_token'
+    ];
 
-    /** Casts */
     protected function casts(): array
     {
         return [
@@ -44,37 +37,42 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /*
-    |--------------------------------------------------------------------------
-    | Mutators / Normalizers
-    |--------------------------------------------------------------------------
-    <?php
+    |------------------------------------------
+    | FIX: Mutator Email
+    |------------------------------------------
+    */
+    public function setEmailAttribute($value)
     {
-        $this->attributes['email'] = is_null($value) ? null : mb_strtolower(trim($value));
+        $this->attributes['email'] = is_null($value)
+            ? null
+            : mb_strtolower(trim($value));
     }
 
     /*
-    |--------------------------------------------------------------------------
+    |------------------------------------------
     | Helpers Role
-    |--------------------------------------------------------------------------
+    |------------------------------------------
     */
     public function hasRole(string|array $roles): bool
     {
         $roles = is_array($roles) ? $roles : explode('|', $roles);
         return in_array($this->role, array_map('trim', $roles), true);
     }
+
     public function isHr(): bool
     {
         return $this->role === 'hr';
     }
+
     public function isSuperadmin(): bool
     {
         return $this->role === 'superadmin';
     }
 
     /*
-    |--------------------------------------------------------------------------
+    |------------------------------------------
     | Helpers Verifikasi
-    |--------------------------------------------------------------------------
+    |------------------------------------------
     */
     public function isVerified(): bool
     {
@@ -82,9 +80,9 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /*
-    |--------------------------------------------------------------------------
+    |------------------------------------------
     | Scopes
-    |--------------------------------------------------------------------------
+    |------------------------------------------
     */
     public function scopeVerified($q)
     {
@@ -97,23 +95,32 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /*
-    |--------------------------------------------------------------------------
+    |------------------------------------------
     | Relasi
-    |--------------------------------------------------------------------------
+    |------------------------------------------
     */
     public function profile(): HasOne
     {
-        return $this->hasOne(CandidateProfile::class);
+        return $this->hasOne(\App\Models\CandidateProfile::class);
     }
 
     public function applications(): HasMany
     {
-        return $this->hasMany(JobApplication::class);
+        return $this->hasMany(\App\Models\JobApplication::class);
     }
 
-    // Alias lain (kalau masih dipakai di beberapa tempat)
     public function candidateProfile(): HasOne
     {
-        return $this->hasOne(CandidateProfile::class, 'user_id');
+        return $this->hasOne(\App\Models\CandidateProfile::class, 'user_id');
+    }
+
+    /**
+     * Send the email verification notification.
+     *
+     * @return void
+     */
+    public function sendEmailVerificationNotification()
+    {
+        $this->notify(new \App\Notifications\CustomVerifyEmail);
     }
 }

@@ -405,7 +405,7 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
                   @if($stageKey === 'offer' && $isSuperHR)
                     <button type="button" class="btn-xs btn-primary"
                       onclick="openSendOlModal('{{ $a->id }}', '{{ addslashes($a->user->name) }}', '{{ optional($a->offer)->salary['gross'] ?? 0 }}', '{{ optional($a->offer)->salary['allowance'] ?? 0 }}', this)">
-                      ✉️ Kirim OL
+                      ✉️ Kirim OL ke {{ $a->user->name }}
                     </button>
                   @endif
 
@@ -413,7 +413,7 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
                   @if($stageKey === 'mcu' && $isSuperHR)
                     <button type="button" class="btn-xs btn-primary"
                       onclick="openSendMcuModal('{{ $a->id }}', '{{ addslashes($a->user->name) }}', this)">
-                      ✉️ Kirim Undangan MCU
+                      ✉️ Kirim Undangan MCU ke {{ $a->user->name }}
                     </button>
                   @endif
 
@@ -519,9 +519,7 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
       <button class="kn-modal-close" onclick="closeModal('overlay-sched')">✕</button>
     </div>
     <div class="kn-modal-body">
-      <div class="stage-banner" id="sched-banner">
-        ➜ Setelah submit, kandidat akan otomatis dipindah ke stage berikutnya
-      </div>
+      <div class="stage-banner" id="sched-banner" style="display:none;"></div>
       <form id="sched-form" method="POST">
         @csrf
         <input type="hidden" name="_method" value="POST">
@@ -563,7 +561,7 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
     </div>
     <div class="kn-modal-footer">
       <button class="btn-xs btn-outline" onclick="closeModal('overlay-sched')">Batal</button>
-      <button class="btn-xs btn-primary" onclick="submitSchedule()">Kirim Undangan &amp; Pindah Stage</button>
+      <button class="btn-xs btn-primary" onclick="submitSchedule()">Kirim Undangan</button>
     </div>
   </div>
 </div>
@@ -1221,18 +1219,7 @@ function submitSchedule() {
   })
   .then(() => {
     closeModal('overlay-sched');
-    // Pindahkan kartu secara optimistic
-    if (schedCardEl && schedToStage) {
-      const fromStage = schedCardEl.dataset.stage;
-      const toCol     = document.getElementById('col-' + schedToStage);
-      if (toCol) {
-        toCol.insertBefore(schedCardEl, toCol.firstChild);
-        schedCardEl.dataset.stage = schedToStage;
-        updateCount(fromStage,  -1);
-        updateCount(schedToStage, 1);
-      }
-    }
-    showToast('Undangan dikirim! Kandidat dipindah ke ' + (stageLabels[schedToStage] || schedToStage), 'ok');
+    showToast('Undangan berhasil dikirim!', 'ok');
     schedCardEl  = null;
     schedToStage = null;
   })
