@@ -8,12 +8,12 @@ Membantu pelamar menggunakan sistem untuk registrasi, verifikasi email, melamar 
 ## 2. Prasyarat
 - Memiliki akun aktif.
 - Sudah login.
-- Sudah menyelesaikan verifikasi email menggunakan OTP.
+- Sudah menyelesaikan verifikasi email melalui link verifikasi Laravel.
 
 ## 3. Ruang Lingkup
 Fitur pelamar mencakup:
 - Registrasi dan login
-- Verifikasi email via OTP
+- Verifikasi email via link
 - Melihat lowongan publik
 - Melengkapi profil kandidat
 - Melamar pekerjaan
@@ -29,18 +29,18 @@ Fitur pelamar mencakup:
 1. Buka halaman register.
 2. Isi nama, email, dan password.
 3. Sistem membuat akun dengan role pelamar.
-4. Sistem mengirim kode OTP verifikasi email.
+4. Sistem mengirim link verifikasi email.
 
 ### 4.2 Login
 1. Buka halaman login.
 2. Masukkan email dan password.
-3. Setelah login, jika email belum terverifikasi, sistem mengarahkan ke flow OTP.
+3. Setelah login, jika email belum terverifikasi, sistem mengarahkan ke halaman verifikasi email.
 
-### 4.3 Verifikasi Email OTP
-1. Buka halaman input kode verifikasi.
-2. Masukkan 6 digit kode yang dikirim ke email.
-3. Jika kode benar dan belum kedaluwarsa, email ditandai verified.
-4. Jika gagal, sistem menampilkan pesan error dan membatasi percobaan.
+### 4.3 Verifikasi Email
+1. Buka email verifikasi yang dikirim sistem.
+2. Klik link verifikasi email.
+3. Jika link valid dan belum kedaluwarsa, email ditandai verified.
+4. Jika email belum masuk, gunakan tombol kirim ulang link verifikasi.
 
 ### 4.4 Melihat Lowongan
 1. Buka daftar lowongan publik.

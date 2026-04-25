@@ -43,6 +43,24 @@
 </head>
 <body class="h-full bg-slate-50 text-slate-800">
 
+@if (session('verify_email_notice'))
+  <div id="verifyEmailModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4" role="dialog" aria-modal="true" aria-labelledby="verifyEmailModalTitle">
+    <div class="w-full max-w-sm rounded-xl bg-white p-6 shadow-2xl ring-1 ring-slate-200">
+      <div class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 text-amber-700">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16v12H4z" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m4 7 8 6 8-6" />
+        </svg>
+      </div>
+      <h2 id="verifyEmailModalTitle" class="text-center text-lg font-semibold text-slate-900">Cek email kamu</h2>
+      <p class="mt-2 text-center text-sm leading-6 text-slate-600">{{ session('verify_email_notice') }}</p>
+      <button type="button" id="verifyEmailModalClose" class="mt-5 w-full rounded-lg bg-[#a77d52] px-4 py-2.5 text-sm font-semibold text-white hover:opacity-90">
+        Oke
+      </button>
+    </div>
+  </div>
+@endif
+
 <div id="appRoot" class="flex min-h-screen" data-cloak>
   {{-- ===== Desktop Sidebar (>= md) ===== --}}
   <aside
@@ -191,6 +209,12 @@
 
     // Lepas cloak
     $root && $root.removeAttribute('data-cloak');
+
+    const verifyModal = $doc.getElementById('verifyEmailModal');
+    const verifyClose = $doc.getElementById('verifyEmailModalClose');
+    verifyClose && verifyClose.addEventListener('click', () => {
+      verifyModal && verifyModal.remove();
+    });
   })();
 </script>
 

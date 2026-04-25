@@ -52,14 +52,13 @@
     }
 
     // Helper format tanggal singkat
-    function ac_dt($dt)
-    {
+    $acDt = function ($dt) {
         try {
             return \Carbon\Carbon::parse($dt)->locale('id')->isoFormat('ddd, D MMM HH:mm');
         } catch (\Throwable $e) {
             return (string) $dt;
         }
-    }
+    };
 
     // URL JSON notifikasi untuk JS (kalau route tersedia)
     $notifJsonUrl = (Route::has('me.notifications.index') && $u)
@@ -114,7 +113,7 @@
                           <div class="min-w-0">
                             <div class="font-medium text-slate-800 truncate">{{ $iv->title ?? 'Interview' }}</div>
                             <div class="text-xs text-slate-600 mt-0.5">
-                              {{ ac_dt($iv->start_at) }}
+                              {{ $acDt($iv->start_at) }}
                               @if($iv->mode) • {{ Str::title($iv->mode) }} @endif
                             </div>
                             @if($iv->location)

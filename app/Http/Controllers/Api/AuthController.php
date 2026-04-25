@@ -30,10 +30,16 @@ class AuthController extends Controller
         $passwordValid = $user && Hash::check($credentials['password'], $user->password);
         $emailVerified = $user?->hasVerifiedEmail();
 
-        if (!$passwordValid || !$emailVerified) {
+        if (!$passwordValid) {
             return response()->json([
-                'message' => 'Kredensial tidak valid atau email belum diverifikasi.',
+                'message' => 'Kredensial tidak valid.',
             ], 422);
+        }
+
+        if (!$emailVerified) {
+            return response()->json([
+                'message' => 'Email belum diverifikasi.',
+            ], 403);
         }
 
         // Use hash for API token (NOT plain random string)

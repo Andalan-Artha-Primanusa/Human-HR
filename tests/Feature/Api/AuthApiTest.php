@@ -32,7 +32,7 @@ class AuthApiTest extends TestCase
         $this->assertNotEmpty($response->json('token'));
         $this->assertDatabaseHas('users', [
             'id' => $user->id,
-            'api_token' => $response->json('token'),
+            'api_token' => hash('sha256', $response->json('token')),
         ]);
     }
 

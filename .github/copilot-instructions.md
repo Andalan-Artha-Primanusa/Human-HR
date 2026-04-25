@@ -8,7 +8,7 @@
 - Views use Blade templating with consistent naming: `jobs.index`, `admin.users.edit`
 
 ## Architecture
-- **Framework**: Laravel 12 with custom OTP-based email verification (not standard Breeze)
+- **Framework**: Laravel 12 with Laravel signed-link email verification
 - **Authentication**: Users have roles (pelamar|hr|superadmin) stored in `User.role` column
 - **Models**: 20+ domain models including Job, CandidateProfile, JobApplication, Interview, Offer
 - **Admin Panel**: Separate `Admin/` namespace with `/admin` route prefix, requires `role:hr|superadmin` middleware
@@ -24,7 +24,7 @@
 
 ## Conventions
 - **UUID Routing**: All main routes use UUID parameters (pre-configured in `routes/web.php`)
-- **OTP Verification**: Custom flow using `EmailVerificationCode` model (6-digit codes, not standard Laravel verification)
+- **Email Verification**: Standard Laravel signed verification links via `MustVerifyEmail`
 - **Role Checks**: Use `auth`, `verified`, `role:hr|superadmin` middleware stack for admin endpoints
 - **Enums**: Job model uses LEVELS/DIVISIONS constants for dropdowns
 - **Seeders**: Run `RolesAndStagesSeeder` before `DemoDataSeeder` for proper data setup

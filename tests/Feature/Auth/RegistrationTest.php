@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Auth;
 
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -26,6 +27,8 @@ class RegistrationTest extends TestCase
         ]);
 
         $this->assertAuthenticated();
-        $response->assertRedirect(route('dashboard', absolute: false));
+        $response->assertRedirect(route('jobs.index', absolute: false));
+        $response->assertSessionHas('verify_email_notice', 'Cek email kamu untuk verifikasi akun.');
+        $this->assertFalse(User::where('email', 'test@example.com')->first()->hasVerifiedEmail());
     }
 }

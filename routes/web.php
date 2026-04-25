@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
@@ -20,9 +20,6 @@ use App\Http\Controllers\Admin\AuditLogController;
 
 // === Public Sites Controller
 use App\Http\Controllers\SitePublicController;
-
-// === OTP Verify Code Controller
-// use App\Http\Controllers\Auth\VerifyCodeController;
 
 // === NEW: pusat notifikasi & interview milik user
 use App\Http\Controllers\UserNotificationController;
@@ -71,31 +68,6 @@ Route::get('/jobs/{job}', [JobController::class, 'show'])->name('jobs.show');
 */
 Route::get('/sites', [SitePublicController::class, 'index'])->name('sites.index');
 Route::get('/sites/{site}', [SitePublicController::class, 'show'])->name('sites.show');
-
-/*
-|--------------------------------------------------------------------------
-| Email Verification via Kode (OTP) — butuh login (belum perlu verified)
-|--------------------------------------------------------------------------
-*/
-// Route::middleware(['auth'])->group(function () {
-//     Route::get('/email/verify', [VerifyCodeController::class, 'notice'])
-//         ->name('verification.notice');
-
-//     Route::get('/email/verify/code', [VerifyCodeController::class, 'showForm'])
-//         ->name('verification.code.form');
-
-//     Route::post('/email/verify/code', [VerifyCodeController::class, 'verify'])
-//         ->middleware('throttle:6,1')
-//         ->name('verification.code.verify');
-
-//     Route::post('/email/verify/resend', [VerifyCodeController::class, 'resend'])
-//         ->middleware('throttle:6,1')
-//         ->name('verification.code.resend');
-
-//     // Mencegah error "Route [verification.verify] not defined." dari default behavior Laravel
-//     Route::get('/email/verify/{id}/{hash}', [VerifyCodeController::class, 'showForm'])
-//         ->name('verification.verify');
-// });
 
 /*
 |--------------------------------------------------------------------------
@@ -157,7 +129,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 /*
 |--------------------------------------------------------------------------
-| Admin (HR & Superadmin) — wajib verified
+| Admin (HR & Superadmin) â€” wajib verified
 |--------------------------------------------------------------------------
 */
 Route::prefix('admin')
@@ -198,7 +170,7 @@ Route::prefix('admin')
         Route::post('applications/board/move', [ApplicationController::class, 'moveStageAjax'])
             ->name('applications.board.move');
 
-        // AJAX Simpan Feedback (dari modal Kanban — HR, Karyawan, Trainer)
+        // AJAX Simpan Feedback (dari modal Kanban â€” HR, Karyawan, Trainer)
         Route::post('applications/feedback', [ApplicationController::class, 'storeFeedback'])->name('applications.feedback.store');
         Route::delete('applications/feedback', [ApplicationController::class, 'deleteFeedback'])->name('applications.feedback.delete');
         

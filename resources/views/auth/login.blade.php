@@ -115,7 +115,7 @@
               <!-- REMEMBER -->
               <div class="flex items-center justify-between text-sm text-gray-600">
                 <label class="flex items-center gap-2">
-                  <input type="checkbox" class="rounded">
+                  <input type="checkbox" name="remember" class="rounded">
                   Ingat saya
                 </label>
 

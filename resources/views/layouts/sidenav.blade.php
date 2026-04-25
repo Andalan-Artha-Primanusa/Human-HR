@@ -141,7 +141,7 @@
           @if(!$isVerified)
             <div class="p-3 mx-0 mb-2 border border-red-200 rounded-lg bg-red-50">
               <div class="text-[12px] text-red-800 mb-2">Akun belum terverifikasi. Selesaikan verifikasi untuk akses menu.</div>
-              @if (Route::has('verification.code.resend'))
+              @if (Route::has('verification.send'))
                   <form method="POST" action="{{ route('verification.send') }}">
                     @csrf
                     <button class="inline-flex items-center gap-2 rounded-md bg-red-600 text-white px-3 py-1.5 text-xs font-semibold hover:bg-red-700">
@@ -358,7 +358,7 @@
           @if(!$isVerified)
               <div class="p-3 mx-0 mb-2 border border-red-200 rounded-lg bg-red-50">
                 <div class="text-[12px] text-red-800 mb-2">Akun belum terverifikasi. Selesaikan verifikasi untuk akses menu.</div>
-                @if (Route::has('verification.code.resend'))
+                @if (Route::has('verification.send'))
                     <form method="POST" action="{{ route('verification.send') }}" {!! $closeAttr !!}>
                       @csrf
                       <button class="inline-flex items-center gap-2 rounded-md bg-red-600 text-white px-3 py-1.5 text-xs font-semibold hover:bg-red-700">

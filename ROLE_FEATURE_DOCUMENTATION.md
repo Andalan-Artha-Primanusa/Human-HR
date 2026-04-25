@@ -20,13 +20,14 @@ Dokumen ini mengikuti implementasi route dan controller terkini.
 - role:hr|superadmin: hanya HR dan Superadmin
 
 ### 1.3 Verifikasi email
-Sistem menggunakan OTP (kode 6 digit), bukan link verifikasi default.
+Sistem menggunakan verifikasi email standar Laravel dengan signed link.
 Flow utama:
 1. User register
-2. User login
-3. User masuk ke halaman input OTP
-4. Setelah OTP valid, status email_verified_at terisi
-5. User baru bisa akses fitur dengan middleware verified
+2. Sistem mengirim link verifikasi email
+3. User login dan masuk ke halaman notice jika belum verified
+4. User klik link verifikasi dari email
+5. Status email_verified_at terisi
+6. User baru bisa akses fitur dengan middleware verified
 
 ## 2. Matrix Fitur per Role
 
@@ -62,10 +63,9 @@ Catatan:
 1. Buka halaman register
 2. Isi nama, email, password
 3. Sistem membuat user dengan role pelamar
-4. Sistem kirim OTP verifikasi email
-5. User login
-6. User input OTP
-7. Jika sukses, user dianggap verified
+4. Sistem kirim link verifikasi email
+5. User klik link verifikasi
+6. Jika sukses, user dianggap verified
 
 ### 3.2 Eksplor lowongan
 1. Buka daftar lowongan publik
@@ -160,7 +160,7 @@ Tambahan otoritas penting:
 2. Endpoint admin dilindungi middleware auth + verified + role
 3. Akses data user dibatasi per ownership atau role
 4. Detail lowongan publik tetap mengikuti policy view
-5. Verifikasi email menggunakan OTP dengan throttle
+5. Verifikasi email menggunakan signed link Laravel dengan throttle resend
 6. Notifikasi user hanya bisa diakses pemilik notifikasi
 7. Ekspor data besar memakai streaming/chunk untuk stabilitas memori
 8. Input pencarian disanitasi untuk menekan query liar
@@ -174,11 +174,10 @@ Tambahan otoritas penting:
 - GET /sites
 - GET /sites/{site}
 
-### 7.2 Auth + OTP
+### 7.2 Auth + Verifikasi Email
 - GET /email/verify
-- GET /email/verify/code
-- POST /email/verify/code
-- POST /email/verify/resend
+- GET /verify-email/{id}/{hash}
+- POST /email/verification-notification
 
 ### 7.3 Pelamar (verified)
 - GET /me/applications
@@ -224,7 +223,7 @@ Prefix: /admin
 ## 9. Checklist UAT per Role
 
 ### 9.1 Pelamar
-1. Register -> OTP -> verified sukses
+1. Register -> klik link verifikasi -> verified sukses
 2. Apply job sukses
 3. Lihat lamaran sendiri sukses
 4. Akses psikotes milik sendiri saja
@@ -245,7 +244,7 @@ Prefix: /admin
 
 ## 10. Catatan Operasional
 
-1. Saat migrasi dari flow verifikasi email link ke OTP, beberapa test bawaan Breeze perlu disesuaikan.
+1. Flow verifikasi email mengikuti signed link Laravel, jadi test bawaan Breeze bisa menjadi acuan utama.
 2. Gunakan seed role dan stage secara konsisten sebelum UAT.
 3. Untuk keamanan produksi, pastikan rate limit dan mail delivery dipantau.
 4. Untuk performa, pastikan index DB pada kolom filter yang sering dipakai (status, created_at, user_id, role).

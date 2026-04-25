@@ -24,8 +24,15 @@ class RegisteredUserController extends Controller
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'agree'  => ['accepted'],
+            'password' => ['required', 'confirmed', Rules\Password::min(6)],
+        ], [
+            'name.required' => 'Nama lengkap wajib diisi.',
+            'email.required' => 'Email wajib diisi.',
+            'email.email' => 'Format email tidak valid.',
+            'email.unique' => 'Email ini sudah terdaftar, silakan login.',
+            'password.required' => 'Password wajib diisi.',
+            'password.min' => 'Password minimal 6 karakter.',
+            'password.confirmed' => 'Konfirmasi password tidak sama.',
         ]);
 
         $user = User::create([
@@ -35,12 +42,12 @@ class RegisteredUserController extends Controller
             'role' => 'pelamar',
         ]);
 
-        // 🔥 ini kirim EMAIL VERIFICATION LINK
         event(new Registered($user));
 
         Auth::login($user);
 
-        return redirect()->route('verification.notice')
-            ->with('status', 'verification-link-sent');
+        return redirect()
+            ->route('jobs.index')
+            ->with('verify_email_notice', 'Cek email kamu untuk verifikasi akun.');
     }
 }
