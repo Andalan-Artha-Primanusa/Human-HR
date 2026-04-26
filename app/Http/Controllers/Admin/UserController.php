@@ -437,7 +437,7 @@ class UserController extends Controller
 
     private function allowedRoles(): array
     {
-        return ['pelamar', 'hr', 'superadmin', 'admin'];
+        return ['pelamar', 'hr', 'superadmin', 'admin', 'trainer', 'karyawan'];
     }
 
     private function ensureCanMutateUser(User $user): void

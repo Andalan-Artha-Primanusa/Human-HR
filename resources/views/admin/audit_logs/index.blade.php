@@ -21,11 +21,11 @@
 
     <div class="mx-auto w-full max-w-[1440px] px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
-      {{-- HEADER --}}
+{{-- HEADER --}}
       <section class="overflow-hidden bg-white border shadow-sm rounded-2xl" style="border-color: {{ $BORD }}">
         <div class="relative h-20 overflow-hidden sm:h-24 rounded-t-2xl">
-          <div class="absolute inset-0 rounded-t-2xl" style="background: linear-gradient(90deg, {{ $PRIMARY }}, {{ $SECOND }});"></div>
-          <div class="absolute inset-y-0 right-0 w-24 rounded-tr-2xl sm:w-36" style="background: linear-gradient(90deg, {{ $SECOND }}, {{ $PRIMARY }});"></div>
+          <div class="absolute inset-0 rounded-t-2xl bg-[#a77d52]"></div>
+          <div class="absolute inset-y-0 right-0 w-24 rounded-tr-2xl sm:w-36 bg-[#8b5e3c]"></div>
 
           <div class="relative flex items-center h-full px-5 text-white md:px-6">
             <div class="min-w-0">
@@ -36,7 +36,7 @@
         </div>
 
         {{-- FILTER --}}
-        <div class="p-6 border-t md:p-7 bg-[linear-gradient(180deg,_#faf7f4,_#ffffff)]" style="border-color: {{ $BORD }}">
+        <div class="p-6 border-t md:p-7 bg-white" style="border-color: {{ $BORD }}">
         <form method="GET"
           class="grid grid-cols-1 gap-3 md:grid-cols-6"
           role="search" aria-label="Filter Audit Logs">
@@ -67,7 +67,7 @@
 
           <div class="flex gap-2 md:col-span-6">
             <button type="submit"
-              class="inline-flex items-center justify-center gap-2 px-5 py-3 text-sm font-semibold text-white rounded-xl bg-[linear-gradient(90deg,_#a77d52,_#8b5e3c)] shadow-sm hover:brightness-105 focus:outline-none focus:ring-2"
+              class="inline-flex items-center justify-center gap-2 px-5 py-3 text-sm font-semibold text-white rounded-xl bg-[#a77d52] shadow-sm hover:opacity-95 focus:outline-none focus:ring-2"
               style="--tw-ring-color: {{ $PRIMARY }};">
               Filter
             </button>
@@ -85,7 +85,7 @@
       <section class="bg-white border shadow-sm rounded-2xl" style="border-color: {{ $BORD }}">
         <div class="overflow-x-auto">
           <table class="min-w-full text-sm">
-            <thead class="text-white bg-[linear-gradient(90deg,_#a77d52,_#8b5e3c)]">
+            <thead class="text-white bg-[#a77d52]">
               <tr>
                 <th class="px-4 py-3 text-left">Time</th>
                 <th class="px-4 py-3 text-left">Event</th>

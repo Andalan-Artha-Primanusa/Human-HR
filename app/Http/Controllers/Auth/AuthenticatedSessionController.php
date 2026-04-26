@@ -24,15 +24,18 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request): RedirectResponse
     {
-        // pakai authenticate() dari Breeze (sudah handle throttle & remember)
         $request->authenticate();
 
-        // penting: regenerasi session id utk cegah fixation
         $request->session()->regenerate();
 
-        // redirect ke intended atau fallback /dashboard
-        return redirect()->intended(route('dashboard'));
-        // Alternatif paling simpel: return redirect()->intended('/dashboard');
+        $user = auth()->user();
+        
+        $redirectRoute = match ($user->role) {
+            'superadmin', 'hr', 'admin' => 'admin.dashboard.manpower',
+            default => 'jobs.index'
+        };
+
+        return redirect()->intended(route($redirectRoute));
     }
 
     /**

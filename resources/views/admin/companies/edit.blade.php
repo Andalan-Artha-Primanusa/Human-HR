@@ -27,7 +27,7 @@
 
       {{-- FORM (tanpa nested form) --}}
       <section class="bg-white border shadow-sm rounded-2xl" style="border-color: {{ $BORD }}">
-        <form method="POST" action="{{ route('admin.companies.update', $record) }}" enctype="multipart/form-data" class="p-6 space-y-6 md:p-7 bg-[linear-gradient(180deg,_#faf7f4,_#ffffff)]">
+        <form method="POST" action="{{ route('admin.companies.update', $record) }}" enctype="multipart/form-data" class="p-6 space-y-6 md:p-7 bg-white">
           @csrf
           @method('PUT')
 
@@ -152,7 +152,7 @@
           {{-- Actions --}}
           <div class="flex items-center gap-3 pt-2">
             <button type="submit"
-                    class="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-lg bg-[linear-gradient(90deg,_#a77d52,_#8b5e3c)] hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-offset-2"
+                    class="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-lg bg-[#a77d52] hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-offset-2"
                     style="--tw-ring-color: {{ $ACCENT }}">
               Save
             </button>

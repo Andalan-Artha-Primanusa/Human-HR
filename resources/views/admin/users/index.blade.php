@@ -24,8 +24,7 @@
       {{-- HEADER + FILTER seperti Sites --}}
       <section class="overflow-hidden bg-white border shadow-sm rounded-2xl" style="border-color: {{ $BORD }}">
         <div class="relative">
-          <div class="w-full h-20 sm:h-24" style="background: linear-gradient(90deg, {{ $ACCENT }}, {{ $ACCENT_DARK }});"></div>
-          <div class="absolute inset-y-0 right-0 w-24 sm:w-36" style="background: linear-gradient(90deg, {{ $ACCENT_DARK }}, {{ $ACCENT }});"></div>
+          <div class="w-full h-20 sm:h-24 bg-[#a77d52]"></div>
 
           <div class="absolute inset-0 flex flex-col gap-3 px-5 py-4 text-white md:px-6 sm:flex-row sm:items-center sm:justify-between">
             <div class="min-w-0">
@@ -35,8 +34,8 @@
 
             <a href="{{ route('admin.users.create') }}"
                class="inline-flex items-center justify-center w-full gap-2 px-4 py-2 text-sm font-semibold bg-white rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-offset-2 sm:w-auto"
-               style="--tw-ring-color: {{ $ACCENT }}">
-              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" aria-hidden="true" style="color: {{ $ACCENT }}">
+               style="--tw-ring-color: #a77d52">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" aria-hidden="true" style="color: #a77d52">
                 <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
               </svg>
               Tambah User
@@ -44,7 +43,7 @@
           </div>
         </div>
 
-        <div class="p-6 border-t md:p-7 bg-[linear-gradient(180deg,_#faf7f4,_#ffffff)]" style="border-color: {{ $BORD }}">
+        <div class="p-6 border-t md:p-7 bg-white" style="border-color: {{ $BORD }}">
           <form method="GET" class="grid grid-cols-1 gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto] md:items-end" role="search" aria-label="Filter Users">
             <label class="sr-only" for="q">Cari</label>
             <input id="q" type="text" name="q" value="{{ $q }}"
@@ -72,7 +71,7 @@
 
             <div class="flex flex-col gap-2 sm:flex-row sm:justify-end">
               <button type="submit"
-                      class="inline-flex items-center justify-center gap-2 px-5 py-3 text-sm font-semibold text-white rounded-xl bg-[linear-gradient(90deg,_#a77d52,_#8b5e3c)] shadow-sm hover:brightness-105 focus:outline-none focus:ring-2"
+                      class="inline-flex items-center justify-center gap-2 px-5 py-3 text-sm font-semibold text-white rounded-xl bg-[#a77d52] shadow-sm hover:brightness-105 focus:outline-none focus:ring-2"
                       style="--tw-ring-color: {{ $ACCENT }}">
                 <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                   <circle cx="11" cy="11" r="7" stroke="#ffffff" stroke-width="2"/>
@@ -97,7 +96,7 @@
         <div class="overflow-x-auto">
           @if(($users->count() ?? 0) > 0)
               <table class="min-w-full text-sm">
-                <thead class="text-white bg-[linear-gradient(90deg,_#a77d52,_#8b5e3c)]">
+                <thead class="text-white bg-[#a77d52]">
                   <tr>
                     <th class="px-4 py-3 text-left">Nama</th>
                     <th class="px-4 py-3 text-left">Email</th>

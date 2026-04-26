@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="id" prefix="og: https://ogp.me/ns#">
 
 <head>
@@ -415,23 +415,23 @@
   {{-- ============================================================
        HEADER
   ============================================================ --}}
-  <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200/60 transition-all duration-300" id="site-header">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex justify-between items-center h-16 md:h-20">
+  <header class="sticky top-0 z-50 transition-all duration-300 border-b bg-white/80 backdrop-blur-md border-slate-200/60" id="site-header">
+    <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16 md:h-20">
         
         {{-- Logo & Mobile Trigger --}}
         <div class="flex items-center gap-4">
-          <button id="btn-nav-toggle" class="md:hidden p-2 rounded-xl text-slate-600 hover:bg-slate-100 transition-colors" aria-label="Toggle menu">
+          <button id="btn-nav-toggle" class="p-2 transition-colors md:hidden rounded-xl text-slate-600 hover:bg-slate-100" aria-label="Toggle menu">
             <svg class="w-6 h-6"><use href="#i-menu"/></svg>
           </button>
           <a href="{{ route('welcome') }}" class="flex items-center group">
-            <img src="{{ asset('assets/logofix.png') }}" alt="Logo" class="h-10 md:h-12 w-auto object-contain group-hover:scale-105 transition-transform duration-300">
+            <img src="{{ asset('assets/logofix.png') }}" alt="Logo" class="object-contain w-auto h-10 transition-transform duration-300 md:h-12 group-hover:scale-105">
           </a>
         </div>
 
         {{-- Desktop Search (Premium) --}}
-        <div class="hidden md:flex flex-1 max-w-md mx-8">
-          <form action="{{ route('jobs.index') }}" method="GET" class="w-full relative group">
+        <div class="flex-1 hidden max-w-md mx-8 md:flex">
+          <form action="{{ route('jobs.index') }}" method="GET" class="relative w-full group">
             <input type="search" name="q" placeholder="Cari posisi atau lokasi..." 
               class="w-full pl-11 pr-4 py-2.5 bg-slate-100/50 border border-slate-200/60 rounded-2xl text-sm focus:bg-white focus:ring-2 focus:ring-[#a77d52]/20 focus:border-[#a77d52] transition-all outline-none"
               value="{{ request('q') }}">
@@ -442,23 +442,23 @@
         </div>
 
         {{-- Desktop Nav --}}
-        <nav class="hidden md:flex items-center gap-1">
+        <nav class="items-center hidden gap-1 md:flex">
           <a href="{{ route('jobs.index') }}" class="px-4 py-2 text-sm font-semibold text-slate-600 hover:text-[#a77d52] transition-colors rounded-xl hover:bg-slate-50">Lowongan</a>
           
           @auth
-            <div class="h-6 w-px bg-slate-200 mx-2"></div>
+            <div class="w-px h-6 mx-2 bg-slate-200"></div>
             <details class="relative group">
-              <summary class="flex items-center gap-3 pl-2 pr-1 py-1 rounded-2xl cursor-pointer hover:bg-slate-50 transition-colors list-none">
-                <div class="text-right hidden lg:block">
-                  <div class="text-xs font-bold text-slate-900 leading-none">{{ auth()->user()->name }}</div>
+              <summary class="flex items-center gap-3 py-1 pl-2 pr-1 list-none transition-colors cursor-pointer rounded-2xl hover:bg-slate-50">
+                <div class="hidden text-right lg:block">
+                  <div class="text-xs font-bold leading-none text-slate-900">{{ auth()->user()->name }}</div>
                   <div class="text-[10px] text-slate-500 mt-0.5 capitalize">{{ auth()->user()->role ?? 'Pelamar' }}</div>
                 </div>
-                <div class="w-9 h-9 rounded-xl bg-[linear-gradient(135deg,#a77d52,#8b5e3c)] flex items-center justify-center text-white font-bold shadow-sm">
+                <div class="w-9 h-9 rounded-xl bg-[#a77d52] flex items-center justify-center text-white font-bold shadow-sm">
                   {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                 </div>
-                <svg class="w-4 h-4 text-slate-400 transition-transform group-open:rotate-180"><use href="#i-chevron"/></svg>
+                <svg class="w-4 h-4 transition-transform text-slate-400 group-open:rotate-180"><use href="#i-chevron"/></svg>
               </summary>
-              <div class="absolute right-0 mt-2 w-56 bg-white border border-slate-200 rounded-2xl shadow-xl py-2 z-50 animate-in fade-in slide-in-from-top-2">
+              <div class="absolute right-0 z-50 w-56 py-2 mt-2 bg-white border shadow-xl border-slate-200 rounded-2xl animate-in fade-in slide-in-from-top-2">
                 <a href="{{ route('profile.edit') }}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
                   <svg class="w-4 h-4 text-slate-400"><use href="#i-user"/></svg>
                   Profil Saya
@@ -479,7 +479,7 @@
             </details>
           @else
             <a href="{{ route('login') }}" class="px-4 py-2 text-sm font-semibold text-slate-600 hover:text-[#a77d52] transition-colors rounded-xl hover:bg-slate-50">Masuk</a>
-            <a href="{{ route('register') }}" class="ml-2 px-5 py-2.5 text-sm font-bold text-white bg-[linear-gradient(135deg,#a77d52,#8b5e3c)] rounded-2xl shadow-md hover:shadow-lg hover:brightness-110 transition-all">Daftar Gratis</a>
+            <a href="{{ route('register') }}" class="ml-2 px-5 py-2.5 text-sm font-bold text-white bg-[#a77d52] rounded-2xl shadow-md hover:shadow-lg hover:brightness-110 transition-all">Daftar Gratis</a>
           @endauth
         </nav>
 
@@ -494,16 +494,16 @@
 
     {{-- Mobile Menu (Premium Slide-out) --}}
     <div id="mobile-menu" class="fixed inset-0 z-[100] pointer-events-none opacity-0 transition-all duration-300">
-      <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity" id="mobile-menu-overlay"></div>
+      <div class="absolute inset-0 transition-opacity bg-slate-900/40 backdrop-blur-sm" id="mobile-menu-overlay"></div>
       <div class="absolute inset-y-0 left-0 w-80 max-w-[85vw] bg-white shadow-2xl transition-transform -translate-x-full flex flex-col" id="mobile-menu-panel">
-        <div class="p-4 border-b flex items-center justify-between">
-          <img src="{{ asset('assets/logofix.png') }}" alt="Logo" class="h-8 w-auto">
-          <button id="btn-menu-close" class="p-2 rounded-lg hover:bg-slate-100 transition-colors">
+        <div class="flex items-center justify-between p-4 border-b">
+          <img src="{{ asset('assets/logofix.png') }}" alt="Logo" class="w-auto h-8">
+          <button id="btn-menu-close" class="p-2 transition-colors rounded-lg hover:bg-slate-100">
             <svg class="w-6 h-6 text-slate-600"><path d="M6 18L18 6M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </button>
         </div>
         
-        <div class="flex-1 overflow-y-auto p-4 space-y-2">
+        <div class="flex-1 p-4 space-y-2 overflow-y-auto">
           <div class="mb-6">
             <form action="{{ route('jobs.index') }}" method="GET" class="relative">
               <input type="search" name="q" placeholder="Cari lowongan..." class="w-full pl-10 pr-4 py-3 bg-slate-100 border-none rounded-2xl text-sm focus:ring-2 focus:ring-[#a77d52]/30 outline-none">
@@ -537,7 +537,7 @@
             <form action="{{ route('logout') }}" method="POST">
               @csrf
               <button type="submit" class="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-red-600 font-semibold hover:bg-red-50 transition-colors text-left">
-                <div class="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center text-red-600">
+                <div class="flex items-center justify-center w-10 h-10 text-red-600 bg-red-100 rounded-xl">
                   <svg class="w-5 h-5"><path d="M15.75 9V5.25A2.25 2.25 0 0013.5 3H6.75A2.25 2.25 0 004.5 5.25v13.5A2.25 2.25 0 006.75 21H13.5a2.25 2.25 0 002.25-2.25V15M9.75 12h10.5m0 0-3-3m3 3-3 3" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 </div>
                 Keluar Akun
@@ -546,7 +546,7 @@
           @else
             <div class="grid grid-cols-2 gap-3 mt-8">
               <a href="{{ route('login') }}" class="flex items-center justify-center py-3.5 rounded-2xl border border-slate-200 font-bold text-slate-600 hover:bg-slate-50 transition-colors">Masuk</a>
-              <a href="{{ route('register') }}" class="flex items-center justify-center py-3.5 rounded-2xl bg-[linear-gradient(135deg,#a77d52,#8b5e3c)] font-bold text-white shadow-lg">Daftar</a>
+              <a href="{{ route('register') }}" class="flex items-center justify-center py-3.5 rounded-2xl bg-[#a77d52] font-bold text-white shadow-lg">Daftar</a>
             </div>
           @endauth
         </div>
@@ -554,8 +554,8 @@
     </div>
 
     {{-- Breadcrumb (Simplified Premium) --}}
-    <div class="bg-slate-50/50 border-b border-slate-200/40 py-2">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="py-2 border-b bg-slate-50/50 border-slate-200/40">
+      <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
         <nav class="flex text-[11px] font-medium text-slate-400 uppercase tracking-widest">
           <ol class="flex items-center gap-2">
             <li><a href="{{ route('welcome') }}" class="hover:text-[#a77d52] transition-colors">Beranda</a></li>

@@ -27,7 +27,7 @@
 
       {{-- FORM (kartu terpisah, ada jarak) --}}
       <section class="bg-white border shadow-sm rounded-2xl" style="border-color: {{ $BORD }}">
-        <form method="POST" action="{{ route('admin.companies.store') }}" enctype="multipart/form-data" class="p-6 md:p-7 space-y-6 bg-[linear-gradient(180deg,_#faf7f4,_#ffffff)]">
+        <form method="POST" action="{{ route('admin.companies.store') }}" enctype="multipart/form-data" class="p-6 md:p-7 space-y-6 bg-white">
           @csrf
 
           <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -146,7 +146,7 @@
           {{-- Actions --}}
           <div class="flex items-center gap-3 pt-2">
             <button type="submit"
-              class="inline-flex items-center justify-center gap-2 rounded-lg bg-[linear-gradient(90deg,_#a77d52,_#8b5e3c)] px-4 py-2 text-sm font-semibold text-white hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-offset-2"
+              class="inline-flex items-center justify-center gap-2 rounded-lg bg-[#a77d52] px-4 py-2 text-sm font-semibold text-white hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-offset-2"
               style="--tw-ring-color: {{ $ACCENT }}">
               Save
             </button>

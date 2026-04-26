@@ -64,7 +64,7 @@
     $linkMobile = $baseLink . ' hover:bg-[#a77d52]/5';
 
     /* ==== ICON WRAPPERS ==== */
-    $iconWrap = 'grid place-items-center shrink-0 w-9 h-9 rounded-xl bg-[#a77d52]/10 text-[#a77d52] shadow-sm ring-1 ring-[#a77d52]/20 group-hover:scale-110 transition-transform';
+    $iconWrap = 'grid place-items-center shrink-0 w-9 h-9 rounded-xl bg-[#a77d52]/10 text-[#a77d52] shadow-sm ring-1 ring-[#a77d52]/20 group-hover:scale-110 transition-transform md:w-10 md:h-10';
 
     $sectionTitle = 'section-title px-3 pt-5 pb-1 text-[11px] tracking-widest font-bold uppercase text-[#a77d52]/60';
     $lockVisual = !$isVerified ? 'opacity-85' : '';
@@ -100,6 +100,17 @@
   /* Logo wrapper agar responsif dan tidak overflow */
   .logo-wrap { min-height: 80px; width: 100% }
   .logo-img  { max-height: 64px; max-width: 100%; width: auto; object-fit: contain; }
+
+  /* Responsive enhancements */
+  @media (max-width: 767px) {
+    .sidenav-shell { padding: 0.5rem !important; }
+    .logo-wrap { min-height: 60px; padding: 0.5rem !important; }
+    .logo-img { max-height: 48px !important; }
+    .group-box { padding: 0.5rem !important; margin-top: 0.25rem !important; }
+    .side-link { padding: 0.625rem 0.5rem !important; border-radius: 0.75rem !important; }
+    .icon-wrap { width: 32px !important; height: 32px !important; }
+    .side-link .label { font-size: 0.875rem !important; }
+  }
 </style>
 
 @if($variant === 'desktop')
@@ -385,8 +396,6 @@
         <span class="align-middle">General</span>
       </div>
 
-      <div class="{{ $groupBox }} {{ $lockVisual }}">
-        <a href="{{ $href('jobs.index') }}" {!! $closeAttr !!} class="{{ $linkMobile }} {{ $activeMenu('jobs.*') }}">
       <div class="{{ $groupBox }} {{ $lockVisual }}">
         <a href="{{ $href('jobs.index') }}" {!! $closeAttr !!} class="{{ $linkMobile }} {{ $activeMenu('jobs.*') }}">
           <span class="{{ $iconWrap }}"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 7V6a3 3 0 116 0v1M6 11h12M5 17h14a2 2 0 002-2v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2z"/></svg></span>

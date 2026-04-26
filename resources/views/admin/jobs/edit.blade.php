@@ -63,7 +63,7 @@
                  class="inline-flex items-center px-4 py-2 text-sm font-semibold bg-white border rounded-lg border-slate-200 text-slate-900 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2"
                  style="--tw-ring-color: {{ $ACCENT }}">Kembali</a>
               <button form="jobEditForm"
-                      class="inline-flex items-center rounded-lg px-4 py-2 text-sm font-semibold text-white bg-[linear-gradient(90deg,_#a77d52,_#8b5e3c)] hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-offset-2"
+                      class="inline-flex items-center rounded-lg px-4 py-2 text-sm font-semibold text-white bg-[#a77d52] hover:opacity-95 focus:outline-none focus:ring-2 focus:ring-offset-2"
                       style="--tw-ring-color: {{ $ACCENT }}">Simpan Perubahan</button>
             </div>
           </div>
@@ -71,7 +71,7 @@
       </section>
 
       {{-- Info unik per company --}}
-      <div class="rounded-xl bg-[linear-gradient(180deg,_#faf7f4,_#ffffff)] text-[#7a5236] px-4 py-3 border text-sm" style="border-color: {{ $BORD }}">
+      <div class="rounded-xl bg-white text-[#7a5236] px-4 py-3 border text-sm" style="border-color: {{ $BORD }}">
         Kode lowongan (<code class="font-mono">code</code>) unik <strong>per company</strong>. Mengubah Company dapat
         mempengaruhi keunikan kode.
       </div>
@@ -94,7 +94,7 @@
             method="POST" action="{{ route('admin.jobs.update', $job) }}" novalidate>
         @csrf @method('PUT')
 
-        <div class="p-6 md:p-7 grid gap-4 md:grid-cols-2 bg-[linear-gradient(180deg,_#faf7f4,_#ffffff)]">
+        <div class="p-6 md:p-7 grid gap-4 md:grid-cols-2 bg-white">
           {{-- Code --}}
           <div>
             <label class="label">Code <span class="text-rose-600">*</span></label>

@@ -36,7 +36,7 @@
 
       {{-- DETAIL CARD --}}
       <section class="bg-white border shadow-sm rounded-2xl" style="border-color: {{ $BORD }}">
-        <div class="p-6 space-y-4 md:p-7 bg-[linear-gradient(180deg,_#faf7f4,_#ffffff)]">
+        <div class="p-6 space-y-4 md:p-7 bg-white">
           <div class="flex flex-wrap items-center gap-3">
             <span class="inline-flex items-center rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-sm text-slate-700">
               CODE: <span class="ml-1 font-mono font-medium text-slate-900">{{ e($record->code) }}</span>
@@ -94,7 +94,7 @@
       {{-- ACTIONS --}}
       <section class="flex items-center gap-3">
         <a href="{{ route('admin.companies.edit', $record) }}"
-           class="inline-flex items-center px-4 py-2 text-sm font-semibold text-white rounded-lg bg-[linear-gradient(90deg,_#a77d52,_#8b5e3c)] hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-offset-2"
+           class="inline-flex items-center px-4 py-2 text-sm font-semibold text-white rounded-lg bg-[#a77d52] hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-offset-2"
            style="--tw-ring-color: {{ $ACCENT }}">
           Edit
         </a>

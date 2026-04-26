@@ -26,8 +26,8 @@
       {{-- HEADER + FILTER seperti halaman Sites --}}
       <section class="overflow-hidden bg-white border shadow-sm rounded-2xl" style="border-color: {{ $BORD }}">
         <div class="relative">
-          <div class="w-full h-20 sm:h-24" style="background: linear-gradient(90deg, {{ $ACCENT }}, {{ $ACCENT_DARK }});"></div>
-          <div class="absolute inset-y-0 right-0 w-24 sm:w-36" style="background: linear-gradient(90deg, {{ $ACCENT_DARK }}, {{ $ACCENT }});"></div>
+          <div class="w-full h-20 sm:h-24 bg-[#a77d52]"></div>
+          <div class="absolute inset-y-0 right-0 w-24 sm:w-36 bg-[#8b5e3c]"></div>
 
           <div class="absolute inset-0 flex flex-col gap-3 px-5 py-4 text-white md:px-6 sm:flex-row sm:items-center sm:justify-between">
             <div class="min-w-0">
@@ -49,7 +49,7 @@
             ];
         @endphp
 
-        <div class="p-6 border-t md:p-7 bg-[linear-gradient(180deg,_#faf7f4,_#ffffff)]" style="border-color: {{ $BORD }}">
+        <div class="p-6 border-t md:p-7 bg-white" style="border-color: {{ $BORD }}">
           <form method="GET" class="grid grid-cols-1 gap-4 md:grid-cols-[minmax(0,1fr)_200px_auto] md:items-end" role="search" aria-label="Filter Offers">
             <label class="sr-only" for="q">Cari</label>
             <input id="q" name="q" value="{{ e($q) }}"
@@ -67,7 +67,7 @@
 
             <div class="flex flex-col gap-2 sm:flex-row sm:justify-end">
               <button type="submit"
-                      class="inline-flex items-center justify-center gap-2 px-5 py-3 text-sm font-semibold text-white rounded-xl bg-[linear-gradient(90deg,_#a77d52,_#8b5e3c)] shadow-sm hover:brightness-105 focus:outline-none focus:ring-2"
+                      class="inline-flex items-center justify-center gap-2 px-5 py-3 text-sm font-semibold text-white rounded-xl bg-[#a77d52] shadow-sm hover:brightness-105 focus:outline-none focus:ring-2"
                       style="--tw-ring-color: {{ $ACCENT }}">
                 <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                   <circle cx="11" cy="11" r="7" stroke="#ffffff" stroke-width="2"/>
@@ -101,7 +101,7 @@
           @if(($offers->count() ?? 0) > 0)
                 <table class="min-w-full text-sm">
                   {{-- HEADER --}}
-                  <thead class="text-white bg-[linear-gradient(90deg,_#a77d52,_#8b5e3c)]">
+                  <thead class="text-white bg-[#a77d52]">
                   <tr>
                     <th class="px-4 py-3 text-left">Kandidat</th>
                     <th class="px-4 py-3 text-left">Posisi</th>
@@ -504,7 +504,7 @@
                         Batal
                     </button>
                     <button type="submit"
-                        class="px-5 py-2.5 text-sm font-semibold text-white transition rounded-xl bg-[linear-gradient(90deg,_#a77d52,_#8b5e3c)] shadow-md hover:brightness-105">
+                        class="px-5 py-2.5 text-sm font-semibold text-white transition rounded-xl bg-[#a77d52] shadow-md hover:brightness-105">
                         Simpan Perubahan
                     </button>
                 </div>

@@ -888,7 +888,7 @@
                                 <li>Kode Pos (Domisili)</li>
                               </ul>
                               @if(Route::has('candidate.profiles.edit'))
-                                <a href="{{ route('candidate.profiles.edit', $job) }}" class="inline-flex items-center rounded-lg bg-[linear-gradient(90deg,_#a77d52,_#8b5e3c)] px-4 py-2 text-sm font-semibold text-white">
+                                <a href="{{ route('candidate.profiles.edit', $job) }}" class="inline-flex items-center rounded-lg bg-[#a77d52] px-4 py-2 text-sm font-semibold text-white">
                                   Lengkapi Sekarang
                                 </a>
                               @endif

@@ -137,7 +137,7 @@
             <div class="flex gap-2">
               <button type="submit"
                       class="inline-flex items-center justify-center w-full gap-2 px-4 py-2 text-sm font-semibold text-white rounded-lg hover:opacity-95 focus:outline-none focus:ring-2 focus:ring-offset-2"
-                      style="background: linear-gradient(90deg, {{ $ACCENT }}, {{ $ACCENT_DARK }}); --tw-ring-color: {{ $ACCENT }};"
+                      style="background: #a77d52; --tw-ring-color: #a77d52;"
                       aria-label="Filter">
                 <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                   <circle cx="11" cy="11" r="7" stroke="#ffffff" stroke-width="2"/>
@@ -162,7 +162,7 @@
         <div class="overflow-x-auto">
           @if($apps->count())
             <table class="min-w-[960px] w-full text-sm">
-              <thead class="text-white" style="background: linear-gradient(90deg, {{ $ACCENT }}, {{ $ACCENT_DARK }});">
+              <thead class="text-white bg-[#a77d52]">
                 <tr>
                   <th class="px-4 py-3 font-semibold text-left">Kandidat</th>
                   <th class="px-4 py-3 font-semibold text-left">Posisi</th>

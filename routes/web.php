@@ -74,7 +74,23 @@ Route::get('/sites/{site}', [SitePublicController::class, 'show'])->name('sites.
 | Authenticated (SEMUA wajib verified)
 |--------------------------------------------------------------------------
 */
-Route::get('/dashboard', fn() => view('dashboard'))
+Route::get('/dashboard', function () {
+    $user = auth()->user();
+    if ($user && in_array($user->role, ['superadmin', 'hr', 'admin'])) {
+        return redirect()->route('admin.dashboard.manpower');
+    }
+    
+    $openJobsCount = \App\Models\Job::where('status', 'open')->count();
+    $myApplicationsCount = $user->applications()->count();
+    $unreadNotificationsCount = $user->notifications()->where('read', false)->count();
+    $latestJobs = \App\Models\Job::where('status', 'open')
+        ->with('site')
+        ->orderByDesc('created_at')
+        ->limit(5)
+        ->get();
+    
+    return view('dashboard', compact('openJobsCount', 'myApplicationsCount', 'unreadNotificationsCount', 'latestJobs'));
+})
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
@@ -134,7 +150,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 */
 Route::prefix('admin')
     ->as('admin.')
-    ->middleware(['auth', 'verified', 'role:hr|superadmin|trainer|karyawan'])
+    ->middleware(['auth', 'verified', 'role:hr|superadmin|admin|trainer|karyawan'])
     ->group(function () {
 
         // ================= Manpower =================
@@ -242,6 +258,7 @@ Route::middleware('guest')->group(function () {
 */
 Route::view('/faq', 'faq')->name('faq');
 Route::view('/blog', 'blog')->name('blog');
+Route::view('/terms-and-conditions', 'legal.terms')->name('terms');
 Route::get('/search', [JobController::class, 'index'])->name('search');
 
 /*

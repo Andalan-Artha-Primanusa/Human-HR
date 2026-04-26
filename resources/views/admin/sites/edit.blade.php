@@ -159,7 +159,7 @@
           <div class="flex items-center justify-between pt-2">
             <div class="flex gap-2">
               <button type="submit"
-                      class="inline-flex items-center rounded-lg bg-[linear-gradient(90deg,_#a77d52,_#8b5e3c)] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-offset-2"
+                      class="inline-flex items-center rounded-lg bg-[#a77d52] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-offset-2"
                       style="--tw-ring-color: {{ $ACCENT }}">
                 Simpan Perubahan
               </button>

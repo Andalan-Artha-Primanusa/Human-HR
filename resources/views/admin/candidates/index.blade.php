@@ -30,8 +30,8 @@
       {{-- HEADER + SEARCH --}}
       <section class="overflow-hidden bg-white border shadow-sm rounded-2xl" style="border-color: {{ $BORD }}">
         <div class="relative h-20 overflow-hidden sm:h-24 rounded-t-2xl">
-          <div class="absolute inset-0 rounded-t-2xl" style="background: linear-gradient(90deg, {{ $ACCENT }}, {{ $ACCENT_DARK }});"></div>
-          <div class="absolute inset-y-0 right-0 w-24 rounded-tr-2xl sm:w-36" style="background: linear-gradient(90deg, {{ $ACCENT_DARK }}, {{ $ACCENT }});"></div>
+          <div class="absolute inset-0 rounded-t-2xl bg-[#a77d52]"></div>
+          <div class="absolute inset-y-0 right-0 w-24 rounded-tr-2xl sm:w-36 bg-[#8b5e3c]"></div>
 
           <div class="relative flex items-center h-full px-5 md:px-6">
             <div class="min-w-0">
@@ -42,7 +42,7 @@
         </div>
 
         {{-- SEARCH FORM --}}
-        <div class="p-6 border-t md:p-7 bg-[linear-gradient(180deg,_#faf7f4,_#ffffff)]" style="border-color: {{ $BORD }}">
+        <div class="p-6 border-t md:p-7 bg-white" style="border-color: {{ $BORD }}">
           <form method="GET"
             class="grid grid-cols-1 gap-4 md:grid-cols-[1fr_auto_auto] md:items-end"
             role="search" aria-label="Cari kandidat">
@@ -69,7 +69,7 @@
             </select>
 
             <button type="submit"
-              class="inline-flex items-center justify-center gap-2 px-5 py-3 text-sm font-semibold text-white rounded-xl bg-[linear-gradient(90deg,_#a77d52,_#8b5e3c)] shadow-sm hover:brightness-105 focus:outline-none focus:ring-2"
+              class="inline-flex items-center justify-center gap-2 px-5 py-3 text-sm font-semibold text-white rounded-xl bg-[#a77d52] shadow-sm hover:brightness-105 focus:outline-none focus:ring-2"
               style="--tw-ring-color: {{ $ACCENT }}"
               aria-label="Filter">
               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -94,7 +94,7 @@
         @if($profiles->count())
             <div class="overflow-x-auto">
               <table class="min-w-full text-sm">
-                <thead class="text-white bg-[linear-gradient(90deg,_#a77d52,_#8b5e3c)]">
+                <thead class="text-white bg-[#a77d52]">
                   <tr>
                     <th class="px-4 py-3 text-left">Nama</th>
                     <th class="px-4 py-3 text-left">Email</th>

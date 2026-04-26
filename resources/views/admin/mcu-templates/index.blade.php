@@ -13,8 +13,8 @@
 
     <section class="overflow-hidden bg-white border shadow-sm rounded-2xl" style="border-color: {{ $BORD }}">
       <div class="relative">
-        <div class="w-full h-20 sm:h-24" style="background: linear-gradient(90deg, {{ $ACCENT }}, {{ $ACCENT_DARK }});"></div>
-        <div class="absolute inset-y-0 right-0 w-24 sm:w-36" style="background: linear-gradient(90deg, {{ $ACCENT_DARK }}, {{ $ACCENT }});"></div>
+        <div class="w-full h-20 sm:h-24 bg-[#a77d52]"></div>
+        <div class="absolute inset-y-0 right-0 w-24 sm:w-36 bg-[#8b5e3c]"></div>
 
         <div class="absolute inset-0 flex flex-col gap-3 px-5 py-4 text-white md:px-6 sm:flex-row sm:items-center sm:justify-between">
           <div class="min-w-0">
@@ -40,7 +40,7 @@
     @if($templates->count())
       <div class="overflow-hidden bg-white border shadow-sm rounded-2xl border-slate-200">
         <table class="min-w-full text-sm">
-          <thead class="text-white bg-[linear-gradient(90deg,_#a77d52,_#8b5e3c)]">
+          <thead class="text-white bg-[#a77d52]">
             <tr>
               <th class="px-4 py-3 text-left">Nama Template</th>
               <th class="px-4 py-3 text-left">Perusahaan</th>

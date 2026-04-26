@@ -57,9 +57,8 @@
     });
   </script>
 </head>
-<body x-data="wizard()" x-init="init()" class="min-h-screen text-slate-900 bg-[linear-gradient(180deg,_#f8f5f1,_#fefcf9)]">
+<body x-data="wizard()" x-init="init()" class="min-h-screen text-slate-900 bg-[#f8f5f1]">
   <!-- DEBUG: tampilkan isi errors[] -->
-  <span x-text="JSON.stringify(errors)" style="position:fixed;top:0;left:0;z-index:99999;background:#fff1;border:1px solid #ccc;padding:2px 8px;font-size:12px;"></span>
 
   {{-- HEADER --}}
   <header class="relative overflow-hidden isolate bg-gradient-to-r from-brand-700 via-brand-600 to-brand-800">
@@ -547,7 +546,7 @@
       </section>
 
       {{-- Right Action Rail --}}
-      <div class="fixed z-20 pointer-events-none inset-x-0 bottom-0 p-3 md:inset-x-auto md:p-0 md:right-4 md:top-1/2 md:-translate-y-1/2">
+      <div class="fixed inset-x-0 bottom-0 z-20 p-3 pointer-events-none md:inset-x-auto md:p-0 md:right-4 md:top-1/2 md:-translate-y-1/2">
         <div class="w-full max-w-sm mx-auto md:mx-0 md:w-48 p-3 border shadow-[0_-4px_20px_rgba(0,0,0,0.1)] md:shadow-lg pointer-events-auto rounded-2xl md:rounded-2xl rounded-b-none md:border-brand-200/70 border-brand-200 bg-white/95 backdrop-blur">
           <div class="px-1 pb-2 text-xs text-center md:text-left text-slate-600">Langkah <span class="font-semibold text-slate-900" x-text="step"></span> / 3 · <span x-text="progress+'%'"></span></div>
           <div class="space-y-2">
@@ -555,12 +554,12 @@
               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
               <span>Prev</span>
             </button>
-            <button type="button" x-show="step<3" @click.prevent="next()" class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-[linear-gradient(90deg,_#a77d52,_#8b5e3c)] px-3 py-2 text-sm font-semibold text-white hover:brightness-105">
+            <button type="button" x-show="step<3" @click.prevent="next()" class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-[#a77d52] px-3 py-2 text-sm font-semibold text-white hover:opacity-95">
               <span>Lanjut</span>
               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
             </button>
             {{-- SUBMIT TERKONTROL: prevent default & submit manual saat valid --}}
-            <button type="submit" x-show="step===3" @click.prevent="if (validate(3)) confirmOpen=true" class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-[linear-gradient(90deg,_#a77d52,_#8b5e3c)] px-3 py-2 text-sm font-semibold text-white hover:brightness-105">
+            <button type="submit" x-show="step===3" @click.prevent="if (validate(3)) confirmOpen=true" class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-[#a77d52] px-3 py-2 text-sm font-semibold text-white hover:opacity-95">
               <span>Simpan & Selesai</span>
               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
             </button>
@@ -575,7 +574,7 @@
           <p class="mt-1 text-sm text-slate-600">Pastikan semua data sudah benar. Kamu tetap bisa mengubahnya lagi nanti.</p>
           <div class="flex items-center justify-end gap-2 mt-4">
             <button type="button" class="px-4 py-2 text-sm border rounded-xl border-brand-200 text-brand-800 hover:bg-brand-50" @click="confirmOpen=false">Batal</button>
-            <button type="button" class="rounded-xl bg-[linear-gradient(90deg,_#a77d52,_#8b5e3c)] px-4 py-2 text-sm font-semibold text-white hover:brightness-105" @click="confirmOpen=false; $refs.form.submit()">Ya, Simpan</button>
+            <button type="button" class="rounded-xl bg-[#a77d52] px-4 py-2 text-sm font-semibold text-white hover:opacity-95" @click="confirmOpen=false; $refs.form.submit()">Ya, Simpan</button>
           </div>
         </div>
       </div>
@@ -600,7 +599,7 @@
       <ul class="pl-5 mb-4 text-sm text-left list-disc text-slate-700">
         <template x-for="(e,i) in errors" :key="i"><li x-text="e"></li></template>
       </ul>
-      <button @click="errors=[]" class="mt-2 inline-flex items-center rounded-lg bg-[linear-gradient(90deg,_#a77d52,_#8b5e3c)] px-4 py-2 text-sm font-semibold text-white">Tutup</button>
+      <button @click="errors=[]" class="mt-2 inline-flex items-center rounded-lg bg-[#a77d52] px-4 py-2 text-sm font-semibold text-white">Tutup</button>
     </div>
   </div>
 </template>

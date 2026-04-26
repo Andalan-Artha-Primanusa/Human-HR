@@ -68,7 +68,7 @@
               @endif
 
               <a href="{{ route('admin.sites.edit', $site) }}"
-                 class="inline-flex items-center gap-2 rounded-lg bg-[linear-gradient(90deg,_#a77d52,_#8b5e3c)] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-offset-2"
+                 class="inline-flex items-center gap-2 rounded-lg bg-[#a77d52] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-offset-2"
                  style="--tw-ring-color: {{ $ACCENT }}">
                 {{-- Icon pensil: outline putih --}}
                 <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">

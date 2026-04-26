@@ -82,7 +82,7 @@
       <h2 class="font-semibold">Application Trend</h2>
       <span class="text-xs text-slate-400">Monthly</span>
     </div>
-    <canvas id="lineChart" class="h-[300px]"></canvas>
+    <canvas id="trendChart" class="h-[300px]"></canvas>
   </section>
 
   {{-- INSIGHT --}}
@@ -160,6 +160,26 @@ new Chart(document.getElementById('genderChart'), {
     }]
   },
   options: { cutout: '70%' }
+});
+
+// TREND - Real data from controller
+new Chart(document.getElementById('trendChart'), {
+  type: 'line',
+  data: {
+    labels: @json(($applicationTrend ?? collect())->keys()->toArray()),
+    datasets: [{
+      label: 'Applications',
+      data: @json(($applicationTrend ?? collect())->values()->toArray()),
+      borderColor: primary,
+      backgroundColor: primary + '20',
+      fill: true,
+      tension: 0.4
+    }]
+  },
+  options: {
+    plugins: { legend: { display: false } },
+    scales: { y: { beginAtZero: true } }
+  }
 });
 
 // SLA (FIXED)

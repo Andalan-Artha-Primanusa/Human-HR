@@ -41,7 +41,7 @@
       @endif
 
       <section class="overflow-hidden bg-white border shadow-sm rounded-2xl" style="border-color: {{ $BORD }}">
-        <div class="p-6 border-t md:p-7 bg-[linear-gradient(180deg,_#faf7f4,_#ffffff)]" style="border-color: {{ $BORD }}">
+        <div class="p-6 border-t md:p-7 bg-white" style="border-color: {{ $BORD }}">
           <form method="POST" action="{{ route('admin.users.update', $user) }}" class="grid max-w-2xl gap-4">
             @csrf @method('PATCH')
 
@@ -109,7 +109,7 @@
                  class="inline-flex items-center justify-center px-5 py-3 text-sm bg-white border shadow-sm rounded-xl border-slate-200 hover:bg-slate-50">
                 Cancel
               </a>
-              <button class="inline-flex items-center justify-center gap-2 px-5 py-3 text-sm font-semibold text-white rounded-xl bg-[linear-gradient(90deg,_#a77d52,_#8b5e3c)] shadow-sm hover:brightness-105 focus:outline-none focus:ring-2"
+              <button class="inline-flex items-center justify-center gap-2 px-5 py-3 text-sm font-semibold text-white rounded-xl bg-[#a77d52] shadow-sm hover:brightness-105 focus:outline-none focus:ring-2"
                       style="--tw-ring-color: {{ $ACCENT }}">
                 Update User
               </button>

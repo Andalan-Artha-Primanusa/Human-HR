@@ -106,7 +106,24 @@ class ManpowerDashboardController extends Controller
             );
         });
 
-        return view('admin.dashboard.manpower', $metrics);
+        // =========================
+        // APPLICATION TREND (monthly)
+        // =========================
+        $applicationTrend = DB::table('job_applications')
+            ->selectRaw('MONTH(created_at) as month, COUNT(*) as total')
+            ->whereYear('created_at', now()->year)
+            ->groupByRaw('MONTH(created_at)')
+            ->pluck('total', 'month');
+
+        $monthNames = [1=>'Jan',2=>'Feb',3=>'Mar',4=>'Apr',5=>'May',6=>'Jun',7=>'Jul',8=>'Aug',9=>'Sep',10=>'Oct',11=>'Nov',12=>'Dec'];
+        $trend = collect();
+        for ($i = 1; $i <= 12; $i++) {
+            $trend[$monthNames[$i]] = $applicationTrend[$i] ?? 0;
+        }
+
+        return view('admin.dashboard.manpower', array_merge($metrics, [
+            'applicationTrend' => $trend
+        ]));
     }
 
     // =========================
