@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" class="h-full">
 <head>
   @vite(['resources/css/app.css', 'resources/js/app.js'])
   <meta charset="utf-8">
@@ -7,31 +7,25 @@
   <title>Daftar Akun - Human.Careers</title>
 </head>
 
-<body class="min-h-screen text-slate-800">
+<body class="min-h-screen flex items-center justify-center p-0 m-0 text-slate-800" style="margin:0;padding:0;">
 
-<div class="relative min-h-screen overflow-hidden">
+<div class="w-full h-full min-h-screen flex items-center justify-center overflow-hidden" style="margin:0;padding:0;">
 
-  <img src="{{ asset('assets/hr1.jpg') }}" class="absolute inset-0 object-cover w-full h-full" alt="bg">
-  <div class="absolute inset-0 bg-black/50"></div>
+  <img src="{{ asset('assets/hr1.jpg') }}" class="absolute inset-0 object-cover w-full h-full" alt="bg" style="top:0;left:0;">
+  <div class="absolute inset-0 bg-black/50" style="top:0;left:0;"></div>
 
-  <div class="absolute top-0 left-0 z-10 items-center justify-center w-full h-full text-center bg-gradient-to-br from-[#a77d52]/90 to-[#8b5e3c] lg:items-center lg:justify-start lg:h-full lg:w-auto lg:bg-transparent lg:bg-gradient-to-r lg:from-[#a77d52] lg:via-[#b88a5c] lg:to-[#8b5e3c] lg:text-left">
-    <div class="max-w-md p-8 lg:p-0 lg:pl-20">
-      <h1 class="mb-3 text-3xl lg:text-4xl font-bold text-white">Human Careers</h1>
-      <p class="text-sm text-white/80">Platform rekrutmen resmi Andalan Group.</p>
-    </div>
-  </div>
 
-  <div class="absolute inset-0 z-10 flex items-center justify-center p-4 sm:p-6 lg:justify-end lg:pr-6 xl:pr-28">
-    <div class="w-full max-w-sm">
+  <div class="relative z-10 flex items-center justify-center w-full min-h-screen p-4 sm:p-6 lg:justify-end lg:pr-6 xl:pr-28">
+    <div class="w-full max-w-sm" style="margin-top:0;">
       <div class="rounded-2xl shadow-2xl p-8 border border-white/20 bg-[#d1d3c7] backdrop-blur max-h-[90vh] overflow-y-auto">
         <div class="flex flex-col items-center mb-6 space-y-3">
           <img src="{{ asset('assets/logologin.png') }}" alt="Logo" class="object-contain h-28 md:h-32">
         </div>
 
         @if ($errors->any())
-          <div class="mb-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+          <div class="px-3 py-2 mb-4 text-sm text-red-700 border border-red-200 rounded-lg bg-red-50">
             <div class="font-semibold">Register belum berhasil</div>
-            <ul class="mt-1 list-disc space-y-1 pl-4">
+            <ul class="pl-4 mt-1 space-y-1 list-disc">
               @foreach ($errors->all() as $error)
                 <li>{{ $error }}</li>
               @endforeach
@@ -73,7 +67,7 @@
 
           <div class="rounded-lg border border-[#a77d52]/30 bg-white/35 px-3 py-2">
             <label for="agree" class="flex items-start gap-2 text-xs leading-5 text-gray-700">
-              <input id="agree" type="checkbox" name="agree" value="1" class="mt-1 rounded border-gray-300" {{ old('agree') ? 'checked' : '' }} required>
+              <input id="agree" type="checkbox" name="agree" value="1" class="mt-1 border-gray-300 rounded" {{ old('agree') ? 'checked' : '' }} required>
               <span>
                 Saya sudah membaca dan menyetujui
                 <a href="{{ route('terms') }}" target="_blank" rel="noopener" class="font-semibold text-[#7a5531] underline">

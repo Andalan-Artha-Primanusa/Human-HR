@@ -1,4 +1,3 @@
-{{-- resources/views/layouts/app.blade.php --}}
 <!DOCTYPE html>
 <html lang="id" class="h-full">
 <head>
@@ -10,10 +9,8 @@
   @stack('head')
 
   <style>
-    /* Cloak: sembunyikan sampai JS siap */
-    [data-cloak]{display:none!important}
+    [data-cloak]{ visibility: hidden !important; }
 
-    /* ==== MINI MODE (desktop) ==== */
     @media (min-width: 768px){
       aside.is-mini nav a{ justify-content:center; }
       aside.is-mini nav a .label{ display:none; }
@@ -41,19 +38,19 @@
     .transition-base{ transition: transform .2s ease, opacity .15s ease; }
   </style>
 </head>
-<body class="h-full bg-slate-50 text-slate-800">
+<body class="text-slate-800">
 
 @if (session('verify_email_notice'))
-  <div id="verifyEmailModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4" role="dialog" aria-modal="true" aria-labelledby="verifyEmailModalTitle">
-    <div class="w-full max-w-sm rounded-xl bg-white p-6 shadow-2xl ring-1 ring-slate-200">
-      <div class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 text-amber-700">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+  <div id="verifyEmailModal" class="fixed inset-0 z-50 flex items-center justify-center px-4 bg-black/50" role="dialog" aria-modal="true" aria-labelledby="verifyEmailModalTitle">
+    <div class="w-full max-w-sm p-6 bg-white shadow-2xl rounded-xl ring-1 ring-slate-200">
+      <div class="flex items-center justify-center w-12 h-12 mx-auto mb-4 rounded-full bg-amber-100 text-amber-700">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16v12H4z" />
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m4 7 8 6 8-6" />
         </svg>
       </div>
-      <h2 id="verifyEmailModalTitle" class="text-center text-lg font-semibold text-slate-900">Cek email kamu</h2>
-      <p class="mt-2 text-center text-sm leading-6 text-slate-600">{{ session('verify_email_notice') }}</p>
+      <h2 id="verifyEmailModalTitle" class="text-lg font-semibold text-center text-slate-900">Cek email kamu</h2>
+      <p class="mt-2 text-sm leading-6 text-center text-slate-600">{{ session('verify_email_notice') }}</p>
       <button type="button" id="verifyEmailModalClose" class="mt-5 w-full rounded-lg bg-[#a77d52] px-4 py-2.5 text-sm font-semibold text-white hover:opacity-90">
         Oke
       </button>
@@ -61,31 +58,29 @@
   </div>
 @endif
 
-<div id="appRoot" class="flex min-h-screen" data-cloak>
-  {{-- ===== Desktop Sidebar (>= md) ===== --}}
+<div id="appRoot" class="flex min-h-screen">
   <aside
     id="desktopSidebar"
+    data-cloak
     class="hidden transition-all duration-200 bg-white border-r md:flex md:flex-col border-slate-200 md:w-64">
     <div class="flex-1 overflow-y-auto">
       @include('layouts.sidenav', [
         'variant' => 'desktop',
         'closeOnClick' => false,
         'offerQuickId' => $offerQuickId ?? null
-    ])
+      ])
     </div>
   </aside>
-
-  {{-- ===== Mobile Drawer (< md) ===== --}}
   <div class="md:hidden">
-    {{-- Overlay --}}
     <div id="drawerOverlay" class="fixed inset-0 z-40 drawer-overlay bg-black/40" aria-hidden="true"></div>
 
     {{-- Panel --}}
     <aside
       id="mobileDrawer"
+      data-cloak
       class="drawer-panel transition-base fixed inset-y-0 left-0 z-50 w-72 max-w-[80vw] bg-white border-r border-slate-200 shadow-xl flex flex-col"
       role="dialog" aria-modal="true" aria-label="Menu">
-      <div class="flex items-center justify-between px-4 border-b h-14 border-slate-200">
+      <div class="flex items-center justify-center w-full h-full min-h-screen overflow-hidden" style="margin:0;padding:0;">
         <div class="flex items-center gap-2">
         </div>
         <button id="drawerCloseBtn" class="p-2 rounded-lg hover:bg-slate-100 text-slate-600" aria-label="Tutup menu">
@@ -122,8 +117,6 @@
       </button>
 
       <div class="font-semibold">@yield('title', 'Dashboard')</div>
-
-      {{-- Right actions (dipisah ke partial) --}}
       @include('layouts.partials.topbar-actions')
     </header>
 
@@ -134,8 +127,8 @@
 <script>
   (function(){
     const $doc    = document;
-    const $root   = $doc.getElementById('appRoot');
     const $aside  = $doc.getElementById('desktopSidebar');
+    const $drawer = $doc.getElementById('mobileDrawer');
     const $btnTog = $doc.getElementById('toggleSidebarBtn');
     const $burger = $doc.getElementById('drawerOpenBtn');
     const $close  = $doc.getElementById('drawerCloseBtn');
@@ -143,9 +136,6 @@
     const $ovl    = $doc.getElementById('drawerOverlay');
     const $iconExpand   = $doc.getElementById('iconExpand');
     const $iconCollapse = $doc.getElementById('iconCollapse');
-
-    const prefersReduced = () =>
-      window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     // --- Side mode (mini/full) persist ---
     const LS_KEY = 'ac.sideMode';
@@ -164,21 +154,25 @@
         $aside.classList.add('is-mini');
         $aside.classList.remove('md:w-64');
         $aside.classList.add('md:w-20');
-        if($iconExpand)  $iconExpand.classList.remove('hidden');   // tampilkan ikon expand
-        if($iconCollapse)$iconCollapse.classList.add('hidden');    // sembunyikan ikon collapse
+        if($iconExpand)   $iconExpand.classList.remove('hidden');
+        if($iconCollapse) $iconCollapse.classList.add('hidden');
         if($btnTog) $btnTog.setAttribute('aria-pressed','true');
       }else{
         $aside.classList.remove('is-mini');
         $aside.classList.add('md:w-64');
         $aside.classList.remove('md:w-20');
-        if($iconExpand)  $iconExpand.classList.add('hidden');
-        if($iconCollapse)$iconCollapse.classList.remove('hidden');
+        if($iconExpand)   $iconExpand.classList.add('hidden');
+        if($iconCollapse) $iconCollapse.classList.remove('hidden');
         if($btnTog) $btnTog.setAttribute('aria-pressed','false');
       }
       try{ localStorage.setItem(LS_KEY, JSON.stringify(sideMode)); }catch(e){}
     }
 
     applySideMode();
+
+    // Lepas cloak setelah sidebar dikonfigurasi
+    if($aside)  $aside.removeAttribute('data-cloak');
+    if($drawer) $drawer.removeAttribute('data-cloak');
 
     if($btnTog){
       $btnTog.addEventListener('click', () => {
@@ -199,16 +193,13 @@
       if($panel) $panel.setAttribute('aria-hidden','true');
     }
 
-    $burger && $burger.addEventListener('click', openDrawer, { passive:true });
-    $close  && $close.addEventListener('click', closeDrawer, { passive:true });
-    $ovl    && $ovl.addEventListener('click', closeDrawer, { passive:true });
+    $burger && $burger.addEventListener('click', openDrawer,  { passive:true });
+    $close  && $close.addEventListener('click',  closeDrawer, { passive:true });
+    $ovl    && $ovl.addEventListener('click',    closeDrawer, { passive:true });
 
     $doc.addEventListener('keydown', (e) => {
       if(e.key === 'Escape'){ closeDrawer(); }
     });
-
-    // Lepas cloak
-    $root && $root.removeAttribute('data-cloak');
 
     const verifyModal = $doc.getElementById('verifyEmailModal');
     const verifyClose = $doc.getElementById('verifyEmailModalClose');
@@ -218,19 +209,18 @@
   })();
 </script>
 
-{{-- Hanya jalankan polling notifikasi saat user login, agar halaman publik tidak 401 --}}
 @auth
-      @push('scripts')
-          <script>
-            (function(){
-              const url = @json(route('me.notifications.index', ['format' => 'json']));
-              fetch(url, { headers: { 'X-Requested-With':'XMLHttpRequest' } })
-                .then(r => (r.ok ? r.json() : null))
-                .then(json => {  })
-                .catch(() => { /* jangan ganggu UI di halaman publik */ });
-            })();
-          </script>
-      @endpush
+  @push('scripts')
+    <script>
+      (function(){
+        const url = @json(route('me.notifications.index', ['format' => 'json']));
+        fetch(url, { headers: { 'X-Requested-With':'XMLHttpRequest' } })
+          .then(r => (r.ok ? r.json() : null))
+          .then(json => {  })
+          .catch(() => {});
+      })();
+    </script>
+  @endpush
 @endauth
 
 @stack('scripts')

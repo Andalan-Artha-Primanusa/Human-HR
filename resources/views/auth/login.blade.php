@@ -44,9 +44,9 @@
   </style>
 </head>
 
-<body class="min-h-screen text-slate-800">
+<body class="flex items-center justify-center min-h-screen p-0 m-0 text-slate-800" style="margin:0;padding:0;">
 
-  <div class="relative min-h-screen overflow-hidden">
+<div class="flex items-center justify-center w-full h-full min-h-screen overflow-hidden" style="margin:0;padding:0;">
 
     <!-- BACKGROUND -->
     <img src="{{ asset('assets/hr1.jpg') }}"
@@ -57,9 +57,9 @@
     <div class="absolute inset-0 bg-black/50"></div>
 
     <!-- TEXT KIRI -->
-    <div class="absolute top-0 left-0 z-10 items-center justify-center w-full h-full text-center bg-gradient-to-br from-[#a77d52]/90 to-[#8b5e3c] lg:items-center lg:justify-start lg:h-full lg:w-auto lg:bg-transparent lg:bg-gradient-to-r lg:from-[#a77d52] lg:via-[#b88a5c] lg:to-[#8b5e3c] lg:text-left">
-      <div class="max-w-md p-8 lg:p-0 lg:pl-20">
-        <h1 class="mb-4 text-3xl lg:text-4xl font-bold text-white">Human Careers</h1>
+    <div class="absolute top-0 left-0 z-10 items-center hidden h-full pl-20 text-white lg:flex">
+      <div class="max-w-md">
+        <h1 class="mb-4 text-4xl font-bold">Human Careers</h1>
         <p class="text-white/80">
           Platform rekrutmen resmi Andalan Group untuk membantu Anda menemukan karier terbaik.
         </p>
@@ -67,7 +67,7 @@
     </div>
 
     <!-- FORM -->
-    <div class="absolute inset-0 z-10 flex items-center justify-center p-4 sm:p-6 lg:justify-end lg:pr-4 xl:pr-20">
+    <div class="relative z-10 flex items-center justify-center w-full min-h-screen p-4 sm:p-6 lg:justify-end lg:pr-4 xl:pr-20">
 
       <div class="w-full max-w-md">
 
