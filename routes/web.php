@@ -82,7 +82,7 @@ Route::get('/dashboard', function () {
     
     $openJobsCount = \App\Models\Job::where('status', 'open')->count();
     $myApplicationsCount = $user->applications()->count();
-    $unreadNotificationsCount = $user->notifications()->where('read', false)->count();
+    $unreadNotificationsCount = $user->notifications()->whereNull('read_at')->count();
     $latestJobs = \App\Models\Job::where('status', 'open')
         ->with('site')
         ->orderByDesc('created_at')
