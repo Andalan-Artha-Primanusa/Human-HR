@@ -274,12 +274,27 @@ textarea.fm-ctrl { resize: vertical; min-height: 68px; }
             <div class="kn-card" data-id="{{ $a->id }}">
 
               {{-- INFO UTAMA --}}
-              <div class="kn-card-name">{{ $a->job->title ?? '-' }}</div>
-              <div class="kn-card-job">{{ $a->job->site->name ?? '-' }}</div>
+              <div class="kn-card-name">
+                @if($isKaryawan || $isTrainer)
+                  {{ $a->user->name ?? '-' }}
+                @else
+                  {{ $a->job->title ?? '-' }}
+                @endif
+              </div>
 
-              {{-- Tampilkan nama kandidat untuk karyawan/trainer --}}
+              <div class="kn-card-job">
+                @if($isKaryawan || $isTrainer)
+                  {{ $a->job->title ?? '-' }} &middot; {{ $a->job->site->name ?? '-' }}
+                @else
+                  {{ $a->job->site->name ?? '-' }}
+                @endif
+              </div>
+
               @if($isKaryawan || $isTrainer)
-                <div class="kn-card-meta">{{ $a->user->name ?? '-' }} &middot; {{ $a->user->email ?? '-' }}</div>
+                <div class="kn-card-meta">{{ $a->user->email ?? '-' }}</div>
+                @if($a->poh)
+                  <div class="kn-card-meta">PoH: {{ $a->poh->name }}</div>
+                @endif
               @endif
 
               <div class="kn-card-meta">Status: {{ $a->current_stage }}</div>

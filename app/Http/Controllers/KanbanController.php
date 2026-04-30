@@ -33,6 +33,7 @@ class KanbanController extends Controller
             'job:id,title,division,site_id',
             'job.site:id,code,name',
             'user:id,name,email,role',
+            'poh:id,name',
             'stages.actor:id,name',
             'stages.user:id,name',
             'feedbacks',
