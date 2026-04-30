@@ -4,7 +4,6 @@ namespace App\Mail;
 
 use App\Models\Offer;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
@@ -12,7 +11,7 @@ use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 use Barryvdh\DomPDF\Facade\Pdf;
 
-class OfferLetterMail extends Mailable implements ShouldQueue
+class OfferLetterMail extends Mailable
 {
     use Queueable, SerializesModels;
 
@@ -22,9 +21,10 @@ class OfferLetterMail extends Mailable implements ShouldQueue
     /**
      * Create a new message instance.
      */
-    public function __construct(Offer $offer)
+    public function __construct(Offer $offer, $bodyContent = null)
     {
         $this->offer = $offer;
+        $this->bodyContent = $bodyContent;
     }
 
     /**

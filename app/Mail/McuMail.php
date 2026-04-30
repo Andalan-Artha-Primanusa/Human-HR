@@ -4,13 +4,12 @@ namespace App\Mail;
 
 use App\Models\JobApplication;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class McuMail extends Mailable implements ShouldQueue
+class McuMail extends Mailable
 {
     use Queueable, SerializesModels;
 
@@ -20,9 +19,10 @@ class McuMail extends Mailable implements ShouldQueue
     /**
      * Create a new message instance.
      */
-    public function __construct(JobApplication $application)
+    public function __construct(JobApplication $application, $bodyContent = null)
     {
         $this->application = $application;
+        $this->bodyContent = $bodyContent;
     }
 
     /**

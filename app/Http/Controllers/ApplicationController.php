@@ -1050,8 +1050,7 @@ class ApplicationController extends Controller
         if ($application->user && $application->user->email) {
             \Log::info("Target email: " . $application->user->email);
             try {
-                $mail = new OfferLetterMail($offer);
-                $mail->bodyContent = $data['email_body'];
+                $mail = new OfferLetterMail($offer, $data['email_body']);
                 Mail::to($application->user->email)->send($mail);
                 \Log::info("Mail sent successfully for app: {$application->id}");
 
@@ -1130,9 +1129,8 @@ class ApplicationController extends Controller
         if ($application->user && $application->user->email) {
             \Log::info("Target MCU email: " . $application->user->email);
             try {
-                $mail = new McuMail($application);
-                $mail->bodyContent = $data['email_body'];
-                \Mail::to($application->user->email)->send($mail);
+                $mail = new McuMail($application, $data['email_body']);
+                Mail::to($application->user->email)->send($mail);
                 \Log::info("MCU Mail sent successfully for app: {$application->id}");
 
                 // Tambahkan in-app notification
