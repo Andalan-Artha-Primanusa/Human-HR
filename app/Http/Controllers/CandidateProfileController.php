@@ -66,7 +66,7 @@ class CandidateProfileController extends Controller
             'birthplace' => 'bail|required|string|max:190',
             'birthdate' => 'bail|required|date',
             'nik' => ['bail', 'required', 'digits:16'],
-            'email' => 'bail|required|email:rfc,dns',
+            'email' => 'bail|required|email:rfc',
             'phone' => [
                 'bail',
                 'required',

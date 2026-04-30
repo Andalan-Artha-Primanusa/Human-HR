@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreJobRequest;
+use App\Http\Requests\UpdateJobRequest;
 use App\Models\Job;
 use App\Models\Site;
 use App\Models\Company;
@@ -188,27 +190,9 @@ class JobController extends Controller
     /**
      * ADMIN STORE -> openings disinkron dari manpower_requirements
      */
-    public function store(Request $request)
+    public function store(StoreJobRequest $request)
     {
-        $payload = $request->validate([
-            'code' => ['required', 'string', 'max:50'],
-            'title' => ['required', 'string', 'max:200'],
-            'division' => ['nullable', 'string', 'max:100'],
-            'level' => ['nullable', 'string', 'max:100'],
-            'employment_type' => ['required', Rule::in(['intern', 'contract', 'fulltime'])], // enum DB
-            'status' => ['required', Rule::in(['draft', 'open', 'closed'])],
-            'description' => ['nullable', 'string'],
-
-            // NEW (opsional)
-            'skills' => ['nullable'], // boleh array/string; dinormalisasi di mutator model
-            'keywords' => ['nullable', 'string', 'max:500'],
-
-            'site_id' => ['nullable', 'uuid', 'exists:sites,id', 'required_without:site_code'],
-            'site_code' => ['nullable', 'string', 'exists:sites,code', 'required_without:site_id'],
-
-            'company_id' => ['nullable', 'uuid', 'exists:companies,id', 'prohibits:company_code'],
-            'company_code' => ['nullable', 'string', 'exists:companies,code', 'prohibits:company_id'],
-        ]);
+        $payload = $request->validated();
 
         $siteId = $this->resolveSiteId($payload['site_id'] ?? null, $payload['site_code'] ?? null);
         $companyId = $this->resolveCompanyId($payload['company_id'] ?? null, $payload['company_code'] ?? null);
@@ -271,27 +255,9 @@ class JobController extends Controller
     /**
      * ADMIN UPDATE -> openings disinkron dari manpower_requirements
      */
-    public function update(Request $request, Job $job)
+    public function update(UpdateJobRequest $request, Job $job)
     {
-        $payload = $request->validate([
-            'code' => ['required', 'string', 'max:50'],
-            'title' => ['required', 'string', 'max:200'],
-            'division' => ['nullable', 'string', 'max:100'],
-            'level' => ['nullable', 'string', 'max:100'],
-            'employment_type' => ['required', Rule::in(['intern', 'contract', 'fulltime'])],
-            'status' => ['required', Rule::in(['draft', 'open', 'closed'])],
-            'description' => ['nullable', 'string'],
-
-            // NEW (opsional)
-            'skills' => ['nullable'], // array/string/JSON → normalisasi di mutator
-            'keywords' => ['nullable', 'string', 'max:500'],
-
-            'site_id' => ['nullable', 'uuid', 'exists:sites,id', 'required_without:site_code'],
-            'site_code' => ['nullable', 'string', 'exists:sites,code', 'required_without:site_id'],
-
-            'company_id' => ['nullable', 'uuid', 'exists:companies,id', 'prohibits:company_code'],
-            'company_code' => ['nullable', 'string', 'exists:companies,code', 'prohibits:company_id'],
-        ]);
+        $payload = $request->validated();
 
         $siteId = $this->resolveSiteId($payload['site_id'] ?? null, $payload['site_code'] ?? null);
         $companyId = $this->resolveCompanyId($payload['company_id'] ?? null, $payload['company_code'] ?? null);

@@ -94,6 +94,7 @@ class PsychotestControllerTest extends TestCase
         $this->attempt = PsychotestAttempt::create([
             'application_id' => $this->application->id,
             'test_id' => $this->psychotest->id,
+            'user_id' => $this->pelamar->id,
             'status' => 'pending',
         ]);
     }
@@ -157,6 +158,7 @@ class PsychotestControllerTest extends TestCase
         $otherAttempt = PsychotestAttempt::create([
             'application_id' => $otherApplication->id,
             'test_id' => $this->psychotest->id,
+            'user_id' => $this->otherPelamar->id,
             'status' => 'pending',
         ]);
 
@@ -243,6 +245,7 @@ class PsychotestControllerTest extends TestCase
         $otherAttempt = PsychotestAttempt::create([
             'application_id' => $otherApplication->id,
             'test_id' => $this->psychotest->id,
+            'user_id' => $this->otherPelamar->id,
             'status' => 'pending',
         ]);
 

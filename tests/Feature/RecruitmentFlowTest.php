@@ -47,7 +47,7 @@ class RecruitmentFlowTest extends TestCase
 
         // 4. Test Melamar Pekerjaan
         $this->actingAs($pelamar);
-        $response = $this->post(route('jobs.apply', $job->slug));
+        $response = $this->post(route('applications.store', $job->id));
         
         $this->assertTrue(in_array($response->status(), [200, 302, 201]));
 

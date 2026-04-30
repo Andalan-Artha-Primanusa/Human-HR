@@ -7,7 +7,7 @@ use App\Models\Concerns\HasUuidPrimaryKey;
 
 class ManpowerRequirement extends Model
 {
-    use HasUuidPrimaryKey;
+    use HasUuidPrimaryKey, \Illuminate\Database\Eloquent\Factories\HasFactory;
 
     protected $fillable = [
         'job_id',

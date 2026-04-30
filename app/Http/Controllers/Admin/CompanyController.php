@@ -58,12 +58,11 @@ class CompanyController extends Controller
             ->when($status, fn($q2) => $q2->where('status', $status))
             ->when($like !== null, function ($q2) use ($like, $hasFulltext) {
                 if ($hasFulltext) {
-                    return $q2->whereRaw("MATCH(name, code, alias) AGAINST (? IN NATURAL LANGUAGE MODE)", [trim($like, '%')]);
+                    return $q2->whereRaw("MATCH(name, code) AGAINST (? IN NATURAL LANGUAGE MODE)", [trim($like, '%')]);
                 }
                 return $q2->where(function ($w) use ($like) {
                     $w->where('name', 'like', $like)
-                        ->orWhere('code', 'like', $like)
-                        ->orWhere('alias', 'like', $like);
+                        ->orWhere('code', 'like', $like);
                 });
             })
             ->orderBy('name')

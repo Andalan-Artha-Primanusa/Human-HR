@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreOfferRequest;
 use App\Models\JobApplication;
 use App\Models\Offer;
 use Illuminate\Http\Request;
@@ -23,17 +24,9 @@ class OfferController extends Controller
     /**
      * Admin: buat draft offer
      */
-    public function store(Request $request, JobApplication $application)
+    public function store(StoreOfferRequest $request, JobApplication $application)
     {
-        $this->ensureAdmin($request);
-
-        $data = $request->validate([
-            'gross_salary' => 'required|numeric|min:0',
-            'allowance' => 'nullable|numeric|min:0',
-            'notes' => 'nullable|string',
-            'html' => 'nullable|string', // jika kirim HTML custom
-            'meta' => 'sometimes|array', // meta opsional (doc_no, level, poh, join_date, dll)
-        ]);
+        $data = $request->validated();
 
         $offer = $application->offer()->create([
             'status' => 'draft',

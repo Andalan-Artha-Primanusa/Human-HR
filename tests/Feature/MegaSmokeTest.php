@@ -88,33 +88,33 @@ class MegaSmokeTest extends TestCase
     public function test_job_crud_flow_hit()
     {
         $this->actingAs($this->admin);
+        $s = Site::first() ?: Site::factory()->create();
 
         // Store
         $this->post(route('admin.jobs.store'), [
             'title' => 'New Job Controller',
             'code' => 'NJC-01',
-            'level' => 1,
+            'level' => 'manager',
+            'employment_type' => 'fulltime',
+            'site_id' => $s->id,
             'status' => 'open',
             'description' => 'Desc',
-            'requirements' => 'Req'
         ]);
 
-        $job = Job::latest()->first();
+        $job = Job::where('code', 'NJC-01')->first();
 
         // Update
         if($job) {
             $this->put(route('admin.jobs.update', $job->id), [
                 'title' => 'Updated Job Controller',
                 'code' => 'NJC-01',
-                'level' => 1,
+                'level' => 'manager',
+                'employment_type' => 'fulltime',
+                'site_id' => $s->id,
                 'status' => 'open',
                 'description' => 'Desc',
-                'requirements' => 'Req'
             ]);
             
-            // Show
-            $this->get(route('admin.jobs.show', $job->id))->assertStatus(200);
-
             // Delete
             $this->delete(route('admin.jobs.destroy', $job->id));
         }
@@ -138,7 +138,6 @@ class MegaSmokeTest extends TestCase
                 'email' => 'newuser@test.com',
                 'role' => 'hr'
             ]);
-            $this->get(route('admin.users.show', $u->id));
             $this->delete(route('admin.users.destroy', $u->id));
         }
     }

@@ -56,6 +56,6 @@ class Site extends Model
     /* ===== Scopes ===== */
     public function scopeActive($q)
     {
-        return $q->where('is_active', true);
+        return $q->where('is_active', 1);
     }
 }

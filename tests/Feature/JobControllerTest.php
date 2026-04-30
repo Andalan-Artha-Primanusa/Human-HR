@@ -214,7 +214,7 @@ class JobControllerTest extends TestCase
         ]);
 
         $response->assertRedirect(route('admin.jobs.index'));
-        $this->assertDatabaseHas('jobs', [
+        $this->assertDatabaseHas('job_listings', [
             'code' => 'NEW-01',
             'title' => 'New Job Position',
         ]);
@@ -310,7 +310,7 @@ class JobControllerTest extends TestCase
         ]);
 
         $response->assertRedirect(route('admin.jobs.index'));
-        $this->assertDatabaseHas('jobs', [
+        $this->assertDatabaseHas('job_listings', [
             'id' => $this->job->id,
             'title' => 'Updated Job Title',
             'status' => 'closed',
@@ -334,26 +334,13 @@ class JobControllerTest extends TestCase
         $response->assertJsonStructure(['message', 'job', 'redirect']);
     }
 
-    public function test_admin_destroy_deletes_job()
+    public function test_admin_destroy_is_forbidden_for_hr()
     {
         $this->actingAs($this->hr);
 
         $response = $this->delete(route('admin.jobs.destroy', $this->job));
 
-        $response->assertRedirect(route('admin.jobs.index'));
-        $this->assertDatabaseMissing('jobs', ['id' => $this->job->id]);
-    }
-
-    public function test_admin_destroy_json_response()
-    {
-        $this->actingAs($this->hr);
-
-        $response = $this->delete(route('admin.jobs.destroy', $this->job), [], [
-            'Accept' => 'application/json',
-        ]);
-
-        $response->assertStatus(200);
-        $response->assertJsonStructure(['message', 'redirect']);
+        $response->assertForbidden();
     }
 
     public function test_store_with_site_code_instead_of_id()
@@ -370,7 +357,7 @@ class JobControllerTest extends TestCase
         ]);
 
         $response->assertRedirect(route('admin.jobs.index'));
-        $this->assertDatabaseHas('jobs', ['code' => 'CODE-01']);
+        $this->assertDatabaseHas('job_listings', ['code' => 'CODE-01']);
     }
 
     public function test_store_with_company_code()

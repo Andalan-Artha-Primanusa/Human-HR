@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\SubmitPsychotestRequest;
 use App\Models\PsychotestAttempt;
 use App\Models\PsychotestAnswer;
 use Illuminate\Http\Request;
@@ -88,27 +89,9 @@ class PsychotestController extends Controller
     }
 
     // ====== PELAMAR: submit jawaban ======
-    public function submit(Request $request, PsychotestAttempt $attempt)
+    public function submit(SubmitPsychotestRequest $request, PsychotestAttempt $attempt)
     {
-        // hanya pemilik
-        abort_unless($attempt->application->user_id === $request->user()->id, 403);
-
-        // cegah submit ulang
-        if (in_array($attempt->status, ['submitted', 'scored', 'expired', 'cancelled'], true)) {
-            return redirect()->route('applications.mine')
-                ->with('warn', 'Tes ini sudah diselesaikan.');
-        }
-
-        // expired check (opsional)
-        if ($attempt->expires_at && now()->greaterThan($attempt->expires_at)) {
-            $attempt->update(['status' => 'expired']);
-            return redirect()->route('applications.mine')->with('warn', 'Tes sudah kedaluwarsa.');
-        }
-
-        $data = $request->validate([
-            'answers' => 'required|array', // [question_id => answer_string]
-            'answers.*' => ['nullable', 'string', 'max:5000'],
-        ]);
+        $data = $request->validated();
 
         $attempt->load(['test.questions']);
         $questions = $attempt->test->questions;

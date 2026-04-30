@@ -9,28 +9,54 @@ class JobApplicationPolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->hasAnyRole(['hr', 'superadmin']);
+        // Semua user terotentikasi boleh mengakses list (filtering di controller)
+        return true;
+    }
+
+    public function viewAdmin(User $user): bool
+    {
+        return $user->hasRole(['admin', 'hr', 'superadmin']);
     }
 
     public function view(User $user, JobApplication $application): bool
     {
-        return $user->hasAnyRole(['hr', 'superadmin']) || $application->user_id === $user->id;
+        // Admin/HR bisa lihat semua, Pelamar hanya bisa lihat miliknya
+        return $user->hasRole(['admin', 'hr', 'superadmin']) 
+               || $application->user_id === $user->id;
     }
 
     public function create(User $user): bool
     {
-        // Pelamar boleh buat lamaran
-        return $user !== null;
+        // Semua user terotentikasi bisa melamar
+        return true;
     }
 
     public function update(User $user, JobApplication $application): bool
     {
-        // Update (move stage, set status) khusus HR/superadmin
-        return $user->hasAnyRole(['hr', 'superadmin']);
+        // Update status/stage khusus Admin/HR
+        return $user->hasRole(['admin', 'hr', 'superadmin']);
     }
 
     public function delete(User $user, JobApplication $application): bool
     {
-        return $user->hasAnyRole(['superadmin']);
+        // Delete hanya Superadmin
+        return $user->hasRole(['superadmin']);
+    }
+
+    public function giveFeedback(User $user, JobApplication $application): bool
+    {
+        // Admin/HR bisa kasih feedback kapan saja
+        // Trainer/Karyawan (User) bisa kasih feedback jika relevan
+        return $user->hasRole(['admin', 'hr', 'superadmin', 'trainer', 'karyawan']);
+    }
+
+    public function sendOffer(User $user, JobApplication $application): bool
+    {
+        return $user->hasRole(['admin', 'hr', 'superadmin']);
+    }
+
+    public function sendMcu(User $user, JobApplication $application): bool
+    {
+        return $user->hasRole(['admin', 'hr', 'superadmin']);
     }
 }

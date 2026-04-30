@@ -88,7 +88,6 @@ class AuditLogController extends Controller
                 'target_id',
                 'ip',
                 'user_agent',
-                'meta',
             ]);
 
         return view('admin.audit_logs.show', compact('log'));

@@ -89,14 +89,12 @@ class MassiveCoverageTest extends TestCase
         $this->post(route('admin.jobs.store'), [
             'title' => 'Job Manager',
             'code' => 'JM-01',
-            'slug' => 'job-manager',
-            'department' => 'IT',
-            'level' => 3,
+            'division' => 'it',
+            'level' => 'manager',
+            'employment_type' => 'fulltime',
             'site_id' => $s->id,
-            'poh_id' => $p->id,
             'status' => 'open',
             'description' => 'Desc',
-            'requirements' => 'Req'
         ]);
 
         $job = Job::where('code', 'JM-01')->first();
@@ -105,12 +103,12 @@ class MassiveCoverageTest extends TestCase
         $this->put(route('admin.jobs.update', $job->id), [
             'title' => 'Job Manager Updated',
             'code' => 'JM-01',
-            'level' => 3,
+            'division' => 'it',
+            'level' => 'manager',
+            'employment_type' => 'fulltime',
             'site_id' => $s->id,
-            'poh_id' => $p->id,
             'status' => 'draft',
             'description' => 'Desc',
-            'requirements' => 'Req'
         ]);
 
         $this->delete(route('admin.jobs.destroy', $job->id));

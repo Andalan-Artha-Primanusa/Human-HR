@@ -125,6 +125,7 @@ class ApplicationController extends Controller
     /** Pelamar: daftar lamaran saya */
     public function index(Request $request)
     {
+        $this->authorize('viewAny', JobApplication::class);
         $apps = JobApplication::with([
             'job:id,title,division,site_id',
             'job.site:id,code,name',
@@ -190,9 +191,28 @@ class ApplicationController extends Controller
             ->with('success', 'Lamaran dibuat. Lengkapi data profil & riwayat kamu ya.');
     }
 
+    /** Pelamar/Admin: detail lamaran */
+    public function show(JobApplication $application)
+    {
+        $this->authorize('view', $application);
+
+        $application->load([
+            'job:id,title,division,site_id',
+            'job.site:id,code,name',
+            'stages.actor:id,name',
+            'stages.user:id,name',
+            'feedbacks.user:id,name',
+            'interviews',
+            'offer',
+        ]);
+
+        return view('applications.show', compact('application'));
+    }
+
     /** Admin: daftar semua aplikasi + filter */
     public function adminIndex(Request $request)
     {
+        $this->authorize('viewAdmin', JobApplication::class);
         $filters = $request->validate([
             'q'     => ['nullable', 'string', 'max:120'],
             'stage' => ['nullable', 'string', 'max:50'],
@@ -233,6 +253,7 @@ class ApplicationController extends Controller
     /** Kanban board */
     public function board(Request $request)
     {
+        $this->authorize('viewAdmin', JobApplication::class);
         $user   = auth()->user();
         $stages = $this->STAGES;
 
@@ -303,6 +324,9 @@ class ApplicationController extends Controller
             'feedback'       => ['required', 'string', 'max:2000'],
             'approve'        => ['required', 'in:yes,no'],
         ]);
+
+        $application = JobApplication::findOrFail($validated['application_id']);
+        $this->authorize('giveFeedback', $application);
 
         /** @var \App\Models\User $actor */
         $actor = auth()->user();
@@ -400,6 +424,7 @@ class ApplicationController extends Controller
      */
     public function moveStage(Request $request, JobApplication $application)
     {
+        $this->authorize('update', $application);
         [$to, $status, $note, $score] = $this->validateMove($request, $application);
         $attempt = $this->applyTransition($application, $to, $status, $note, $score);
         return $this->redirectAfterMove($request, $application, $to, $attempt);
@@ -958,7 +983,7 @@ class ApplicationController extends Controller
     public function sendOfferEmail(Request $request, JobApplication $application)
     {
         \Log::info("sendOfferEmail started for app: {$application->id}");
-        abort_unless(in_array($request->user()?->role, ['admin', 'hr', 'superadmin']), 403);
+        $this->authorize('sendOffer', $application);
 
         try {
             $data = $request->validate([
@@ -1065,7 +1090,7 @@ class ApplicationController extends Controller
     public function sendMcuEmail(Request $request, JobApplication $application)
     {
         \Log::info("sendMcuEmail started for app: {$application->id}");
-        abort_unless(in_array($request->user()?->role, ['admin', 'hr', 'superadmin']), 403);
+        $this->authorize('sendMcu', $application);
 
         try {
             $data = $request->validate([

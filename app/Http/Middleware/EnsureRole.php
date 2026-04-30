@@ -10,9 +10,7 @@ class EnsureRole
 {
     public function handle(Request $request, Closure $next, string $roles): Response
     {
-        $allowed = array_map('trim', explode('|', $roles));
-
-        if (!$request->user() || !in_array($request->user()->role, $allowed, true)) {
+        if (!$request->user() || !$request->user()->hasRole($roles)) {
             abort(403, 'Forbidden.');
         }
 

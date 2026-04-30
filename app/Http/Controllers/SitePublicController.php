@@ -17,29 +17,32 @@ class SitePublicController extends Controller
             'q' => ['nullable', 'string', 'max:100'],
         ]);
 
-        $qRaw = (string) ($data['q'] ?? '');
+        $qRaw = (string) $request->query('q', '');
         $q = Str::limit(
             preg_replace('/[\x00-\x1F\x7F]/u', '', trim($qRaw)) ?? '',
             80,
             ''
         );
-        $like = $q !== '' ? '%' . addcslashes($q, '\\%_') . '%' : null;
+        $like = $q !== '' ? '%' . $q . '%' : null;
 
-        $sites = Site::query()
+        $query = Site::query()
             ->select(['id', 'code', 'name', 'region', 'timezone', 'address'])
-            ->where('is_active', true)
-            ->when($like !== null, function ($qq) use ($like) {
-                $qq->where(function ($w) use ($like) {
-                    $w->where('code', 'like', $like)
-                        ->orWhere('name', 'like', $like)
-                        ->orWhere('region', 'like', $like)
-                        ->orWhere('timezone', 'like', $like)
-                        ->orWhere('address', 'like', $like);
-                });
-            })
-            ->orderBy('code')
+            ->active();
+
+        if ($like !== null) {
+            $query->where(function ($w) use ($like) {
+                $w->where('code', 'like', $like)
+                    ->orWhere('name', 'like', $like)
+                    ->orWhere('region', 'like', $like)
+                    ->orWhere('timezone', 'like', $like)
+                    ->orWhere('address', 'like', $like);
+            });
+        }
+
+        $sites = $query->orderBy('code')
             ->paginate(20)
             ->withQueryString();
+
 
         if ($request->wantsJson()) {
             return response()->json($sites);
