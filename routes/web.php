@@ -193,6 +193,8 @@ Route::prefix('admin')
         Route::post('applications/{application}/send-offer', [ApplicationController::class, 'sendOfferEmail'])->name('applications.send-offer');
         Route::post('applications/{application}/send-mcu', [ApplicationController::class, 'sendMcuEmail'])->name('applications.send-mcu');
         Route::post('applications/{application}/mcu-result', [ApplicationController::class, 'updateMcuResult'])->name('applications.mcu-result');
+        Route::post('applications/{application}/mobilisasi', [ApplicationController::class, 'updateMobilisasi'])->name('applications.mobilisasi.update');
+        Route::post('applications/{application}/ground-test', [ApplicationController::class, 'updateGroundTest'])->name('applications.ground-test.update');
 
         // Move via form POST (tombol blade)
         Route::post('applications/{application}/move', [ApplicationController::class, 'moveStage'])

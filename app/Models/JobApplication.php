@@ -19,11 +19,14 @@ class JobApplication extends Model
         'feedback_trainer', 'approve_trainer', 
         'feedback_user', 'approve_user', 
         'feedback_employee', 'approve_employee',
-        'mcu_meta', 'mcu_result'
+        'mcu_meta', 'mcu_result',
+        'mobilisasi_meta', 'ground_test_meta', 'ground_test_result'
     ];
 
     protected $casts = [
-        'mcu_meta' => 'array'
+        'mcu_meta' => 'array',
+        'mobilisasi_meta' => 'array',
+        'ground_test_meta' => 'array',
     ];
 
     public function feedbacks()

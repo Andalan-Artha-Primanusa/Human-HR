@@ -369,6 +369,9 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
                 data-offer-body="{{ optional($a->offer)->body_template }}"
                 data-offer-meta="{{ json_encode(optional($a->offer)->meta ?? []) }}"
                 data-mcu-meta="{{ json_encode($a->mcu_meta ?? []) }}"
+                data-mobilisasi-meta="{{ json_encode($a->mobilisasi_meta ?? []) }}"
+                data-gt-meta="{{ json_encode($a->ground_test_meta ?? []) }}"
+                data-gt-result="{{ $a->ground_test_result }}"
                 data-schedule-url="{{ route('admin.interviews.store', $a) }}"
               >
                 <div class="kn-card-name">{{ $a->user->name }}</div>
@@ -389,6 +392,21 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
                 @if($mcuRes)
                   <span class="kn-pill {{ $mcuRes === 'fit' ? 'pill-hired' : ($mcuRes === 'fit_note' ? 'pill-warn' : 'pill-nq') }}">
                     {{ $mcuRes === 'fit' ? '✓ FIT' : ($mcuRes === 'fit_note' ? '⚠ FIT NOTE' : '✕ UNFIT') }}
+                  </span>
+                @endif
+
+                {{-- INDICATOR MOBILISASI --}}
+                @if(isset($a->mobilisasi_meta['ticket_path']))
+                  <span class="kn-pill pill-hired" title="Tiket: {{ $a->mobilisasi_meta['ticket_name'] }}">
+                    ✈ TIKET OK
+                  </span>
+                @endif
+
+                {{-- INDICATOR GROUND TEST --}}
+                @if(isset($a->ground_test_meta['lap_path']) || $a->ground_test_result)
+                  <span class="kn-pill {{ $a->ground_test_result === 'lolos' ? 'pill-hired' : ($a->ground_test_result === 'tidak_lolos' ? 'pill-nq' : 'pill-warn') }}">
+                    GT: {{ $a->ground_test_result === 'lolos' ? 'LOLOS' : ($a->ground_test_result === 'tidak_lolos' ? 'TIDAK LOLOS' : 'PENDING') }}
+                    @if(isset($a->ground_test_meta['lap_path'])) 📄 @endif
                   </span>
                 @endif
 
@@ -435,6 +453,28 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
                         <option value="unfit" {{ $a->mcu_result === 'unfit' ? 'selected' : '' }}>✕ Unfit</option>
                       </select>
                     </div>
+                  @endif
+
+                  {{-- MOBILISASI ACTIONS --}}
+                  @if($stageKey === 'mobilisasi' && $isSuperHR)
+                    <button type="button" class="btn-xs btn-primary"
+                      onclick="openMobilisasiModal('{{ $a->id }}', '{{ addslashes($a->user->name) }}', this)">
+                      ✈ Mobilisasi (Tiket & Email)
+                    </button>
+                    @if(isset($a->mobilisasi_meta['ticket_path']))
+                      <a href="{{ Storage::url($a->mobilisasi_meta['ticket_path']) }}" target="_blank" class="btn-xs btn-outline">Lihat Tiket</a>
+                    @endif
+                  @endif
+
+                  {{-- GROUND TEST ACTIONS --}}
+                  @if($stageKey === 'ground_test' && $isSuperHR)
+                    <button type="button" class="btn-xs btn-primary"
+                      onclick="openGroundTestModal('{{ $a->id }}', '{{ addslashes($a->user->name) }}', this)">
+                      📄 Update LAP & Hasil GT
+                    </button>
+                    @if(isset($a->ground_test_meta['lap_path']))
+                      <a href="{{ Storage::url($a->ground_test_meta['lap_path']) }}" target="_blank" class="btn-xs btn-outline">Lihat LAP</a>
+                    @endif
                   @endif
 
                   {{-- FEEDBACK FORM BUTTON (hanya di hr_iv & belum ada feedback) --}}
@@ -885,6 +925,85 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
   </div>
 </div>
 
+{{-- ============================= MODAL: MOBILISASI ============================= --}}
+<div class="hidden kn-overlay" id="overlay-mobilisasi">
+  <div class="kn-modal">
+    <div class="kn-modal-head">
+      <div>
+        <div class="kn-modal-title">✈ Mobilisasi</div>
+        <div class="kn-modal-sub" id="mob-sub">Upload tiket dan kirim email ke kandidat</div>
+      </div>
+      <button class="kn-modal-close" onclick="closeModal('overlay-mobilisasi')">✕</button>
+    </div>
+    <form id="form-mobilisasi" method="POST" enctype="multipart/form-data">
+      @csrf
+      <div class="kn-modal-body">
+        <div class="fm-group">
+          <label class="fm-label">Upload Tiket / Dokumen</label>
+          <input type="file" name="ticket" class="fm-ctrl" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
+          <div id="mob-ticket-existing" style="font-size:0.65rem; color:#888; margin-top:4px;"></div>
+        </div>
+        <div class="fm-group">
+          <label class="fm-label">Catatan Internal</label>
+          <textarea name="notes" id="mob-notes" class="fm-ctrl" rows="2" placeholder="Catatan untuk tim HR..."></textarea>
+        </div>
+        <div class="fm-group">
+          <label class="fm-label" style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+            <input type="checkbox" name="send_email" id="mob-send-email" value="1" onchange="document.getElementById('mob-email-group').style.display = this.checked ? 'block' : 'none'">
+            Kirim Email ke Kandidat
+          </label>
+        </div>
+        <div id="mob-email-group" style="display:none">
+          <label class="fm-label">Isi Pesan Email</label>
+          <textarea name="email_body" id="mob-email-body" class="fm-ctrl" rows="4" placeholder="Tulis instruksi mobilisasi untuk kandidat..."></textarea>
+        </div>
+      </div>
+      <div class="kn-modal-footer">
+        <button type="button" class="btn-xs btn-outline" onclick="closeModal('overlay-mobilisasi')">Batal</button>
+        <button type="submit" class="btn-xs btn-primary">Simpan & Kirim</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{{-- ============================= MODAL: GROUND TEST ============================= --}}
+<div class="hidden kn-overlay" id="overlay-gt">
+  <div class="kn-modal">
+    <div class="kn-modal-head">
+      <div>
+        <div class="kn-modal-title">📄 Ground Test</div>
+        <div class="kn-modal-sub" id="gt-sub">Update LAP dan Hasil Ground Test</div>
+      </div>
+      <button class="kn-modal-close" onclick="closeModal('overlay-gt')">✕</button>
+    </div>
+    <form id="form-gt" method="POST" enctype="multipart/form-data">
+      @csrf
+      <div class="kn-modal-body">
+        <div class="fm-group">
+          <label class="fm-label">Upload File LAP (Trainer)</label>
+          <input type="file" name="lap" class="fm-ctrl" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.xls,.xlsx">
+          <div id="gt-lap-existing" style="font-size:0.65rem; color:#888; margin-top:4px;"></div>
+        </div>
+        <div class="fm-group">
+          <label class="fm-label">Hasil Ground Test (Tidak Wajib)</label>
+          <select name="result" id="gt-result" class="fm-ctrl">
+            <option value="">— Belum Ada Hasil —</option>
+            <option value="lolos">✓ Lolos</option>
+            <option value="tidak_lolos">✕ Tidak Lolos</option>
+          </select>
+        </div>
+        <div class="fm-group">
+          <label class="fm-label">Catatan Tambahan</label>
+          <textarea name="notes" id="gt-notes" class="fm-ctrl" rows="2" placeholder="Catatan evaluasi GT..."></textarea>
+        </div>
+      </div>
+      <div class="kn-modal-footer">
+        <button type="button" class="btn-xs btn-outline" onclick="closeModal('overlay-gt')">Batal</button>
+        <button type="submit" class="btn-xs btn-primary">Simpan Hasil</button>
+      </div>
+    </form>
+  </div>
+</div>
 
 {{-- TOAST --}}
 <div class="hidden kn-toast" id="kn-toast"></div>
@@ -1137,6 +1256,43 @@ function updateMcuResult(selectEl, appId) {
   .catch(err => {
     showToast(err.message, 'err');
   });
+}
+
+function openMobilisasiModal(appId, name, btn) {
+  const card = getCard(btn);
+  const meta = JSON.parse(card.dataset.mobilisasiMeta || '{}');
+  
+  const form = document.getElementById('form-mobilisasi');
+  form.action = `/admin/applications/${appId}/mobilisasi`;
+  
+  document.getElementById('mob-sub').textContent = 'Kandidat: ' + name;
+  document.getElementById('mob-notes').value = meta.notes || '';
+  document.getElementById('mob-send-email').checked = false;
+  document.getElementById('mob-email-group').style.display = 'none';
+  document.getElementById('mob-email-body').value = '';
+  
+  const existing = document.getElementById('mob-ticket-existing');
+  existing.textContent = meta.ticket_name ? 'File saat ini: ' + meta.ticket_name : '';
+
+  openModal('overlay-mobilisasi');
+}
+
+function openGroundTestModal(appId, name, btn) {
+  const card = getCard(btn);
+  const meta = JSON.parse(card.dataset.gtMeta || '{}');
+  const result = card.dataset.gtResult || '';
+  
+  const form = document.getElementById('form-gt');
+  form.action = `/admin/applications/${appId}/ground-test`;
+  
+  document.getElementById('gt-sub').textContent = 'Kandidat: ' + name;
+  document.getElementById('gt-notes').value = meta.notes || '';
+  document.getElementById('gt-result').value = result;
+  
+  const existing = document.getElementById('gt-lap-existing');
+  existing.textContent = meta.lap_name ? 'File saat ini: ' + meta.lap_name : '';
+
+  openModal('overlay-gt');
 }
 
 /* ============================= ISI FEEDBACK FORM ============================= */

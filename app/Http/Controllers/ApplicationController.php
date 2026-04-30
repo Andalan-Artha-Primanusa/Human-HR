@@ -25,6 +25,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\OfferLetterMail;
 use App\Mail\McuMail;
+use App\Mail\MobilisasiMail;
 
 class ApplicationController extends Controller
 {
@@ -1179,5 +1180,78 @@ class ApplicationController extends Controller
             'ok' => true,
             'message' => 'Hasil MCU berhasil diperbarui.'
         ]);
+    }
+
+    public function updateMobilisasi(Request $request, JobApplication $application)
+    {
+        $this->authorize('update', $application);
+        $data = $request->validate([
+            'ticket' => 'nullable|file|mimes:pdf,jpg,jpeg,png,doc,docx|max:5120',
+            'notes' => 'nullable|string',
+            'email_body' => 'nullable|string',
+            'send_email' => 'nullable'
+        ]);
+
+        $meta = $application->mobilisasi_meta ?? [];
+        
+        if ($request->hasFile('ticket')) {
+            $path = $request->file('ticket')->store('mobilisasi', 'public');
+            $meta['ticket_path'] = $path;
+            $meta['ticket_name'] = $request->file('ticket')->getClientOriginalName();
+            $meta['uploaded_at'] = now()->toDateTimeString();
+        }
+
+        if (isset($data['notes'])) {
+            $meta['notes'] = $data['notes'];
+        }
+
+        $application->update(['mobilisasi_meta' => $meta]);
+
+        if ($request->has('send_email') && $application->user->email) {
+            $body = $data['email_body'] ?: "Berikut adalah tiket/dokumen mobilisasi Anda.";
+            try {
+                Mail::to($application->user->email)->send(new MobilisasiMail(
+                    $application, 
+                    $body, 
+                    $meta['ticket_path'] ?? null, 
+                    $meta['ticket_name'] ?? null
+                ));
+                return back()->with('ok', 'Data mobilisasi diperbarui dan email terkirim.');
+            } catch (\Exception $e) {
+                return back()->with('ok', 'Data mobilisasi diperbarui, namun GAGAL kirim email: ' . $e->getMessage());
+            }
+        }
+
+        return back()->with('ok', 'Data mobilisasi berhasil diperbarui.');
+    }
+
+    public function updateGroundTest(Request $request, JobApplication $application)
+    {
+        $this->authorize('update', $application);
+        $data = $request->validate([
+            'lap' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png,xls,xlsx|max:10240',
+            'result' => 'nullable|string|in:lolos,tidak_lolos',
+            'notes' => 'nullable|string',
+        ]);
+
+        $meta = $application->ground_test_meta ?? [];
+
+        if ($request->hasFile('lap')) {
+            $path = $request->file('lap')->store('ground_test', 'public');
+            $meta['lap_path'] = $path;
+            $meta['lap_name'] = $request->file('lap')->getClientOriginalName();
+            $meta['uploaded_at'] = now()->toDateTimeString();
+        }
+
+        if (isset($data['notes'])) {
+            $meta['notes'] = $data['notes'];
+        }
+
+        $application->update([
+            'ground_test_meta' => $meta,
+            'ground_test_result' => $data['result'] ?: $application->ground_test_result,
+        ]);
+
+        return back()->with('ok', 'Data ground test berhasil diperbarui.');
     }
 }
