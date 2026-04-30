@@ -14,7 +14,6 @@
     <section class="overflow-hidden bg-white border shadow-sm rounded-2xl" style="border-color: {{ $BORD }}">
       <div class="relative">
         <div class="w-full h-20 sm:h-24 bg-[#a77d52]"></div>
-        <div class="absolute inset-y-0 right-0 w-24 sm:w-36 bg-[#8b5e3c]"></div>
 
         <div class="absolute inset-0 flex flex-col gap-3 px-5 py-4 text-white md:px-6 sm:flex-row sm:items-center sm:justify-between">
           <div class="min-w-0">
@@ -90,7 +89,7 @@
     @else
       <div class="p-12 text-center bg-white border border-dashed rounded-2xl border-slate-300">
         <p class="text-slate-500">Belum ada template MCU. Silakan tambah template pertama Anda.</p>
-        <a href="{{ route('admin.mcu-templates.create') }}" class="inline-flex items-center px-4 py-2 mt-4 text-sm font-semibold text-white bg-slate-900 rounded-lg">
+        <a href="{{ route('admin.mcu-templates.create') }}" class="inline-flex items-center px-4 py-2 mt-4 text-sm font-semibold text-white bg-[#a77d52] rounded-lg">
           Tambah Template
         </a>
       </div>

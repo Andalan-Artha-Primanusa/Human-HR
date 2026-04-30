@@ -258,38 +258,32 @@
   {!! json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!}
   </script>
   <script>
-    // Mobile menu toggle
+    // Mobile menu toggle (Bottom Sheet)
     document.addEventListener('DOMContentLoaded', function () {
-      var btnNavToggle = document.getElementById('btn-nav-toggle');
-      var mobileMenu = document.getElementById('mobile-menu');
-      var mobileMenuPanel = document.getElementById('mobile-menu-panel');
-      var btnMenuClose = document.getElementById('btn-menu-close');
-      var mobileMenuOverlay = document.getElementById('mobile-menu-overlay');
+      var btnNavToggle   = document.getElementById('btn-nav-toggle');
+      var mobileMenu     = document.getElementById('mobile-menu');
+      var btnMenuClose   = document.getElementById('btn-menu-close');
+      var mobileBackdrop = document.getElementById('mobile-menu-backdrop');
+
       function openMenu() {
         mobileMenu.classList.remove('pointer-events-none', 'opacity-0');
-        mobileMenu.classList.add('pointer-events-auto', 'opacity-100');
-        mobileMenuPanel.classList.remove('-translate-x-full');
-        mobileMenuPanel.classList.add('translate-x-0');
-        document.body.classList.add('overflow-hidden');
+        mobileMenu.classList.add('pointer-events-auto', 'opacity-100', 'open');
+        document.body.style.overflow = 'hidden';
       }
       function closeMenu() {
-        mobileMenu.classList.add('pointer-events-none', 'opacity-0');
-        mobileMenu.classList.remove('pointer-events-auto', 'opacity-100');
-        mobileMenuPanel.classList.add('-translate-x-full');
-        mobileMenuPanel.classList.remove('translate-x-0');
-        document.body.classList.remove('overflow-hidden');
+        mobileMenu.classList.remove('open');
+        setTimeout(function () {
+          mobileMenu.classList.add('pointer-events-none', 'opacity-0');
+          mobileMenu.classList.remove('pointer-events-auto', 'opacity-100');
+        }, 350);
+        document.body.style.overflow = '';
       }
-      if (btnNavToggle && mobileMenu && mobileMenuPanel) {
-        btnNavToggle.addEventListener('click', openMenu);
-      }
-      if (btnMenuClose) {
-        btnMenuClose.addEventListener('click', closeMenu);
-      }
-      if (mobileMenuOverlay) {
-        mobileMenuOverlay.addEventListener('click', closeMenu);
-      }
-      // ESC key to close
-      document.addEventListener('keydown', function(e) {
+
+      if (btnNavToggle) btnNavToggle.addEventListener('click', openMenu);
+      if (btnMenuClose) btnMenuClose.addEventListener('click', closeMenu);
+      if (mobileBackdrop) mobileBackdrop.addEventListener('click', closeMenu);
+
+      document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape') closeMenu();
       });
     });
@@ -306,7 +300,7 @@
 
     /* Aksesibilitas focus */
     *:focus-visible {
-      outline: 3px solid #1d4ed8;
+      outline: 3px solid #a77d52;
       outline-offset: 3px;
       border-radius: 4px;
     }
@@ -317,7 +311,7 @@
     }
     .card-hover:hover {
       transform: translateY(-4px);
-      box-shadow: 0 20px 48px rgba(167,125,82,.18);
+      box-shadow: 0 20px 48px rgba(167,125,82,.25);
     }
 
     /* Details / dropdown */
@@ -417,8 +411,8 @@
       padding: .2rem .55rem;
       border-radius: 999px;
     }
-    .badge-open { background: #dcfce7; color: #15803d; }
-    .badge-new  { background: #dbeafe; color: #1d4ed8; }
+    .badge-open { background: #f4ebe0; color: #7a5530; }
+    .badge-new  { background: #f4ebe0; color: #a77d52; }
   </style>
 </head>
 
@@ -426,7 +420,7 @@
 
   {{-- Skip nav untuk screen reader --}}
   <a href="#maincontent"
-    class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:bg-blue-600 focus:text-white focus:rounded-lg focus:px-4 focus:py-2 focus:shadow-lg focus:text-sm focus:font-semibold">
+    class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:bg-[#a77d52] focus:text-white focus:rounded-lg focus:px-4 focus:py-2 focus:shadow-lg focus:text-sm focus:font-semibold">
     Lewati ke konten utama
   </a>
 
@@ -529,37 +523,194 @@
       </div>
     </div>
 
-    {{-- Mobile Menu (Premium Slide-out) --}}
-    <div id="mobile-menu" class="fixed inset-0 z-[100] pointer-events-none opacity-0 transition-all duration-300">
-      <div class="absolute inset-0 transition-opacity bg-white !bg-opacity-100 !backdrop-blur-none" id="mobile-menu-overlay"></div>
-      <div class="absolute inset-0 flex flex-col w-full h-full transition-transform -translate-x-full bg-white !bg-opacity-100 !backdrop-blur-none shadow-lg" id="mobile-menu-panel" style="max-width:100vw; border-top-left-radius: 1.25rem; border-top-right-radius: 1.25rem;">
-        <div class="flex items-center justify-between p-4 border-b" style="height:64px;min-height:64px;">
-          <img src="{{ asset('assets/logofix.png') }}" alt="Logo" class="w-auto h-8">
-          <button id="btn-menu-close" class="p-2 transition-colors rounded-lg hover:bg-[#a77d52]/10">
-            <svg class="w-6 h-6 text-[#a77d52]"><path d="M6 18L18 6M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    {{-- ===== MOBILE MENU (Bottom Sheet Premium) ===== --}}
+    <style>
+      #mobile-menu {
+        display: flex;
+        align-items: flex-end;
+      }
+      #mobile-menu-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.45);
+        backdrop-filter: blur(3px);
+        -webkit-backdrop-filter: blur(3px);
+        transition: opacity 0.3s ease;
+        opacity: 0;
+      }
+      #mobile-menu-sheet {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: #ffffff;
+        border-radius: 1.5rem 1.5rem 0 0;
+        padding-bottom: env(safe-area-inset-bottom, 1rem);
+        transform: translateY(100%);
+        transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+        box-shadow: 0 -8px 40px rgba(167,125,82,0.18);
+        max-height: 92vh;
+        overflow-y: auto;
+      }
+      #mobile-menu.open #mobile-menu-backdrop { opacity: 1; }
+      #mobile-menu.open #mobile-menu-sheet { transform: translateY(0); }
+
+      .mob-nav-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.9rem 1.25rem;
+        border-radius: 1rem;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.95rem;
+        color: #3b2209;
+        transition: background 0.18s, color 0.18s;
+        border: 1.5px solid transparent;
+      }
+      .mob-nav-item:hover {
+        background: #fff8f2;
+        border-color: rgba(167,125,82,0.25);
+        color: #a77d52;
+      }
+      .mob-nav-item .mob-icon {
+        width: 2.25rem;
+        height: 2.25rem;
+        border-radius: 0.625rem;
+        background: #fff8f2;
+        border: 1.5px solid rgba(167,125,82,0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #a77d52;
+        flex-shrink: 0;
+        transition: background 0.18s;
+      }
+      .mob-nav-item:hover .mob-icon {
+        background: #a77d52;
+        color: #fff;
+      }
+    </style>
+
+    <div id="mobile-menu" class="fixed inset-0 z-[100] pointer-events-none opacity-0 transition-opacity duration-300">
+      {{-- Backdrop --}}
+      <div id="mobile-menu-backdrop"></div>
+
+      {{-- Bottom Sheet --}}
+      <div id="mobile-menu-sheet">
+        {{-- Handle bar --}}
+        <div class="flex justify-center pt-3 pb-1">
+          <div class="w-10 h-1 rounded-full bg-slate-200"></div>
+        </div>
+
+        {{-- Sheet Header --}}
+        <div class="flex items-center justify-between px-5 py-3 border-b" style="border-color: rgba(167,125,82,0.15)">
+          <img src="{{ asset('assets/logofix.png') }}" alt="Logo PT Andalan" class="h-8 w-auto">
+          <button id="btn-menu-close"
+            class="w-9 h-9 rounded-xl flex items-center justify-center text-[#a77d52] transition hover:bg-[#a77d52]/10"
+            aria-label="Tutup menu">
+            <svg class="w-5 h-5"><path d="M6 18L18 6M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </button>
         </div>
-        <style>
-          #mobile-menu-panel { background: #fff !important; border-bottom: 2px solid #a77d52; box-shadow: 0 8px 32px 0 rgba(167,125,82,0.10) !important; }
-          #mobile-menu-panel .border-b { border-bottom: 2px solid #a77d52 !important; }
-        </style>
-        
-        <div class="flex flex-col items-center justify-center flex-1 p-4 space-y-2">
-          <div class="mb-6">
-            <form action="{{ route('jobs.index') }}" method="GET" class="relative">
-              <input type="search" name="q" placeholder="Cari lowongan..." class="w-full pl-10 pr-4 py-3 bg-slate-100 border-none rounded-2xl text-sm focus:ring-2 focus:ring-[#a77d52]/30 outline-none">
-            <div class="w-full max-w-xs mb-6">
-            </div>
 
-            <div class="flex flex-col w-full max-w-xs gap-3">
-              <a href="{{ route('jobs.index') }}" class="flex items-center justify-center gap-2 px-4 py-4 rounded-2xl border border-[#a77d52] bg-white text-[#a77d52] font-bold text-lg hover:bg-[#a77d52]/10 transition-colors">
-                <svg class="w-5 h-5"><use href="#i-briefcase"/></svg>
-                Lowongan Kerja
-              </a>
-              <a href="{{ route('login') }}" class="flex items-center justify-center gap-2 px-4 py-4 rounded-2xl border border-[#a77d52] bg-white text-[#a77d52] font-bold text-lg hover:bg-[#a77d52]/10 transition-colors">Masuk</a>
-              <a href="{{ route('register') }}" class="flex items-center justify-center gap-2 px-4 py-4 rounded-2xl border border-[#a77d52] bg-[#a77d52] text-white font-bold text-lg hover:brightness-110 transition-all">Daftar</a>
+        {{-- Search --}}
+        <div class="px-5 pt-4 pb-2">
+          <form action="{{ route('jobs.index') }}" method="GET" class="relative">
+            <div class="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#a77d52]">
+              <svg class="w-4 h-4"><use href="#i-search"/></svg>
             </div>
+            <input type="search" name="q" placeholder="Cari posisi atau lokasi..."
+              class="w-full pl-10 pr-4 py-3 rounded-xl text-sm outline-none transition"
+              style="background:#fff8f2; border:1.5px solid rgba(167,125,82,0.25); color:#3b2209;"
+              onfocus="this.style.borderColor='#a77d52'" onblur="this.style.borderColor='rgba(167,125,82,0.25)'">
+          </form>
         </div>
+
+        {{-- Nav Items --}}
+        <div class="px-4 pt-2 pb-3 space-y-1">
+          <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 px-2 pb-1">Menu</p>
+
+          <a href="{{ route('jobs.index') }}" class="mob-nav-item">
+            <span class="mob-icon">
+              <svg class="w-4 h-4"><use href="#i-briefcase"/></svg>
+            </span>
+            Lowongan Kerja
+          </a>
+
+          <a href="/faq" class="mob-nav-item">
+            <span class="mob-icon">
+              <svg class="w-4 h-4"><use href="#i-help"/></svg>
+            </span>
+            FAQ
+          </a>
+
+          <a href="/sites" class="mob-nav-item">
+            <span class="mob-icon">
+              <svg class="w-4 h-4"><use href="#i-map-pin"/></svg>
+            </span>
+            Lokasi Site
+          </a>
+        </div>
+
+        {{-- Divider --}}
+        <div class="mx-5 border-t" style="border-color: rgba(167,125,82,0.12)"></div>
+
+        @auth
+          {{-- Logged in user --}}
+          <div class="px-4 pt-3 pb-2 space-y-1">
+            <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 px-2 pb-1">Akun Saya</p>
+            <div class="flex items-center gap-3 px-3 py-3 rounded-xl" style="background:#fff8f2;">
+              <div class="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
+                style="background:#a77d52">
+                {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+              </div>
+              <div>
+                <div class="text-sm font-bold" style="color:#3b2209">{{ auth()->user()->name }}</div>
+                <div class="text-xs capitalize" style="color:#a77d52">{{ auth()->user()->role ?? 'Pelamar' }}</div>
+              </div>
+            </div>
+            <a href="{{ route('profile.edit') }}" class="mob-nav-item">
+              <span class="mob-icon"><svg class="w-4 h-4"><use href="#i-user"/></svg></span>
+              Profil Saya
+            </a>
+            <a href="{{ route('applications.mine') }}" class="mob-nav-item">
+              <span class="mob-icon"><svg class="w-4 h-4"><use href="#i-briefcase"/></svg></span>
+              Lamaran Saya
+            </a>
+          </div>
+          <div class="px-4 pb-5">
+            <form action="{{ route('logout') }}" method="POST">
+              @csrf
+              <button type="submit"
+                class="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition"
+                style="border: 1.5px solid rgba(220,38,38,0.3); color:#dc2626; background:transparent"
+                onmouseover="this.style.background='rgba(220,38,38,0.06)'" onmouseout="this.style.background='transparent'">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                  <path d="M15.75 9V5.25A2.25 2.25 0 0013.5 3H6.75A2.25 2.25 0 004.5 5.25v13.5A2.25 2.25 0 006.75 21H13.5a2.25 2.25 0 002.25-2.25V15M9.75 12h10.5m0 0-3-3m3 3-3 3"/>
+                </svg>
+                Keluar
+              </button>
+            </form>
+          </div>
+        @else
+          {{-- Guest CTA --}}
+          <div class="px-4 pt-4 pb-6 grid grid-cols-2 gap-3">
+            <a href="{{ route('login') }}"
+              class="flex items-center justify-center gap-2 py-3.5 rounded-xl text-sm font-bold transition"
+              style="border:2px solid #a77d52; color:#a77d52; background:#fff"
+              onmouseover="this.style.background='#fff8f2'" onmouseout="this.style.background='#fff'">
+              <svg class="w-4 h-4"><use href="#i-user"/></svg>
+              Masuk
+            </a>
+            <a href="{{ route('register') }}"
+              class="flex items-center justify-center gap-2 py-3.5 rounded-xl text-sm font-bold text-white transition shadow-md"
+              style="background:#a77d52"
+              onmouseover="this.style.filter='brightness(1.1)'" onmouseout="this.style.filter='none'">
+              <svg class="w-4 h-4"><use href="#i-apply"/></svg>
+              Daftar Gratis
+            </a>
+          </div>
+        @endauth
       </div>
     </div>
   </header>
@@ -604,8 +755,8 @@
               </a>
               @guest
                   <a href="{{ route('register') }}"
-                    class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm text-white hover:opacity-90 transition shadow"
-                    style="background: #1d4ed8">
+                    class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm hover:opacity-90 transition shadow"
+                    style="background: #fff; color: #a77d52">
                     Daftar Sekarang
                   </a>
               @endguest
@@ -616,7 +767,7 @@
     </section>
 
     {{-- ===== QUICK LINKS ===== --}}
-    <section aria-label="Menu cepat" style="padding: 2.5rem 1.5rem; background: #dfe6da">
+    <section aria-label="Menu cepat" style="padding: 2.5rem 1.5rem; background: #ffffff">
       <div class="mx-auto max-w-7xl">
         <h2 class="sr-only">Menu Cepat</h2>
         <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:1rem">
@@ -665,7 +816,7 @@
         $sitesDup = $sitesNorm->concat($sitesNorm);
     @endphp
 
-    <section class="border-b" style="border-color: #f4f0eb; background: #dfe6da"
+    <section class="border-b" style="border-color: #e8d5c4; background: #ffffff"
       aria-labelledby="sites-heading">
       <div class="px-6 py-8 mx-auto max-w-7xl lg:px-8">
         <h2 id="sites-heading" class="mb-4 text-base font-semibold" style="color: #1f2937">Lokasi Site</h2>
@@ -682,7 +833,7 @@
                   @foreach($sitesDup as $s)
                       <div class="shrink-0">
                         <span class="inline-flex items-center gap-2 px-4 py-2 border rounded-full"
-                          style="border-color: #f4f0eb; background: #ede5dc; color: #6b4f3a;">
+                          style="border-color: #e8d5c4; background: #fff; color: #a77d52;">
                           <span class="inline-block w-2.5 h-2.5 rounded-full shrink-0"
                             style="background: {{ $s['dot'] }}"></span>
                           <span class="text-sm whitespace-nowrap">{{ $s['name'] }}</span>
@@ -697,7 +848,7 @@
                     <li>
                       <a href="{{ route('jobs.index', ['site' => $s['param']]) }}"
                         class="inline-flex items-center gap-2 px-4 py-2 transition border rounded-full hover:shadow-md"
-                        style="border-color: #f4f0eb; background: #ede5dc; color: #6b4f3a;"
+                        style="border-color: #e8d5c4; background: #fff; color: #a77d52;"
                         aria-label="Filter lowongan di site {{ $s['name'] }}">
                         <span class="inline-block w-2.5 h-2.5 rounded-full shrink-0"
                           style="background: {{ $s['dot'] }}" aria-hidden="true"></span>
@@ -707,7 +858,7 @@
                 @endforeach
               </ul>
         @else
-              <p class="text-sm" style="color: #6b4f3a">Belum ada data site.</p>
+              <p class="text-sm" style="color: #a77d52">Belum ada data site.</p>
         @endif
       </div>
     </section>
@@ -812,14 +963,14 @@
 
               <ol class="space-y-3" aria-label="Langkah-langkah rekrutmen PT Andalan">
                 @foreach($steps as $i => [$title, $desc, $time])
-                    <li class="flex gap-4 p-3 transition rounded-xl hover:bg-amber-50">
+                    <li class="flex gap-4 p-3 transition rounded-xl hover:bg-[#f9f3ee]">
                       <div class="flex items-center justify-center text-xs font-bold text-white rounded-full shadow w-8 h-8 shrink-0 mt-0.5"
                         style="background: #a77d52" aria-hidden="true">{{ $i + 1 }}</div>
                       <div class="flex-1 min-w-0">
                         <div class="flex flex-wrap items-center justify-between gap-2">
                           <p class="text-sm font-semibold" style="color:#1f2937">{{ $title }}</p>
                           <span class="text-xs shrink-0 whitespace-nowrap px-2 py-0.5 rounded-full"
-                            style="background: #ede5dc; color: #6b4f3a">{{ $time }}</span>
+                            style="background: #f9f3ee; color: #a77d52">{{ $time }}</span>
                         </div>
                         <p class="mt-0.5 text-xs leading-relaxed" style="color:#6b7280">{{ $desc }}</p>
                       </div>
@@ -839,7 +990,7 @@
     {{-- ===== LOWONGAN TERBARU ===== --}}
     <section class="px-6 py-10 mx-auto max-w-7xl lg:px-8" aria-labelledby="jobs-heading">
       <div class="overflow-hidden border shadow-sm rounded-2xl"
-        style="border-color: #f4f0eb; background: #dfe6da">
+        style="border-color: #e8d5c4; background: #ffffff">
 
         {{-- Header --}}
         <div class="flex items-center justify-between p-6 border-b" style="border-color: #f4f0eb">
@@ -877,7 +1028,7 @@
                 @endphp
 
                 <article class="flex flex-col overflow-hidden border rounded-2xl card-hover"
-                  style="border-color: #f4f0eb; background: #ede5dc"
+                  style="border-color: #e8d5c4; background: #ffffff"
                   itemscope itemtype="https://schema.org/JobPosting">
                   <meta itemprop="title" content="{{ $job->title }}">
                   <meta itemprop="datePosted" content="{{ optional($job->created_at)->toDateString() }}">
@@ -1034,24 +1185,24 @@
   {{-- ============================================================
        FOOTER
   ============================================================ --}}
-  <footer class="bg-[#1f2937] text-slate-300">
+  <footer style="background: #5c3d1e; color: #f9f3ee;">
     <div class="px-6 py-12 mx-auto max-w-7xl lg:px-8">
       <div class="grid gap-8 md:grid-cols-4">
 
         {{-- Brand --}}
         <div class="md:col-span-2">
           <img src="{{ asset('assets/logofix.png') }}" alt="Logo" class="h-10 mb-4">
-          <p class="max-w-sm text-sm leading-relaxed text-slate-400">
+          <p class="max-w-sm text-sm leading-relaxed" style="color: #e8d5c4">
             Portal karier resmi PT Andalan Artha Primanusa. Kami menghubungkan talenta terbaik dengan peluang karier yang sesuai.
           </p>
           <div class="flex gap-4 mt-6">
-            <a href="https://andalan.co.id" target="_blank" rel="noopener noreferrer" class="text-slate-400 hover:text-white transition" aria-label="Website PT Andalan">
+            <a href="https://andalan.co.id" target="_blank" rel="noopener noreferrer" style="color:#e8d5c4" class="hover:text-white transition" aria-label="Website PT Andalan">
               <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
             </a>
-            <a href="https://linkedin.com/company/andalan" target="_blank" rel="noopener noreferrer" class="text-slate-400 hover:text-white transition" aria-label="LinkedIn PT Andalan">
+            <a href="https://linkedin.com/company/andalan" target="_blank" rel="noopener noreferrer" style="color:#e8d5c4" class="hover:text-white transition" aria-label="LinkedIn PT Andalan">
               <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
             </a>
-            <a href="https://instagram.com/andalan" target="_blank" rel="noopener noreferrer" class="text-slate-400 hover:text-white transition" aria-label="Instagram PT Andalan">
+            <a href="https://instagram.com/andalan" target="_blank" rel="noopener noreferrer" style="color:#e8d5c4" class="hover:text-white transition" aria-label="Instagram PT Andalan">
               <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
             </a>
           </div>
@@ -1061,17 +1212,17 @@
         <div>
           <h3 class="mb-4 text-sm font-bold text-white uppercase tracking-wide">Menu</h3>
           <ul class="space-y-2">
-            <li><a href="{{ route('jobs.index') }}" class="text-sm transition text-slate-400 hover:text-white">Lowongan Kerja</a></li>
-            <li><a href="{{ route('register') }}" class="text-sm transition text-slate-400 hover:text-white">Daftar</a></li>
-            <li><a href="{{ route('login') }}" class="text-sm transition text-slate-400 hover:text-white">Masuk</a></li>
-            <li><a href="/faq" class="text-sm transition text-slate-400 hover:text-white">FAQ</a></li>
+            <li><a href="{{ route('jobs.index') }}" class="text-sm transition hover:text-white" style="color:#e8d5c4">Lowongan Kerja</a></li>
+            <li><a href="{{ route('register') }}" class="text-sm transition hover:text-white" style="color:#e8d5c4">Daftar</a></li>
+            <li><a href="{{ route('login') }}" class="text-sm transition hover:text-white" style="color:#e8d5c4">Masuk</a></li>
+            <li><a href="/faq" class="text-sm transition hover:text-white" style="color:#e8d5c4">FAQ</a></li>
           </ul>
         </div>
 
         {{-- Contact --}}
         <div>
           <h3 class="mb-4 text-sm font-bold text-white uppercase tracking-wide">Kontak</h3>
-          <ul class="space-y-2 text-sm text-slate-400">
+          <ul class="space-y-2 text-sm" style="color:#e8d5c4">
             <li class="flex items-start gap-2">
               <svg class="w-4 h-4 mt-0.5 shrink-0" aria-hidden="true"><use href="#i-map-pin"/></svg>
               <span>Jl. Plaju No.11, Kebon Melati, Tanah Abang, Jakarta Pusat 10230</span>
@@ -1085,8 +1236,8 @@
 
       </div>
 
-      <div class="pt-8 mt-12 border-t border-slate-700">
-        <p class="text-xs text-center text-slate-500">
+      <div class="pt-8 mt-12 border-t" style="border-color: rgba(255,255,255,0.2)">
+        <p class="text-xs text-center" style="color:#e8d5c4">
           &copy; {{ date('Y') }} PT Andalan Artha Primanusa. All rights reserved.
         </p>
       </div>

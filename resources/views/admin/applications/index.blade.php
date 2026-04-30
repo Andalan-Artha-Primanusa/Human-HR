@@ -30,20 +30,7 @@
           </svg>
 
           {{-- CSS kecil untuk header 2-tone yang fleksibel --}}
-          <style>
-            .twotone {
-              --accent-w: 84px; /* lebar strip accent (mobile) */
-              background:
-                linear-gradient(
-                  to right,
-                  {{ $ACCENT }} 0%,
-                  {{ $ACCENT }} calc(100% - var(--accent-w)),
-                  {{ $ACCENT_DARK }}  calc(100% - var(--accent-w)),
-                  {{ $ACCENT_DARK }} 100%
-                );
-            }
-            @media (min-width: 640px) { .twotone { --accent-w: 144px; } }
-          </style>
+          
     @endonce
 
     @php
@@ -87,8 +74,9 @@
 
       {{-- ===== HEADER + CTA (responsif) ===== --}}
       <section class="relative overflow-hidden bg-white border shadow-sm rounded-2xl" style="border-color: {{ $BORD }}">
-        <div class="text-white twotone rounded-t-2xl">
-          <div class="px-5 md:px-6 py-6 md:py-7 min-h-[96px] flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <div class="relative">
+          <div class="w-full h-20 sm:h-24 bg-[#a77d52]"></div>
+          <div class="absolute inset-0 flex flex-col gap-3 px-5 py-4 text-white md:px-6 sm:flex-row sm:items-center sm:justify-between" md:px-6 py-6 >
             <div class="min-w-0">
               <h1 class="text-2xl font-semibold tracking-tight sm:text-3xl">Applications</h1>
               <p class="text-xs sm:text-sm text-white/90">Daftar semua kandidat &amp; status proses rekrutmen.</p>
@@ -104,7 +92,7 @@
         </div>
 
         {{-- ===== FILTER ===== --}}
-        <div class="p-6 border-t md:p-7" style="border-color: {{ $BORD }}; background: linear-gradient(180deg, #faf7f4, #ffffff);">
+        <div class="p-6 border-t md:p-7 bg-white" style="border-color: {{ $BORD }}; ">
           <form method="GET" class="grid grid-cols-1 gap-3 md:grid-cols-5">
             {{-- q --}}
             <input name="q"

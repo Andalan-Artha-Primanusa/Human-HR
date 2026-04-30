@@ -5,7 +5,7 @@
     $ACCENT = '#a77d52';
     $ACCENT_DARK = '#8b5e3c';
     $BORD = '#e5e7eb'; // slate-200
-    $DARK = '#0f172a'; // slate-900-like, untuk tombol gelap
+    $DARK = '#a77d52'; // slate-900-like, untuk tombol gelap
 @endphp
 
 @section('content')
@@ -27,7 +27,7 @@
       <section class="overflow-hidden bg-white border shadow-sm rounded-2xl" style="border-color: {{ $BORD }}">
         <div class="relative">
           <div class="w-full h-20 sm:h-24 bg-[#a77d52]"></div>
-          <div class="absolute inset-y-0 right-0 w-24 sm:w-36 bg-[#8b5e3c]"></div>
+          
 
           <div class="absolute inset-0 flex flex-col gap-3 px-5 py-4 text-white md:px-6 sm:flex-row sm:items-center sm:justify-between">
             <div class="min-w-0">
@@ -71,7 +71,7 @@
         <div class="overflow-x-auto">
           @if(($interviews->count() ?? 0) > 0)
             <table class="min-w-[960px] w-full text-sm">
-              <thead class="text-white" style="background: linear-gradient(90deg, {{ $ACCENT }}, {{ $ACCENT_DARK }});">
+              <thead class="text-white" class="text-white bg-[#a77d52]">
                 <tr>
                   <th class="w-56 px-4 py-3 text-left">Tanggal</th>
                   <th class="px-4 py-3 text-left w-60">Kandidat</th>
@@ -120,7 +120,7 @@
                             {{ $iv->location ?? '—' }}
                           @else
                             @if($iv->meeting_link)
-                                  <a class="text-blue-600 hover:underline" href="{{ $iv->meeting_link }}" target="_blank" rel="noopener">
+                                  <a class="text-[#a77d52] hover:underline" href="{{ $iv->meeting_link }}" target="_blank" rel="noopener">
                                     Join link
                                   </a>
                             @else

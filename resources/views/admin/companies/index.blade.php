@@ -65,7 +65,7 @@
            <div class="flex gap-2">
       <button type="submit"
               class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-lg hover:opacity-95 focus:outline-none focus:ring-2"
-              style="background-color:#0f172a; border:1px solid #0f172a; --tw-ring-color:#0f172a;"
+              style="background-color:#a77d52; border:1px solid #a77d52; --tw-ring-color:#a77d52;"
               aria-label="Filter">
         {{-- ICON inline: putih fix, tanpa currentColor --}}
         <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">

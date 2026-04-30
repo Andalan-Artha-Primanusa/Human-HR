@@ -7,6 +7,7 @@
   <meta name="csrf-token" content="{{ csrf_token() }}">
   <title>@yield('title', 'karir-andalan')</title>
   @stack('head')
+  @include('layouts.partials.admin-ui')
 
   <style>
     [data-cloak]{ visibility: hidden !important; }
@@ -62,7 +63,8 @@
   <aside
     id="desktopSidebar"
     data-cloak
-    class="hidden transition-all duration-200 bg-white border-r md:flex md:flex-col border-slate-200 md:w-64">
+    class="hidden transition-all duration-200 md:flex md:flex-col md:w-64"
+    style="background:#a77d52;">
     <div class="flex-1 overflow-y-auto">
       @include('layouts.sidenav', [
         'variant' => 'desktop',
@@ -78,13 +80,17 @@
     <aside
       id="mobileDrawer"
       data-cloak
-      class="drawer-panel transition-base fixed inset-y-0 left-0 z-50 w-72 max-w-[80vw] bg-white border-r border-slate-200 shadow-xl flex flex-col"
+      class="drawer-panel transition-base fixed inset-y-0 left-0 z-50 w-72 max-w-[80vw] shadow-xl flex flex-col"
+      style="background:#a77d52;"
       role="dialog" aria-modal="true" aria-label="Menu">
-      <div class="flex items-center justify-center w-full h-full min-h-screen overflow-hidden" style="margin:0;padding:0;">
-        <div class="flex items-center gap-2">
-        </div>
-        <button id="drawerCloseBtn" class="p-2 rounded-lg hover:bg-slate-100 text-slate-600" aria-label="Tutup menu">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+      {{-- Drawer header --}}
+      <div class="flex items-center justify-between px-4 py-3" style="border-bottom:1.5px solid rgba(255,255,255,0.15);">
+        <img src="{{ asset('assets/logofix.png') }}" alt="Logo" class="h-8 w-auto" style="filter:brightness(0) invert(1);">
+        <button id="drawerCloseBtn"
+          class="w-8 h-8 rounded-lg flex items-center justify-center text-white transition"
+          style="background:rgba(255,255,255,0.12);"
+          aria-label="Tutup menu">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
         </button>
       </div>
       <div class="flex-1 p-2 overflow-y-auto">
@@ -99,7 +105,7 @@
 
   {{-- ===== Main ===== --}}
   <div class="flex flex-col flex-1 min-w-0">
-    <header class="sticky top-0 z-30 flex items-center gap-2 px-3 bg-white border-b h-14 border-slate-200 md:px-5">
+    <header class="sticky top-0 z-30 flex items-center gap-2 px-3 bg-white border-b h-14 border-slate-200 md:px-5" style="margin:0;padding-top:0;padding-bottom:0;">
       <button id="drawerOpenBtn" class="p-2 rounded-lg md:hidden hover:bg-slate-100" aria-label="Buka menu">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5"/>

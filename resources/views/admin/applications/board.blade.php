@@ -15,7 +15,7 @@
 
 /* ===== PAGE HEADER ===== */
 .kn-header {
-  background: linear-gradient(135deg, #8b5e3c 0%, #a77d52 60%, #c9a882 100%);
+  background: #a77d52;
   padding: 1.5rem 2rem 1.25rem;
   border-radius: 0 0 1.25rem 1.25rem;
   color: #fff;
@@ -54,7 +54,7 @@
   box-shadow: 0 0 0 3px rgba(167,125,82,.18);
 }
 .kn-filter .btn-filter {
-  background: linear-gradient(135deg, #a77d52, #8b5e3c);
+  background: #a77d52;
   color: #fff; border: none; border-radius: .55rem;
   padding: .44rem 1.1rem; font-size: .82rem; font-weight: 700;
   cursor: pointer; letter-spacing: .2px;
@@ -85,7 +85,7 @@
 .kn-col-head {
   display: flex; align-items: center; justify-content: space-between;
   padding: .7rem 1rem;
-  background: linear-gradient(90deg, #f5f0ea, #ede6dc);
+  background: #fdf7f0;
   border-bottom: 1px solid #ddd3c4;
   border-radius: 1rem 1rem 0 0;
   position: sticky; top: 0; z-index: 2;
@@ -96,7 +96,7 @@
   color: #7a4f2a;
 }
 .kn-col-badge {
-  background: #8b5e3c; color: #fff;
+  background: #5c3d1e; color: #fff;
   font-size: .65rem; font-weight: 700;
   border-radius: 999px; padding: .12rem .5rem;
   min-width: 22px; text-align: center;
@@ -117,7 +117,7 @@
 .kn-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(107,63,31,.13);
-  border-color: #c9a882;
+  border-color: #a77d52;
 }
 .kn-card:active { cursor: grabbing; }
 .kn-card.dragging { opacity: .45; transform: scale(.97); }
@@ -154,9 +154,9 @@
   transition: all .12s; white-space: nowrap; line-height: 1.4;
   font-family: inherit;
 }
-.btn-outline  { background: #fff; border-color: #c9a882; color: #7a4f2a; }
+.btn-outline  { background: #fff; border-color: #a77d52; color: #7a4f2a; }
 .btn-outline:hover { background: #f7f0e8; border-color: #a77d52; }
-.btn-primary  { background: linear-gradient(135deg,#a77d52,#7a4f2a); border-color: transparent; color: #fff; }
+.btn-primary  { background: #a77d52; border-color: transparent; color: #fff; }
 .btn-primary:hover { opacity: .9; }
 .btn-sched    { background: linear-gradient(135deg,#8b5e3c,#6b3f1f); border-color: transparent; color: #fff; }
 .btn-sched:hover { opacity: .9; }
@@ -932,7 +932,7 @@ function openFeedbackModal(btn) {
     html += `
       <div style="margin-bottom:16px; padding:12px; background:#f8fafc; border-radius:8px; border-left:4px solid ${color}">
         <div style="font-weight:bold; font-size:0.75rem; color:#64748b; text-transform:uppercase; margin-bottom:4px;">${title}</div>
-        <div style="font-size:0.875rem; color:#1e293b; white-space:pre-wrap;">${data}</div>
+        <div style="font-size:0.875rem; color:#a77d52; white-space:pre-wrap;">${data}</div>
       </div>
     `;
   };

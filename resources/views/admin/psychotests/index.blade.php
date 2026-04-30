@@ -5,7 +5,7 @@
     $ACCENT = '#a77d52';
     $ACCENT_DARK = '#8b5e3c';
     $BORD = '#e5e7eb'; // slate-200
-    $DARK = '#0f172a'; // gelap untuk tombol
+    $DARK = '#a77d52'; // gelap untuk tombol
 @endphp
 
 @section('content')
@@ -27,7 +27,6 @@
       <section class="overflow-hidden bg-white border shadow-sm rounded-2xl" style="border-color: {{ $BORD }}">
         <div class="relative">
           <div class="w-full h-20 sm:h-24 bg-[#a77d52]"></div>
-          <div class="absolute inset-y-0 right-0 w-24 sm:w-36 bg-[#8b5e3c]"></div>
 
           <div class="absolute inset-0 flex flex-col gap-3 px-5 py-4 text-white md:px-6 sm:flex-row sm:items-center sm:justify-between">
             <div class="min-w-0">

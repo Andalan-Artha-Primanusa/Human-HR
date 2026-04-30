@@ -27,7 +27,6 @@
       <section class="overflow-hidden bg-white border shadow-sm rounded-2xl" style="border-color: {{ $BORD }}">
         <div class="relative">
           <div class="w-full h-20 sm:h-24 bg-[#a77d52]"></div>
-          <div class="absolute inset-y-0 right-0 w-24 sm:w-36 bg-[#8b5e3c]"></div>
 
           <div class="absolute inset-0 flex flex-col gap-3 px-5 py-4 text-white md:px-6 sm:flex-row sm:items-center sm:justify-between">
             <div class="min-w-0">
@@ -131,7 +130,7 @@
                         $badge = match ($offer->status) {
                             'accepted' => 'bg-green-50 text-green-700',
                             'rejected' => 'bg-rose-50 text-rose-700',
-                            'sent' => 'bg-blue-50 text-blue-700',
+                            'sent' => 'bg-blue-50 text-[#a77d52]',
                             default => 'bg-amber-50 text-amber-700',
                         };
                     @endphp
@@ -336,7 +335,7 @@
     </div>
     
     {{-- MODAL: EDIT OFFER --}}
-    <div id="modal-edit-offer" class="fixed inset-0 z-50 flex items-center justify-center hidden p-4 bg-slate-900/50 backdrop-blur-sm">
+    <div id="modal-edit-offer" class="fixed inset-0 z-50 flex items-center justify-center hidden p-4 bg-[#a77d52]/50 backdrop-blur-sm">
         <div class="w-full max-w-lg overflow-hidden bg-white shadow-2xl rounded-2xl animate-in fade-in zoom-in duration-200">
             <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/50">
                 <div>

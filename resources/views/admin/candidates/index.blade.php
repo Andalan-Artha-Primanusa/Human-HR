@@ -29,11 +29,10 @@
 
       {{-- HEADER + SEARCH --}}
       <section class="overflow-hidden bg-white border shadow-sm rounded-2xl" style="border-color: {{ $BORD }}">
-        <div class="relative h-20 overflow-hidden sm:h-24 rounded-t-2xl">
-          <div class="absolute inset-0 rounded-t-2xl bg-[#a77d52]"></div>
-          <div class="absolute inset-y-0 right-0 w-24 rounded-tr-2xl sm:w-36 bg-[#8b5e3c]"></div>
+        <div class="relative">
+          <div class="w-full h-20 sm:h-24 bg-[#a77d52]"></div>
 
-          <div class="relative flex items-center h-full px-5 md:px-6">
+          <div class="absolute inset-0 flex flex-col gap-3 px-5 py-4 text-white md:px-6 sm:flex-row sm:items-center sm:justify-between">
             <div class="min-w-0">
               <h1 class="text-2xl font-semibold tracking-tight text-white sm:text-3xl">Candidates</h1>
               <p class="text-xs sm:text-sm text-white/90">Daftar kandidat yang telah mengisi profil.</p>

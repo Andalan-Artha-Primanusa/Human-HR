@@ -314,7 +314,7 @@
           <div class="font-medium text-slate-700">Belum ada data site.</div>
           <div class="mt-1 text-sm text-slate-500">Tambahkan site pertama kamu sekarang.</div>
           <a href="{{ route('admin.sites.create') }}"
-             class="inline-flex items-center gap-2 px-4 py-2 mt-4 text-sm font-semibold text-white rounded-lg bg-slate-900 focus:outline-none focus:ring-2"
+             class="inline-flex items-center gap-2 px-4 py-2 mt-4 text-sm font-semibold text-white rounded-lg bg-[#a77d52] focus:outline-none focus:ring-2"
              style="--tw-ring-color: {{ $ACCENT }}">
             <svg class="w-4 h-4"><use href="#i-plus"/></svg>
             Tambah Site
