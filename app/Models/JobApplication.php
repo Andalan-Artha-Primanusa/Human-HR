@@ -19,7 +19,7 @@ class JobApplication extends Model
         'feedback_trainer', 'approve_trainer', 
         'feedback_user', 'approve_user', 
         'feedback_employee', 'approve_employee',
-        'mcu_meta'
+        'mcu_meta', 'mcu_result'
     ];
 
     protected $casts = [

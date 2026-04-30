@@ -1161,4 +1161,23 @@ class ApplicationController extends Controller
         }
         return back()->with('error', 'Kandidat tidak memiliki email valid.');
     }
+
+    public function updateMcuResult(Request $request, JobApplication $application)
+    {
+        $this->authorize('update', $application);
+        $result = $request->input('result');
+        
+        $meta = $application->mcu_meta ?? [];
+        $meta['result'] = $result;
+        
+        $application->update([
+            'mcu_meta' => $meta,
+            'mcu_result' => $result
+        ]);
+
+        return response()->json([
+            'ok' => true,
+            'message' => 'Hasil MCU berhasil diperbarui.'
+        ]);
+    }
 }

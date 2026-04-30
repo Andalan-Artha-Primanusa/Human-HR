@@ -133,6 +133,7 @@
 .pill-active   { background: #fef3e2; color: #92580b; }
 .pill-hired    { background: #e6f4ea; color: #256629; }
 .pill-nq       { background: #fdeaea; color: #9b2525; }
+.pill-warn     { background: #fff8e1; color: #b7791f; }
 
 .kn-lock-note {
   font-size: .65rem; color: #b05020;
@@ -382,6 +383,15 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
                   {{ $a->overall_status === 'hired' ? '✓ Hired' : ($a->overall_status === 'not_qualified' ? '✕ TIDAK lOLOS' : '● Active') }}
                 </span>
 
+                @php
+                  $mcuRes = $a->mcu_result;
+                @endphp
+                @if($mcuRes)
+                  <span class="kn-pill {{ $mcuRes === 'fit' ? 'pill-hired' : ($mcuRes === 'fit_note' ? 'pill-warn' : 'pill-nq') }}">
+                    {{ $mcuRes === 'fit' ? '✓ FIT' : ($mcuRes === 'fit_note' ? '⚠ FIT NOTE' : '✕ UNFIT') }}
+                  </span>
+                @endif
+
                 @if($isHrLocked)
                   <div class="kn-lock-note">⚠ Isi feedback HR sebelum dapat dilanjutkan</div>
                 @endif
@@ -415,6 +425,16 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
                       onclick="openSendMcuModal('{{ $a->id }}', '{{ addslashes($a->user->name) }}', this)">
                       ✉️ Kirim Undangan MCU ke {{ $a->user->name }}
                     </button>
+
+                    <div style="width:100%; margin-top:8px;">
+                      <label style="font-size:0.65rem; font-weight:700; color:#64748b; text-transform:uppercase; display:block; margin-bottom:4px;">Hasil MCU:</label>
+                      <select class="btn-xs" style="width:100%; height:30px; border:1px solid #e2d9cf; border-radius:4px;" onchange="updateMcuResult(this, '{{ $a->id }}')">
+                        <option value="">— Pilih Hasil —</option>
+                        <option value="fit" {{ $a->mcu_result === 'fit' ? 'selected' : '' }}>✓ Fit</option>
+                        <option value="fit_note" {{ $a->mcu_result === 'fit_note' ? 'selected' : '' }}>⚠ Fit with Note</option>
+                        <option value="unfit" {{ $a->mcu_result === 'unfit' ? 'selected' : '' }}>✕ Unfit</option>
+                      </select>
+                    </div>
                   @endif
 
                   {{-- FEEDBACK FORM BUTTON (hanya di hr_iv & belum ada feedback) --}}
@@ -1085,6 +1105,38 @@ function deleteFeedback(appId, role, csrf) {
     showToast('Feedback berhasil dihapus', 'ok');
     setTimeout(() => window.location.reload(), 800);
   }).catch(e => showToast(e.message, 'err'));
+}
+
+function updateMcuResult(selectEl, appId) {
+  const result = selectEl.value;
+  if (!result) return;
+
+  const csrf = document.querySelector('meta[name="csrf-token"]')?.content || '';
+  
+  fetch(`/admin/applications/${appId}/mcu-result`, {
+    method: 'POST',
+    headers: {
+      'X-CSRF-TOKEN': csrf,
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ result: result })
+  })
+  .then(async res => {
+    if (!res.ok) {
+      const err = await res.json().catch(()=>({}));
+      throw new Error(err.message || 'Gagal update hasil MCU');
+    }
+    return res.json();
+  })
+  .then(data => {
+    showToast(data.message || 'Hasil MCU diperbarui', 'ok');
+    // Refresh to update the card indicator
+    setTimeout(() => window.location.reload(), 800);
+  })
+  .catch(err => {
+    showToast(err.message, 'err');
+  });
 }
 
 /* ============================= ISI FEEDBACK FORM ============================= */
