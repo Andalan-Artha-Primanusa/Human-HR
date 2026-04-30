@@ -288,7 +288,10 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
   $freeAfter = ['offer','mcu','mobilisasi','ground_test','hired','not_qualified'];
 
   $authRole  = auth()->user()->role ?? 'guest';
-  $isSuperHR = in_array($authRole, ['admin','hr','superadmin', 'trainer', 'karyawan']);
+  $isHR      = in_array($authRole, ['admin', 'hr', 'superadmin']);
+  $isTrainer = ($authRole === 'trainer');
+  $isKaryawan = ($authRole === 'karyawan');
+  $isSuperHR = $isHR || $isTrainer || $isKaryawan;
 @endphp
 
 <div class="kn-wrap">
@@ -430,7 +433,7 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
                   @endif
 
                   {{-- KIRIM OL EMAIL (hanya di offer) --}}
-                  @if($stageKey === 'offer' && $isSuperHR)
+                  @if($stageKey === 'offer' && $isHR)
                     <button type="button" class="btn-xs btn-primary"
                       onclick="openSendOlModal('{{ $a->id }}', '{{ addslashes($a->user->name) }}', '{{ optional($a->offer)->salary['gross'] ?? 0 }}', '{{ optional($a->offer)->salary['allowance'] ?? 0 }}', this)">
                       ✉️ Kirim OL ke {{ $a->user->name }}
@@ -438,7 +441,7 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
                   @endif
 
                   {{-- KIRIM MCU EMAIL (hanya di mcu) --}}
-                  @if($stageKey === 'mcu' && $isSuperHR)
+                  @if($stageKey === 'mcu' && $isHR)
                     <button type="button" class="btn-xs btn-primary"
                       onclick="openSendMcuModal('{{ $a->id }}', '{{ addslashes($a->user->name) }}', this)">
                       ✉️ Kirim Undangan MCU ke {{ $a->user->name }}
@@ -456,7 +459,7 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
                   @endif
 
                   {{-- MOBILISASI ACTIONS --}}
-                  @if($stageKey === 'mobilisasi' && $isSuperHR)
+                  @if($stageKey === 'mobilisasi' && ($isHR || $isTrainer))
                     <button type="button" class="btn-xs btn-primary"
                       onclick="openMobilisasiModal('{{ $a->id }}', '{{ addslashes($a->user->name) }}', this)">
                       ✈ Mobilisasi (Tiket & Email)
@@ -467,7 +470,7 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
                   @endif
 
                   {{-- GROUND TEST ACTIONS --}}
-                  @if($stageKey === 'ground_test' && $isSuperHR)
+                  @if($stageKey === 'ground_test' && ($isHR || $isTrainer))
                     <button type="button" class="btn-xs btn-primary"
                       onclick="openGroundTestModal('{{ $a->id }}', '{{ addslashes($a->user->name) }}', this)">
                       📄 Update LAP & Hasil GT
