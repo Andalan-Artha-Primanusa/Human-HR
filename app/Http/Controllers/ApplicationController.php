@@ -256,7 +256,10 @@ class ApplicationController extends Controller
     {
         $this->authorize('viewAdmin', JobApplication::class);
         $user   = auth()->user();
-        $stages = $this->STAGES;
+        $stages = [];
+        foreach ($this->STAGES as $s) {
+            $stages[$s] = $this->PRETTY[$s] ?? ucfirst(str_replace('_', ' ', $s));
+        }
 
         $query = JobApplication::with([
             'job:id,title,division,site_id',
