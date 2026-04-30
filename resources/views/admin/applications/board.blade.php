@@ -919,7 +919,7 @@ function updateCount(stage, delta) {
 }
 
 /* ============================= VIEW FEEDBACK MODAL ============================= */
-function openFeedbackModal(btn) {
+function openFbModal(btn) {
   const card = getCard(btn);
   const fbHr = getCardData(card, 'fbHr');
   const fbUser = getCardData(card, 'fbUser');
@@ -929,10 +929,14 @@ function openFeedbackModal(btn) {
   let html = '';
   const addBlock = (title, data, color) => {
     if(!data) return;
+    const feedbackText = data.notes || data.feedback || data;
+    const approveStatus = data.approve;
+    
     html += `
       <div style="margin-bottom:16px; padding:12px; background:#f8fafc; border-radius:8px; border-left:4px solid ${color}">
         <div style="font-weight:bold; font-size:0.75rem; color:#64748b; text-transform:uppercase; margin-bottom:4px;">${title}</div>
-        <div style="font-size:0.875rem; color:#a77d52; white-space:pre-wrap;">${data}</div>
+        <div style="font-size:0.875rem; color:#a77d52; white-space:pre-wrap;">${feedbackText}</div>
+        ${approveStatus ? `<div style="margin-top:8px; font-size:0.75rem; font-weight:bold; color:${approveStatus === 'yes' ? '#10b981' : '#ef4444'}">${approveStatus === 'yes' ? '✓ SETUJU' : '✕ TIDAK SETUJU'}</div>` : ''}
       </div>
     `;
   };
@@ -944,8 +948,11 @@ function openFeedbackModal(btn) {
 
   if(!html) html = '<div style="text-align:center; color:#94a3b8; padding:20px;">Belum ada feedback untuk kandidat ini.</div>';
 
-  document.getElementById('fb-modal-container').innerHTML = html;
-  openModal('overlay-feedback');
+  const container = document.getElementById('fb-modal-body');
+  if (container) {
+    container.innerHTML = html;
+    openModal('overlay-fb');
+  }
 }
 
 function openSendOlModal(appId, name, gross, allow, btn) {
