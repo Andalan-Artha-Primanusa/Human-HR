@@ -41,13 +41,11 @@ class KanbanController extends Controller
             'offer',
         ])
             ->where(function ($query) use ($user) {
-                if (in_array($user->role, ['karyawan', 'trainer'])) {
-                    // Karyawan/Trainer -> lihat lamaran di mana mereka diassign sebagai panel interview
-                    $query->whereHas('interviews', function ($q) use ($user) {
-                        $q->whereJsonContains('panel', $user->name);
-                    });
+                if (in_array($user->role, ['karyawan', 'trainer', 'hr', 'admin', 'superadmin'])) {
+                    // Trainer, Karyawan, dan HR/Admin -> lihat semua lamaran (sama seperti HR)
+                    // Tidak ada filter tambahan
                 } else {
-                    // Pelamar (dan role lainnya jika nyasar) -> wajib hanya lihat milik sendiri
+                    // Pelamar -> wajib hanya lihat milik sendiri
                     $query->where('user_id', $user->id);
                 }
             })

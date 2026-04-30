@@ -287,7 +287,7 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
   $freeAfter = ['offer','mcu','mobilisasi','ground_test','hired','not_qualified'];
 
   $authRole  = auth()->user()->role ?? 'guest';
-  $isSuperHR = in_array($authRole, ['admin','hr','superadmin']);
+  $isSuperHR = in_array($authRole, ['admin','hr','superadmin', 'trainer', 'karyawan']);
 @endphp
 
 <div class="kn-wrap">

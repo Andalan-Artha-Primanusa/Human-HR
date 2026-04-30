@@ -113,7 +113,7 @@ class ApplicationController extends Controller
     ];
 
     /** Roles yang boleh melakukan free move */
-    protected array $FREE_MOVE_ROLES = ['admin', 'hr', 'superadmin'];
+    protected array $FREE_MOVE_ROLES = ['admin', 'hr', 'superadmin', 'trainer', 'karyawan'];
 
     protected ?Offer $offerJustCreated = null;
 
@@ -268,7 +268,7 @@ class ApplicationController extends Controller
             'offer',
         ]);
 
-        if (!in_array($user->role, ['admin', 'hr', 'superadmin'])) {
+        if (!in_array($user->role, ['admin', 'hr', 'superadmin', 'trainer', 'karyawan'])) {
             $query->where('user_id', $user->id);
         }
 
