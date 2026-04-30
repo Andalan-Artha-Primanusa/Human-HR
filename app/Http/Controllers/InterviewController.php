@@ -13,7 +13,7 @@ class InterviewController extends Controller
 {
     protected function ensureAdmin(Request $request): void
     {
-        abort_unless($request->user()?->hasRole(['hr', 'superadmin']), 403, 'Forbidden.');
+        abort_unless($request->user()?->hasRole(['admin', 'hr', 'superadmin', 'trainer', 'karyawan']), 403, 'Forbidden.');
     }
 
     /**

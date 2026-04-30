@@ -15,13 +15,13 @@ class JobApplicationPolicy
 
     public function viewAdmin(User $user): bool
     {
-        return $user->hasRole(['admin', 'hr', 'superadmin']);
+        return $user->hasRole(['admin', 'hr', 'superadmin', 'trainer', 'karyawan']);
     }
 
     public function view(User $user, JobApplication $application): bool
     {
         // Admin/HR bisa lihat semua, Pelamar hanya bisa lihat miliknya
-        return $user->hasRole(['admin', 'hr', 'superadmin']) 
+        return $user->hasRole(['admin', 'hr', 'superadmin', 'trainer', 'karyawan']) 
                || $application->user_id === $user->id;
     }
 
@@ -33,8 +33,8 @@ class JobApplicationPolicy
 
     public function update(User $user, JobApplication $application): bool
     {
-        // Update status/stage khusus Admin/HR
-        return $user->hasRole(['admin', 'hr', 'superadmin']);
+        // Update status/stage khusus Admin/HR/Trainer/User
+        return $user->hasRole(['admin', 'hr', 'superadmin', 'trainer', 'karyawan']);
     }
 
     public function delete(User $user, JobApplication $application): bool
@@ -52,11 +52,11 @@ class JobApplicationPolicy
 
     public function sendOffer(User $user, JobApplication $application): bool
     {
-        return $user->hasRole(['admin', 'hr', 'superadmin']);
+        return $user->hasRole(['admin', 'hr', 'superadmin', 'trainer', 'karyawan']);
     }
 
     public function sendMcu(User $user, JobApplication $application): bool
     {
-        return $user->hasRole(['admin', 'hr', 'superadmin']);
+        return $user->hasRole(['admin', 'hr', 'superadmin', 'trainer', 'karyawan']);
     }
 }

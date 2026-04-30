@@ -332,8 +332,8 @@ class ApplicationController extends Controller
         $actor = auth()->user();
 
         // Validasi: hanya HR/admin/superadmin boleh simpan feedback HR
-        if ($validated['role'] === 'hr' && !in_array($actor->role, ['admin', 'hr', 'superadmin'])) {
-            abort(403, 'Hanya HR, Admin, atau Superadmin yang dapat mengisi feedback HR.');
+        if ($validated['role'] === 'hr' && !in_array($actor->role, ['admin', 'hr', 'superadmin', 'trainer', 'karyawan'])) {
+            abort(403, 'Hanya HR, Admin, Superadmin, Trainer, atau Karyawan yang dapat mengisi feedback HR.');
         }
 
         $feedback = DB::transaction(function () use ($validated, $actor) {
@@ -386,8 +386,8 @@ class ApplicationController extends Controller
         ]);
 
         $actor = auth()->user();
-        if ($validated['role'] === 'hr' && !in_array($actor->role, ['admin', 'hr', 'superadmin'])) {
-            abort(403, 'Hanya HR, Admin, atau Superadmin yang dapat menghapus feedback HR.');
+        if ($validated['role'] === 'hr' && !in_array($actor->role, ['admin', 'hr', 'superadmin', 'trainer', 'karyawan'])) {
+            abort(403, 'Hanya HR, Admin, Superadmin, Trainer, atau Karyawan yang dapat menghapus feedback HR.');
         }
 
         DB::transaction(function () use ($validated) {
@@ -585,7 +585,7 @@ class ApplicationController extends Controller
         if (
             $fromStage === 'hr_iv'
             && $to !== 'hr_iv'
-            && in_array(auth()->user()?->role, ['admin', 'hr', 'superadmin'])
+            && in_array(auth()->user()?->role, ['admin', 'hr', 'superadmin', 'trainer', 'karyawan'])
         ) {
             $feedback = $validated['feedback_hr'] ?? $application->feedback_hr;
             $approve = $validated['approve_hr'] ?? $application->approve_hr;
