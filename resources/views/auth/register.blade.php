@@ -169,19 +169,37 @@
             @enderror
           </div>
 
-          <div>
+          <div style="position:relative; margin-bottom:.5rem;">
             <label class="auth-label">Password</label>
-            <input type="password" name="password" class="auth-input"
-              placeholder="Minimal 8 karakter" required autocomplete="new-password">
+            <div style="position:relative;">
+              <input id="register_password" type="password" name="password" class="auth-input"
+                placeholder="Minimal 8 karakter" required autocomplete="new-password" style="padding-right:3.5rem;">
+              <button type="button" id="toggleRegisterPassword" aria-label="Tampilkan password"
+                style="position:absolute; right:8px; top:50%; transform:translateY(-50%); background:transparent; border:none; cursor:pointer; padding:.25rem; color:#a77d52;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+              </button>
+            </div>
             @error('password')
               <div class="field-error">{{ $message }}</div>
             @enderror
           </div>
 
-          <div>
+          <div style="position:relative;">
             <label class="auth-label">Konfirmasi Password</label>
-            <input type="password" name="password_confirmation" class="auth-input"
-              placeholder="Ulangi password" required autocomplete="new-password">
+            <div style="position:relative;">
+              <input id="register_password_confirmation" type="password" name="password_confirmation" class="auth-input"
+                placeholder="Ulangi password" required autocomplete="new-password" style="padding-right:3.5rem;">
+              <button type="button" id="toggleRegisterPasswordConfirm" aria-label="Tampilkan konfirmasi password"
+                style="position:absolute; right:8px; top:50%; transform:translateY(-50%); background:transparent; border:none; cursor:pointer; padding:.25rem; color:#a77d52;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+              </button>
+            </div>
           </div>
 
           {{-- Terms --}}
@@ -238,6 +256,28 @@
       function sync() { if (submit) submit.disabled = !agree?.checked; }
       agree?.addEventListener('change', sync);
       sync();
+
+      // Password toggle for register form
+      const pwd = document.getElementById('register_password');
+      const pwdConfirm = document.getElementById('register_password_confirmation');
+      const togglePwd = document.getElementById('toggleRegisterPassword');
+      const togglePwdConfirm = document.getElementById('toggleRegisterPasswordConfirm');
+
+      function toggleField(field, btn, hideLabel, showLabel) {
+        if (!field || !btn) return;
+        btn.addEventListener('click', function(){
+          if (field.type === 'password') {
+            field.type = 'text';
+            btn.setAttribute('aria-label', hideLabel);
+          } else {
+            field.type = 'password';
+            btn.setAttribute('aria-label', showLabel);
+          }
+        });
+      }
+
+      toggleField(pwd, togglePwd, 'Sembunyikan password', 'Tampilkan password');
+      toggleField(pwdConfirm, togglePwdConfirm, 'Sembunyikan konfirmasi password', 'Tampilkan konfirmasi password');
     })();
   </script>
 </body>
