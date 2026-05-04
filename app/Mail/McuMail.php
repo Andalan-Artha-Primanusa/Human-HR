@@ -7,9 +7,10 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\SerializesModels;
 
-class McuMail extends Mailable
+class McuMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 

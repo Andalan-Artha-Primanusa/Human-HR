@@ -80,4 +80,15 @@ class CandidateEmploymentTest extends TestCase
 
         $this->assertEquals('- - Jun 2023', $employment->period_label);
     }
+
+    public function test_scope_ordered(): void
+    {
+        $query = CandidateEmployment::query();
+        $orderedQuery = CandidateEmployment::ordered();
+
+        $this->assertEquals(
+            'select * from "candidate_employments" order by "order_no" asc, "created_at" asc',
+            $orderedQuery->toSql()
+        );
+    }
 }

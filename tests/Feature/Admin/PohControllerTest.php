@@ -89,4 +89,25 @@ class PohControllerTest extends TestCase
         $response->assertRedirect(route('admin.pohs.index'));
         $this->assertDatabaseMissing('pohs', ['id' => $poh->id]);
     }
+
+    public function test_create_renders_view()
+    {
+        $this->actingAs($this->admin);
+        $response = $this->get(route('admin.pohs.create'));
+
+        $response->assertStatus(200);
+        $response->assertViewIs('admin.pohs.create');
+    }
+
+    public function test_edit_renders_view()
+    {
+        $poh = Poh::factory()->create();
+
+        $this->actingAs($this->admin);
+        $response = $this->get(route('admin.pohs.edit', $poh));
+
+        $response->assertStatus(200);
+        $response->assertViewIs('admin.pohs.edit');
+        $response->assertViewHas('poh', $poh);
+    }
 }

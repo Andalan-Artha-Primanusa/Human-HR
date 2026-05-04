@@ -79,4 +79,56 @@ class LoginRequestTest extends TestCase
 
         $this->assertStringContainsString('test@example.com', $throttleKey);
     }
+
+    public function test_authenticate_success_clears_rate_limiter(): void
+    {
+        \Illuminate\Support\Facades\Auth::shouldReceive('attempt')->once()->andReturn(true);
+        \Illuminate\Support\Facades\RateLimiter::shouldReceive('tooManyAttempts')->once()->andReturn(false);
+        \Illuminate\Support\Facades\RateLimiter::shouldReceive('clear')->once();
+
+        $request = LoginRequest::create('/login', 'POST', [
+            'email' => 'test@example.com',
+            'password' => 'secret',
+        ]);
+        $request->server->set('REMOTE_ADDR', '127.0.0.1');
+
+        $request->authenticate();
+    }
+
+    public function test_authenticate_failure_hits_rate_limiter_and_throws(): void
+    {
+        \Illuminate\Support\Facades\Auth::shouldReceive('attempt')->once()->andReturn(false);
+        \Illuminate\Support\Facades\RateLimiter::shouldReceive('tooManyAttempts')->once()->andReturn(false);
+        \Illuminate\Support\Facades\RateLimiter::shouldReceive('hit')->once();
+
+        $request = LoginRequest::create('/login', 'POST', [
+            'email' => 'test@example.com',
+            'password' => 'secret',
+        ]);
+        $request->server->set('REMOTE_ADDR', '127.0.0.1');
+
+        $this->expectException(\Illuminate\Validation\ValidationException::class);
+        $request->authenticate();
+    }
+
+    public function test_ensure_is_not_rate_limited_throws_when_too_many_attempts(): void
+    {
+        \Illuminate\Support\Facades\RateLimiter::shouldReceive('tooManyAttempts')->once()->andReturn(true);
+        \Illuminate\Support\Facades\RateLimiter::shouldReceive('availableIn')->once()->andReturn(120);
+        \Illuminate\Support\Facades\Event::fake([\Illuminate\Auth\Events\Lockout::class]);
+
+        $request = LoginRequest::create('/login', 'POST', [
+            'email' => 'test@example.com',
+            'password' => 'secret',
+        ]);
+        $request->server->set('REMOTE_ADDR', '127.0.0.1');
+
+        try {
+            $request->ensureIsNotRateLimited();
+            $this->fail('Expected ValidationException was not thrown.');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            \Illuminate\Support\Facades\Event::assertDispatched(\Illuminate\Auth\Events\Lockout::class);
+            $this->assertArrayHasKey('email', $e->errors());
+        }
+    }
 }

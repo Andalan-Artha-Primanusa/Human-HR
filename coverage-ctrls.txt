@@ -1,0 +1,34 @@
+
+
+Code Coverage Report:
+  2026-05-04 10:56:04
+
+ Summary:
+  Classes:  6.10% (5/82)
+  Methods:  8.48% (29/342)
+  Lines:    6.49% (247/3806)
+
+App\Http\Controllers\Admin\ManpowerRequirementController
+  Methods:  83.33% ( 5/ 6)   Lines:  44.35% ( 51/115)
+App\Http\Controllers\Admin\PohController
+  Methods: 100.00% ( 6/ 6)   Lines: 100.00% ( 33/ 33)
+App\Http\Controllers\ManpowerDashboardController
+  Methods:   0.00% ( 0/ 2)   Lines:  70.41% ( 69/ 98)
+App\Http\Middleware\EnsureRole
+  Methods:   0.00% ( 0/ 1)   Lines:  66.67% (  2/  3)
+App\Models\Concerns\HasUuidPrimaryKey
+  Methods: 100.00% ( 2/ 2)   Lines: 100.00% (  7/  7)
+App\Models\Job
+  Methods:  14.29% ( 4/28)   Lines:  33.64% ( 36/107)
+App\Models\ManpowerRequirement
+  Methods:  66.67% ( 2/ 3)   Lines:  94.12% ( 16/ 17)
+App\Models\User
+  Methods:  15.38% ( 2/13)   Lines:  42.11% (  8/ 19)
+App\Observers\AuditLogObserver
+  Methods:  75.00% ( 3/ 4)   Lines:  92.86% ( 13/ 14)
+App\Providers\AppServiceProvider
+  Methods: 100.00% ( 2/ 2)   Lines: 100.00% (  8/  8)
+App\Providers\AuthServiceProvider
+  Methods: 100.00% ( 2/ 2)   Lines: 100.00% (  3/  3)
+App\Providers\EventServiceProvider
+  Methods: 100.00% ( 1/ 1)   Lines: 100.00% (  1/  1)

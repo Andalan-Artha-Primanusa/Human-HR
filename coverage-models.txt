@@ -1,0 +1,26 @@
+
+
+Code Coverage Report:
+  2026-05-04 10:05:47
+
+ Summary:
+  Classes:  3.66% (3/82)
+  Methods:  7.89% (27/342)
+  Lines:    2.39% (91/3806)
+
+App\Models\ApplicationStage
+  Methods:  80.00% ( 4/ 5)   Lines:  66.67% ( 12/ 18)
+App\Models\CandidateEmployment
+  Methods:  66.67% ( 2/ 3)   Lines:  80.00% (  4/  5)
+App\Models\Concerns\HasUuidPrimaryKey
+  Methods:  50.00% ( 1/ 2)   Lines:  57.14% (  4/  7)
+App\Models\Job
+  Methods:  21.43% ( 6/28)   Lines:  41.12% ( 44/107)
+App\Models\User
+  Methods:  69.23% ( 9/13)   Lines:  78.95% ( 15/ 19)
+App\Providers\AppServiceProvider
+  Methods: 100.00% ( 2/ 2)   Lines: 100.00% (  8/  8)
+App\Providers\AuthServiceProvider
+  Methods: 100.00% ( 2/ 2)   Lines: 100.00% (  3/  3)
+App\Providers\EventServiceProvider
+  Methods: 100.00% ( 1/ 1)   Lines: 100.00% (  1/  1)

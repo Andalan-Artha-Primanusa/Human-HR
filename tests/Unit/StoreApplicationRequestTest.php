@@ -35,4 +35,20 @@ class StoreApplicationRequestTest extends TestCase
         $this->assertIsArray($rules);
         $this->assertEmpty($rules);
     }
+
+    public function test_job_method_returns_job_from_route(): void
+    {
+        $job = new \App\Models\Job();
+        $job->id = 'job-1';
+        
+        $request = StoreApplicationRequest::create('/jobs/1/apply', 'POST', []);
+        $request->setRouteResolver(function () use ($job, $request) {
+            $route = new \Illuminate\Routing\Route('POST', '/jobs/{job}/apply', []);
+            $route->bind($request);
+            $route->setParameter('job', $job);
+            return $route;
+        });
+
+        $this->assertSame($job, $request->job());
+    }
 }

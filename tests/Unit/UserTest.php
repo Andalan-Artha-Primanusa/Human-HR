@@ -128,4 +128,35 @@ class UserTest extends TestCase
         $relation = $user->candidateProfile();
         $this->assertInstanceOf(\Illuminate\Database\Eloquent\Relations\HasOne::class, $relation);
     }
+
+    public function test_user_has_job_applications_relationship(): void
+    {
+        $user = new User();
+        $relation = $user->jobApplications();
+        $this->assertInstanceOf(\Illuminate\Database\Eloquent\Relations\HasMany::class, $relation);
+    }
+
+    public function test_scope_verified(): void
+    {
+        $query = User::verified();
+        $this->assertStringContainsString('where "email_verified_at" is not null', $query->toSql());
+    }
+
+    public function test_scope_unverified(): void
+    {
+        $query = User::unverified();
+        $this->assertStringContainsString('where "email_verified_at" is null', $query->toSql());
+    }
+
+    public function test_send_email_verification_notification(): void
+    {
+        \Illuminate\Support\Facades\Notification::fake();
+        $user = new User();
+        $user->id = '123';
+        $user->sendEmailVerificationNotification();
+        \Illuminate\Support\Facades\Notification::assertSentTo(
+            $user,
+            \App\Notifications\CustomVerifyEmail::class
+        );
+    }
 }

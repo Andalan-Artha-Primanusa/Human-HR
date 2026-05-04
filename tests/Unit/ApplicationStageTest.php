@@ -5,9 +5,11 @@ namespace Tests\Unit;
 use Tests\TestCase;
 use App\Models\ApplicationStage;
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class ApplicationStageTest extends TestCase
 {
+    use RefreshDatabase;
     public function test_fillable_attributes(): void
     {
         $stage = new ApplicationStage();
@@ -101,5 +103,21 @@ class ApplicationStageTest extends TestCase
         $user->name = null;
         $stage->setRelation('actor', $user);
         $this->assertEquals('Sistem/Unknown', $stage->actor_name);
+    }
+
+    public function test_get_actor_name_from_db_acted_by(): void
+    {
+        $user = User::factory()->create(['name' => 'Acted By User']);
+        $stage = new ApplicationStage();
+        $stage->acted_by = $user->id;
+        $this->assertEquals('Acted By User', $stage->actor_name);
+    }
+
+    public function test_get_actor_name_from_db_user_id(): void
+    {
+        $user = User::factory()->create(['name' => 'User ID User']);
+        $stage = new ApplicationStage();
+        $stage->user_id = $user->id;
+        $this->assertEquals('User ID User', $stage->actor_name);
     }
 }

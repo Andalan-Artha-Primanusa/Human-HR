@@ -167,7 +167,10 @@ class ManpowerRequirementControllerTest extends TestCase
 
     public function test_dashboard_with_data()
     {
+        ManpowerRequirement::query()->delete();
         $job = Job::factory()->create(['status' => 'open']);
+        ManpowerRequirement::query()->where('job_id', $job->id)->delete();
+
         ManpowerRequirement::factory()->create([
             'job_id' => $job->id,
             'budget_headcount' => 10,

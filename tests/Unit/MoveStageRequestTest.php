@@ -9,9 +9,10 @@ class MoveStageRequestTest extends TestCase
 {
     public function test_to_stage_is_required(): void
     {
+        $request = new \App\Http\Requests\MoveStageRequest();
         $validator = Validator::make(
             [],
-            ['to_stage' => 'required|in:applied,psychotest,hr_iv,user_iv,final,offer,hired,not_qualified']
+            $request->rules()
         );
 
         $this->assertFalse($validator->passes());
@@ -19,9 +20,10 @@ class MoveStageRequestTest extends TestCase
 
     public function test_to_stage_must_be_valid_value(): void
     {
+        $request = new \App\Http\Requests\MoveStageRequest();
         $validator = Validator::make(
             ['to_stage' => 'invalid_stage'],
-            ['to_stage' => 'required|in:applied,psychotest,hr_iv,user_iv,final,offer,hired,not_qualified']
+            $request->rules()
         );
 
         $this->assertFalse($validator->passes());
@@ -29,12 +31,13 @@ class MoveStageRequestTest extends TestCase
 
     public function test_to_stage_accepts_all_valid_values(): void
     {
+        $request = new \App\Http\Requests\MoveStageRequest();
         $stages = ['applied', 'psychotest', 'hr_iv', 'user_iv', 'final', 'offer', 'hired', 'not_qualified'];
 
         foreach ($stages as $stage) {
             $validator = Validator::make(
                 ['to_stage' => $stage],
-                ['to_stage' => 'required|in:applied,psychotest,hr_iv,user_iv,final,offer,hired,not_qualified']
+                $request->rules()
             );
 
             $this->assertTrue($validator->passes(), "Failed for stage: {$stage}");
@@ -43,9 +46,10 @@ class MoveStageRequestTest extends TestCase
 
     public function test_status_is_nullable(): void
     {
+        $request = new \App\Http\Requests\MoveStageRequest();
         $validator = Validator::make(
             ['to_stage' => 'applied'],
-            ['status' => 'nullable|in:pending,passed,failed,no-show,reschedule']
+            $request->rules()
         );
 
         $this->assertTrue($validator->passes());
@@ -53,9 +57,10 @@ class MoveStageRequestTest extends TestCase
 
     public function test_status_must_be_valid(): void
     {
+        $request = new \App\Http\Requests\MoveStageRequest();
         $validator = Validator::make(
             ['to_stage' => 'applied', 'status' => 'invalid'],
-            ['status' => 'nullable|in:pending,passed,failed,no-show,reschedule']
+            $request->rules()
         );
 
         $this->assertFalse($validator->passes());
@@ -63,9 +68,10 @@ class MoveStageRequestTest extends TestCase
 
     public function test_note_is_nullable(): void
     {
+        $request = new \App\Http\Requests\MoveStageRequest();
         $validator = Validator::make(
             ['to_stage' => 'applied', 'note' => 'Some notes'],
-            ['note' => 'nullable|string']
+            $request->rules()
         );
 
         $this->assertTrue($validator->passes());
@@ -73,9 +79,10 @@ class MoveStageRequestTest extends TestCase
 
     public function test_score_is_nullable_numeric(): void
     {
+        $request = new \App\Http\Requests\MoveStageRequest();
         $validator = Validator::make(
             ['to_stage' => 'applied', 'score' => 'abc'],
-            ['score' => 'nullable|numeric']
+            $request->rules()
         );
 
         $this->assertFalse($validator->passes());
@@ -83,6 +90,7 @@ class MoveStageRequestTest extends TestCase
 
     public function test_valid_data_passes(): void
     {
+        $request = new \App\Http\Requests\MoveStageRequest();
         $validator = Validator::make(
             [
                 'to_stage' => 'hr_iv',
@@ -90,14 +98,31 @@ class MoveStageRequestTest extends TestCase
                 'note' => 'Good candidate',
                 'score' => 85.5,
             ],
-            [
-                'to_stage' => 'required|in:applied,psychotest,hr_iv,user_iv,final,offer,hired,not_qualified',
-                'status' => 'nullable|in:pending,passed,failed,no-show,reschedule',
-                'note' => 'nullable|string',
-                'score' => 'nullable|numeric',
-            ]
+            $request->rules()
         );
 
         $this->assertTrue($validator->passes());
+    }
+
+    public function test_authorize_allows_valid_roles(): void
+    {
+        $request = new \App\Http\Requests\MoveStageRequest();
+        
+        $user = new \App\Models\User();
+        $user->role = 'admin';
+        $request->setUserResolver(fn() => $user);
+        $this->assertTrue($request->authorize());
+        
+        $user->role = 'hr';
+        $this->assertTrue($request->authorize());
+        
+        $user->role = 'superadmin';
+        $this->assertTrue($request->authorize());
+        
+        $user->role = 'pelamar';
+        $this->assertFalse($request->authorize());
+        
+        $request->setUserResolver(fn() => null);
+        $this->assertFalse($request->authorize());
     }
 }

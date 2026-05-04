@@ -1,0 +1,26 @@
+
+
+Code Coverage Report:
+  2026-05-04 09:47:09
+
+ Summary:
+  Classes:  7.32% (6/82)
+  Methods:  4.97% (17/342)
+  Lines:    1.81% (69/3806)
+
+App\Mail\InterviewInviteMail
+  Methods: 100.00% ( 2/ 2)   Lines: 100.00% ( 10/ 10)
+App\Mail\McuMail
+  Methods: 100.00% ( 4/ 4)   Lines: 100.00% ( 23/ 23)
+App\Mail\MobilisasiMail
+  Methods: 100.00% ( 4/ 4)   Lines: 100.00% ( 16/ 16)
+App\Models\Concerns\HasUuidPrimaryKey
+  Methods:  50.00% ( 1/ 2)   Lines:  57.14% (  4/  7)
+App\Models\User
+  Methods:   7.69% ( 1/13)   Lines:  21.05% (  4/ 19)
+App\Providers\AppServiceProvider
+  Methods: 100.00% ( 2/ 2)   Lines: 100.00% (  8/  8)
+App\Providers\AuthServiceProvider
+  Methods: 100.00% ( 2/ 2)   Lines: 100.00% (  3/  3)
+App\Providers\EventServiceProvider
+  Methods: 100.00% ( 1/ 1)   Lines: 100.00% (  1/  1)

@@ -1,0 +1,28 @@
+
+
+Code Coverage Report:
+  2026-05-04 10:44:10
+
+ Summary:
+  Classes:  8.54% (7/82)
+  Methods:  5.56% (19/342)
+  Lines:    1.84% (70/3806)
+
+App\Http\Middleware\EnsureApiToken
+  Methods: 100.00% ( 1/ 1)   Lines: 100.00% ( 13/ 13)
+App\Http\Requests\Auth\LoginRequest
+  Methods: 100.00% ( 5/ 5)   Lines: 100.00% ( 23/ 23)
+App\Http\Requests\MoveStageRequest
+  Methods: 100.00% ( 2/ 2)   Lines: 100.00% (  7/  7)
+App\Http\Requests\StoreApplicationRequest
+  Methods: 100.00% ( 3/ 3)   Lines: 100.00% (  3/  3)
+App\Models\Concerns\HasUuidPrimaryKey
+  Methods:  50.00% ( 1/ 2)   Lines:  57.14% (  4/  7)
+App\Models\User
+  Methods:  15.38% ( 2/13)   Lines:  42.11% (  8/ 19)
+App\Providers\AppServiceProvider
+  Methods: 100.00% ( 2/ 2)   Lines: 100.00% (  8/  8)
+App\Providers\AuthServiceProvider
+  Methods: 100.00% ( 2/ 2)   Lines: 100.00% (  3/  3)
+App\Providers\EventServiceProvider
+  Methods: 100.00% ( 1/ 1)   Lines: 100.00% (  1/  1)

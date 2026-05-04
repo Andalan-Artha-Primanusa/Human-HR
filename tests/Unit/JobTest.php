@@ -4,9 +4,12 @@ namespace Tests\Unit;
 
 use Tests\TestCase;
 use App\Models\Job;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 
 class JobTest extends TestCase
 {
+    use RefreshDatabase;
     public function test_normalize_level_with_valid_levels(): void
     {
         $this->assertEquals('foreman', Job::normalizeLevel('foreman'));
@@ -162,5 +165,72 @@ class JobTest extends TestCase
         $this->assertArrayHasKey('engineering', Job::DIVISIONS);
         $this->assertArrayHasKey('hr', Job::DIVISIONS);
         $this->assertEquals('Engineering', Job::DIVISIONS['engineering']);
+    }
+
+    public function test_relationships(): void
+    {
+        $job = new Job();
+        $this->assertInstanceOf(\Illuminate\Database\Eloquent\Relations\BelongsTo::class, $job->site());
+        $this->assertInstanceOf(\Illuminate\Database\Eloquent\Relations\BelongsTo::class, $job->company());
+        $this->assertInstanceOf(\Illuminate\Database\Eloquent\Relations\BelongsTo::class, $job->creator());
+        $this->assertInstanceOf(\Illuminate\Database\Eloquent\Relations\BelongsTo::class, $job->updater());
+        $this->assertInstanceOf(\Illuminate\Database\Eloquent\Relations\HasMany::class, $job->applications());
+        $this->assertInstanceOf(\Illuminate\Database\Eloquent\Relations\HasMany::class, $job->manpowerRequirements());
+        $this->assertInstanceOf(\Illuminate\Database\Eloquent\Relations\HasOne::class, $job->manpowerRequirement());
+    }
+
+    public function test_scopes(): void
+    {
+        $this->assertStringContainsString('where "status" = ?', Job::open()->toSql());
+        $this->assertStringContainsString('where "site_id" = ?', Job::atSite('site-1')->toSql());
+        $this->assertStringContainsString('where "company_id" is null', Job::atCompany(null)->toSql());
+        $this->assertStringContainsString('where "company_id" = ?', Job::atCompany('comp-1')->toSql());
+        
+        $divSql = Job::inDivision('hr')->toSql();
+        $this->assertStringContainsString('where "division" = ?', $divSql);
+        
+        $this->assertStringContainsString('select * from "sites" where "job_listings"."site_id" = "sites"."id" and "code" = ?', Job::atSiteCode('S1')->toSql());
+        $this->assertStringContainsString('select * from "companies" where "job_listings"."company_id" = "companies"."id" and "code" = ?', Job::atCompanyCode('C1')->toSql());
+
+        $searchSql = Job::search('test')->toSql();
+        $this->assertStringContainsString('code" like ?', $searchSql);
+    }
+
+    public function test_keywords_attribute(): void
+    {
+        $job = new Job();
+        $job->keywords = 'test1, test2';
+        $this->assertEquals('test1, test2', $job->keywords_text);
+        
+        $job->keywords = ['test3', 'test4'];
+        $this->assertEquals('test3, test4', $job->keywords_text);
+
+        $job->keywords = json_encode(['test5']);
+        $this->assertEquals('test5', $job->keywords_text);
+
+        $job->keywords = [['name' => 'test6']];
+        $this->assertEquals('test6', $job->keywords_text);
+    }
+
+    public function test_set_site_code_attribute(): void
+    {
+        $job = new Job();
+        $job->site_code = null;
+        $this->assertNull($job->site_id);
+
+        DB::table('sites')->insert(['id' => 'site-uuid-1', 'code' => 'SITE1', 'name' => 'Site 1', 'created_at' => now(), 'updated_at' => now()]);
+        $job->site_code = 'SITE1';
+        $this->assertEquals('site-uuid-1', $job->site_id);
+    }
+
+    public function test_set_company_code_attribute(): void
+    {
+        $job = new Job();
+        $job->company_code = null;
+        $this->assertNull($job->company_id);
+
+        DB::table('companies')->insert(['id' => 'comp-uuid-1', 'code' => 'COMP1', 'name' => 'Comp 1', 'created_at' => now(), 'updated_at' => now()]);
+        $job->company_code = 'COMP1';
+        $this->assertEquals('comp-uuid-1', $job->company_id);
     }
 }

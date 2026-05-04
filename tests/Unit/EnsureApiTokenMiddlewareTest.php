@@ -9,9 +9,11 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class EnsureApiTokenMiddlewareTest extends TestCase
 {
+    use RefreshDatabase;
     public function test_returns_401_when_no_token_provided(): void
     {
         $middleware = new EnsureApiToken();
