@@ -122,13 +122,16 @@
 
       {{-- Mobile logo --}}
       <div class="lg:hidden" style="text-align:center; margin-bottom:1.5rem;">
-        <img src="{{ asset('assets/logologin.png') }}" alt="Logo" style="height:64px; object-fit:contain;">
+        <img src="{{ asset('assets/logologin.png') }}" alt="Logo" style="height:88px; object-fit:contain; display:block; margin:0 auto;">
       </div>
 
       <div class="fade-up {{ $errors->first('email') ? 'shake' : '' }}" style="width:100%; max-width:380px;">
 
         {{-- Heading --}}
-        <div style="margin-bottom:1.75rem;">
+        <div style="margin-bottom:1.75rem; text-align:center;">
+          <div style="margin-bottom:.75rem;">
+            <img src="{{ asset('assets/logologin.png') }}" alt="Logo" style="height:88px; object-fit:contain; display:block; margin:0 auto;">
+          </div>
           <h2 style="font-size:1.5rem; font-weight:800; color:#3b2209; margin:0 0 .35rem;">Masuk ke Akun</h2>
           <p style="font-size:.85rem; color:#a77d52; margin:0;">Silakan isi email dan password Anda</p>
         </div>
@@ -154,10 +157,19 @@
               value="{{ old('email') }}" autocomplete="email" autofocus>
           </div>
 
-          <div style="margin-bottom:.75rem;">
+          <div style="margin-bottom:.75rem; position:relative;">
             <label class="auth-label">Password</label>
-            <input type="password" name="password" class="auth-input"
-              placeholder="••••••••" autocomplete="current-password">
+            <div style="position:relative;">
+              <input id="login_password" type="password" name="password" class="auth-input"
+                placeholder="••••••••" autocomplete="current-password" style="padding-right:3.5rem;">
+              <button type="button" id="togglePassword" aria-label="Tampilkan password"
+                style="position:absolute; right:8px; top:50%; transform:translateY(-50%); background:transparent; border:none; cursor:pointer; padding:.25rem; color:#a77d52;">
+                <svg id="eyeIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+              </button>
+            </div>
           </div>
 
           <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem; font-size:.82rem;">
@@ -200,6 +212,25 @@
     </div>
 
   </div>
+
+</div>
+
+<script>
+  (function(){
+    const pwd = document.getElementById('login_password');
+    const btn = document.getElementById('togglePassword');
+    btn?.addEventListener('click', function(){
+      if(!pwd) return;
+      if (pwd.type === 'password') {
+        pwd.type = 'text';
+        btn.setAttribute('aria-label','Sembunyikan password');
+      } else {
+        pwd.type = 'password';
+        btn.setAttribute('aria-label','Tampilkan password');
+      }
+    });
+  })();
+</script>
 
 </body>
 </html>

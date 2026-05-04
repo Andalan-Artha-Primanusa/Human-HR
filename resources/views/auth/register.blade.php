@@ -121,13 +121,16 @@
 
       {{-- Mobile logo --}}
       <div class="lg:hidden" style="text-align:center; margin-bottom:1.25rem;">
-        <img src="{{ asset('assets/logologin.png') }}" alt="Logo" style="height:58px; object-fit:contain;">
+        <img src="{{ asset('assets/logologin.png') }}" alt="Logo" style="height:80px; object-fit:contain; display:block; margin:0 auto;">
       </div>
 
       <div class="fade-up" style="width:100%; max-width:380px;">
 
         {{-- Heading --}}
-        <div style="margin-bottom:1.5rem;">
+        <div style="margin-bottom:1.5rem; text-align:center;">
+          <div style="margin-bottom:.6rem;">
+            <img src="{{ asset('assets/logologin.png') }}" alt="Logo" style="height:80px; object-fit:contain; display:block; margin:0 auto;">
+          </div>
           <h2 style="font-size:1.4rem; font-weight:800; color:#3b2209; margin:0 0 .3rem;">Buat Akun Baru</h2>
           <p style="font-size:.82rem; color:#a77d52; margin:0;">Isi data di bawah untuk mendaftar</p>
         </div>

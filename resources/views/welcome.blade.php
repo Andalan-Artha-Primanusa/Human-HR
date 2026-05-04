@@ -605,7 +605,7 @@
 
         {{-- Sheet Header --}}
         <div class="flex items-center justify-between px-5 py-3 border-b" style="border-color: rgba(167,125,82,0.15)">
-          <img src="{{ asset('assets/logofix.png') }}" alt="Logo PT Andalan" class="h-8 w-auto">
+          <img src="{{ asset('assets/logofix.png') }}" alt="Logo PT Andalan" class="w-auto h-8">
           <button id="btn-menu-close"
             class="w-9 h-9 rounded-xl flex items-center justify-center text-[#a77d52] transition hover:bg-[#a77d52]/10"
             aria-label="Tutup menu">
@@ -620,7 +620,7 @@
               <svg class="w-4 h-4"><use href="#i-search"/></svg>
             </div>
             <input type="search" name="q" placeholder="Cari posisi atau lokasi..."
-              class="w-full pl-10 pr-4 py-3 rounded-xl text-sm outline-none transition"
+              class="w-full py-3 pl-10 pr-4 text-sm transition outline-none rounded-xl"
               style="background:#fff8f2; border:1.5px solid rgba(167,125,82,0.25); color:#3b2209;"
               onfocus="this.style.borderColor='#a77d52'" onblur="this.style.borderColor='rgba(167,125,82,0.25)'">
           </form>
@@ -660,7 +660,7 @@
           <div class="px-4 pt-3 pb-2 space-y-1">
             <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 px-2 pb-1">Akun Saya</p>
             <div class="flex items-center gap-3 px-3 py-3 rounded-xl" style="background:#fff8f2;">
-              <div class="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
+              <div class="flex items-center justify-center flex-shrink-0 w-10 h-10 text-sm font-bold text-white rounded-xl"
                 style="background:#a77d52">
                 {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
               </div>
@@ -682,7 +682,7 @@
             <form action="{{ route('logout') }}" method="POST">
               @csrf
               <button type="submit"
-                class="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition"
+                class="flex items-center justify-center w-full gap-2 py-3 text-sm font-semibold transition rounded-xl"
                 style="border: 1.5px solid rgba(220,38,38,0.3); color:#dc2626; background:transparent"
                 onmouseover="this.style.background='rgba(220,38,38,0.06)'" onmouseout="this.style.background='transparent'">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
@@ -694,7 +694,7 @@
           </div>
         @else
           {{-- Guest CTA --}}
-          <div class="px-4 pt-4 pb-6 grid grid-cols-2 gap-3">
+          <div class="grid grid-cols-2 gap-3 px-4 pt-4 pb-6">
             <a href="{{ route('login') }}"
               class="flex items-center justify-center gap-2 py-3.5 rounded-xl text-sm font-bold transition"
               style="border:2px solid #a77d52; color:#a77d52; background:#fff"
@@ -1191,18 +1191,17 @@
 
         {{-- Brand --}}
         <div class="md:col-span-2">
-          <img src="{{ asset('assets/logofix.png') }}" alt="Logo" class="h-10 mb-4">
           <p class="max-w-sm text-sm leading-relaxed" style="color: #e8d5c4">
             Portal karier resmi PT Andalan Artha Primanusa. Kami menghubungkan talenta terbaik dengan peluang karier yang sesuai.
           </p>
           <div class="flex gap-4 mt-6">
-            <a href="https://andalan.co.id" target="_blank" rel="noopener noreferrer" style="color:#e8d5c4" class="hover:text-white transition" aria-label="Website PT Andalan">
+            <a href="https://andalan.co.id" target="_blank" rel="noopener noreferrer" style="color:#e8d5c4" class="transition hover:text-white" aria-label="Website PT Andalan">
               <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
             </a>
-            <a href="https://linkedin.com/company/andalan" target="_blank" rel="noopener noreferrer" style="color:#e8d5c4" class="hover:text-white transition" aria-label="LinkedIn PT Andalan">
+            <a href="https://linkedin.com/company/andalan" target="_blank" rel="noopener noreferrer" style="color:#e8d5c4" class="transition hover:text-white" aria-label="LinkedIn PT Andalan">
               <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
             </a>
-            <a href="https://instagram.com/andalan" target="_blank" rel="noopener noreferrer" style="color:#e8d5c4" class="hover:text-white transition" aria-label="Instagram PT Andalan">
+            <a href="https://instagram.com/andalan" target="_blank" rel="noopener noreferrer" style="color:#e8d5c4" class="transition hover:text-white" aria-label="Instagram PT Andalan">
               <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
             </a>
           </div>
@@ -1210,7 +1209,7 @@
 
         {{-- Quick Links --}}
         <div>
-          <h3 class="mb-4 text-sm font-bold text-white uppercase tracking-wide">Menu</h3>
+          <h3 class="mb-4 text-sm font-bold tracking-wide text-white uppercase">Menu</h3>
           <ul class="space-y-2">
             <li><a href="{{ route('jobs.index') }}" class="text-sm transition hover:text-white" style="color:#e8d5c4">Lowongan Kerja</a></li>
             <li><a href="{{ route('register') }}" class="text-sm transition hover:text-white" style="color:#e8d5c4">Daftar</a></li>
@@ -1221,7 +1220,7 @@
 
         {{-- Contact --}}
         <div>
-          <h3 class="mb-4 text-sm font-bold text-white uppercase tracking-wide">Kontak</h3>
+          <h3 class="mb-4 text-sm font-bold tracking-wide text-white uppercase">Kontak</h3>
           <ul class="space-y-2 text-sm" style="color:#e8d5c4">
             <li class="flex items-start gap-2">
               <svg class="w-4 h-4 mt-0.5 shrink-0" aria-hidden="true"><use href="#i-map-pin"/></svg>
