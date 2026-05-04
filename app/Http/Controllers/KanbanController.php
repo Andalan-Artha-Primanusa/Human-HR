@@ -53,7 +53,7 @@ class KanbanController extends Controller
             ->orderBy('id')
             ->get();
 
-        $grouped = collect($stages)->mapWithKeys(fn($s, $k) => [$k => collect()]);
+        $grouped = collect($stages)->mapWithKeys(fn($label, $key) => [$key => collect()]);
         foreach ($apps as $a) {
             $key = $a->current_stage ?? 'applied';
             if (!array_key_exists($key, $stages)) $key = 'applied';

@@ -96,8 +96,6 @@
       <div style="position:absolute; top:40%; left:-30px; width:140px; height:140px; border-radius:50%; background:rgba(255,255,255,.05);"></div>
 
       <div style="position:relative; z-index:1; text-align:center; max-width:400px;">
-        <img src="{{ asset('assets/logologin.png') }}" alt="Logo Human.Careers"
-          style="height:90px; object-fit:contain; margin-bottom:2rem; filter:brightness(0) invert(1);">
         <h1 style="color:#fff; font-size:2rem; font-weight:800; margin:0 0 1rem; line-height:1.2;">
           Selamat Datang<br>di Human.Careers
         </h1>

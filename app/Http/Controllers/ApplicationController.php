@@ -297,11 +297,11 @@ class ApplicationController extends Controller
             ->orderBy('id')
             ->get();
 
-        $grouped = collect($stages)->mapWithKeys(fn($s) => [$s => collect()]);
+        $grouped = collect($stages)->mapWithKeys(fn($label, $key) => [$key => collect()]);
         foreach ($apps as $a) {
             $key = $this->normalizeStage($a->current_stage) ?: 'applied';
             if ($key === 'user_iv') $key = 'user_trainer_iv';
-            if (!in_array($key, $stages, true)) $key = 'applied';
+            if (!array_key_exists($key, $stages)) $key = 'applied';
             $grouped[$key]->push($a);
         }
 
@@ -341,14 +341,18 @@ class ApplicationController extends Controller
         }
 
         $feedback = DB::transaction(function () use ($validated, $actor) {
-            $fb = ApplicationFeedback::create([
-                'application_id' => $validated['application_id'],
-                'stage_key'      => $validated['stage_key'],
-                'role'           => $validated['role'],
-                'feedback'       => $validated['feedback'],
-                'approve'        => $validated['approve'],
-                'user_id'        => $actor->id,
-            ]);
+            $fb = ApplicationFeedback::updateOrCreate(
+                [
+                    'application_id' => $validated['application_id'],
+                    'stage_key'      => $validated['stage_key'],
+                    'role'           => $validated['role'],
+                    'user_id'        => $actor->id,
+                ],
+                [
+                    'feedback'       => $validated['feedback'],
+                    'approve'        => $validated['approve'],
+                ]
+            );
 
             // Mirror ke kolom langsung di job_applications untuk kompatibilitas backward
             /** @var JobApplication $app */
@@ -454,7 +458,7 @@ class ApplicationController extends Controller
         // Cek apakah ini adalah FREE MOVE (setelah user_trainer_iv)
         $toRaw    = $request->input('to') ?? $request->input('to_stage');
         $toStage  = $this->normalizeStage($toRaw) ?: 'applied';
-        $fromStage = $application->current_stage;
+        $fromStage = $this->normalizeStage($request->input('from_stage')) ?: $application->current_stage;
 
         $isFreeMoveAllowed = $this->canFreeMoveFrom($fromStage, $actor->role ?? '');
 
@@ -581,9 +585,9 @@ class ApplicationController extends Controller
         $note   = $validated['note']   ?? null;
         $score  = isset($validated['score']) ? (float) $validated['score'] : null;
 
-        $fromStage = $application?->current_stage
-                   ?? $request->input('from_stage')
-                   ?? $request->input('from');
+        $fromStage = $this->normalizeStage($request->input('from_stage'))
+               ?? $this->normalizeStage($request->input('from'))
+               ?? $application?->current_stage;
 
         // Wajib feedback HR saat pindah dari hr_iv
         if (
@@ -845,7 +849,7 @@ class ApplicationController extends Controller
 
             // Notifikasi ke pelamar
             $appReload  = $application->fresh(['job:id,title', 'user:id,name']);
-            $jobTitle   = $appReload->job?->title ?? '—';
+            $jobTitle   = $appReload->job?->title ?? 'ΓÇö';
             $toPretty   = $this->PRETTY[$to]   ?? strtoupper($to);
             $fromPretty = $from ? ($this->PRETTY[$from] ?? strtoupper($from)) : null;
 
@@ -855,7 +859,7 @@ class ApplicationController extends Controller
             } elseif ($appReload->overall_status === 'not_qualified' && $prevOverall !== 'not_qualified') {
                 $body = "Maaf, lamaran kamu untuk posisi \"{$jobTitle}\" tidak melanjutkan proses.";
             } else {
-                $stagePart = $fromPretty ? "{$fromPretty} → {$toPretty}" : $toPretty;
+                $stagePart = $fromPretty ? "{$fromPretty} ΓåÆ {$toPretty}" : $toPretty;
                 $body = "Tahap lamaran kamu untuk posisi \"{$jobTitle}\" diperbarui menjadi: {$stagePart}.";
             }
 

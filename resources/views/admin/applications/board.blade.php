@@ -113,6 +113,9 @@
   border-radius: .875rem; padding: .875rem;
   cursor: grab; position: relative;
   transition: transform .15s, box-shadow .15s, border-color .2s, opacity .2s;
+  display: flex; flex-direction: column;
+  max-height: 550px;
+  overflow-y: auto;
 }
 .kn-card:hover {
   transform: translateY(-2px);
@@ -144,9 +147,16 @@
 
 .kn-card-actions {
   display: flex; flex-wrap: wrap; gap: .4rem;
-  margin-top: .65rem; padding-top: .6rem;
+  margin-top: auto; padding-top: .6rem; padding-bottom: .4rem;
   border-top: 1px solid #f0e9df;
+  position: sticky; bottom: 0; background: #fff; z-index: 10;
 }
+
+/* ===== FEEDBACK PANEL (collapsible) ===== */
+.fb-panel-toggle { background: #d97706; border-color: transparent; color: #fff; cursor: pointer; }
+.fb-panel-toggle:hover { opacity: .85; }
+.fb-panel { display: flex; flex-wrap: wrap; gap: .4rem; padding-top: .6rem; padding-bottom: .4rem; border-top: 1px solid #f0e9df; }
+.fb-panel.hidden { display: none; }
 
 /* ===== BUTTONS ===== */
 .btn-xs {
@@ -432,6 +442,14 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
                     <button type="button" class="btn-xs btn-outline" onclick="openFbModal(this)">View Feedbacks</button>
                   @endif
 
+                  {{-- FEEDBACK FORM BUTTONS (user_trainer_iv) - TOGGLE --}}
+                  @if($stageKey === 'user_trainer_iv' && ($isHR || $isTrainer || $isKaryawan))
+                    <button type="button" class="btn-xs fb-panel-toggle"
+                      onclick="toggleFbPanel('fbp-{{ $a->id }}', this)" title="Tampilkan form feedback">
+                      ⚠️ Feedback
+                    </button>
+                  @endif
+
                   {{-- KIRIM OL EMAIL (hanya di offer) --}}
                   @if($stageKey === 'offer' && $isHR)
                     <button type="button" class="btn-xs btn-primary"
@@ -480,17 +498,36 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
                     @endif
                   @endif
 
+                  @if($stageKey === 'ground_test' && $isHR)
+                    <button type="button" class="btn-xs btn-outline"
+                      onclick="openFbForm(this, '{{ $a->id }}', '{{ $a->user->name }}', 'ground_test', 'hr')">
+                      + Feedback HR GT
+                    </button>
+                  @endif
+                  @if($stageKey === 'ground_test' && $isTrainer)
+                    <button type="button" class="btn-xs btn-outline"
+                      onclick="openFbForm(this, '{{ $a->id }}', '{{ $a->user->name }}', 'ground_test', 'trainer')">
+                      + Feedback Trainer GT
+                    </button>
+                  @endif
+                  @if($stageKey === 'ground_test' && $isKaryawan)
+                    <button type="button" class="btn-xs btn-outline"
+                      onclick="openFbForm(this, '{{ $a->id }}', '{{ $a->user->name }}', 'ground_test', 'karyawan')">
+                      + Feedback User GT
+                    </button>
+                  @endif
+
                   {{-- FEEDBACK FORM BUTTON (hanya di hr_iv & belum ada feedback) --}}
                   @if($stageKey === 'hr_iv' && !$fbHR && $isSuperHR)
-                    <button type="button" class="btn-xs btn-primary"
-                      onclick="openFbForm(this, '{{ $a->id }}', '{{ $a->user->name }}', 'hr_iv')">
-                      + Isi Feedback HR
+                    <button type="button" class="btn-xs btn-primary" style="flex:1; background-color:#d97706; font-size:.7rem;"
+                      onclick="openFbForm(this, '{{ $a->id }}', '{{ $a->user->name }}', 'hr_iv', 'hr')" title="WAJIB isi feedback dan pilih setuju/tidak setuju sebelum bisa pindah ke stage lain">
+                      ⚠️ + Isi Feedback HR
                     </button>
                   @endif
 
                   {{-- FREE MOVE DROPDOWN (admin/hr/superadmin, setelah user_trainer_iv) --}}
                   @if($isFreeMove && $isSuperHR)
-                    <div class="free-move-wrap" style="width:100%">
+                    <div class="free-move-wrap" style="width:100%; margin-top: auto;">
                       <label>Pindahkan ke Stage</label>
                       <select onchange="freeMoveCard(this, '{{ $a->id }}', '{{ $stageKey }}', '{{ csrf_token() }}', '{{ route('admin.applications.board.move') }}')">
                         <option value="">— Pilih Stage —</option>
@@ -501,10 +538,38 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
                         @endforeach
                       </select>
                     </div>
+                  @elseif($stageKey === 'hr_iv' && !$fbHR && $isSuperHR)
+                    <div style="width:100%; padding:.6rem; background:#fed7aa; border:1px solid #fb923c; border-radius:.4rem; font-size:.65rem; color:#b45309; margin-top: auto; text-align:center; font-weight:600;">
+                      ⚠️ Selesaikan Feedback HR untuk pindah ke stage lain
+                    </div>
                   @endif
 
                   <a class="btn-xs btn-outline" href="{{ route('jobs.show', $a->job) }}" target="_blank">Job</a>
                 </div>
+
+                {{-- FEEDBACK PANEL (collapsible, hidden by default) --}}
+                @if($stageKey === 'user_trainer_iv')
+                  <div id="fbp-{{ $a->id }}" class="hidden fb-panel">
+                    @if($isHR)
+                      <button type="button" class="btn-xs btn-primary"
+                        onclick="openFbForm(this, '{{ $a->id }}', '{{ $a->user->name }}', 'user_trainer_iv', 'hr')">
+                        + Isi Feedback HR
+                      </button>
+                    @endif
+                    @if($isTrainer)
+                      <button type="button" class="btn-xs btn-primary"
+                        onclick="openFbForm(this, '{{ $a->id }}', '{{ $a->user->name }}', 'user_trainer_iv', 'trainer')">
+                        + Isi Feedback Trainer
+                      </button>
+                    @endif
+                    @if($isKaryawan)
+                      <button type="button" class="btn-xs btn-primary"
+                        onclick="openFbForm(this, '{{ $a->id }}', '{{ $a->user->name }}', 'user_trainer_iv', 'karyawan')">
+                        + Isi Feedback User
+                      </button>
+                    @endif
+                  </div>
+                @endif
               </div>
             @endforeach
           </div>
@@ -548,6 +613,7 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
     <div class="kn-modal-body">
       <input type="hidden" id="fbform-app-id" value="">
       <input type="hidden" id="fbform-stage" value="">
+      <input type="hidden" id="fbform-role" value="hr">
       <div style="display:flex;flex-direction:column;gap:.8rem">
         <div class="fm-group">
           <label class="fm-label">Catatan / Feedback</label>
@@ -1301,11 +1367,26 @@ function openGroundTestModal(appId, name, btn) {
 /* ============================= ISI FEEDBACK FORM ============================= */
 let fbFormCardEl = null;
 
-function openFbForm(btn, appId, name, stage) {
+function fbRoleLabel(role) {
+  if (role === 'trainer') return 'Trainer';
+  if (role === 'karyawan') return 'User';
+  if (role === 'pelamar') return 'Pelamar';
+  return 'HR';
+}
+
+function toggleFbPanel(panelId, btn) {
+  const panel = document.getElementById(panelId);
+  if (!panel) return;
+  panel.classList.toggle('hidden');
+  if (btn) btn.textContent = panel.classList.contains('hidden') ? '⚠️ Feedback' : '✕ Tutup';
+}
+
+function openFbForm(btn, appId, name, stage, role = 'hr') {
   fbFormCardEl = getCard(btn);
-  document.getElementById('fbform-title').textContent = 'Isi Feedback HR — ' + name;
+  document.getElementById('fbform-title').textContent = 'Isi Feedback ' + fbRoleLabel(role) + ' — ' + name;
   document.getElementById('fbform-app-id').value = appId;
   document.getElementById('fbform-stage').value  = stage;
+  document.getElementById('fbform-role').value   = role;
   document.getElementById('fbform-notes').value  = '';
   document.getElementById('fbform-approve').value = '';
   openModal('overlay-fbform');
@@ -1316,6 +1397,7 @@ function submitFbForm() {
   const approve = document.getElementById('fbform-approve').value;
   const appId   = document.getElementById('fbform-app-id').value;
   const stage   = document.getElementById('fbform-stage').value;
+  const role    = document.getElementById('fbform-role').value || 'hr';
   const csrf    = document.querySelector('meta[name="csrf-token"]')?.content
                || (fbFormCardEl && fbFormCardEl.dataset.csrf)
                || '';
@@ -1330,7 +1412,7 @@ function submitFbForm() {
       'Accept': 'application/json',
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ application_id: appId, stage_key: stage, role: 'hr', feedback: notes, approve }),
+    body: JSON.stringify({ application_id: appId, stage_key: stage, role, feedback: notes, approve }),
   })
   .then(async res => {
     const contentType = res.headers.get('content-type') || '';
@@ -1348,26 +1430,33 @@ function submitFbForm() {
   .then(() => {
     // Update card UI
     if (fbFormCardEl) {
-      fbFormCardEl.dataset.fbHr = JSON.stringify({ notes, approve });
+      if (role === 'hr') fbFormCardEl.dataset.fbHr = JSON.stringify({ notes, approve });
+      if (role === 'trainer') fbFormCardEl.dataset.fbTrainer = JSON.stringify({ notes, approve });
+      if (role === 'karyawan') fbFormCardEl.dataset.fbUser = JSON.stringify({ notes, approve });
       fbFormCardEl.removeAttribute('draggable'); // reset
       fbFormCardEl.setAttribute('draggable', 'true');
       fbFormCardEl.classList.remove('card-locked');
-      const lockNote = fbFormCardEl.querySelector('.kn-lock-note');
-      if (lockNote) lockNote.remove();
-      // Ganti tombol "Isi Feedback" jadi "View Feedback HR"
-      const fillBtn = fbFormCardEl.querySelector('[onclick*="openFbForm"]');
-      if (fillBtn) {
-        const viewBtn = document.createElement('button');
-        viewBtn.type = 'button';
-        viewBtn.className = 'btn-xs btn-outline';
-        viewBtn.setAttribute('onclick', "openFbModal(this,'hr')");
-        viewBtn.textContent = 'View Feedback HR';
-        fillBtn.replaceWith(viewBtn);
+      if (role === 'hr') {
+        const lockNote = fbFormCardEl.querySelector('.kn-lock-note');
+        if (lockNote) lockNote.remove();
+        // Hapus warning message (divider dengan pesan Selesaikan Feedback)
+        const warningDiv = Array.from(fbFormCardEl.querySelectorAll('div')).find(d => 
+          d.textContent.includes('Selesaikan Feedback HR')
+        );
+        if (warningDiv) warningDiv.remove();
+      }
+      // Hide feedback panel & toggle button after successful submission
+      const fbToggle = fbFormCardEl.querySelector('.fb-panel-toggle');
+      const stage = fbFormCardEl.dataset.stage;
+      if (fbToggle && stage === 'user_trainer_iv') {
+        fbToggle.style.display = 'none';
+        const fbPanel = fbFormCardEl.querySelector('[id^="fbp-"]');
+        if (fbPanel) fbPanel.classList.add('hidden');
       }
       initDrag(fbFormCardEl);
     }
     closeModal('overlay-fbform');
-    showToast('Feedback HR tersimpan. Kartu siap di-drag!', 'ok');
+    showToast('✓ Feedback ' + fbRoleLabel(role) + ' tersimpan!', 'ok');
   })
   .catch(err => {
     showToast(err.message || 'Gagal menyimpan feedback', 'err');
@@ -1462,7 +1551,7 @@ function freeMoveCard(selectEl, appId, fromStage, csrf, baseUrl) {
       'Accept': 'application/json',
       'Content-Type': 'application/x-www-form-urlencoded',
     },
-    body: new URLSearchParams({ to_stage: toStage }),
+    body: new URLSearchParams({ to_stage: toStage, from_stage: fromStage }),
   })
   .then(async res => {
     const contentType = res.headers.get('content-type') || '';
@@ -1545,7 +1634,7 @@ document.querySelectorAll('.kn-col').forEach(col => {
         'Accept': 'application/json',
         'Content-Type': 'application/x-www-form-urlencoded',
       },
-      body: new URLSearchParams({ to_stage: toStage }),
+      body: new URLSearchParams({ to_stage: toStage, from_stage: from }),
     })
     .then(async res => {
       const contentType = res.headers.get('content-type') || '';

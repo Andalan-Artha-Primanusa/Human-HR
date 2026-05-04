@@ -1,166 +1,216 @@
-{{-- resources/views/auth/forgot-password.blade.php --}}
 <!DOCTYPE html>
 <html lang="id">
 <head>
+  @vite(['resources/css/app.css', 'resources/js/app.js'])
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Lupa Password • Human.Careers</title>
-  <meta name="csrf-token" content="{{ csrf_token() }}">
-  {{-- === Vite build tanpa @vite (baca manifest.json) === --}}
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
   <style>
-    [x-cloak]{display:none!important}
-    .bg-dots{
-      background-image:
-        radial-gradient(#e5e7eb 1px, transparent 1px),
-        radial-gradient(#e5e7eb 1px, transparent 1px);
-      background-position: 0 0, 10px 10px;
-      background-size: 20px 20px;
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+      margin: 0; padding: 0;
+      font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+      -webkit-font-smoothing: antialiased;
     }
-    @keyframes spin-slow { to { transform: rotate(360deg); } }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .fade-up { animation: fadeUp .45s ease both; }
+
+    .auth-input {
+      width: 100%;
+      padding: .7rem 1rem;
+      border-radius: .625rem;
+      border: 1.5px solid rgba(167,125,82,.25);
+      background: #fff;
+      color: #3b2209;
+      font-size: .875rem;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .auth-input::placeholder { color: #c4a882; }
+    .auth-input:focus {
+      border-color: #a77d52;
+      box-shadow: 0 0 0 3px rgba(167,125,82,.15);
+    }
+    .auth-label {
+      display: block;
+      font-size: .78rem;
+      font-weight: 600;
+      color: #5c3d1e;
+      margin-bottom: .3rem;
+      letter-spacing: .02em;
+    }
+    .auth-btn {
+      width: 100%;
+      padding: .8rem;
+      background: #a77d52;
+      color: #fff;
+      border: none;
+      border-radius: .625rem;
+      font-size: .9rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity .2s, transform .15s, box-shadow .2s;
+      box-shadow: 0 4px 14px rgba(167,125,82,.35);
+    }
+    .auth-btn:hover  { opacity: .92; box-shadow: 0 6px 20px rgba(167,125,82,.45); }
+    .auth-btn:active { transform: scale(.98); }
+    .auth-btn:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .field-error {
+      margin-top: .3rem;
+      font-size: .75rem;
+      color: #b91c1c;
+    }
+
+    .alert-success {
+      padding: .75rem 1rem;
+      border-radius: .625rem;
+      background: #ecfdf5;
+      border: 1.5px solid rgba(16,185,129,.25);
+      font-size: .82rem;
+      color: #065f46;
+      margin-bottom: 1.25rem;
+    }
   </style>
 </head>
-<body class="min-h-screen bg-white text-slate-800">
-  <div class="min-h-screen grid grid-cols-1 lg:grid-cols-2">
 
-    {{-- Kiri: foto --}}
-    <div class="relative hidden lg:block">
-      <img src="{{ asset('assets/hr1.jpg') }}" alt="Aktivitas tim Andalan"
-           class="absolute inset-0 h-full w-full object-cover" loading="lazy" referrerpolicy="no-referrer" />
-    </div>
+<body style="background:#fff; min-height:100vh; display:flex; align-items:stretch;">
 
-    {{-- Kanan: form --}}
-    <div class="bg-dots flex min-h-screen items-center justify-center p-6 sm:p-10 relative overflow-hidden">
-      {{-- Aura dekoratif --}}
-      <div class="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-gradient-to-tr from-blue-500/20 via-teal-400/20 to-emerald-400/20 blur-3xl"></div>
-      <div class="pointer-events-none absolute -bottom-28 -left-20 h-64 w-64 rounded-full bg-gradient-to-tr from-pink-400/20 via-purple-400/20 to-indigo-400/20 blur-3xl"></div>
+  <div style="display:flex; width:100%; min-height:100vh;">
 
-      <div class="w-full max-w-md">
-        {{-- Brand --}}
-        <div class="mb-8 flex flex-col items-center justify-center gap-3">
-          
-          <span class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/70 px-3 py-1 text-xs font-medium shadow-sm backdrop-blur">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-emerald-600" viewBox="0 0 24 24" fill="currentColor"><path d="M10.242 16.313 6.343 12.414l1.414-1.414 2.485 2.485 6.364-6.364 1.414 1.414z"/></svg>
-            Pemulihan Akun • Human.Careers
-          </span>
-        </div>
+    {{-- ===== PANEL KIRI ===== --}}
+    <div class="hidden lg:flex" style="flex:1; position:relative; overflow:hidden; flex-direction:column; align-items:center; justify-content:center; padding:3rem;">
+      {{-- Background foto --}}
+      <img src="{{ asset('assets/hr1.jpg') }}" alt="" aria-hidden="true"
+        style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center;">
+      {{-- Overlay #a77d52 --}}
+      <div style="position:absolute; inset:0; background:rgba(167,125,82,0.82);"></div>
+      <div style="position:absolute; top:-80px; right:-80px; width:320px; height:320px; border-radius:50%; background:rgba(255,255,255,.08);"></div>
+      <div style="position:absolute; bottom:-60px; left:-60px; width:240px; height:240px; border-radius:50%; background:rgba(255,255,255,.06);"></div>
+      <div style="position:absolute; top:35%; right:-20px; width:160px; height:160px; border-radius:50%; background:rgba(255,255,255,.05);"></div>
 
-        {{-- Info intro --}}
-        <div class="mb-4 text-sm text-slate-600">
-          Lupa kata sandi? Tidak masalah. Masukkan alamat email Anda dan kami akan mengirim tautan untuk mengatur ulang kata sandi.
-        </div>
+      <div style="position:relative; z-index:1; text-align:center; max-width:400px;">
+        <h1 style="color:#fff; font-size:1.9rem; font-weight:800; margin:0 0 1rem; line-height:1.25;">
+          Pulihkan Akses<br>Akun Anda
+        </h1>
+        <p style="color:rgba(255,255,255,.8); font-size:.9rem; line-height:1.75; margin:0 0 2rem;">
+          Lupa password? Jangan khawatir, kami akan membantu Anda mengatur ulang password dengan aman dan cepat.
+        </p>
 
-        {{-- Status sukses (link reset terkirim) --}}
-        @if (session('status'))
-              <div class="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800" role="status" aria-live="polite">
-                <div class="flex items-start gap-2">
-                  <svg class="mt-0.5 h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><path d="M10 15.172 6.414 11.586 5 13l5 5 9-9-1.414-1.414L10 15.172Z"/></svg>
-                  <div>
-                    {{ session('status') }}
-                    <div class="text-[11px] text-emerald-700/80 mt-1">Jika tidak terlihat di inbox, periksa folder Spam/Promosi.</div>
-                  </div>
-                </div>
-              </div>
-        @endif
-
-        {{-- Error global (mis. throttle) --}}
-        @if ($errors->any())
-              <div class="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-800" role="alert" aria-live="assertive">
-                {{ $errors->first() }}
-              </div>
-        @endif
-
-        <div class="relative">
-          {{-- Ring luar animasi --}}
-          <div class="absolute -inset-[2px] rounded-2xl bg-[conic-gradient(var(--tw-gradient-stops))] from-blue-500 via-teal-400 to-emerald-400 animate-[spin-slow_8s_linear_infinite] opacity-20"></div>
-
-          <div class="relative rounded-2xl bg-white/80 p-6 shadow-xl ring-1 ring-slate-200/80 backdrop-blur">
-            <form id="forgotForm" method="POST" action="{{ route('password.email') }}" class="space-y-5" novalidate>
-              @csrf
-
-              {{-- Honeypot sederhana untuk bot --}}
-              <input type="text" name="hp_url" tabindex="-1" autocomplete="off" class="hidden" aria-hidden="true">
-
-              {{-- Email --}}
-              <div>
-                <label for="email" class="block text-sm font-medium text-slate-700">Email</label>
-                <div class="mt-1 relative">
-                  <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                    <svg class="h-4.5 w-4.5 text-slate-400" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M20 4H4a2 2 0 0 0-2 2v.35l10 6.25L22 6.35V6a2 2 0 0 0-2-2Zm0 5.23-8 5-8-5V18a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9.23Z"/>
-                    </svg>
-                  </span>
-                  <input id="email" type="email" name="email" value="{{ old('email') }}" required
-                         inputmode="email" autocapitalize="none" autocomplete="email" spellcheck="false"
-                         placeholder="nama@email.com"
-                         class="block w-full rounded-lg border-slate-300 pl-9 shadow-sm focus:border-blue-600 focus:ring-blue-600"/>
-                </div>
-                @error('email') <p class="mt-2 text-sm text-red-600">{{ $message }}</p> @enderror
-              </div>
-
-              {{-- Submit --}}
-              <button id="submitBtn" type="submit"
-                class="group w-full inline-flex justify-center items-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-teal-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:from-blue-700 hover:to-teal-700 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed transition"
-                aria-busy="false">
-                <svg id="spinner" class="hidden h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"></circle>
-                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 0 1 8-8v3a5 5 0 0 0-5 5H4z"></path>
-                </svg>
-                <span>Kirim Tautan Reset</span>
-                <svg class="h-4 w-4 opacity-80 transition group-hover:translate-x-0.5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                  <path d="M13.172 12 8.222 7.05l1.414-1.414L16 12l-6.364 6.364-1.414-1.414z"/>
-                </svg>
-              </button>
-
-              {{-- Link balik --}}
-              <div class="text-center text-sm text-slate-600">
-                Ingat kata sandi Anda?
-                @if (Route::has('login'))
-                      <a class="font-medium text-blue-700 hover:text-blue-800 underline" href="{{ route('login') }}">Masuk</a>
-                @endif
-                @if (Route::has('register'))
-                      • Belum punya akun? <a class="font-medium text-emerald-700 hover:text-emerald-800 underline" href="{{ route('register') }}">Daftar</a>
-                @endif
-              </div>
-            </form>
-
-            {{-- Catatan keamanan --}}
-            <div class="mt-6 text-center text-xs text-slate-500">
-              Kami melindungi data Anda dengan enkripsi TLS dan audit akses berkala.
-            </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:.6rem; margin-top:1rem;">
+          <div style="background:rgba(255,255,255,.12); border-radius:.875rem; padding:.85rem .5rem; text-align:center;">
+            <div style="color:#fff; font-size:1.3rem; font-weight:800;">Aman</div>
+            <div style="color:rgba(255,255,255,.72); font-size:.7rem; margin-top:.2rem;">Terenkripsi TLS</div>
           </div>
-        </div>
-
-        {{-- Footer --}}
-        <div class="mt-6 flex items-center justify-center gap-2 text-xs text-slate-500">
-          <span>© {{ now()->year }} Andalan Group • Human.Careers</span>
+          <div style="background:rgba(255,255,255,.12); border-radius:.875rem; padding:.85rem .5rem; text-align:center;">
+            <div style="color:#fff; font-size:1.3rem; font-weight:800;">Cepat</div>
+            <div style="color:rgba(255,255,255,.72); font-size:.7rem; margin-top:.2rem;">Instant Email</div>
+          </div>
+          <div style="background:rgba(255,255,255,.12); border-radius:.875rem; padding:.85rem .5rem; text-align:center;">
+            <div style="color:#fff; font-size:1.3rem; font-weight:800;">Mudah</div>
+            <div style="color:rgba(255,255,255,.72); font-size:.7rem; margin-top:.2rem;">Langkah Sederhana</div>
+          </div>
         </div>
       </div>
     </div>
+
+    {{-- ===== PANEL KANAN (form) ===== --}}
+    <div style="flex:0 0 auto; width:100%; max-width:480px; min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:2rem; background:#fff; overflow-y:auto;">
+
+      {{-- Mobile logo --}}
+      <div class="lg:hidden" style="text-align:center; margin-bottom:1.25rem;">
+        <img src="{{ asset('assets/logologin.png') }}" alt="Logo" style="height:58px; object-fit:contain;">
+      </div>
+
+      <div class="fade-up" style="width:100%; max-width:380px;">
+
+        {{-- Heading --}}
+        <div style="margin-bottom:1.5rem;">
+          <h2 style="font-size:1.4rem; font-weight:800; color:#3b2209; margin:0 0 .3rem;">Lupa Password?</h2>
+          <p style="font-size:.82rem; color:#a77d52; margin:0;">Masukkan email untuk menerima tautan reset</p>
+        </div>
+
+        {{-- Success --}}
+        @if (session('status'))
+          <div class="alert-success">
+            <div style="font-weight:700; margin-bottom:.3rem;">✓ Email terkirim</div>
+            <div style="font-size:.75rem;">{{ session('status') }} Periksa folder Spam jika tidak ditemukan.</div>
+          </div>
+        @endif
+
+        {{-- Error --}}
+        @if ($errors->any())
+          <div style="padding:.75rem 1rem; border-radius:.625rem; background:#fff5f5; border:1.5px solid rgba(220,38,38,.25); font-size:.82rem; margin-bottom:1.25rem;">
+            <div style="font-weight:700; color:#b91c1c; margin-bottom:.4rem;">Gagal mengirim email</div>
+            <ul style="margin:0; padding-left:1.2rem; color:#b91c1c;">
+              @foreach ($errors->all() as $error)
+                <li style="margin:.2rem 0;">{{ $error }}</li>
+              @endforeach
+            </ul>
+          </div>
+        @endif
+
+        {{-- Form --}}
+        <form method="POST" action="{{ route('password.email') }}" style="display:flex; flex-direction:column; gap:1.25rem;">
+          @csrf
+
+          <div>
+            <label class="auth-label">Alamat Email</label>
+            <input type="email" name="email" value="{{ old('email') }}" class="auth-input"
+              placeholder="email@contoh.com" required autocomplete="email" autofocus>
+            @error('email')
+              <div class="field-error">{{ $message }}</div>
+            @enderror
+          </div>
+
+          <div>
+            <button type="submit" class="auth-btn">
+              Kirim Tautan Reset
+            </button>
+          </div>
+        </form>
+
+        {{-- Links --}}
+        <p style="text-align:center; margin-top:1.25rem; font-size:.82rem; color:#9c7a52;">
+          Ingat password Anda?
+          <a href="{{ route('login') }}"
+            style="color:#a77d52; font-weight:700; text-decoration:none;"
+            onmouseover="this.style.textDecoration='underline'"
+            onmouseout="this.style.textDecoration='none'">
+            Masuk sekarang
+          </a>
+        </p>
+
+        <p style="text-align:center; margin-top:1rem; font-size:.82rem; color:#9c7a52;">
+          Belum punya akun?
+          <a href="{{ route('register') }}"
+            style="color:#a77d52; font-weight:700; text-decoration:none;"
+            onmouseover="this.style.textDecoration='underline'"
+            onmouseout="this.style.textDecoration='none'">
+            Daftar gratis
+          </a>
+        </p>
+
+        <p style="text-align:center; margin-top:1.75rem; font-size:.72rem; color:#c4a882;">
+          © {{ now()->year }} PT Andalan Artha Primanusa
+        </p>
+
+      </div>
+    </div>
+
   </div>
 
-  {{-- JS: cegah double submit + fokus --}}
-  <script>
-    (function () {
-      const form = document.getElementById('forgotForm');
-      const btn = document.getElementById('submitBtn');
-      const spinner = document.getElementById('spinner');
-      const email = document.getElementById('email');
-
-      form?.addEventListener('submit', function () {
-        // Honeypot quick check (jika terisi, jangan kirim)
-        const hp = form.querySelector('input[name="hp_url"]');
-        if (hp && hp.value) {
-          event?.preventDefault();
-          return false;
-        }
-        btn?.setAttribute('disabled','disabled');
-        btn?.setAttribute('aria-busy','true');
-        spinner?.classList.remove('hidden');
-      }, { once: true });
-
-      if (!email?.value) email?.focus();
-    })();
-  </script>
 </body>
 </html>

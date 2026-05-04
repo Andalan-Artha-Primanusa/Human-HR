@@ -92,9 +92,7 @@
       <div style="position:absolute; top:35%; right:-20px; width:160px; height:160px; border-radius:50%; background:rgba(255,255,255,.05);"></div>
 
       <div style="position:relative; z-index:1; text-align:center; max-width:400px;">
-        <img src="{{ asset('assets/logologin.png') }}" alt="Logo Human.Careers"
-          style="height:80px; object-fit:contain; margin-bottom:2rem; filter:brightness(0) invert(1);">
-        <h1 style="color:#fff; font-size:1.9rem; font-weight:800; margin:0 0 1rem; line-height:1.25;">
+               <h1 style="color:#fff; font-size:1.9rem; font-weight:800; margin:0 0 1rem; line-height:1.25;">
           Bergabung Bersama<br>Tim Profesional Andalan
         </h1>
         <p style="color:rgba(255,255,255,.8); font-size:.9rem; line-height:1.75; margin:0 0 2rem;">

@@ -79,6 +79,9 @@
   border-radius: .875rem; padding: .875rem;
   position: relative;
   transition: transform .15s, box-shadow .15s, border-color .2s;
+  display: flex; flex-direction: column;
+  max-height: 460px;
+  overflow-y: auto;
 }
 .kn-card:hover {
   transform: translateY(-2px);
@@ -96,8 +99,9 @@
 
 .kn-card-actions {
   display: flex; flex-wrap: wrap; gap: .4rem;
-  margin-top: .65rem; padding-top: .6rem;
+  margin-top: auto; padding-top: .6rem; padding-bottom: .4rem;
   border-top: 1px solid #f0e9df;
+  position: sticky; bottom: 0; background: #fff; z-index: 10;
 }
 
 /* ===== BUTTONS ===== */
@@ -136,7 +140,9 @@
 .fb-no    { background: #fdeaea; color: #9b2525; }
 
 /* ===== FORM FEEDBACK INLINE ===== */
-.fb-form { margin-top: .7rem; padding-top: .7rem; border-top: 1px solid #f0e9df; display: flex; flex-direction: column; gap: .55rem; }
+.fb-panel { margin-top: .7rem; padding-top: .7rem; border-top: 1px solid #f0e9df; display: flex; flex-direction: column; gap: .55rem; }
+.fb-panel.hidden { display: none; }
+.fb-form { display: flex; flex-direction: column; gap: .55rem; }
 .fm-label { font-size: .68rem; font-weight: 700; color: #7a4f2a; text-transform: uppercase; letter-spacing: .4px; display: block; margin-bottom: .2rem; }
 .fm-ctrl {
   border: 1.5px solid #ddd3c4; border-radius: .55rem;
@@ -264,14 +270,19 @@ textarea.fm-ctrl { resize: vertical; min-height: 68px; }
               // Apakah user ini yang sedang login adalah si pelamar
               $isOwner = (string)$authUser->id === (string)$a->user_id;
 
-              // Karyawan boleh isi feedback di user_trainer_iv HANYA jika belum ada feedback user
-              $canKaryawanFeedback = $isKaryawan && $stageKey === 'user_trainer_iv' && !$fbUser;
+              // Karyawan dan trainer bisa isi feedback di user_trainer_iv
+              $canKaryawanFeedback = $isKaryawan && $stageKey === 'user_trainer_iv';
+              $canTrainerFeedback  = $isTrainer && $stageKey === 'user_trainer_iv';
 
-              // Trainer boleh isi feedback di user_trainer_iv HANYA jika belum ada feedback trainer
-              $canTrainerFeedback  = $isTrainer && $stageKey === 'user_trainer_iv' && !$fbTrainer;
+              $karyawanFeedbackFormId = 'fb-user-form-'.$a->id;
+              $trainerFeedbackFormId  = 'fb-trainer-form-'.$a->id;
             @endphp
 
-            <div class="kn-card" data-id="{{ $a->id }}">
+              <div class="kn-card"
+                data-id="{{ $a->id }}"
+                data-gt-url="{{ route('admin.applications.ground-test.update', $a) }}"
+                data-gt-meta="{{ json_encode($a->ground_test_meta ?? []) }}"
+                data-gt-result="{{ $a->ground_test_result ?? '' }}">
 
               {{-- INFO UTAMA --}}
               <div class="kn-card-name">
@@ -373,62 +384,6 @@ textarea.fm-ctrl { resize: vertical; min-height: 68px; }
               @endif
 
               {{-- ====================================================
-                   FORM FEEDBACK KARYAWAN (user_trainer_iv, jika belum diisi)
-                   ==================================================== --}}
-              @if($canKaryawanFeedback)
-                <form method="POST"
-                      action="{{ route('admin.applications.move', $a) }}"
-                      class="fb-form">
-                  @csrf
-                  <input type="hidden" name="to" value="user_trainer_iv">
-                  <div>
-                    <label class="fm-label">Feedback User</label>
-                    <textarea name="feedback_user" class="fm-ctrl" required
-                              placeholder="Tulis penilaian kandidat..."></textarea>
-                  </div>
-                  <div>
-                    <label class="fm-label">Rekomendasi / Setuju Lanjut?</label>
-                    <select name="approve_user" class="fm-ctrl" required>
-                      <option value="">— Pilih —</option>
-                      <option value="yes">✓ Setuju</option>
-                      <option value="no">✕ Tidak Setuju</option>
-                    </select>
-                  </div>
-                  <button type="submit" class="btn-xs btn-primary" style="width:100%;justify-content:center">
-                    Simpan Feedback
-                  </button>
-                </form>
-              @endif
-
-              {{-- ====================================================
-                   FORM FEEDBACK TRAINER (user_trainer_iv, jika belum diisi)
-                   ==================================================== --}}
-              @if($canTrainerFeedback)
-                <form method="POST"
-                      action="{{ route('admin.applications.move', $a) }}"
-                      class="fb-form">
-                  @csrf
-                  <input type="hidden" name="to" value="user_trainer_iv">
-                  <div>
-                    <label class="fm-label">Feedback Trainer</label>
-                    <textarea name="feedback_trainer" class="fm-ctrl" required
-                              placeholder="Tulis penilaian kandidat..."></textarea>
-                  </div>
-                  <div>
-                    <label class="fm-label">Rekomendasi / Setuju Lanjut?</label>
-                    <select name="approve_trainer" class="fm-ctrl" required>
-                      <option value="">— Pilih —</option>
-                      <option value="yes">✓ Setuju</option>
-                      <option value="no">✕ Tidak Setuju</option>
-                    </select>
-                  </div>
-                  <button type="submit" class="btn-xs btn-primary" style="width:100%;justify-content:center">
-                    Simpan Feedback
-                  </button>
-                </form>
-              @endif
-
-              {{-- ====================================================
                    RIWAYAT STAGE (klik buka modal)
                    ==================================================== --}}
               @php
@@ -437,6 +392,13 @@ textarea.fm-ctrl { resize: vertical; min-height: 68px; }
 
               {{-- ACTIONS --}}
               <div class="kn-card-actions">
+                @if($stageKey === 'ground_test' && ($isKaryawan || $isTrainer))
+                  <button type="button" class="btn-xs btn-primary"
+                    onclick="openGroundTestModal(this, '{{ $a->id }}', '{{ addslashes($a->user->name ?? $a->job->title ?? 'Kandidat') }}')">
+                    📄 Upload Hasil GT
+                  </button>
+                @endif
+
                 @if($stageHistory->count())
                   <button type="button" class="btn-xs btn-outline"
                     onclick="openRiwayat({{ $stageHistory->map(fn($s) => ['stage'=>$s->stage_key,'notes'=>($authRole === 'pelamar' ? '' : $s->notes),'actor'=>optional($s->actor)->name ?? 'System','created_at'=>$s->created_at?->format('d M Y H:i')])->toJson() }})">
@@ -451,6 +413,22 @@ textarea.fm-ctrl { resize: vertical; min-height: 68px; }
                   </a>
                 @endif
 
+                @if($canKaryawanFeedback)
+                  <button type="button" class="btn-xs btn-primary"
+                    data-label="+ Feedback User"
+                    onclick="toggleFeedbackPanel('{{ $karyawanFeedbackFormId }}', this)">
+                    + Feedback User
+                  </button>
+                @endif
+
+                @if($canTrainerFeedback)
+                  <button type="button" class="btn-xs btn-primary"
+                    data-label="+ Feedback Trainer"
+                    onclick="toggleFeedbackPanel('{{ $trainerFeedbackFormId }}', this)">
+                    + Feedback Trainer
+                  </button>
+                @endif
+
                 @if($a->offer)
                   <span class="btn-xs" style="background:#e6f4ea;border-color:#b0d9b5;color:#256629;cursor:default;">
                     ✓ Offering Letter
@@ -459,6 +437,54 @@ textarea.fm-ctrl { resize: vertical; min-height: 68px; }
 
                 <a href="{{ route('jobs.show', $a->job) }}" target="_blank" class="btn-xs btn-outline">Job</a>
               </div>
+
+              @if($canKaryawanFeedback)
+                <div id="{{ $karyawanFeedbackFormId }}" class="hidden fb-panel">
+                  <form method="POST" action="{{ route('admin.applications.move', $a) }}" class="fb-form">
+                    @csrf
+                    <input type="hidden" name="to" value="user_trainer_iv">
+                    <div>
+                      <label class="fm-label">Feedback User</label>
+                      <textarea name="feedback_user" class="fm-ctrl" required placeholder="Tulis penilaian kandidat..."></textarea>
+                    </div>
+                    <div>
+                      <label class="fm-label">Rekomendasi / Setuju Lanjut?</label>
+                      <select name="approve_user" class="fm-ctrl" required>
+                        <option value="">— Pilih —</option>
+                        <option value="yes">✓ Setuju</option>
+                        <option value="no">✕ Tidak Setuju</option>
+                      </select>
+                    </div>
+                    <button type="submit" class="btn-xs btn-primary" style="width:100%;justify-content:center">
+                      Simpan Feedback
+                    </button>
+                  </form>
+                </div>
+              @endif
+
+              @if($canTrainerFeedback)
+                <div id="{{ $trainerFeedbackFormId }}" class="hidden fb-panel">
+                  <form method="POST" action="{{ route('admin.applications.move', $a) }}" class="fb-form">
+                    @csrf
+                    <input type="hidden" name="to" value="user_trainer_iv">
+                    <div>
+                      <label class="fm-label">Feedback Trainer</label>
+                      <textarea name="feedback_trainer" class="fm-ctrl" required placeholder="Tulis penilaian kandidat..."></textarea>
+                    </div>
+                    <div>
+                      <label class="fm-label">Rekomendasi / Setuju Lanjut?</label>
+                      <select name="approve_trainer" class="fm-ctrl" required>
+                        <option value="">— Pilih —</option>
+                        <option value="yes">✓ Setuju</option>
+                        <option value="no">✕ Tidak Setuju</option>
+                      </select>
+                    </div>
+                    <button type="submit" class="btn-xs btn-primary" style="width:100%;justify-content:center">
+                      Simpan Feedback
+                    </button>
+                  </form>
+                </div>
+              @endif
 
             </div>{{-- /kn-card --}}
           @empty
@@ -487,6 +513,45 @@ textarea.fm-ctrl { resize: vertical; min-height: 68px; }
     <div class="kn-modal-footer">
       <button class="btn-xs btn-outline" onclick="document.getElementById('overlay-riwayat').classList.add('hidden')">Tutup</button>
     </div>
+  </div>
+</div>
+
+{{-- ============================= MODAL: GROUND TEST ============================= --}}
+<div class="hidden kn-overlay" id="overlay-gt">
+  <div class="kn-modal">
+    <div class="kn-modal-head">
+      <div>
+        <div class="kn-modal-title">📄 Ground Test</div>
+        <div class="kn-modal-sub" id="gt-sub">Upload hasil Ground Test</div>
+      </div>
+      <button class="kn-modal-close" onclick="document.getElementById('overlay-gt').classList.add('hidden')">✕</button>
+    </div>
+    <form id="form-gt" method="POST" enctype="multipart/form-data">
+      @csrf
+      <div class="kn-modal-body">
+        <div class="fm-group">
+          <label class="fm-label">Upload File LAP</label>
+          <input type="file" name="lap" class="fm-ctrl" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.xls,.xlsx">
+          <div id="gt-lap-existing" style="font-size:0.65rem; color:#888; margin-top:4px;"></div>
+        </div>
+        <div class="fm-group">
+          <label class="fm-label">Hasil Ground Test</label>
+          <select name="result" id="gt-result" class="fm-ctrl">
+            <option value="">— Belum Ada Hasil —</option>
+            <option value="lolos">✓ Lolos</option>
+            <option value="tidak_lolos">✕ Tidak Lolos</option>
+          </select>
+        </div>
+        <div class="fm-group">
+          <label class="fm-label">Catatan Tambahan</label>
+          <textarea name="notes" id="gt-notes" class="fm-ctrl" rows="2" placeholder="Catatan evaluasi GT..."></textarea>
+        </div>
+      </div>
+      <div class="kn-modal-footer">
+        <button type="button" class="btn-xs btn-outline" onclick="document.getElementById('overlay-gt').classList.add('hidden')">Batal</button>
+        <button type="submit" class="btn-xs btn-primary">Simpan Hasil</button>
+      </div>
+    </form>
   </div>
 </div>
 
@@ -545,6 +610,17 @@ function roleCls(r) {
   return '';
 }
 
+function toggleFeedbackPanel(panelId, btn) {
+  const panel = document.getElementById(panelId);
+  if (!panel) return;
+  const isHidden = panel.classList.contains('hidden');
+  panel.classList.toggle('hidden');
+  if (btn) {
+    const label = btn.dataset.label || btn.textContent.trim();
+    btn.textContent = isHidden ? 'Tutup Feedback' : label;
+  }
+}
+
 function openRiwayat(data) {
   const body = document.getElementById('riwayat-body');
   if (!data || !data.length) {
@@ -562,5 +638,45 @@ function openRiwayat(data) {
   }
   document.getElementById('overlay-riwayat').classList.remove('hidden');
 }
+
+function openGroundTestModal(btn, appId, name) {
+  const card = btn.closest('.kn-card');
+  const form = document.getElementById('form-gt');
+  const meta = JSON.parse(card?.dataset.gtMeta || '{}');
+  const result = card?.dataset.gtResult || '';
+
+  form.action = card?.dataset.gtUrl || `/admin/applications/${appId}/ground-test`;
+  document.getElementById('gt-sub').textContent = 'Kandidat: ' + name;
+  document.getElementById('gt-notes').value = meta.notes || '';
+  document.getElementById('gt-result').value = result;
+  document.getElementById('gt-lap-existing').textContent = meta.lap_name ? 'File saat ini: ' + meta.lap_name : '';
+  document.getElementById('overlay-gt').classList.remove('hidden');
+}
+
+document.getElementById('form-gt')?.addEventListener('submit', function (e) {
+  e.preventDefault();
+  const form = e.currentTarget;
+  const csrf = document.querySelector('meta[name="csrf-token"]')?.content || '';
+  const data = new FormData(form);
+
+  fetch(form.action, { method: 'POST', headers: { 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' }, body: data })
+    .then(async res => {
+      const contentType = res.headers.get('content-type') || '';
+      if (!res.ok) {
+        if (contentType.includes('application/json')) {
+          const j = await res.json().catch(() => ({}));
+          throw new Error(j.message || 'Gagal simpan hasil ground test');
+        }
+        throw new Error(await res.text());
+      }
+      return contentType.includes('application/json') ? res.json() : res.text();
+    })
+    .then(() => {
+      document.getElementById('overlay-gt').classList.add('hidden');
+      showToast('Hasil ground test tersimpan', 'ok');
+      setTimeout(() => window.location.reload(), 250);
+    })
+    .catch(err => showToast(err.message || 'Gagal simpan hasil ground test', 'err'));
+});
 </script>
 @endsection
