@@ -387,7 +387,13 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
                 data-gt-result="{{ $a->ground_test_result }}"
                 data-schedule-url="{{ route('admin.interviews.store', $a) }}"
               >
-                <div class="kn-card-name">{{ $a->user->name }}</div>
+                <div class="kn-card-name">
+                  @if(optional($a->user)->candidateProfile && Route::has('admin.candidates.show'))
+                    <a href="{{ route('admin.candidates.show', $a->user->candidateProfile) }}" target="_blank" class="hover:underline">{{ $a->user->name }}</a>
+                  @else
+                    {{ $a->user->name }}
+                  @endif
+                </div>
                 <div class="kn-card-job">{{ $a->job->title }}</div>
                 <div class="kn-card-email">{{ $a->user->email }}</div>
                 <div class="kn-card-role">{{ $a->user->role === 'karyawan' ? 'User' : ($a->user->role === 'pelamar' ? 'Pelamar' : ucfirst($a->user->role)) }}</div>
@@ -483,7 +489,15 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
                       ✈ Mobilisasi (Tiket & Email)
                     </button>
                     @if(isset($a->mobilisasi_meta['ticket_path']))
-                      <a href="{{ Storage::url($a->mobilisasi_meta['ticket_path']) }}" target="_blank" class="btn-xs btn-outline">Lihat Tiket</a>
+                      @php $tpath = $a->mobilisasi_meta['ticket_path']; @endphp
+                      @if(
+                        $tpath && 
+                        Illuminate\Support\Facades\Storage::disk('public')->exists($tpath)
+                      )
+                        <a href="{{ Storage::url($tpath) }}" target="_blank" class="btn-xs btn-outline">Lihat Tiket</a>
+                      @else
+                        <span class="btn-xs btn-outline" title="File tidak ditemukan">Lihat Tiket (tidak ditemukan)</span>
+                      @endif
                     @endif
                   @endif
 
@@ -494,7 +508,12 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
                       📄 Update LAP & Hasil GT
                     </button>
                     @if(isset($a->ground_test_meta['lap_path']))
-                      <a href="{{ Storage::url($a->ground_test_meta['lap_path']) }}" target="_blank" class="btn-xs btn-outline">Lihat LAP</a>
+                      @php $lpath = $a->ground_test_meta['lap_path']; @endphp
+                      @if($lpath && Illuminate\Support\Facades\Storage::disk('public')->exists($lpath))
+                        <a href="{{ Storage::url($lpath) }}" target="_blank" class="btn-xs btn-outline">Lihat LAP</a>
+                      @else
+                        <span class="btn-xs btn-outline" title="File tidak ditemukan">Lihat LAP (tidak ditemukan)</span>
+                      @endif
                     @endif
                   @endif
 
@@ -544,6 +563,9 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
                     </div>
                   @endif
 
+                  @if(optional($a->user)->candidateProfile && Route::has('admin.candidates.show'))
+                    <a class="btn-xs btn-outline" href="{{ route('admin.candidates.show', $a->user->candidateProfile) }}" target="_blank">Profil</a>
+                  @endif
                   <a class="btn-xs btn-outline" href="{{ route('jobs.show', $a->job) }}" target="_blank">Job</a>
                 </div>
 

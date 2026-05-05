@@ -700,21 +700,8 @@
                     <svg class="w-4 h-4 text-slate-500"><use href="#i-calendar"/></svg>
                     Deskripsi Pekerjaan
                   </div>
-                  <div x-data="{ open: false }" class="relative">
-                    <div :class="open ? 'max-h-none' : 'max-h-44'"
-                         class="prose prose-sm prose-slate max-w-none overflow-hidden
-                                transition-[max-height] duration-300
-                                prose-a:text-[#a77d52] prose-headings:text-slate-800">
-                      {!! $desc !!}
-                    </div>
-                    <div x-show="!open" x-cloak
-                         class="absolute inset-x-0 bottom-0 pointer-events-none h-14 bg-gradient-to-t from-white to-transparent">
-                    </div>
-                    <button type="button" @click="open = !open"
-                      class="mt-2 text-sm font-medium text-[#a77d52] hover:underline focus:outline-none">
-                      <span x-show="!open">Tampilkan selengkapnya ↓</span>
-                      <span x-show="open" x-cloak>Tutup deskripsi ↑</span>
-                    </button>
+                  <div class="prose prose-sm prose-slate max-w-none prose-a:text-[#a77d52] prose-headings:text-slate-800">
+                    {!! $desc !!}
                   </div>
                 </div>
               @endif

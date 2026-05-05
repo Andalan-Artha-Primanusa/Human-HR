@@ -183,7 +183,13 @@
 
                       <tr class="align-top" style="background-color: #faf9f7;" onmouseover="this.style.backgroundColor='#f8f5f2'" onmouseout="this.style.backgroundColor='#faf9f7'">
                         <td class="px-4 py-3">
-                          <div class="font-medium text-black">{{ e($candidate) }}</div>
+                          <div class="font-medium text-black">
+                            @if(optional($app->candidate)->id && Route::has('admin.candidates.show'))
+                              <a href="{{ route('admin.candidates.show', $app->candidate) }}" target="_blank" class="hover:underline">{{ e($candidate) }}</a>
+                            @else
+                              {{ e($candidate) }}
+                            @endif
+                          </div>
                           @if(!empty($app->candidate?->email))
                             <div class="text-xs text-black">{{ e($app->candidate->email) }}</div>
                           @endif
@@ -223,6 +229,16 @@
 
                         <td class="px-4 py-3">
                           <div class="flex justify-end gap-2">
+                            @if(optional($app->candidate)->id && Route::has('admin.candidates.show'))
+                              <a class="btn btn-outline btn-sm inline-flex items-center gap-1.5"
+                                 target="_blank" href="{{ route('admin.candidates.show', $app->candidate) }}">
+                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                  <path stroke-linecap="round" stroke-width="2" d="M12 12m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"/>
+                                </svg>
+                                Profil
+                              </a>
+                            @endif
+
                             <a class="btn btn-outline btn-sm inline-flex items-center gap-1.5"
                                target="_blank" href="{{ route('jobs.show', $app->job ?? 0) }}">
                               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">

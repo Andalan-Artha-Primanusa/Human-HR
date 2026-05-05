@@ -19,7 +19,7 @@
         'engineering' => 'Engineering',
         'hr' => 'Human Resources',
         'it' => 'Information Technology',
-        'finance' => 'Finance',
+      'finance' => 'Finance & Accounting',
         'marketing' => 'Marketing',
         'sales' => 'Sales',
         'operations' => 'Operations',

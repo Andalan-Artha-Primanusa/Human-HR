@@ -27,8 +27,8 @@ class KanbanController extends Controller
         ];
 
         // Filter khusus:
-        // Pelamar -> lihat lamaran sendiri
-        // Karyawan/Trainer -> lihat lamaran di mana mereka diassign sebagai panel interview
+        // Karyawan/Trainer -> lihat semua lamaran untuk bisa memberikan feedback
+        // (Pelamar tidak dapat mengakses halaman ini karena middleware role:karyawan,trainer)
         $apps = JobApplication::with([
             'job:id,title,division,site_id',
             'job.site:id,code,name',
@@ -40,15 +40,6 @@ class KanbanController extends Controller
             'interviews',
             'offer',
         ])
-            ->where(function ($query) use ($user) {
-                if (in_array($user->role, ['karyawan', 'trainer', 'hr', 'admin', 'superadmin'])) {
-                    // Trainer, Karyawan, dan HR/Admin -> lihat semua lamaran (sama seperti HR)
-                    // Tidak ada filter tambahan
-                } else {
-                    // Pelamar -> wajib hanya lihat milik sendiri
-                    $query->where('user_id', $user->id);
-                }
-            })
             ->orderBy('created_at')
             ->orderBy('id')
             ->get();
@@ -58,6 +49,15 @@ class KanbanController extends Controller
             $key = $a->current_stage ?? 'applied';
             if (!array_key_exists($key, $stages)) $key = 'applied';
             $grouped[$key]->push($a);
+        }
+
+        // If JSON requested, return lightweight counts for client polling
+        if ($request->boolean('json') || $request->wantsJson()) {
+            $counts = $grouped->map(fn($c) => $c->count());
+            return response()->json([
+                'ok' => true,
+                'counts' => $counts,
+            ]);
         }
 
         return view('kanban.board', [

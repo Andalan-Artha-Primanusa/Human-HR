@@ -138,9 +138,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('me.interviews.ics');
 
     // =========================================================
-    // Kanban untuk user/karyawan/trainer/pelamar
+    // Kanban untuk karyawan/trainer (tidak untuk pelamar)
     // =========================================================
-    Route::get('/kanban', [KanbanController::class, 'mine'])->name('kanban.mine');
+    Route::get('/kanban', [KanbanController::class, 'mine'])
+        ->middleware('role:karyawan,trainer')
+        ->name('kanban.mine');
 });
 
 /*

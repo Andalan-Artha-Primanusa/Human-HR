@@ -22,12 +22,19 @@ class CandidateTraining extends Model
         'period_start',
         'period_end',
         'certificate_path',
+        'certificate_name',
+        'cert_valid_from',
+        'cert_valid_to',
+        'cert_no_expiry',
         'order_no',
     ];
 
     protected $casts = [
         'period_start' => 'date',
         'period_end' => 'date',
+        'cert_valid_from' => 'date',
+        'cert_valid_to' => 'date',
+        'cert_no_expiry' => 'boolean',
     ];
 
     public function profile(): BelongsTo

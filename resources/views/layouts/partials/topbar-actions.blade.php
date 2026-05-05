@@ -76,10 +76,12 @@
               data-dd-trigger="dd-interviews"
               aria-haspopup="true"
               aria-expanded="false"
+              aria-label="Interview Saya"
               title="Interview Saya">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V5m8 2V5M4 9h16M7 11h10a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2z" />
         </svg>
+        <span class="sr-only">Interview Saya (klik untuk melihat jadwal interview Anda)</span>
         @if($interviewUpcoming > 0)
               <span class="absolute -top-0.5 -right-0.5 text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-500 text-white">
                 {{ $interviewUpcoming }}
@@ -145,10 +147,12 @@
               data-dd-trigger="dd-notifs"
               aria-haspopup="true"
               aria-expanded="false"
+              aria-label="Notifikasi"
               title="Notifikasi">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 18.75a2.25 2.25 0 1 1-4.5 0m9-4.5v-3a6.75 6.75 0 1 0-13.5 0v3l-1.5 1.5v1.5h16.5v-1.5l-1.5-1.5z" />
         </svg>
+        <span class="sr-only">Notifikasi (klik untuk melihat pemberitahuan terbaru Anda)</span>
         <span id="notif-badge"
               class="absolute -top-0.5 -right-0.5 text-[10px] px-1.5 py-0.5 rounded-full bg-red-500 text-white {{ $notifUnread > 0 ? '' : 'hidden' }}">
           {{ $notifUnread }}

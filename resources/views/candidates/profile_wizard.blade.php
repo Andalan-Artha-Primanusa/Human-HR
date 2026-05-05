@@ -336,19 +336,30 @@
               <svg class="w-5 h-5 text-brand-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5z"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l6.16-3.422A12.083 12.083 0 016 10.882M12 14v7"/></svg>
               Pendidikan Non-Formal (Pelatihan/Sertifikasi)
             </h2>
-            <button type="button" class="rounded-xl border border-brand-200 px-3 py-1.5 text-sm text-brand-800 hover:bg-brand-50" @click="items.push({title:'',institution:'',period_start:'',period_end:''})">+ Tambah</button>
+            <button type="button" class="rounded-xl border border-brand-200 px-3 py-1.5 text-sm text-brand-800 hover:bg-brand-50" @click="items.push({title:'',institution:'',certificate_name:'',cert_valid_from:'',cert_valid_to:'',cert_no_expiry:false})">+ Tambah</button>
           </div>
           <p class="mt-1 text-xs text-slate-500">Opsional.</p>
           <template x-for="(it,idx) in items" :key="idx">
             <div class="grid gap-3 p-3 mt-4 border rounded-xl">
               <input class="px-3 py-2 border rounded-lg" :name="`trainings[${idx}][title]`" x-model="it.title" placeholder="Nama Training/Sertifikasi">
+
               <div class="grid gap-3 sm:grid-cols-2">
                 <input class="px-3 py-2 border rounded-lg" :name="`trainings[${idx}][institution]`" x-model="it.institution" placeholder="Institusi/Penyelenggara">
+                <input class="px-3 py-2 border rounded-lg" :name="`trainings[${idx}][certificate_name]`" x-model="it.certificate_name" placeholder="Nama Sertifikat (opsional)">
+              </div>
+
+              <div class="grid gap-3 sm:grid-cols-2">
                 <div class="grid gap-3 sm:grid-cols-2">
-                  <input type="date" class="px-3 py-2 border rounded-lg" :name="`trainings[${idx}][period_start]`" x-model="it.period_start">
-                  <input type="date" class="px-3 py-2 border rounded-lg" :name="`trainings[${idx}][period_end]`"   x-model="it.period_end">
+                  <input type="date" class="px-3 py-2 border rounded-lg" :name="`trainings[${idx}][cert_valid_from]`" x-model="it.cert_valid_from">
+                  <input type="date" class="px-3 py-2 border rounded-lg" :name="`trainings[${idx}][cert_valid_to]`"   x-model="it.cert_valid_to" :disabled="it.cert_no_expiry" :class="it.cert_no_expiry ? 'opacity-60' : ''">
                 </div>
               </div>
+
+              <div class="flex items-center gap-2">
+                <input type="checkbox" :id="`cert_no_expiry_${idx}`" :name="`trainings[${idx}][cert_no_expiry]`" x-model="it.cert_no_expiry" @change="if(it.cert_no_expiry){ it.cert_valid_to=''; }">
+                <label :for="`cert_no_expiry_${idx}`" class="text-sm">Tanpa masa berlaku sertifikat</label>
+              </div>
+
               <div class="text-right">
                 <button type="button" class="text-sm text-brand-700 hover:underline" @click="items.splice(idx,1)">Hapus</button>
               </div>
@@ -637,7 +648,7 @@
       // === LIFECYCLE ===
       init(){
         if(Alpine.store('form').trainings.length===0){
-          Alpine.store('form').trainings.push({title:'',institution:'',period_start:'',period_end:''});
+          Alpine.store('form').trainings.push({title:'',institution:'',certificate_name:'',cert_valid_from:'',cert_valid_to:'',cert_no_expiry:false});
         }
         if(Alpine.store('form').employments.length===0){
           Alpine.store('form').employments.push({company:'',position_start:'',position_end:'',period_start:'',period_end:'',reason_for_leaving:'',job_description:''});

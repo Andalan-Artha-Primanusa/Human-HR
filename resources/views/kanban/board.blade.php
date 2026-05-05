@@ -287,7 +287,11 @@ textarea.fm-ctrl { resize: vertical; min-height: 68px; }
               {{-- INFO UTAMA --}}
               <div class="kn-card-name">
                 @if($isKaryawan || $isTrainer)
-                  {{ $a->user->name ?? '-' }}
+                  @if(optional($a->user)->candidateProfile)
+                    <a href="{{ route('admin.candidates.show', $a->user->candidateProfile) }}" target="_blank" class="hover:underline">{{ $a->user->name ?? '-' }}</a>
+                  @else
+                    {{ $a->user->name ?? '-' }}
+                  @endif
                 @else
                   {{ $a->job->title ?? '-' }}
                 @endif
@@ -435,6 +439,9 @@ textarea.fm-ctrl { resize: vertical; min-height: 68px; }
                   </span>
                 @endif
 
+                @if(optional($a->user)->candidateProfile && Route::has('admin.candidates.show'))
+                  <a href="{{ route('admin.candidates.show', $a->user->candidateProfile) }}" target="_blank" class="btn-xs btn-outline">Profil</a>
+                @endif
                 <a href="{{ route('jobs.show', $a->job) }}" target="_blank" class="btn-xs btn-outline">Job</a>
               </div>
 
@@ -678,5 +685,46 @@ document.getElementById('form-gt')?.addEventListener('submit', function (e) {
     })
     .catch(err => showToast(err.message || 'Gagal simpan hasil ground test', 'err'));
 });
+
+// Auto-refresh helper: poll server counts and reload if changed
+(function(){
+  try {
+    const pollInterval = 8000; // ms
+    async function fetchCounts(){
+      try {
+        const res = await fetch(location.pathname + '?json=1', { credentials: 'same-origin', headers: { 'Accept': 'application/json' } });
+        if (!res.ok) return null;
+        return await res.json();
+      } catch (e) { return null; }
+    }
+
+    function readDomCounts(){
+      const map = {};
+      document.querySelectorAll('.kn-col').forEach(col => {
+        const k = col.dataset.stage;
+        const badge = col.querySelector('.kn-col-badge') || col.querySelector('[id^="cnt-"]');
+        const n = badge ? Number(badge.textContent.trim() || 0) : 0;
+        if (k) map[k] = n;
+      });
+      return map;
+    }
+
+    let last = readDomCounts();
+    setInterval(async () => {
+      const j = await fetchCounts();
+      if (!j || !j.counts) return;
+      const server = j.counts;
+      let changed = false;
+      for (const k in server) {
+        const s = Number(server[k] || 0);
+        if ((last[k] || 0) !== s) { changed = true; break; }
+      }
+      if (changed) {
+        // full reload to get fresh board markup
+        window.location.reload();
+      }
+    }, pollInterval);
+  } catch (e) { /* ignore */ }
+})();
 </script>
 @endsection

@@ -25,7 +25,7 @@ class CandidateProfileController extends Controller
         $profile = CandidateProfile::firstOrCreate(['user_id' => $user->id], ['full_name' => $user->name]);
 
         // Ambil ONLY kolom yang dipakai view (hemat)
-        $trainings = $profile->trainings()->orderBy('order_no')->get(['title', 'institution', 'period_start', 'period_end'])->toArray();
+        $trainings = $profile->trainings()->orderBy('order_no')->get(['title', 'institution', 'period_start', 'period_end', 'certificate_path', 'certificate_name', 'cert_valid_from', 'cert_valid_to', 'cert_no_expiry'])->toArray();
 
         $employments = $profile->employments()->orderBy('order_no')->get(['company', 'position_start', 'position_end', 'period_start', 'period_end', 'reason_for_leaving', 'job_description'])->toArray();
 
@@ -109,13 +109,17 @@ class CandidateProfileController extends Controller
             // File (4MB, PDF only)
             'cv' => 'nullable|file|mimes:pdf|max:4096',
             'documents' => "nullable|array|max:{$maxDocuments}",
-            'documents.*' => 'nullable|file|max:4096|mimetypes:application/pdf,image/jpeg,image/png,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'documents.*' => 'nullable|file|max:5120|mimetypes:application/pdf,image/jpeg,image/png,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document',
             // Repeater
             'trainings' => "bail|required|array|min:1|max:{$maxTrainings}",
             'trainings.*.title' => 'required|string|max:190',
             'trainings.*.institution' => 'required|string|max:190',
             'trainings.*.period_start' => 'required|date',
             'trainings.*.period_end' => 'nullable|date',
+            'trainings.*.certificate_name' => 'nullable|string|max:190',
+            'trainings.*.cert_valid_from' => 'nullable|date',
+            'trainings.*.cert_valid_to' => 'nullable|date',
+            'trainings.*.cert_no_expiry' => 'nullable|boolean',
             'employments' => "bail|required|array|min:1|max:{$maxEmployments}",
             'employments.*.company' => 'required|string|max:190',
             'employments.*.position_start' => 'required|string|max:190',
@@ -150,6 +154,16 @@ class CandidateProfileController extends Controller
             $endTs = $end ? strtotime((string) $end) : false;
             if ($startTs !== false && $endTs !== false && $endTs < $startTs) {
                 $errors["trainings.$i.period_end"] = 'Tanggal selesai pelatihan #' . ($i + 1) . ' harus >= tanggal mulai.';
+            }
+
+            // Certificate validity date range check (if provided and not marked no-expiry)
+            $cf = $t['cert_valid_from'] ?? null;
+            $ct = $t['cert_valid_to'] ?? null;
+            $noExpiry = isset($t['cert_no_expiry']) ? filter_var($t['cert_no_expiry'], FILTER_VALIDATE_BOOL) : false;
+            $cfTs = $cf ? strtotime((string) $cf) : false;
+            $ctTs = $ct ? strtotime((string) $ct) : false;
+            if (!$noExpiry && $cfTs !== false && $ctTs !== false && $ctTs < $cfTs) {
+                $errors["trainings.$i.cert_valid_to"] = 'Tanggal masa berlaku sertifikat #' . ($i + 1) . ' harus >= tanggal mulai masa berlaku.';
             }
         }
         foreach ((array) $request->input('employments', []) as $i => $e) {
@@ -291,6 +305,11 @@ class CandidateProfileController extends Controller
                     'institution' => $row['institution'] ?? null,
                     'period_start' => $row['period_start'] ?? null,
                     'period_end' => $row['period_end'] ?? null,
+                    'certificate_path' => $row['certificate_path'] ?? null,
+                    'certificate_name' => isset($row['certificate_name']) ? Str::limit((string) $row['certificate_name'], 190, '') : null,
+                    'cert_valid_from' => $row['cert_valid_from'] ?? null,
+                    'cert_valid_to' => $row['cert_valid_to'] ?? null,
+                    'cert_no_expiry' => isset($row['cert_no_expiry']) ? (bool) $row['cert_no_expiry'] : false,
                     'created_at' => $now,
                     'updated_at' => $now,
                 ];
@@ -398,7 +417,7 @@ class CandidateProfileController extends Controller
     public function adminShow(CandidateProfile $profile)
     {
         $profile->load([
-            'trainings' => fn($q) => $q->orderBy('order_no')->select(['id', 'candidate_profile_id', 'order_no', 'title', 'institution', 'period_start', 'period_end']),
+            'trainings' => fn($q) => $q->orderBy('order_no')->select(['id', 'candidate_profile_id', 'order_no', 'title', 'institution', 'period_start', 'period_end', 'certificate_path', 'certificate_name', 'cert_valid_from', 'cert_valid_to', 'cert_no_expiry']),
             'employments' => fn($q) => $q->orderBy('order_no')->select(['id', 'candidate_profile_id', 'order_no', 'company', 'position_start', 'position_end', 'period_start', 'period_end', 'reason_for_leaving', 'job_description']),
             'references' => fn($q) => $q->orderBy('order_no')->select(['id', 'candidate_profile_id', 'order_no', 'name', 'job_title', 'company', 'contact']),
             'user:id,name,email',
