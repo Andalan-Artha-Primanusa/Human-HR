@@ -510,7 +510,7 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
                     @if(isset($a->ground_test_meta['lap_path']))
                       @php $lpath = $a->ground_test_meta['lap_path']; @endphp
                       @if($lpath && Illuminate\Support\Facades\Storage::disk('public')->exists($lpath))
-                        <a href="{{ Storage::url($lpath) }}" target="_blank" class="btn-xs btn-outline">Lihat LAP</a>
+                        <a href="{{ route('admin.applications.ground-test.lap', $a) }}" target="_blank" class="btn-xs btn-outline">Lihat LAP</a>
                       @else
                         <span class="btn-xs btn-outline" title="File tidak ditemukan">Lihat LAP (tidak ditemukan)</span>
                       @endif

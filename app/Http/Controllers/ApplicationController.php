@@ -1281,4 +1281,23 @@ class ApplicationController extends Controller
 
         return back()->with('ok', 'Data ground test berhasil diperbarui.');
     }
+
+    public function showGroundTestLap(JobApplication $application)
+    {
+        $this->authorize('view', $application);
+
+        $meta = $application->ground_test_meta ?? [];
+        $path = $meta['lap_path'] ?? null;
+
+        if (!$path || !Storage::disk('public')->exists($path)) {
+            abort(404, 'File LAP tidak ditemukan.');
+        }
+
+        $filename = $meta['lap_name'] ?? basename($path);
+        $fullPath = Storage::disk('public')->path($path);
+
+        return response()->file($fullPath, [
+            'Content-Disposition' => 'inline; filename="' . $filename . '"',
+        ]);
+    }
 }
