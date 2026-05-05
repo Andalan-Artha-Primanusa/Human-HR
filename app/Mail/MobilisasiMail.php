@@ -8,11 +8,10 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Mail\Mailables\Attachment;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Storage;
 
-class MobilisasiMail extends Mailable implements ShouldQueue
+class MobilisasiMail extends Mailable
 {
     use Queueable, SerializesModels;
 
