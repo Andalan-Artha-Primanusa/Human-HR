@@ -348,12 +348,17 @@
                 <input class="px-3 py-2 border rounded-lg" :name="`trainings[${idx}][certificate_name]`" x-model="it.certificate_name" placeholder="Nama Sertifikat (opsional)">
               </div>
 
-              <div class="grid gap-3 sm:grid-cols-2">
                 <div class="grid gap-3 sm:grid-cols-2">
-                  <input type="date" class="px-3 py-2 border rounded-lg" :name="`trainings[${idx}][cert_valid_from]`" x-model="it.cert_valid_from">
-                  <input type="date" class="px-3 py-2 border rounded-lg" :name="`trainings[${idx}][cert_valid_to]`"   x-model="it.cert_valid_to" :disabled="it.cert_no_expiry" :class="it.cert_no_expiry ? 'opacity-60' : ''">
+                  <div class="grid gap-3 sm:grid-cols-2">
+                    <input type="date" class="px-3 py-2 border rounded-lg" :name="`trainings[${idx}][cert_valid_from]`" x-model="it.cert_valid_from">
+                    <input type="date" class="px-3 py-2 border rounded-lg" :name="`trainings[${idx}][cert_valid_to]`"   x-model="it.cert_valid_to" :disabled="it.cert_no_expiry" :class="it.cert_no_expiry ? 'opacity-60' : ''">
+                  </div>
                 </div>
-              </div>
+
+                <div class="grid gap-3 sm:grid-cols-2">
+                  <input type="date" class="px-3 py-2 border rounded-lg" :name="`trainings[${idx}][period_start]`" x-model="it.period_start" placeholder="Tanggal Mulai">
+                  <input type="date" class="px-3 py-2 border rounded-lg" :name="`trainings[${idx}][period_end]`"   x-model="it.period_end" placeholder="Tanggal Selesai">
+                </div>
 
               <div class="flex items-center gap-2">
                 <input type="checkbox" :id="`cert_no_expiry_${idx}`" :name="`trainings[${idx}][cert_no_expiry]`" x-model="it.cert_no_expiry" @change="if(it.cert_no_expiry){ it.cert_valid_to=''; }">
@@ -648,7 +653,7 @@
       // === LIFECYCLE ===
       init(){
         if(Alpine.store('form').trainings.length===0){
-          Alpine.store('form').trainings.push({title:'',institution:'',certificate_name:'',cert_valid_from:'',cert_valid_to:'',cert_no_expiry:false});
+          Alpine.store('form').trainings.push({title:'',institution:'',certificate_name:'',cert_valid_from:'',cert_valid_to:'',cert_no_expiry:false, period_start:'', period_end:''});
         }
         if(Alpine.store('form').employments.length===0){
           Alpine.store('form').employments.push({company:'',position_start:'',position_end:'',period_start:'',period_end:'',reason_for_leaving:'',job_description:''});
