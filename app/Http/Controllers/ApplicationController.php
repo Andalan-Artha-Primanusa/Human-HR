@@ -1082,12 +1082,32 @@ class ApplicationController extends Controller
                     'updated_at' => now(),
                 ]);
 
+                // For API / AJAX clients return JSON instead of redirect
+                if ($request->expectsJson() || str_contains($request->header('Accept', ''), 'application/json')) {
+                    return response()->json([
+                        'ok' => true,
+                        'message' => 'Email Offer Letter berhasil dikirim beserta notifikasi.',
+                        'offer' => [
+                            'id' => $offer->id ?? null,
+                            'status' => $offer->status ?? null,
+                        ],
+                    ], 200);
+                }
+
                 return back()->with('ok', 'Email Offer Letter berhasil dikirim beserta notifikasi.');
             } catch (\Exception $e) {
                 \Log::error('Failed to send OfferLetterMail: ' . $e->getMessage());
+                if ($request->expectsJson() || str_contains($request->header('Accept', ''), 'application/json')) {
+                    return response()->json(['ok' => false, 'error' => 'Gagal mengirim email: ' . $e->getMessage()], 500);
+                }
                 return back()->with('error', 'Gagal mengirim email: ' . $e->getMessage());
             }
         }
+
+        if ($request->expectsJson() || str_contains($request->header('Accept', ''), 'application/json')) {
+            return response()->json(['ok' => false, 'error' => 'Kandidat tidak memiliki email valid.'], 422);
+        }
+
         return back()->with('error', 'Kandidat tidak memiliki email valid.');
     }
 
