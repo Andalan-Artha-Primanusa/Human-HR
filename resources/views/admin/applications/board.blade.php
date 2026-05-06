@@ -1686,6 +1686,21 @@ document.querySelectorAll('.kn-col').forEach(col => {
   });
 });
 
+// Prevent accidental clicks/navigation immediately after a drag operation.
+// Some browsers may fire a click after dragend if the pointer is released
+// over a clickable element. This suppresses such clicks for a short time.
+let _knSuppressClick = false;
+document.addEventListener('dragstart', () => { _knSuppressClick = true; });
+document.addEventListener('dragend', () => { setTimeout(() => { _knSuppressClick = false; }, 300); });
+document.addEventListener('click', (e) => {
+  if (!_knSuppressClick) return;
+  const targetCard = e.target.closest && e.target.closest('.kn-card');
+  if (targetCard) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+}, true);
+
 @if(session('ok'))
   showToast("{{ session('ok') }}", 'ok');
 @endif

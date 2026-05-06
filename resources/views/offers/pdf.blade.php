@@ -41,9 +41,8 @@
     
     $signerName = $m['signer_name'] ?? $defSigner;
     $signerTitle = $m['signer_title'] ?? $defTitle;
-    $deptName = $m['signer_title'] ?? $defTitle; // Gunakan jabatan sebagai penawaran oleh
+    $deptName = $m['signer_title'] ?? $defTitle;
 
-    // SIGNATURE: meta['sign_image'] > storage/app/public/ttdmahya.png > public/assets/sign_ceo.png
     $signImage = $m['sign_image']
         ?? (is_file(storage_path('app/public/ttdmahya.png')) ? storage_path('app/public/ttdmahya.png')
             : (is_file(public_path('assets/sign_ceo.png')) ? public_path('assets/sign_ceo.png') : null));
@@ -65,243 +64,406 @@
         return $n ?: '&nbsp;';
     };
 
-    // Pengurangan Penghasilan (dipisah " • ")
-    $bpjsText = $m['deductions'] ?? $m['bpjs_employee'] ?? 'BPJS JHT 2% • BPJS JP 1% • BPJS Kesehatan 1% (sesuai ketentuan)';
+    $bpjsText = $m['deductions'] ?? $m['bpjs_employee'] ?? 'BPJS JHT 2% sesuai ketentuan Pemerintah • BPJS Jaminan Pensiun 1% sesuai ketentuan Pemerintah • BPJS Kesehatan 1% sesuai ketentuan Pemerintah';
     $bpjsItems = preg_split('/\s*[•|]\s*/u', (string) $bpjsText, -1, PREG_SPLIT_NO_EMPTY);
 
-    // Benefit
     $benefit = [
-        'BPJS Kesehatan & BPJS Ketenagakerjaan.',
-        'BPJS Kesehatan untuk karyawan, pasangan, & maks. 3 anak (<21 th).',
-        'THR prorata sesuai peraturan perundang-undangan.',
-        'Transport & akomodasi saat field break mengikuti regulasi perusahaan.',
-        'Akomodasi: Mess, Laundry, Catering 3x.',
+        'Karyawan akan diikutsertakan dalam program BPJS Kesehatan dan BPJS Ketenagakerjaan.',
+        'Perusahaan akan mengikutsertakan Karyawan, pasangan sah, dan maksimal 3 anak (di bawah 21 tahun) ke dalam program BPJS Kesehatan.',
+        'THR akan dihitung prorata sesuai peraturan Undang-Undang Ketenagakerjaan.',
+        'Bagi karyawan yang ditempatkan di site, maka transportasi dan akomodasi dalam rangka cuti lapangan (<i>field break</i>) diatur sesuai regulasi Perusahaan.',
+        'Akomodasi : ' . ($m['akomodasi'] ?? '&lt;&lt;Akomodasi&gt;&gt;'),
     ];
 @endphp
 <!doctype html>
-<html>
+<html lang="id">
 <head>
   <meta charset="utf-8">
   <title>Offering Letter</title>
   <style>
-    /* Ganti ukuran kertas ke Legal (8.5in x 14in) agar lebih lebar */
-    @page { size: 8.5in 14in; margin: 4px 16px 32px; }
-
-    *{ box-sizing:border-box; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
-
-    :root{
-      --fs: 11px;
-      --lh: 1.36;
-      --mut:#6b7280;
-      --bd:#111;
+    /* ============================================================
+       TARGET: semua konten + TTD + footer muat di 1 halaman A4
+       Margin diperkecil, font 8.5px, padding super compact
+       ============================================================ */
+    @page {
+      size: A4;
+      margin: 10mm 12mm 16mm 12mm;
     }
-    body{
-      margin:0; /* hilangkan margin default body */
+
+    * {
+      box-sizing: border-box;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    body {
+      margin: 0;
       font-family: DejaVu Sans, Arial, Helvetica, sans-serif;
-      font-size:var(--fs);
-      line-height:var(--lh);
-      color:#111;
-      word-spacing:1px;
+      font-size: 42px;
+      line-height: 1.28;
+      color: #111;
     }
 
-    /* Konten center */
-    .page{ width:98%; max-width:900px; margin:0 auto; margin-top:-18px; }
-
-    .right{ text-align:right; }
-    .muted{ color:var(--mut); }
-    .small{ font-size:12px; }
+    .page { width: 100%; }
 
     /* ===== HEADER ===== */
-    .hdr{
-      display:flex; align-items:flex-start; gap:12px;
-      margin-bottom:6px;
-      margin-top:0;                /* normal, tidak terlalu ke atas */
+    .header-logo-wrap {
+      text-align: center;
+      margin-bottom: 0;
+      margin-top: -8px;
     }
-    .brand{ flex:0 0 auto; text-align:center; margin-top:0; } /* dinaikkan */
-    .logo{
-      height:110px;
-      width:auto;
-      max-width:320px; /* jauh lebih besar */
-      object-fit:contain;
-      display:block;
-      margin:0 auto;
-    }
-    .no{
-      font-size:12px; line-height:1;
-      margin-top:-68px;            /* nempel di bawah logo */
+    .logo {
+      height: 100px;
+      width: auto;
+      max-width: 400px;
+      object-fit: contain;
+      display: inline-block;
     }
 
-    .head{ flex:1 1 auto; text-align:left; padding-top:2px;margin-top:-65px;   }
-    .head .title{ font-weight:800; letter-spacing:.4px; }
-    .head .priv{ color:#b91c1c; font-weight:800; margin-top:2px; }
-
-    /* ===== Tabel utama ===== */
-    table.sheet{
-      width:100%;
-      max-width:880px;
-      margin-left:auto;
-      margin-right:auto;
-      border-collapse:separate;
-      border-spacing:0;
-      border:2.2px solid var(--bd); /* lebih tebal */
-      /* border-radius:8px; sudut membulat dihapus */
-      margin-top:8px;
-      background:#fff;
-      box-shadow:0 1px 4px 0 #ddd;
+    .header-meta {
+      display: table;
+      width: 100%;
+      margin-bottom: 3px;
     }
-    .sheet td{
-      padding:6px 10px; /* lebih lega */
-      vertical-align:top;
-      border:0;
-      line-height:1.32;
-      word-spacing:1px;
+    .header-meta-left  { display: table-cell; width: 33%; vertical-align: top; }
+    .header-meta-center {
+      display: table-cell; width: 34%;
+      text-align: center; vertical-align: middle;
+      font-size: 16px;
     }
-    .sheet .sec{
-      font-weight:800;
-      text-transform:uppercase;
-      padding:6px 12px;
+    .header-meta-right { display: table-cell; width: 33%; }
+
+    .doc-title {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      line-height: 1.15;
+      color: #111;
     }
-    .sheet .sec{ font-weight:800; text-transform:uppercase; padding:2px 6px; }
-    .key{ width:200px; }
-    .sep{ width:8px; text-align:center; }
-    .val{ width:auto; }
-
-    /* Benefit ringkas */
-    .sheet td.no5-full{ padding:1px 6px !important; line-height:1.15 !important; }
-    .sheet td.sec.no5-head{ padding:2px 6px !important; line-height:1.15 !important; }
-
-    /* ===== TTD ===== */
-    table.sigbox{
-      width:100%; border-collapse:separate; border-spacing:0;
-      border:1.6px solid var(--bd); margin-top: calc(var(--fs) * 3);
+    .doc-private {
+      font-size: 10px;
+      font-weight: 800;
+      color: #c0392b;
+      line-height: 1.15;
     }
-    .sigbox td{ border:1px solid var(--bd); padding:6px 8px; vertical-align:top; word-spacing:1px; }
-    .sigbox .area{ height:90px; vertical-align:middle; }
-    .sigbox .center{ text-align:center; }
-    .sigbox .meta{ color:var(--mut); font-size:10px; }
-    .sig-sign{ display:block; height:50px; margin:2px auto 4px; object-fit:contain; }
-    .sig-space{ display:block; height:50px; margin:2px auto 4px; }
-    .sigbox .hcell{ text-align:center; font-size:14px; line-height:1.25; font-weight:600; }
 
-    /* ===== FOOTER ===== */
-    .footer{ position:fixed; left:0; right:0; bottom:0; width:100%; }
-    .footer-table{ width:100%; border-collapse:separate; border-spacing:0; font-size:12px; color:#111; }
-    .foot-left{ text-align:left; } .foot-mid{ text-align:center; } .foot-right{ text-align:right; }
+    /* Greeting */
+    .greeting {
+      margin: 0 0 3px 0;
+      font-size: 9.5px;
+      line-height: 1.3;
+    }
+
+    /* ===== MAIN TABLE ===== */
+    table.sheet {
+      width: 100%;
+      border-collapse: collapse;
+      border: 1px solid #111;
+      font-size: 9.5px;
+      margin-bottom: 0;
+    }
+
+    /* Section header */
+    .sheet tr.sec-row td {
+      font-weight: 800;
+      text-transform: uppercase;
+      font-size: 9.5px;
+      padding: 2px 5px;
+      border-top: 1px solid #111;
+      border-bottom: 0;
+      vertical-align: middle;
+      letter-spacing: 0.1px;
+    }
+
+    /* Data rows — super compact */
+    .sheet tr.data-row td {
+      padding: 1px 5px;
+      line-height: 1.28;
+      vertical-align: top;
+      border: 0;
+      font-size: 9.5px;
+    }
+    .sheet tr.data-row.last td {
+      padding-bottom: 2px;
+    }
+
+    .sheet td.key  { width: 140px; min-width: 120px; }
+    .sheet td.sep  { width: 8px; text-align: center; padding-left: 0; padding-right: 0; }
+    .sheet td.val  { }
+
+    /* Full-width cells (benefit, others) */
+    .sheet td.full {
+      padding: 1px 6px 2px 6px;
+      font-size: 9.5px;
+      line-height: 1.28;
+      vertical-align: top;
+    }
+
+    /* BPJS bullet list */
+    .bpjs-list {
+      margin: 0;
+      padding-left: 14px;
+      list-style: disc;
+      line-height: 1.25;
+    }
+    .bpjs-list li { margin: 0; }
+
+    /* Benefit list */
+    .benefit-list {
+      margin: 0;
+      padding-left: 12px;
+      list-style-type: lower-alpha;
+      line-height: 1.28;
+    }
+    .benefit-list li { margin: 0; }
+
+    /* Others list */
+    .others-list {
+      margin: 1px 0 1px 12px;
+      padding: 0;
+      line-height: 1.28;
+      font-size: 9.5px;
+    }
+    .others-list li { margin-bottom: 1px; }
+
+    /* ===== SIGNATURE BOX ===== */
+    table.sigbox {
+      width: 100%;
+      border-collapse: collapse;
+      border: 1px solid #111;
+      margin-top: 4px;
+      font-size: 9.5px;
+    }
+    .sigbox td {
+      border: 1px solid #111;
+      padding: 3px 6px;
+      vertical-align: top;
+      width: 50%;
+    }
+    .sigbox .sig-header {
+      text-align: center;
+      font-size: 9.5px;
+      font-weight: normal;
+      padding: 3px 6px 2px;
+    }
+    .sigbox .sig-area {
+      height: 135px;
+      padding: 2px 6px 2px;
+      vertical-align: bottom;
+      text-align: center;
+    }
+    .sig-sign {
+      display: block;
+      height: 95px;
+      margin: 0 auto 2px;
+      object-fit: contain;
+    }
+    .sig-space {
+      display: block;
+      height: 95px;
+    }
+    .sigbox .sig-name {
+      font-weight: 800;
+      text-transform: uppercase;
+      font-size: 9.5px;
+      text-align: center;
+    }
+    .sigbox .sig-title {
+      font-size: 9px;
+      color: #555;
+      text-align: center;
+    }
+    .sigbox .sig-date {
+      padding: 2px 6px 3px;
+      font-size: 9.5px;
+      vertical-align: top;
+    }
+
+    /* ===== FOOTER fixed ===== */
+    .footer {
+      position: fixed;
+      left: 0; right: 0;
+      bottom: -12mm;
+      width: 100%;
+    }
+    .footer-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 9px;
+      color: #333;
+      border-top: 0.5px solid #aaa;
+    }
+    .foot-left  { text-align: left;   padding: 1px 0; }
+    .foot-mid   { text-align: center; padding: 1px 0; }
+    .foot-right { text-align: right;  padding: 1px 0; }
   </style>
 </head>
 <body>
 
-  <div class="page">
-    {{-- HEADER: logo kiri + nomor di bawah; teks di kanan --}}
-    <!-- HEADER: Logo tengah atas, judul kiri, nomor kanan -->
-    <div style="width:100%; margin-bottom:8px; margin-top:-12px;">
-      <div style="width:100%; text-align:center;">
-        <img class="logo" src="{{ $logoPath }}" alt="Logo">
-      </div>
-      <div style="width:100%; display:flex; flex-direction:row; justify-content:space-between; align-items:flex-start; margin-top:-10px;">
-        <div style="flex:1; text-align:left;">
-          <div class="title small" style="font-weight:800; letter-spacing:.4px; color:#111; margin-top:-6px;">OFFERING LETTER</div>
-          <div class="priv small" style="color:#b91c1c; font-weight:800; margin-top:0;">PRIBADI &amp; RAHASIA</div>
-        </div>
-        <div style="flex:1; text-align:center; font-size:12px; line-height:1; margin-top:-6px;">
-          No : {!! $fmt($docNo) !!}
-        </div>
-        <div style="flex:1;"></div>
-      </div>
+<div class="page">
+
+  {{-- ===== HEADER ===== --}}
+  {{-- Logo center --}}
+  <div class="header-logo-wrap">
+    <img class="logo" src="{{ $logoPath }}" alt="Logo Andalan">
+  </div>
+
+  {{-- Row: OFFERING LETTER left | No: center | empty right --}}
+  <div class="header-meta">
+    <div class="header-meta-left">
+      <div class="doc-title">OFFERING LETTER</div>
+      <div class="doc-private">PRIBADI &amp; RAHASIA</div>
     </div>
+    <div class="header-meta-center">
+      No : {!! $fmt($docNo) !!}
+    </div>
+    <div class="header-meta-right"></div>
+  </div>
 
-    <p style="margin:0 0 4px">
-      Dear Saudara/i <strong>{{ $fmt($candidateName) }}</strong>@if(filled($candidateNik)), ({{ $fmt($candidateNik) }})@endif —<br>
-      Dengan senang hati kami memberikan penawaran untuk bergabung dengan PT {{ $fmt($company) }} dengan ketentuan berikut:
-    </p>
+  {{-- Greeting --}}
+  <p class="greeting">
+    Dear Saudara/i <strong>{{ $candidateName }}</strong>@if(filled($candidateNik)), ({{ $candidateNik }})@endif<br>
+    Dengan senang hati kami memberikan penawaran untuk bergabung dengan PT {!! $fmt($company) !!}, dengan ketentuan sbb :
+  </p>
 
-    <table class="sheet">
-      <tr><td class="sec" colspan="3">1. JABATAN & TEMPAT PENERIMAAN</td></tr>
-      <tr><td class="key">a. Jabatan</td><td class="sep">:</td><td class="val">{{ $fmt($position) }}</td></tr>
-      <tr><td class="key">b. Grade/Level</td><td class="sep">:</td><td class="val">{{ $fmt($gradeLevel) }}</td></tr>
-      <tr><td class="key">c. Tempat Penerimaan (PoH)</td><td class="sep">:</td><td class="val">{{ $fmt($poh) }}</td></tr>
+  {{-- ===== MAIN TABLE ===== --}}
+  <table class="sheet">
 
-      <tr><td class="sec" colspan="3">2. LOKASI & STATUS KEKARYAWANAN</td></tr>
-      <tr><td class="key">a. Lokasi</td><td class="sep">:</td><td class="val">{{ $fmt($lokasiDisplay) }}</td></tr>
-      <tr><td class="key">b. Status Perjanjian Kerja</td><td class="sep">:</td><td class="val">{{ $fmt($contractStatus) }}</td></tr>
-      <tr><td class="key">c. Estimasi Tanggal Bergabung</td><td class="sep">:</td><td class="val">{{ $fmt($joinText) }}</td></tr>
+    {{-- 1. JABATAN & TEMPAT PENERIMAAN --}}
+    <tr class="sec-row"><td colspan="3">1. &nbsp; JABATAN &amp; TEMPAT PENERIMAAN</td></tr>
+    <tr class="data-row"><td class="key">a.&nbsp; Jabatan</td><td class="sep">:</td><td class="val">{!! $fmt($position) !!}</td></tr>
+    <tr class="data-row"><td class="key">b.&nbsp; Grade/Level</td><td class="sep">:</td><td class="val">{!! $fmt($gradeLevel) !!}</td></tr>
+    <tr class="data-row last"><td class="key">c.&nbsp; Tempat Penerimaan (PoH)</td><td class="sep">:</td><td class="val">{!! $fmt($poh) !!}</td></tr>
 
-      <tr><td class="sec" colspan="3">3. WAKTU KERJA & ISTIRAHAT</td></tr>
-      <tr><td class="key">a. Waktu Kerja</td><td class="sep">:</td><td class="val">{{ $fmt($workingHours) }}</td></tr>
-      <tr><td class="key">b. Jadwal Kerja</td><td class="sep">:</td><td class="val">{{ $fmt($workingSchedule) }}</td></tr>
+    {{-- 2. LOKASI & STATUS KEKARYAWANAN --}}
+    <tr class="sec-row"><td colspan="3">2. &nbsp; LOKASI &amp; STATUS KEKARYAWANAN</td></tr>
+    <tr class="data-row"><td class="key">a.&nbsp; Lokasi</td><td class="sep">:</td><td class="val">{!! $fmt($lokasiDisplay) !!}</td></tr>
+    <tr class="data-row"><td class="key">b.&nbsp; Status Perjanjian Kerja</td><td class="sep">:</td><td class="val">{!! $fmt($contractStatus) !!}</td></tr>
+    <tr class="data-row last"><td class="key">c.&nbsp; Estimasi Tanggal Bergabung</td><td class="sep">:</td><td class="val">{!! $fmt($joinText) !!}</td></tr>
 
-      <tr><td class="sec" colspan="3">4. GAJI, BONUS, & PENGURANGAN PENGHASILAN</td></tr>
-      <tr><td class="key">a. Gaji Pokok</td><td class="sep">:</td><td class="val"><strong>{{ $fmt($idr($gajiPokok)) }}</strong> <span class="muted">{{ is_numeric($gajiPokok) ? 'Gross/bulan' : '' }}</span></td></tr>
-      <tr><td class="key">b. Insentif / Site Allowance</td><td class="sep">:</td><td class="val">{{ $fmt($idr($insLap)) }} <span class="muted">{{ is_numeric($insLap) ? 'Nett/hari' : '' }}</span></td></tr>
-      <tr><td class="key">c. Uang Makan</td><td class="sep">:</td><td class="val">{{ $fmt($mealsAllowance) }}</td></tr>
-      <tr><td class="key">d. Overtime/Lembur</td><td class="sep">:</td><td class="val">{{ $fmt($overtimeRate) }}</td></tr>
-      <tr><td class="key">e. Pajak Penghasilan</td><td class="sep">:</td><td class="val">{{ $fmt($taxBorneBy) }}</td></tr>
-      <tr><td class="key">f. Pengurangan Penghasilan</td><td class="sep">:</td><td class="val">
-        <ul style="margin:0; padding-left:14px; list-style:disc; line-height:1.25;">
-          @foreach ($bpjsItems as $it) <li>{{ trim($it) }}</li> @endforeach
+    {{-- 3. WAKTU KERJA & ISTIRAHAT --}}
+    <tr class="sec-row"><td colspan="3">3. &nbsp; WAKTU KERJA &amp; ISTIRAHAT</td></tr>
+    <tr class="data-row"><td class="key">a.&nbsp; Waktu Kerja</td><td class="sep">:</td><td class="val">{!! $fmt($workingHours) !!}</td></tr>
+    <tr class="data-row"><td class="key">b.&nbsp; Jadwal Kerja</td><td class="sep">:</td><td class="val">{!! $fmt($workingSchedule) !!}</td></tr>
+    <tr class="data-row last"><td class="key">c.&nbsp; Roster Kerja</td><td class="sep">:</td><td class="val">{!! $fmt($m['roster_kerja'] ?? '&lt;Roster Kerja&gt;') !!}</td></tr>
+
+    {{-- 4. GAJI, BONUS, & PENGURANGAN PENGHASILAN --}}
+    <tr class="sec-row"><td colspan="3">4. &nbsp; GAJI, BONUS, &amp; PENGURANGAN PENGHASILAN</td></tr>
+    <tr class="data-row">
+      <td class="key">a.&nbsp; Gaji Pokok</td>
+      <td class="sep">:</td>
+      <td class="val">
+        <strong>{{ $idr($gajiPokok) }}</strong>
+        @if(is_numeric($gajiPokok)) <span style="color:#555;">Gross/bulan</span> @endif
+      </td>
+    </tr>
+    <tr class="data-row">
+      <td class="key">b.&nbsp; Insentif / Site Allowance</td>
+      <td class="sep">:</td>
+      <td class="val">
+        <strong>{{ $idr($insLap) }}</strong>
+        @if(is_numeric($insLap)) <span style="color:#555;">Nett/hari</span> @endif
+      </td>
+    </tr>
+    <tr class="data-row">
+      <td class="key">c.&nbsp; Meals Allowance</td>
+      <td class="sep">:</td>
+      <td class="val">
+        {!! $fmt($mealsAllowance) !!}
+        @if(filled($mealsAllowance) && $mealsAllowance !== '&nbsp;')
+          <span style="color:#555;">Nett/hari (diluar gaji, tanggal ditentukan Perusahaan)</span>
+        @endif
+      </td>
+    </tr>
+    <tr class="data-row"><td class="key">d.&nbsp; Overtime/Lembur</td><td class="sep">:</td><td class="val">{!! $fmt($overtimeRate) !!}</td></tr>
+    <tr class="data-row"><td class="key">e.&nbsp; Pajak Penghasilan</td><td class="sep">:</td><td class="val">{!! $fmt($taxBorneBy) !!}</td></tr>
+    <tr class="data-row last">
+      <td class="key">f.&nbsp; Pengurangan Penghasilan</td>
+      <td class="sep">:</td>
+      <td class="val">
+        <ul class="bpjs-list">
+          @foreach ($bpjsItems as $it)
+            <li>{{ trim($it) }}</li>
+          @endforeach
         </ul>
-      </td></tr>
+      </td>
+    </tr>
 
-      @php
-        $labels = ['a', 'b', 'c', 'd', 'e'];
-        $benefitLines = [];
-        foreach ($benefit as $i => $text) {
-            $benefitLines[] = $labels[$i] . '. ' . e($text);
-        }
-      @endphp
-      <tr><td class="sec no5-head" colspan="3">5. BENEFIT</td></tr>
-      <tr><td class="no5-full" colspan="3"><div style="margin:1px 0 0 0; padding:0; line-height:1.15;">{!! implode('<br>', $benefitLines) !!}</div></td></tr>
+    {{-- 5. BENEFIT --}}
+    <tr class="sec-row"><td colspan="3">5. &nbsp; BENEFIT</td></tr>
+    <tr class="data-row last">
+      <td class="full" colspan="3">
+        <ol class="benefit-list" type="a" style="padding-left:14px; list-style-type:lower-alpha;">
+          @foreach ($benefit as $b)
+            <li>{!! $b !!}</li>
+          @endforeach
+        </ol>
+      </td>
+    </tr>
 
-      <tr><td class="sec" colspan="3">6. OTHERS</td></tr>
-      <tr>
-        <td colspan="3" style="font-size:11px; line-height:1.4; padding:8px 18px;">
-          <ol type="a" style="margin:0 0 0 18px; padding:0 0 0 0;">
-            <li>Jika Saudara menyetujui dan menerima Surat Penawaran Kerja (Offering Letter) ini, maka mohon di cantumkan tanggal bergabung dan silahkan tuliskan nama lengkap serta tanda tangan pada kolom yang telah disediakan.</li>
-            <li>Mohon untuk dapat mengirimkan kembali Surat Penawaran Kerja (Offering Letter) yang telah Saudara setujui kepada kami, paling lambat 2 hari setelah Surat Penawaran Kerja (Offering Letter) ini Saudara terima.</li>
-            <li>Surat Penawaran Kerja (Offering Letter) hanya berlaku jika calon karyawan dinyatakan <b>Fit To Work</b> pada Hasil MCU (Medical Check Up) dan atau Hasil <b>Soliuog MCU</b> dinyatakan <b>Fit To Work</b>.</li>
-            <li>Apabila Saudara tidak mengembalikan Surat Penawaran Kerja (Offering Letter) dalam waktu yang telah ditentukan, maka penawaran ini dianggap batal.</li>
-          </ol>
-        </td>
-      </tr>
-    </table>
+    {{-- 6. OTHERS --}}
+    <tr class="sec-row"><td colspan="3">6. &nbsp; OTHERS</td></tr>
+    <tr class="data-row">
+      <td class="full" colspan="3">
+        <ol class="others-list" type="a">
+          <li>Jika Saudara menyetujui dan menerima Surat Penawaran Kerja (Offering Letter) ini, maka mohon di cantumkan tanggal bergabung dan silahkan tulisakan nama lengkap serta tanda tangan pada kolom yang telah disediakan</li>
+          <li>Mohon untuk dapat mengirimkan kembali Surat Penawaran Kerja (Offering Letter) yang telah Saudara setujui kepada kami, paling lambat 2 hari setelah Surat Penawaran Kerja (Offering Letter) ini Saudara terima</li>
+          <li>Surat Penawaran Kerja (Offering Letter) hanya berlaku jika calon karyawan dinyatakan <strong>Fit To Work</strong> pada Hasil MCU (Medical Check Up) dan atau Hasil Followup MCU dinyatakan <strong>Fit To Work</strong></li>
+          <li>Untuk calon karyawan Operator dan Driver atau calon karyawan yang memerlukan Simper/Kimper Surat Penawaran Kerja (Offering Letter) hanya berlaku jika dinyatakan <strong>Lolos</strong> pada tahap <strong>Teori Test dan Ground Test</strong></li>
+        </ol>
+      </td>
+    </tr>
 
-    {{-- TTD --}}
-    <table class="sigbox">
-      <tr><td class="hcell">Penawaran oleh,<br>{{ $deptName }}</td><td class="hcell">Disetujui oleh,<br>Calon Karyawan</td></tr>
-      <tr>
-        <td class="area center">
-          @if($signImage && is_file($signImage))
-            <img src="{{ $signImage }}" class="sig-sign" alt="ttdmahya" onerror="this.style.display='none'">
-          @else <span class="sig-space"></span> @endif
-          <div><strong style="text-transform:uppercase">{{ $fmt($signerName) }}</strong></div>
-          <div class="meta">{{ $fmt($signerTitle) }}</div>
-        </td>
-        <td class="area center">
+  </table>
+
+  {{-- ===== SIGNATURE BOX ===== --}}
+  <table class="sigbox">
+    <tr>
+      <td class="sig-header">Penawaran oleh,<br>{{ $deptName }}</td>
+      <td class="sig-header">Diterima dan disetujui oleh,<br>Calon Karyawan</td>
+    </tr>
+    <tr>
+      <td class="sig-area">
+        @if($signImage && is_file($signImage))
+          <img src="{{ $signImage }}" class="sig-sign" alt="Tanda Tangan">
+        @else
           <span class="sig-space"></span>
-          <div><strong style="text-transform:uppercase">{{ $fmt($candidateName) }}</strong></div>
-        </td>
-      </tr>
-      <tr><td> Tanggal : {!! $fmt($todayText) !!}</td><td> Tanggal bergabung : {!! $fmt($joinText) !!}</td></tr>
-    </table>
-  </div>
+        @endif
+        <div class="sig-name">{{ $signerName }}</div>
+        <div class="sig-title">{{ $signerTitle }}</div>
+      </td>
+      <td class="sig-area">
+        <span class="sig-space"></span>
+        <div class="sig-name">{{ $candidateName }}</div>
+      </td>
+    </tr>
+    <tr>
+      <td class="sig-date">Tanggal : {!! $fmt($todayText) !!}</td>
+      <td class="sig-date">Tanggal bergabung :</td>
+    </tr>
+  </table>
 
-  {{-- Footer tetap bawah-tengah --}}
-  <div class="footer">
-    <table class="footer-table">
-      <tr>
-        <td class="foot-left">{{ $footerCode }}</td>
-        <td class="foot-mid">{{ str_replace(['{PAGE_NUM}', '{PAGE_COUNT}'], ['{PAGE_NUM}', '{PAGE_COUNT}'], $footerPageText) }}</td>
-        <td class="foot-right">{{ $footerVersion }}</td>
-      </tr>
-    </table>
-  </div>
+</div>
 
-  <script type="text/php">
-    if (isset($pdf)) {
-        $text = "Page {PAGE_NUM} of {PAGE_COUNT}";
-        $font = $fontMetrics->get_font("DejaVu Sans","normal");
-        // $pdf->page_text(297, 810, $text, $font, 9, array(0,0,0));
-    }
-  </script>
+{{-- ===== FIXED FOOTER ===== --}}
+<div class="footer">
+  <table class="footer-table">
+    <tr>
+      <td class="foot-left">{{ $footerCode }}</td>
+      <td class="foot-mid">Page 1 of 1</td>
+      <td class="foot-right">{{ $footerVersion }}</td>
+    </tr>
+  </table>
+</div>
+
+<script type="text/php">
+  if (isset($pdf)) {
+    $text = "Page {PAGE_NUM} of {PAGE_COUNT}";
+    $font = $fontMetrics->get_font("DejaVu Sans", "normal");
+    // $pdf->page_text(297, 810, $text, $font, 9, [0,0,0]);
+  }
+</script>
+
 </body>
 </html>
