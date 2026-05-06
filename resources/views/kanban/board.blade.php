@@ -244,6 +244,9 @@ textarea.fm-ctrl { resize: vertical; min-height: 68px; }
       Lihat progres lamaran kamu di setiap stage rekrutmen.
     @endif
   </p>
+  <div style="position:absolute; right:1.25rem; top:1.25rem">
+    <a href="{{ route('admin.interviews.index') }}" class="btn-xs btn-primary" style="font-size:.75rem; padding:.35rem .6rem">Interview</a>
+  </div>
 </div>
 
 {{-- BOARD --}}
@@ -280,6 +283,7 @@ textarea.fm-ctrl { resize: vertical; min-height: 68px; }
 
               <div class="kn-card"
                 data-id="{{ $a->id }}"
+                data-schedule-url="{{ route('admin.interviews.store', $a) }}"
                 data-gt-url="{{ route('admin.applications.ground-test.update', $a) }}"
                 data-gt-meta="{{ json_encode($a->ground_test_meta ?? []) }}"
                 data-gt-result="{{ $a->ground_test_result ?? '' }}">
@@ -415,6 +419,11 @@ textarea.fm-ctrl { resize: vertical; min-height: 68px; }
                      class="btn-xs btn-outline">
                     Lihat Jadwal
                   </a>
+                @else
+                  @if($isKaryawan || $isTrainer)
+                    <button type="button" class="btn-xs btn-outline" onclick="openSchedModal(this, '{{ $stageKey }}')">Schedule</button>
+                  @endif
+                @endif
                 @endif
 
                 @if($canKaryawanFeedback)
@@ -562,6 +571,61 @@ textarea.fm-ctrl { resize: vertical; min-height: 68px; }
   </div>
 </div>
 
+{{-- ============================= SCHEDULE MODAL ============================= --}}
+<div class="hidden kn-overlay" id="overlay-sched">
+  <div class="kn-modal">
+    <div class="kn-modal-head">
+      <div>
+        <div class="kn-modal-title">Jadwalkan Interview</div>
+        <div class="kn-modal-sub" id="sched-sub">Buat jadwal interview</div>
+      </div>
+      <button class="kn-modal-close" onclick="document.getElementById('overlay-sched').classList.add('hidden')">✕</button>
+    </div>
+    <form id="sched-form" method="POST">
+      @csrf
+      <input type="hidden" id="sched-to-stage" name="to_stage" value="">
+      <div class="kn-modal-body">
+        <div class="fm-group">
+          <label class="fm-label">Judul</label>
+          <input id="sched-title" name="title" class="fm-ctrl" placeholder="Judul interview">
+        </div>
+        <div class="fm-group">
+          <label class="fm-label">Mode</label>
+          <select id="sched-mode" name="mode" class="fm-ctrl" onchange="toggleSchedMode()">
+            <option value="online">Online</option>
+            <option value="onsite">Onsite</option>
+          </select>
+        </div>
+        <div class="fm-group" id="sched-link-group">
+          <label class="fm-label">Meeting link</label>
+          <input id="sched-link" name="meeting_link" class="fm-ctrl" placeholder="https://...">
+        </div>
+        <div class="fm-group" id="sched-loc-group" style="display:none">
+          <label class="fm-label">Lokasi</label>
+          <input id="sched-loc" name="location" class="fm-ctrl" placeholder="Lokasi onsite">
+        </div>
+        <div class="fm-group">
+          <label class="fm-label">Mulai</label>
+          <input id="sched-start" name="start_at" type="datetime-local" class="fm-ctrl">
+        </div>
+        <div class="fm-group">
+          <label class="fm-label">Selesai</label>
+          <input id="sched-end" name="end_at" type="datetime-local" class="fm-ctrl">
+        </div>
+        <div class="fm-group">
+          <label class="fm-label">Catatan</label>
+          <textarea id="sched-notes" name="notes" class="fm-ctrl" rows="3"></textarea>
+        </div>
+        <div id="sched-banner" style="font-size:.85rem;color:#7a4f2a;margin-top:.6rem"></div>
+      </div>
+      <div class="kn-modal-footer">
+        <button type="button" class="btn-xs btn-outline" onclick="document.getElementById('overlay-sched').classList.add('hidden')">Batal</button>
+        <button type="button" class="btn-xs btn-primary" onclick="submitSchedule()">Kirim Undangan</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 {{-- TOAST --}}
 <div class="hidden kn-toast" id="kn-toast"></div>
 
@@ -660,6 +724,78 @@ function openGroundTestModal(btn, appId, name) {
   document.getElementById('overlay-gt').classList.remove('hidden');
 }
 
+/* ============================= SCHEDULE HANDLERS ============================= */
+let schedCardEl  = null;
+let schedToStage = null;
+
+function openSchedModal(btn, toStage) {
+  schedCardEl  = btn.closest ? btn.closest('.kn-card') : null;
+  schedToStage = toStage;
+
+  const candidate = schedCardEl?.querySelector('.kn-card-name')?.textContent?.trim() || 'Kandidat';
+  const job       = schedCardEl?.querySelector('.kn-card-job')?.textContent?.trim() || '';
+  const url       = schedCardEl?.dataset?.scheduleUrl || '#';
+
+  document.getElementById('sched-sub').textContent    = candidate + ' — ' + job;
+  document.getElementById('sched-title').value        = 'Interview – ' + candidate;
+  document.getElementById('sched-to-stage').value     = toStage || '';
+  document.getElementById('sched-banner').innerHTML   = `➜ Setelah submit, <b>${candidate}</b> akan dipindah ke <b>${(stageLabels[toStage]||toStage)}</b>`;
+
+  document.getElementById('sched-form').action = url;
+  document.getElementById('sched-notes').value  = '';
+  document.getElementById('sched-start').value  = '';
+  document.getElementById('sched-end').value    = '';
+  document.getElementById('sched-mode').value   = 'online';
+  toggleSchedMode();
+  document.getElementById('overlay-sched').classList.remove('hidden');
+}
+
+function toggleSchedMode() {
+  const m = document.getElementById('sched-mode').value;
+  document.getElementById('sched-link-group').style.display = m === 'online' ? '' : 'none';
+  document.getElementById('sched-loc-group').style.display  = m === 'onsite' ? '' : 'none';
+}
+
+function submitSchedule() {
+  const title = document.getElementById('sched-title').value.trim();
+  const start = document.getElementById('sched-start').value;
+  const end   = document.getElementById('sched-end').value;
+  if (!title)       { showToast('Judul interview wajib diisi', 'err');   return; }
+  if (!start || !end) { showToast('Waktu mulai & selesai wajib diisi', 'err'); return; }
+  if (start >= end) { showToast('Waktu selesai harus setelah waktu mulai', 'err'); return; }
+
+  const form   = document.getElementById('sched-form');
+  const csrf   = form.querySelector('[name="_token"]').value;
+  const url    = form.action;
+  const data   = new FormData(form);
+
+  fetch(url, { method: 'POST', headers: { 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' }, body: data })
+  .then(async res => {
+    const contentType = res.headers.get('content-type') || '';
+    if (!res.ok) {
+      if (contentType.includes('application/json')) {
+        const j = await res.json().catch(()=>({}));
+        throw new Error(j.message || 'Gagal kirim');
+      } else {
+        const text = await res.text();
+        throw new Error('Unexpected response: ' + text.slice(0, 100));
+      }
+    }
+    return contentType.includes('application/json') ? res.json() : res.text();
+  })
+  .then(() => {
+    document.getElementById('overlay-sched').classList.add('hidden');
+    showToast('Undangan berhasil dikirim!', 'ok');
+    // we don't force a reload; let server-side notifications/refresh update counts
+    schedCardEl  = null;
+    schedToStage = null;
+  })
+  .catch(err => {
+    document.getElementById('overlay-sched').classList.add('hidden');
+    showToast(err.message || 'Gagal mengirim undangan', 'err');
+  });
+}
+
 document.getElementById('form-gt')?.addEventListener('submit', function (e) {
   e.preventDefault();
   const form = e.currentTarget;
@@ -686,10 +822,10 @@ document.getElementById('form-gt')?.addEventListener('submit', function (e) {
     .catch(err => showToast(err.message || 'Gagal simpan hasil ground test', 'err'));
 });
 
-// Auto-refresh helper: poll server counts and reload if changed
+// Poll server counts periodically but do NOT force full page reloads.
 (function(){
   try {
-    const pollInterval = 8000; // ms
+    const pollInterval = 15000; // ms — less frequent
     async function fetchCounts(){
       try {
         const res = await fetch(location.pathname + '?json=1', { credentials: 'same-origin', headers: { 'Accept': 'application/json' } });
@@ -698,32 +834,32 @@ document.getElementById('form-gt')?.addEventListener('submit', function (e) {
       } catch (e) { return null; }
     }
 
-    function readDomCounts(){
-      const map = {};
-      document.querySelectorAll('.kn-col').forEach(col => {
-        const k = col.dataset.stage;
-        const badge = col.querySelector('.kn-col-badge') || col.querySelector('[id^="cnt-"]');
-        const n = badge ? Number(badge.textContent.trim() || 0) : 0;
-        if (k) map[k] = n;
-      });
-      return map;
+    function applyCounts(server){
+      try {
+        for (const k in server) {
+          const cnt = Number(server[k] || 0);
+          const badge = document.querySelector('#cnt-' + k) || Array.from(document.querySelectorAll('.kn-col')).find(c => c.dataset.stage === k)?.querySelector('.kn-col-badge');
+          if (badge) badge.textContent = String(cnt);
+        }
+      } catch (e) { /* ignore */ }
     }
 
-    let last = readDomCounts();
-    setInterval(async () => {
+    // Only poll when page is visible
+    let polling = null;
+    async function doPoll(){
       const j = await fetchCounts();
       if (!j || !j.counts) return;
-      const server = j.counts;
-      let changed = false;
-      for (const k in server) {
-        const s = Number(server[k] || 0);
-        if ((last[k] || 0) !== s) { changed = true; break; }
-      }
-      if (changed) {
-        // full reload to get fresh board markup
-        window.location.reload();
-      }
-    }, pollInterval);
+      applyCounts(j.counts);
+    }
+
+    function start() { if (!polling) polling = setInterval(doPoll, pollInterval); }
+    function stop()  { if (polling) { clearInterval(polling); polling = null; } }
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) stop(); else start();
+    });
+    // initial
+    start();
   } catch (e) { /* ignore */ }
 })();
 </script>

@@ -85,9 +85,9 @@
       role="dialog" aria-modal="true" aria-label="Menu">
       {{-- Drawer header --}}
       <div class="flex items-center justify-between px-4 py-3" style="border-bottom:1.5px solid rgba(255,255,255,0.15);">
-        <img src="{{ asset('assets/logofix.png') }}" alt="Logo" class="h-8 w-auto" style="filter:brightness(0) invert(1);">
+        <img src="{{ asset('assets/logofix.png') }}" alt="Logo" class="w-auto h-8" style="filter:brightness(0) invert(1);">
         <button id="drawerCloseBtn"
-          class="w-8 h-8 rounded-lg flex items-center justify-center text-white transition"
+          class="flex items-center justify-center w-8 h-8 text-white transition rounded-lg"
           style="background:rgba(255,255,255,0.12);"
           aria-label="Tutup menu">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>

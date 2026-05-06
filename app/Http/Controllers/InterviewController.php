@@ -5,9 +5,13 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use App\Models\Interview;
 use App\Models\JobApplication;
+use App\Models\ApplicationStage;
 use App\Notifications\InterviewScheduled;
+use Carbon\Carbon;
 
 class InterviewController extends Controller
 {
@@ -68,7 +72,7 @@ class InterviewController extends Controller
         /** @var JobApplication $app */
         $app = JobApplication::query()
             ->select(['id', 'user_id', 'job_id'])
-            ->with(['user:id'])
+            ->with(['user:id,name,email'])
             ->whereKey($application)
             ->firstOrFail();
 
@@ -107,6 +111,15 @@ class InterviewController extends Controller
         // Kirim notifikasi ke kandidat (database notification)
         if ($app->user) {
             $app->user->notify(new InterviewScheduled($iv));
+        }
+
+        // Return JSON jika request expect JSON
+        if ($request->expectsJson()) {
+            return response()->json([
+                'ok' => true,
+                'message' => 'Jadwal interview dibuat & pemberitahuan dikirim.',
+                'interview_id' => $iv->id,
+            ]);
         }
 
         return redirect()

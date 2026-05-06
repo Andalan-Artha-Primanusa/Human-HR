@@ -168,7 +168,8 @@
           method="POST"
           action="{{ route('candidate.profiles.update', $job) }}"
           enctype="multipart/form-data"
-          novalidate>
+          novalidate
+          class="pb-24 md:pb-0">
       @csrf
 
       {{-- STEP 1 --}}
@@ -341,24 +342,35 @@
           <p class="mt-1 text-xs text-slate-500">Opsional.</p>
           <template x-for="(it,idx) in items" :key="idx">
             <div class="grid gap-3 p-3 mt-4 border rounded-xl">
-              <input class="px-3 py-2 border rounded-lg" :name="`trainings[${idx}][title]`" x-model="it.title" placeholder="Nama Training/Sertifikasi">
+              <input class="px-3 py-2 border rounded-lg" :name="`trainings[${idx}][title]`" x-model="it.title" placeholder="Nama Training/Sertifikasi *" required>
+
+              <input class="px-3 py-2 border rounded-lg" :name="`trainings[${idx}][institution]`" x-model="it.institution" placeholder="Institusi/Penyelenggara">
 
               <div class="grid gap-3 sm:grid-cols-2">
-                <input class="px-3 py-2 border rounded-lg" :name="`trainings[${idx}][institution]`" x-model="it.institution" placeholder="Institusi/Penyelenggara">
-                <input class="px-3 py-2 border rounded-lg" :name="`trainings[${idx}][certificate_name]`" x-model="it.certificate_name" placeholder="Nama Sertifikat (opsional)">
+                <div>
+                  <label class="text-xs text-slate-500">Tanggal Mulai</label>
+                  <input type="date" class="w-full px-3 py-2 border rounded-lg" :name="`trainings[${idx}][period_start]`" x-model="it.period_start">
+                </div>
+                <div>
+                  <label class="text-xs text-slate-500">Tanggal Selesai</label>
+                  <input type="date" class="w-full px-3 py-2 border rounded-lg" :name="`trainings[${idx}][period_end]`" x-model="it.period_end">
+                </div>
               </div>
 
-                <div class="grid gap-3 sm:grid-cols-2">
-                  <div class="grid gap-3 sm:grid-cols-2">
-                    <input type="date" class="px-3 py-2 border rounded-lg" :name="`trainings[${idx}][cert_valid_from]`" x-model="it.cert_valid_from">
-                    <input type="date" class="px-3 py-2 border rounded-lg" :name="`trainings[${idx}][cert_valid_to]`"   x-model="it.cert_valid_to" :disabled="it.cert_no_expiry" :class="it.cert_no_expiry ? 'opacity-60' : ''">
-                  </div>
+              <div class="grid gap-3 sm:grid-cols-3">
+                <div>
+                  <label class="text-xs text-slate-500">Sertifikat Berlaku Dari</label>
+                  <input type="date" class="w-full px-3 py-2 border rounded-lg" :name="`trainings[${idx}][cert_valid_from]`" x-model="it.cert_valid_from">
                 </div>
-
-                <div class="grid gap-3 sm:grid-cols-2">
-                  <input type="date" class="px-3 py-2 border rounded-lg" :name="`trainings[${idx}][period_start]`" x-model="it.period_start" placeholder="Tanggal Mulai">
-                  <input type="date" class="px-3 py-2 border rounded-lg" :name="`trainings[${idx}][period_end]`"   x-model="it.period_end" placeholder="Tanggal Selesai">
+                <div>
+                  <label class="text-xs text-slate-500">Sertifikat Berlaku Sampai</label>
+                  <input type="date" class="w-full px-3 py-2 border rounded-lg" :name="`trainings[${idx}][cert_valid_to]`" x-model="it.cert_valid_to" :disabled="it.cert_no_expiry" :class="it.cert_no_expiry ? 'opacity-60' : ''">
                 </div>
+                <div>
+                  <label class="text-xs text-slate-500">Nama Sertifikat</label>
+                  <input class="w-full px-3 py-2 border rounded-lg" :name="`trainings[${idx}][certificate_name]`" x-model="it.certificate_name" placeholder="(opsional)">
+                </div>
+              </div>
 
               <div class="flex items-center gap-2">
                 <input type="checkbox" :id="`cert_no_expiry_${idx}`" :name="`trainings[${idx}][cert_no_expiry]`" x-model="it.cert_no_expiry" @change="if(it.cert_no_expiry){ it.cert_valid_to=''; }">
@@ -538,6 +550,7 @@
             <svg class="w-5 h-5 text-brand-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 12v7m-6 0h12a2 2 0 002-2V7a2 2 0 00-2-2H6a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
             CV & Certificate (PDF, maks 4MB)
           </h2>
+          <p class="mt-1 text-sm text-slate-500">Berkas yang diunggah dibatasi maksimal 4MB per file</p>
           <div class="grid gap-4 mt-3 sm:grid-cols-2">
             <div>
               <label class="text-sm text-slate-600">CV (PDF, maks 4MB) <span class="text-red-600" x-show="!hasCv">*</span></label>
@@ -561,11 +574,30 @@
         </div>
       </section>
 
-      {{-- Right Action Rail --}}
-      <div class="fixed inset-x-0 bottom-0 z-20 p-3 pointer-events-none md:inset-x-auto md:p-0 md:right-4 md:top-1/2 md:-translate-y-1/2">
-        <div class="w-full max-w-sm mx-auto md:mx-0 md:w-48 p-3 border shadow-[0_-4px_20px_rgba(0,0,0,0.1)] md:shadow-lg pointer-events-auto rounded-2xl md:rounded-2xl rounded-b-none md:border-brand-200/70 border-brand-200 bg-white/95 backdrop-blur">
-          <div class="px-1 pb-2 text-xs text-center md:text-left text-slate-600">Langkah <span class="font-semibold text-slate-900" x-text="step"></span> / 3 · <span x-text="progress+'%'"></span></div>
-          <div class="space-y-2">
+      {{-- Action Rail: Mobile (horizontal) / Desktop (vertical) --}}
+      <div class="fixed inset-x-0 bottom-0 z-20 p-2 pointer-events-none md:inset-x-auto md:p-0 md:right-4 md:top-1/2 md:-translate-y-1/2">
+        <div class="w-full mx-auto md:mx-0 md:w-48 p-3 border shadow-[0_-4px_20px_rgba(0,0,0,0.1)] md:shadow-lg pointer-events-auto rounded-2xl md:rounded-2xl md:border-brand-200/70 border-brand-200 bg-white/95 backdrop-blur">
+          {{-- Progress indicator --}}
+          <div class="hidden px-1 pb-2 text-xs text-left md:block text-slate-600">Langkah <span class="font-semibold text-slate-900" x-text="step"></span> / 3 · <span x-text="progress+'%'"></span></div>
+          
+          {{-- Mobile: Horizontal layout --}}
+          <div class="flex items-center justify-between gap-2 md:hidden">
+            <div class="text-xs text-slate-600">Langkah <span class="font-semibold text-slate-900" x-text="step"></span>/3</div>
+            <div class="flex flex-1 gap-2">
+              <button type="button" @click.prevent="prev()" :disabled="step===1" class="inline-flex items-center justify-center flex-1 px-2 py-2 text-xs font-medium border rounded-lg border-brand-200 text-brand-800 hover:bg-brand-50 disabled:opacity-50">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+              </button>
+              <button type="button" x-show="step<3" @click.prevent="next()" class="flex-1 inline-flex items-center justify-center rounded-lg bg-[#a77d52] px-2 py-2 text-xs font-semibold text-white hover:opacity-95">
+                <span>Lanjut</span>
+              </button>
+              <button type="submit" x-show="step===3" @click.prevent="if (validate(3)) confirmOpen=true" class="flex-1 inline-flex items-center justify-center rounded-lg bg-[#a77d52] px-2 py-2 text-xs font-semibold text-white hover:opacity-95">
+                <span>Simpan</span>
+              </button>
+            </div>
+          </div>
+
+          {{-- Desktop: Vertical layout --}}
+          <div class="hidden md:space-y-2 md:block">
             <button type="button" @click.prevent="prev()" :disabled="step===1" class="inline-flex items-center justify-center w-full gap-2 px-3 py-2 text-sm font-medium border rounded-xl border-brand-200 text-brand-800 hover:bg-brand-50 disabled:opacity-50">
               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
               <span>Prev</span>
@@ -574,7 +606,6 @@
               <span>Lanjut</span>
               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
             </button>
-            {{-- SUBMIT TERKONTROL: prevent default & submit manual saat valid --}}
             <button type="submit" x-show="step===3" @click.prevent="if (validate(3)) confirmOpen=true" class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-[#a77d52] px-3 py-2 text-sm font-semibold text-white hover:opacity-95">
               <span>Simpan & Selesai</span>
               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
@@ -600,8 +631,8 @@
 
 </main>
 
-  <!-- Beri jarak bawah ekstra untuk mobile agar konten tidak tertutup Action Rail -->
-  <div class="h-24 md:h-0"></div>
+  <!-- Extra padding untuk mobile (form sudah punya pb-24) -->
+  <div class="h-8 md:h-0"></div>
 
 {{-- Error Modal: kelengkapan wajib, render di akhir body agar floating di atas semua konten --}}
 <template x-if="errors.length">

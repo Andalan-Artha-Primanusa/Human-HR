@@ -66,21 +66,22 @@
         : null;
 @endphp
 
-<div class="ml-auto flex items-center gap-1 md:gap-2 relative">
+<div class="relative flex items-center gap-1 ml-auto md:gap-2">
 
   @auth
     {{-- ====== DROPDOWN: Interviews ====== --}}
     <div class="relative">
       <button type="button"
-              class="relative p-2 rounded-lg hover:bg-slate-100"
+              class="relative flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg hover:bg-slate-100 text-slate-700"
               data-dd-trigger="dd-interviews"
               aria-haspopup="true"
               aria-expanded="false"
               aria-label="Interview Saya"
               title="Interview Saya">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V5m8 2V5M4 9h16M7 11h10a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2z" />
         </svg>
+        <span>Interview</span>
         <span class="sr-only">Interview Saya (klik untuk melihat jadwal interview Anda)</span>
         @if($interviewUpcoming > 0)
               <span class="absolute -top-0.5 -right-0.5 text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-500 text-white">
@@ -91,7 +92,7 @@
 
       <div id="dd-interviews"
            class="dropdown-panel hidden absolute right-0 mt-2 w-[22rem] bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden z-40">
-        <div class="px-3 py-2 border-b border-slate-200 flex items-center justify-between">
+        <div class="flex items-center justify-between px-3 py-2 border-b border-slate-200">
           <div class="font-semibold text-slate-800">Interview</div>
           @if($interviewUpcoming > 0)
             <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">
@@ -103,7 +104,7 @@
         @if($interviewItems->isEmpty())
               <div class="p-4 text-sm text-slate-500">Belum ada jadwal interview.</div>
         @else
-              <ul class="max-h-96 overflow-y-auto divide-y divide-slate-100">
+              <ul class="overflow-y-auto divide-y max-h-96 divide-slate-100">
                 @foreach($interviewItems as $iv)
                       <li class="p-3 hover:bg-slate-50">
                         <div class="flex items-start gap-3">
@@ -113,13 +114,13 @@
                             </svg>
                           </div>
                           <div class="min-w-0">
-                            <div class="font-medium text-slate-800 truncate">{{ $iv->title ?? 'Interview' }}</div>
+                            <div class="font-medium truncate text-slate-800">{{ $iv->title ?? 'Interview' }}</div>
                             <div class="text-xs text-slate-600 mt-0.5">
                               {{ $acDt($iv->start_at) }}
                               @if($iv->mode) • {{ Str::title($iv->mode) }} @endif
                             </div>
                             @if($iv->location)
-                                  <div class="text-xs text-slate-600 truncate">Lokasi: {{ $iv->location }}</div>
+                                  <div class="text-xs truncate text-slate-600">Lokasi: {{ $iv->location }}</div>
                             @elseif($iv->meeting_link)
                                   <div class="text-xs">
                                     <a href="{{ $iv->meeting_link }}" target="_blank" class="text-blue-600 hover:underline">Link meeting</a>
@@ -132,7 +133,7 @@
               </ul>
         @endif
 
-        <div class="px-3 py-2 border-t border-slate-200 text-right">
+        <div class="px-3 py-2 text-right border-t border-slate-200">
           @if (Route::has('me.interviews.index'))
             <a href="{{ route('me.interviews.index') }}" class="text-sm text-blue-600 hover:underline">Lihat semua</a>
           @endif
@@ -161,7 +162,7 @@
 
       <div id="dd-notifs"
            class="dropdown-panel hidden absolute right-0 mt-2 w-[26rem] bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden z-40">
-        <div class="px-3 py-2 border-b border-slate-200 flex items-center justify-between">
+        <div class="flex items-center justify-between px-3 py-2 border-b border-slate-200">
           <div class="font-semibold text-slate-800">Notifikasi</div>
           <span id="notif-chip"
                 class="text-xs px-2 py-0.5 rounded-full bg-red-100 text-red-700 {{ $notifUnread > 0 ? '' : 'hidden' }}">
@@ -191,7 +192,7 @@
                   </span>
                 </div>
                 <div class="min-w-0">
-                  <div class="font-medium text-slate-800 truncate">{{ $title }}</div>
+                  <div class="font-medium truncate text-slate-800">{{ $title }}</div>
                   @if($desc)
                     <div class="text-xs text-slate-600 line-clamp-2">{{ $desc }}</div>
                   @endif
@@ -209,7 +210,7 @@
           @endforeach
         </ul>
 
-        <div class="px-3 py-2 border-t border-slate-200 text-right">
+        <div class="px-3 py-2 text-right border-t border-slate-200">
           @if (Route::has('me.notifications.index'))
             <a href="{{ route('me.notifications.index') }}" class="text-sm text-blue-600 hover:underline">Lihat semua</a>
           @endif
@@ -218,12 +219,12 @@
     </div>
 
     {{-- ====== Avatar ====== --}}
-    <a href="{{ route('profile.edit') }}" class="p-1 rounded-full border border-slate-200 hover:bg-slate-50" title="Profil">
+    <a href="{{ route('profile.edit') }}" class="p-1 border rounded-full border-slate-200 hover:bg-slate-50" title="Profil">
       @if($u && property_exists($u, 'profile_photo_url') && $u->profile_photo_url)
-        <img src="{{ $u->profile_photo_url }}" class="w-8 h-8 rounded-full object-cover" alt="{{ $u->name }}">
+        <img src="{{ $u->profile_photo_url }}" class="object-cover w-8 h-8 rounded-full" alt="{{ $u->name }}">
       @else
         @php $initial = $u && $u->name ? mb_strtoupper(mb_substr(trim($u->name), 0, 1)) : 'U'; @endphp
-        <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-700 grid place-content-center text-sm font-semibold">
+        <div class="grid w-8 h-8 text-sm font-semibold text-blue-700 bg-blue-100 rounded-full place-content-center">
           {{ $initial }}
         </div>
       @endif
@@ -363,7 +364,7 @@
                       </span>
                     </div>
                     <div class="min-w-0">
-                      <div class="font-medium text-slate-800 truncate">${title}</div>
+                      <div class="font-medium truncate text-slate-800">${title}</div>
                       ${body}
                       ${time}
                       ${link}
