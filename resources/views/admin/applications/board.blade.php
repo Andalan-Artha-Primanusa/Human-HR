@@ -132,6 +132,31 @@
 .kn-card-email { font-size: .7rem; color: #b89070; margin-top: .3rem; }
 .kn-card-role  { font-size: .68rem; color: #c0a080; margin-top: .1rem; }
 
+.kn-subcard {
+  margin-top: .7rem;
+  padding: .7rem .75rem;
+  border-radius: .7rem;
+  border: 1px solid #eadbcb;
+  background: #faf6f1;
+}
+.kn-subcard.hidden { display: none; }
+.kn-subcard-head {
+  display: flex; align-items: center; justify-content: space-between; gap: .5rem;
+  font-size: .68rem; font-weight: 800; color: #a77d52; text-transform: uppercase; letter-spacing: .35px;
+}
+.kn-subcard-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: .45rem .7rem; margin-top: .55rem;
+}
+.kn-subcard-item {
+  display: flex; flex-direction: column; gap: .08rem;
+}
+.kn-subcard-label {
+  font-size: .62rem; text-transform: uppercase; letter-spacing: .3px; color: #9a7558;
+}
+.kn-subcard-value {
+  font-size: .8rem; font-weight: 700; color: #3d1f08; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
 .kn-pill { display: inline-flex; align-items: center; gap: .25rem; font-size: .65rem; font-weight: 700; padding: .18rem .55rem; border-radius: 999px; letter-spacing: .2px; margin-top: .45rem; }
 .pill-active   { background: #fef3e2; color: #92580b; }
 .pill-hired    { background: #e6f4ea; color: #256629; }
@@ -157,6 +182,8 @@
 .fb-panel-toggle:hover { opacity: .85; }
 .fb-panel { display: flex; flex-wrap: wrap; gap: .4rem; padding-top: .6rem; padding-bottom: .4rem; border-top: 1px solid #f0e9df; }
 .fb-panel.hidden { display: none; }
+.btn-detail-toggle { background: #fff; border-color: #a77d52; color: #7a4f2a; }
+.btn-detail-toggle:hover { background: #f7f0e8; border-color: #a77d52; }
 
 /* ===== BUTTONS ===== */
 .btn-xs {
@@ -387,16 +414,200 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
                 data-gt-result="{{ $a->ground_test_result }}"
                 data-schedule-url="{{ route('admin.interviews.store', $a) }}"
               >
-                <div class="kn-card-name">
-                  @if(optional($a->user)->candidateProfile && Route::has('admin.candidates.show'))
-                    <a href="{{ route('admin.candidates.show', $a->user->candidateProfile) }}" target="_blank" class="hover:underline">{{ $a->user->name }}</a>
-                  @else
-                    {{ $a->user->name }}
-                  @endif
+                <div class="flex items-start justify-between gap-2">
+                  <div class="kn-card-name">
+                    @if(optional($a->user)->candidateProfile && Route::has('admin.candidates.show'))
+                      <a href="{{ route('admin.candidates.show', $a->user->candidateProfile) }}" target="_blank" class="hover:underline">{{ $a->user->name }}</a>
+                    @else
+                      {{ $a->user->name }}
+                    @endif
+                  </div>
+
+                  <span class="kn-pill
+                    @if($a->overall_status==='hired') pill-hired
+                    @elseif($a->overall_status==='not_qualified') pill-nq
+                    @else pill-active
+                    @endif"
+                    style="margin-top: 0; flex-shrink: 0;">
+                    {{ $a->overall_status === 'hired' ? '✓ Sudah Keterima' : ($a->overall_status === 'not_qualified' ? '✕ TIDAK lOLOS' : '● Active') }}
+                  </span>
                 </div>
                 <div class="kn-card-job">{{ $a->job->title }}</div>
                 <div class="kn-card-email">{{ $a->user->email }}</div>
-                <div class="kn-card-role">{{ $a->user->role === 'karyawan' ? 'User' : ($a->user->role === 'pelamar' ? 'Pelamar' : ucfirst($a->user->role)) }}</div>
+                <div class="kn-card-role">{{ $a->user->role === 'karyawan' ? 'User' : ($a->user->role === 'pelamar' ? 'Applicant' : ucfirst($a->user->role)) }}</div>
+
+                <div id="detail-{{ $a->id }}" class="hidden kn-subcard">
+                  <div class="kn-subcard-head">
+                    <span>Detail</span>
+                    <span>{{ strtoupper($stageKey) }}</span>
+                  </div>
+                  <div class="kn-subcard-grid">
+                    <div class="kn-subcard-item">
+                      <span class="kn-subcard-label">Nama</span>
+                      <span class="kn-subcard-value">{{ $a->user->name }}</span>
+                    </div>
+                    <div class="kn-subcard-item">
+                      <span class="kn-subcard-label">Lamar ke</span>
+                      <span class="kn-subcard-value">{{ $a->job->title }}</span>
+                    </div>
+                    <div class="kn-subcard-item">
+                      <span class="kn-subcard-label">Stage</span>
+                      <span class="kn-subcard-value">{{ $stageLabel }}</span>
+                    </div>
+                    <div class="kn-subcard-item">
+                      <span class="kn-subcard-label">Status</span>
+                      <span class="kn-subcard-value">{{ strtoupper($a->overall_status) }}</span>
+                    </div>
+                  </div>
+
+                  <div class="mt-3 overflow-hidden border rounded-xl border-[#eadbcb] bg-white">
+                    <div class="px-3 py-2 text-[11px] font-extrabold uppercase tracking-[0.35px] text-[#a77d52] bg-[#faf6f1] border-b border-[#eadbcb]">
+                      Terima OL
+                    </div>
+                    <div class="overflow-x-auto">
+                      <table class="w-full text-[11px] text-left">
+                        <thead class="bg-[#fcf9f6] text-[#9a7558] uppercase">
+                          <tr>
+                            <th class="px-3 py-2">Status</th>
+                            <th class="px-3 py-2">Gaji Pokok</th>
+                            <th class="px-3 py-2">Tunjangan</th>
+                            <th class="px-3 py-2">Catatan</th>
+                          </tr>
+                        </thead>
+                        <tbody class="divide-y divide-[#f0e8df]">
+                          @if(optional($a->offer)->status === 'accepted')
+                            @php
+                              $gross = data_get($a->offer->salary, 'gross', data_get($a->offer->salary, 'base', 0));
+                              $allow = data_get($a->offer->salary, 'allowance', 0);
+                              $note = $a->offer->body_template ?: 'Offering Letter sudah disetujui.';
+                            @endphp
+                            <tr>
+                              <td class="px-3 py-2 font-semibold text-emerald-700">Accepted</td>
+                              <td class="px-3 py-2 text-slate-700">{{ is_numeric($gross) ? number_format((float) $gross, 0, ',', '.') : $gross }}</td>
+                              <td class="px-3 py-2 text-slate-700">{{ is_numeric($allow) ? number_format((float) $allow, 0, ',', '.') : $allow }}</td>
+                              <td class="px-3 py-2 text-slate-600">{{ \Illuminate\Support\Str::limit($note, 60) }}</td>
+                            </tr>
+                          @else
+                            <tr>
+                              <td colspan="4" class="px-3 py-3 text-slate-500">Belum ada data OL yang diterima.</td>
+                            </tr>
+                          @endif
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+
+                  <div class="mt-3 flex flex-wrap gap-1.5">
+                    <button type="button" class="btn-xs btn-detail-toggle" onclick="toggleDetailPanel('detail-{{ $a->id }}', this)">
+                      ▲ Tutup
+                    </button>
+                    @if(optional($a->user)->candidateProfile && Route::has('admin.candidates.show'))
+                      <a class="btn-xs btn-outline" href="{{ route('admin.candidates.show', $a->user->candidateProfile) }}" target="_blank">Profil</a>
+                    @endif
+                    <a class="btn-xs btn-outline" href="{{ route('jobs.show', $a->job) }}" target="_blank">Job</a>
+                  </div>
+
+                  <div class="mt-3 flex flex-wrap gap-1.5">
+                    {{-- VIEW FEEDBACK BUTTONS --}}
+                    @if($fbHR || $fbUser || $fbTrainer || $fbEmployee)
+                      <button type="button" class="btn-xs btn-outline" onclick="openFbModal(this)">View Feedbacks</button>
+                    @endif
+
+                    {{-- SCHEDULE BUTTON (hr_iv, user_trainer_iv) --}}
+                    @if(in_array($stageKey, ['hr_iv','user_trainer_iv']))
+                      <button type="button" class="btn-xs btn-sched" onclick="openSchedModal(this, '{{ $stageKey }}')">
+                        Schedule
+                      </button>
+                    @endif
+
+                    {{-- FEEDBACK FORM BUTTONS (user_trainer_iv) - TOGGLE --}}
+                    @if($stageKey === 'user_trainer_iv' && ($isHR || $isTrainer || $isKaryawan))
+                      <button type="button" class="btn-xs fb-panel-toggle"
+                        onclick="toggleFbPanel('fbp-{{ $a->id }}', this)" title="Tampilkan form feedback">
+                        ⚠️ Feedback
+                      </button>
+                    @endif
+
+                    {{-- KIRIM OL EMAIL (hanya di offer) --}}
+                    @if($stageKey === 'offer' && $isHR)
+                      <button type="button" class="btn-xs btn-primary"
+                        onclick="openSendOlModal('{{ $a->id }}', '{{ addslashes($a->user->name) }}', '{{ optional($a->offer)->salary['gross'] ?? 0 }}', '{{ optional($a->offer)->salary['allowance'] ?? 0 }}', this)">
+                        ✉️ Kirim OL ke {{ $a->user->name }}
+                      </button>
+                    @endif
+
+                    {{-- KIRIM MCU EMAIL (hanya di mcu) --}}
+                    @if($stageKey === 'mcu' && $isHR)
+                      <button type="button" class="btn-xs btn-primary"
+                        onclick="openSendMcuModal('{{ $a->id }}', '{{ addslashes($a->user->name) }}', this)">
+                        ✉️ Kirim Undangan MCU ke {{ $a->user->name }}
+                      </button>
+                    @endif
+
+                    {{-- MOBILISASI ACTIONS --}}
+                    @if($stageKey === 'mobilisasi' && ($isHR || $isTrainer))
+                      <button type="button" class="btn-xs btn-primary"
+                        onclick="openMobilisasiModal('{{ $a->id }}', '{{ addslashes($a->user->name) }}', this)">
+                        ✈ Mobilisasi (Tiket & Email)
+                      </button>
+                    @endif
+
+                    {{-- GROUND TEST ACTIONS --}}
+                    @if($stageKey === 'ground_test' && ($isHR || $isTrainer))
+                      <button type="button" class="btn-xs btn-primary"
+                        onclick="openGroundTestModal('{{ $a->id }}', '{{ addslashes($a->user->name) }}', this)">
+                        📄 Update LAP & Hasil GT
+                      </button>
+                    @endif
+
+                    @if($stageKey === 'ground_test' && $isHR)
+                      <button type="button" class="btn-xs btn-outline"
+                        onclick="openFbForm(this, '{{ $a->id }}', '{{ $a->user->name }}', 'ground_test', 'hr')">
+                        + Feedback HR GT
+                      </button>
+                    @endif
+                    @if($stageKey === 'ground_test' && $isTrainer)
+                      <button type="button" class="btn-xs btn-outline"
+                        onclick="openFbForm(this, '{{ $a->id }}', '{{ $a->user->name }}', 'ground_test', 'trainer')">
+                        + Feedback Trainer GT
+                      </button>
+                    @endif
+                    @if($stageKey === 'ground_test' && $isKaryawan)
+                      <button type="button" class="btn-xs btn-outline"
+                        onclick="openFbForm(this, '{{ $a->id }}', '{{ $a->user->name }}', 'ground_test', 'karyawan')">
+                        + Feedback User GT
+                      </button>
+                    @endif
+
+                    {{-- FEEDBACK FORM BUTTON (hanya di hr_iv & belum ada feedback) --}}
+                    @if($stageKey === 'hr_iv' && !$fbHR && $isSuperHR)
+                      <button type="button" class="btn-xs btn-primary" style="background-color:#d97706; font-size:.7rem;"
+                        onclick="openFbForm(this, '{{ $a->id }}', '{{ $a->user->name }}', 'hr_iv', 'hr')" title="WAJIB isi feedback dan pilih setuju/tidak setuju sebelum bisa pindah ke stage lain">
+                        ⚠️ + Isi Feedback HR
+                      </button>
+                    @endif
+
+                    {{-- FREE MOVE DROPDOWN (admin/hr/superadmin, setelah user_trainer_iv) --}}
+                    @if($isFreeMove && $isSuperHR)
+                      <div class="free-move-wrap" style="width:100%; margin-top: auto;">
+                        <label>Pindahkan ke Stage</label>
+                        <select onchange="freeMoveCard(this, '{{ $a->id }}', '{{ $stageKey }}', '{{ csrf_token() }}', '{{ route('admin.applications.board.move') }}')">
+                          <option value="">— Pilih Stage —</option>
+                          @foreach($stages as $sk => $sl)
+                            @if($sk !== $stageKey)
+                              <option value="{{ $sk }}">{{ $sl }}</option>
+                            @endif
+                          @endforeach
+                        </select>
+                      </div>
+                    @elseif($stageKey === 'hr_iv' && !$fbHR && $isSuperHR)
+                      <div style="width:100%; padding:.6rem; background:#fed7aa; border:1px solid #fb923c; border-radius:.4rem; font-size:.65rem; color:#b45309; margin-top: auto; text-align:center; font-weight:600;">
+                        ⚠️ Selesaikan Feedback HR untuk pindah ke stage lain
+                      </div>
+                    @endif
+                  </div>
+                </div>
+
                 <span class="kn-pill
                   @if($a->overall_status==='hired') pill-hired
                   @elseif($a->overall_status==='not_qualified') pill-nq
@@ -434,139 +645,10 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
                 @endif
 
                 <div class="kn-card-actions">
-                  {{-- VIEW FEEDBACK BUTTONS --}}
-                  {{-- SCHEDULE BUTTON (hr_iv, user_trainer_iv) --}}
-                  @if(in_array($stageKey, ['hr_iv','user_trainer_iv']))
-                    <button type="button" class="btn-xs btn-sched"
-                      onclick="openSchedModal(this, '{{ $stageKey }}')">
-                      Schedule
-                    </button>
-                  @endif
-
-                  {{-- VIEW FEEDBACK BUTTONS --}}
-                  @if($fbHR || $fbUser || $fbTrainer || $fbEmployee)
-                    <button type="button" class="btn-xs btn-outline" onclick="openFbModal(this)">View Feedbacks</button>
-                  @endif
-
-                  {{-- FEEDBACK FORM BUTTONS (user_trainer_iv) - TOGGLE --}}
-                  @if($stageKey === 'user_trainer_iv' && ($isHR || $isTrainer || $isKaryawan))
-                    <button type="button" class="btn-xs fb-panel-toggle"
-                      onclick="toggleFbPanel('fbp-{{ $a->id }}', this)" title="Tampilkan form feedback">
-                      ⚠️ Feedback
-                    </button>
-                  @endif
-
-                  {{-- KIRIM OL EMAIL (hanya di offer) --}}
-                  @if($stageKey === 'offer' && $isHR)
-                    <button type="button" class="btn-xs btn-primary"
-                      onclick="openSendOlModal('{{ $a->id }}', '{{ addslashes($a->user->name) }}', '{{ optional($a->offer)->salary['gross'] ?? 0 }}', '{{ optional($a->offer)->salary['allowance'] ?? 0 }}', this)">
-                      ✉️ Kirim OL ke {{ $a->user->name }}
-                    </button>
-                  @endif
-
-                  {{-- KIRIM MCU EMAIL (hanya di mcu) --}}
-                  @if($stageKey === 'mcu' && $isHR)
-                    <button type="button" class="btn-xs btn-primary"
-                      onclick="openSendMcuModal('{{ $a->id }}', '{{ addslashes($a->user->name) }}', this)">
-                      ✉️ Kirim Undangan MCU ke {{ $a->user->name }}
-                    </button>
-
-                    <div style="width:100%; margin-top:8px;">
-                      <label style="font-size:0.65rem; font-weight:700; color:#64748b; text-transform:uppercase; display:block; margin-bottom:4px;">Hasil MCU:</label>
-                      <select class="btn-xs" style="width:100%; height:30px; border:1px solid #e2d9cf; border-radius:4px;" onchange="updateMcuResult(this, '{{ $a->id }}')">
-                        <option value="">— Pilih Hasil —</option>
-                        <option value="fit" {{ $a->mcu_result === 'fit' ? 'selected' : '' }}>✓ Fit</option>
-                        <option value="fit_note" {{ $a->mcu_result === 'fit_note' ? 'selected' : '' }}>⚠ Fit with Note</option>
-                        <option value="unfit" {{ $a->mcu_result === 'unfit' ? 'selected' : '' }}>✕ Unfit</option>
-                      </select>
-                    </div>
-                  @endif
-
-                  {{-- MOBILISASI ACTIONS --}}
-                  @if($stageKey === 'mobilisasi' && ($isHR || $isTrainer))
-                    <button type="button" class="btn-xs btn-primary"
-                      onclick="openMobilisasiModal('{{ $a->id }}', '{{ addslashes($a->user->name) }}', this)">
-                      ✈ Mobilisasi (Tiket & Email)
-                    </button>
-                    @if(isset($a->mobilisasi_meta['ticket_path']))
-                      @php $tpath = $a->mobilisasi_meta['ticket_path']; @endphp
-                      @if(
-                        $tpath && 
-                        Illuminate\Support\Facades\Storage::disk('public')->exists($tpath)
-                      )
-                        <a href="{{ Storage::url($tpath) }}" target="_blank" class="btn-xs btn-outline">Lihat Tiket</a>
-                      @else
-                        <span class="btn-xs btn-outline" title="File tidak ditemukan">Lihat Tiket (tidak ditemukan)</span>
-                      @endif
-                    @endif
-                  @endif
-
-                  {{-- GROUND TEST ACTIONS --}}
-                  @if($stageKey === 'ground_test' && ($isHR || $isTrainer))
-                    <button type="button" class="btn-xs btn-primary"
-                      onclick="openGroundTestModal('{{ $a->id }}', '{{ addslashes($a->user->name) }}', this)">
-                      📄 Update LAP & Hasil GT
-                    </button>
-                    @if(isset($a->ground_test_meta['lap_path']))
-                      @php $lpath = $a->ground_test_meta['lap_path']; @endphp
-                      @if($lpath && Illuminate\Support\Facades\Storage::disk('public')->exists($lpath))
-                        <a href="{{ route('admin.applications.ground-test.lap', $a) }}" target="_blank" class="btn-xs btn-outline">Lihat LAP</a>
-                      @else
-                        <span class="btn-xs btn-outline" title="File tidak ditemukan">Lihat LAP (tidak ditemukan)</span>
-                      @endif
-                    @endif
-                  @endif
-
-                  @if($stageKey === 'ground_test' && $isHR)
-                    <button type="button" class="btn-xs btn-outline"
-                      onclick="openFbForm(this, '{{ $a->id }}', '{{ $a->user->name }}', 'ground_test', 'hr')">
-                      + Feedback HR GT
-                    </button>
-                  @endif
-                  @if($stageKey === 'ground_test' && $isTrainer)
-                    <button type="button" class="btn-xs btn-outline"
-                      onclick="openFbForm(this, '{{ $a->id }}', '{{ $a->user->name }}', 'ground_test', 'trainer')">
-                      + Feedback Trainer GT
-                    </button>
-                  @endif
-                  @if($stageKey === 'ground_test' && $isKaryawan)
-                    <button type="button" class="btn-xs btn-outline"
-                      onclick="openFbForm(this, '{{ $a->id }}', '{{ $a->user->name }}', 'ground_test', 'karyawan')">
-                      + Feedback User GT
-                    </button>
-                  @endif
-
-                  {{-- FEEDBACK FORM BUTTON (hanya di hr_iv & belum ada feedback) --}}
-                  @if($stageKey === 'hr_iv' && !$fbHR && $isSuperHR)
-                    <button type="button" class="btn-xs btn-primary" style="flex:1; background-color:#d97706; font-size:.7rem;"
-                      onclick="openFbForm(this, '{{ $a->id }}', '{{ $a->user->name }}', 'hr_iv', 'hr')" title="WAJIB isi feedback dan pilih setuju/tidak setuju sebelum bisa pindah ke stage lain">
-                      ⚠️ + Isi Feedback HR
-                    </button>
-                  @endif
-
-                  {{-- FREE MOVE DROPDOWN (admin/hr/superadmin, setelah user_trainer_iv) --}}
-                  @if($isFreeMove && $isSuperHR)
-                    <div class="free-move-wrap" style="width:100%; margin-top: auto;">
-                      <label>Pindahkan ke Stage</label>
-                      <select onchange="freeMoveCard(this, '{{ $a->id }}', '{{ $stageKey }}', '{{ csrf_token() }}', '{{ route('admin.applications.board.move') }}')">
-                        <option value="">— Pilih Stage —</option>
-                        @foreach($stages as $sk => $sl)
-                          @if($sk !== $stageKey)
-                            <option value="{{ $sk }}">{{ $sl }}</option>
-                          @endif
-                        @endforeach
-                      </select>
-                    </div>
-                  @elseif($stageKey === 'hr_iv' && !$fbHR && $isSuperHR)
-                    <div style="width:100%; padding:.6rem; background:#fed7aa; border:1px solid #fb923c; border-radius:.4rem; font-size:.65rem; color:#b45309; margin-top: auto; text-align:center; font-weight:600;">
-                      ⚠️ Selesaikan Feedback HR untuk pindah ke stage lain
-                    </div>
-                  @endif
-
-                  @if(optional($a->user)->candidateProfile && Route::has('admin.candidates.show'))
-                    <a class="btn-xs btn-outline" href="{{ route('admin.candidates.show', $a->user->candidateProfile) }}" target="_blank">Profil</a>
-                  @endif
-                  <a class="btn-xs btn-outline" href="{{ route('jobs.show', $a->job) }}" target="_blank">Job</a>
+                    <button type="button" class="btn-xs btn-detail-toggle"
+                      onclick="toggleDetailPanel('detail-{{ $a->id }}', this)">
+                    ▼ Detail
+                  </button>
                 </div>
 
                 {{-- FEEDBACK PANEL (collapsible, hidden by default) --}}
@@ -719,299 +801,96 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
 
 {{-- ============================= MODAL: KIRIM OL EMAIL ============================= --}}
 <div class="hidden kn-overlay" id="overlay-send-ol">
-  <div class="kn-modal wide">
+  <div class="kn-modal">
     <div class="kn-modal-head">
       <div>
         <div class="kn-modal-title" id="send-ol-title">Kirim Offering Letter</div>
-        <div class="kn-modal-sub">Edit detail gaji dan isi pesan email sebelum dikirim ke kandidat</div>
+        <div class="kn-modal-sub">Upload dokumen Offering Letter untuk dikirim ke kandidat</div>
       </div>
       <button class="kn-modal-close" onclick="closeModal('overlay-send-ol')">✕</button>
     </div>
     <div class="kn-modal-body">
-      <form id="form-send-ol" method="POST" style="max-height: 65vh; overflow-y: auto; padding-right: 8px;">
+      <form id="form-send-ol" method="POST" enctype="multipart/form-data">
         @csrf
         <input type="hidden" name="app_id" id="send-ol-appid">
         
-        <div class="kn-modal-section">Identitas Surat</div>
-        
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
-          <div>
-            <label class="fm-label">Perusahaan (PT)</label>
-            <input type="text" name="company" id="send-ol-company" class="fm-ctrl">
-          </div>
-          <div>
-            <label class="fm-label">Nomor Surat</label>
-            <input type="text" name="doc_no" id="send-ol-doc-no" class="fm-ctrl">
+        <div style="padding: 20px; border: 2px dashed #ccc; border-radius: 8px; text-align: center; background: #f9f9f9; margin-bottom: 20px;">
+          <div style="margin-bottom: 15px;">
+            <label class="fm-label" style="display: block; font-size: 1rem; font-weight: 600; margin-bottom: 10px;">Pilih File Offering Letter</label>
+            <input type="file" name="offer_file" id="send-ol-file" class="fm-ctrl" accept=".pdf,.doc,.docx" required style="padding: 15px; cursor: pointer;">
+            <div style="font-size: 0.75rem; color: #666; margin-top: 8px;">Format: PDF, DOC, DOCX | Ukuran maks: 10MB</div>
           </div>
         </div>
 
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
-          <div>
-            <label class="fm-label">Grade / Level</label>
-            <select name="grade_level" id="send-ol-grade" class="fm-ctrl">
-              <option value="">-- Pilih Level --</option>
-              @foreach(\App\Models\Job::LEVEL_LABELS as $slug => $label)
-                <option value="{{ $label }}">{{ $label }}</option>
-              @endforeach
-              <option value="non_staff">Non Staff</option>
-            </select>
+        <div style="background: #fffbeb; border-left: 4px solid #fbbf24; padding: 12px; border-radius: 4px; margin-bottom: 15px;">
+          <div style="font-size: 0.85rem; color: #92400e; font-weight: 500;">
+            ℹ️ File akan langsung dikirim ke kandidat sebagai lampiran email Offering Letter.
           </div>
-          <div>
-            <label class="fm-label">PoH (Tempat Penerimaan)</label>
-            <select name="poh" id="send-ol-poh" class="fm-ctrl">
-              <option value="">-- Pilih PoH --</option>
-              @foreach($pohs as $p)
-                <option value="{{ $p->name }}">{{ $p->name }}</option>
-              @endforeach
-            </select>
-          </div>
-        </div>
-
-        <div class="kn-modal-section">Lokasi & Status</div>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
-          <div>
-            <label class="fm-label">Lokasi Kerja</label>
-            <select name="lokasi" id="send-ol-lokasi" class="fm-ctrl">
-              <option value="">-- Pilih Lokasi --</option>
-              @foreach($sites as $s)
-                @php $val = "Site " . $s->code . " – " . $s->name; @endphp
-                <option value="{{ $val }}">{{ $val }}</option>
-              @endforeach
-            </select>
-          </div>
-          <div>
-            <label class="fm-label">Status Perjanjian</label>
-            <input type="text" name="contract_status" id="send-ol-contract" class="fm-ctrl" value="PKWT 6 Bulan">
-          </div>
-        </div>
-
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
-          <div>
-            <label class="fm-label">Tgl Bergabung</label>
-            <input type="date" name="join_date" id="send-ol-join-date" class="fm-ctrl">
-          </div>
-          <div>
-            <label class="fm-label">Waktu Kerja</label>
-            <input type="text" name="working_hours" id="send-ol-hours" class="fm-ctrl">
-          </div>
-        </div>
-
-        <div style="margin-bottom:12px;">
-          <label class="fm-label">Jadwal Kerja / Roster</label>
-          <input type="text" name="working_schedule" id="send-ol-schedule" class="fm-ctrl">
-        </div>
-
-        <div class="kn-modal-section">Kompensasi & Benefit</div>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
-          <div>
-            <label class="fm-label">Gaji Pokok (Gross)</label>
-            <input type="number" name="gross" id="send-ol-gross" class="fm-ctrl" required>
-          </div>
-          <div>
-            <label class="fm-label">Site Allowance (Nett)</label>
-            <input type="number" name="allowance" id="send-ol-allow" class="fm-ctrl" required>
-          </div>
-        </div>
-
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
-          <div>
-            <label class="fm-label">Uang Makan</label>
-            <input type="text" name="meals_allowance" id="send-ol-meals" class="fm-ctrl">
-          </div>
-          <div>
-            <label class="fm-label">Lembur</label>
-            <input type="text" name="overtime" id="send-ol-overtime" class="fm-ctrl">
-          </div>
-        </div>
-
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
-          <div>
-            <label class="fm-label">Pajak Penghasilan</label>
-            <input type="text" name="tax_borne_by" id="send-ol-tax" class="fm-ctrl" value="Ditanggung Perusahaan">
-          </div>
-          <div>
-            <label class="fm-label">Pengurangan (BPJS dll)</label>
-            <input type="text" name="deductions" id="send-ol-deductions" class="fm-ctrl">
-          </div>
-        </div>
-
-        <div class="kn-modal-section">Penandatangan</div>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
-          <div>
-            <label class="fm-label">Nama Lengkap</label>
-            <input type="text" name="signer_name" id="send-ol-signer-name" class="fm-ctrl">
-          </div>
-          <div>
-            <label class="fm-label">Jabatan</label>
-            <input type="text" name="signer_title" id="send-ol-signer-title" class="fm-ctrl">
-          </div>
-        </div>
-
-        <div class="kn-modal-section">Footer Dokumen</div>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
-          <div>
-            <label class="fm-label">Kode Dokumen</label>
-            <input type="text" name="footer_code" id="send-ol-footer-code" class="fm-ctrl" value="AAP-HRM-SDF-003">
-          </div>
-          <div>
-            <label class="fm-label">Versi / Tanggal</label>
-            <input type="text" name="footer_version" id="send-ol-footer-version" class="fm-ctrl" value="v01/01/2022">
-          </div>
-        </div>
-        <div style="margin-bottom:12px;">
-            <label class="fm-label">Teks Halaman (Footer)</label>
-            <input type="text" name="footer_page_text" id="send-ol-footer-page" class="fm-ctrl" value="Page {PAGE_NUM} of {PAGE_COUNT}">
-        </div>
-
-        <div class="kn-modal-section">Pesan Email</div>
-        <div style="margin-bottom:12px;">
-          <textarea name="email_body" id="send-ol-body" class="fm-ctrl" style="height:120px;"></textarea>
-          <div style="font-size:0.65rem;color:#888;margin-top:6px; font-style:italic;">* PDF Offering Letter akan dilampirkan otomatis.</div>
         </div>
       </form>
     </div>
     <div class="kn-modal-footer">
       <button class="btn-xs btn-outline" onclick="closeModal('overlay-send-ol')">Batal</button>
-      <button class="btn-xs btn-primary" id="btn-send-ol" onclick="submitSendOl()">Kirim Email & Simpan</button>
+      <button class="btn-xs btn-primary" id="btn-send-ol" onclick="submitSendOl()">Upload & Kirim</button>
     </div>
   </div>
 </div>
 
 {{-- ============================= MODAL: KIRIM MCU EMAIL ============================= --}}
 <div class="hidden kn-overlay" id="overlay-send-mcu">
-  <div class="kn-modal wide">
+  <div class="kn-modal">
     <div class="kn-modal-head">
       <div>
         <div class="kn-modal-title" id="send-mcu-title">Kirim Undangan MCU</div>
-        <div class="kn-modal-sub">Edit detail surat dan instruksi MCU sebelum dikirim</div>
+        <div class="kn-modal-sub">Upload dokumen Undangan MCU untuk dikirim ke kandidat</div>
       </div>
       <button class="kn-modal-close" onclick="closeModal('overlay-send-mcu')">✕</button>
     </div>
     <div class="kn-modal-body">
-      <form id="form-send-mcu" method="POST" style="max-height: 65vh; overflow-y: auto; padding-right: 8px;">
+      <form id="form-send-mcu" method="POST" enctype="multipart/form-data">
         @csrf
         <input type="hidden" name="app_id" id="send-mcu-appid">
+        <input type="hidden" name="company_name" id="send-mcu-company-name">
+        <input type="hidden" name="doc_no" id="send-mcu-doc-no">
+        <input type="hidden" name="city" id="send-mcu-city">
+        <input type="hidden" name="project_name" id="send-mcu-project-name">
+        <input type="hidden" name="clinic_name" id="send-mcu-clinic">
+        <input type="hidden" name="clinic_city" id="send-mcu-clinic-city">
+        <input type="hidden" name="clinic_address" id="send-mcu-address">
+        <input type="hidden" name="mcu_date" id="send-mcu-date">
+        <input type="hidden" name="mcu_time" id="send-mcu-time">
+        <input type="hidden" name="for_text" id="send-mcu-for">
+        <input type="hidden" name="bu_name" id="send-mcu-bu">
+        <input type="hidden" name="matrix_owner" id="send-mcu-owner">
+        <input type="hidden" name="package" id="send-mcu-package">
+        <input type="hidden" name="notes" id="send-mcu-notes">
+        <input type="hidden" name="result_emails" id="send-mcu-result-emails">
+        <input type="hidden" name="signer_name" id="send-mcu-signer-name">
+        <input type="hidden" name="signer_title" id="send-mcu-signer-title">
+        <input type="hidden" name="footer_company_name" id="send-mcu-footer-company">
+        <input type="hidden" name="footer_address" id="send-mcu-footer-address">
+        <input type="hidden" name="footer_email" id="send-mcu-footer-email">
+        <input type="hidden" name="footer_website" id="send-mcu-footer-website">
+        <input type="hidden" name="email_body" id="send-mcu-body">
         
-        <div class="kn-modal-section">Informasi Dokumen & Header</div>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
-          <div>
-            <label class="fm-label">Nama Perusahaan (Header)</label>
-            <input type="text" name="company_name" id="send-mcu-company-name" class="fm-ctrl">
-          </div>
-          <div>
-            <label class="fm-label">Nomor Surat</label>
-            <input type="text" name="doc_no" id="send-mcu-doc-no" class="fm-ctrl">
-          </div>
-        </div>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
-          <div>
-            <label class="fm-label">Kota Penerbitan</label>
-            <input type="text" name="city" id="send-mcu-city" class="fm-ctrl">
-          </div>
-          <div>
-            <label class="fm-label">Nama Project (Red Box)</label>
-            <input type="text" name="project_name" id="send-mcu-project-name" class="fm-ctrl">
+        <div style="padding: 20px; border: 2px dashed #ccc; border-radius: 8px; text-align: center; background: #f9f9f9; margin-bottom: 20px;">
+          <div style="margin-bottom: 15px;">
+            <label class="fm-label">Pilih File Undangan MCU</label>
+            <input type="file" name="mcu_file" id="send-mcu-file" class="fm-ctrl" accept=".pdf,.doc,.docx" required style="padding: 15px; cursor: pointer;">
+            <div style="font-size: 0.75rem; color: #666; margin-top: 8px;">Format: PDF, DOC, DOCX | Ukuran maks: 10MB</div>
           </div>
         </div>
 
-        <div class="kn-modal-section">Informasi Klinik / Vendor</div>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
-          <div>
-            <label class="fm-label">Nama Klinik / RS</label>
-            <input type="text" name="clinic_name" id="send-mcu-clinic" class="fm-ctrl" required>
+        <div style="background: #fffbeb; border-left: 4px solid #fbbf24; padding: 12px; border-radius: 4px; margin-bottom: 15px;">
+          <div style="font-size: 0.85rem; color: #92400e; font-weight: 500;">
+            ℹ️ File akan langsung dikirim ke kandidat sebagai lampiran email Undangan MCU.
           </div>
-          <div>
-            <label class="fm-label">Kota Klinik</label>
-            <input type="text" name="clinic_city" id="send-mcu-clinic-city" class="fm-ctrl">
-          </div>
-        </div>
-        <div style="margin-bottom:12px;">
-          <label class="fm-label">Alamat Klinik</label>
-          <input type="text" name="clinic_address" id="send-mcu-address" class="fm-ctrl" required>
-        </div>
-
-        <div class="kn-modal-section">Detail MCU</div>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
-          <div>
-            <label class="fm-label">Tanggal MCU</label>
-            <input type="date" name="mcu_date" id="send-mcu-date" class="fm-ctrl" required>
-          </div>
-          <div>
-            <label class="fm-label">Waktu / Jam</label>
-            <input type="text" name="mcu_time" id="send-mcu-time" class="fm-ctrl" value="08:00" required>
-          </div>
-        </div>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
-          <div>
-            <label class="fm-label">Text "for" (e.g. Pre-Employee)</label>
-            <input type="text" name="for_text" id="send-mcu-for" class="fm-ctrl">
-          </div>
-          <div>
-            <label class="fm-label">Nama BU (PT. <<BU>>)</label>
-            <input type="text" name="bu_name" id="send-mcu-bu" class="fm-ctrl">
-          </div>
-        </div>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
-          <div>
-            <label class="fm-label">Matrix Owner (PT. <<Owner>>)</label>
-            <input type="text" name="matrix_owner" id="send-mcu-owner" class="fm-ctrl">
-          </div>
-          <div>
-            <label class="fm-label">Package</label>
-            <input type="text" name="package" id="send-mcu-package" class="fm-ctrl">
-          </div>
-        </div>
-
-        <div class="kn-modal-section">Instruksi & Email Hasil</div>
-        <div style="margin-bottom:12px;">
-          <label class="fm-label">Catatan / Instruksi (PDF)</label>
-          <textarea name="notes" id="send-mcu-notes" class="fm-ctrl" style="height:100px;"></textarea>
-        </div>
-        <div style="margin-bottom:12px;">
-          <label class="fm-label">Email Hasil (per baris)</label>
-          <textarea name="result_emails" id="send-mcu-result-emails" class="fm-ctrl" style="height:80px;"></textarea>
-        </div>
-
-        <div class="kn-modal-section">Penandatangan & Footer</div>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
-          <div>
-            <label class="fm-label">Nama Penandatangan</label>
-            <input type="text" name="signer_name" id="send-mcu-signer-name" class="fm-ctrl">
-          </div>
-          <div>
-            <label class="fm-label">Jabatan</label>
-            <input type="text" name="signer_title" id="send-mcu-signer-title" class="fm-ctrl">
-          </div>
-        </div>
-        <div style="margin-bottom:12px;">
-          <label class="fm-label">Nama Perusahaan (Footer)</label>
-          <input type="text" name="footer_company_name" id="send-mcu-footer-company" class="fm-ctrl">
-        </div>
-        <div style="margin-bottom:12px;">
-          <label class="fm-label">Alamat Footer</label>
-          <input type="text" name="footer_address" id="send-mcu-footer-address" class="fm-ctrl">
-        </div>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
-          <div>
-            <label class="fm-label">Email Footer</label>
-            <input type="text" name="footer_email" id="send-mcu-footer-email" class="fm-ctrl">
-          </div>
-          <div>
-            <label class="fm-label">Website Footer</label>
-            <input type="text" name="footer_website" id="send-mcu-footer-website" class="fm-ctrl">
-          </div>
-        </div>
-
-        <div class="kn-modal-section">Pesan Email</div>
-        <div style="margin-bottom:12px;">
-          <textarea name="email_body" id="send-mcu-body" class="fm-ctrl" style="height:100px;"></textarea>
-          <div style="font-size:0.65rem;color:#888;margin-top:6px; font-style:italic;">* PDF Surat Undangan akan dilampirkan otomatis.</div>
         </div>
       </form>
     </div>
     <div class="kn-modal-footer">
       <button class="btn-xs btn-outline" onclick="closeModal('overlay-send-mcu')">Batal</button>
-      <button class="btn-xs btn-primary" id="btn-send-mcu" onclick="submitSendMcu()">Kirim Email MCU</button>
+      <button class="btn-xs btn-primary" id="btn-send-mcu" onclick="submitSendMcu()">Upload & Kirim</button>
     </div>
   </div>
 </div>
@@ -1186,46 +1065,15 @@ function openFbModal(btn) {
 }
 
 function openSendOlModal(appId, name, gross, allow, btn) {
-  const card = getCard(btn);
-  const existingBody = card.dataset.offerBody;
-  let meta = {};
-  try {
-    meta = JSON.parse(card.dataset.offerMeta || '{}');
-  } catch(e) { meta = {}; }
-
+  // Simplified for upload-only modal
   document.getElementById('send-ol-appid').value = appId;
   document.getElementById('send-ol-title').textContent = 'Kirim Offering Letter — ' + name;
-  document.getElementById('send-ol-gross').value = gross || 0;
-  document.getElementById('send-ol-allow').value = allow || 0;
-  
-  // Populate meta fields
-  document.getElementById('send-ol-company').value = meta.company || card.dataset.company || 'ANDALAN BHUMI NUSANTARA';
-  document.getElementById('send-ol-doc-no').value = meta.doc_no || '';
-  document.getElementById('send-ol-grade').value = meta.grade_level || card.dataset.level || '';
-  document.getElementById('send-ol-poh').value = meta.poh || card.dataset.poh || '';
-  document.getElementById('send-ol-lokasi').value = meta.lokasi || '';
-  document.getElementById('send-ol-contract').value = meta.contract_status || 'PKWT 6 Bulan';
-  document.getElementById('send-ol-join-date').value = meta.join_date || '';
-  document.getElementById('send-ol-hours').value = meta.working_hours || 'Senin – Minggu : Shift 1 & 2';
-  document.getElementById('send-ol-schedule').value = meta.working_schedule || '<Roster Kerja>';
-  document.getElementById('send-ol-meals').value = meta.meals_allowance || '';
-  document.getElementById('send-ol-overtime').value = meta.overtime || 'Ditanggung Perusahaan';
-  document.getElementById('send-ol-tax') ? document.getElementById('send-ol-tax').value = meta.tax_borne_by || 'Ditanggung Perusahaan' : null;
-  document.getElementById('send-ol-deductions').value = meta.deductions || 'BPJS JHT 2% • BPJS JP 1% • BPJS Kesehatan 1%';
-  document.getElementById('send-ol-signer-name').value = meta.signer_name || '';
-  document.getElementById('send-ol-signer-title').value = meta.signer_title || '';
-  document.getElementById('send-ol-footer-code').value = meta.footer_code || 'AAP-HRM-SDF-003';
-  document.getElementById('send-ol-footer-version').value = meta.footer_version || 'v01/01/2022';
-  document.getElementById('send-ol-footer-page').value = meta.footer_page_text || 'Page {PAGE_NUM} of {PAGE_COUNT}';
-  
-  if (existingBody && existingBody !== 'null' && existingBody.trim() !== '') {
-    document.getElementById('send-ol-body').value = existingBody;
-  } else {
-    document.getElementById('send-ol-body').value = "Selamat! Anda telah mencapai tahap Offering.\n\nTerlampir adalah dokumen Offering Letter Anda. Silakan unduh, pelajari, dan berikan tanggapan Anda.\n\nTerima kasih.";
-  }
   
   const form = document.getElementById('form-send-ol');
   form.action = `/admin/applications/${appId}/send-offer`;
+  
+  // Reset file input
+  document.getElementById('send-ol-file').value = '';
   
   openModal('overlay-send-ol');
 }
@@ -1246,55 +1094,86 @@ function openSendMcuModal(appId, name, btn) {
   } catch(e) { meta = {}; }
 
   const tpl = @json($mcuTemplate);
+  const setValue = (id, value) => {
+    const element = document.getElementById(id);
+    if (element) element.value = value ?? '';
+  };
+  const setText = (id, value) => {
+    const element = document.getElementById(id);
+    if (element) element.textContent = value ?? '';
+  };
 
-  document.getElementById('send-mcu-appid').value = appId;
-  document.getElementById('send-mcu-title').textContent = 'Kirim Undangan MCU — ' + name;
-  
-  document.getElementById('send-mcu-company-name').value = meta.company_name || (tpl ? tpl.company_name : 'ANDALAN');
-  document.getElementById('send-mcu-doc-no').value       = meta.doc_no || '';
-  document.getElementById('send-mcu-city').value         = meta.city || (tpl ? tpl.city : 'Jakarta');
-  document.getElementById('send-mcu-project-name').value = meta.project_name || (tpl ? tpl.project_name : 'PROJECT');
-  
-  document.getElementById('send-mcu-clinic').value       = meta.clinic_name || (tpl ? tpl.vendor_name : '');
-  document.getElementById('send-mcu-clinic-city').value  = meta.clinic_city || '';
-  document.getElementById('send-mcu-address').value      = meta.clinic_address || (tpl ? tpl.vendor_address : '');
-  
-  document.getElementById('send-mcu-date').value         = meta.mcu_date || '';
-  document.getElementById('send-mcu-time').value         = meta.mcu_time || '08:00';
-  
-  document.getElementById('send-mcu-for').value          = meta.for_text || (tpl ? tpl.for_text : '');
-  document.getElementById('send-mcu-bu').value           = meta.bu_name || (tpl ? tpl.bu_name : '');
-  document.getElementById('send-mcu-owner').value        = meta.matrix_owner || (tpl ? tpl.matrix_owner : '');
-  document.getElementById('send-mcu-package').value      = meta.package || '';
-  
-  document.getElementById('send-mcu-notes').value         = meta.notes || (tpl ? tpl.notes : "1. Bagi kandidat berusia > 40 tahun, diwajibkan menjalani pemeriksaan treadmill.\n2. Mohon cocokan KTP asli dengan identitas kandidat yang akan diperiksa.");
-  document.getElementById('send-mcu-result-emails').value = meta.result_emails || (tpl ? tpl.result_emails : "hendy.fardiansyah@pt-aap.com\nvidya.paramitha.putri@pt-aap.com\nrizal.abu@pt-aap.com");
+  setValue('send-mcu-appid', appId);
+  setText('send-mcu-title', 'Kirim Undangan MCU — ' + name);
 
-  document.getElementById('send-mcu-signer-name').value    = meta.signer_name || (tpl ? tpl.signer_name : 'Roy/Hansen C. Saragi');
-  document.getElementById('send-mcu-signer-title').value   = meta.signer_title || (tpl ? tpl.signer_title : 'General Manager');
-  document.getElementById('send-mcu-footer-company').value = meta.footer_company_name || (tpl ? tpl.footer_company_name : 'PT. Andalan Artha Primanusa');
-  document.getElementById('send-mcu-footer-address').value = meta.footer_address || (tpl ? tpl.footer_address : 'Jl. Plaju No.11 Kebon Melati, Tanah Abang Jakarta Pusat 10230 DKI Jakarta – Indonesia');
-  document.getElementById('send-mcu-footer-email').value   = meta.footer_email || (tpl ? tpl.footer_email : 'corporatesecretary@andalan-nusantara.com');
-  document.getElementById('send-mcu-footer-website').value = meta.footer_website || (tpl ? tpl.footer_website : 'www.andalan-nusantara.com');
+  setValue('send-mcu-company-name', meta.company_name || (tpl ? tpl.company_name : 'ANDALAN'));
+  setValue('send-mcu-doc-no', meta.doc_no || '');
+  setValue('send-mcu-city', meta.city || (tpl ? tpl.city : 'Jakarta'));
+  setValue('send-mcu-project-name', meta.project_name || (tpl ? tpl.project_name : 'PROJECT'));
 
-  if (meta.email_body) {
-    document.getElementById('send-mcu-body').value = meta.email_body;
-  } else {
-    document.getElementById('send-mcu-body').value = "Selamat! Anda telah lolos ke tahap Medical Check Up (MCU).\n\nTerlampir adalah Surat Undangan MCU resmi yang berisi detail jadwal, lokasi, dan instruksi persiapan yang wajib Anda patuhi.\n\nMohon hadir tepat waktu.";
-  }
-  
+  setValue('send-mcu-clinic', meta.clinic_name || (tpl ? tpl.vendor_name : ''));
+  setValue('send-mcu-clinic-city', meta.clinic_city || '');
+  setValue('send-mcu-address', meta.clinic_address || (tpl ? tpl.vendor_address : ''));
+
+  setValue('send-mcu-date', meta.mcu_date || '');
+  setValue('send-mcu-time', meta.mcu_time || '08:00');
+
+  setValue('send-mcu-for', meta.for_text || (tpl ? tpl.for_text : ''));
+  setValue('send-mcu-bu', meta.bu_name || (tpl ? tpl.bu_name : ''));
+  setValue('send-mcu-owner', meta.matrix_owner || (tpl ? tpl.matrix_owner : ''));
+  setValue('send-mcu-package', meta.package || '');
+
+  setValue('send-mcu-notes', meta.notes || (tpl ? tpl.notes : "1. Bagi kandidat berusia > 40 tahun, diwajibkan menjalani pemeriksaan treadmill.\n2. Mohon cocokan KTP asli dengan identitas kandidat yang akan diperiksa."));
+  setValue('send-mcu-result-emails', meta.result_emails || (tpl ? tpl.result_emails : "hendy.fardiansyah@pt-aap.com\nvidya.paramitha.putri@pt-aap.com\nrizal.abu@pt-aap.com"));
+
+  setValue('send-mcu-signer-name', meta.signer_name || (tpl ? tpl.signer_name : 'Roy/Hansen C. Saragi'));
+  setValue('send-mcu-signer-title', meta.signer_title || (tpl ? tpl.signer_title : 'General Manager'));
+  setValue('send-mcu-footer-company', meta.footer_company_name || (tpl ? tpl.footer_company_name : 'PT. Andalan Artha Primanusa'));
+  setValue('send-mcu-footer-address', meta.footer_address || (tpl ? tpl.footer_address : 'Jl. Plaju No.11 Kebon Melati, Tanah Abang Jakarta Pusat 10230 DKI Jakarta – Indonesia'));
+  setValue('send-mcu-footer-email', meta.footer_email || (tpl ? tpl.footer_email : 'corporatesecretary@andalan-nusantara.com'));
+  setValue('send-mcu-footer-website', meta.footer_website || (tpl ? tpl.footer_website : 'www.andalan-nusantara.com'));
+
+  setValue('send-mcu-body', meta.email_body || "Selamat! Anda telah lolos ke tahap Medical Check Up (MCU).\n\nTerlampir adalah Surat Undangan MCU resmi yang berisi detail jadwal, lokasi, dan instruksi persiapan yang wajib Anda patuhi.\n\nMohon hadir tepat waktu.");
+
   const form = document.getElementById('form-send-mcu');
-  form.action = `/admin/applications/${appId}/send-mcu`;
+  if (form) form.action = `/admin/applications/${appId}/send-mcu`;
   
   openModal('overlay-send-mcu');
 }
 
 function submitSendMcu() {
   const form = document.getElementById('form-send-mcu');
-  if(!form.reportValidity()) return;
-  document.getElementById('btn-send-mcu').textContent = 'Mengirim...';
-  document.getElementById('btn-send-mcu').disabled = true;
-  form.submit();
+  const button = document.getElementById('btn-send-mcu');
+  if (!form.reportValidity()) return;
+
+  const formData = new FormData(form);
+  button.textContent = 'Mengirim...';
+  button.disabled = true;
+
+  fetch(form.action, {
+    method: 'POST',
+    headers: {
+      'X-CSRF-TOKEN': form.querySelector('input[name="_token"]').value,
+      'Accept': 'application/json'
+    },
+    body: formData
+  })
+    .then(async (response) => {
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(data.message || 'Gagal mengupload dokumen MCU');
+      }
+      showToast(data.message || 'Dokumen MCU berhasil diupload.', 'ok');
+      closeModal('overlay-send-mcu');
+      window.location.reload();
+    })
+    .catch((error) => {
+      showToast(error.message || 'Gagal mengupload dokumen MCU', 'err');
+    })
+    .finally(() => {
+      button.textContent = 'Upload & Kirim';
+      button.disabled = false;
+    });
 }
 
 function deleteFeedback(appId, role, csrf) {
@@ -1401,6 +1280,13 @@ function toggleFbPanel(panelId, btn) {
   if (!panel) return;
   panel.classList.toggle('hidden');
   if (btn) btn.textContent = panel.classList.contains('hidden') ? '⚠️ Feedback' : '✕ Tutup';
+}
+
+function toggleDetailPanel(panelId, btn) {
+  const panel = document.getElementById(panelId);
+  if (!panel) return;
+  panel.classList.toggle('hidden');
+  if (btn) btn.textContent = panel.classList.contains('hidden') ? '▼ Detail Pelamar' : '▲ Tutup Detail';
 }
 
 function openFbForm(btn, appId, name, stage, role = 'hr') {

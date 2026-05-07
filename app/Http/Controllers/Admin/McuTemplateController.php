@@ -102,4 +102,60 @@ class McuTemplateController extends Controller
         $mcuTemplate->delete();
         return redirect()->route('admin.mcu-templates.index')->with('ok', 'Template MCU berhasil dihapus.');
     }
+
+    public function preview(McuTemplate $mcuTemplate)
+    {
+        // Prepare mock mcu_meta data untuk preview
+        $mcu_meta = [
+            'company_name' => $mcuTemplate->company_name ?? 'ANDALAN',
+            'city' => $mcuTemplate->city ?? 'Jakarta',
+            'doc_date' => now(),
+            'doc_no' => 'No. Surat Preview',
+            'project_name' => $mcuTemplate->project_name ?? 'PROJECT',
+            'clinic_name' => $mcuTemplate->vendor_name ?? 'Nama Klinik / RS',
+            'clinic_address' => $mcuTemplate->vendor_address ?? 'Alamat Vendor MCU',
+            'subject' => $mcuTemplate->subject ?? 'Medical Check Up – Pre Employee',
+            'for_text' => $mcuTemplate->for_text ?? 'Pre-Employment',
+            'bu_name' => $mcuTemplate->bu_name ?? 'PT. Andalan Artha Primanusa',
+            'matrix_owner' => $mcuTemplate->matrix_owner ?? 'Andalan Artha Primanusa',
+            'package' => $mcuTemplate->package ?? 'Paket Standard',
+            'mcu_date' => now()->addDays(7),
+            'notes' => $mcuTemplate->notes ?? '1. Bagi kandidat berusia > 40 tahun, diwajibkan menjalani pemeriksaan treadmill.\n2. Mohon cocokan KTP asli dengan identitas kandidat yang akan diperiksa.',
+            'result_emails' => $mcuTemplate->result_emails ?? 'email@example.com',
+            'signer_name' => $mcuTemplate->signer_name ?? 'Roy/Hansen C. Saragi',
+            'signer_title' => $mcuTemplate->signer_title ?? 'General Manager',
+            'footer_company_name' => $mcuTemplate->footer_company_name ?? 'PT. Andalan Artha Primanusa',
+            'footer_address' => $mcuTemplate->footer_address ?? 'Jl. Plaju No.11 Kebon Melati, Tanah Abang Jakarta Pusat 10230 DKI Jakarta – Indonesia',
+            'footer_email' => $mcuTemplate->footer_email ?? 'corporatesecretary@andalan-nusantara.com',
+            'footer_website' => $mcuTemplate->footer_website ?? 'www.andalan-nusantara.com',
+        ];
+
+        // Mock application dengan struktur lengkap untuk preview
+        $application = (object) [
+            'id' => 'PREVIEW-001',
+            'user' => (object) [
+                'id_employe' => 'EMP000001',
+                'name' => 'Nama Kandidat (Preview)',
+                'candidateProfile' => (object) [
+                    'dob' => now()->subYears(30),
+                ]
+            ],
+            'job' => (object) [
+                'title' => 'Posisi (Preview)',
+                'site' => (object) [
+                    'code' => 'PJK001'
+                ]
+            ],
+        ];
+
+        // Generate HTML dari view
+        $html = view('mcu.pdf', compact('application', 'mcu_meta'))->render();
+        
+        // Generate PDF
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadHTML($html)
+            ->setPaper('a4')
+            ->setWarnings(false);
+
+        return $pdf->stream('Preview-Template-MCU-' . $mcuTemplate->id . '.pdf');
+    }
 }

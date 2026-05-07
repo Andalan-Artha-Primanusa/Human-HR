@@ -158,6 +158,7 @@ Route::prefix('admin')
         // ================= Manpower =================
         Route::resource('pohs', \App\Http\Controllers\Admin\PohController::class);
         Route::resource('mcu-templates', \App\Http\Controllers\Admin\McuTemplateController::class);
+        Route::get('mcu-templates/{mcuTemplate}/preview', [\App\Http\Controllers\Admin\McuTemplateController::class, 'preview'])->name('mcu-templates.preview');
 
         Route::get('manpower', [ManpowerRequirementController::class, 'index'])->name('manpower.index');
         Route::post('manpower/preview', [ManpowerRequirementController::class, 'preview'])->name('manpower.preview');

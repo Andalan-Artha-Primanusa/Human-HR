@@ -87,7 +87,8 @@ class ApplicationControllerFeatureTest extends TestCase
 
     public function test_pelamar_store_with_poh()
     {
-        $poh = Poh::create([
+        // Create a POH first
+        $poh = \App\Models\Poh::create([
             'name' => 'Test POH',
             'code' => 'TPOH-01',
             'address' => 'Test Address',
@@ -96,15 +97,25 @@ class ApplicationControllerFeatureTest extends TestCase
 
         $this->actingAs($this->pelamar);
 
-        $this->post(route('applications.store', $this->job), [
+        // Verify validation passes
+        $response = $this->post(route('applications.store', $this->job), [
             'poh_id' => $poh->id,
         ]);
 
+        $response->assertRedirect();
+        
+        // Check the application was created with poh_id
         $this->assertDatabaseHas('job_applications', [
             'job_id' => $this->job->id,
             'user_id' => $this->pelamar->id,
-            'poh_id' => $poh->id,
         ]);
+        
+        $app = \App\Models\JobApplication::where('user_id', $this->pelamar->id)
+            ->where('job_id', $this->job->id)
+            ->first();
+            
+        $this->assertNotNull($app);
+        $this->assertEquals($poh->id, $app->poh_id);
     }
 
     public function test_pelamar_store_creates_application_stage()

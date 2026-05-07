@@ -49,6 +49,15 @@
             default => 'bg-[#f5efe8] text-[#6b4f3a]',
         };
     };
+
+    $statusLabel = function ($overall) {
+      return match (strtolower((string) $overall)) {
+        'hired' => 'Sudah Keterima',
+        'rejected' => 'Ditolak',
+        'active' => 'Masih Berjalan',
+        default => strtoupper((string) $overall),
+      };
+    };
 @endphp
 
 @section('content')
@@ -203,7 +212,7 @@
 
                 {{-- STATUS --}}
                 <span class="text-[11px] px-2.5 py-1 rounded-full font-medium {{ $badge($app->overall_status) }}">
-                  {{ strtoupper($app->overall_status) }}
+                  {{ $statusLabel($app->overall_status) }}
                 </span>
               </div>
 
@@ -267,6 +276,23 @@
                         Interview
                       </a>
                     @endif
+                      @php
+                        $canAcceptOl = in_array(strtolower((string) $app->current_stage), ['final', 'offer'], true)
+                          && strtolower((string) $app->overall_status) !== 'hired'
+                          && strtolower((string) $app->overall_status) !== 'rejected';
+                      @endphp
+                      @if($canAcceptOl)
+                        <form method="POST" action="{{ route('applications.move', $app) }}" class="inline-flex">
+                          @csrf
+                          <input type="hidden" name="to" value="hired">
+                          <input type="hidden" name="status" value="pending">
+                          <button type="submit"
+                                  class="px-3 py-1.5 rounded-lg text-white text-xs font-medium flex items-center gap-1 hover:opacity-90 transition"
+                                  style="background: {{ $PRIMARY }}">
+                            Terima OL
+                          </button>
+                        </form>
+                      @endif
                     <a href="{{ route('jobs.show', $app->job_id) }}"
                        class="px-3 py-1.5 rounded-lg text-white text-xs font-medium flex items-center gap-1 hover:opacity-90 transition"
                        style="background: {{ $PRIMARY }}">

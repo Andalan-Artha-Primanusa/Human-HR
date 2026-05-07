@@ -17,7 +17,6 @@ class CandidateProfile extends Model
     {
         $this->attributes['gender'] = is_null($value) ? null : mb_strtolower(trim($value));
     }
-    use HasUuids;
 
     protected $fillable = [
         'user_id',
@@ -31,6 +30,7 @@ class CandidateProfile extends Model
         'phone',
         'whatsapp',
         'email',
+        'source_channel',
 
         'last_education',
         'education_major',

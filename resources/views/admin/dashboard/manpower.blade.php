@@ -2,231 +2,431 @@
 
 @php
     $primary = '#a77d52';
-    $secondary = '#8b5e3c';
+    $secondary = '#8b9f6f';
+    $accent = '#2f6f6d';
+    $danger = '#b45309';
+
+    $sourceLabels = $sourceLabels ?? [];
+    $educationLabels = $educationLabels ?? [];
+    $openJobCards = collect($openJobCards ?? []);
+    $levelStats = collect($levelStats ?? []);
+    $slaLevelStats = $levelStats->filter(fn ($row) => (($row['hired'] ?? 0) > 0) && (($row['avg_sla_days'] ?? 0) > 0));
+    $hasSlaChartData = $slaLevelStats->isNotEmpty();
+    $failureRows = collect($failureRows ?? []);
 @endphp
 
 @section('content')
+<div class="mx-auto w-full max-w-[1320px] px-4 py-4 space-y-4">
 
-<div class="mx-auto w-full max-w-[1440px] px-4 py-6 space-y-6">
-
-  {{-- HEADER --}}
-  <section class="relative overflow-hidden text-white shadow rounded-2xl">
+  <section class="relative overflow-hidden text-white shadow rounded-3xl">
     <div class="absolute inset-0 bg-gradient-to-r from-[#a77d52] via-[#b88a5c] to-[#8b5e3c]"></div>
-
-    <div class="relative flex items-center justify-between px-6 py-6">
+    <div class="relative flex flex-col gap-3 px-5 py-4 md:flex-row md:items-end md:justify-between">
       <div>
-        <h1 class="text-3xl font-bold tracking-wide">Manpower Dashboard</h1>
-        <p class="text-sm opacity-90">Recruitment analytics & insights</p>
+        <p class="text-[11px] uppercase tracking-[0.35em] text-white/70">Manpower Intelligence</p>
+        <h1 class="mt-1 text-2xl font-bold tracking-wide md:text-3xl">Manpower Dashboard</h1>
+        <p class="max-w-2xl mt-1 text-sm text-white/80">Compact presentation view for SLA per level, applicant source, POH, pendidikan, gender, and stage failure.</p>
       </div>
-
       <div class="text-right">
-        <p class="text-xs opacity-80">Last Updated</p>
-        <p class="text-sm font-semibold">{{ now()->format('d M Y H:i') }}</p>
+        <p class="text-xs opacity-75">Last Updated</p>
+        <p class="text-sm font-semibold">{{ ($generatedAt ?? now())->format('d M Y H:i') }}</p>
       </div>
     </div>
   </section>
 
-  {{-- KPI --}}
-  <section class="grid grid-cols-2 gap-4 md:grid-cols-4">
-    @php
-      $kpis = [
-        ['title'=>'Open Jobs','value'=>$openJobs,'icon'=>'💼'],
-        ['title'=>'Applicants','value'=>$activeApps,'icon'=>'👤'],
-        ['title'=>'Budget','value'=>$budget,'icon'=>'💰'],
-        ['title'=>'Fulfillment','value'=>$fulfillment.'%','icon'=>'⚡'],
-      ];
-    @endphp
+  @php
+    $cards = [
+      ['label' => 'Open Jobs', 'value' => $openJobs ?? 0, 'hint' => 'Posisi aktif', 'icon' => '💼'],
+      ['label' => 'Total Applicants', 'value' => $totalApplicants ?? 0, 'hint' => 'Semua lamaran', 'icon' => '👥'],
+      ['label' => 'Applicants / Open Job', 'value' => $openJobApplicants ?? 0, 'hint' => 'Akumulasi pelamar per job', 'icon' => '📊'],
+      ['label' => 'Fulfillment', 'value' => ($fulfillment ?? 0) . '%', 'hint' => 'Sourcing + Onsite jadi karyawan', 'icon' => '⚡'],
+      ['label' => 'SLA Success Rate', 'value' => ($acceptanceRate ?? 0) . '%', 'hint' => 'Terima OL / total applicants', 'icon' => '✅'],
+    ];
+  @endphp
 
-    @foreach($kpis as $kpi)
-    <div class="p-5 transition bg-white border shadow-sm rounded-xl hover:shadow-md">
-      <div class="flex items-center justify-between">
-        <p class="text-xs uppercase text-slate-500">{{ $kpi['title'] }}</p>
-        <span class="text-xl">{{ $kpi['icon'] }}</span>
+  <section class="grid grid-cols-2 gap-3 xl:grid-cols-6">
+    @foreach($cards as $card)
+      <div class="p-4 transition bg-white border shadow-sm rounded-2xl hover:shadow-md">
+        <div class="flex items-center justify-between gap-3">
+          <p class="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">{{ $card['label'] }}</p>
+          <span class="text-lg">{{ $card['icon'] }}</span>
+        </div>
+        <p class="mt-2 text-xl font-bold text-[#a77d52]">{{ $card['value'] }}</p>
+        <p class="mt-1 text-[11px] text-slate-500">{{ $card['hint'] }}</p>
       </div>
-
-      <p class="mt-2 text-2xl font-bold text-[#a77d52]">
-        {{ $kpi['value'] ?? '-' }}
-      </p>
-
-      <div class="mt-2 text-xs text-green-600">
-        ▲ +12% vs last month
-      </div>
-    </div>
     @endforeach
   </section>
 
-  {{-- CHARTS --}}
-  <section class="grid grid-cols-1 gap-6 md:grid-cols-2">
-
-    <div class="p-6 bg-white border shadow-sm rounded-2xl">
-      <div class="flex items-center justify-between mb-4">
-        <h2 class="font-semibold">Pipeline Stage</h2>
-        <span class="text-xs text-slate-400">Overview</span>
+  <section class="grid grid-cols-1 gap-3 md:grid-cols-3">
+    <div class="p-4 bg-white border shadow-sm rounded-2xl">
+      <p class="text-[11px] uppercase tracking-[0.2em] text-slate-400">Age Insight</p>
+      <div class="grid grid-cols-3 gap-2 mt-3 text-center">
+        <div class="p-3 rounded-xl bg-slate-50">
+          <div class="text-xs text-slate-500">Avg</div>
+          <div class="text-lg font-bold text-slate-900">{{ number_format((float) ($avgAge ?? 0), 1) }}</div>
+        </div>
+        <div class="p-3 rounded-xl bg-slate-50">
+          <div class="text-xs text-slate-500">Min</div>
+          <div class="text-lg font-bold text-slate-900">{{ (int) ($minAge ?? 0) }}</div>
+        </div>
+        <div class="p-3 rounded-xl bg-slate-50">
+          <div class="text-xs text-slate-500">Max</div>
+          <div class="text-lg font-bold text-slate-900">{{ (int) ($maxAge ?? 0) }}</div>
+        </div>
       </div>
-      <canvas id="pipelineChart" class="h-[300px]"></canvas>
     </div>
 
-    <div class="p-6 bg-white border shadow-sm rounded-2xl">
-      <div class="flex items-center justify-between mb-4">
-        <h2 class="font-semibold">Candidate Demographics</h2>
-        <span class="text-xs text-slate-400">Distribution</span>
+    <div class="p-4 bg-white border shadow-sm rounded-2xl">
+      <p class="text-[11px] uppercase tracking-[0.2em] text-slate-400">Top Failed Stage</p>
+      <div class="flex items-end justify-between gap-4 mt-3">
+        <div>
+          <div class="text-sm text-slate-500">Stage</div>
+          <div class="text-base font-bold text-[#a77d52]">{{ $failedStageName ?? '-' }}</div>
+        </div>
+        <div class="text-right">
+          <div class="text-sm text-slate-500">Total Gagal</div>
+          <div class="text-2xl font-bold text-[#b45309]">{{ (int) ($failedStageCount ?? 0) }}</div>
+        </div>
       </div>
-      <canvas id="genderChart" class="h-[300px]"></canvas>
     </div>
 
-  </section>
-
-  {{-- TREND --}}
-  <section class="p-6 bg-white border shadow-sm rounded-2xl">
-    <div class="flex items-center justify-between mb-4">
-      <h2 class="font-semibold">Application Trend</h2>
-      <span class="text-xs text-slate-400">Monthly</span>
-    </div>
-    <canvas id="trendChart" class="h-[300px]"></canvas>
-  </section>
-
-  {{-- INSIGHT --}}
-  <section class="grid gap-4 md:grid-cols-2">
-    <div class="p-5 bg-white border shadow-sm rounded-xl">
-      <p class="text-xs text-slate-500">Top Stage</p>
-      <p class="text-lg font-semibold text-[#a77d52]">
-        {{ array_key_first(($byStage ?? collect())->toArray()) }}
-      </p>
-    </div>
-
-    <div class="p-5 bg-white border shadow-sm rounded-xl">
-      <p class="text-xs text-slate-500">Fulfillment Rate</p>
-      <p class="text-lg font-semibold text-green-600">
-        {{ $fulfillment }}%
-      </p>
+    <div class="p-4 bg-white border shadow-sm rounded-2xl">
+      <p class="text-[11px] uppercase tracking-[0.2em] text-slate-400">Overall Hiring</p>
+      <div class="flex items-end justify-between gap-4 mt-3">
+        <div>
+          <div class="text-sm text-slate-500">Filled</div>
+          <div class="text-base font-bold text-slate-900">{{ (int) ($filled ?? 0) }}</div>
+        </div>
+        <div class="text-right">
+          <div class="text-sm text-slate-500">Budget Openings</div>
+          <div class="text-2xl font-bold text-[#8b9f6f]">{{ (int) ($budget ?? 0) }}</div>
+        </div>
+      </div>
     </div>
   </section>
 
-  {{-- GRID EXTRA --}}
-  <section class="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
-
-    <div class="p-6 bg-white border shadow-sm rounded-2xl">
-      <h2 class="mb-4 font-semibold">SLA per Stage</h2>
-      <canvas id="slaChart"></canvas>
+  <section class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+    <div class="p-4 bg-white border shadow-sm rounded-2xl">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-sm font-semibold text-slate-900">SLA per Level</h2>
+        <span class="text-[11px] text-slate-400">Open job → Terima OL</span>
+      </div>
+      <div class="h-[200px]">
+        <canvas id="slaLevelChart" class="w-full h-full"></canvas>
+      </div>
+      @unless($hasSlaChartData)
+        <p class="mt-2 text-[11px] text-slate-400">Belum ada data SLA yang cukup untuk ditampilkan.</p>
+      @endunless
     </div>
 
-    <div class="p-6 bg-white border shadow-sm rounded-2xl">
-      <h2 class="mb-4 font-semibold">Age Groups</h2>
-      <canvas id="ageChart"></canvas>
+    <div class="p-4 bg-white border shadow-sm rounded-2xl">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-sm font-semibold text-slate-900">Applicant Source</h2>
+        <span class="text-[11px] text-slate-400">Dari mana kandidat datang</span>
+      </div>
+      <div class="h-[200px]"><canvas id="sourceChart" class="w-full h-full"></canvas></div>
+    </div>
+  </section>
+
+  <section class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+    <div class="p-4 bg-white border shadow-sm rounded-2xl">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-sm font-semibold text-slate-900">Education Background</h2>
+        <span class="text-[11px] text-slate-400">Pendidikan terakhir</span>
+      </div>
+      <div class="h-[200px]"><canvas id="educationChart" class="w-full h-full"></canvas></div>
     </div>
 
-    <div class="p-6 bg-white border shadow-sm rounded-2xl">
-      <h2 class="mb-4 font-semibold">Acceptance Rate</h2>
-      <canvas id="acceptanceChart"></canvas>
+    <div class="p-4 bg-white border shadow-sm rounded-2xl">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-sm font-semibold text-slate-900">Gender Breakdown</h2>
+        <span class="text-[11px] text-slate-400">Candidate gender</span>
+      </div>
+      <div class="h-[200px]"><canvas id="genderChart" class="w-full h-full"></canvas></div>
+    </div>
+  </section>
+
+  <section class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+    <div class="p-4 bg-white border shadow-sm rounded-2xl">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-sm font-semibold text-slate-900">Stage Failure</h2>
+        <span class="text-[11px] text-slate-400">Failed / no-show stage</span>
+      </div>
+      <div class="h-[200px]"><canvas id="failureStageChart" class="w-full h-full"></canvas></div>
     </div>
 
+    <div class="p-4 bg-white border shadow-sm rounded-2xl">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-sm font-semibold text-slate-900">Application Trend</h2>
+        <span class="text-[11px] text-slate-400">Monthly intake</span>
+      </div>
+      <div class="h-[200px]"><canvas id="trendChart" class="w-full h-full"></canvas></div>
+    </div>
+  </section>
+
+  <section class="p-4 bg-white border shadow-sm rounded-2xl">
+    <div class="flex items-center justify-between mb-3">
+      <div>
+        <h2 class="text-sm font-semibold text-slate-900">Open Jobs & Applicant Count</h2>
+        <p class="text-[11px] text-slate-500">Per open job, terlihat berapa pelamar, terima OL, dan hiring per level.</p>
+      </div>
+      <span class="text-[11px] text-slate-400">{{ $openJobCards->count() }} jobs</span>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead class="text-xs uppercase bg-slate-50 text-slate-500">
+          <tr>
+            <th class="px-3 py-2 text-left">Job</th>
+            <th class="px-3 py-2 text-left">Level</th>
+            <th class="px-3 py-2 text-right">Openings</th>
+            <th class="px-3 py-2 text-right">Applicants</th>
+            <th class="px-3 py-2 text-right">Terima OL</th>
+            <th class="px-3 py-2 text-right">Hired</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          @forelse($openJobCards as $job)
+            <tr>
+              <td class="px-3 py-2 font-medium text-slate-800">{{ $job['title'] }}</td>
+              <td class="px-3 py-2 text-slate-600">{{ $job['level_label'] }}</td>
+              <td class="px-3 py-2 text-right text-slate-700">{{ $job['openings'] }}</td>
+              <td class="px-3 py-2 text-right text-slate-700">{{ $job['applicants'] }}</td>
+              <td class="px-3 py-2 text-right text-slate-700">{{ $job['accepted_ol'] }}</td>
+              <td class="px-3 py-2 text-right text-slate-700">{{ $job['hired'] }}</td>
+            </tr>
+          @empty
+            <tr>
+              <td colspan="6" class="px-3 py-6 text-center text-slate-500">Belum ada open job untuk ditampilkan.</td>
+            </tr>
+          @endforelse
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="p-4 bg-white border shadow-sm rounded-2xl">
+    <div class="flex items-center justify-between mb-3">
+      <div>
+        <h2 class="text-sm font-semibold text-slate-900">Level Performance Summary</h2>
+        <p class="text-[11px] text-slate-500">SLA dari open job sampai hired, applicant count, hired, dan success rate per level.</p>
+      </div>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead class="text-xs uppercase bg-slate-50 text-slate-500">
+          <tr>
+            <th class="px-3 py-2 text-left">Level</th>
+            <th class="px-3 py-2 text-right">Open Jobs</th>
+            <th class="px-3 py-2 text-right">Applicants</th>
+            <th class="px-3 py-2 text-right">Hired</th>
+            <th class="px-3 py-2 text-right">Avg SLA (days)</th>
+            <th class="px-3 py-2 text-right">Success Rate</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          @forelse($levelStats as $row)
+            <tr>
+              <td class="px-3 py-2 font-medium text-slate-800">{{ $row['level_label'] }}</td>
+              <td class="px-3 py-2 text-right text-slate-700">{{ $row['open_jobs'] }}</td>
+              <td class="px-3 py-2 text-right text-slate-700">{{ $row['applicants'] }}</td>
+              <td class="px-3 py-2 text-right text-slate-700">{{ $row['hired'] }}</td>
+              <td class="px-3 py-2 text-right text-slate-700">{{ number_format((float) $row['avg_sla_days'], 1) }}</td>
+              <td class="px-3 py-2 text-right text-slate-700">{{ $row['success_rate'] }}%</td>
+            </tr>
+          @empty
+            <tr>
+              <td colspan="6" class="px-3 py-6 text-center text-slate-500">Belum ada data level performance.</td>
+            </tr>
+          @endforelse
+        </tbody>
+      </table>
+    </div>
   </section>
 
 </div>
 
-{{-- SCRIPT --}}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-
 const primary = '#a77d52';
-const secondary = '#8b5e3c';
+const secondary = '#8b9f6f';
+const accent = '#2f6f6d';
+const danger = '#b45309';
 
-// PIPELINE
-new Chart(document.getElementById('pipelineChart'), {
+const sourceLabels = @json(array_values($sourceLabels));
+const sourceValues = @json(array_values($sourceBreakdown->toArray()));
+const educationLabels = @json(array_values($educationLabels));
+const educationValues = @json(array_values($educationBreakdown->toArray()));
+const levelLabels = @json($slaLevelStats->pluck('level_label')->toArray());
+const levelSlaValues = @json($slaLevelStats->pluck('avg_sla_days')->map(fn ($value) => (float) $value)->toArray());
+const levelSuccessValues = @json($slaLevelStats->pluck('success_rate')->toArray());
+const failureLabels = @json($failureRows->pluck('stage_key')->toArray());
+const failureValues = @json($failureRows->pluck('total')->toArray());
+const trendLabels = @json(($applicationTrend ?? collect())->keys()->toArray());
+const trendValues = @json(($applicationTrend ?? collect())->values()->toArray());
+
+new Chart(document.getElementById('slaLevelChart'), {
   type: 'bar',
   data: {
-    labels: Object.keys(@json(($byStage ?? collect())->toArray())),
+    labels: levelLabels,
     datasets: [{
-      data: Object.values(@json(($byStage ?? collect())->toArray())),
+      label: 'Avg SLA Days',
+      data: levelSlaValues,
+      borderColor: primary,
       backgroundColor: primary,
-      borderRadius: 8
+      borderWidth: 1,
+      borderRadius: 8,
+      barPercentage: 0.7,
+      categoryPercentage: 0.7,
     }]
   },
-  options: { plugins: { legend: { display: false } } }
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: { mode: 'index', intersect: false },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          precision: 0,
+          callback: (value) => Number(value).toLocaleString('id-ID', { maximumFractionDigits: 0 }),
+        },
+      },
+      x: { grid: { display: false }, ticks: { maxRotation: 0, minRotation: 0, autoSkip: true } },
+    }
+  }
 });
 
-// GENDER
+new Chart(document.getElementById('sourceChart'), {
+  type: 'doughnut',
+  data: {
+    labels: sourceLabels,
+    datasets: [{
+      data: sourceValues,
+      backgroundColor: [primary, secondary, accent, '#38bdf8', '#f472b6', '#f59e0b', '#94a3b8', '#64748b'],
+      borderWidth: 0,
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    cutout: '82%',
+    plugins: {
+      legend: {
+        position: 'bottom',
+        labels: {
+          usePointStyle: true,
+          boxWidth: 8,
+          boxHeight: 8,
+          padding: 6,
+          font: { size: 9 },
+        }
+      }
+    }
+  }
+});
+
+new Chart(document.getElementById('educationChart'), {
+  type: 'bar',
+  data: {
+    labels: educationLabels,
+    datasets: [{
+      label: 'Candidates',
+      data: educationValues,
+      backgroundColor: accent,
+      borderRadius: 10,
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { display: false } },
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          precision: 0,
+          callback: (value) => Number(value).toLocaleString('id-ID', { maximumFractionDigits: 0 }),
+        },
+      },
+    }
+  }
+});
+
 new Chart(document.getElementById('genderChart'), {
   type: 'doughnut',
   data: {
-    labels: ['Male','Female','Other'],
+    labels: ['Male', 'Female', 'Other'],
     datasets: [{
       data: [
         {{ $genderBreakdown['male'] ?? 0 }},
         {{ $genderBreakdown['female'] ?? 0 }},
-        {{ $genderBreakdown['other'] ?? 0 }}
+        {{ $genderBreakdown['other'] ?? 0 }},
       ],
-      backgroundColor: ['#60a5fa','#f472b6','#a3a3a3']
+      backgroundColor: ['#60a5fa', '#f472b6', '#94a3b8'],
+      borderWidth: 0,
     }]
   },
-  options: { cutout: '70%' }
+  options: { responsive: true, maintainAspectRatio: false, cutout: '72%' }
 });
 
-// TREND - Real data from controller
-new Chart(document.getElementById('trendChart'), {
-  type: 'line',
+new Chart(document.getElementById('failureStageChart'), {
+  type: 'bar',
   data: {
-    labels: @json(($applicationTrend ?? collect())->keys()->toArray()),
+    labels: failureLabels,
     datasets: [{
-      label: 'Applications',
-      data: @json(($applicationTrend ?? collect())->values()->toArray()),
-      borderColor: primary,
-      backgroundColor: primary + '20',
-      fill: true,
-      tension: 0.4
+      label: 'Failed Stage Count',
+      data: failureValues,
+      backgroundColor: danger,
+      borderRadius: 10,
     }]
   },
   options: {
+    responsive: true,
+    maintainAspectRatio: false,
     plugins: { legend: { display: false } },
-    scales: { y: { beginAtZero: true } }
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          precision: 0,
+          callback: (value) => Number(value).toLocaleString('id-ID', { maximumFractionDigits: 0 }),
+        },
+      },
+    }
   }
 });
 
-// SLA (FIXED)
-new Chart(document.getElementById('slaChart'), {
-  type: 'bar',
+new Chart(document.getElementById('trendChart'), {
+  type: 'line',
   data: {
-    labels: @json(($slaPerStage ?? collect())->pluck('stage_key')),
+    labels: trendLabels,
     datasets: [{
-      data: @json(($slaPerStage ?? collect())->pluck('avg_sla_days')),
-      backgroundColor: secondary
-    }]
-  }
-});
-
-// AGE
-new Chart(document.getElementById('ageChart'), {
-  type: 'bar',
-  data: {
-    labels: ['<25','25-34','35-44','45+'],
-    datasets: [{
-      data: [
-        {{ $ageGroups['<25'] ?? 0 }},
-        {{ $ageGroups['25-34'] ?? 0 }},
-        {{ $ageGroups['35-44'] ?? 0 }},
-        {{ $ageGroups['45+'] ?? 0 }}
-      ],
-      backgroundColor: primary
-    }]
-  }
-});
-
-// ACCEPTANCE
-new Chart(document.getElementById('acceptanceChart'), {
-  type: 'doughnut',
-  data: {
-    labels: ['Accepted','Other'],
-    datasets: [{
-      data: [
-        {{ $acceptanceRate ?? 0 }},
-        {{ 100 - ($acceptanceRate ?? 0) }}
-      ],
-      backgroundColor: ['#22c55e','#e5e7eb']
+      label: 'Applications',
+      data: trendValues,
+      borderColor: primary,
+      backgroundColor: primary + '20',
+      fill: true,
+      tension: 0.35,
     }]
   },
-  options: { cutout: '70%' }
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          precision: 0,
+          callback: (value) => Number(value).toLocaleString('id-ID', { maximumFractionDigits: 0 }),
+        },
+      },
+    }
+  }
 });
-
 </script>
 
 @endsection

@@ -124,7 +124,7 @@ class WelcomeControllerTest extends TestCase
         JobApplication::create([
             'user_id' => $this->user->id,
             'job_id' => $job->id,
-            'current_stage' => 'screening',
+            'current_stage' => 'applied',
             'overall_status' => 'active',
         ]);
 
@@ -180,7 +180,7 @@ class WelcomeControllerTest extends TestCase
         JobApplication::create([
             'user_id' => $this->user->id,
             'job_id' => $job->id,
-            'current_stage' => 'hr_iv',
+            'current_stage' => 'applied',
             'overall_status' => 'active',
         ]);
 

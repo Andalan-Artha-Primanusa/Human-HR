@@ -1112,82 +1112,46 @@ class ApplicationController extends Controller
     }
 
     /**
-     * Send MCU Email with customizable body and document metadata.
+     * Upload MCU Document only (no email sending).
+     * Supports file upload (PDF/image) to be stored.
      */
     public function sendMcuEmail(Request $request, JobApplication $application)
     {
-        \Log::info("sendMcuEmail started for app: {$application->id}");
+        \Log::info("uploadMcuDocument started for app: {$application->id}");
         $this->authorize('sendMcu', $application);
 
         try {
             $data = $request->validate([
-                'email_body'          => 'required|string',
-                'doc_no'              => 'nullable|string',
-                'company_name'        => 'nullable|string',
-                'city'                => 'nullable|string',
-                'project_name'        => 'nullable|string',
-                'clinic_name'         => 'required|string',
-                'clinic_address'      => 'required|string',
-                'clinic_city'         => 'nullable|string',
-                'mcu_date'            => 'required|date',
-                'mcu_time'            => 'required|string',
-                'for_text'            => 'nullable|string',
-                'bu_name'             => 'nullable|string',
-                'matrix_owner'        => 'nullable|string',
-                'package'             => 'nullable|string',
-                'notes'               => 'nullable|string',
-                'result_emails'       => 'nullable|string',
-                'signer_name'         => 'nullable|string',
-                'signer_title'        => 'nullable|string',
-                'footer_company_name' => 'nullable|string',
-                'footer_address'      => 'nullable|string',
-                'footer_email'        => 'nullable|string',
-                'footer_website'      => 'nullable|string',
+                'mcu_file' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
-            \Log::error("Validation failed for sendMcuEmail: " . json_encode($e->errors()));
-            throw $e;
+            \Log::error("Validation failed for uploadMcuDocument: " . json_encode($e->errors()));
+            return response()->json([
+                'message' => 'Validasi gagal: ' . implode(', ', array_merge(...array_values($e->errors())))
+            ], 422);
         }
 
-        // Save metadata to application
-        $application->update([
-            'mcu_meta' => $data
-        ]);
-
-        if ($application->user && $application->user->email) {
-            \Log::info("Target MCU email: " . $application->user->email);
-            try {
-                $mail = new McuMail($application, $data['email_body']);
-                Mail::to($application->user->email)->send($mail);
-                \Log::info("MCU Mail sent successfully for app: {$application->id}");
-
-                // Tambahkan in-app notification
-                \Illuminate\Notifications\DatabaseNotification::create([
-                    'id'             => (string) \Illuminate\Support\Str::uuid(),
-                    'type'           => 'app:application.mcu_sent',
-                    'notifiable_type' => \App\Models\User::class,
-                    'notifiable_id'  => $application->user_id,
-                    'data'           => [
-                        'title'            => 'Undangan MCU',
-                        'body'             => 'Kamu menerima email Undangan Medical Check Up (MCU) untuk posisi "' . ($application->job->title ?? '-') . '". Silakan cek kotak masuk atau folder spam di email kamu untuk instruksi lebih lanjut.',
-                        'job_title'        => $application->job->title ?? '-',
-                        'application_id'   => $application->id,
-                        'job_id'           => $application->job_id,
-                        'url'              => route('applications.mine'),
-                        'when_wib'         => \Carbon\Carbon::now('Asia/Jakarta')->format('d M Y, H:i') . ' WIB',
-                    ],
-                    'read_at'    => null,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
-
-                return back()->with('ok', 'Undangan MCU berhasil dikirim beserta notifikasi.');
-            } catch (\Exception $e) {
-                \Log::error('Failed to send McuMail: ' . $e->getMessage());
-                return back()->with('error', 'Gagal mengirim email MCU: ' . $e->getMessage());
-            }
+        // Handle file upload
+        if ($request->hasFile('mcu_file')) {
+            $uploadedFilePath = $request->file('mcu_file')->store('mcu', 'public');
+            
+            // Update application with file path
+            $application->update([
+                'mcu_meta' => [
+                    'mcu_file_path' => $uploadedFilePath,
+                    'uploaded_at' => now()->toDateTimeString(),
+                ]
+            ]);
+            
+            \Log::info("MCU file uploaded successfully: {$uploadedFilePath}");
+            return response()->json([
+                'message' => 'Dokumen MCU berhasil diupload.'
+            ]);
         }
-        return back()->with('error', 'Kandidat tidak memiliki email valid.');
+        
+        return response()->json([
+            'message' => 'Gagal upload dokumen MCU.'
+        ], 500);
     }
 
     public function updateMcuResult(Request $request, JobApplication $application)

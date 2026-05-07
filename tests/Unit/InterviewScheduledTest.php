@@ -127,11 +127,30 @@ class InterviewScheduledTest extends TestCase
 
     public function test_to_array_handles_missing_job()
     {
+        // Create a job
+        $job = Job::create([
+            'title' => 'Temp Job',
+            'slug' => 'temp-job',
+            'code' => 'TJ-01',
+            'description' => 'Test',
+            'status' => 'open',
+            'level' => 1,
+            'site_id' => $this->site->id,
+        ]);
+
+        // Create an application with the job
         $appWithoutJob = JobApplication::create([
             'user_id' => $this->user->id,
+            'job_id' => $job->id,
             'current_stage' => 'hr_iv',
             'overall_status' => 'active',
         ]);
+
+        // Update the job_id to a non-existent UUID
+        $nonExistentUuid = (string) \Illuminate\Support\Str::uuid();
+        DB::table('job_applications')
+            ->where('id', $appWithoutJob->id)
+            ->update(['job_id' => $nonExistentUuid]);
 
         $interviewWithoutJob = Interview::create([
             'application_id' => $appWithoutJob->id,
