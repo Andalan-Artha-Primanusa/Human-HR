@@ -15,14 +15,16 @@ class McuMail extends Mailable
 
     public $application;
     public $bodyContent;
+    public $mcuFilePath;
 
     /**
      * Create a new message instance.
      */
-    public function __construct(JobApplication $application, $bodyContent = null)
+    public function __construct(JobApplication $application, $bodyContent = null, $mcuFilePath = null)
     {
         $this->application = $application;
         $this->bodyContent = $bodyContent;
+        $this->mcuFilePath = $mcuFilePath;
     }
 
     /**
@@ -54,20 +56,22 @@ class McuMail extends Mailable
 
     /**
      * Get the attachments for the message.
+     * If mcuFilePath is provided, attach only that file (no PDF generation).
      *
      * @return array<int, \Illuminate\Mail\Mailables\Attachment>
      */
     public function attachments(): array
     {
-        $application = $this->application->loadMissing('user', 'job', 'job.site');
-        $mcu_meta = $application->mcu_meta ?? [];
-        
-        $html = view('mcu.pdf', compact('application', 'mcu_meta'))->render();
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadHTML($html)->setPaper('a4')->setWarnings(false);
-
-        return [
-            \Illuminate\Mail\Mailables\Attachment::fromData(fn () => $pdf->output(), 'UndanganMCU-' . $this->application->id . '.pdf')
-                    ->withMime('application/pdf'),
-        ];
+        // Only attach the uploaded MCU file, don't generate PDF
+        if ($this->mcuFilePath) {
+            $path = storage_path('app/public/' . $this->mcuFilePath);
+            if (file_exists($path)) {
+                return [
+                    \Illuminate\Mail\Mailables\Attachment::fromPath($path)
+                        ->as('UndanganMCU-' . $this->application->id . '.' . pathinfo($path, PATHINFO_EXTENSION))
+                ];
+            }
+        }
+        return [];
     }
 }

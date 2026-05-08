@@ -1133,20 +1133,21 @@ class ApplicationController extends Controller
     }
 
     /**
-     * Upload MCU Document only (no email sending).
-     * Supports file upload (PDF/image) to be stored.
+     * Upload MCU Document & Send Email
+     * Supports file upload (PDF/image) to be stored and sends MCU invitation email to candidate
      */
     public function sendMcuEmail(Request $request, JobApplication $application)
     {
-        \Log::info("uploadMcuDocument started for app: {$application->id}");
+        \Log::info("sendMcuEmail started for app: {$application->id}");
         $this->authorize('sendMcu', $application);
 
         try {
             $data = $request->validate([
                 'mcu_file' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
+                'email_body' => 'nullable|string',
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
-            \Log::error("Validation failed for uploadMcuDocument: " . json_encode($e->errors()));
+            \Log::error("Validation failed for sendMcuEmail: " . json_encode($e->errors()));
             return response()->json([
                 'message' => 'Validasi gagal: ' . implode(', ', array_merge(...array_values($e->errors())))
             ], 422);
@@ -1156,18 +1157,75 @@ class ApplicationController extends Controller
         if ($request->hasFile('mcu_file')) {
             $uploadedFilePath = $request->file('mcu_file')->store('mcu', 'public');
             
+            // Build meta data from request
+            $meta = [
+                'mcu_file_path' => $uploadedFilePath,
+                'uploaded_at' => now()->toDateTimeString(),
+            ];
+            
+            // Optional: capture MCU details from form
+            $metaFields = [
+                'doc_no', 'company_name', 'city', 'project_name', 'clinic_name', 'clinic_city',
+                'clinic_address', 'mcu_date', 'mcu_time', 'for_text', 'bu_name', 'matrix_owner',
+                'package', 'notes', 'result_emails', 'signer_name', 'signer_title',
+                'footer_company_name', 'footer_address', 'footer_email', 'footer_website'
+            ];
+            foreach ($metaFields as $f) {
+                if ($request->has($f)) {
+                    $meta[$f] = $request->input($f);
+                }
+            }
+            
             // Update application with file path
-            $application->update([
-                'mcu_meta' => [
-                    'mcu_file_path' => $uploadedFilePath,
-                    'uploaded_at' => now()->toDateTimeString(),
-                ]
-            ]);
+            $application->update(['mcu_meta' => $meta]);
             
             \Log::info("MCU file uploaded successfully: {$uploadedFilePath}");
+            
+            // Send email if candidate has valid email
+            if ($application->user && $application->user->email) {
+                try {
+                    $emailBody = $data['email_body'] ?? "Selamat! Anda telah lolos ke tahap Medical Check Up (MCU).\n\nTerlampir adalah Surat Undangan MCU resmi yang berisi detail jadwal, lokasi, dan instruksi persiapan yang wajib Anda patuhi.\n\nMohon hadir tepat waktu.";
+                    $mail = new \App\Mail\McuMail($application, $emailBody, $uploadedFilePath);
+                    \Illuminate\Support\Facades\Mail::to($application->user->email)->send($mail);
+                    \Log::info("MCU email sent successfully to: {$application->user->email}");
+                    
+                    // Add in-app notification
+                    \Illuminate\Notifications\DatabaseNotification::create([
+                        'id'             => (string) \Illuminate\Support\Str::uuid(),
+                        'type'           => 'app:application.mcu_invited',
+                        'notifiable_type' => \App\Models\User::class,
+                        'notifiable_id'  => $application->user_id,
+                        'data'           => [
+                            'title'            => 'Undangan MCU Diterima',
+                            'body'             => 'Kamu menerima email Undangan Medical Check Up (MCU) untuk posisi "' . ($application->job->title ?? '-') . '". Silakan cek kotak masuk atau folder spam di email kamu.',
+                            'job_title'        => $application->job->title ?? '-',
+                            'application_id'   => $application->id,
+                            'job_id'           => $application->job_id,
+                            'url'              => route('applications.mine'),
+                            'when_wib'         => \Carbon\Carbon::now('Asia/Jakarta')->format('d M Y, H:i') . ' WIB',
+                        ],
+                        'read_at'    => null,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                    
+                    return response()->json([
+                        'ok' => true,
+                        'message' => 'Dokumen MCU berhasil diupload dan email undangan telah dikirim.'
+                    ], 200);
+                } catch (\Exception $e) {
+                    \Log::error("Failed to send MCU email: " . $e->getMessage());
+                    return response()->json([
+                        'ok' => false,
+                        'message' => 'File berhasil diupload tapi gagal mengirim email: ' . $e->getMessage()
+                    ], 500);
+                }
+            }
+            
             return response()->json([
-                'message' => 'Dokumen MCU berhasil diupload.'
-            ]);
+                'ok' => false,
+                'message' => 'File berhasil diupload tapi kandidat tidak memiliki email valid.'
+            ], 422);
         }
         
         return response()->json([
@@ -1274,8 +1332,14 @@ class ApplicationController extends Controller
         $meta = $application->ground_test_meta ?? [];
         $path = $meta['lap_path'] ?? null;
 
-        if (!$path || !Storage::disk('public')->exists($path)) {
-            abort(404, 'File LAP tidak ditemukan.');
+        if (!$path) {
+            \Log::warning("showGroundTestLap: lap_path tidak ditemukan di ground_test_meta. AppID: {$application->id}, Meta: " . json_encode($meta));
+            abort(404, 'File LAP belum di-upload. Meta: ' . json_encode($meta));
+        }
+
+        if (!Storage::disk('public')->exists($path)) {
+            \Log::warning("showGroundTestLap: file tidak ada di disk. AppID: {$application->id}, Path: {$path}");
+            abort(404, 'File LAP tidak ditemukan di storage. Path: ' . $path);
         }
 
         $filename = $meta['lap_name'] ?? basename($path);

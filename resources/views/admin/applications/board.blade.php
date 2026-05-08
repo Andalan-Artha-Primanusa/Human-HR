@@ -998,7 +998,14 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
         <div class="fm-group">
           <label class="fm-label">Upload File LAP (Trainer)</label>
           <input type="file" name="lap" class="fm-ctrl" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.xls,.xlsx">
-          <div id="gt-lap-existing" style="font-size:0.65rem; color:#888; margin-top:4px;"></div>
+          <div id="gt-lap-existing" style="font-size:0.65rem; color:#888; margin-top:4px;">
+            <div style="margin-top: 4px;">
+              <span id="gt-lap-filename"></span>
+              <a id="gt-lap-view-btn" href="#" target="_blank" style="margin-left: 8px; color: #a77d52; text-decoration: underline; font-weight: 500; display: none;">
+                📄 Buka File
+              </a>
+            </div>
+          </div>
         </div>
         <div class="fm-group">
           <label class="fm-label">Hasil Ground Test (Tidak Wajib)</label>
@@ -1291,8 +1298,19 @@ function openGroundTestModal(appId, name, btn) {
   document.getElementById('gt-sub').textContent = 'Kandidat: ' + name;
   document.getElementById('gt-notes').value = meta.notes || '';
   document.getElementById('gt-result').value = result;
-  const existing = document.getElementById('gt-lap-existing');
-  existing.textContent = meta.lap_name ? 'File saat ini: ' + meta.lap_name : '';
+  
+  const filenameEl = document.getElementById('gt-lap-filename');
+  const viewBtn = document.getElementById('gt-lap-view-btn');
+  
+  if (meta.lap_name) {
+    filenameEl.textContent = 'File saat ini: ' + meta.lap_name;
+    viewBtn.href = `/admin/applications/${appId}/ground-test/lap`;
+    viewBtn.style.display = 'inline';
+  } else {
+    filenameEl.textContent = '';
+    viewBtn.style.display = 'none';
+  }
+  
   openModal('overlay-gt');
 }
 
