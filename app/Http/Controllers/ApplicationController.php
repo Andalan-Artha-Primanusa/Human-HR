@@ -1000,7 +1000,7 @@ class ApplicationController extends Controller
         $this->authorize('sendOffer', $application);
 
         try {
-            $rules = [
+            $data = $request->validate([
                 'gross' => 'required|numeric|min:0',
                 'allowance' => 'required|numeric|min:0',
                 'email_body' => 'required|string',
@@ -1023,7 +1023,7 @@ class ApplicationController extends Controller
                 'footer_code'     => 'nullable|string',
                 'footer_version'  => 'nullable|string',
                 'footer_page_text'=> 'nullable|string',
-            ];
+            ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             \Log::error("Validation failed for sendOfferEmail: " . json_encode($e->errors()));
             throw $e;
@@ -1035,7 +1035,7 @@ class ApplicationController extends Controller
         $meta = $offer ? ($offer->meta ?? []) : [];
         $metaFields = [
             'doc_no', 'grade_level', 'poh', 'lokasi', 'contract_status', 
-            'join_date', 'working_hours', 'work ing_schedule', 
+            'join_date', 'working_hours', 'working_schedule', 
             'meals_allowance', 'overtime', 'tax_borne_by', 'deductions',
             'signer_name', 'signer_title', 'company', 'footer_code', 'footer_version',
             'footer_page_text'
