@@ -2,6 +2,17 @@
 @extends('layouts.app', ['title' => 'Admin · Kanban Kandidat'])
 
 @section('content')
+{{-- FLASH MESSAGE --}}
+@if(session('ok') || session('error') || session('warn'))
+  <div class="max-w-[1320px] mx-auto px-4 mt-4">
+    <div class="px-4 py-3 rounded-xl text-sm font-medium border shadow-sm
+      {{ session('ok') ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-red-50 text-red-800 border-red-200' }}">
+      <span>{{ session('ok') ?? session('error') ?? session('warn') }}</span>
+      <button onclick="this.parentElement.remove()" class="float-right font-bold">&times;</button>
+    </div>
+  </div>
+  <script>setTimeout(()=>{const e=document.querySelector('[class*="bg-emerald-50"],[class*="bg-red-50"]');if(e&&e.parentElement)e.parentElement.remove()},5000)</script>
+@endif
 <style>
 /* ===== BASE ===== */
 :root {
@@ -844,9 +855,14 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
       <button class="kn-modal-close" onclick="closeModal('overlay-send-ol')">✕</button>
     </div>
     <div class="kn-modal-body">
-      <form id="form-send-ol" method="POST">
+      <form id="form-send-ol" method="POST" enctype="multipart/form-data">
         @csrf
         <input type="hidden" name="app_id" id="send-ol-appid">
+        <div class="space-y-1.5" style="margin-bottom: 16px;">
+          <label for="send-ol-file" class="fm-label">Dokumen Offering Letter (PDF)</label>
+          <input type="file" name="ol_file" id="send-ol-file" class="fm-ctrl" accept=".pdf,application/pdf" style="padding: 15px; cursor: pointer;">
+          <p class="text-[11px] text-slate-400 mt-1">Upload file PDF Offering Letter yang sudah ditandatangani.</p>
+        </div>
         <div class="grid grid-cols-2 gap-4" style="margin-bottom: 16px;">
           <div class="space-y-1.5">
             <label for="send-ol-gross" class="fm-label">Gaji Pokok (Rp)</label>
@@ -1148,6 +1164,7 @@ function openSendOlModal(appId, name, gross, allow, btn) {
   form.action = `/admin/applications/${appId}/send-offer`;
   document.getElementById('send-ol-gross').value = gross;
   document.getElementById('send-ol-allowance').value = allow;
+  document.getElementById('send-ol-file').value = '';
   document.getElementById('send-ol-email-body').value = 'Kepada Yth. ' + name + ',\n\nDengan ini kami sampaikan Offering Letter untuk posisi yang Anda lamar. Silakan cek lampiran PDF untuk detail lengkapnya.\n\nHarap konfirmasi penerimaan offering letter ini melalui aplikasi.\n\nTerima kasih.';
   openModal('overlay-send-ol');
 }

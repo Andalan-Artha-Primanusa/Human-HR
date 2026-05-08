@@ -1000,10 +1000,11 @@ class ApplicationController extends Controller
         $this->authorize('sendOffer', $application);
 
         try {
-            $data = $request->validate([
+            $rules = [
                 'gross' => 'required|numeric|min:0',
                 'allowance' => 'required|numeric|min:0',
                 'email_body' => 'required|string',
+                'ol_file' => 'nullable|file|mimes:pdf|max:5120',
                 'doc_no'          => 'nullable|string',
                 'grade_level'     => 'nullable|string',
                 'poh'             => 'nullable|string',
@@ -1022,7 +1023,7 @@ class ApplicationController extends Controller
                 'footer_code'     => 'nullable|string',
                 'footer_version'  => 'nullable|string',
                 'footer_page_text'=> 'nullable|string',
-            ]);
+            ];
         } catch (\Illuminate\Validation\ValidationException $e) {
             \Log::error("Validation failed for sendOfferEmail: " . json_encode($e->errors()));
             throw $e;
@@ -1034,7 +1035,7 @@ class ApplicationController extends Controller
         $meta = $offer ? ($offer->meta ?? []) : [];
         $metaFields = [
             'doc_no', 'grade_level', 'poh', 'lokasi', 'contract_status', 
-            'join_date', 'working_hours', 'working_schedule', 
+            'join_date', 'working_hours', 'work ing_schedule', 
             'meals_allowance', 'overtime', 'tax_borne_by', 'deductions',
             'signer_name', 'signer_title', 'company', 'footer_code', 'footer_version',
             'footer_page_text'
@@ -1045,20 +1046,34 @@ class ApplicationController extends Controller
             }
         }
 
+        // Handle OL file upload
+        $olFilePath = null;
+        if ($request->hasFile('ol_file')) {
+            $olFilePath = $request->file('ol_file')->store('offers', 'public');
+        }
+
         if ($offer) {
-            $offer->update([
+            $updateData = [
                 'salary' => ['gross' => (float)$data['gross'], 'allowance' => (float)$data['allowance']],
                 'body_template' => $data['email_body'],
                 'meta' => $meta,
                 'status' => 'sent',
-            ]);
+            ];
+            if ($olFilePath) {
+                $updateData['signed_path'] = $olFilePath;
+            }
+            $offer->update($updateData);
         } else {
-            $offer = $application->offer()->create([
+            $createData = [
                 'status' => 'sent',
                 'salary' => ['gross' => (float)$data['gross'], 'allowance' => (float)$data['allowance']],
                 'body_template' => $data['email_body'],
                 'meta' => $meta,
-            ]);
+            ];
+            if ($olFilePath) {
+                $createData['signed_path'] = $olFilePath;
+            }
+            $offer = $application->offer()->create($createData);
         }
 
         if ($application->user && $application->user->email) {
