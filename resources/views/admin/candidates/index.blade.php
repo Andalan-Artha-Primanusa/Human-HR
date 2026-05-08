@@ -100,7 +100,6 @@
                     <th class="px-4 py-3 text-left">HP</th>
                     <th class="px-4 py-3 text-left">NIK</th>
                     <th class="px-4 py-3 text-left">Posisi yang Dilamar</th>
-                    <th class="px-4 py-3 text-center">Tr / Emp / Ref</th>
                     <th class="px-4 py-3"></th>
                   </tr>
                 </thead>
@@ -127,9 +126,6 @@
                           @else
                             <span class="text-slate-400">-</span>
                           @endif
-                        </td>
-                        <td class="px-4 py-3 text-center">
-                          {{ (int) $p->trainings_count }} / {{ (int) $p->employments_count }} / {{ (int) $p->references_count }}
                         </td>
                         <td class="px-4 py-3 text-right">
                           <a href="{{ route('admin.candidates.show', $p) }}"
