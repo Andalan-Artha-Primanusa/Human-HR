@@ -1371,7 +1371,7 @@ class ApplicationController extends Controller
             ApplicationStage::create([
                 'application_id' => $application->id,
                 'stage_key' => 'hired',
-                'status' => 'completed',
+                'status' => 'passed',
                 'acted_by' => Auth::id(),
                 'user_id' => Auth::id(),
                 'notes' => 'OL diterima oleh kandidat',
