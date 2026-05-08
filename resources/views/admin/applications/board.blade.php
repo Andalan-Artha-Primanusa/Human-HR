@@ -850,18 +850,15 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
     <div class="kn-modal-head">
       <div>
         <div class="kn-modal-title" id="send-ol-title">Kirim Offering Letter</div>
-        <div class="kn-modal-sub">Upload dokumen Offering Letter untuk dikirim ke kandidat</div>
+        <div class="kn-modal-sub">Kirim Offering Letter kepada kandidat (dokumen digenerate otomatis)</div>
       </div>
       <button class="kn-modal-close" onclick="closeModal('overlay-send-ol')">✕</button>
     </div>
     <div class="kn-modal-body">
-      <form id="form-send-ol" method="POST" enctype="multipart/form-data">
+      <form id="form-send-ol" method="POST">
         @csrf
         <input type="hidden" name="app_id" id="send-ol-appid">
         <div class="space-y-1.5" style="margin-bottom: 16px;">
-          <label for="send-ol-file" class="fm-label">Dokumen Offering Letter (PDF)</label>
-          <input type="file" name="ol_file" id="send-ol-file" class="fm-ctrl" accept=".pdf,application/pdf" style="padding: 15px; cursor: pointer;">
-          <p class="text-[11px] text-slate-400 mt-1">Upload file PDF Offering Letter yang sudah ditandatangani.</p>
         </div>
         <div class="grid grid-cols-2 gap-4" style="margin-bottom: 16px;">
           <div class="space-y-1.5">
@@ -873,6 +870,7 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
             <input type="number" name="allowance" id="send-ol-allowance" class="fm-ctrl" required min="0" step="1">
           </div>
         </div>
+        {{-- File upload removed: Offering Letter is generated server-side --}}
         <div class="space-y-1.5" style="margin-bottom: 16px;">
           <label for="send-ol-email-body" class="fm-label">Body Email</label>
           <textarea name="email_body" id="send-ol-email-body" class="fm-ctrl" required rows="5" placeholder="Isi email Offering Letter yang akan dikirim ke kandidat..."></textarea>
@@ -881,7 +879,7 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
     </div>
     <div class="kn-modal-footer">
       <button class="btn-xs btn-outline" onclick="closeModal('overlay-send-ol')">Batal</button>
-      <button class="btn-xs btn-primary" id="btn-send-ol" onclick="submitSendOl()">Upload & Kirim</button>
+      <button class="btn-xs btn-primary" id="btn-send-ol" onclick="submitSendOl()">Kirim</button>
     </div>
   </div>
 </div>
@@ -1164,7 +1162,7 @@ function openSendOlModal(appId, name, gross, allow, btn) {
   form.action = `/admin/applications/${appId}/send-offer`;
   document.getElementById('send-ol-gross').value = gross;
   document.getElementById('send-ol-allowance').value = allow;
-  document.getElementById('send-ol-file').value = '';
+  // OL upload handled server-side; no client file input to clear.
   document.getElementById('send-ol-email-body').value = 'Kepada Yth. ' + name + ',\n\nDengan ini kami sampaikan Offering Letter untuk posisi yang Anda lamar. Silakan cek lampiran PDF untuk detail lengkapnya.\n\nHarap konfirmasi penerimaan offering letter ini melalui aplikasi.\n\nTerima kasih.';
   openModal('overlay-send-ol');
 }

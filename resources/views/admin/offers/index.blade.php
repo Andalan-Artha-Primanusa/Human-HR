@@ -90,6 +90,9 @@
       @if(session('success'))
         <div class="px-4 py-3 text-green-700 border border-green-200 rounded-xl bg-green-50">{{ session('success') }}</div>
       @endif
+      @if(session('ok'))
+        <div class="px-4 py-3 text-green-700 border border-green-200 rounded-xl bg-green-50">{{ session('ok') }}</div>
+      @endif
       @if(session('error'))
         <div class="px-4 py-3 text-red-700 border border-red-200 rounded-xl bg-red-50">{{ session('error') }}</div>
       @endif
@@ -350,6 +353,15 @@
             <form id="form-edit-offer" method="POST" class="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
                 @csrf
                 @method('PATCH')
+              @if($errors->any())
+                <div class="px-4 py-3 text-sm text-rose-700 border border-rose-200 rounded-xl bg-rose-50">
+                  <ul class="list-disc pl-5">
+                    @foreach($errors->all() as $err)
+                      <li>{{ $err }}</li>
+                    @endforeach
+                  </ul>
+                </div>
+              @endif
                 
                 <div class="grid grid-cols-2 gap-4">
                     <div class="space-y-1.5">
