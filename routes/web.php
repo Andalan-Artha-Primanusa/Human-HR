@@ -199,6 +199,8 @@ Route::prefix('admin')
         Route::post('applications/{application}/mobilisasi', [ApplicationController::class, 'updateMobilisasi'])->name('applications.mobilisasi.update');
         Route::post('applications/{application}/ground-test', [ApplicationController::class, 'updateGroundTest'])->name('applications.ground-test.update');
         Route::get('applications/{application}/ground-test/lap', [ApplicationController::class, 'showGroundTestLap'])->name('applications.ground-test.lap');
+        Route::get('applications/{application}/stages-history', [ApplicationController::class, 'stagesHistory'])->name('applications.stages-history');
+        Route::post('applications/{application}/reject-offer', [ApplicationController::class, 'rejectOffer'])->name('applications.reject-offer');
 
         // Move via form POST (tombol blade)
         Route::post('applications/{application}/move', [ApplicationController::class, 'moveStage'])

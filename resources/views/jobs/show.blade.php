@@ -51,7 +51,7 @@
         : null;
 
     // ==== Tahapan & label (FLOW BARU) ====
-    $stageOrder = ['applied', 'screening', 'psychotest', 'hr_iv', 'user_iv', 'user_trainer_iv', 'offer', 'mcu', 'mobilisasi', 'ground_test', 'hired', 'not_qualified'];
+    $stageOrder = ['applied', 'screening', 'psychotest', 'hr_iv', 'user_iv', 'user_trainer_iv', 'offer', 'mcu', 'mobilisasi', 'ground_test', 'onsite', 'hired', 'not_qualified'];
     $pretty = [
         'applied' => 'Pengajuan Berkas',
         'screening' => 'Screening Berkas',
@@ -63,6 +63,7 @@
         'mcu' => 'MCU',
         'mobilisasi' => 'Mobilisasi',
         'ground_test' => 'Ground Test',
+        'onsite' => 'Onsite',
         'hired' => 'Diterima',
         'not_qualified' => 'Tidak Lolos',
         'rejected' => 'Tidak Lolos',

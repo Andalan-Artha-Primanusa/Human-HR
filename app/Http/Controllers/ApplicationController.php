@@ -43,6 +43,7 @@ class ApplicationController extends Controller
         'mcu',
         'mobilisasi',
         'ground_test',
+        'onsite',
         'hired',
         'not_qualified',
     ];
@@ -78,6 +79,9 @@ class ApplicationController extends Controller
         'ground-test'        => 'ground_test',
         'diterima'           => 'hired',
         'hired'              => 'hired',
+        'onsite'             => 'onsite',
+        'on_site'            => 'onsite',
+        'on-site'            => 'onsite',
         'rejected'           => 'not_qualified',
         'not_qualified'      => 'not_qualified',
         'not-qualified'      => 'not_qualified',
@@ -97,6 +101,7 @@ class ApplicationController extends Controller
         'mobilisasi'      => 'Mobilisasi',
         'ground_test'     => 'Ground Test',
         'hired'           => 'Hired',
+        'onsite'          => 'Onsite',
         'not_qualified'   => 'Tidak Lolos',
     ];
 
@@ -110,6 +115,7 @@ class ApplicationController extends Controller
         'mobilisasi',
         'ground_test',
         'hired',
+        'onsite',
         'not_qualified',
     ];
 
@@ -791,10 +797,9 @@ class ApplicationController extends Controller
                 $job = $application->job()->with('manpowerRequirement', 'site:id,code', 'company:id,code')->first();
                 if ($job && $job->manpowerRequirement) {
                     $job->manpowerRequirement->increment('filled_headcount');
-                    if ($job->manpowerRequirement->filled_headcount >= $job->manpowerRequirement->budget_headcount) {
-                        $job->update(['status' => 'closed']);
-                    }
                 }
+                // Close the job immediately once there is at least one hired candidate.
+                $job?->update(['status' => 'closed']);
                 $application->update(['overall_status' => 'hired']);
 
                 // Auto-generate NIK
@@ -1263,5 +1268,80 @@ class ApplicationController extends Controller
         return response()->file($fullPath, [
             'Content-Disposition' => 'inline; filename="' . $filename . '"',
         ]);
+    }
+
+    /**
+     * Get application stages history with acted_by user info
+     */
+    public function stagesHistory(JobApplication $application)
+    {
+        $this->authorize('view', $application);
+
+        $stages = ApplicationStage::where('application_id', $application->id)
+            ->with('application')
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($stage) {
+                $actedByUser = User::find($stage->acted_by);
+                return [
+                    'id' => $stage->id,
+                    'stage_key' => $stage->stage_key,
+                    'status' => $stage->status,
+                    'score' => $stage->score,
+                    'notes' => $stage->notes,
+                    'acted_by' => $stage->acted_by,
+                    'acted_by_name' => $actedByUser?->name ?? 'System',
+                    'created_at' => $stage->created_at,
+                ];
+            })
+            ->values();
+
+        return response()->json(['stages' => $stages]);
+    }
+
+    /**
+     * Reject offer with reason
+     */
+    public function rejectOffer(Request $request, JobApplication $application)
+    {
+        $this->authorize('update', $application);
+
+        $request->validate([
+            'rejection_reason' => 'required|string|min:5|max:500',
+        ]);
+
+        $offer = $application->offer;
+        if (!$offer) {
+            return response()->json(['error' => 'Tidak ada Offering Letter untuk ditolak.'], 404);
+        }
+
+        if ($offer->status !== 'sent') {
+            return response()->json(['error' => 'Hanya OL dengan status "sent" yang bisa ditolak.'], 422);
+        }
+
+        DB::transaction(function () use ($offer, $request, $application) {
+            $offer->update([
+                'status' => 'declined',
+                'rejection_reason' => $request->input('rejection_reason'),
+                'rejected_by' => Auth::id(),
+                'rejected_at' => now(),
+            ]);
+
+            // Log stage change ke ApplicationStage
+            ApplicationStage::create([
+                'application_id' => $application->id,
+                'stage_key' => 'offer',
+                'status' => 'failed',
+                'acted_by' => Auth::id(),
+                'user_id' => Auth::id(),
+                'notes' => 'OL ditolak: ' . $request->input('rejection_reason'),
+            ]);
+        });
+
+        if ($request->expectsJson()) {
+            return response()->json(['ok' => true, 'message' => 'Offering Letter berhasil ditolak.']);
+        }
+
+        return back()->with('ok', 'Offering Letter berhasil ditolak.');
     }
 }

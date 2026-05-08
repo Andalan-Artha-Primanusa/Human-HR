@@ -62,18 +62,35 @@
 }
 .kn-filter .btn-filter:hover { opacity: .9; }
 
+/* ===== MAIN WRAPPER — FIX UTAMA ===== */
+.kn-wrap {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  box-sizing: border-box;
+  /* TIDAK pakai flex:1 atau overflow:hidden supaya tidak kabur dari parent <main> */
+}
+
 /* ===== BOARD ===== */
-.kn-board-wrap { overflow-x: auto; padding: 1rem 1.25rem 3rem; -webkit-overflow-scrolling: touch; }
-.kn-board { display: flex; gap: .9rem; align-items: flex-start; min-width: max-content; }
+.kn-board-wrap {
+  overflow-x: auto;
+  overflow-y: visible;
+  padding: 1.5rem 2.2rem 3.7rem;
+  -webkit-overflow-scrolling: touch;
+  width: 100%;
+  box-sizing: border-box;
+  /* TIDAK pakai flex:1 */
+}
+.kn-board { display: flex; gap: 1.8rem; align-items: flex-start; min-width: max-content; }
 
 /* ===== COLUMN ===== */
 .kn-col {
-  width: 276px;
+  width: 485px;
   background: #fff;
   border-radius: 1rem;
   border: 1px solid #e2d9cf;
   display: flex; flex-direction: column;
-  max-height: 80vh;
+  max-height: none;
   box-shadow: 0 2px 14px rgba(107,63,31,.06);
   transition: outline .1s;
 }
@@ -84,39 +101,46 @@
 }
 .kn-col-head {
   display: flex; align-items: center; justify-content: space-between;
-  padding: .7rem 1rem;
+  padding: 1.12rem 1.4rem;
   background: #fdf7f0;
   border-bottom: 1px solid #ddd3c4;
   border-radius: 1rem 1rem 0 0;
   position: sticky; top: 0; z-index: 2;
 }
 .kn-col-title {
-  font-size: .68rem; font-weight: 800;
+  font-size: .96rem; font-weight: 800;
   text-transform: uppercase; letter-spacing: .7px;
   color: #7a4f2a;
 }
 .kn-col-badge {
   background: #5c3d1e; color: #fff;
-  font-size: .65rem; font-weight: 700;
-  border-radius: 999px; padding: .12rem .5rem;
-  min-width: 22px; text-align: center;
+  font-size: .96rem; font-weight: 700;
+  border-radius: 999px; padding: .25rem .8rem;
+  min-width: 40px; text-align: center;
 }
 .kn-col-body {
-  padding: .7rem .6rem;
-  overflow-y: auto; flex: 1;
-  display: flex; flex-direction: column; gap: .6rem;
+  padding: 1.25rem 1.15rem;
+  overflow-y: visible; flex: 1;
+  display: flex; flex-direction: column; gap: 1.15rem;
 }
+.kn-col-body { -ms-overflow-style: none; scrollbar-width: none; }
+.kn-col-body::-webkit-scrollbar { width: 0; height: 0; display: none; }
 
 /* ===== CARD ===== */
 .kn-card {
   background: #fff; border: 1px solid #e8dfd4;
-  border-radius: .875rem; padding: .875rem;
+  border-radius: 1.2rem; padding: 1.45rem;
   cursor: grab; position: relative;
   transition: transform .15s, box-shadow .15s, border-color .2s, opacity .2s;
   display: flex; flex-direction: column;
-  max-height: 550px;
-  overflow-y: auto;
+  gap: .82rem;
+  max-height: none;
+  overflow-y: visible;
+  word-wrap: break-word;
+  word-break: break-word;
 }
+.kn-card { -ms-overflow-style: none; scrollbar-width: none; }
+.kn-card::-webkit-scrollbar { width: 0; height: 0; display: none; }
 .kn-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(107,63,31,.13);
@@ -127,13 +151,13 @@
 .kn-card.card-locked { opacity: .55; cursor: not-allowed; }
 .kn-card.card-locked .kn-card-name { color: #8a7060; }
 
-.kn-card-name  { font-weight: 700; font-size: .87rem; color: #3d1f08; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.kn-card-job   { font-size: .72rem; color: #9a7558; margin-top: .1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.kn-card-email { font-size: .7rem; color: #b89070; margin-top: .3rem; }
-.kn-card-role  { font-size: .68rem; color: #c0a080; margin-top: .1rem; }
+.kn-card-name  { font-weight: 700; font-size: 1.22rem; color: #3d1f08; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.kn-card-job   { font-size: 1.02rem; color: #9a7558; margin-top: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.kn-card-email { font-size: .96rem; color: #b89070; margin-top: 0; }
+.kn-card-role  { font-size: .94rem; color: #c0a080; margin-top: 0; }
 
 .kn-subcard {
-  margin-top: .7rem;
+  margin-top: 0;
   padding: .7rem .75rem;
   border-radius: .7rem;
   border: 1px solid #eadbcb;
@@ -157,40 +181,64 @@
   font-size: .8rem; font-weight: 700; color: #3d1f08; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 
-.kn-pill { display: inline-flex; align-items: center; gap: .25rem; font-size: .65rem; font-weight: 700; padding: .18rem .55rem; border-radius: 999px; letter-spacing: .2px; margin-top: .45rem; }
+.kn-pill { display: inline-flex; align-items: center; gap: .3rem; font-size: .94rem; font-weight: 700; padding: .4rem .92rem; border-radius: 999px; letter-spacing: .2px; margin-top: 0; }
 .pill-active   { background: #fef3e2; color: #92580b; }
 .pill-hired    { background: #e6f4ea; color: #256629; }
 .pill-nq       { background: #fdeaea; color: #9b2525; }
 .pill-warn     { background: #fff8e1; color: #b7791f; }
 
 .kn-lock-note {
-  font-size: .65rem; color: #b05020;
+  font-size: .92rem; color: #b05020;
   background: #fff3ed; border: 1px dashed #e8b090;
-  border-radius: .4rem; padding: .28rem .6rem;
-  margin-top: .5rem; display: flex; align-items: center; gap: .3rem;
+  border-radius: .6rem; padding: .48rem .86rem;
+  margin-top: 0; display: flex; align-items: center; gap: .35rem;
 }
 
 .kn-card-actions {
-  display: flex; flex-wrap: wrap; gap: .4rem;
-  margin-top: auto; padding-top: .6rem; padding-bottom: .4rem;
+  display: flex; flex-wrap: wrap; gap: .55rem;
+  margin-top: 0; padding-top: .95rem; padding-bottom: .7rem;
   border-top: 1px solid #f0e9df;
   position: sticky; bottom: 0; background: #fff; z-index: 10;
+}
+
+/* Stage-specific polish: Screening CV/Berkas */
+.kn-col[data-stage="screening"] .kn-col-body {
+  padding-top: 1.35rem;
+  padding-bottom: 1.35rem;
+  gap: 1.25rem;
+}
+.kn-col[data-stage="screening"] .kn-card {
+  padding: 1.5rem;
+  gap: .9rem;
+}
+.kn-col[data-stage="screening"] .kn-card-name {
+  line-height: 1.35;
+}
+.kn-col[data-stage="screening"] .kn-card-actions {
+  padding-top: 1.05rem;
 }
 
 /* ===== FEEDBACK PANEL (collapsible) ===== */
 .fb-panel-toggle { background: #d97706; border-color: transparent; color: #fff; cursor: pointer; }
 .fb-panel-toggle:hover { opacity: .85; }
-.fb-panel { display: flex; flex-wrap: wrap; gap: .4rem; padding-top: .6rem; padding-bottom: .4rem; border-top: 1px solid #f0e9df; }
+.fb-panel { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: 0; padding-top: .6rem; padding-bottom: .4rem; border-top: 1px solid #f0e9df; }
 .fb-panel.hidden { display: none; }
 .btn-detail-toggle { background: #fff; border-color: #a77d52; color: #7a4f2a; }
 .btn-detail-toggle:hover { background: #f7f0e8; border-color: #a77d52; }
 
 /* ===== BUTTONS ===== */
 .btn-xs {
-  font-size: .67rem; font-weight: 700; padding: .26rem .62rem;
+  font-size: .98rem; font-weight: 700; padding: .52rem 1.05rem;
   border-radius: .45rem; border: 1.5px solid; cursor: pointer;
   transition: all .12s; white-space: nowrap; line-height: 1.4;
   font-family: inherit;
+}
+
+@media (max-width: 768px) {
+  .kn-board-wrap { padding: 1.2rem 1.2rem 2.2rem; }
+  .kn-board { gap: 1.2rem; }
+  .kn-col { width: 400px; }
+  .kn-card { max-height: none; padding: 1.3rem; overflow-y: visible; }
 }
 .btn-outline  { background: #fff; border-color: #a77d52; color: #7a4f2a; }
 .btn-outline:hover { background: #f7f0e8; border-color: #a77d52; }
@@ -314,15 +362,12 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
     'mcu'             => 'MCU',
     'mobilisasi'      => 'Mobilisasi',
     'ground_test'     => 'Ground Test',
+    'onsite'          => 'Onsite',
     'hired'           => 'Hired',
     'not_qualified'   => 'TIDAK lOLOS',
   ];
 
-  /**
-   * Stage yang BEBAS dipindah oleh hr/admin/superadmin
-   * tanpa perlu feedback tambahan (setelah user_trainer_iv selesai)
-   */
-  $freeAfter = ['offer','mcu','mobilisasi','ground_test','hired','not_qualified'];
+  $freeAfter = ['offer','mcu','mobilisasi','ground_test','onsite','hired','not_qualified'];
 
   $authRole  = auth()->user()->role ?? 'guest';
   $isHR      = in_array($authRole, ['admin', 'hr', 'superadmin']);
@@ -372,15 +417,8 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
                 $fbTrainer  = $a->feedbacks->where('role','trainer')->sortByDesc('created_at')->first();
                 $fbEmployee = $a->feedbacks->where('role','pelamar')->sortByDesc('created_at')->first();
 
-                /**
-                 * Kartu LOCKED di hr_iv jika feedback HR belum ada
-                 * (hanya berlaku di kolom hr_iv)
-                 */
                 $isHrLocked = ($stageKey === 'hr_iv' && !$fbHR && $isSuperHR);
 
-                /**
-                 * Setelah user_trainer_iv, admin/hr/superadmin bebas drag ke stage mana saja
-                 */
                 $stageOrder = array_keys($stages);
                 $curIdx     = array_search($stageKey, $stageOrder);
                 $trainerIdx = array_search('user_trainer_iv', $stageOrder);
@@ -460,46 +498,38 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
                     </div>
                   </div>
 
-                  <div class="mt-3 overflow-hidden border rounded-xl border-[#eadbcb] bg-white">
-                    <div class="px-3 py-2 text-[11px] font-extrabold uppercase tracking-[0.35px] text-[#a77d52] bg-[#faf6f1] border-b border-[#eadbcb]">
-                      Terima OL
+                  <div class="mt-3 overflow-hidden border rounded-lg border-[#eadbcb] bg-white" style="font-size: 0.7rem;">
+                    <div class="px-2 py-1.5 font-bold uppercase text-[#a77d52] bg-[#faf6f1] border-b border-[#eadbcb]">
+                      OL Status
                     </div>
-                    <div class="overflow-x-auto">
-                      <table class="w-full text-[11px] text-left">
-                        <thead class="bg-[#fcf9f6] text-[#9a7558] uppercase">
-                          <tr>
-                            <th class="px-3 py-2">Status</th>
-                            <th class="px-3 py-2">Gaji Pokok</th>
-                            <th class="px-3 py-2">Tunjangan</th>
-                            <th class="px-3 py-2">Catatan</th>
-                          </tr>
-                        </thead>
-                        <tbody class="divide-y divide-[#f0e8df]">
-                          @if(optional($a->offer)->status === 'accepted')
-                            @php
-                              $gross = data_get($a->offer->salary, 'gross', data_get($a->offer->salary, 'base', 0));
-                              $allow = data_get($a->offer->salary, 'allowance', 0);
-                              $note = $a->offer->body_template ?: 'Offering Letter sudah disetujui.';
-                            @endphp
-                            <tr>
-                              <td class="px-3 py-2 font-semibold text-emerald-700">Accepted</td>
-                              <td class="px-3 py-2 text-slate-700">{{ is_numeric($gross) ? number_format((float) $gross, 0, ',', '.') : $gross }}</td>
-                              <td class="px-3 py-2 text-slate-700">{{ is_numeric($allow) ? number_format((float) $allow, 0, ',', '.') : $allow }}</td>
-                              <td class="px-3 py-2 text-slate-600">{{ \Illuminate\Support\Str::limit($note, 60) }}</td>
-                            </tr>
-                          @else
-                            <tr>
-                              <td colspan="4" class="px-3 py-3 text-slate-500">Belum ada data OL yang diterima.</td>
-                            </tr>
-                          @endif
-                        </tbody>
-                      </table>
+                    <div class="px-2 py-2">
+                      @if(optional($a->offer)->status === 'accepted')
+                        @php
+                          $gross = data_get($a->offer->salary, 'gross', data_get($a->offer->salary, 'base', 0));
+                          $allow = data_get($a->offer->salary, 'allowance', 0);
+                        @endphp
+                        <div class="font-semibold text-emerald-700">✓ Accepted</div>
+                        <div class="mt-1 text-slate-600">Gaji: Rp {{ is_numeric($gross) ? number_format((float) $gross, 0, ',', '.') : $gross }}</div>
+                        @if($allow)
+                          <div class="text-slate-600">Tunjangan: Rp {{ is_numeric($allow) ? number_format((float) $allow, 0, ',', '.') : $allow }}</div>
+                        @endif
+                      @elseif(optional($a->offer)->status === 'declined')
+                        <div class="font-semibold text-red-600">✕ Declined</div>
+                        @if(optional($a->offer)->rejection_reason)
+                          <div class="mt-1 italic text-slate-600">{{ $a->offer->rejection_reason }}</div>
+                        @endif
+                      @else
+                        <div class="text-slate-500">Belum ada OL</div>
+                      @endif
                     </div>
                   </div>
 
                   <div class="mt-3 flex flex-wrap gap-1.5">
                     <button type="button" class="btn-xs btn-detail-toggle" onclick="toggleDetailPanel('detail-{{ $a->id }}', this)">
                       ▲ Tutup
+                    </button>
+                    <button type="button" class="btn-xs btn-outline" onclick="openHistoryModal('{{ $a->id }}', '{{ addslashes($a->user->name) }}')" title="Lihat history pergerakan stage">
+                      📋 History
                     </button>
                     @if(optional($a->user)->candidateProfile && Route::has('admin.candidates.show'))
                       <a class="btn-xs btn-outline" href="{{ route('admin.candidates.show', $a->user->candidateProfile) }}" target="_blank">Profil</a>
@@ -508,19 +538,16 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
                   </div>
 
                   <div class="mt-3 flex flex-wrap gap-1.5">
-                    {{-- VIEW FEEDBACK BUTTONS --}}
                     @if($fbHR || $fbUser || $fbTrainer || $fbEmployee)
                       <button type="button" class="btn-xs btn-outline" onclick="openFbModal(this)">View Feedbacks</button>
                     @endif
 
-                    {{-- SCHEDULE BUTTON (hr_iv, user_trainer_iv) --}}
                     @if(in_array($stageKey, ['hr_iv','user_trainer_iv']))
                       <button type="button" class="btn-xs btn-sched" onclick="openSchedModal(this, '{{ $stageKey }}')">
                         Schedule
                       </button>
                     @endif
 
-                    {{-- FEEDBACK FORM BUTTONS (user_trainer_iv) - TOGGLE --}}
                     @if($stageKey === 'user_trainer_iv' && ($isHR || $isTrainer || $isKaryawan))
                       <button type="button" class="btn-xs fb-panel-toggle"
                         onclick="toggleFbPanel('fbp-{{ $a->id }}', this)" title="Tampilkan form feedback">
@@ -528,15 +555,19 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
                       </button>
                     @endif
 
-                    {{-- KIRIM OL EMAIL (hanya di offer) --}}
                     @if($stageKey === 'offer' && $isHR)
                       <button type="button" class="btn-xs btn-primary"
                         onclick="openSendOlModal('{{ $a->id }}', '{{ addslashes($a->user->name) }}', '{{ optional($a->offer)->salary['gross'] ?? 0 }}', '{{ optional($a->offer)->salary['allowance'] ?? 0 }}', this)">
                         ✉️ Kirim OL ke {{ $a->user->name }}
                       </button>
+                      @if(optional($a->offer)->status === 'sent')
+                        <button type="button" class="btn-xs btn-primary" style="background-color: #dc2626; border-color: transparent; color: #fff;"
+                          onclick="openRejectOlModal('{{ $a->id }}', '{{ addslashes($a->user->name) }}')" title="Tolak Offering Letter">
+                          ✕ Tolak OL
+                        </button>
+                      @endif
                     @endif
 
-                    {{-- KIRIM MCU EMAIL (hanya di mcu) --}}
                     @if($stageKey === 'mcu' && $isHR)
                       <button type="button" class="btn-xs btn-primary"
                         onclick="openSendMcuModal('{{ $a->id }}', '{{ addslashes($a->user->name) }}', this)">
@@ -544,7 +575,6 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
                       </button>
                     @endif
 
-                    {{-- MOBILISASI ACTIONS --}}
                     @if($stageKey === 'mobilisasi' && ($isHR || $isTrainer))
                       <button type="button" class="btn-xs btn-primary"
                         onclick="openMobilisasiModal('{{ $a->id }}', '{{ addslashes($a->user->name) }}', this)">
@@ -552,7 +582,6 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
                       </button>
                     @endif
 
-                    {{-- GROUND TEST ACTIONS --}}
                     @if($stageKey === 'ground_test' && ($isHR || $isTrainer))
                       <button type="button" class="btn-xs btn-primary"
                         onclick="openGroundTestModal('{{ $a->id }}', '{{ addslashes($a->user->name) }}', this)">
@@ -579,7 +608,6 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
                       </button>
                     @endif
 
-                    {{-- FEEDBACK FORM BUTTON (hanya di hr_iv & belum ada feedback) --}}
                     @if($stageKey === 'hr_iv' && !$fbHR && $isSuperHR)
                       <button type="button" class="btn-xs btn-primary" style="background-color:#d97706; font-size:.7rem;"
                         onclick="openFbForm(this, '{{ $a->id }}', '{{ $a->user->name }}', 'hr_iv', 'hr')" title="WAJIB isi feedback dan pilih setuju/tidak setuju sebelum bisa pindah ke stage lain">
@@ -587,9 +615,8 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
                       </button>
                     @endif
 
-                    {{-- FREE MOVE DROPDOWN (admin/hr/superadmin, setelah user_trainer_iv) --}}
                     @if($isFreeMove && $isSuperHR)
-                      <div class="free-move-wrap" style="width:100%; margin-top: auto;">
+                      <div class="free-move-wrap" style="width:100%; margin-top: .45rem;">
                         <label>Pindahkan ke Stage</label>
                         <select onchange="freeMoveCard(this, '{{ $a->id }}', '{{ $stageKey }}', '{{ csrf_token() }}', '{{ route('admin.applications.board.move') }}')">
                           <option value="">— Pilih Stage —</option>
@@ -601,7 +628,7 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
                         </select>
                       </div>
                     @elseif($stageKey === 'hr_iv' && !$fbHR && $isSuperHR)
-                      <div style="width:100%; padding:.6rem; background:#fed7aa; border:1px solid #fb923c; border-radius:.4rem; font-size:.65rem; color:#b45309; margin-top: auto; text-align:center; font-weight:600;">
+                      <div style="width:100%; padding:.6rem; background:#fed7aa; border:1px solid #fb923c; border-radius:.4rem; font-size:.65rem; color:#b45309; margin-top: .45rem; text-align:center; font-weight:600;">
                         ⚠️ Selesaikan Feedback HR untuk pindah ke stage lain
                       </div>
                     @endif
@@ -625,14 +652,12 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
                   </span>
                 @endif
 
-                {{-- INDICATOR MOBILISASI --}}
                 @if(isset($a->mobilisasi_meta['ticket_path']))
                   <span class="kn-pill pill-hired" title="Tiket: {{ $a->mobilisasi_meta['ticket_name'] }}">
                     ✈ TIKET OK
                   </span>
                 @endif
 
-                {{-- INDICATOR GROUND TEST --}}
                 @if(isset($a->ground_test_meta['lap_path']) || $a->ground_test_result)
                   <span class="kn-pill {{ $a->ground_test_result === 'lolos' ? 'pill-hired' : ($a->ground_test_result === 'tidak_lolos' ? 'pill-nq' : 'pill-warn') }}">
                     GT: {{ $a->ground_test_result === 'lolos' ? 'LOLOS' : ($a->ground_test_result === 'tidak_lolos' ? 'TIDAK LOLOS' : 'PENDING') }}
@@ -645,13 +670,12 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
                 @endif
 
                 <div class="kn-card-actions">
-                    <button type="button" class="btn-xs btn-detail-toggle"
-                      onclick="toggleDetailPanel('detail-{{ $a->id }}', this)">
+                  <button type="button" class="btn-xs btn-detail-toggle"
+                    onclick="toggleDetailPanel('detail-{{ $a->id }}', this)">
                     ▼ Detail
                   </button>
                 </div>
 
-                {{-- FEEDBACK PANEL (collapsible, hidden by default) --}}
                 @if($stageKey === 'user_trainer_iv')
                   <div id="fbp-{{ $a->id }}" class="hidden fb-panel">
                     @if($isHR)
@@ -813,7 +837,6 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
       <form id="form-send-ol" method="POST" enctype="multipart/form-data">
         @csrf
         <input type="hidden" name="app_id" id="send-ol-appid">
-        
         <div style="padding: 20px; border: 2px dashed #ccc; border-radius: 8px; text-align: center; background: #f9f9f9; margin-bottom: 20px;">
           <div style="margin-bottom: 15px;">
             <label class="fm-label" style="display: block; font-size: 1rem; font-weight: 600; margin-bottom: 10px;">Pilih File Offering Letter</label>
@@ -821,7 +844,6 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
             <div style="font-size: 0.75rem; color: #666; margin-top: 8px;">Format: PDF, DOC, DOCX | Ukuran maks: 10MB</div>
           </div>
         </div>
-
         <div style="background: #fffbeb; border-left: 4px solid #fbbf24; padding: 12px; border-radius: 4px; margin-bottom: 15px;">
           <div style="font-size: 0.85rem; color: #92400e; font-weight: 500;">
             ℹ️ File akan langsung dikirim ke kandidat sebagai lampiran email Offering Letter.
@@ -872,7 +894,6 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
         <input type="hidden" name="footer_email" id="send-mcu-footer-email">
         <input type="hidden" name="footer_website" id="send-mcu-footer-website">
         <input type="hidden" name="email_body" id="send-mcu-body">
-        
         <div style="padding: 20px; border: 2px dashed #ccc; border-radius: 8px; text-align: center; background: #f9f9f9; margin-bottom: 20px;">
           <div style="margin-bottom: 15px;">
             <label class="fm-label">Pilih File Undangan MCU</label>
@@ -880,7 +901,6 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
             <div style="font-size: 0.75rem; color: #666; margin-top: 8px;">Format: PDF, DOC, DOCX | Ukuran maks: 10MB</div>
           </div>
         </div>
-
         <div style="background: #fffbeb; border-left: 4px solid #fbbf24; padding: 12px; border-radius: 4px; margin-bottom: 15px;">
           <div style="font-size: 0.85rem; color: #92400e; font-weight: 500;">
             ℹ️ File akan langsung dikirim ke kandidat sebagai lampiran email Undangan MCU.
@@ -975,6 +995,52 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
   </div>
 </div>
 
+{{-- ============================= MODAL: REJECT OL ============================= --}}
+<div class="hidden kn-overlay" id="overlay-reject-ol">
+  <div class="kn-modal">
+    <div class="kn-modal-head">
+      <div>
+        <div class="kn-modal-title" id="reject-ol-title">Tolak Offering Letter</div>
+        <div class="kn-modal-sub">Masukkan alasan penolakan Offering Letter</div>
+      </div>
+      <button class="kn-modal-close" onclick="closeModal('overlay-reject-ol')">✕</button>
+    </div>
+    <div class="kn-modal-body">
+      <input type="hidden" id="reject-ol-appid">
+      <div class="fm-group">
+        <label class="fm-label">Alasan Penolakan *</label>
+        <textarea class="fm-ctrl" id="reject-ol-reason" rows="4" placeholder="Jelaskan mengapa offering letter ditolak..."></textarea>
+      </div>
+      <div class="text-[0.75rem] text-[#9a7558] mt-3">
+        Catatan ini akan dicatat sebagai bukti penolakan OL.
+      </div>
+    </div>
+    <div class="kn-modal-footer">
+      <button class="btn-xs btn-outline" onclick="closeModal('overlay-reject-ol')">Batal</button>
+      <button class="btn-xs btn-primary" id="btn-reject-ol" style="background-color: #dc2626; border-color: transparent; color: #fff;" onclick="submitRejectOl()">Tolak OL</button>
+    </div>
+  </div>
+</div>
+
+{{-- ============================= MODAL: HISTORY PERGERAKAN ============================= --}}
+<div class="hidden kn-overlay" id="overlay-history">
+  <div class="kn-modal">
+    <div class="kn-modal-head">
+      <div>
+        <div class="kn-modal-title" id="history-modal-title">History Pergerakan</div>
+        <div class="kn-modal-sub">Riwayat pergerakan dan perubahan stage kandidat</div>
+      </div>
+      <button class="kn-modal-close" onclick="closeModal('overlay-history')">✕</button>
+    </div>
+    <div class="kn-modal-body">
+      <div id="history-list" class="space-y-2 overflow-y-auto max-h-96"></div>
+    </div>
+    <div class="kn-modal-footer">
+      <button class="btn-xs btn-outline" onclick="closeModal('overlay-history')">Tutup</button>
+    </div>
+  </div>
+</div>
+
 {{-- TOAST --}}
 <div class="hidden kn-toast" id="kn-toast"></div>
 
@@ -994,21 +1060,21 @@ function showToast(msg, type = 'ok') {
   t._timer = setTimeout(() => t.classList.add('hidden'), 2800);
 }
 
-function roleLabel(r) { 
+function roleLabel(r) {
   if(r === 'hr') return 'HR';
   if(r === 'user' || r === 'karyawan') return 'User';
   if(r === 'trainer') return 'Trainer';
   if(r === 'pelamar' || r === 'employee') return 'Pelamar';
   return r;
 }
-function roleIcon(r) { 
+function roleIcon(r) {
   if(r === 'hr') return 'HR';
   if(r === 'user' || r === 'karyawan') return 'US';
   if(r === 'trainer') return 'TR';
   if(r === 'pelamar' || r === 'employee') return 'PL';
   return '??';
 }
-function roleCls(r) { 
+function roleCls(r) {
   if(r === 'hr') return 'fb-hr';
   if(r === 'user' || r === 'karyawan') return 'fb-user';
   if(r === 'trainer') return 'fb-tr';
@@ -1040,7 +1106,6 @@ function openFbModal(btn) {
     if(!data) return;
     const feedbackText = data.notes || data.feedback || data;
     const approveStatus = data.approve;
-    
     html += `
       <div style="margin-bottom:16px; padding:12px; background:#f8fafc; border-radius:8px; border-left:4px solid ${color}">
         <div style="font-weight:bold; font-size:0.75rem; color:#64748b; text-transform:uppercase; margin-bottom:4px;">${title}</div>
@@ -1065,16 +1130,11 @@ function openFbModal(btn) {
 }
 
 function openSendOlModal(appId, name, gross, allow, btn) {
-  // Simplified for upload-only modal
   document.getElementById('send-ol-appid').value = appId;
   document.getElementById('send-ol-title').textContent = 'Kirim Offering Letter — ' + name;
-  
   const form = document.getElementById('form-send-ol');
   form.action = `/admin/applications/${appId}/send-offer`;
-  
-  // Reset file input
   document.getElementById('send-ol-file').value = '';
-  
   openModal('overlay-send-ol');
 }
 
@@ -1089,108 +1149,73 @@ function submitSendOl() {
 function openSendMcuModal(appId, name, btn) {
   const card = getCard(btn);
   let meta = {};
-  try {
-    meta = JSON.parse(card.dataset.mcuMeta || '{}');
-  } catch(e) { meta = {}; }
+  try { meta = JSON.parse(card.dataset.mcuMeta || '{}'); } catch(e) { meta = {}; }
 
   const tpl = @json($mcuTemplate);
-  const setValue = (id, value) => {
-    const element = document.getElementById(id);
-    if (element) element.value = value ?? '';
-  };
-  const setText = (id, value) => {
-    const element = document.getElementById(id);
-    if (element) element.textContent = value ?? '';
-  };
+  const setValue = (id, value) => { const el = document.getElementById(id); if (el) el.value = value ?? ''; };
+  const setText  = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value ?? ''; };
 
   setValue('send-mcu-appid', appId);
   setText('send-mcu-title', 'Kirim Undangan MCU — ' + name);
-
   setValue('send-mcu-company-name', meta.company_name || (tpl ? tpl.company_name : 'ANDALAN'));
   setValue('send-mcu-doc-no', meta.doc_no || '');
   setValue('send-mcu-city', meta.city || (tpl ? tpl.city : 'Jakarta'));
   setValue('send-mcu-project-name', meta.project_name || (tpl ? tpl.project_name : 'PROJECT'));
-
   setValue('send-mcu-clinic', meta.clinic_name || (tpl ? tpl.vendor_name : ''));
   setValue('send-mcu-clinic-city', meta.clinic_city || '');
   setValue('send-mcu-address', meta.clinic_address || (tpl ? tpl.vendor_address : ''));
-
   setValue('send-mcu-date', meta.mcu_date || '');
   setValue('send-mcu-time', meta.mcu_time || '08:00');
-
   setValue('send-mcu-for', meta.for_text || (tpl ? tpl.for_text : ''));
   setValue('send-mcu-bu', meta.bu_name || (tpl ? tpl.bu_name : ''));
   setValue('send-mcu-owner', meta.matrix_owner || (tpl ? tpl.matrix_owner : ''));
   setValue('send-mcu-package', meta.package || '');
-
   setValue('send-mcu-notes', meta.notes || (tpl ? tpl.notes : "1. Bagi kandidat berusia > 40 tahun, diwajibkan menjalani pemeriksaan treadmill.\n2. Mohon cocokan KTP asli dengan identitas kandidat yang akan diperiksa."));
   setValue('send-mcu-result-emails', meta.result_emails || (tpl ? tpl.result_emails : "hendy.fardiansyah@pt-aap.com\nvidya.paramitha.putri@pt-aap.com\nrizal.abu@pt-aap.com"));
-
   setValue('send-mcu-signer-name', meta.signer_name || (tpl ? tpl.signer_name : 'Roy/Hansen C. Saragi'));
   setValue('send-mcu-signer-title', meta.signer_title || (tpl ? tpl.signer_title : 'General Manager'));
   setValue('send-mcu-footer-company', meta.footer_company_name || (tpl ? tpl.footer_company_name : 'PT. Andalan Artha Primanusa'));
   setValue('send-mcu-footer-address', meta.footer_address || (tpl ? tpl.footer_address : 'Jl. Plaju No.11 Kebon Melati, Tanah Abang Jakarta Pusat 10230 DKI Jakarta – Indonesia'));
   setValue('send-mcu-footer-email', meta.footer_email || (tpl ? tpl.footer_email : 'corporatesecretary@andalan-nusantara.com'));
   setValue('send-mcu-footer-website', meta.footer_website || (tpl ? tpl.footer_website : 'www.andalan-nusantara.com'));
-
   setValue('send-mcu-body', meta.email_body || "Selamat! Anda telah lolos ke tahap Medical Check Up (MCU).\n\nTerlampir adalah Surat Undangan MCU resmi yang berisi detail jadwal, lokasi, dan instruksi persiapan yang wajib Anda patuhi.\n\nMohon hadir tepat waktu.");
 
   const form = document.getElementById('form-send-mcu');
   if (form) form.action = `/admin/applications/${appId}/send-mcu`;
-  
   openModal('overlay-send-mcu');
 }
 
 function submitSendMcu() {
-  const form = document.getElementById('form-send-mcu');
+  const form   = document.getElementById('form-send-mcu');
   const button = document.getElementById('btn-send-mcu');
   if (!form.reportValidity()) return;
-
   const formData = new FormData(form);
   button.textContent = 'Mengirim...';
   button.disabled = true;
-
   fetch(form.action, {
     method: 'POST',
-    headers: {
-      'X-CSRF-TOKEN': form.querySelector('input[name="_token"]').value,
-      'Accept': 'application/json'
-    },
+    headers: { 'X-CSRF-TOKEN': form.querySelector('input[name="_token"]').value, 'Accept': 'application/json' },
     body: formData
   })
-    .then(async (response) => {
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok) {
-        throw new Error(data.message || 'Gagal mengupload dokumen MCU');
-      }
-      showToast(data.message || 'Dokumen MCU berhasil diupload.', 'ok');
-      closeModal('overlay-send-mcu');
-      window.location.reload();
-    })
-    .catch((error) => {
-      showToast(error.message || 'Gagal mengupload dokumen MCU', 'err');
-    })
-    .finally(() => {
-      button.textContent = 'Upload & Kirim';
-      button.disabled = false;
-    });
+  .then(async (response) => {
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.message || 'Gagal mengupload dokumen MCU');
+    showToast(data.message || 'Dokumen MCU berhasil diupload.', 'ok');
+    closeModal('overlay-send-mcu');
+    window.location.reload();
+  })
+  .catch((error) => { showToast(error.message || 'Gagal mengupload dokumen MCU', 'err'); })
+  .finally(() => { button.textContent = 'Upload & Kirim'; button.disabled = false; });
 }
 
 function deleteFeedback(appId, role, csrf) {
   if (!confirm('Yakin ingin menghapus feedback ini?')) return;
   fetch('/admin/applications/feedback', {
     method: 'DELETE',
-    headers: {
-      'X-CSRF-TOKEN': csrf,
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
-    },
+    headers: { 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json', 'Content-Type': 'application/json' },
     body: JSON.stringify({ application_id: appId, role: role })
   }).then(async res => {
-    if (!res.ok) {
-      const err = await res.json().catch(()=>({}));
-      throw new Error(err.message || 'Gagal menghapus feedback');
-    }
+    if (!res.ok) { const err = await res.json().catch(()=>({})); throw new Error(err.message || 'Gagal menghapus feedback'); }
     showToast('Feedback berhasil dihapus', 'ok');
     setTimeout(() => window.location.reload(), 800);
   }).catch(e => showToast(e.message, 'err'));
@@ -1199,51 +1224,32 @@ function deleteFeedback(appId, role, csrf) {
 function updateMcuResult(selectEl, appId) {
   const result = selectEl.value;
   if (!result) return;
-
   const csrf = document.querySelector('meta[name="csrf-token"]')?.content || '';
-  
   fetch(`/admin/applications/${appId}/mcu-result`, {
     method: 'POST',
-    headers: {
-      'X-CSRF-TOKEN': csrf,
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
-    },
+    headers: { 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json', 'Content-Type': 'application/json' },
     body: JSON.stringify({ result: result })
   })
   .then(async res => {
-    if (!res.ok) {
-      const err = await res.json().catch(()=>({}));
-      throw new Error(err.message || 'Gagal update hasil MCU');
-    }
+    if (!res.ok) { const err = await res.json().catch(()=>({})); throw new Error(err.message || 'Gagal update hasil MCU'); }
     return res.json();
   })
-  .then(data => {
-    showToast(data.message || 'Hasil MCU diperbarui', 'ok');
-    // Refresh to update the card indicator
-    setTimeout(() => window.location.reload(), 800);
-  })
-  .catch(err => {
-    showToast(err.message, 'err');
-  });
+  .then(data => { showToast(data.message || 'Hasil MCU diperbarui', 'ok'); setTimeout(() => window.location.reload(), 800); })
+  .catch(err => { showToast(err.message, 'err'); });
 }
 
 function openMobilisasiModal(appId, name, btn) {
   const card = getCard(btn);
   const meta = JSON.parse(card.dataset.mobilisasiMeta || '{}');
-  
   const form = document.getElementById('form-mobilisasi');
   form.action = `/admin/applications/${appId}/mobilisasi`;
-  
   document.getElementById('mob-sub').textContent = 'Kandidat: ' + name;
   document.getElementById('mob-notes').value = meta.notes || '';
   document.getElementById('mob-send-email').checked = false;
   document.getElementById('mob-email-group').style.display = 'none';
   document.getElementById('mob-email-body').value = '';
-  
   const existing = document.getElementById('mob-ticket-existing');
   existing.textContent = meta.ticket_name ? 'File saat ini: ' + meta.ticket_name : '';
-
   openModal('overlay-mobilisasi');
 }
 
@@ -1251,17 +1257,13 @@ function openGroundTestModal(appId, name, btn) {
   const card = getCard(btn);
   const meta = JSON.parse(card.dataset.gtMeta || '{}');
   const result = card.dataset.gtResult || '';
-  
   const form = document.getElementById('form-gt');
   form.action = `/admin/applications/${appId}/ground-test`;
-  
   document.getElementById('gt-sub').textContent = 'Kandidat: ' + name;
   document.getElementById('gt-notes').value = meta.notes || '';
   document.getElementById('gt-result').value = result;
-  
   const existing = document.getElementById('gt-lap-existing');
   existing.textContent = meta.lap_name ? 'File saat ini: ' + meta.lap_name : '';
-
   openModal('overlay-gt');
 }
 
@@ -1286,7 +1288,7 @@ function toggleDetailPanel(panelId, btn) {
   const panel = document.getElementById(panelId);
   if (!panel) return;
   panel.classList.toggle('hidden');
-  if (btn) btn.textContent = panel.classList.contains('hidden') ? '▼ Detail Pelamar' : '▲ Tutup Detail';
+  if (btn) btn.textContent = panel.classList.contains('hidden') ? '▼ Detail' : '▲ Tutup';
 }
 
 function openFbForm(btn, appId, name, stage, role = 'hr') {
@@ -1315,45 +1317,31 @@ function submitFbForm() {
 
   fetch(`/admin/applications/feedback`, {
     method: 'POST',
-    headers: {
-      'X-CSRF-TOKEN': csrf,
-      'Accept': 'application/json',
-      'Content-Type': 'application/json',
-    },
+    headers: { 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json', 'Content-Type': 'application/json' },
     body: JSON.stringify({ application_id: appId, stage_key: stage, role, feedback: notes, approve }),
   })
   .then(async res => {
     const contentType = res.headers.get('content-type') || '';
     if (!res.ok) {
-      if (contentType.includes('application/json')) {
-        const j = await res.json().catch(()=>({}));
-        throw new Error(j.message || 'Gagal simpan');
-      } else {
-        const text = await res.text();
-        throw new Error('Unexpected response: ' + text.slice(0, 100));
-      }
+      if (contentType.includes('application/json')) { const j = await res.json().catch(()=>({})); throw new Error(j.message || 'Gagal simpan'); }
+      else { const text = await res.text(); throw new Error('Unexpected response: ' + text.slice(0, 100)); }
     }
     return contentType.includes('application/json') ? res.json() : res.text();
   })
   .then(() => {
-    // Update card UI
     if (fbFormCardEl) {
       if (role === 'hr') fbFormCardEl.dataset.fbHr = JSON.stringify({ notes, approve });
       if (role === 'trainer') fbFormCardEl.dataset.fbTrainer = JSON.stringify({ notes, approve });
       if (role === 'karyawan') fbFormCardEl.dataset.fbUser = JSON.stringify({ notes, approve });
-      fbFormCardEl.removeAttribute('draggable'); // reset
+      fbFormCardEl.removeAttribute('draggable');
       fbFormCardEl.setAttribute('draggable', 'true');
       fbFormCardEl.classList.remove('card-locked');
       if (role === 'hr') {
         const lockNote = fbFormCardEl.querySelector('.kn-lock-note');
         if (lockNote) lockNote.remove();
-        // Hapus warning message (divider dengan pesan Selesaikan Feedback)
-        const warningDiv = Array.from(fbFormCardEl.querySelectorAll('div')).find(d => 
-          d.textContent.includes('Selesaikan Feedback HR')
-        );
+        const warningDiv = Array.from(fbFormCardEl.querySelectorAll('div')).find(d => d.textContent.includes('Selesaikan Feedback HR'));
         if (warningDiv) warningDiv.remove();
       }
-      // Hide feedback panel & toggle button after successful submission
       const fbToggle = fbFormCardEl.querySelector('.fb-panel-toggle');
       const stage = fbFormCardEl.dataset.stage;
       if (fbToggle && stage === 'user_trainer_iv') {
@@ -1366,9 +1354,7 @@ function submitFbForm() {
     closeModal('overlay-fbform');
     showToast('✓ Feedback ' + fbRoleLabel(role) + ' tersimpan!', 'ok');
   })
-  .catch(err => {
-    showToast(err.message || 'Gagal menyimpan feedback', 'err');
-  });
+  .catch(err => { showToast(err.message || 'Gagal menyimpan feedback', 'err'); });
 }
 
 /* ============================= SCHEDULE MODAL ============================= */
@@ -1378,18 +1364,13 @@ let schedToStage = null;
 function openSchedModal(btn, toStage) {
   schedCardEl  = getCard(btn);
   schedToStage = toStage;
-
   const candidate = schedCardEl.dataset.candidate || 'Kandidat';
   const job       = schedCardEl.dataset.job       || '';
   const url       = schedCardEl.dataset.scheduleUrl || '#';
-  const fromStage = schedCardEl.dataset.stage;
-
   document.getElementById('sched-sub').textContent    = candidate + ' — ' + job;
   document.getElementById('sched-title').value        = 'Interview – ' + candidate;
   document.getElementById('sched-to-stage').value     = toStage || '';
-  document.getElementById('sched-banner').innerHTML   =
-    `➜ Setelah submit, <b>${candidate}</b> akan dipindah ke <b>${stageLabels[toStage] || toStage}</b>`;
-
+  document.getElementById('sched-banner').innerHTML   = `➜ Setelah submit, <b>${candidate}</b> akan dipindah ke <b>${stageLabels[toStage] || toStage}</b>`;
   document.getElementById('sched-form').action = url;
   document.getElementById('sched-notes').value  = '';
   document.getElementById('sched-start').value  = '';
@@ -1409,26 +1390,18 @@ function submitSchedule() {
   const title = document.getElementById('sched-title').value.trim();
   const start = document.getElementById('sched-start').value;
   const end   = document.getElementById('sched-end').value;
-  if (!title)       { showToast('Judul interview wajib diisi', 'err');   return; }
+  if (!title)         { showToast('Judul interview wajib diisi', 'err');   return; }
   if (!start || !end) { showToast('Waktu mulai & selesai wajib diisi', 'err'); return; }
-  if (start >= end) { showToast('Waktu selesai harus setelah waktu mulai', 'err'); return; }
-
-  const form   = document.getElementById('sched-form');
-  const csrf   = form.querySelector('[name="_token"]').value;
-  const url    = form.action;
-  const data   = new FormData(form);
-
-  fetch(url, { method: 'POST', headers: { 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' }, body: data })
+  if (start >= end)   { showToast('Waktu selesai harus setelah waktu mulai', 'err'); return; }
+  const form = document.getElementById('sched-form');
+  const csrf = form.querySelector('[name="_token"]').value;
+  const data = new FormData(form);
+  fetch(form.action, { method: 'POST', headers: { 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' }, body: data })
   .then(async res => {
     const contentType = res.headers.get('content-type') || '';
     if (!res.ok) {
-      if (contentType.includes('application/json')) {
-        const j = await res.json().catch(()=>({}));
-        throw new Error(j.message || 'Gagal kirim');
-      } else {
-        const text = await res.text();
-        throw new Error('Unexpected response: ' + text.slice(0, 100));
-      }
+      if (contentType.includes('application/json')) { const j = await res.json().catch(()=>({})); throw new Error(j.message || 'Gagal kirim'); }
+      else { const text = await res.text(); throw new Error('Unexpected response: ' + text.slice(0, 100)); }
     }
     return contentType.includes('application/json') ? res.json() : res.text();
   })
@@ -1438,39 +1411,25 @@ function submitSchedule() {
     schedCardEl  = null;
     schedToStage = null;
   })
-  .catch(err => {
-    closeModal('overlay-sched');
-    showToast(err.message || 'Gagal mengirim undangan', 'err');
-  });
+  .catch(err => { closeModal('overlay-sched'); showToast(err.message || 'Gagal mengirim undangan', 'err'); });
 }
 
-/* ============================= FREE MOVE (after user_trainer_iv) ============================= */
+/* ============================= FREE MOVE ============================= */
 function freeMoveCard(selectEl, appId, fromStage, csrf, baseUrl) {
   const toStage = selectEl.value;
   if (!toStage) return;
-
   const card = selectEl.closest('.kn-card');
-  selectEl.value = ''; // reset dropdown
-
+  selectEl.value = '';
   fetch(baseUrl + '?id=' + appId, {
     method: 'POST',
-    headers: {
-      'X-CSRF-TOKEN': csrf,
-      'Accept': 'application/json',
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
+    headers: { 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json', 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({ to_stage: toStage, from_stage: fromStage }),
   })
   .then(async res => {
     const contentType = res.headers.get('content-type') || '';
     if (!res.ok) {
-      if (contentType.includes('application/json')) {
-        const j = await res.json().catch(()=>({}));
-        throw new Error(j.message || 'Gagal pindah');
-      } else {
-        const text = await res.text();
-        throw new Error('Unexpected response: ' + text.slice(0, 100));
-      }
+      if (contentType.includes('application/json')) { const j = await res.json().catch(()=>({})); throw new Error(j.message || 'Gagal pindah'); }
+      else { const text = await res.text(); throw new Error('Unexpected response: ' + text.slice(0, 100)); }
     }
     return contentType.includes('application/json') ? res.json() : res.text();
   })
@@ -1484,9 +1443,7 @@ function freeMoveCard(selectEl, appId, fromStage, csrf, baseUrl) {
     }
     showToast('Dipindah ke ' + (stageLabels[toStage] || toStage), 'ok');
   })
-  .catch(err => {
-    showToast(err.message || 'Gagal memindahkan kartu', 'err');
-  });
+  .catch(err => { showToast(err.message || 'Gagal memindahkan kartu', 'err'); });
 }
 
 /* ============================= DRAG & DROP ============================= */
@@ -1517,51 +1474,33 @@ document.querySelectorAll('.kn-col').forEach(col => {
     e.preventDefault();
     col.classList.remove('dragover');
     if (!dragCard) return;
-
     const toStage = col.dataset.stage;
     if (toStage === dragFrom) { dragCard = null; dragFrom = null; return; }
-
     const appId  = dragCard.dataset.id;
     const csrf   = dragCard.dataset.csrf;
     const url    = dragCard.dataset.moveUrl;
     const from   = dragFrom;
-
-    // Optimistic move
     body.insertBefore(dragCard, body.firstChild);
     dragCard.dataset.stage = toStage;
     updateCount(from,    -1);
     updateCount(toStage,  1);
-
     const movedCard = dragCard;
     dragCard = null; dragFrom = null;
-
     fetch(url + '?id=' + appId, {
       method: 'POST',
-      headers: {
-        'X-CSRF-TOKEN': csrf,
-        'Accept': 'application/json',
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
+      headers: { 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json', 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({ to_stage: toStage, from_stage: from }),
     })
     .then(async res => {
       const contentType = res.headers.get('content-type') || '';
       if (!res.ok) {
-        if (contentType.includes('application/json')) {
-          const j = await res.json().catch(()=>({}));
-          throw new Error(j.message || 'Move failed');
-        } else {
-          const text = await res.text();
-          throw new Error('Unexpected response: ' + text.slice(0, 100));
-        }
+        if (contentType.includes('application/json')) { const j = await res.json().catch(()=>({})); throw new Error(j.message || 'Move failed'); }
+        else { const text = await res.text(); throw new Error('Unexpected response: ' + text.slice(0, 100)); }
       }
       return contentType.includes('application/json') ? res.json() : res.text();
     })
-    .then(() => {
-      showToast('Dipindah ke ' + (stageLabels[toStage] || toStage), 'ok');
-    })
+    .then(() => { showToast('Dipindah ke ' + (stageLabels[toStage] || toStage), 'ok'); })
     .catch(err => {
-      // Rollback
       const fromCol = document.getElementById('col-' + from);
       if (fromCol) fromCol.insertBefore(movedCard, fromCol.firstChild);
       movedCard.dataset.stage = from;
@@ -1572,20 +1511,83 @@ document.querySelectorAll('.kn-col').forEach(col => {
   });
 });
 
-// Prevent accidental clicks/navigation immediately after a drag operation.
-// Some browsers may fire a click after dragend if the pointer is released
-// over a clickable element. This suppresses such clicks for a short time.
 let _knSuppressClick = false;
 document.addEventListener('dragstart', () => { _knSuppressClick = true; });
 document.addEventListener('dragend', () => { setTimeout(() => { _knSuppressClick = false; }, 300); });
 document.addEventListener('click', (e) => {
   if (!_knSuppressClick) return;
   const targetCard = e.target.closest && e.target.closest('.kn-card');
-  if (targetCard) {
-    e.preventDefault();
-    e.stopPropagation();
-  }
+  if (targetCard) { e.preventDefault(); e.stopPropagation(); }
 }, true);
+
+/* ============================= REJECT OL ============================= */
+function openRejectOlModal(appId, name) {
+  document.getElementById('reject-ol-appid').value = appId;
+  document.getElementById('reject-ol-title').textContent = 'Tolak Offering Letter — ' + name;
+  document.getElementById('reject-ol-reason').value = '';
+  openModal('overlay-reject-ol');
+}
+
+function submitRejectOl() {
+  const appId = document.getElementById('reject-ol-appid').value;
+  const reason = document.getElementById('reject-ol-reason').value.trim();
+  if (!reason) { showToast('Silakan masukkan alasan penolakan', 'err'); return; }
+  document.getElementById('btn-reject-ol').disabled = true;
+  fetch(`/admin/applications/${appId}/reject-offer`, {
+    method: 'POST',
+    headers: {
+      'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    },
+    body: JSON.stringify({ rejection_reason: reason }),
+  })
+  .then(async res => {
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.message || 'Gagal menolak OL');
+    showToast('Offering Letter berhasil ditolak', 'ok');
+    closeModal('overlay-reject-ol');
+    setTimeout(() => window.location.reload(), 500);
+  })
+  .catch(err => { showToast(err.message || 'Gagal menolak OL', 'err'); document.getElementById('btn-reject-ol').disabled = false; });
+}
+
+/* ============================= VIEW HISTORY ============================= */
+function openHistoryModal(appId, name) {
+  document.getElementById('history-modal-title').textContent = 'History Pergerakan — ' + name;
+  document.getElementById('history-list').innerHTML = '<div class="py-4 text-center">Memuat...</div>';
+  fetch(`/admin/applications/${appId}/stages-history`, {
+    method: 'GET',
+    headers: { 'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value, 'Accept': 'application/json' },
+  })
+  .then(async res => {
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.message || 'Gagal memuat history');
+    let html = '';
+    if (data.stages && data.stages.length > 0) {
+      data.stages.forEach((stage, idx) => {
+        const actedByName = stage.acted_by_name || stage.acted_by || 'System';
+        const createdAt = new Date(stage.created_at).toLocaleString('id-ID', {
+          year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
+        });
+        html += `
+          <div class="border-b border-[#e2d9cf] pb-3 mb-3">
+            <div class="font-semibold text-[#3d1f08]">${stage.stage_key.replace(/_/g, ' ').toUpperCase()}</div>
+            <div class="text-sm text-[#9a7558] mt-1">Status: <span class="font-medium">${stage.status}</span></div>
+            <div class="text-sm text-[#b89070] mt-1">Diubah oleh: <span class="font-medium">${actedByName}</span></div>
+            <div class="text-sm text-[#b89070]">Waktu: <span class="font-medium">${createdAt}</span></div>
+            ${stage.notes ? `<div class="text-sm text-[#7a4f2a] mt-2 italic">Catatan: ${stage.notes}</div>` : ''}
+          </div>
+        `;
+      });
+    } else {
+      html = '<div class="text-center text-[#9a7558] py-4">Belum ada history pergerakan</div>';
+    }
+    document.getElementById('history-list').innerHTML = html;
+  })
+  .catch(err => { document.getElementById('history-list').innerHTML = `<div class="py-4 text-center text-red-600">${err.message}</div>`; });
+  openModal('overlay-history');
+}
 
 @if(session('ok'))
   showToast("{{ session('ok') }}", 'ok');
@@ -1597,4 +1599,5 @@ document.addEventListener('click', (e) => {
   showToast("{{ $errors->first() }}", 'err');
 @endif
 </script>
+
 @endsection

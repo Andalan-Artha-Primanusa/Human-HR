@@ -126,7 +126,8 @@
       @include('layouts.partials.topbar-actions')
     </header>
 
-    <main class="p-3 md:p-6">@yield('content')</main>
+    
+    <main class="flex-1 min-w-0 min-h-0 p-3 overflow-y-auto md:p-6">@yield('content')</main>
   </div>
 </div>
 

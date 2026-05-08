@@ -46,6 +46,7 @@
             'mcu' => 'MCU',
             'mobilisasi' => 'Mobilisasi',
             'ground_test' => 'Ground Test',
+            'onsite' => 'Onsite',
             'hired' => 'Hired',
             'not_qualified' => 'TIDAK lOLOS',
         ];

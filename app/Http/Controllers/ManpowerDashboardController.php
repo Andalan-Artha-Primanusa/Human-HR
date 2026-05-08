@@ -50,6 +50,41 @@ class ManpowerDashboardController extends Controller
             $openJobApplicants = (int) $openJobsQuery->sum('applicants_count');
             $hiredCount = JobApplication::where('overall_status', 'hired')->count();
             $acceptedOlCount = DB::table('offers')->where('status', 'accepted')->count();
+            $declinedOlCount = DB::table('offers')->where('status', 'declined')->count();
+
+            $olRejectionReasons = DB::table('offers')
+                ->where('status', 'declined')
+                ->whereNotNull('rejection_reason')
+                ->where('rejection_reason', '<>', '')
+                ->selectRaw('rejection_reason, COUNT(*) as total')
+                ->groupBy('rejection_reason')
+                ->orderByDesc('total')
+                ->limit(5)
+                ->get()
+                ->map(fn ($row) => [
+                    'reason' => (string) $row->rejection_reason,
+                    'total' => (int) $row->total,
+                ]);
+
+            $timeToFillRows = DB::table('job_listings as j')
+                ->join('job_applications as ja', 'ja.job_id', '=', 'j.id')
+                ->join('offers as o', function ($join) {
+                    $join->on('o.application_id', '=', 'ja.id')
+                        ->where('o.status', '=', 'sent');
+                })
+                ->whereNotNull('j.created_at')
+                ->selectRaw('j.id, j.created_at as job_created_at, MIN(o.created_at) as first_ol_at')
+                ->groupBy('j.id', 'j.created_at')
+                ->get();
+
+            $timeToFillDays = $timeToFillRows->isNotEmpty()
+                ? round((float) $timeToFillRows->avg(function ($row) {
+                    $start = $row->job_created_at ? \Carbon\Carbon::parse($row->job_created_at) : null;
+                    $end = $row->first_ol_at ? \Carbon\Carbon::parse($row->first_ol_at) : null;
+
+                    return ($start && $end) ? $start->diffInDays($end) : 0;
+                }), 1)
+                : 0;
 
             $sourceRaw = $hasSourceChannel
                 ? DB::table('candidate_profiles')
@@ -184,7 +219,7 @@ class ManpowerDashboardController extends Controller
                 $jobCount = $openJobsQuery->where('level', $levelKey)->count();
                 $applicants = (int) ($jobApplicationsByLevel[$levelKey] ?? 0);
                 $hired = (int) ($jobHiredByLevel[$levelKey] ?? 0);
-                $successRate = $applicants > 0 ? round(($hired / $applicants) * 100) : 0;
+                $successRate = $jobCount > 0 ? round(($hired / $jobCount) * 100) : 0;
 
                 return [
                     'level_key' => $levelKey,
@@ -261,6 +296,10 @@ class ManpowerDashboardController extends Controller
                 'filled' => $hiredCount,
                 'fulfillment' => $fulfillment,
                 'acceptanceRate' => $acceptanceRate,
+                'acceptedOlCount' => $acceptedOlCount,
+                'declinedOlCount' => $declinedOlCount,
+                'olRejectionReasons' => $olRejectionReasons,
+                'timeToFillDays' => $timeToFillDays,
                 'avgAge' => (float) ($ageStats->avg_age ?? 0),
                 'minAge' => (int) ($ageStats->min_age ?? 0),
                 'maxAge' => (int) ($ageStats->max_age ?? 0),
@@ -302,6 +341,10 @@ class ManpowerDashboardController extends Controller
             'filled' => 0,
             'fulfillment' => 0,
             'acceptanceRate' => 0,
+            'acceptedOlCount' => 0,
+            'declinedOlCount' => 0,
+            'olRejectionReasons' => collect(),
+            'timeToFillDays' => 0,
             'avgAge' => 0,
             'minAge' => 0,
             'maxAge' => 0,

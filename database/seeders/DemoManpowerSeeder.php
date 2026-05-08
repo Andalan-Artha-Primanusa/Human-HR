@@ -47,7 +47,16 @@ class DemoManpowerSeeder extends Seeder
             'description' => 'Project Site',
         ]);
 
-        $hr = User::where('role', 'hr')->first() ?? User::first();
+        // Ensure there's a demo HR user to act as 'acted_by' in histories
+        $hr = User::where('role', 'hr')->first();
+        if (!$hr) {
+            $hr = User::create([
+                'name' => 'Demo HR',
+                'email' => 'demo.hr@demo.com',
+                'password' => bcrypt('password'),
+                'role' => 'hr',
+            ]);
+        }
 
         $jobs = collect([
             [
@@ -860,6 +869,198 @@ class DemoManpowerSeeder extends Seeder
                         'updated_at' => now()->subDays($daysAgo),
                     ]);
             }
+        }
+
+        // ------------------ Additional demo offers and history ------------------
+        // 1) Create one example with OL status 'sent' so UI shows 'Tolak OL' button
+        $sentUser = User::where('email', 'demo.referral@demo.com')->first();
+        if ($sentUser) {
+            $appSent = JobApplication::firstOrCreate([
+                'job_id' => $jobs[0]->id,
+                'user_id' => $sentUser->id,
+            ], [
+                'poh_id' => $pohJakarta->id,
+                'current_stage' => 'offer',
+                'overall_status' => 'active',
+            ]);
+
+            Offer::updateOrCreate(
+                ['application_id' => $appSent->id],
+                [
+                    'status' => 'sent',
+                    'salary' => ['base' => 9000000, 'allowance' => 500000],
+                    'body_template' => 'OL: Mohon konfirmasi penerimaan',
+                    'meta' => [],
+                ]
+            );
+
+            ApplicationStage::updateOrCreate(
+                [
+                    'application_id' => $appSent->id,
+                    'stage_key' => 'offer',
+                ], [
+                    // use allowed enum values for status; record real meaning in notes
+                    'status' => 'passed',
+                    'acted_by' => $hr->id,
+                    'user_id' => $sentUser->id,
+                    'notes' => 'Offering Letter dikirim (demo)',
+                ]
+            );
+        }
+
+        // 2) Create one example with OL declined, record rejection_reason + rejected_by
+        $declUser = User::where('email', 'demo.linkedin@demo.com')->first();
+        if ($declUser) {
+            $appDecl = JobApplication::firstOrCreate([
+                'job_id' => $jobs[1]->id,
+                'user_id' => $declUser->id,
+            ], [
+                'poh_id' => $pohKarawang->id,
+                'current_stage' => 'offer',
+                'overall_status' => 'active',
+            ]);
+
+            $rejectionReason = 'Gaji tidak memenuhi ekspektasi kandidat (demo)';
+
+            Offer::updateOrCreate(
+                ['application_id' => $appDecl->id],
+                [
+                    'status' => 'declined',
+                    'salary' => ['base' => 8500000],
+                    'body_template' => 'OL ditolak oleh kandidat',
+                    'rejection_reason' => $rejectionReason,
+                    'rejected_by' => $hr->id,
+                    'rejected_at' => now()->subDays(2),
+                    'meta' => [],
+                ]
+            );
+
+            ApplicationStage::create([
+                'application_id' => $appDecl->id,
+                'stage_key' => 'offer',
+                // use existing enum values; store rejection reason in notes
+                'status' => 'failed',
+                'acted_by' => $hr->id,
+                'user_id' => $declUser->id,
+                'notes' => 'OL ditolak: ' . $rejectionReason,
+            ]);
+        }
+
+        // 2b) Create one example in onsite stage (after hired)
+        $onsiteUser = User::where('email', 'demo.onsitestage@demo.com')->first();
+        if (!$onsiteUser) {
+            $onsiteUser = User::create([
+                'name' => 'Demo Onsite Stage',
+                'email' => 'demo.onsitestage@demo.com',
+                'password' => bcrypt('password'),
+                'role' => 'pelamar',
+            ]);
+
+            CandidateProfile::create([
+                'user_id' => $onsiteUser->id,
+                'full_name' => $onsiteUser->name,
+                'nickname' => 'Onsite Demo',
+                'gender' => 'male',
+                'birthplace' => 'Jakarta',
+                'birthdate' => now()->subYears(28),
+                'age' => 28,
+                'poh_id' => $pohJakarta->id,
+                'email' => $onsiteUser->email,
+            ]);
+        }
+
+        if ($onsiteUser) {
+            $appOnsite = JobApplication::firstOrCreate([
+                'job_id' => $jobs[0]->id,
+                'user_id' => $onsiteUser->id,
+            ], [
+                'poh_id' => $pohJakarta->id,
+                'current_stage' => 'onsite',
+                'overall_status' => 'active',
+            ]);
+
+            Offer::updateOrCreate(
+                ['application_id' => $appOnsite->id],
+                [
+                    'status' => 'accepted',
+                    'salary' => ['base' => 11000000, 'allowance' => 750000],
+                    'body_template' => 'Selamat! Menunggu hari pertama bekerja.',
+                    'signed_path' => null,
+                    'meta' => [],
+                ]
+            );
+
+            // Create full stage history up to onsite
+            $stageHistoryOnsite = [
+                ['screening', 'passed'],
+                ['psychotest', 'passed'],
+                ['hr_iv', 'passed'],
+                ['user_trainer_iv', 'passed'],
+                ['offer', 'passed'],
+                ['mcu', 'passed'],
+                ['mobilisasi', 'passed'],
+                ['ground_test', 'passed'],
+                ['hired', 'passed'],
+                ['onsite', 'pending'],
+            ];
+
+            foreach ($stageHistoryOnsite as [$stageKey, $status]) {
+                ApplicationStage::updateOrCreate(
+                    [
+                        'application_id' => $appOnsite->id,
+                        'stage_key' => $stageKey,
+                    ],
+                    [
+                        'status' => $status,
+                        'acted_by' => $hr->id,
+                        'user_id' => $onsiteUser->id,
+                        'notes' => 'Demo onsite stage progression',
+                    ]
+                );
+            }
+        }
+
+        // 3) Fill board/dashboard with additional dummy applications to make it look full
+        $extraStages = ['applied', 'screening', 'psychotest', 'hr_iv', 'user_iv', 'offer', 'mcu', 'mobilisasi', 'ground_test', 'onsite', 'hired', 'final'];
+        for ($i = 1; $i <= 16; $i++) {
+            $u = User::create([
+                'name' => 'Demo Extra ' . $i,
+                'email' => "demo.extra{$i}@demo.com",
+                'password' => bcrypt('password'),
+                'role' => 'pelamar',
+            ]);
+
+            CandidateProfile::create([
+                'user_id' => $u->id,
+                'full_name' => $u->name,
+                'nickname' => 'Extra' . $i,
+                'gender' => $i % 2 ? 'male' : 'female',
+                'birthplace' => 'Demo City',
+                'birthdate' => now()->subYears(22 + ($i % 10)),
+                'age' => 22 + ($i % 10),
+                'poh_id' => ($i % 2) ? $pohJakarta->id : $pohCikarang->id,
+                'email' => $u->email,
+            ]);
+
+            $j = $jobs[$i % $jobs->count()];
+            $stage = $extraStages[$i % count($extraStages)];
+
+            $app = JobApplication::create([
+                'job_id' => $j->id,
+                'user_id' => $u->id,
+                'poh_id' => ($i % 2) ? $pohJakarta->id : $pohCikarang->id,
+                'current_stage' => $stage,
+                'overall_status' => $stage === 'final' ? 'active' : 'active',
+            ]);
+
+            ApplicationStage::create([
+                'application_id' => $app->id,
+                'stage_key' => $stage,
+                'status' => 'pending',
+                'acted_by' => $hr->id,
+                'user_id' => $u->id,
+                'notes' => 'Auto-generated demo application',
+            ]);
         }
     }
 }

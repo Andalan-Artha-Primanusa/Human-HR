@@ -12,7 +12,7 @@
     $BORD = '#e7ded6';
 
     // === STAGES ===
-    $stageOrder = ['applied', 'psychotest', 'hr_iv', 'user_iv', 'final', 'offer', 'hired'];
+    $stageOrder = ['applied', 'psychotest', 'hr_iv', 'user_iv', 'final', 'offer', 'onsite', 'hired'];
     $pretty = [
         'applied' => 'Pengajuan Berkas',
         'psychotest' => 'Psikotes',
@@ -20,6 +20,7 @@
         'user_iv' => 'User Interview',
         'final' => 'Final',
         'offer' => 'Offering',
+        'onsite' => 'Onsite',
         'hired' => 'Diterima',
         'rejected' => 'Ditolak'
     ];

@@ -18,16 +18,26 @@ class Offer extends Model
         'body_template',
         'signed_path',
         'meta',
+        'rejection_reason',
+        'rejected_by',
+        'rejected_at',
     ];
 
     protected $casts = [
         'salary' => 'array',
         'meta' => 'array',
+        'rejected_at' => 'datetime',
     ];
 
     /** @return BelongsTo<JobApplication,Offer> */
     public function application(): BelongsTo
     {
         return $this->belongsTo(JobApplication::class, 'application_id');
+    }
+
+    /** @return BelongsTo<User,Offer> */
+    public function rejectedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'rejected_by');
     }
 }

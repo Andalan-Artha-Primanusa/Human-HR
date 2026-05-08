@@ -13,6 +13,7 @@
     $slaLevelStats = $levelStats->filter(fn ($row) => (($row['hired'] ?? 0) > 0) && (($row['avg_sla_days'] ?? 0) > 0));
     $hasSlaChartData = $slaLevelStats->isNotEmpty();
     $failureRows = collect($failureRows ?? []);
+    $olRejectionReasons = collect($olRejectionReasons ?? []);
 @endphp
 
 @section('content')
@@ -38,12 +39,15 @@
       ['label' => 'Open Jobs', 'value' => $openJobs ?? 0, 'hint' => 'Posisi aktif', 'icon' => '💼'],
       ['label' => 'Total Applicants', 'value' => $totalApplicants ?? 0, 'hint' => 'Semua lamaran', 'icon' => '👥'],
       ['label' => 'Applicants / Open Job', 'value' => $openJobApplicants ?? 0, 'hint' => 'Akumulasi pelamar per job', 'icon' => '📊'],
+      ['label' => 'Time to Fill', 'value' => ($timeToFillDays ?? 0) . ' hari', 'hint' => 'Open job → OL pertama dikirim', 'icon' => '⏱️'],
+      ['label' => 'OL Diterima', 'value' => (int) ($acceptedOlCount ?? 0), 'hint' => 'Jumlah OL accepted', 'icon' => '✅'],
+      ['label' => 'OL Ditolak', 'value' => (int) ($declinedOlCount ?? 0), 'hint' => 'Jumlah OL declined', 'icon' => '✕'],
       ['label' => 'Fulfillment', 'value' => ($fulfillment ?? 0) . '%', 'hint' => 'Sourcing + Onsite jadi karyawan', 'icon' => '⚡'],
       ['label' => 'SLA Success Rate', 'value' => ($acceptanceRate ?? 0) . '%', 'hint' => 'Terima OL / total applicants', 'icon' => '✅'],
     ];
   @endphp
 
-  <section class="grid grid-cols-2 gap-3 xl:grid-cols-6">
+  <section class="grid grid-cols-2 gap-3 xl:grid-cols-8">
     @foreach($cards as $card)
       <div class="p-4 transition bg-white border shadow-sm rounded-2xl hover:shadow-md">
         <div class="flex items-center justify-between gap-3">
@@ -160,6 +164,46 @@
         <span class="text-[11px] text-slate-400">Monthly intake</span>
       </div>
       <div class="h-[200px]"><canvas id="trendChart" class="w-full h-full"></canvas></div>
+    </div>
+  </section>
+
+  <section class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+    <div class="p-4 bg-white border shadow-sm rounded-2xl">
+      <div class="flex items-center justify-between mb-3">
+        <div>
+          <h2 class="text-sm font-semibold text-slate-900">OL Summary</h2>
+          <p class="text-[11px] text-slate-500">Ringkasan jumlah OL diterima dan ditolak.</p>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-100">
+          <div class="text-xs uppercase tracking-[0.18em] text-emerald-700">Accepted</div>
+          <div class="mt-2 text-3xl font-bold text-emerald-700">{{ (int) ($acceptedOlCount ?? 0) }}</div>
+        </div>
+        <div class="p-4 rounded-2xl bg-rose-50 border border-rose-100">
+          <div class="text-xs uppercase tracking-[0.18em] text-rose-700">Declined</div>
+          <div class="mt-2 text-3xl font-bold text-rose-700">{{ (int) ($declinedOlCount ?? 0) }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="p-4 bg-white border shadow-sm rounded-2xl">
+      <div class="flex items-center justify-between mb-3">
+        <div>
+          <h2 class="text-sm font-semibold text-slate-900">OL Rejection Reasons</h2>
+          <p class="text-[11px] text-slate-500">Alasan penolakan yang paling sering muncul.</p>
+        </div>
+      </div>
+      <div class="space-y-2">
+        @forelse($olRejectionReasons as $item)
+          <div class="flex items-start justify-between gap-4 p-3 rounded-xl bg-slate-50">
+            <div class="text-sm text-slate-700 leading-snug">{{ $item['reason'] }}</div>
+            <div class="shrink-0 text-sm font-bold text-[#a77d52]">{{ $item['total'] }}</div>
+          </div>
+        @empty
+          <div class="p-4 text-sm text-slate-500 rounded-xl bg-slate-50">Belum ada OL yang ditolak.</div>
+        @endforelse
+      </div>
     </div>
   </section>
 
