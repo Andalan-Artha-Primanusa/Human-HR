@@ -1378,6 +1378,6 @@ class ApplicationController extends Controller
             ]);
         });
 
-        return redirect()->back()->with('ok', 'Selamat! Anda telah menerima Offering Letter.');
+        return redirect()->back()->with('success', 'Selamat! Anda telah menerima Offering Letter.');
     }
 }

@@ -75,7 +75,7 @@
 
     {{-- ALERT FLOATING TENGAH --}}
     @if(session('success') || session('info'))
-      <div style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:1000;min-width:320px;max-width:90vw;" class="flex items-center justify-center">
+      <div id="flash-alert" style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:1000;min-width:320px;max-width:90vw;" class="flex items-center justify-center">
         <div class="px-6 py-4 text-lg font-semibold text-center bg-white border shadow-lg rounded-xl border-emerald-300 animate-fadein">
           @if(session('success'))
             <span class="text-emerald-700">{{ session('success') }}</span>
@@ -83,9 +83,11 @@
           @if(session('info'))
             <span class="text-blue-700">{{ session('info') }}</span>
           @endif
+          <button onclick="document.getElementById('flash-alert').remove()" class="ml-4 text-slate-400 hover:text-slate-700">&times;</button>
         </div>
       </div>
       <style>@keyframes fadein{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}</style>
+      <script>setTimeout(()=>{const e=document.getElementById('flash-alert');if(e)e.remove()},5000)</script>
     @endif
 
     <div class="px-6 py-8 mx-auto max-w-7xl">
