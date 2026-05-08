@@ -281,8 +281,9 @@
                         $canAcceptOl = in_array(strtolower((string) $app->current_stage), ['final', 'offer'], true)
                           && strtolower((string) $app->overall_status) !== 'hired'
                           && strtolower((string) $app->overall_status) !== 'rejected';
+                        $olStatus = $app->relationLoaded('offer') && $app->offer ? strtolower($app->offer->status) : null;
                       @endphp
-                      @if($canAcceptOl)
+                      @if($canAcceptOl && !$olStatus)
                         <div class="flex items-center gap-2">
                           <form method="POST" action="{{ route('applications.move', $app) }}" class="inline-flex">
                             @csrf
@@ -301,6 +302,21 @@
                             Tolak OL
                           </button>
                         </div>
+                      @elseif($olStatus === 'accepted')
+                        <span class="px-3 py-1.5 rounded-lg text-xs font-medium"
+                              style="background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7;">
+                          ✔ Sudah Terima OL
+                        </span>
+                      @elseif($olStatus === 'pending')
+                        <span class="px-3 py-1.5 rounded-lg text-xs font-medium"
+                              style="background: #fff3e0; color: #e65100; border: 1px solid #ffcc80;">
+                          ⏳ OL Aktif
+                        </span>
+                      @elseif($olStatus === 'rejected')
+                        <span class="px-3 py-1.5 rounded-lg text-xs font-medium"
+                              style="background: #ffebee; color: #c62828; border: 1px solid #ef9a9a;">
+                          ✕ OL Ditolak
+                        </span>
                       @endif
                     <a href="{{ route('jobs.show', $app->job_id) }}"
                        class="px-3 py-1.5 rounded-lg text-white text-xs font-medium flex items-center gap-1 hover:opacity-90 transition"

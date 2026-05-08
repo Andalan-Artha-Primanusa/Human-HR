@@ -139,6 +139,7 @@ class ApplicationController extends Controller
             'stages.actor:id,name',
             'stages.user:id,name',
             'interviews',
+            'offer',
         ])
             ->where('user_id', $request->user()->id)
             ->orderByDesc('created_at')
