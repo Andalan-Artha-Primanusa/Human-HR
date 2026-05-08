@@ -42,7 +42,7 @@
 
     /** @var \App\Models\JobApplication|null $myApp */
     $myApp = auth()->check()
-        ? $job->applications()->where('user_id', auth()->id())->with(['stages', 'stages.actor', 'stages.user'])->latest()->first()
+        ? $job->applications()->where('user_id', auth()->id())->with(['stages', 'stages.actor', 'stages.user', 'offer'])->latest()->first()
         : null;
 
     /** @var \App\Models\CandidateProfile|null $meProfile */
@@ -780,6 +780,41 @@
                               </div>
                         @endif
                       </div>
+
+                      @php
+                        $olStatus = $myApp->relationLoaded('offer') && $myApp->offer ? strtolower($myApp->offer->status) : null;
+                        $canAcceptOl = (in_array(strtolower((string) $myApp->current_stage), ['final', 'offer'], true) || $olStatus === 'sent')
+                          && strtolower((string) $myApp->overall_status) !== 'hired'
+                          && strtolower((string) $myApp->overall_status) !== 'rejected';
+                      @endphp
+                      @if($myApp && $canAcceptOl)
+                        <div class="flex items-center gap-2 mt-4">
+                          <form method="POST" action="{{ route('applications.accept-offer', $myApp) }}" class="inline-flex">
+                            @csrf
+                            <button type="submit"
+                                    class="px-4 py-2 rounded-lg text-white text-sm font-medium flex items-center gap-1 hover:opacity-90 transition"
+                                    style="background: #a77d52">
+                              @if($olStatus === 'sent') ⏳ @endif Terima OL
+                            </button>
+                          </form>
+                          <button type="button"
+                                  class="px-4 py-2 rounded-lg text-white text-sm font-medium flex items-center gap-1 hover:opacity-90 transition"
+                                  style="background: rgba(220,38,38,0.8)"
+                                  onclick="openRejectOlModal('{{ $myApp->id }}', '{{ $myApp->user->name }}')">
+                            Tolak OL
+                          </button>
+                        </div>
+                      @elseif($myApp && $olStatus === 'accepted')
+                        <div class="px-4 py-2 mt-4 rounded-lg text-sm font-medium"
+                             style="background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7;">
+                          ✔ Sudah Terima OL
+                        </div>
+                      @elseif($myApp && $olStatus === 'declined')
+                        <div class="px-4 py-2 mt-4 rounded-lg text-sm font-medium"
+                             style="background: #ffebee; color: #c62828; border: 1px solid #ef9a9a;">
+                          ✕ OL Ditolak
+                        </div>
+                      @endif
                 @endif
               @endguest
             </div>
@@ -975,4 +1010,73 @@
         }
     @endphp
     <script type="application/ld+json">{!! json_encode(array_filter($jobLd, fn($v) => $v !== null), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}</script>
+
+    {{-- REJECT OL MODAL --}}
+    <div id="modal-reject-ol" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50" onclick="if(event.target === this) closeRejectOlModal()">
+      <div class="bg-white rounded-xl shadow-lg max-w-md w-full mx-4" onclick="event.stopPropagation()">
+        <div class="p-6 border-b border-slate-200">
+          <h3 class="text-lg font-semibold text-slate-900">Tolak Offering Letter</h3>
+          <p class="text-sm mt-1 text-[#9a7558]">Berikan alasan penolakan (opsional). HR akan menghubungi Anda.</p>
+        </div>
+        <div class="p-6">
+          <textarea id="reject-ol-reason"
+                    class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 border-slate-200"
+                    style="--tw-ring-color: #a77d52; min-height: 100px"
+                    placeholder="Jelaskan alasan Anda menolak offering letter ini..."></textarea>
+          <p class="text-xs mt-2 text-[#c4a882]">Catatan: Informasi ini akan dikirim ke tim HR.</p>
+        </div>
+        <div class="p-6 border-t border-slate-200 flex gap-2 justify-end">
+          <button type="button"
+                  class="px-4 py-2 rounded-lg border border-slate-200 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                  onclick="closeRejectOlModal()">
+            Batal
+          </button>
+          <button type="button"
+                  class="px-4 py-2 rounded-lg text-white text-sm font-medium transition hover:opacity-90"
+                  style="background: rgba(220,38,38,0.8)"
+                  id="btn-submit-reject-ol"
+                  onclick="submitRejectOl()">
+            Tolak OL
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+    let _rejectOlAppId = null;
+
+    function openRejectOlModal(appId, userName) {
+      _rejectOlAppId = appId;
+      document.getElementById('reject-ol-reason').value = '';
+      document.getElementById('modal-reject-ol').classList.remove('hidden');
+    }
+
+    function closeRejectOlModal() {
+      document.getElementById('modal-reject-ol').classList.add('hidden');
+      _rejectOlAppId = null;
+    }
+
+    function submitRejectOl() {
+      const reason = document.getElementById('reject-ol-reason').value.trim();
+      if (!_rejectOlAppId) return;
+      fetch('{{ route('applications.reject-offer', '_APP_ID_') }}'.replace('_APP_ID_', _rejectOlAppId), {
+        method: 'POST',
+        headers: {
+          'X-CSRF-TOKEN': '{{ csrf_token() }}',
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify({ reason: reason || null }),
+      }).then(r => r.json()).then(data => {
+        if (data.success) {
+          closeRejectOlModal();
+          window.location.reload();
+        } else {
+          alert(data.message || 'Gagal menolak OL');
+        }
+      }).catch(() => {
+        alert('Terjadi kesalahan. Silakan coba lagi.');
+      });
+    }
+    </script>
 @endsection

@@ -278,17 +278,15 @@
                       </a>
                     @endif
                       @php
-                        $canAcceptOl = in_array(strtolower((string) $app->current_stage), ['final', 'offer'], true)
+                        $olStatus = $app->relationLoaded('offer') && $app->offer ? strtolower($app->offer->status) : null;
+                        $canAcceptOl = (in_array(strtolower((string) $app->current_stage), ['final', 'offer'], true) || $olStatus === 'sent')
                           && strtolower((string) $app->overall_status) !== 'hired'
                           && strtolower((string) $app->overall_status) !== 'rejected';
-                        $olStatus = $app->relationLoaded('offer') && $app->offer ? strtolower($app->offer->status) : null;
                       @endphp
-                      @if($canAcceptOl && (!$olStatus || $olStatus === 'sent'))
+                      @if($canAcceptOl)
                         <div class="flex items-center gap-2">
-                          <form method="POST" action="{{ route('applications.move', $app) }}" class="inline-flex">
+                          <form method="POST" action="{{ route('applications.accept-offer', $app) }}" class="inline-flex">
                             @csrf
-                            <input type="hidden" name="to" value="hired">
-                            <input type="hidden" name="status" value="pending">
                             <button type="submit"
                                     class="px-3 py-1.5 rounded-lg text-white text-xs font-medium flex items-center gap-1 hover:opacity-90 transition"
                                     style="background: {{ $PRIMARY }}">

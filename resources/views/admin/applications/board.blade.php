@@ -518,6 +518,16 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
                         @if(optional($a->offer)->rejection_reason)
                           <div class="mt-1 italic text-slate-600">{{ $a->offer->rejection_reason }}</div>
                         @endif
+                      @elseif(optional($a->offer)->status === 'sent' || optional($a->offer)->status === 'draft')
+                        @php
+                          $gross = data_get($a->offer->salary, 'gross', data_get($a->offer->salary, 'base', 0));
+                          $allow = data_get($a->offer->salary, 'allowance', 0);
+                        @endphp
+                        <div class="font-semibold text-amber-700">{{ optional($a->offer)->status === 'sent' ? '⏳ Dikirim' : '📄 Draft' }}</div>
+                        <div class="mt-1 text-slate-600">Gaji: Rp {{ is_numeric($gross) ? number_format((float) $gross, 0, ',', '.') : $gross }}</div>
+                        @if($allow)
+                          <div class="text-slate-600">Tunjangan: Rp {{ is_numeric($allow) ? number_format((float) $allow, 0, ',', '.') : $allow }}</div>
+                        @endif
                       @else
                         <div class="text-slate-500">Belum ada OL</div>
                       @endif
@@ -834,20 +844,22 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
       <button class="kn-modal-close" onclick="closeModal('overlay-send-ol')">✕</button>
     </div>
     <div class="kn-modal-body">
-      <form id="form-send-ol" method="POST" enctype="multipart/form-data">
+      <form id="form-send-ol" method="POST">
         @csrf
         <input type="hidden" name="app_id" id="send-ol-appid">
-        <div style="padding: 20px; border: 2px dashed #ccc; border-radius: 8px; text-align: center; background: #f9f9f9; margin-bottom: 20px;">
-          <div style="margin-bottom: 15px;">
-            <label class="fm-label" style="display: block; font-size: 1rem; font-weight: 600; margin-bottom: 10px;">Pilih File Offering Letter</label>
-            <input type="file" name="offer_file" id="send-ol-file" class="fm-ctrl" accept=".pdf,.doc,.docx" required style="padding: 15px; cursor: pointer;">
-            <div style="font-size: 0.75rem; color: #666; margin-top: 8px;">Format: PDF, DOC, DOCX | Ukuran maks: 10MB</div>
+        <div class="grid grid-cols-2 gap-4" style="margin-bottom: 16px;">
+          <div class="space-y-1.5">
+            <label for="send-ol-gross" class="fm-label">Gaji Pokok (Rp)</label>
+            <input type="number" name="gross" id="send-ol-gross" class="fm-ctrl" required min="0" step="1">
+          </div>
+          <div class="space-y-1.5">
+            <label for="send-ol-allowance" class="fm-label">Site Allowance (Rp)</label>
+            <input type="number" name="allowance" id="send-ol-allowance" class="fm-ctrl" required min="0" step="1">
           </div>
         </div>
-        <div style="background: #fffbeb; border-left: 4px solid #fbbf24; padding: 12px; border-radius: 4px; margin-bottom: 15px;">
-          <div style="font-size: 0.85rem; color: #92400e; font-weight: 500;">
-            ℹ️ File akan langsung dikirim ke kandidat sebagai lampiran email Offering Letter.
-          </div>
+        <div class="space-y-1.5" style="margin-bottom: 16px;">
+          <label for="send-ol-email-body" class="fm-label">Body Email</label>
+          <textarea name="email_body" id="send-ol-email-body" class="fm-ctrl" required rows="5" placeholder="Isi email Offering Letter yang akan dikirim ke kandidat..."></textarea>
         </div>
       </form>
     </div>
@@ -1134,7 +1146,9 @@ function openSendOlModal(appId, name, gross, allow, btn) {
   document.getElementById('send-ol-title').textContent = 'Kirim Offering Letter — ' + name;
   const form = document.getElementById('form-send-ol');
   form.action = `/admin/applications/${appId}/send-offer`;
-  document.getElementById('send-ol-file').value = '';
+  document.getElementById('send-ol-gross').value = gross;
+  document.getElementById('send-ol-allowance').value = allow;
+  document.getElementById('send-ol-email-body').value = 'Kepada Yth. ' + name + ',\n\nDengan ini kami sampaikan Offering Letter untuk posisi yang Anda lamar. Silakan cek lampiran PDF untuk detail lengkapnya.\n\nHarap konfirmasi penerimaan offering letter ini melalui aplikasi.\n\nTerima kasih.';
   openModal('overlay-send-ol');
 }
 

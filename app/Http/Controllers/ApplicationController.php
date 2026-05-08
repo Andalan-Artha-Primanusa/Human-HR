@@ -1345,4 +1345,39 @@ class ApplicationController extends Controller
 
         return back()->with('ok', 'Offering Letter berhasil ditolak.');
     }
+
+    public function acceptOffer(Request $request, JobApplication $application)
+    {
+        $this->authorize('acceptOffer', $application);
+
+        $offer = $application->offer;
+        if (!$offer) {
+            return redirect()->back()->with('warn', 'Tidak ada Offering Letter.');
+        }
+
+        if ($offer->status !== 'sent') {
+            return redirect()->back()->with('warn', 'Hanya OL dengan status "sent" yang bisa diterima.');
+        }
+
+        DB::transaction(function () use ($offer, $application) {
+            $offer->update([
+                'status' => 'accepted',
+            ]);
+
+            $application->update([
+                'overall_status' => 'hired',
+            ]);
+
+            ApplicationStage::create([
+                'application_id' => $application->id,
+                'stage_key' => 'hired',
+                'status' => 'completed',
+                'acted_by' => Auth::id(),
+                'user_id' => Auth::id(),
+                'notes' => 'OL diterima oleh kandidat',
+            ]);
+        });
+
+        return redirect()->back()->with('ok', 'Selamat! Anda telah menerima Offering Letter.');
+    }
 }

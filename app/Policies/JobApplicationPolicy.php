@@ -43,6 +43,11 @@ class JobApplicationPolicy
         return $application->user_id === $user->id || $user->hasRole(['admin', 'hr', 'superadmin', 'trainer', 'karyawan']);
     }
 
+    public function acceptOffer(User $user, JobApplication $application): bool
+    {
+        return $application->user_id === $user->id || $user->hasRole(['admin', 'hr', 'superadmin', 'trainer', 'karyawan']);
+    }
+
     public function delete(User $user, JobApplication $application): bool
     {
         // Delete hanya Superadmin

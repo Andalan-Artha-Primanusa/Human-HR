@@ -114,6 +114,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('applications.mine');
     Route::post('/me/applications/{application}/reject-offer', [ApplicationController::class, 'rejectOffer'])
         ->name('applications.reject-offer');
+    Route::post('/me/applications/{application}/accept-offer', [ApplicationController::class, 'acceptOffer'])
+        ->name('applications.accept-offer');
 
     // Psikotes
     Route::get('/me/psychotest/{attempt}', [PsychotestController::class, 'show'])
