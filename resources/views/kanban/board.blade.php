@@ -424,7 +424,6 @@ textarea.fm-ctrl { resize: vertical; min-height: 68px; }
                     <button type="button" class="btn-xs btn-outline" onclick="openSchedModal(this, '{{ $stageKey }}')">Schedule</button>
                   @endif
                 @endif
-                @endif
 
                 @if($canKaryawanFeedback)
                   <button type="button" class="btn-xs btn-primary"

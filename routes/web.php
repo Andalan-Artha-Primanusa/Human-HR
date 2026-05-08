@@ -145,7 +145,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Kanban untuk karyawan/trainer (tidak untuk pelamar)
     // =========================================================
     Route::get('/kanban', [KanbanController::class, 'mine'])
-        ->middleware('role:karyawan,trainer')
+        ->middleware('role:karyawan|trainer')
         ->name('kanban.mine');
 });
 
