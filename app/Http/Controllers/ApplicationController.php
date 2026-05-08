@@ -1304,7 +1304,7 @@ class ApplicationController extends Controller
      */
     public function rejectOffer(Request $request, JobApplication $application)
     {
-        $this->authorize('update', $application);
+        $this->authorize('rejectOffer', $application);
 
         $request->validate([
             'rejection_reason' => 'required|string|min:5|max:500',

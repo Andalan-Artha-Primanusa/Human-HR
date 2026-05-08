@@ -112,6 +112,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Lamaran saya
     Route::get('/me/applications', [ApplicationController::class, 'index'])
         ->name('applications.mine');
+    Route::post('/me/applications/{application}/reject-offer', [ApplicationController::class, 'rejectOffer'])
+        ->name('applications.reject-offer');
 
     // Psikotes
     Route::get('/me/psychotest/{attempt}', [PsychotestController::class, 'show'])

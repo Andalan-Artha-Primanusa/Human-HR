@@ -128,7 +128,7 @@
 
         {{-- Heading --}}
         <div style="margin-bottom:1.5rem; text-align:center;">
-          <div style="margin-bottom:.6rem;">
+          <div class="hidden lg:block" style="margin-bottom:.6rem;">
             <img src="{{ asset('assets/logologin.png') }}" alt="Logo" style="height:80px; object-fit:contain; display:block; margin:0 auto;">
           </div>
           <h2 style="font-size:1.4rem; font-weight:800; color:#3b2209; margin:0 0 .3rem;">Buat Akun Baru</h2>

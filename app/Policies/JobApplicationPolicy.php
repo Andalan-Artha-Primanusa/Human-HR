@@ -37,6 +37,12 @@ class JobApplicationPolicy
         return $user->hasRole(['admin', 'hr', 'superadmin', 'trainer', 'karyawan']);
     }
 
+    public function rejectOffer(User $user, JobApplication $application): bool
+    {
+        // Candidate dapat menolak offer mereka sendiri, atau HR/Admin dapat menolak offer milik siapa saja
+        return $application->user_id === $user->id || $user->hasRole(['admin', 'hr', 'superadmin', 'trainer', 'karyawan']);
+    }
+
     public function delete(User $user, JobApplication $application): bool
     {
         // Delete hanya Superadmin

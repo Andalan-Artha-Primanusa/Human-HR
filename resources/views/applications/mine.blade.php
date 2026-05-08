@@ -283,16 +283,24 @@
                           && strtolower((string) $app->overall_status) !== 'rejected';
                       @endphp
                       @if($canAcceptOl)
-                        <form method="POST" action="{{ route('applications.move', $app) }}" class="inline-flex">
-                          @csrf
-                          <input type="hidden" name="to" value="hired">
-                          <input type="hidden" name="status" value="pending">
-                          <button type="submit"
-                                  class="px-3 py-1.5 rounded-lg text-white text-xs font-medium flex items-center gap-1 hover:opacity-90 transition"
-                                  style="background: {{ $PRIMARY }}">
-                            Terima OL
+                        <div class="flex items-center gap-2">
+                          <form method="POST" action="{{ route('applications.move', $app) }}" class="inline-flex">
+                            @csrf
+                            <input type="hidden" name="to" value="hired">
+                            <input type="hidden" name="status" value="pending">
+                            <button type="submit"
+                                    class="px-3 py-1.5 rounded-lg text-white text-xs font-medium flex items-center gap-1 hover:opacity-90 transition"
+                                    style="background: {{ $PRIMARY }}">
+                              Terima OL
+                            </button>
+                          </form>
+                          <button type="button"
+                                  class="px-3 py-1.5 rounded-lg text-white text-xs font-medium flex items-center gap-1 hover:opacity-90 transition border border-red-500"
+                                  style="background: rgba(220,38,38,0.8)"
+                                  onclick="openRejectOlModal('{{ $app->id }}', '{{ $app->user->name }}')">
+                            Tolak OL
                           </button>
-                        </form>
+                        </div>
                       @endif
                     <a href="{{ route('jobs.show', $app->job_id) }}"
                        class="px-3 py-1.5 rounded-lg text-white text-xs font-medium flex items-center gap-1 hover:opacity-90 transition"
@@ -329,4 +337,88 @@
       @endif
 
     </div>
+
+    {{-- MODAL: REJECT OL --}}
+    <div id="modal-reject-ol" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50" onclick="if(event.target === this) closeRejectOlModal()">
+      <div class="bg-white rounded-xl shadow-lg max-w-md w-full mx-4" onclick="event.stopPropagation()">
+        <div class="p-6 border-b" style="border-color: {{ $BORD }}">
+          <h3 class="text-lg font-semibold" style="color: {{ $TEXT }}">Tolak Offering Letter</h3>
+          <p class="text-sm mt-1" style="color: #9a7558">Berikan alasan penolakan (opsional). HR akan menghubungi Anda.</p>
+        </div>
+        <div class="p-6">
+          <textarea id="reject-ol-reason"
+                    class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2"
+                    style="border-color: {{ $BORD }}; --tw-ring-color: {{ $PRIMARY }}; min-height: 100px"
+                    placeholder="Jelaskan alasan Anda menolak offering letter ini..."></textarea>
+          <p class="text-xs mt-2" style="color: #c4a882">Catatan: Informasi ini akan dikirim ke tim HR.</p>
+        </div>
+        <div class="p-6 border-t flex gap-2 justify-end" style="border-color: {{ $BORD }}">
+          <button type="button"
+                  class="px-4 py-2 rounded-lg border text-sm font-medium transition"
+                  style="border-color: {{ $BORD }}; color: {{ $TEXT }}"
+                  onclick="closeRejectOlModal()">
+            Batal
+          </button>
+          <button type="button"
+                  class="px-4 py-2 rounded-lg text-white text-sm font-medium transition hover:opacity-90"
+                  style="background: rgba(220,38,38,0.8)"
+                  id="btn-submit-reject-ol"
+                  onclick="submitRejectOl()">
+            Tolak OL
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+    let _rejectOlAppId = null;
+    
+    function openRejectOlModal(appId, userName) {
+      _rejectOlAppId = appId;
+      document.getElementById('reject-ol-reason').value = '';
+      document.getElementById('modal-reject-ol').classList.remove('hidden');
+    }
+    
+    function closeRejectOlModal() {
+      document.getElementById('modal-reject-ol').classList.add('hidden');
+      _rejectOlAppId = null;
+    }
+    
+    function submitRejectOl() {
+      const reason = document.getElementById('reject-ol-reason').value.trim();
+      if (!_rejectOlAppId) return;
+      
+      const btn = document.getElementById('btn-submit-reject-ol');
+      btn.disabled = true;
+      btn.textContent = 'Mengirim...';
+      
+      fetch(`{{ url('/me/applications') }}/${_rejectOlAppId}/reject-offer`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify({ rejection_reason: reason || 'Menolak penawaran (tanpa alasan)' })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.ok || data.message?.includes('berhasil')) {
+          alert('Penolakan berhasil dikirim. HR akan menghubungi Anda.');
+          closeRejectOlModal();
+          setTimeout(() => location.reload(), 500);
+        } else {
+          alert('Error: ' + (data.message || data.error || 'Gagal menolak OL'));
+          btn.disabled = false;
+          btn.textContent = 'Tolak OL';
+        }
+      })
+      .catch(err => {
+        alert('Error: ' + err.message);
+        btn.disabled = false;
+        btn.textContent = 'Tolak OL';
+      });
+    }
+    </script>
+
 @endsection

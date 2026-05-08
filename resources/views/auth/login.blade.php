@@ -129,7 +129,7 @@
 
         {{-- Heading --}}
         <div style="margin-bottom:1.75rem; text-align:center;">
-          <div style="margin-bottom:.75rem;">
+          <div class="hidden lg:block" style="margin-bottom:.75rem;">
             <img src="{{ asset('assets/logologin.png') }}" alt="Logo" style="height:88px; object-fit:contain; display:block; margin:0 auto;">
           </div>
           <h2 style="font-size:1.5rem; font-weight:800; color:#3b2209; margin:0 0 .35rem;">Masuk ke Akun</h2>
