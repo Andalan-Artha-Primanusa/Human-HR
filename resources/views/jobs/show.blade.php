@@ -219,6 +219,18 @@
 @section('content')
     <div class="mx-auto w-full max-w-[1400px] px-4 sm:px-6 lg:px-8 py-6">
 
+      {{-- FLASH MESSAGE --}}
+      @if(session('success') || session('warn'))
+        <div id="flash-alert" style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:1000;min-width:320px;max-width:90vw;" class="flex items-center justify-center">
+          <div class="px-6 py-4 text-lg font-semibold text-center bg-white border shadow-lg rounded-xl {{ session('success') ? 'border-emerald-300' : 'border-amber-300' }} animate-fadein">
+            <span class="{{ session('success') ? 'text-emerald-700' : 'text-amber-700' }}">{{ session('success') ?? session('warn') }}</span>
+            <button onclick="document.getElementById('flash-alert').remove()" class="ml-4 text-slate-400 hover:text-slate-700">&times;</button>
+          </div>
+        </div>
+        <style>@keyframes fadein{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}</style>
+        <script>setTimeout(()=>{const e=document.getElementById('flash-alert');if(e)e.remove()},5000)</script>
+      @endif
+
       {{-- BREADCRUMB --}}
       <nav class="mb-4" aria-label="Breadcrumb">
         <div class="relative rounded-xl border border-slate-200 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 shadow-sm">
