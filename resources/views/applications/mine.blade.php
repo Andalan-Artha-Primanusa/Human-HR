@@ -283,7 +283,7 @@
                           && strtolower((string) $app->overall_status) !== 'rejected';
                         $olStatus = $app->relationLoaded('offer') && $app->offer ? strtolower($app->offer->status) : null;
                       @endphp
-                      @if($canAcceptOl && !$olStatus)
+                      @if($canAcceptOl && (!$olStatus || $olStatus === 'sent'))
                         <div class="flex items-center gap-2">
                           <form method="POST" action="{{ route('applications.move', $app) }}" class="inline-flex">
                             @csrf
@@ -292,7 +292,7 @@
                             <button type="submit"
                                     class="px-3 py-1.5 rounded-lg text-white text-xs font-medium flex items-center gap-1 hover:opacity-90 transition"
                                     style="background: {{ $PRIMARY }}">
-                              Terima OL
+                              @if($olStatus === 'sent') ⏳ @endif Terima OL
                             </button>
                           </form>
                           <button type="button"
@@ -306,11 +306,6 @@
                         <span class="px-3 py-1.5 rounded-lg text-xs font-medium"
                               style="background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7;">
                           ✔ Sudah Terima OL
-                        </span>
-                      @elseif($olStatus === 'pending')
-                        <span class="px-3 py-1.5 rounded-lg text-xs font-medium"
-                              style="background: #fff3e0; color: #e65100; border: 1px solid #ffcc80;">
-                          ⏳ OL Aktif
                         </span>
                       @elseif($olStatus === 'rejected')
                         <span class="px-3 py-1.5 rounded-lg text-xs font-medium"
