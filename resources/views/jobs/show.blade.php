@@ -47,8 +47,14 @@
 
     /** @var \App\Models\CandidateProfile|null $meProfile */
     $meProfile = auth()->check()
-        ? \App\Models\CandidateProfile::where('user_id', auth()->id())->first()
+        ? \App\Models\CandidateProfile::where('user_id', auth()->id())
+            ->withCount(['trainings', 'employments', 'references'])
+            ->first()
         : null;
+    $missingProfileFields = $meProfile?->missingRequiredForApplication() ?? ['Profil kandidat'];
+    $profileCompleteForApplication = auth()->guest()
+        || (auth()->user()?->role !== 'pelamar')
+        || $missingProfileFields === [];
 
     // ==== Tahapan & label (FLOW BARU) ====
     $stageOrder = ['applied', 'screening', 'psychotest', 'hr_iv', 'user_iv', 'user_trainer_iv', 'offer', 'mcu', 'mobilisasi', 'ground_test', 'onsite', 'hired', 'not_qualified'];
@@ -662,6 +668,23 @@
                                 Lamar Sekarang
                               </button>
                             </form>
+                        @endif
+                      </div>
+                @elseif(!$profileCompleteForApplication)
+                      <div class="px-4 py-4 mt-3 text-sm border rounded-xl border-amber-200 bg-amber-50 text-amber-950">
+                        <div class="font-semibold">Lengkapi profil dulu</div>
+                        <p class="mt-1">Progres lamaran belum bisa dilihat karena data kandidat kamu belum lengkap.</p>
+                        <div class="flex flex-wrap gap-2 mt-3">
+                          @foreach($missingProfileFields as $field)
+                            <span class="inline-flex items-center px-2.5 py-1 text-xs font-medium bg-white border rounded-full border-amber-200 text-amber-900">{{ $field }}</span>
+                          @endforeach
+                        </div>
+                        @if(Route::has('candidate.profiles.edit'))
+                          <a href="{{ route('candidate.profiles.edit', $job) }}"
+                             class="inline-flex items-center justify-center w-full px-3 py-2 mt-4 text-sm font-semibold text-white rounded-lg"
+                             style="background: linear-gradient(90deg, {{ $ACCENT }} 0%, {{ $ACCENT_DARK }} 100%);">
+                            Isi Profil Sekarang
+                          </a>
                         @endif
                       </div>
                 @else
