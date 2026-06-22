@@ -63,6 +63,7 @@ class Job extends Model
         'operations' => 'Operations',
         'admin' => 'Administration',
         'scm' => 'SCM',
+        'she' => 'SHE',
         'plant' => 'Plant',
     ];
 

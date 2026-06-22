@@ -73,6 +73,40 @@
       font-size: .75rem;
       color: #b91c1c;
     }
+    .terms-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      background: rgba(0,0,0,.56);
+    }
+    .terms-modal.is-open { display: flex; }
+    .terms-dialog {
+      width: min(720px, 100%);
+      max-height: min(760px, 90vh);
+      overflow: hidden;
+      border-radius: 1rem;
+      background: #fff;
+      box-shadow: 0 24px 80px rgba(0,0,0,.28);
+      border: 1px solid rgba(167,125,82,.22);
+    }
+    .terms-scroll {
+      max-height: 54vh;
+      overflow-y: auto;
+      padding-right: .25rem;
+    }
+    .terms-close {
+      border: 0;
+      background: #fff8f2;
+      color: #5c3d1e;
+      border-radius: .625rem;
+      padding: .45rem .65rem;
+      font-weight: 800;
+      cursor: pointer;
+    }
   </style>
 </head>
 
@@ -210,10 +244,10 @@
                 {{ old('agree') ? 'checked' : '' }} required>
               <span>
                 Saya telah membaca dan menyetujui
-                <a href="{{ route('terms') }}" target="_blank" rel="noopener"
-                  style="color:#a77d52; font-weight:700; text-decoration:underline;">
+                <button type="button" id="openTermsModal"
+                  style="border:0; background:transparent; padding:0; color:#a77d52; font:inherit; font-weight:700; text-decoration:underline; cursor:pointer;">
                   Terms &amp; Conditions
-                </a>
+                </button>
                 Human.Careers.
               </span>
             </label>
@@ -249,6 +283,44 @@
 
   </div>
 
+  <div id="termsModal" class="terms-modal" role="dialog" aria-modal="true" aria-labelledby="termsModalTitle">
+    <div class="terms-dialog">
+      <div style="display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:1rem 1.25rem; border-bottom:1px solid rgba(167,125,82,.18);">
+        <div>
+          <h3 id="termsModalTitle" style="margin:0; color:#3b2209; font-size:1rem; font-weight:800;">Terms &amp; Conditions</h3>
+          <p style="margin:.2rem 0 0; color:#9c7a52; font-size:.75rem;">Baca sebelum membuat akun Human.Careers</p>
+        </div>
+        <button type="button" id="closeTermsModal" class="terms-close" aria-label="Tutup Terms and Conditions">Tutup</button>
+      </div>
+
+      <div style="padding:1.25rem;">
+        <div class="terms-scroll" style="color:#5c3d1e; font-size:.84rem; line-height:1.75;">
+          <p style="margin-top:0;">Dengan membuat akun, Anda setuju menggunakan Human.Careers untuk proses rekrutmen, pengelolaan profil kandidat, lamaran pekerjaan, psikotes, interview, dan komunikasi seleksi.</p>
+
+          <h4 style="margin:1rem 0 .35rem; color:#3b2209;">1. Kebenaran Data</h4>
+          <p>Anda wajib mengisi data yang benar, lengkap, dan terbaru. Data yang tidak valid dapat memengaruhi proses seleksi atau menyebabkan akun dibatasi.</p>
+
+          <h4 style="margin:1rem 0 .35rem; color:#3b2209;">2. Verifikasi Email</h4>
+          <p>Setelah registrasi, Anda wajib melakukan verifikasi email melalui link yang dikirim sistem sebelum mengakses fitur tertentu.</p>
+
+          <h4 style="margin:1rem 0 .35rem; color:#3b2209;">3. Keamanan Akun</h4>
+          <p>Anda bertanggung jawab menjaga kerahasiaan password dan aktivitas yang terjadi melalui akun Anda.</p>
+
+          <h4 style="margin:1rem 0 .35rem; color:#3b2209;">4. Penggunaan Data</h4>
+          <p>Data digunakan untuk kebutuhan rekrutmen, evaluasi kandidat, komunikasi proses seleksi, dan administrasi internal perusahaan.</p>
+
+          <h4 style="margin:1rem 0 .35rem; color:#3b2209;">5. Perubahan Ketentuan</h4>
+          <p>Ketentuan dapat diperbarui sewaktu-waktu. Penggunaan platform setelah perubahan berlaku dianggap sebagai persetujuan terhadap ketentuan terbaru.</p>
+        </div>
+
+        <div style="display:flex; gap:.75rem; justify-content:flex-end; margin-top:1rem; padding-top:1rem; border-top:1px solid rgba(167,125,82,.14);">
+          <a href="{{ route('terms') }}" target="_blank" rel="noopener" style="align-self:center; color:#9c7a52; font-size:.8rem; font-weight:700; text-decoration:underline;">Buka halaman penuh</a>
+          <button type="button" id="acceptTermsFromModal" class="auth-btn" style="width:auto; min-width:150px; padding:.7rem 1rem;">Saya Setuju</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
     (function () {
       const agree  = document.getElementById('agree');
@@ -278,6 +350,37 @@
 
       toggleField(pwd, togglePwd, 'Sembunyikan password', 'Tampilkan password');
       toggleField(pwdConfirm, togglePwdConfirm, 'Sembunyikan konfirmasi password', 'Tampilkan konfirmasi password');
+
+      const termsModal = document.getElementById('termsModal');
+      const openTerms = document.getElementById('openTermsModal');
+      const closeTerms = document.getElementById('closeTermsModal');
+      const acceptTerms = document.getElementById('acceptTermsFromModal');
+
+      function openTermsModal() {
+        termsModal?.classList.add('is-open');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeTermsModal() {
+        termsModal?.classList.remove('is-open');
+        document.body.style.overflow = '';
+      }
+
+      openTerms?.addEventListener('click', openTermsModal);
+      closeTerms?.addEventListener('click', closeTermsModal);
+      termsModal?.addEventListener('click', function (event) {
+        if (event.target === termsModal) closeTermsModal();
+      });
+      acceptTerms?.addEventListener('click', function () {
+        if (agree) {
+          agree.checked = true;
+          sync();
+        }
+        closeTermsModal();
+      });
+      document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') closeTermsModal();
+      });
     })();
   </script>
 </body>

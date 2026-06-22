@@ -35,6 +35,27 @@
   } else {
       $docs = [];
   }
+
+  $attachmentDocs = collect($profile->attachments ?? [])
+      ->merge($profile->user?->jobApplications?->flatMap->attachments ?? collect())
+      ->map(fn($a) => ['name' => $a->label ?: basename((string) $a->path), 'path' => $a->path])
+      ->filter(fn($d) => !empty($d['path']))
+      ->values()
+      ->all();
+
+  $docs = collect($docs)
+      ->map(fn($d) => is_array($d) ? $d : ['name' => basename((string) $d), 'path' => (string) $d])
+      ->merge($attachmentDocs)
+      ->filter(fn($d) => !empty($d['path']))
+      ->unique('path')
+      ->values();
+
+  $hasCv = (bool) $profile->cv_path || $docs->contains(function ($d) {
+      $needle = Str::lower((string) (($d['name'] ?? '') . ' ' . ($d['path'] ?? '')));
+      return Str::contains($needle, ['cv', 'resume', 'curriculum']);
+  });
+
+  $profileEmail = $profile->email ?: $profile->user?->email;
 @endphp
 
 <div class="flex flex-col gap-6 lg:flex-row">
@@ -46,10 +67,10 @@
       </div>
       <div class="text-center">
         <div class="font-semibold">{{ $profile->full_name }}</div>
-        <div class="text-xs text-slate-500">{{ $profile->email }}<br>{{ $profile->phone }}</div>
+        <div class="text-xs text-slate-500">{{ $profileEmail ?: 'Belum ada email' }}<br>{{ $profile->phone ?: 'Belum ada HP' }}</div>
       </div>
       <div class="flex gap-2 mt-3">
-        @if($profile->cv_path)
+        @if($hasCv)
           <a target="_blank" href="{{ route('admin.candidates.cv',$profile) }}"
              class="inline-flex items-center justify-center gap-2 px-3 py-1 text-xs font-semibold text-white rounded bg-[#a77d52] hover:brightness-105">Lihat CV</a>
         @endif
@@ -81,7 +102,7 @@
           <span class="text-sm truncate">{{ $d['name'] ?? 'Dokumen' }}</span>
           <a target="_blank" href="{{ Storage::disk('public')->url($d['path'] ?? '') }}" class="ml-2 px-2 py-1 text-xs rounded bg-[#a77d52] text-white">Lihat</a>
         </div>
-      @empty <div class="text-xs text-slate-400">—</div> @endforelse
+      @empty <div class="text-xs text-slate-400">Belum ada dokumen tersimpan.</div> @endforelse
     </div>
     <div class="p-4 bg-white border shadow-sm rounded-2xl">
       <div class="mb-2 font-semibold">Status Profil</div>
@@ -117,7 +138,7 @@
         <div>Usia</div><div>{{ $profile->age ?? '—' }}</div>
         <div>TTL</div><div>{{ $profile->birthplace }}, {{ $fmtDate($profile->birthdate) }}</div>
         <div>NIK</div><div>{{ $profile->nik ?: '—' }}</div>
-        <div>Email</div><div>{{ $profile->email ?: '—' }}</div>
+        <div>Email</div><div>{{ $profileEmail ?: '—' }}</div>
         <div>HP</div><div>{{ $profile->phone ?: '—' }}</div>
         <div>WhatsApp</div><div>{{ $profile->whatsapp ?: '—' }}</div>
       </div>

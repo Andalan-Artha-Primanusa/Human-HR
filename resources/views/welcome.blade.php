@@ -857,9 +857,9 @@
                     </li>
                 @endforeach
               </ul>
-        @else
-              <p class="text-sm" style="color: #a77d52">Belum ada data site.</p>
-        @endif
+          @else
+            {{-- Tidak ada site untuk ditampilkan --}}
+          @endif
       </div>
     </section>
 

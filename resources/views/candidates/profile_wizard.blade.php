@@ -104,6 +104,22 @@
     @if(session('success'))
           <div class="px-4 py-3 mb-4 border rounded-xl border-brand-200 bg-brand-50 text-brand-800">{{ session('success') }}</div>
     @endif
+    @php
+      $missingProfileFieldsForView = collect(session('missing_profile_fields', $missingProfileFields ?? []))
+        ->filter()
+        ->values();
+    @endphp
+    @if($missingProfileFieldsForView->isNotEmpty())
+          <div class="px-4 py-4 mb-4 border rounded-xl border-amber-200 bg-amber-50 text-amber-950">
+            <div class="mb-1 font-semibold">Data profil belum lengkap</div>
+            <p class="text-sm">Lengkapi bagian berikut sebelum melamar. Lamaran baru akan masuk setelah semua data wajib terisi.</p>
+            <div class="flex flex-wrap gap-2 mt-3">
+              @foreach($missingProfileFieldsForView as $field)
+                <span class="inline-flex items-center px-2.5 py-1 text-xs font-medium rounded-full bg-white border border-amber-200 text-amber-900">{{ $field }}</span>
+              @endforeach
+            </div>
+          </div>
+    @endif
     @if($errors->any())
           <div class="px-4 py-3 mb-4 border rounded-xl border-brand-200 bg-[#fbf3ea] text-brand-900">
             <div class="mb-1 font-semibold">Periksa kembali isian kamu:</div>

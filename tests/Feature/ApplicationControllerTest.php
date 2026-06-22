@@ -4,6 +4,10 @@ namespace Tests\Feature;
 
 use App\Models\Job;
 use App\Models\JobApplication;
+use App\Models\CandidateEmployment;
+use App\Models\CandidateProfile;
+use App\Models\CandidateReference;
+use App\Models\CandidateTraining;
 use App\Models\Poh;
 use App\Models\Site;
 use App\Models\User;
@@ -55,6 +59,7 @@ class ApplicationControllerTest extends TestCase
 
     public function test_store_creates_application_and_redirects()
     {
+        $this->createCompleteProfile($this->user, $this->poh);
         $this->actingAs($this->user);
 
         $response = $this->post(route('applications.store', $this->job), [
@@ -66,6 +71,23 @@ class ApplicationControllerTest extends TestCase
             'user_id' => $this->user->id,
             'job_id' => $this->job->id,
             'current_stage' => 'applied'
+        ]);
+    }
+
+    public function test_store_blocks_application_when_profile_is_incomplete()
+    {
+        $this->actingAs($this->user);
+
+        $response = $this->post(route('applications.store', $this->job), [
+            'poh_id' => $this->poh->id
+        ]);
+
+        $response->assertRedirect(route('candidate.profiles.edit', $this->job));
+        $response->assertSessionHasErrors('profile_incomplete');
+        $response->assertSessionHas('missing_profile_fields');
+        $this->assertDatabaseMissing('job_applications', [
+            'user_id' => $this->user->id,
+            'job_id' => $this->job->id,
         ]);
     }
 
@@ -228,5 +250,61 @@ class ApplicationControllerTest extends TestCase
         });
         $app->refresh();
         $this->assertNotNull($app->mcu_meta);
+    }
+
+    private function createCompleteProfile(User $user, Poh $poh): CandidateProfile
+    {
+        $profile = CandidateProfile::create([
+            'user_id' => $user->id,
+            'poh_id' => $poh->id,
+            'full_name' => $user->name,
+            'gender' => 'male',
+            'age' => 25,
+            'birthplace' => 'Jakarta',
+            'birthdate' => '2001-01-01',
+            'nik' => '3201010101010001',
+            'email' => $user->email,
+            'phone' => '081234567890',
+            'last_education' => 'S1',
+            'education_major' => 'Informatika',
+            'education_school' => 'Universitas Test',
+            'ktp_address' => 'Jl. KTP',
+            'ktp_village' => 'KTP Village',
+            'ktp_district' => 'KTP District',
+            'ktp_city' => 'Jakarta',
+            'ktp_province' => 'DKI Jakarta',
+            'ktp_postal_code' => '12345',
+            'domicile_address' => 'Jl. Domisili',
+            'domicile_village' => 'Dom Village',
+            'domicile_district' => 'Dom District',
+            'domicile_city' => 'Jakarta',
+            'domicile_province' => 'DKI Jakarta',
+            'domicile_postal_code' => '12345',
+            'cv_path' => 'candidates/test/cv.pdf',
+        ]);
+
+        CandidateTraining::create([
+            'candidate_profile_id' => $profile->id,
+            'title' => 'Safety Training',
+            'institution' => 'Training Center',
+            'period_start' => '2025-01-01',
+        ]);
+
+        CandidateEmployment::create([
+            'candidate_profile_id' => $profile->id,
+            'company' => 'Company Test',
+            'position_start' => 'Staff',
+            'period_start' => '2024-01-01',
+        ]);
+
+        CandidateReference::create([
+            'candidate_profile_id' => $profile->id,
+            'name' => 'Reference Test',
+            'job_title' => 'Manager',
+            'company' => 'Company Test',
+            'contact' => '081234567891',
+        ]);
+
+        return $profile;
     }
 }

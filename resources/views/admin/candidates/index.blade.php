@@ -105,14 +105,22 @@
                 </thead>
                 <tbody class="divide-y divide-slate-100">
                   @foreach($profiles as $p)
+                      @php
+                        $email = $p->email ?: $p->user?->email;
+                        $phone = $p->phone;
+                        $nik = $p->nik;
+                      @endphp
                       <tr class="transition hover:bg-[#f8f5f2]">
                         <td class="px-4 py-3">
                           <div class="font-medium text-slate-900">{{ e($p->full_name) }}</div>
+                          @if(!$email || !$phone || !$nik)
+                            <div class="mt-1 inline-flex rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-700 ring-1 ring-amber-200">Profil belum lengkap</div>
+                          @endif
                           <div class="text-xs text-slate-500">Updated: {{ e(optional($p->updated_at)->format('d M Y H:i')) }}</div>
                         </td>
-                        <td class="px-4 py-3">{{ e($p->email) }}</td>
-                        <td class="px-4 py-3">{{ e($p->phone) }}</td>
-                        <td class="px-4 py-3">{{ e($p->nik) }}</td>
+                        <td class="px-4 py-3">{{ $email ? e($email) : 'Belum diisi' }}</td>
+                        <td class="px-4 py-3">{{ $phone ? e($phone) : 'Belum diisi' }}</td>
+                        <td class="px-4 py-3">{{ $nik ? e($nik) : 'Belum diisi' }}</td>
                         <td class="px-4 py-3">
                           @php
                             $jobsApplied = $p->user && $p->user->jobApplications ? $p->user->jobApplications->pluck('job.title')->unique()->filter()->values() : collect();

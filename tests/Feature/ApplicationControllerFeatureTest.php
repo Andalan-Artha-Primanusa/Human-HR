@@ -4,6 +4,10 @@ namespace Tests\Feature;
 
 use App\Models\Job;
 use App\Models\JobApplication;
+use App\Models\CandidateEmployment;
+use App\Models\CandidateProfile;
+use App\Models\CandidateReference;
+use App\Models\CandidateTraining;
 use App\Models\Poh;
 use App\Models\Site;
 use App\Models\User;
@@ -87,6 +91,8 @@ class ApplicationControllerFeatureTest extends TestCase
 
     public function test_pelamar_store_with_poh()
     {
+        $this->application->delete();
+
         // Create a POH first
         $poh = \App\Models\Poh::create([
             'name' => 'Test POH',
@@ -94,6 +100,7 @@ class ApplicationControllerFeatureTest extends TestCase
             'address' => 'Test Address',
             'is_active' => true,
         ]);
+        $this->createCompleteProfile($this->pelamar, $poh);
 
         $this->actingAs($this->pelamar);
 
@@ -120,9 +127,14 @@ class ApplicationControllerFeatureTest extends TestCase
 
     public function test_pelamar_store_creates_application_stage()
     {
+        $this->application->delete();
+        $poh = Poh::factory()->create(['is_active' => true]);
+        $this->createCompleteProfile($this->pelamar, $poh);
         $this->actingAs($this->pelamar);
 
-        $this->post(route('applications.store', $this->job));
+        $this->post(route('applications.store', $this->job), [
+            'poh_id' => $poh->id,
+        ]);
 
         $app = JobApplication::where('user_id', $this->pelamar->id)->first();
         $this->assertDatabaseHas('application_stages', [
@@ -472,5 +484,61 @@ class ApplicationControllerFeatureTest extends TestCase
         ]);
 
         $response->assertSessionHasErrors('to');
+    }
+
+    private function createCompleteProfile(User $user, Poh $poh): CandidateProfile
+    {
+        $profile = CandidateProfile::create([
+            'user_id' => $user->id,
+            'poh_id' => $poh->id,
+            'full_name' => $user->name,
+            'gender' => 'male',
+            'age' => 25,
+            'birthplace' => 'Jakarta',
+            'birthdate' => '2001-01-01',
+            'nik' => '3201010101010001',
+            'email' => $user->email,
+            'phone' => '081234567890',
+            'last_education' => 'S1',
+            'education_major' => 'Informatika',
+            'education_school' => 'Universitas Test',
+            'ktp_address' => 'Jl. KTP',
+            'ktp_village' => 'KTP Village',
+            'ktp_district' => 'KTP District',
+            'ktp_city' => 'Jakarta',
+            'ktp_province' => 'DKI Jakarta',
+            'ktp_postal_code' => '12345',
+            'domicile_address' => 'Jl. Domisili',
+            'domicile_village' => 'Dom Village',
+            'domicile_district' => 'Dom District',
+            'domicile_city' => 'Jakarta',
+            'domicile_province' => 'DKI Jakarta',
+            'domicile_postal_code' => '12345',
+            'cv_path' => 'candidates/test/cv.pdf',
+        ]);
+
+        CandidateTraining::create([
+            'candidate_profile_id' => $profile->id,
+            'title' => 'Safety Training',
+            'institution' => 'Training Center',
+            'period_start' => '2025-01-01',
+        ]);
+
+        CandidateEmployment::create([
+            'candidate_profile_id' => $profile->id,
+            'company' => 'Company Test',
+            'position_start' => 'Staff',
+            'period_start' => '2024-01-01',
+        ]);
+
+        CandidateReference::create([
+            'candidate_profile_id' => $profile->id,
+            'name' => 'Reference Test',
+            'job_title' => 'Manager',
+            'company' => 'Company Test',
+            'contact' => '081234567891',
+        ]);
+
+        return $profile;
     }
 }

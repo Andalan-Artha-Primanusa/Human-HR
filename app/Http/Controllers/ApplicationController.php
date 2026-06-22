@@ -154,6 +154,17 @@ class ApplicationController extends Controller
     {
         abort_if($job->status !== 'open', 403, 'Job is not open');
 
+        /** @var CandidateProfile $profile */
+        $profile = CandidateProfile::withCount(['trainings', 'employments', 'references'])
+            ->firstOrCreate(
+                ['user_id' => $request->user()->id],
+                ['full_name' => $request->user()->name]
+            );
+
+        $data = $request->validate([
+            'poh_id' => ['nullable', 'uuid', 'exists:pohs,id'],
+        ]);
+
         $already = JobApplication::where('job_id', $job->id)
             ->where('user_id', $request->user()->id)
             ->first();
@@ -164,9 +175,21 @@ class ApplicationController extends Controller
                 ->with('info', 'Kamu sudah melamar. Silakan lengkapi/cek data profil.');
         }
 
-        $data = $request->validate([
-            'poh_id' => ['nullable', 'uuid', 'exists:pohs,id'],
-        ]);
+        if (! $profile->poh_id && ! empty($data['poh_id'])) {
+            $profile->forceFill(['poh_id' => $data['poh_id']])->save();
+        }
+
+        $missingProfileFields = $profile->missingRequiredForApplication();
+
+        if ($missingProfileFields !== []) {
+            return redirect()
+                ->route('candidate.profiles.edit', ['job' => $job->id])
+                ->withErrors([
+                    'profile_incomplete' => 'Data profil belum lengkap. Lengkapi semua field wajib sebelum melamar.',
+                ])
+                ->with('missing_profile_fields', $missingProfileFields)
+                ->with('info', 'Lamaran belum dibuat karena data profil kamu belum lengkap.');
+        }
 
         DB::transaction(function () use ($request, $job, $data) {
             $app = JobApplication::create([
@@ -187,11 +210,6 @@ class ApplicationController extends Controller
                 'user_id'        => $request->user()->id,
                 'notes'          => null,
             ]);
-
-            CandidateProfile::firstOrCreate(
-                ['user_id' => $request->user()->id],
-                ['full_name' => $request->user()->name]
-            );
         });
 
         return redirect()

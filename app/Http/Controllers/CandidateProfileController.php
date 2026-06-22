@@ -23,6 +23,7 @@ class CandidateProfileController extends Controller
 
         /** @var CandidateProfile $profile */
         $profile = CandidateProfile::firstOrCreate(['user_id' => $user->id], ['full_name' => $user->name]);
+        $profile->loadCount(['trainings', 'employments', 'references']);
 
         // Ambil ONLY kolom yang dipakai view (hemat)
         $trainings = $profile->trainings()->orderBy('order_no')->get(['title', 'institution', 'period_start', 'period_end', 'certificate_path', 'certificate_name', 'cert_valid_from', 'cert_valid_to', 'cert_no_expiry'])->toArray();
@@ -33,8 +34,9 @@ class CandidateProfileController extends Controller
 
         // Ambil POH untuk dropdown (hanya yang aktif)
         $pohs = \App\Models\Poh::query()->orderBy('name')->get(['id', 'name']);
+        $missingProfileFields = session('missing_profile_fields', $profile->missingRequiredForApplication());
 
-        return view('candidates.profile_wizard', compact('job', 'profile', 'trainings', 'employments', 'references', 'pohs'));
+        return view('candidates.profile_wizard', compact('job', 'profile', 'trainings', 'employments', 'references', 'pohs', 'missingProfileFields'));
     }
 
     /**
@@ -420,7 +422,9 @@ class CandidateProfileController extends Controller
             'trainings' => fn($q) => $q->orderBy('order_no')->select(['id', 'candidate_profile_id', 'order_no', 'title', 'institution', 'period_start', 'period_end', 'certificate_path', 'certificate_name', 'cert_valid_from', 'cert_valid_to', 'cert_no_expiry']),
             'employments' => fn($q) => $q->orderBy('order_no')->select(['id', 'candidate_profile_id', 'order_no', 'company', 'position_start', 'position_end', 'period_start', 'period_end', 'reason_for_leaving', 'job_description']),
             'references' => fn($q) => $q->orderBy('order_no')->select(['id', 'candidate_profile_id', 'order_no', 'name', 'job_title', 'company', 'contact']),
+            'attachments',
             'user:id,name,email',
+            'user.jobApplications' => fn($q) => $q->with(['job:id,title', 'attachments']),
         ]);
 
         return view('admin.candidates.show', compact('profile'));
@@ -431,20 +435,22 @@ class CandidateProfileController extends Controller
      */
     public function adminCv(CandidateProfile $profile)
     {
-        if (!$profile->cv_path) {
+        $cvPath = $this->resolveCandidateCvPath($profile);
+
+        if (!$cvPath) {
             abort(404, 'CV tidak tersedia.');
         }
 
-        abort_unless($this->isSafeRelativePath((string) $profile->cv_path), 404, 'Path CV tidak valid.');
+        abort_unless($this->isSafeRelativePath($cvPath), 404, 'Path CV tidak valid.');
 
         // Disk 'public' → cepat untuk file statik
-        if (Storage::disk('public')->exists($profile->cv_path)) {
-            return response()->file(Storage::disk('public')->path($profile->cv_path));
+        if (Storage::disk('public')->exists($cvPath)) {
+            return response()->file(Storage::disk('public')->path($cvPath));
         }
 
         // Fallback: stream dari local/private disk
-        if (Storage::exists($profile->cv_path)) {
-            $path = Storage::path($profile->cv_path);
+        if (Storage::exists($cvPath)) {
+            $path = Storage::path($cvPath);
             return response()->file($path, [
                 'Cache-Control' => 'private, max-age=0, no-cache',
                 'X-Content-Type-Options' => 'nosniff',
@@ -452,6 +458,28 @@ class CandidateProfileController extends Controller
         }
 
         abort(404, 'File CV tidak ditemukan.');
+    }
+
+    private function resolveCandidateCvPath(CandidateProfile $profile): ?string
+    {
+        if ($profile->cv_path) {
+            return (string) $profile->cv_path;
+        }
+
+        $profile->loadMissing(['attachments', 'user.jobApplications.attachments']);
+
+        $applicationAttachments = $profile->user?->jobApplications?->flatMap->attachments ?? collect();
+        $attachments = collect($profile->attachments ?? [])->merge($applicationAttachments);
+
+        $cv = $attachments->first(function ($attachment) {
+            $needle = Str::lower((string) ($attachment->label . ' ' . $attachment->path));
+
+            return str_contains($needle, 'cv')
+                || str_contains($needle, 'resume')
+                || str_contains($needle, 'curriculum');
+        });
+
+        return $cv?->path ? (string) $cv->path : null;
     }
 
     /**
