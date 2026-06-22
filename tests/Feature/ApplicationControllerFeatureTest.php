@@ -69,10 +69,22 @@ class ApplicationControllerFeatureTest extends TestCase
 
     public function test_pelamar_index_renders_own_applications()
     {
+        $this->createCompleteProfile($this->pelamar, Poh::factory()->create(['is_active' => true]));
         $this->actingAs($this->pelamar);
         $response = $this->get(route('applications.mine'));
         $response->assertStatus(200);
         $response->assertViewHas('apps');
+    }
+
+    public function test_pelamar_index_redirects_when_profile_incomplete()
+    {
+        $this->actingAs($this->pelamar);
+
+        $response = $this->get(route('applications.mine'));
+
+        $response->assertRedirect(route('candidate.profiles.edit', ['job' => $this->job->id]));
+        $response->assertSessionHasErrors('profile_incomplete');
+        $response->assertSessionHas('missing_profile_fields');
     }
 
     public function test_pelamar_store_creates_application()
@@ -174,6 +186,8 @@ class ApplicationControllerFeatureTest extends TestCase
 
     public function test_pelamar_store_redirects_if_already_applied()
     {
+        $poh = Poh::factory()->create(['is_active' => true]);
+        $this->createCompleteProfile($this->pelamar, $poh);
         $this->actingAs($this->pelamar);
 
         $response = $this->post(route('applications.store', $this->job));
@@ -272,6 +286,7 @@ class ApplicationControllerFeatureTest extends TestCase
 
     public function test_move_stage_to_screening()
     {
+        $this->createCompleteProfile($this->pelamar, Poh::factory()->create(['is_active' => true]));
         $this->actingAs($this->hr);
 
         $response = $this->post(route('admin.applications.move', $this->application), [
@@ -283,8 +298,22 @@ class ApplicationControllerFeatureTest extends TestCase
         $this->assertEquals('screening', $this->application->current_stage);
     }
 
+    public function test_move_stage_blocks_incomplete_existing_candidate()
+    {
+        $this->actingAs($this->hr);
+
+        $response = $this->post(route('admin.applications.move', $this->application), [
+            'to' => 'screening',
+        ]);
+
+        $response->assertSessionHasErrors('profile_incomplete');
+        $this->application->refresh();
+        $this->assertEquals('applied', $this->application->current_stage);
+    }
+
     public function test_move_stage_to_not_qualified()
     {
+        $this->createCompleteProfile($this->pelamar, Poh::factory()->create(['is_active' => true]));
         $this->actingAs($this->hr);
 
         $response = $this->post(route('admin.applications.move', $this->application), [
@@ -299,6 +328,7 @@ class ApplicationControllerFeatureTest extends TestCase
 
     public function test_move_stage_to_hired()
     {
+        $this->createCompleteProfile($this->pelamar, Poh::factory()->create(['is_active' => true]));
         $this->actingAs($this->hr);
 
         $response = $this->post(route('admin.applications.move', $this->application), [
@@ -313,6 +343,7 @@ class ApplicationControllerFeatureTest extends TestCase
 
     public function test_move_stage_creates_application_stage_entry()
     {
+        $this->createCompleteProfile($this->pelamar, Poh::factory()->create(['is_active' => true]));
         $this->actingAs($this->hr);
 
         $this->post(route('admin.applications.move', $this->application), [
@@ -328,6 +359,7 @@ class ApplicationControllerFeatureTest extends TestCase
 
     public function test_move_stage_sends_notification_to_user()
     {
+        $this->createCompleteProfile($this->pelamar, Poh::factory()->create(['is_active' => true]));
         $this->actingAs($this->hr);
 
         $this->post(route('admin.applications.move', $this->application), [
@@ -342,6 +374,7 @@ class ApplicationControllerFeatureTest extends TestCase
 
     public function test_move_stage_ajax_moves_application()
     {
+        $this->createCompleteProfile($this->pelamar, Poh::factory()->create(['is_active' => true]));
         $this->actingAs($this->hr);
 
         $response = $this->post(route('admin.applications.board.move'), [
@@ -476,6 +509,7 @@ class ApplicationControllerFeatureTest extends TestCase
 
     public function test_move_stage_ajax_with_invalid_to_stage()
     {
+        $this->createCompleteProfile($this->pelamar, Poh::factory()->create(['is_active' => true]));
         $this->actingAs($this->hr);
 
         $response = $this->post(route('admin.applications.board.move'), [

@@ -165,16 +165,6 @@ class ApplicationController extends Controller
             'poh_id' => ['nullable', 'uuid', 'exists:pohs,id'],
         ]);
 
-        $already = JobApplication::where('job_id', $job->id)
-            ->where('user_id', $request->user()->id)
-            ->first();
-
-        if ($already) {
-            return redirect()
-                ->route('candidate.profiles.edit', ['job' => $job->id])
-                ->with('info', 'Kamu sudah melamar. Silakan lengkapi/cek data profil.');
-        }
-
         if (! $profile->poh_id && ! empty($data['poh_id'])) {
             $profile->forceFill(['poh_id' => $data['poh_id']])->save();
         }
@@ -189,6 +179,16 @@ class ApplicationController extends Controller
                 ])
                 ->with('missing_profile_fields', $missingProfileFields)
                 ->with('info', 'Lamaran belum dibuat karena data profil kamu belum lengkap.');
+        }
+
+        $already = JobApplication::where('job_id', $job->id)
+            ->where('user_id', $request->user()->id)
+            ->first();
+
+        if ($already) {
+            return redirect()
+                ->route('candidate.profiles.edit', ['job' => $job->id])
+                ->with('info', 'Kamu sudah melamar dan data profil kamu sudah lengkap.');
         }
 
         DB::transaction(function () use ($request, $job, $data) {
@@ -459,6 +459,7 @@ class ApplicationController extends Controller
     {
         $this->authorize('update', $application);
         [$to, $status, $note, $score] = $this->validateMove($request, $application);
+        $this->guardCompleteProfileBeforeStageMove($request, $application, $to);
         $attempt = $this->applyTransition($application, $to, $status, $note, $score);
         return $this->redirectAfterMove($request, $application, $to, $attempt);
     }
@@ -498,6 +499,8 @@ class ApplicationController extends Controller
             $score  = $request->input('score') ? (float) $request->input('score') : null;
         }
 
+        $this->guardCompleteProfileBeforeStageMove($request, $application, $to);
+
         $attempt = $this->applyTransition($application, $to, $status, $note, $score);
 
         return response()->json([
@@ -533,6 +536,43 @@ class ApplicationController extends Controller
 
         // Boleh free move jika dari user_trainer_iv ke atas
         return $fromIdx !== -1 && $fromIdx >= $trainerIdx;
+    }
+
+    protected function guardCompleteProfileBeforeStageMove(Request $request, JobApplication $application, string $to): void
+    {
+        $from = $this->normalizeStage($application->current_stage) ?: $application->current_stage;
+        $to = $this->normalizeStage($to) ?: $to;
+
+        if ($to === $from) {
+            return;
+        }
+
+        $profile = $application->user?->candidateProfile()
+            ->withCount(['trainings', 'employments', 'references'])
+            ->first();
+
+        $missing = $profile
+            ? $profile->missingRequiredForApplication()
+            : ['Profil kandidat'];
+
+        if ($missing === []) {
+            return;
+        }
+
+        $message = 'Profil kandidat belum lengkap. Kandidat wajib melengkapi data berikut sebelum lanjut stage: '
+            . implode(', ', $missing);
+
+        if ($request->expectsJson() || $request->ajax()) {
+            abort(response()->json([
+                'ok' => false,
+                'message' => $message,
+                'missing_profile_fields' => $missing,
+            ], 422));
+        }
+
+        throw \Illuminate\Validation\ValidationException::withMessages([
+            'profile_incomplete' => $message,
+        ]);
     }
 
     protected function normalizeStage(?string $s): ?string

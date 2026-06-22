@@ -111,16 +111,21 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Lamaran saya
     Route::get('/me/applications', [ApplicationController::class, 'index'])
+        ->middleware('candidate.complete')
         ->name('applications.mine');
     Route::post('/me/applications/{application}/reject-offer', [ApplicationController::class, 'rejectOffer'])
+        ->middleware('candidate.complete')
         ->name('applications.reject-offer');
     Route::post('/me/applications/{application}/accept-offer', [ApplicationController::class, 'acceptOffer'])
+        ->middleware('candidate.complete')
         ->name('applications.accept-offer');
 
     // Psikotes
     Route::get('/me/psychotest/{attempt}', [PsychotestController::class, 'show'])
+        ->middleware('candidate.complete')
         ->name('psychotest.show');
     Route::post('/me/psychotest/{attempt}', [PsychotestController::class, 'submit'])
+        ->middleware('candidate.complete')
         ->name('psychotest.submit');
 
     // Notifikasi user
@@ -135,10 +140,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Interview user
     Route::get('/me/interviews', [MyInterviewController::class, 'index'])
+        ->middleware('candidate.complete')
         ->name('me.interviews.index');
     Route::get('/me/interviews/{interview}', [MyInterviewController::class, 'show'])
+        ->middleware('candidate.complete')
         ->name('me.interviews.show');
     Route::get('/me/interviews/{interview}/ics', [MyInterviewController::class, 'ics'])
+        ->middleware('candidate.complete')
         ->name('me.interviews.ics');
 
     // =========================================================

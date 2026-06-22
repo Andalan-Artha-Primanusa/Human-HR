@@ -42,6 +42,7 @@ class ApplicationControllerTest extends TestCase
 
     public function test_index_displays_user_applications()
     {
+        $this->createCompleteProfile($this->user, $this->poh);
         JobApplication::create([
             'user_id' => $this->user->id,
             'job_id' => $this->job->id,
@@ -149,6 +150,7 @@ class ApplicationControllerTest extends TestCase
 
     public function test_move_stage_updates_application()
     {
+        $this->createCompleteProfile($this->user, $this->poh);
         $app = JobApplication::create([
             'user_id' => $this->user->id,
             'job_id' => $this->job->id,
@@ -175,6 +177,7 @@ class ApplicationControllerTest extends TestCase
 
     public function test_move_to_psychotest_creates_attempt()
     {
+        $this->createCompleteProfile($this->user, $this->poh);
         $app = JobApplication::create([
             'user_id' => $this->user->id,
             'job_id' => $this->job->id,
