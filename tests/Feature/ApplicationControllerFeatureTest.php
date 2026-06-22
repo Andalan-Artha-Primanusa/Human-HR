@@ -87,6 +87,28 @@ class ApplicationControllerFeatureTest extends TestCase
         $response->assertSessionHas('missing_profile_fields');
     }
 
+    public function test_user_role_index_redirects_when_profile_incomplete()
+    {
+        $userRole = User::factory()->create([
+            'role' => 'user',
+            'email_verified_at' => now(),
+        ]);
+
+        JobApplication::create([
+            'user_id' => $userRole->id,
+            'job_id' => $this->job->id,
+            'current_stage' => 'applied',
+            'overall_status' => 'active',
+        ]);
+
+        $this->actingAs($userRole);
+
+        $response = $this->get(route('applications.mine'));
+
+        $response->assertRedirect(route('candidate.profiles.edit', ['job' => $this->job->id]));
+        $response->assertSessionHasErrors('profile_incomplete');
+    }
+
     public function test_pelamar_store_creates_application()
     {
         $this->actingAs($this->pelamar);

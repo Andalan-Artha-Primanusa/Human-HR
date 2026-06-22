@@ -52,8 +52,9 @@
             ->first()
         : null;
     $missingProfileFields = $meProfile?->missingRequiredForApplication() ?? ['Profil kandidat'];
+    $profileLockedRoles = ['admin', 'hr', 'superadmin', 'trainer', 'karyawan'];
     $profileCompleteForApplication = auth()->guest()
-        || (auth()->user()?->role !== 'pelamar')
+        || in_array(auth()->user()?->role, $profileLockedRoles, true)
         || $missingProfileFields === [];
 
     // ==== Tahapan & label (FLOW BARU) ====

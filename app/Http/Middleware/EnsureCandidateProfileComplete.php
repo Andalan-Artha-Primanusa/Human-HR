@@ -13,7 +13,9 @@ class EnsureCandidateProfileComplete
     {
         $user = $request->user();
 
-        if (! $user || $user->role !== 'pelamar') {
+        $unlockedRoles = ['admin', 'hr', 'superadmin', 'trainer', 'karyawan'];
+
+        if (! $user || in_array($user->role, $unlockedRoles, true)) {
             return $next($request);
         }
 
