@@ -52,10 +52,7 @@
             ->first()
         : null;
     $missingProfileFields = $meProfile?->missingRequiredForApplication() ?? ['Profil kandidat'];
-    $profileLockedRoles = ['admin', 'hr', 'superadmin', 'trainer', 'karyawan'];
-    $profileCompleteForApplication = auth()->guest()
-        || in_array(auth()->user()?->role, $profileLockedRoles, true)
-        || $missingProfileFields === [];
+    $profileCompleteForApplication = auth()->guest() || $missingProfileFields === [];
 
     // ==== Tahapan & label (FLOW BARU) ====
     $stageOrder = ['applied', 'screening', 'psychotest', 'hr_iv', 'user_iv', 'user_trainer_iv', 'offer', 'mcu', 'mobilisasi', 'ground_test', 'onsite', 'hired', 'not_qualified'];
