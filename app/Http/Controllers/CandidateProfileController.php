@@ -396,12 +396,26 @@ class CandidateProfileController extends Controller
         // Ambil daftar posisi (job) untuk filter
         $jobs = \App\Models\Job::orderBy('title')->pluck('title', 'id');
         $pohs = \App\Models\Poh::orderBy('name')->pluck('name', 'id');
+        $provinces = CandidateProfile::query()
+            ->select('ktp_province')
+            ->whereNotNull('ktp_province')
+            ->where('ktp_province', '<>', '')
+            ->union(
+                CandidateProfile::query()
+                    ->select('domicile_province')
+                    ->whereNotNull('domicile_province')
+                    ->where('domicile_province', '<>', '')
+            )
+            ->orderBy('ktp_province')
+            ->pluck('ktp_province');
 
         $jobId = $request->query('job_id');
         $pohId = $request->query('poh_id');
+        $province = trim((string) $request->query('province', ''));
+        $ageRange = trim((string) $request->query('age_range', ''));
 
         $profiles = CandidateProfile::query()
-            ->select(['candidate_profiles.id', 'candidate_profiles.user_id', 'candidate_profiles.poh_id', 'candidate_profiles.full_name', 'candidate_profiles.email', 'candidate_profiles.phone', 'candidate_profiles.nik', 'candidate_profiles.updated_at'])
+            ->select(['candidate_profiles.id', 'candidate_profiles.user_id', 'candidate_profiles.poh_id', 'candidate_profiles.full_name', 'candidate_profiles.email', 'candidate_profiles.phone', 'candidate_profiles.nik', 'candidate_profiles.age', 'candidate_profiles.birthdate', 'candidate_profiles.ktp_province', 'candidate_profiles.domicile_province', 'candidate_profiles.updated_at'])
             ->withCount(['trainings', 'employments', 'references'])
             ->with(['poh:id,name', 'user.jobApplications' => function ($q) use ($jobId) {
                 if ($jobId) $q->where('job_id', $jobId);
@@ -428,11 +442,26 @@ class CandidateProfileController extends Controller
                         });
                 });
             })
+            ->when($province !== '', function ($q) use ($province) {
+                $q->where(function ($w) use ($province) {
+                    $w->where('ktp_province', $province)
+                        ->orWhere('domicile_province', $province);
+                });
+            })
+            ->when($ageRange !== '', function ($q) use ($ageRange) {
+                match ($ageRange) {
+                    'lt25' => $q->where('age', '<', 25),
+                    '25_34' => $q->whereBetween('age', [25, 34]),
+                    '35_44' => $q->whereBetween('age', [35, 44]),
+                    '45plus' => $q->where('age', '>=', 45),
+                    default => null,
+                };
+            })
             ->orderByDesc('updated_at')
             ->paginate(20)
             ->withQueryString();
 
-        return view('admin.candidates.index', compact('profiles', 'q', 'jobs', 'jobId', 'pohs', 'pohId'));
+        return view('admin.candidates.index', compact('profiles', 'q', 'jobs', 'jobId', 'pohs', 'pohId', 'provinces', 'province', 'ageRange'));
     }
 
     /**

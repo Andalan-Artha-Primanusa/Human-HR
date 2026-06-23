@@ -6,6 +6,18 @@
     $ACCENT = '#a77d52'; // brown
     $ACCENT_DARK = '#8b5e3c'; // dark brown
     $BORD = '#e5e7eb'; // slate-200
+    $fmtBirthdate = function ($date) {
+        if (!$date) return null;
+        try {
+            $c = $date instanceof \Illuminate\Support\Carbon || $date instanceof \Carbon\Carbon
+                ? $date
+                : \Illuminate\Support\Carbon::parse($date);
+            $days = ['Sunday' => 'Minggu', 'Monday' => 'Senin', 'Tuesday' => 'Selasa', 'Wednesday' => 'Rabu', 'Thursday' => 'Kamis', 'Friday' => 'Jumat', 'Saturday' => 'Sabtu'];
+            return ($days[$c->format('l')] ?? $c->format('l')) . ', ' . $c->format('d M Y');
+        } catch (\Throwable $e) {
+            return null;
+        }
+    };
 @endphp
 
 @section('content')
@@ -44,7 +56,7 @@
         <div class="p-6 border-t md:p-7 bg-white" style="border-color: {{ $BORD }}">
           <form method="GET"
             id="candidate-filter-form"
-            class="grid grid-cols-1 gap-4 md:grid-cols-[1fr_auto_auto_auto_auto] md:items-end"
+            class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-[1fr_auto_auto_auto_auto_auto_auto] md:items-end"
             role="search" aria-label="Cari kandidat">
 
             <label class="sr-only" for="q">Cari</label>
@@ -68,6 +80,17 @@
                 @endforeach
             </select>
 
+            <label class="sr-only" for="age_range">Usia</label>
+            <select id="age_range" name="age_range"
+                class="w-full px-4 py-3 text-sm bg-white border shadow-sm rounded-xl input border-slate-200 focus:outline-none focus:ring-2"
+                style="--tw-ring-color: {{ $ACCENT }}">
+                <option value="">Semua Usia</option>
+                <option value="lt25" @selected(($ageRange ?? '') === 'lt25')>&lt; 25</option>
+                <option value="25_34" @selected(($ageRange ?? '') === '25_34')>25 - 34</option>
+                <option value="35_44" @selected(($ageRange ?? '') === '35_44')>35 - 44</option>
+                <option value="45plus" @selected(($ageRange ?? '') === '45plus')>45+</option>
+            </select>
+
             <label class="sr-only" for="poh_id">POH</label>
             <select id="poh_id" name="poh_id"
                 class="w-full px-4 py-3 text-sm bg-white border shadow-sm rounded-xl input border-slate-200 focus:outline-none focus:ring-2"
@@ -75,6 +98,16 @@
                 <option value="">Semua POH</option>
                 @foreach($pohs ?? [] as $id => $name)
                     <option value="{{ $id }}" @selected(($pohId ?? '') == $id)>{{ $name }}</option>
+                @endforeach
+            </select>
+
+            <label class="sr-only" for="province">Provinsi</label>
+            <select id="province" name="province"
+                class="w-full px-4 py-3 text-sm bg-white border shadow-sm rounded-xl input border-slate-200 focus:outline-none focus:ring-2"
+                style="--tw-ring-color: {{ $ACCENT }}">
+                <option value="">Semua Provinsi</option>
+                @foreach($provinces ?? [] as $name)
+                    <option value="{{ $name }}" @selected(($province ?? '') === $name)>{{ $name }}</option>
                 @endforeach
             </select>
 
@@ -89,7 +122,7 @@
               <span>Filter</span>
             </button>
 
-            @if(filled($q ?? '') || filled($jobId ?? '') || filled($pohId ?? ''))
+            @if(filled($q ?? '') || filled($jobId ?? '') || filled($ageRange ?? '') || filled($pohId ?? '') || filled($province ?? ''))
                   <a href="{{ route('admin.candidates.index') }}"
                      id="candidate-filter-reset"
                      class="inline-flex items-center justify-center px-5 py-3 text-sm bg-white border shadow-sm rounded-xl border-slate-200 hover:bg-slate-50">
@@ -111,7 +144,9 @@
                     <th class="px-4 py-3 text-left">Email</th>
                     <th class="px-4 py-3 text-left">HP</th>
                     <th class="px-4 py-3 text-left">NIK</th>
+                    <th class="px-4 py-3 text-left">Usia</th>
                     <th class="px-4 py-3 text-left">POH</th>
+                    <th class="px-4 py-3 text-left">Provinsi</th>
                     <th class="px-4 py-3 text-left">Posisi yang Dilamar</th>
                     <th class="px-4 py-3"></th>
                   </tr>
@@ -123,6 +158,7 @@
                         $phone = $p->phone;
                         $nik = $p->nik;
                         $pohName = $p->poh?->name ?: ($p->user?->jobApplications?->first(fn($app) => $app->poh?->name)?->poh?->name);
+                        $provinceName = $p->ktp_province ?: $p->domicile_province;
                       @endphp
                       <tr class="transition hover:bg-[#f8f5f2]">
                         <td class="px-4 py-3">
@@ -135,7 +171,27 @@
                         <td class="px-4 py-3">{{ $email ? e($email) : 'Belum diisi' }}</td>
                         <td class="px-4 py-3">{{ $phone ? e($phone) : 'Belum diisi' }}</td>
                         <td class="px-4 py-3">{{ $nik ? e($nik) : 'Belum diisi' }}</td>
+                        <td class="px-4 py-3">
+                          @if($p->age || $p->birthdate)
+                            <div>{{ $p->age ? e($p->age . ' tahun') : 'Usia belum diisi' }}</div>
+                            @if($fmtBirthdate($p->birthdate))
+                              <div class="text-xs text-slate-500">{{ e($fmtBirthdate($p->birthdate)) }}</div>
+                            @endif
+                          @else
+                            Belum diisi
+                          @endif
+                        </td>
                         <td class="px-4 py-3">{{ $pohName ? e($pohName) : 'Belum diisi' }}</td>
+                        <td class="px-4 py-3">
+                          @if($provinceName)
+                            <div>{{ e($provinceName) }}</div>
+                            @if($p->ktp_province && $p->domicile_province && $p->ktp_province !== $p->domicile_province)
+                              <div class="text-xs text-slate-500">Domisili: {{ e($p->domicile_province) }}</div>
+                            @endif
+                          @else
+                            Belum diisi
+                          @endif
+                        </td>
                         <td class="px-4 py-3">
                           @php
                             $jobsApplied = $p->user && $p->user->jobApplications ? $p->user->jobApplications->pluck('job.title')->unique()->filter()->values() : collect();
@@ -283,14 +339,14 @@
         if (!form) return;
 
         const params = new URLSearchParams(window.location.search);
-        const hasQuery = ['q', 'job_id', 'poh_id'].some((key) => params.has(key) && params.get(key) !== '');
+        const hasQuery = ['q', 'job_id', 'age_range', 'poh_id', 'province'].some((key) => params.has(key) && params.get(key) !== '');
         const saved = localStorage.getItem(storageKey);
 
         if (!hasQuery && saved) {
           try {
             const data = JSON.parse(saved);
             const next = new URLSearchParams();
-            ['q', 'job_id', 'poh_id'].forEach((key) => {
+            ['q', 'job_id', 'age_range', 'poh_id', 'province'].forEach((key) => {
               if (data[key]) next.set(key, data[key]);
             });
             if ([...next.keys()].length) {
@@ -304,7 +360,9 @@
           const data = {
             q: form.q?.value || '',
             job_id: form.job_id?.value || '',
+            age_range: form.age_range?.value || '',
             poh_id: form.poh_id?.value || '',
+            province: form.province?.value || '',
           };
           localStorage.setItem(storageKey, JSON.stringify(data));
         });
