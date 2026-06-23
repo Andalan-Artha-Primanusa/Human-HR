@@ -43,8 +43,23 @@
       ->values()
       ->all();
 
+  $cvDocs = $profile->cv_path
+      ? [['name' => 'CV', 'path' => $profile->cv_path]]
+      : [];
+
+  $certificateDocs = $profile->trainings
+      ->filter(fn($t) => filled($t->certificate_path))
+      ->map(fn($t) => [
+          'name' => $t->certificate_name ?: ('Sertifikat - ' . ($t->title ?: 'Pelatihan')),
+          'path' => $t->certificate_path,
+      ])
+      ->values()
+      ->all();
+
   $docs = collect($docs)
       ->map(fn($d) => is_array($d) ? $d : ['name' => basename((string) $d), 'path' => (string) $d])
+      ->merge($cvDocs)
+      ->merge($certificateDocs)
       ->merge($attachmentDocs)
       ->filter(fn($d) => !empty($d['path']))
       ->unique('path')
@@ -163,6 +178,7 @@
           <tr class="text-left text-slate-500">
             <th class="py-1">Judul Pelatihan</th>
             <th class="py-1">Institusi</th>
+            <th class="py-1">Sertifikat</th>
             <th class="py-1">Periode</th>
           </tr>
         </thead>
@@ -171,10 +187,17 @@
             <tr>
               <td class="py-1">{{ $t->title }}</td>
               <td class="py-1">{{ $t->institution }}</td>
+              <td class="py-1">
+                @if($t->certificate_path)
+                  <a target="_blank" href="{{ Storage::disk('public')->url($t->certificate_path) }}" class="px-2 py-1 text-xs rounded bg-[#a77d52] text-white">Lihat</a>
+                @else
+                  <span class="text-slate-400">-</span>
+                @endif
+              </td>
               <td class="py-1">{{ $fmtDate($t->period_start) }}{{ $t->period_end ? ' – '.$fmtDate($t->period_end) : '' }}</td>
             </tr>
           @empty
-            <tr><td colspan="3" class="text-center text-slate-400">—</td></tr>
+            <tr><td colspan="4" class="text-center text-slate-400">—</td></tr>
           @endforelse
         </tbody>
       </table>
@@ -241,22 +264,6 @@
       </div>
       <div class="mt-2 text-xs"><strong>Fasilitas Diharapkan:</strong> {{ $profile->expected_facilities ?: '—' }}</div>
       <div class="mt-2 text-xs"><strong>Motivasi Kerja:</strong> {{ $profile->work_motivation ?: '—' }}</div>
-    </div>
-    <div class="p-4 bg-white border shadow-sm rounded-2xl">
-      <div class="mb-2 font-semibold">Informasi Tambahan</div>
-      <div class="grid grid-cols-2 text-sm gap-x-4 gap-y-1">
-        <div>Status Pernikahan</div><div>{{ $profile->marital_status ?? '—' }}</div>
-        <div>Kerabat di Perusahaan?</div><div>{{ $profile->has_relatives ? 'Ya' : 'Tidak' }}</div>
-        <div>Detail Kerabat</div><div>{{ $profile->relatives_detail ?: '—' }}</div>
-        <div>Pernah Bekerja di Sini?</div><div>{{ $profile->worked_before ? 'Ya' : 'Tidak' }}</div>
-        <div>Posisi Sebelumnya</div><div>{{ $profile->worked_before_position ?: '—' }}</div>
-        <div>Durasi Bekerja</div><div>{{ $profile->worked_before_duration ?: '—' }}</div>
-        <div>Pernah Melamar?</div><div>{{ $profile->applied_before ? 'Ya' : 'Tidak' }}</div>
-        <div>Posisi Dilamar Sebelumnya</div><div>{{ $profile->applied_before_position ?: '—' }}</div>
-        <div>Bersedia Luar Kota?</div><div>{{ $profile->willing_out_of_town ? 'Ya' : 'Tidak' }}</div>
-        <div>Alasan Tidak Bersedia</div><div>{{ $profile->not_willing_reason ?: '—' }}</div>
-        <div>Extras</div><div>—</div>
-      </div>
     </div>
     <div class="p-4 bg-white border shadow-sm rounded-2xl">
       <div class="mb-2 font-semibold">Kesehatan</div>

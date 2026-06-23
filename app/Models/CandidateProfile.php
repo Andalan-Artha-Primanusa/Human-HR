@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Str;
 
@@ -105,6 +106,11 @@ class CandidateProfile extends Model
     {
         // kolom FK: user_id (UUID atau bigint sesuai migrasi kamu)
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function poh(): BelongsTo
+    {
+        return $this->belongsTo(Poh::class, 'poh_id');
     }
 
     /**

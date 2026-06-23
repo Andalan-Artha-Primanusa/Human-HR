@@ -43,7 +43,8 @@
         {{-- SEARCH FORM --}}
         <div class="p-6 border-t md:p-7 bg-white" style="border-color: {{ $BORD }}">
           <form method="GET"
-            class="grid grid-cols-1 gap-4 md:grid-cols-[1fr_auto_auto] md:items-end"
+            id="candidate-filter-form"
+            class="grid grid-cols-1 gap-4 md:grid-cols-[1fr_auto_auto_auto_auto] md:items-end"
             role="search" aria-label="Cari kandidat">
 
             <label class="sr-only" for="q">Cari</label>
@@ -67,6 +68,16 @@
                 @endforeach
             </select>
 
+            <label class="sr-only" for="poh_id">POH</label>
+            <select id="poh_id" name="poh_id"
+                class="w-full px-4 py-3 text-sm bg-white border shadow-sm rounded-xl input border-slate-200 focus:outline-none focus:ring-2"
+                style="--tw-ring-color: {{ $ACCENT }}">
+                <option value="">Semua POH</option>
+                @foreach($pohs ?? [] as $id => $name)
+                    <option value="{{ $id }}" @selected(($pohId ?? '') == $id)>{{ $name }}</option>
+                @endforeach
+            </select>
+
             <button type="submit"
               class="inline-flex items-center justify-center gap-2 px-5 py-3 text-sm font-semibold text-white rounded-xl bg-[#a77d52] shadow-sm hover:brightness-105 focus:outline-none focus:ring-2"
               style="--tw-ring-color: {{ $ACCENT }}"
@@ -78,8 +89,9 @@
               <span>Filter</span>
             </button>
 
-            @if(filled($q ?? ''))
+            @if(filled($q ?? '') || filled($jobId ?? '') || filled($pohId ?? ''))
                   <a href="{{ route('admin.candidates.index') }}"
+                     id="candidate-filter-reset"
                      class="inline-flex items-center justify-center px-5 py-3 text-sm bg-white border shadow-sm rounded-xl border-slate-200 hover:bg-slate-50">
                     Reset
                   </a>
@@ -99,6 +111,7 @@
                     <th class="px-4 py-3 text-left">Email</th>
                     <th class="px-4 py-3 text-left">HP</th>
                     <th class="px-4 py-3 text-left">NIK</th>
+                    <th class="px-4 py-3 text-left">POH</th>
                     <th class="px-4 py-3 text-left">Posisi yang Dilamar</th>
                     <th class="px-4 py-3"></th>
                   </tr>
@@ -109,6 +122,7 @@
                         $email = $p->email ?: $p->user?->email;
                         $phone = $p->phone;
                         $nik = $p->nik;
+                        $pohName = $p->poh?->name ?: ($p->user?->jobApplications?->first(fn($app) => $app->poh?->name)?->poh?->name);
                       @endphp
                       <tr class="transition hover:bg-[#f8f5f2]">
                         <td class="px-4 py-3">
@@ -121,6 +135,7 @@
                         <td class="px-4 py-3">{{ $email ? e($email) : 'Belum diisi' }}</td>
                         <td class="px-4 py-3">{{ $phone ? e($phone) : 'Belum diisi' }}</td>
                         <td class="px-4 py-3">{{ $nik ? e($nik) : 'Belum diisi' }}</td>
+                        <td class="px-4 py-3">{{ $pohName ? e($pohName) : 'Belum diisi' }}</td>
                         <td class="px-4 py-3">
                           @php
                             $jobsApplied = $p->user && $p->user->jobApplications ? $p->user->jobApplications->pluck('job.title')->unique()->filter()->values() : collect();
@@ -260,4 +275,43 @@
               </section>
       @endif
     </div>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        const storageKey = 'admin:candidates:filters';
+        const form = document.getElementById('candidate-filter-form');
+        if (!form) return;
+
+        const params = new URLSearchParams(window.location.search);
+        const hasQuery = ['q', 'job_id', 'poh_id'].some((key) => params.has(key) && params.get(key) !== '');
+        const saved = localStorage.getItem(storageKey);
+
+        if (!hasQuery && saved) {
+          try {
+            const data = JSON.parse(saved);
+            const next = new URLSearchParams();
+            ['q', 'job_id', 'poh_id'].forEach((key) => {
+              if (data[key]) next.set(key, data[key]);
+            });
+            if ([...next.keys()].length) {
+              window.location.href = `${window.location.pathname}?${next.toString()}`;
+              return;
+            }
+          } catch (e) {}
+        }
+
+        form.addEventListener('submit', function () {
+          const data = {
+            q: form.q?.value || '',
+            job_id: form.job_id?.value || '',
+            poh_id: form.poh_id?.value || '',
+          };
+          localStorage.setItem(storageKey, JSON.stringify(data));
+        });
+
+        document.getElementById('candidate-filter-reset')?.addEventListener('click', function () {
+          localStorage.removeItem(storageKey);
+        });
+      });
+    </script>
 @endsection

@@ -353,7 +353,7 @@
               <svg class="w-5 h-5 text-brand-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5z"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l6.16-3.422A12.083 12.083 0 016 10.882M12 14v7"/></svg>
               Pendidikan Non-Formal (Pelatihan/Sertifikasi)
             </h2>
-            <button type="button" class="rounded-xl border border-brand-200 px-3 py-1.5 text-sm text-brand-800 hover:bg-brand-50" @click="items.push({title:'',institution:'',certificate_name:'',cert_valid_from:'',cert_valid_to:'',cert_no_expiry:false})">+ Tambah</button>
+            <button type="button" class="rounded-xl border border-brand-200 px-3 py-1.5 text-sm text-brand-800 hover:bg-brand-50" @click="items.push({title:'',institution:'',certificate_name:'',certificate_path:'',cert_valid_from:'',cert_valid_to:'',cert_no_expiry:false})">+ Tambah</button>
           </div>
           <p class="mt-1 text-xs text-slate-500">Opsional.</p>
           <template x-for="(it,idx) in items" :key="idx">
@@ -386,6 +386,18 @@
                   <label class="text-xs text-slate-500">Nama Sertifikat</label>
                   <input class="w-full px-3 py-2 border rounded-lg" :name="`trainings[${idx}][certificate_name]`" x-model="it.certificate_name" placeholder="(opsional)">
                 </div>
+              </div>
+
+              <div>
+                <input type="hidden" :name="`trainings[${idx}][certificate_path]`" x-model="it.certificate_path">
+                <label class="text-xs text-slate-500">File Sertifikat (PDF, maks 4MB)</label>
+                <input type="file" accept="application/pdf" class="w-full px-3 py-2 mt-1 border rounded-lg" :name="`trainings[${idx}][certificate_file]`">
+                <template x-if="it.certificate_path">
+                  <div class="mt-1 text-xs text-slate-600">
+                    Terunggah:
+                    <a class="underline text-brand-700" :href="`/storage/${it.certificate_path}`" target="_blank">Lihat sertifikat</a>
+                  </div>
+                </template>
               </div>
 
               <div class="flex items-center gap-2">
@@ -700,7 +712,7 @@
       // === LIFECYCLE ===
       init(){
         if(Alpine.store('form').trainings.length===0){
-          Alpine.store('form').trainings.push({title:'',institution:'',certificate_name:'',cert_valid_from:'',cert_valid_to:'',cert_no_expiry:false, period_start:'', period_end:''});
+          Alpine.store('form').trainings.push({title:'',institution:'',certificate_name:'',certificate_path:'',cert_valid_from:'',cert_valid_to:'',cert_no_expiry:false, period_start:'', period_end:''});
         }
         if(Alpine.store('form').employments.length===0){
           Alpine.store('form').employments.push({company:'',position_start:'',position_end:'',period_start:'',period_end:'',reason_for_leaving:'',job_description:''});

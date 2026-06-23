@@ -119,6 +119,8 @@ class CandidateProfileController extends Controller
             'trainings.*.period_start' => 'required|date',
             'trainings.*.period_end' => 'nullable|date',
             'trainings.*.certificate_name' => 'nullable|string|max:190',
+            'trainings.*.certificate_path' => 'nullable|string|max:255',
+            'trainings.*.certificate_file' => 'nullable|file|mimes:pdf|max:4096',
             'trainings.*.cert_valid_from' => 'nullable|date',
             'trainings.*.cert_valid_to' => 'nullable|date',
             'trainings.*.cert_no_expiry' => 'nullable|boolean',
@@ -299,6 +301,16 @@ class CandidateProfileController extends Controller
             foreach ((array) $request->input('trainings', []) as $i => $row) {
                 if (!filled($row['title'] ?? null))
                     continue;
+                $certificatePath = $row['certificate_path'] ?? null;
+                $certificateName = isset($row['certificate_name']) ? Str::limit((string) $row['certificate_name'], 190, '') : null;
+                $certificateFile = $request->file("trainings.{$i}.certificate_file");
+
+                if ($certificateFile) {
+                    $safeName = $this->safeOriginalName($certificateFile->getClientOriginalName());
+                    $certificatePath = $certificateFile->storeAs($userFolder . '/certificates', Str::uuid() . '_' . $safeName, 'public');
+                    $certificateName = $certificateName ?: Str::limit($safeName, 190, '');
+                }
+
                 $trainRows[] = [
                     'id' => (string) Str::uuid(),
                     'candidate_profile_id' => $profile->id,
@@ -307,8 +319,8 @@ class CandidateProfileController extends Controller
                     'institution' => $row['institution'] ?? null,
                     'period_start' => $row['period_start'] ?? null,
                     'period_end' => $row['period_end'] ?? null,
-                    'certificate_path' => $row['certificate_path'] ?? null,
-                    'certificate_name' => isset($row['certificate_name']) ? Str::limit((string) $row['certificate_name'], 190, '') : null,
+                    'certificate_path' => $certificatePath,
+                    'certificate_name' => $certificateName,
                     'cert_valid_from' => $row['cert_valid_from'] ?? null,
                     'cert_valid_to' => $row['cert_valid_to'] ?? null,
                     'cert_no_expiry' => isset($row['cert_no_expiry']) ? (bool) $row['cert_no_expiry'] : false,
@@ -383,15 +395,17 @@ class CandidateProfileController extends Controller
 
         // Ambil daftar posisi (job) untuk filter
         $jobs = \App\Models\Job::orderBy('title')->pluck('title', 'id');
+        $pohs = \App\Models\Poh::orderBy('name')->pluck('name', 'id');
 
         $jobId = $request->query('job_id');
+        $pohId = $request->query('poh_id');
 
         $profiles = CandidateProfile::query()
-            ->select(['candidate_profiles.id', 'candidate_profiles.user_id', 'candidate_profiles.full_name', 'candidate_profiles.email', 'candidate_profiles.phone', 'candidate_profiles.nik', 'candidate_profiles.updated_at'])
+            ->select(['candidate_profiles.id', 'candidate_profiles.user_id', 'candidate_profiles.poh_id', 'candidate_profiles.full_name', 'candidate_profiles.email', 'candidate_profiles.phone', 'candidate_profiles.nik', 'candidate_profiles.updated_at'])
             ->withCount(['trainings', 'employments', 'references'])
-            ->with(['user.jobApplications' => function ($q) use ($jobId) {
+            ->with(['poh:id,name', 'user.jobApplications' => function ($q) use ($jobId) {
                 if ($jobId) $q->where('job_id', $jobId);
-                $q->with('job:id,title');
+                $q->with(['job:id,title', 'poh:id,name']);
             }])
             ->when($like !== null, function ($w) use ($like) {
                 $w->where(function ($s) use ($like) {
@@ -406,11 +420,19 @@ class CandidateProfileController extends Controller
                     $a->where('job_id', $jobId);
                 });
             })
+            ->when($pohId, function ($q) use ($pohId) {
+                $q->where(function ($w) use ($pohId) {
+                    $w->where('candidate_profiles.poh_id', $pohId)
+                        ->orWhereHas('user.jobApplications', function ($a) use ($pohId) {
+                            $a->where('poh_id', $pohId);
+                        });
+                });
+            })
             ->orderByDesc('updated_at')
             ->paginate(20)
             ->withQueryString();
 
-        return view('admin.candidates.index', compact('profiles', 'q', 'jobs', 'jobId'));
+        return view('admin.candidates.index', compact('profiles', 'q', 'jobs', 'jobId', 'pohs', 'pohId'));
     }
 
     /**

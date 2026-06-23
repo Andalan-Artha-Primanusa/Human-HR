@@ -80,6 +80,8 @@ class CandidateProfileControllerTest extends TestCase
                     'institution' => 'Inst A',
                     'period_start' => '2020-01-01',
                     'period_end' => '2020-01-02',
+                    'certificate_name' => 'Certificate A',
+                    'certificate_file' => UploadedFile::fake()->create('certificate-a.pdf', 100, 'application/pdf'),
                 ]
             ],
             'employments' => [
@@ -108,13 +110,20 @@ class CandidateProfileControllerTest extends TestCase
             'nik' => '1234567890123456',
         ]);
 
-        $this->assertDatabaseHas('candidate_trainings', ['title' => 'Training A']);
+        $this->assertDatabaseHas('candidate_trainings', [
+            'title' => 'Training A',
+            'certificate_name' => 'Certificate A',
+        ]);
         $this->assertDatabaseHas('candidate_employments', ['company' => 'Company A']);
         $this->assertDatabaseHas('candidate_references', ['name' => 'Ref A']);
 
         $profile = CandidateProfile::where('user_id', $this->user->id)->first();
         $this->assertNotNull($profile->cv_path);
         Storage::disk('public')->assertExists($profile->cv_path);
+
+        $training = $profile->trainings()->first();
+        $this->assertNotNull($training->certificate_path);
+        Storage::disk('public')->assertExists($training->certificate_path);
     }
 
     public function test_admin_index_displays_candidates()
