@@ -4,7 +4,7 @@
 
 ### Production
 ```
-https://karirandalan.com/api
+https://kariran-dalan.com/api
 ```
 
 ### Development (Local)
@@ -70,7 +70,7 @@ Endpoint untuk login dan mendapatkan Bearer token.
 
 #### cURL (Production)
 ```bash
-curl -X POST "https://karirandalan.com/api/login" \
+curl -X POST "https://karir-andalan.com/api/login" \
   -H "Accept: application/json" \
   -H "Content-Type: application/json" \
   -d '{"email":"admin@local.test","password":"password123"}'
@@ -86,7 +86,7 @@ curl -X POST "http://127.0.0.1:8000/api/login" \
 
 #### PowerShell (Production)
 ```powershell
-curl.exe -X POST "https://karirandalan.com/api/login" `
+curl.exe -X POST "https://karir-andalan.com/api/login" `
   -H "Accept: application/json" `
   -H "Content-Type: application/json" `
   -d '{"email":"admin@local.test","password":"password123"}'
@@ -142,7 +142,7 @@ atau
 
 #### cURL (Production)
 ```bash
-curl "https://karirandalan.com/api/me" \
+curl "https://karir-andalan.com/api/me" \
   -H "Accept: application/json" \
   -H "Authorization: Bearer TOKEN_DARI_LOGIN"
 ```
@@ -156,7 +156,7 @@ curl "http://127.0.0.1:8000/api/me" \
 
 #### PowerShell (Production)
 ```powershell
-curl.exe "https://karirandalan.com/api/me" `
+curl.exe "https://karir-andalan.com/api/me" `
   -H "Accept: application/json" `
   -H "Authorization: Bearer TOKEN_DARI_LOGIN"
 ```
@@ -215,7 +215,7 @@ Authorization: Bearer {token}
 
 #### cURL (Production)
 ```bash
-curl "https://karirandalan.com/api/users" \
+curl "https://karir-andalan.com/api/users" \
   -H "Accept: application/json" \
   -H "Authorization: Bearer TOKEN_DARI_LOGIN"
 ```
@@ -229,7 +229,7 @@ curl "http://127.0.0.1:8000/api/users" \
 
 #### PowerShell (Production)
 ```powershell
-curl.exe "https://karirandalan.com/api/users" `
+curl.exe "https://karir-andalan.com/api/users" `
   -H "Accept: application/json" `
   -H "Authorization: Bearer TOKEN_DARI_LOGIN"
 ```
@@ -287,7 +287,7 @@ Authorization: Bearer {token}
 
 #### cURL (Production)
 ```bash
-curl "https://karirandalan.com/api/users/UUID_USER" \
+curl "https://karir-andalan.com/api/users/UUID_USER" \
   -H "Accept: application/json" \
   -H "Authorization: Bearer TOKEN_DARI_LOGIN"
 ```
@@ -301,7 +301,7 @@ curl "http://127.0.0.1:8000/api/users/UUID_USER" \
 
 #### PowerShell (Production)
 ```powershell
-curl.exe "https://karirandalan.com/api/users/UUID_USER" `
+curl.exe "https://karir-andalan.com/api/users/UUID_USER" `
   -H "Accept: application/json" `
   -H "Authorization: Bearer TOKEN_DARI_LOGIN"
 ```
@@ -348,7 +348,7 @@ Mendapatkan daftar semua user secara publik (tanpa memerlukan token).
 
 #### cURL (Production)
 ```bash
-curl "https://karirandalan.com/api/public/users" \
+curl "https://karir-andalan.com/api/public/users" \
   -H "Accept: application/json"
 ```
 
@@ -360,7 +360,7 @@ curl "http://127.0.0.1:8000/api/public/users" \
 
 #### PowerShell (Production)
 ```powershell
-curl.exe "https://karirandalan.com/api/public/users" `
+curl.exe "https://karir-andalan.com/api/public/users" `
   -H "Accept: application/json"
 ```
 
@@ -404,7 +404,7 @@ Mendapatkan data user tertentu berdasarkan UUID secara publik (tanpa memerlukan 
 
 #### cURL (Production)
 ```bash
-curl "https://karirandalan.com/api/public/users/UUID_USER" \
+curl "https://karir-andalan.com/api/public/users/UUID_USER" \
   -H "Accept: application/json"
 ```
 
@@ -416,7 +416,7 @@ curl "http://127.0.0.1:8000/api/public/users/UUID_USER" \
 
 #### PowerShell (Production)
 ```powershell
-curl.exe "https://karirandalan.com/api/public/users/UUID_USER" `
+curl.exe "https://karir-andalan.com/api/public/users/UUID_USER" `
   -H "Accept: application/json"
 ```
 
