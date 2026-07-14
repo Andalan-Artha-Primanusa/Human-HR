@@ -59,6 +59,7 @@ class UserController extends Controller
         // Add pagination for public endpoint (prevent scraping)
         $users = User::query()
             ->select(['id', 'name', 'role'])
+            ->with($this->publicUserRelations())
             ->latest('id')
             ->paginate(30); // Smaller page size for public
 
@@ -75,8 +76,32 @@ class UserController extends Controller
 
     private function publicUserResponse(User $user): JsonResponse
     {
+        $user->load($this->publicUserRelations());
+
         return response()->json([
-            'user' => $user->only(['id', 'name', 'role']),
+            'user' => $user,
         ]);
+    }
+
+    private function publicUserRelations(): array
+    {
+        return [
+            'candidateProfile.poh',
+            'candidateProfile.trainings',
+            'candidateProfile.employments',
+            'candidateProfile.references',
+            'candidateProfile.attachments',
+            'jobApplications.job.site',
+            'jobApplications.job.company',
+            'jobApplications.poh',
+            'jobApplications.stages.actor',
+            'jobApplications.stages.user',
+            'jobApplications.interviews',
+            'jobApplications.psychotestAttempts.test',
+            'jobApplications.psychotestAttempts.answers',
+            'jobApplications.offer',
+            'jobApplications.feedbacks.user',
+            'jobApplications.attachments',
+        ];
     }
 }
