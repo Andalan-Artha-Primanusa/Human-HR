@@ -50,6 +50,10 @@
   display: flex; flex-wrap: wrap; gap: .6rem; align-items: center;
   background: #fff; border-bottom: 1px solid #e2d9cf;
   padding: .75rem 1.5rem;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  box-shadow: 0 8px 18px -18px rgba(107,63,31,.35);
 }
 .kn-filter input,
 .kn-filter select {
@@ -85,14 +89,16 @@
 /* ===== BOARD ===== */
 .kn-board-wrap {
   overflow-x: auto;
-  overflow-y: visible;
-  padding: 1.5rem 2.2rem 3.7rem;
+  overflow-y: hidden;
+  padding: 1.25rem 2.2rem 1.5rem;
   -webkit-overflow-scrolling: touch;
   width: 100%;
+  height: calc(100vh - 235px);
+  min-height: 560px;
   box-sizing: border-box;
   /* TIDAK pakai flex:1 */
 }
-.kn-board { display: flex; gap: 1.8rem; align-items: flex-start; min-width: max-content; }
+.kn-board { display: flex; gap: 1.8rem; align-items: stretch; min-width: max-content; height: 100%; }
 
 /* ===== COLUMN ===== */
 .kn-col {
@@ -101,7 +107,8 @@
   border-radius: 1rem;
   border: 1px solid #e2d9cf;
   display: flex; flex-direction: column;
-  max-height: none;
+  height: 100%;
+  min-height: 0;
   box-shadow: 0 2px 14px rgba(107,63,31,.06);
   transition: outline .1s;
 }
@@ -131,11 +138,16 @@
 }
 .kn-col-body {
   padding: 1.25rem 1.15rem;
-  overflow-y: visible; flex: 1;
+  overflow-y: auto; flex: 1;
+  min-height: 0;
   display: flex; flex-direction: column; gap: 1.15rem;
+  overscroll-behavior: contain;
 }
-.kn-col-body { -ms-overflow-style: none; scrollbar-width: none; }
-.kn-col-body::-webkit-scrollbar { width: 0; height: 0; display: none; }
+.kn-col-body { scrollbar-width: thin; scrollbar-color: #c9a882 #f7f3ef; }
+.kn-col-body::-webkit-scrollbar { width: 8px; }
+.kn-col-body::-webkit-scrollbar-track { background: #f7f3ef; border-radius: 999px; }
+.kn-col-body::-webkit-scrollbar-thumb { background: #c9a882; border-radius: 999px; }
+.kn-col-body::-webkit-scrollbar-thumb:hover { background: #a77d52; }
 
 /* ===== CARD ===== */
 .kn-card {
@@ -246,8 +258,12 @@
 }
 
 @media (max-width: 768px) {
-  .kn-board-wrap { padding: 1.2rem 1.2rem 2.2rem; }
-  .kn-board { gap: 1.2rem; }
+  .kn-board-wrap {
+    padding: 1rem 1rem 1.25rem;
+    height: calc(100vh - 250px);
+    min-height: 520px;
+  }
+  .kn-board { gap: 1.2rem; height: 100%; }
   .kn-col { width: 400px; }
   .kn-card { max-height: none; padding: 1.3rem; overflow-y: visible; }
 }

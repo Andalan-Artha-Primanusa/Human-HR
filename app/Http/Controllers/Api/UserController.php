@@ -33,6 +33,7 @@ class UserController extends Controller
         // Add pagination to prevent dumping all users at once
         $users = User::query()
             ->select(['id', 'name', 'email', 'role'])
+            ->with($this->userRelations())
             ->latest('id')
             ->paginate(50); // Limit to 50 per page
 
@@ -49,8 +50,10 @@ class UserController extends Controller
 
     private function userResponse(User $user): JsonResponse
     {
+        $user->load($this->userRelations());
+
         return response()->json([
-            'user' => $user->only(['id', 'name', 'email', 'role']),
+            'user' => $user,
         ]);
     }
 
@@ -59,7 +62,7 @@ class UserController extends Controller
         // Add pagination for public endpoint (prevent scraping)
         $users = User::query()
             ->select(['id', 'name', 'role'])
-            ->with($this->publicUserRelations())
+            ->with($this->userRelations())
             ->latest('id')
             ->paginate(30); // Smaller page size for public
 
@@ -76,14 +79,14 @@ class UserController extends Controller
 
     private function publicUserResponse(User $user): JsonResponse
     {
-        $user->load($this->publicUserRelations());
+        $user->load($this->userRelations());
 
         return response()->json([
             'user' => $user,
         ]);
     }
 
-    private function publicUserRelations(): array
+    private function userRelations(): array
     {
         return [
             'candidateProfile.poh',
