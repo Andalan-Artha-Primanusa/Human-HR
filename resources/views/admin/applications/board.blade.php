@@ -98,11 +98,12 @@
   box-sizing: border-box;
   /* TIDAK pakai flex:1 */
 }
-.kn-board { display: flex; gap: 1.8rem; align-items: stretch; min-width: max-content; height: 100%; }
+.kn-board { display: flex; gap: 1.8rem; align-items: stretch; min-width: max-content; width: max-content; height: 100%; }
 
 /* ===== COLUMN ===== */
 .kn-col {
   width: 485px;
+  flex: 0 0 485px;
   background: #fff;
   border-radius: 1rem;
   border: 1px solid #e2d9cf;
@@ -264,7 +265,7 @@
     min-height: 520px;
   }
   .kn-board { gap: 1.2rem; height: 100%; }
-  .kn-col { width: 400px; }
+  .kn-col { width: 400px; flex-basis: 400px; }
   .kn-card { max-height: none; padding: 1.3rem; overflow-y: visible; }
 }
 .btn-outline  { background: #fff; border-color: #a77d52; color: #7a4f2a; }
@@ -1528,6 +1529,17 @@ function _onDragStart(e) {
 function _onDragEnd(e) { e.currentTarget.classList.remove('dragging'); }
 
 document.querySelectorAll('.kn-card[draggable="true"]').forEach(initDrag);
+
+const boardWrap = document.querySelector('.kn-board-wrap');
+if (boardWrap) {
+  boardWrap.addEventListener('wheel', (e) => {
+    if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
+    const targetColumn = e.target.closest && e.target.closest('.kn-col-body');
+    if (targetColumn && targetColumn.scrollHeight > targetColumn.clientHeight) return;
+    e.preventDefault();
+    boardWrap.scrollLeft += e.deltaY;
+  }, { passive: false });
+}
 
 document.querySelectorAll('.kn-col').forEach(col => {
   const body = col.querySelector('.kn-col-body');
