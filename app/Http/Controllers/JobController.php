@@ -7,6 +7,7 @@ use App\Http\Requests\UpdateJobRequest;
 use App\Models\Job;
 use App\Models\Site;
 use App\Models\Company;
+use App\Models\ManpowerRequirement;
 use App\Services\MineproRfrService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -210,7 +211,8 @@ class JobController extends Controller
         $this->checkUserCanUseSite($siteId);
 
         $job = DB::transaction(function () use ($payload, $siteId, $companyId) {
-            unset($payload['site_id'], $payload['site_code'], $payload['company_id'], $payload['company_code']);
+            $initialOpenings = (int) ($payload['initial_openings'] ?? $payload['openings'] ?? 0);
+            unset($payload['site_id'], $payload['site_code'], $payload['company_id'], $payload['company_code'], $payload['initial_openings']);
 
             $payload['site_id'] = $siteId;
             $payload['company_id'] = $companyId; // boleh null
@@ -220,6 +222,16 @@ class JobController extends Controller
 
             /** @var Job $job */
             $job = Job::create($payload);
+
+            if ($initialOpenings > 0) {
+                ManpowerRequirement::create([
+                    'job_id' => $job->id,
+                    'asset_name' => 'RFR MinePro',
+                    'assets_count' => $initialOpenings,
+                    'ratio_per_asset' => 1,
+                    'filled_headcount' => 0,
+                ]);
+            }
 
             // Sync openings dari manpower_requirements
             $sum = (int) $job->manpowerRequirements()->sum('budget_headcount');

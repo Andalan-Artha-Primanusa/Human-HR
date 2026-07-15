@@ -240,9 +240,10 @@
           {{-- Openings (disabled, disinkron dari Manpower) --}}
           <div>
             <label class="label">Openings</label>
-            <input class="input" type="number" min="0" value="{{ old('openings', 0) }}" disabled
+            <input class="input" id="openings_display" type="number" min="0" value="{{ old('initial_openings', 0) }}" disabled
                    style="--tw-ring-color: {{ $ACCENT }}">
-            <p class="text-xs text-slate-500 mt-1">Nilai ini akan disinkron otomatis dari <em>Manpower Requirements</em>.</p>
+            <input type="hidden" name="initial_openings" id="initial_openings" value="{{ old('initial_openings', 0) }}">
+            <p class="text-xs text-slate-500 mt-1">Kalau pilih RFR, nilai ini diambil dari <code>QtyRequired</code> lalu dibuatkan <em>Manpower Requirements</em> otomatis.</p>
           </div>
 
           {{-- Keywords (string, max:500) --}}
@@ -315,6 +316,8 @@
         const descInput = document.getElementById('desc_input');
         const kw = document.getElementById('keywords');
         const skills = document.getElementById('skills');
+        const openingsDisplay = document.getElementById('openings_display');
+        const initialOpenings = document.getElementById('initial_openings');
         const form = document.getElementById('jobCreateForm');
         const kwCount = document.getElementById('kw_count');
 
@@ -396,6 +399,11 @@
           setSelectByNormalized(level, opt.dataset.level);
           setSiteByCode(opt.dataset.location);
           setTrixDescription(opt.dataset.description);
+          if (initialOpenings && openingsDisplay) {
+            const qty = Math.max(0, parseInt(opt.dataset.qty || '0', 10) || 0);
+            initialOpenings.value = qty;
+            openingsDisplay.value = qty;
+          }
 
           const keywordParts = [
             opt.dataset.title,

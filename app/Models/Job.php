@@ -33,6 +33,8 @@ class Job extends Model
         'dept_head',
         'project_manager',
         'pjo',
+        'staff',
+        'non_staff',
     ];
 
     /** Label Level untuk tampilan */
@@ -49,6 +51,7 @@ class Job extends Model
         'dept_head'       => 'Dept Head',
         'project_manager' => 'Project Manager',
         'pjo'             => 'PJO',
+        'staff'           => 'Staff',
         'non_staff'       => 'Non Staff',
     ];
 
