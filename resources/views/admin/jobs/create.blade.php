@@ -63,6 +63,23 @@
         Kode lowongan (<code class="font-mono">code</code>) unik <strong>per company</strong>. Kamu boleh kosongkan Company bila job tidak terikat company tertentu.
       </div>
 
+      <form method="GET" action="{{ route('admin.jobs.create') }}"
+            class="rounded-xl bg-white text-[#7a5236] px-4 py-3 border text-sm flex flex-wrap items-end gap-3"
+            style="border-color: {{ $BORD }}">
+        <div>
+          <label class="label">Start Date RFR</label>
+          <input type="date" name="rfr_start_date" value="{{ $rfrStartDate ?? now()->startOfMonth()->format('Y-m-d') }}"
+                 class="input min-w-[180px]" style="--tw-ring-color: {{ $ACCENT }}">
+        </div>
+        <button type="submit"
+                class="inline-flex items-center rounded-lg bg-[#a77d52] px-4 py-2 text-sm font-semibold text-white hover:opacity-95">
+          Ambil RFR
+        </button>
+        <div class="text-xs text-slate-500">
+          Data code diambil dari RFR fully approved MinePro.
+        </div>
+      </form>
+
       {{-- Error summary --}}
       @if ($errors->any())
         <div class="rounded-xl bg-rose-50 text-rose-700 px-4 py-3 border" style="border-color: #fecaca">
@@ -83,11 +100,39 @@
 
         <div class="p-6 md:p-7 grid gap-4 md:grid-cols-2 bg-white">
           {{-- Code --}}
-          <div>
+          <div class="md:col-span-2 grid md:grid-cols-2 gap-4">
+            <div>
+              <label class="label">Pilih RFR dari API</label>
+              <select class="input" id="rfr_select" style="--tw-ring-color: {{ $ACCENT }}">
+                <option value="">— Pilih RFR —</option>
+                @foreach(($rfrVacancies ?? []) as $rfr)
+                  <option value="{{ $rfr['code'] }}"
+                          data-title="{{ e($rfr['title']) }}"
+                          data-department="{{ e($rfr['department'] ?? '') }}"
+                          data-level="{{ e($rfr['status_position'] ?? '') }}"
+                          data-location="{{ e($rfr['work_location'] ?? '') }}"
+                          data-description="{{ e($rfr['description'] ?? '') }}"
+                          data-facilities="{{ e($rfr['facilities'] ?? '') }}"
+                          data-experience="{{ e($rfr['work_experience'] ?? '') }}"
+                          data-education="{{ e($rfr['education_level'] ?? '') }}"
+                          data-candidate-type="{{ e($rfr['candidate_type'] ?? '') }}"
+                          data-qty="{{ e($rfr['qty_required'] ?? '') }}">
+                    {{ $rfr['code'] }} — {{ $rfr['title'] ?: 'Tanpa posisi' }}{{ !empty($rfr['project_id']) ? ' · '.$rfr['project_id'] : '' }}
+                  </option>
+                @endforeach
+              </select>
+              @if(empty($rfrVacancies))
+                <p class="text-xs text-amber-700 mt-1">Data RFR belum tersedia. Kamu tetap bisa isi Code manual.</p>
+              @else
+                <p class="text-xs text-slate-500 mt-1">{{ count($rfrVacancies) }} RFR ditemukan dari API.</p>
+              @endif
+            </div>
+            <div>
             <label class="label">Code <span class="text-rose-600">*</span></label>
-            <input class="input" name="code" value="{{ old('code') }}" required maxlength="50"
+            <input class="input" name="code" id="code" value="{{ old('code') }}" required maxlength="50"
                placeholder="Mis. MCH-OPR-01" style="--tw-ring-color: {{ $ACCENT }}" autofocus>
             @error('code')<p class="text-xs text-rose-600 mt-1">{{ $message }}</p>@enderror
+            </div>
           </div>
 
           {{-- Title --}}
@@ -262,6 +307,12 @@
         const siteCode = document.getElementById('site_code');
         const compSel = document.getElementById('company_id');
         const compCode = document.getElementById('company_code');
+        const rfrSelect = document.getElementById('rfr_select');
+        const code = document.getElementById('code');
+        const title = document.querySelector('[name="title"]');
+        const division = document.querySelector('[name="division"]');
+        const level = document.querySelector('[name="level"]');
+        const descInput = document.getElementById('desc_input');
         const kw = document.getElementById('keywords');
         const skills = document.getElementById('skills');
         const form = document.getElementById('jobCreateForm');
@@ -284,6 +335,89 @@
         siteSel?.addEventListener('change', syncSiteCode);
         // Run once on load if old() exists
         syncSiteCode();
+
+        function normalizeOptionValue(raw) {
+          return (raw || '')
+            .toString()
+            .trim()
+            .toLowerCase()
+            .replace(/&/g, 'and')
+            .replace(/[^a-z0-9]+/g, '_')
+            .replace(/^_+|_+$/g, '');
+        }
+
+        function setSelectByNormalized(select, raw) {
+          if (!select || !raw) return;
+          const target = normalizeOptionValue(raw);
+          const match = Array.from(select.options).find((opt) => {
+            return normalizeOptionValue(opt.value) === target
+              || normalizeOptionValue(opt.textContent) === target
+              || normalizeOptionValue(opt.textContent).includes(target);
+          });
+          if (match) select.value = match.value;
+        }
+
+        function setSiteByCode(rawCode) {
+          if (!siteSel || !rawCode) return;
+          const target = rawCode.toString().trim().toLowerCase();
+          const match = Array.from(siteSel.options).find((opt) => {
+            return (opt.dataset.code || '').toLowerCase() === target
+              || opt.textContent.toLowerCase().includes(target);
+          });
+          if (match) {
+            siteSel.value = match.value;
+            syncSiteCode();
+          }
+        }
+
+        function setTrixDescription(text) {
+          if (!descInput || !text) return;
+          const html = text
+            .toString()
+            .split(/\n{2,}/)
+            .map((part) => part.trim())
+            .filter(Boolean)
+            .map((part) => `<p>${part.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>')}</p>`)
+            .join('');
+          descInput.value = html;
+          const editor = document.querySelector('trix-editor[input="desc_input"]');
+          if (editor?.editor) {
+            editor.editor.loadHTML(html);
+          }
+        }
+
+        rfrSelect?.addEventListener('change', function () {
+          const opt = rfrSelect.options[rfrSelect.selectedIndex];
+          if (!opt || !opt.value) return;
+
+          if (code) code.value = opt.value;
+          if (title && opt.dataset.title) title.value = opt.dataset.title;
+          setSelectByNormalized(division, opt.dataset.department);
+          setSelectByNormalized(level, opt.dataset.level);
+          setSiteByCode(opt.dataset.location);
+          setTrixDescription(opt.dataset.description);
+
+          const keywordParts = [
+            opt.dataset.title,
+            opt.dataset.department,
+            opt.dataset.location,
+            opt.dataset.education,
+            opt.dataset.candidateType,
+          ].filter(Boolean);
+          if (kw && keywordParts.length) {
+            kw.value = keywordParts.join(', ');
+            kw.dispatchEvent(new Event('input'));
+          }
+
+          const skillParts = [
+            opt.dataset.experience ? `Pengalaman ${opt.dataset.experience}` : '',
+            opt.dataset.education ? `Pendidikan ${opt.dataset.education}` : '',
+            opt.dataset.facilities ? `Fasilitas ${opt.dataset.facilities}` : '',
+          ].filter(Boolean);
+          if (skills && skillParts.length) {
+            skills.value = skillParts.join(', ');
+          }
+        });
 
         // Mutual exclusion company_id <-> company_code (Rule: prohibits)
         function toggleCompanyInputs(){

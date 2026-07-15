@@ -7,6 +7,7 @@ use App\Http\Requests\UpdateJobRequest;
 use App\Models\Job;
 use App\Models\Site;
 use App\Models\Company;
+use App\Services\MineproRfrService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -173,7 +174,7 @@ class JobController extends Controller
     /**
      * ADMIN CREATE FORM
      */
-    public function create()
+    public function create(Request $request, MineproRfrService $rfrService)
     {
         $sitesQuery = Site::query()->select(['id', 'code', 'name'])->orderBy('code');
         if (method_exists($this, 'restrictSitesForUser')) {
@@ -184,7 +185,13 @@ class JobController extends Controller
         // (opsional) dropdown company
         $companies = Company::query()->select(['id', 'code', 'name'])->orderBy('code')->get();
 
-        return view('admin.jobs.create', compact('sites', 'companies'));
+        $rfrStartDate = $request->query('rfr_start_date', now()->startOfMonth()->format('Y-m-d'));
+        $rfrStartDate = preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $rfrStartDate)
+            ? (string) $rfrStartDate
+            : now()->startOfMonth()->format('Y-m-d');
+        $rfrVacancies = $rfrService->approvedVacancies($rfrStartDate);
+
+        return view('admin.jobs.create', compact('sites', 'companies', 'rfrVacancies', 'rfrStartDate'));
     }
 
     /**
