@@ -74,8 +74,9 @@ class AuthApiTest extends TestCase
         $response = $this->getJson('/api/public/users');
 
         $response->assertOk()
-            ->assertJsonCount(3, 'users')
-            ->assertJsonMissingPath('users.0.email');
+            ->assertJsonPath('status', 'success')
+            ->assertJsonCount(3, 'data')
+            ->assertJsonMissingPath('data.0.email');
     }
 
     public function test_users_index_requires_token(): void

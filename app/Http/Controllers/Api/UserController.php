@@ -91,7 +91,6 @@ class UserController extends Controller
             ],
             'count' => $users->count(),
             'data' => $users,
-            'users' => $users,
         ]);
     }
 
