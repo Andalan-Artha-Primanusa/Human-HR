@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
 class UserController extends Controller
@@ -13,9 +14,9 @@ class UserController extends Controller
         return $this->usersResponse();
     }
 
-    public function publicIndex(): JsonResponse
+    public function publicIndex(Request $request): JsonResponse
     {
-        return $this->publicUsersResponse();
+        return $this->publicUsersResponse($request);
     }
 
     public function show(User $user): JsonResponse
@@ -57,17 +58,41 @@ class UserController extends Controller
         ]);
     }
 
-    private function publicUsersResponse(): JsonResponse
+    private function publicUsersResponse(Request $request): JsonResponse
     {
+        $filters = $request->validate([
+            'create_at' => ['nullable', 'date_format:Y-m-d'],
+            'created_at' => ['nullable', 'date_format:Y-m-d'],
+            'created_from' => ['nullable', 'date_format:Y-m-d'],
+            'created_to' => ['nullable', 'date_format:Y-m-d'],
+            'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
+            'page' => ['nullable', 'integer', 'min:1'],
+        ]);
+
+        $createdAt = $filters['created_at'] ?? $filters['create_at'] ?? null;
+        $createdFrom = $filters['created_from'] ?? null;
+        $createdTo = $filters['created_to'] ?? null;
+        $perPage = (int) ($filters['per_page'] ?? 30);
+
         // Add pagination for public endpoint (prevent scraping)
         $users = User::query()
-            ->select(['id', 'name', 'role'])
+            ->select(['id', 'name', 'role', 'created_at'])
             ->with($this->userRelations())
+            ->when($createdAt, fn($query) => $query->whereDate('created_at', $createdAt))
+            ->when($createdFrom, fn($query) => $query->whereDate('created_at', '>=', $createdFrom))
+            ->when($createdTo, fn($query) => $query->whereDate('created_at', '<=', $createdTo))
+            ->latest('created_at')
             ->latest('id')
-            ->paginate(30); // Smaller page size for public
+            ->paginate($perPage)
+            ->appends($request->query());
 
         return response()->json([
             'users' => $users->items(),
+            'filters' => [
+                'created_at' => $createdAt,
+                'created_from' => $createdFrom,
+                'created_to' => $createdTo,
+            ],
             'pagination' => [
                 'total' => $users->total(),
                 'per_page' => $users->perPage(),

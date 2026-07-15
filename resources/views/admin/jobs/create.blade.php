@@ -363,6 +363,7 @@
         function setSiteByCode(rawCode) {
           if (!siteSel || !rawCode) return;
           const target = rawCode.toString().trim().toLowerCase();
+          if (siteCode) siteCode.value = rawCode.toString().trim();
           const match = Array.from(siteSel.options).find((opt) => {
             return (opt.dataset.code || '').toLowerCase() === target
               || opt.textContent.toLowerCase().includes(target);

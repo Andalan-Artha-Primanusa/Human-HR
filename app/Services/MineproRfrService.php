@@ -81,7 +81,7 @@ class MineproRfrService
             'work_experience' => $row['WorkExperience'] ?? null,
             'status_position' => $row['StatusPosition'] ?? null,
             'candidate_type' => $row['TypeKandidat'] ?? null,
-            'work_location' => $row['LokasiKerja'] ?? null,
+            'work_location' => $row['LokasiKerja'] ?? $row['ProjectID'] ?? $row['Location'] ?? null,
             'education_level' => $row['LevelEducation'] ?? null,
             'discipline_description' => $row['DisciplineDescription'] ?? null,
             'description' => implode("\n\n", $descriptionParts),
