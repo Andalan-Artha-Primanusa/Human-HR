@@ -109,7 +109,7 @@
                   <option value="{{ $rfr['code'] }}"
                           data-title="{{ e($rfr['title']) }}"
                           data-department="{{ e($rfr['department'] ?? '') }}"
-                          data-level="{{ e($rfr['status_position'] ?? '') }}"
+                          data-level="{{ e($rfr['level'] ?? $rfr['status_position'] ?? '') }}"
                           data-location="{{ e($rfr['work_location'] ?? '') }}"
                           data-description="{{ e($rfr['description'] ?? '') }}"
                           data-facilities="{{ e($rfr['facilities'] ?? '') }}"
@@ -371,6 +371,10 @@
           if (match) {
             siteSel.value = match.value;
             syncSiteCode();
+            siteSel.setAttribute('required', 'required');
+          } else {
+            siteSel.value = '';
+            siteSel.removeAttribute('required');
           }
         }
 

@@ -80,6 +80,7 @@ class MineproRfrService
             'facilities' => $row['Fasilitas'] ?? null,
             'work_experience' => $row['WorkExperience'] ?? null,
             'status_position' => $row['StatusPosition'] ?? null,
+            'level' => $this->inferLevel($row['Position_Description'] ?? null, $row['StatusPosition'] ?? null),
             'candidate_type' => $row['TypeKandidat'] ?? null,
             'work_location' => $row['LokasiKerja'] ?? $row['ProjectID'] ?? $row['Location'] ?? null,
             'education_level' => $row['LevelEducation'] ?? null,
@@ -87,5 +88,37 @@ class MineproRfrService
             'description' => implode("\n\n", $descriptionParts),
             'raw' => $row,
         ];
+    }
+
+    private function inferLevel(?string $title, ?string $statusPosition): ?string
+    {
+        $source = strtolower(trim(($title ?? '') . ' ' . ($statusPosition ?? '')));
+
+        $matches = [
+            'department head' => 'dept_head',
+            'dept head' => 'dept_head',
+            'section head' => 'section_head',
+            'project manager' => 'project_manager',
+            'superintendent' => 'superintendent',
+            'supervisor' => 'supervisor',
+            'foreman' => 'foreman',
+            'manager' => 'manager',
+            'analyst' => 'analyst',
+            'specialist' => 'specialist',
+            'expert' => 'expert',
+            'lead of' => 'lead_of',
+            'staff' => 'staff',
+            'non staff' => 'non_staff',
+            'non-staff' => 'non_staff',
+            'pjo' => 'pjo',
+        ];
+
+        foreach ($matches as $needle => $level) {
+            if (str_contains($source, $needle)) {
+                return $level;
+            }
+        }
+
+        return null;
     }
 }

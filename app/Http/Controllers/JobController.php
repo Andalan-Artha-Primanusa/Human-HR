@@ -352,9 +352,17 @@ class JobController extends Controller
             return $siteId;
 
         if ($siteCode) {
-            $found = Site::where('code', $siteCode)->value('id');
-            abort_unless($found, 422, 'Site code tidak valid.');
-            return (string) $found;
+            $siteCode = trim($siteCode);
+            $site = Site::firstOrCreate(
+                ['code' => $siteCode],
+                [
+                    'name' => $siteCode,
+                    'is_active' => true,
+                    'meta' => ['source' => 'minepro_rfr'],
+                ]
+            );
+
+            return (string) $site->id;
         }
 
         abort(422, 'Site harus diisi via site_id atau site_code.');

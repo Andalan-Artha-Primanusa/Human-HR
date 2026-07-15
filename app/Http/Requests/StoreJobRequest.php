@@ -26,7 +26,7 @@ class StoreJobRequest extends FormRequest
             'openings' => ['nullable', 'integer', 'min:0', 'max:10000'],
             'initial_openings' => ['nullable', 'integer', 'min:0', 'max:10000'],
             'site_id' => ['nullable', 'uuid', 'exists:sites,id', 'required_without:site_code'],
-            'site_code' => ['nullable', 'string', 'exists:sites,code', 'required_without:site_id'],
+            'site_code' => ['nullable', 'string', 'max:50', 'required_without:site_id'],
             'company_id' => ['nullable', 'uuid', 'exists:companies,id', 'prohibits:company_code'],
             'company_code' => ['nullable', 'string', 'exists:companies,code', 'prohibits:company_id'],
         ];
