@@ -382,9 +382,17 @@ class JobController extends Controller
             return $companyId;
 
         if ($companyCode) {
-            $found = Company::where('code', $companyCode)->value('id');
-            abort_unless($found, 422, 'Company code tidak valid.');
-            return (string) $found;
+            $companyCode = trim($companyCode);
+            $company = Company::firstOrCreate(
+                ['code' => $companyCode],
+                [
+                    'name' => $companyCode,
+                    'status' => 'active',
+                    'meta' => ['source' => 'minepro_rfr'],
+                ]
+            );
+
+            return (string) $company->id;
         }
 
         return null; // jobs boleh tanpa company

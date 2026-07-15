@@ -110,7 +110,8 @@
                           data-title="{{ e($rfr['title']) }}"
                           data-department="{{ e($rfr['department'] ?? '') }}"
                           data-level="{{ e($rfr['level'] ?? $rfr['status_position'] ?? '') }}"
-                          data-location="{{ e($rfr['work_location'] ?? '') }}"
+                          data-location="{{ e($rfr['site_code'] ?? $rfr['work_location'] ?? '') }}"
+                          data-company-code="{{ e($rfr['company_code'] ?? '') }}"
                           data-description="{{ e($rfr['description'] ?? '') }}"
                           data-facilities="{{ e($rfr['facilities'] ?? '') }}"
                           data-experience="{{ e($rfr['work_experience'] ?? '') }}"
@@ -373,7 +374,12 @@
             syncSiteCode();
             siteSel.setAttribute('required', 'required');
           } else {
-            siteSel.value = '';
+            const existingApiOption = siteSel.querySelector('option[data-api-site="1"]');
+            if (existingApiOption) existingApiOption.remove();
+            const apiOption = new Option(`${rawCode.toString().trim()} — dari API MinePro`, '');
+            apiOption.dataset.apiSite = '1';
+            siteSel.add(apiOption);
+            apiOption.selected = true;
             siteSel.removeAttribute('required');
           }
         }
@@ -403,6 +409,12 @@
           setSelectByNormalized(division, opt.dataset.department);
           setSelectByNormalized(level, opt.dataset.level);
           setSiteByCode(opt.dataset.location);
+          if (compCode && opt.dataset.companyCode) {
+            if (compSel) compSel.value = '';
+            compCode.removeAttribute('disabled');
+            compCode.value = opt.dataset.companyCode;
+            toggleCompanyInputs();
+          }
           setTrixDescription(opt.dataset.description);
           if (initialOpenings && openingsDisplay) {
             const qty = Math.max(0, parseInt(opt.dataset.qty || '0', 10) || 0);

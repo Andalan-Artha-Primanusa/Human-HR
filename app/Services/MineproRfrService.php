@@ -67,6 +67,9 @@ class MineproRfrService
             $row['KetDocRFR'] ?? null,
         ]);
 
+        $workLocation = $row['LokasiKerja'] ?? $row['ProjectID'] ?? $row['Location'] ?? null;
+        [$companyCode, $siteCode] = $this->splitWorkLocation($workLocation);
+
         return [
             'code' => trim((string) ($row['RFRRefID'] ?? '')),
             'position_ref' => $row['Position_Ref'] ?? null,
@@ -82,12 +85,34 @@ class MineproRfrService
             'status_position' => $row['StatusPosition'] ?? null,
             'level' => $this->inferLevel($row['Position_Description'] ?? null, $row['StatusPosition'] ?? null),
             'candidate_type' => $row['TypeKandidat'] ?? null,
-            'work_location' => $row['LokasiKerja'] ?? $row['ProjectID'] ?? $row['Location'] ?? null,
+            'work_location' => $workLocation,
+            'company_code' => $companyCode,
+            'site_code' => $siteCode,
             'education_level' => $row['LevelEducation'] ?? null,
             'discipline_description' => $row['DisciplineDescription'] ?? null,
             'description' => implode("\n\n", $descriptionParts),
             'raw' => $row,
         ];
+    }
+
+    private function splitWorkLocation(?string $workLocation): array
+    {
+        $value = trim((string) $workLocation);
+
+        if ($value === '') {
+            return [null, null];
+        }
+
+        $parts = array_values(array_filter(array_map('trim', explode('-', $value))));
+
+        if (count($parts) >= 2) {
+            return [
+                strtoupper($parts[0]),
+                strtoupper(implode('-', array_slice($parts, 1))),
+            ];
+        }
+
+        return [null, strtoupper($value)];
     }
 
     private function inferLevel(?string $title, ?string $statusPosition): ?string
