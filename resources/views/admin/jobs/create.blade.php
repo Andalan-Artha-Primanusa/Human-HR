@@ -32,15 +32,15 @@
     <div class="space-y-6">
 
       {{-- HEADER dua-tone --}}
-      <section class="relative rounded-2xl border bg-white shadow-sm" style="border-color: {{ $BORD }}">
-        <div class="relative h-20 sm:h-24 rounded-t-2xl overflow-hidden">
+      <section class="relative bg-white border shadow-sm rounded-2xl" style="border-color: {{ $BORD }}">
+        <div class="relative h-20 overflow-hidden sm:h-24 rounded-t-2xl">
           <div class="absolute inset-0 rounded-t-2xl" style="background: linear-gradient(90deg, {{ $ACCENT }}, {{ $ACCENT_DARK }});"></div>
-          <div class="absolute inset-y-0 right-0 rounded-tr-2xl w-24 sm:w-36" style="background: linear-gradient(90deg, {{ $ACCENT_DARK }}, {{ $ACCENT }});"></div>
+          <div class="absolute inset-y-0 right-0 w-24 rounded-tr-2xl sm:w-36" style="background: linear-gradient(90deg, {{ $ACCENT_DARK }}, {{ $ACCENT }});"></div>
 
-          <div class="relative h-full px-5 md:px-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div class="relative flex flex-col h-full gap-3 px-5 md:px-6 sm:flex-row sm:items-center sm:justify-between">
             <div class="min-w-0">
-              <h1 class="text-2xl md:text-3xl font-semibold tracking-tight text-white">Create Job</h1>
-              <div class="mt-1 text-xs sm:text-sm text-white/90 flex flex-wrap items-center gap-2">
+              <h1 class="text-2xl font-semibold tracking-tight text-white md:text-3xl">Create Job</h1>
+              <div class="flex flex-wrap items-center gap-2 mt-1 text-xs sm:text-sm text-white/90">
                 <a href="{{ route('admin.jobs.index') }}" class="hover:text-white">Jobs</a>
                 <span class="opacity-70">/</span>
                 <span class="font-medium text-white">Create</span>
@@ -48,7 +48,7 @@
             </div>
             <div class="flex gap-2">
               <a href="{{ route('admin.jobs.index') }}"
-                 class="inline-flex items-center rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2"
+                 class="inline-flex items-center px-4 py-2 text-sm font-semibold bg-white border rounded-lg border-slate-200 text-slate-900 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2"
                  style="--tw-ring-color: {{ $ACCENT }}">Kembali</a>
               <button form="jobCreateForm"
                       class="inline-flex items-center rounded-lg bg-[#a77d52] px-4 py-2 text-sm font-semibold text-white hover:opacity-95 focus:outline-none focus:ring-2 focus:ring-offset-2"
@@ -82,9 +82,9 @@
 
       {{-- Error summary --}}
       @if ($errors->any())
-        <div class="rounded-xl bg-rose-50 text-rose-700 px-4 py-3 border" style="border-color: #fecaca">
+        <div class="px-4 py-3 border rounded-xl bg-rose-50 text-rose-700" style="border-color: #fecaca">
           <div class="font-medium">Periksa kembali isian Anda:</div>
-          <ul class="mt-1 list-disc list-inside text-sm">
+          <ul class="mt-1 text-sm list-disc list-inside">
             @foreach ($errors->all() as $error)
                   <li>{{ $error }}</li>
             @endforeach
@@ -93,14 +93,14 @@
       @endif
 
       {{-- FORM utama --}}
-      <form id="jobCreateForm" class="rounded-2xl border bg-white shadow-sm overflow-hidden"
+      <form id="jobCreateForm" class="overflow-hidden bg-white border shadow-sm rounded-2xl"
             style="border-color: {{ $BORD }}"
             method="POST" action="{{ route('admin.jobs.store') }}" novalidate>
         @csrf
 
-        <div class="p-6 md:p-7 grid gap-4 md:grid-cols-2 bg-white">
+        <div class="grid gap-4 p-6 bg-white md:p-7 md:grid-cols-2">
           {{-- Code --}}
-          <div class="md:col-span-2 grid md:grid-cols-2 gap-4">
+          <div class="grid gap-4 md:col-span-2 md:grid-cols-2">
             <div>
               <label class="label">Pilih RFR dari API</label>
               <select class="input" id="rfr_select" style="--tw-ring-color: {{ $ACCENT }}">
@@ -123,16 +123,16 @@
                 @endforeach
               </select>
               @if(empty($rfrVacancies))
-                <p class="text-xs text-amber-700 mt-1">Data RFR belum tersedia. Kamu tetap bisa isi Code manual.</p>
+                <p class="mt-1 text-xs text-amber-700">Data RFR belum tersedia. Kamu tetap bisa isi Code manual.</p>
               @else
-                <p class="text-xs text-slate-500 mt-1">{{ count($rfrVacancies) }} RFR ditemukan dari API.</p>
+                <p class="mt-1 text-xs text-slate-500">{{ count($rfrVacancies) }} RFR ditemukan dari API.</p>
               @endif
             </div>
             <div>
             <label class="label">Code <span class="text-rose-600">*</span></label>
             <input class="input" name="code" id="code" value="{{ old('code') }}" required maxlength="50"
                placeholder="Mis. MCH-OPR-01" style="--tw-ring-color: {{ $ACCENT }}" autofocus>
-            @error('code')<p class="text-xs text-rose-600 mt-1">{{ $message }}</p>@enderror
+            @error('code')<p class="mt-1 text-xs text-rose-600">{{ $message }}</p>@enderror
             </div>
           </div>
 
@@ -141,7 +141,7 @@
             <label class="label">Title <span class="text-rose-600">*</span></label>
             <input class="input" name="title" value="{{ old('title') }}" required maxlength="200"
                placeholder="Operator Excavator" style="--tw-ring-color: {{ $ACCENT }}">
-            @error('title')<p class="text-xs text-rose-600 mt-1">{{ $message }}</p>@enderror
+            @error('title')<p class="mt-1 text-xs text-rose-600">{{ $message }}</p>@enderror
           </div>
 
           {{-- Division --}}
@@ -154,7 +154,7 @@
                 <option value="{{ $val }}" @selected($divisionOld === $val)>{{ $label }}</option>
               @endforeach
             </select>
-            @error('division')<p class="text-xs text-rose-600 mt-1">{{ $message }}</p>@enderror
+            @error('division')<p class="mt-1 text-xs text-rose-600">{{ $message }}</p>@enderror
           </div>
 
           {{-- Level --}}
@@ -167,7 +167,7 @@
                 <option value="{{ $val }}" @selected($levelOld === $val)>{{ $label }}</option>
               @endforeach
             </select>
-            @error('level')<p class="text-xs text-rose-600 mt-1">{{ $message }}</p>@enderror
+            @error('level')<p class="mt-1 text-xs text-rose-600">{{ $message }}</p>@enderror
           </div>
 
           {{-- Site --}}
@@ -183,9 +183,9 @@
               @endforelse
             </select>
             <input type="hidden" name="site_code" id="site_code" value="{{ old('site_code') }}">
-            <p class="text-xs text-slate-500 mt-1">Bisa pilih via dropdown (site_id) atau kirim <code>site_code</code>.</p>
-            @error('site_id')<p class="text-xs text-rose-600 mt-1">{{ $message }}</p>@enderror
-            @error('site_code')<p class="text-xs text-rose-600 mt-1">{{ $message }}</p>@enderror
+            <p class="mt-1 text-xs text-slate-500">Bisa pilih via dropdown (site_id) atau kirim <code>site_code</code>.</p>
+            @error('site_id')<p class="mt-1 text-xs text-rose-600">{{ $message }}</p>@enderror
+            @error('site_code')<p class="mt-1 text-xs text-rose-600">{{ $message }}</p>@enderror
           </div>
 
           {{-- Employment Type --}}
@@ -197,11 +197,11 @@
               <option value="contract" @selected($et === 'contract')>Contract</option>
               <option value="intern"   @selected($et === 'intern')>Intern</option>
             </select>
-            @error('employment_type')<p class="text-xs text-rose-600 mt-1">{{ $message }}</p>@enderror
+            @error('employment_type')<p class="mt-1 text-xs text-rose-600">{{ $message }}</p>@enderror
           </div>
 
           {{-- Company (opsional) + Company code (opsional) --}}
-          <div class="md:col-span-2 grid md:grid-cols-2 gap-4">
+          <div class="grid gap-4 md:col-span-2 md:grid-cols-2">
             <div>
               <label class="label">Company (opsional)</label>
               <select class="input" name="company_id" id="company_id" style="--tw-ring-color: {{ $ACCENT }}">
@@ -213,16 +213,16 @@
                       <option value="" disabled>Tidak ada data company</option>
                 @endforelse
               </select>
-              @error('company_id')<p class="text-xs text-rose-600 mt-1">{{ $message }}</p>@enderror
+              @error('company_id')<p class="mt-1 text-xs text-rose-600">{{ $message }}</p>@enderror
             </div>
             <div>
               <label class="label">Company Code (opsional)</label>
               <input class="input" name="company_code" id="company_code" value="{{ old('company_code') }}"
                      maxlength="50" placeholder="mis. ACME" style="--tw-ring-color: {{ $ACCENT }}">
-              <p class="text-xs text-slate-500 mt-1">
+              <p class="mt-1 text-xs text-slate-500">
                 Isi salah satu: <code>Company</code> (dropdown) <em>atau</em> <code>Company Code</code>.
               </p>
-              @error('company_code')<p class="text-xs text-rose-600 mt-1">{{ $message }}</p>@enderror
+              @error('company_code')<p class="mt-1 text-xs text-rose-600">{{ $message }}</p>@enderror
             </div>
           </div>
 
@@ -235,7 +235,7 @@
               <option value="open"   @selected($st === 'open')>Open</option>
               <option value="closed" @selected($st === 'closed')>Closed</option>
             </select>
-            @error('status')<p class="text-xs text-rose-600 mt-1">{{ $message }}</p>@enderror
+            @error('status')<p class="mt-1 text-xs text-rose-600">{{ $message }}</p>@enderror
           </div>
 
           {{-- Openings (disabled, disinkron dari Manpower) --}}
@@ -244,7 +244,7 @@
             <input class="input" id="openings_display" type="number" min="0" value="{{ old('initial_openings', 0) }}" disabled
                    style="--tw-ring-color: {{ $ACCENT }}">
             <input type="hidden" name="initial_openings" id="initial_openings" value="{{ old('initial_openings', 0) }}">
-            <p class="text-xs text-slate-500 mt-1">Kalau pilih RFR, nilai ini diambil dari <code>QtyRequired</code> lalu dibuatkan <em>Manpower Requirements</em> otomatis.</p>
+            <p class="mt-1 text-xs text-slate-500">Kalau pilih RFR, nilai ini diambil dari <code>QtyRequired</code> lalu dibuatkan <em>Manpower Requirements</em> otomatis.</p>
           </div>
 
           {{-- Keywords (string, max:500) --}}
@@ -253,11 +253,11 @@
             <input class="input" name="keywords" id="keywords" maxlength="500"
                    value="{{ old('keywords') }}" placeholder="contoh: excavator, operator alat berat, tambang"
                    style="--tw-ring-color: {{ $ACCENT }}">
-            <div class="mt-1 flex items-center justify-between text-xs text-slate-500">
+            <div class="flex items-center justify-between mt-1 text-xs text-slate-500">
               <span>Pisahkan dengan koma untuk memudahkan pencarian.</span>
               <span id="kw_count">0/500</span>
             </div>
-            @error('keywords')<p class="text-xs text-rose-600 mt-1">{{ $message }}</p>@enderror
+            @error('keywords')<p class="mt-1 text-xs text-rose-600">{{ $message }}</p>@enderror
           </div>
 
           {{-- Skills (array/string; controller aman) --}}
@@ -266,8 +266,8 @@
             <textarea class="input min-h-[84px]" name="skills" id="skills"
                       placeholder="Ketik skill, pisahkan dengan koma atau Enter. Contoh: Excavator A40, SIM B2 Umum, Basic Safety"
                       style="--tw-ring-color: {{ $ACCENT }}">{{ old('skills') }}</textarea>
-            <p class="text-xs text-slate-500 mt-1">Boleh diisi: <em>comma-separated</em> atau satu skill per baris. Sistem akan menormalkan sebagai array.</p>
-            @error('skills')<p class="text-xs text-rose-600 mt-1">{{ $message }}</p>@enderror
+            <p class="mt-1 text-xs text-slate-500">Boleh diisi: <em>comma-separated</em> atau satu skill per baris. Sistem akan menormalkan sebagai array.</p>
+            @error('skills')<p class="mt-1 text-xs text-rose-600">{{ $message }}</p>@enderror
           </div>
 
           {{-- Description (Trix) --}}
@@ -296,7 +296,7 @@
             <p class="mt-1 text-xs text-slate-500">
               Bisa <strong>bold</strong>, <em>italic</em>, bullet & numbered list, dan tautan. Konten disimpan sebagai HTML.
             </p>
-            @error('description')<p class="text-xs text-rose-600 mt-2">{{ $message }}</p>@enderror
+            @error('description')<p class="mt-2 text-xs text-rose-600">{{ $message }}</p>@enderror
           </div>
         </div>
       </form>
@@ -376,7 +376,7 @@
           } else {
             const existingApiOption = siteSel.querySelector('option[data-api-site="1"]');
             if (existingApiOption) existingApiOption.remove();
-            const apiOption = new Option(`${rawCode.toString().trim()} — dari API MinePro`, '');
+            const apiOption = new Option(`${rawCode.toString().trim()} `, '');
             apiOption.dataset.apiSite = '1';
             siteSel.add(apiOption);
             apiOption.selected = true;
