@@ -65,16 +65,12 @@ class UserController extends Controller
             'created_at' => ['nullable', 'date_format:Y-m-d'],
             'created_from' => ['nullable', 'date_format:Y-m-d'],
             'created_to' => ['nullable', 'date_format:Y-m-d'],
-            'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
-            'page' => ['nullable', 'integer', 'min:1'],
         ]);
 
         $createdAt = $filters['created_at'] ?? $filters['create_at'] ?? null;
         $createdFrom = $filters['created_from'] ?? null;
         $createdTo = $filters['created_to'] ?? null;
-        $perPage = (int) ($filters['per_page'] ?? 30);
 
-        // Add pagination for public endpoint (prevent scraping)
         $users = User::query()
             ->select(['id', 'name', 'role', 'created_at'])
             ->with($this->userRelations())
@@ -83,22 +79,19 @@ class UserController extends Controller
             ->when($createdTo, fn($query) => $query->whereDate('created_at', '<=', $createdTo))
             ->latest('created_at')
             ->latest('id')
-            ->paginate($perPage)
-            ->appends($request->query());
+            ->get();
 
         return response()->json([
-            'users' => $users->items(),
+            'status' => 'success',
+            'message' => 'Public users retrieved successfully.',
             'filters' => [
                 'created_at' => $createdAt,
                 'created_from' => $createdFrom,
                 'created_to' => $createdTo,
             ],
-            'pagination' => [
-                'total' => $users->total(),
-                'per_page' => $users->perPage(),
-                'current_page' => $users->currentPage(),
-                'last_page' => $users->lastPage(),
-            ],
+            'count' => $users->count(),
+            'data' => $users,
+            'users' => $users,
         ]);
     }
 
