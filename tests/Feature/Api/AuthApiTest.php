@@ -119,6 +119,22 @@ class AuthApiTest extends TestCase
             ->assertJsonCount(2, 'data.0.applications');
     }
 
+    public function test_public_jobs_index_accepts_basic_auth_login(): void
+    {
+        $user = User::factory()->create();
+        Job::factory()->create();
+
+        $response = $this
+            ->withHeaders([
+                'Authorization' => 'Basic ' . base64_encode($user->email . ':password'),
+            ])
+            ->getJson('/api/public/jobs');
+
+        $response->assertOk()
+            ->assertJsonPath('status', 'success')
+            ->assertJsonCount(1, 'data');
+    }
+
     public function test_users_index_requires_token(): void
     {
         $response = $this->getJson('/api/users');

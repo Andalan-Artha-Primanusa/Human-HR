@@ -16,6 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'role' => \App\Http\Middleware\EnsureRole::class,
             'api.token' => \App\Http\Middleware\EnsureApiToken::class,
+            'public.api.login' => \App\Http\Middleware\EnsurePublicApiLogin::class,
             'candidate.complete' => \App\Http\Middleware\EnsureCandidateProfileComplete::class,
         ]);
     })

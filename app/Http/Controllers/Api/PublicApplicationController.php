@@ -20,6 +20,29 @@ class PublicApplicationController extends Controller
 {
     public function uploadCv(Request $request, Job $job): JsonResponse
     {
+        return $this->storeCvForJob($request, $job);
+    }
+
+    public function uploadCvByCode(Request $request): JsonResponse
+    {
+        $request->validate([
+            'code_id' => ['required', 'string', 'max:80'],
+        ]);
+
+        $job = Job::where('code', $request->input('code_id'))->first();
+
+        if (! $job) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Job dengan code_id tersebut tidak ditemukan.',
+            ], 404);
+        }
+
+        return $this->storeCvForJob($request, $job);
+    }
+
+    private function storeCvForJob(Request $request, Job $job): JsonResponse
+    {
         $user = $this->resolveUser($request);
 
         if (! $user) {
@@ -102,6 +125,8 @@ class PublicApplicationController extends Controller
                 : 'CV berhasil diupload ke profil kandidat.',
             'data' => [
                 'job_id' => $job->id,
+                'code_id' => $job->code,
+                'job' => $job->loadMissing('site', 'company'),
                 'user_id' => $user->id,
                 'cv_path' => $path,
                 'profile_complete' => $missing === [],

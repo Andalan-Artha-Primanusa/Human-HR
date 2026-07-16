@@ -23,10 +23,11 @@ Route::middleware(['api.token', 'verified'])->group(function () {
 });
 
 Route::prefix('public')->middleware('throttle:30,1')->group(function () {
+    Route::post('/jobs/apply/cv', [PublicApplicationController::class, 'uploadCvByCode']);
     Route::post('/jobs/{job}/apply/cv', [PublicApplicationController::class, 'uploadCv']);
 });
 
-Route::prefix('public')->middleware(['api.token', 'verified', 'throttle:30,1'])->group(function () { // 30 requests per minute
+Route::prefix('public')->middleware(['public.api.login', 'throttle:30,1'])->group(function () { // 30 requests per minute
     Route::get('/jobs', [PublicJobController::class, 'index']);
     Route::get('/jobs/code/{code}', [PublicJobController::class, 'showByCode']);
     Route::get('/jobs/{job}', [PublicJobController::class, 'show']);
