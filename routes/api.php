@@ -23,6 +23,7 @@ Route::middleware(['api.token', 'verified'])->group(function () {
 });
 
 Route::prefix('public')->middleware('throttle:30,1')->group(function () {
+    Route::post('/jobs/apply/profile', [PublicApplicationController::class, 'injectApplicantProfile']);
     Route::post('/jobs/apply/cv', [PublicApplicationController::class, 'uploadCvByCode']);
     Route::post('/jobs/{job}/apply/cv', [PublicApplicationController::class, 'uploadCv']);
 });
