@@ -43,8 +43,8 @@ return [
             'root' => env('UPLOAD_DIR', storage_path('app/public')),
             'url' => env('APP_URL') . '/storage',
             'visibility' => 'public',
-            'throw' => false,
-            'report' => false,
+            'throw' => true,
+            'report' => true,
         ],
 
         's3' => [

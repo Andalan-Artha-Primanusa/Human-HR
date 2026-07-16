@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class PublicApplicationController extends Controller
@@ -76,11 +77,27 @@ class PublicApplicationController extends Controller
 
         $file = $request->file('cv');
         $safeName = UploadPath::safeOriginalName($file->getClientOriginalName());
+        $storageError = $this->validateUploadDisk();
+
+        if ($storageError) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $storageError,
+            ], 500);
+        }
+
         $path = $file->storeAs(
             UploadPath::forUser($user, 'candidate-profile/cv'),
             Str::uuid() . '_' . $safeName,
             'public'
         );
+
+        if (! $path || ! Storage::disk('public')->exists($path)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'CV gagal tersimpan ke storage upload. Cek permission dan path UPLOAD_DIR.',
+            ], 500);
+        }
 
         $profile->forceFill(['cv_path' => $path])->save();
         $attachment = $profile->attachments()->updateOrCreate(
@@ -188,5 +205,24 @@ class PublicApplicationController extends Controller
         $request->setUserResolver(fn() => $user);
 
         return $user;
+    }
+
+    private function validateUploadDisk(): ?string
+    {
+        $root = (string) config('filesystems.disks.public.root');
+
+        if (DIRECTORY_SEPARATOR !== '\\' && str_starts_with($root, '\\\\')) {
+            return 'UPLOAD_DIR memakai path UNC Windows, sedangkan server berjalan di Linux. Mount NAS ke path Linux seperti /mnt/hr-karir/uploads lalu set UPLOAD_DIR ke path mount tersebut.';
+        }
+
+        if (! is_dir($root) && ! @mkdir($root, 0775, true) && ! is_dir($root)) {
+            return 'Folder UPLOAD_DIR tidak bisa dibuat: ' . $root;
+        }
+
+        if (! is_writable($root)) {
+            return 'Folder UPLOAD_DIR tidak bisa ditulis oleh web server: ' . $root;
+        }
+
+        return null;
     }
 }
