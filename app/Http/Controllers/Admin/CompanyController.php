@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Company\StoreCompanyRequest;
 use App\Http\Requests\Admin\Company\UpdateCompanyRequest;
 use App\Models\Company;
+use App\Support\UploadPath;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Cache;
@@ -85,7 +86,7 @@ class CompanyController extends Controller
             $data = $request->validated();
             if ($request->hasFile('logo')) {
                 $file = $request->file('logo');
-                $path = $file->store('logos', 'public');
+                $path = $file->store(UploadPath::forUser($request->user(), 'company-logos'), 'public');
                 $data['logo_path'] = 'storage/' . $path;
             }
             Company::create($data);
@@ -115,7 +116,7 @@ class CompanyController extends Controller
             $data = $request->validated();
             if ($request->hasFile('logo')) {
                 $file = $request->file('logo');
-                $path = $file->store('logos', 'public');
+                $path = $file->store(UploadPath::forUser($request->user(), 'company-logos'), 'public');
                 $data['logo_path'] = 'storage/' . $path;
             }
             $company->update($data);

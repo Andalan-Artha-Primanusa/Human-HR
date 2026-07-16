@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\CandidateProfile;
 use App\Models\Job;
+use App\Support\UploadPath;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -263,7 +264,7 @@ class CandidateProfileController extends Controller
             $profile->extras = $extras;
 
             // Upload aman
-            $userFolder = 'candidates/u_' . $user->id;
+            $userFolder = UploadPath::forUser($user, 'candidate-profile');
 
             if ($request->hasFile('cv')) {
                 $cv = $request->file('cv');

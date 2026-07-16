@@ -21,6 +21,7 @@ use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Support\Carbon;
 use App\Models\Poh;
 use App\Models\Site;
+use App\Support\UploadPath;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\OfferLetterMail;
@@ -1107,7 +1108,7 @@ class ApplicationController extends Controller
         // Handle OL file upload
         $olFilePath = null;
         if ($request->hasFile('ol_file')) {
-            $olFilePath = $request->file('ol_file')->store('offers', 'public');
+            $olFilePath = $request->file('ol_file')->store(UploadPath::forUser($request->user(), 'offers'), 'public');
         }
 
         if ($offer) {
@@ -1213,7 +1214,7 @@ class ApplicationController extends Controller
 
         // Handle file upload
         if ($request->hasFile('mcu_file')) {
-            $uploadedFilePath = $request->file('mcu_file')->store('mcu', 'public');
+            $uploadedFilePath = $request->file('mcu_file')->store(UploadPath::forUser($request->user(), 'mcu'), 'public');
             
             // Build meta data from request
             $meta = [
@@ -1323,7 +1324,7 @@ class ApplicationController extends Controller
         $meta = $application->mobilisasi_meta ?? [];
         
         if ($request->hasFile('ticket')) {
-            $path = $request->file('ticket')->store('mobilisasi', 'public');
+            $path = $request->file('ticket')->store(UploadPath::forUser($request->user(), 'mobilisasi'), 'public');
             $meta['ticket_path'] = $path;
             $meta['ticket_name'] = $request->file('ticket')->getClientOriginalName();
             $meta['uploaded_at'] = now()->toDateTimeString();
@@ -1365,7 +1366,7 @@ class ApplicationController extends Controller
         $meta = $application->ground_test_meta ?? [];
 
         if ($request->hasFile('lap')) {
-            $path = $request->file('lap')->store('ground_test', 'public');
+            $path = $request->file('lap')->store(UploadPath::forUser($request->user(), 'ground-test'), 'public');
             $meta['lap_path'] = $path;
             $meta['lap_name'] = $request->file('lap')->getClientOriginalName();
             $meta['uploaded_at'] = now()->toDateTimeString();
