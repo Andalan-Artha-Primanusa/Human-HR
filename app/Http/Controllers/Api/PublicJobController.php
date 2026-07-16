@@ -13,6 +13,7 @@ class PublicJobController extends Controller
     {
         $filters = $request->validate([
             'status' => ['nullable', 'in:draft,open,closed'],
+            'create_at' => ['nullable', 'date_format:Y-m-d'],
             'created_at' => ['nullable', 'date_format:Y-m-d'],
             'created_from' => ['nullable', 'date_format:Y-m-d'],
             'created_to' => ['nullable', 'date_format:Y-m-d'],
@@ -21,13 +22,14 @@ class PublicJobController extends Controller
         ]);
 
         $code = $filters['code_id'] ?? $filters['code'] ?? null;
+        $createdAt = $filters['created_at'] ?? $filters['create_at'] ?? null;
 
         $jobs = Job::query()
             ->with($this->relations())
             ->withCount('applications')
             ->when($code, fn($query) => $query->where('code', $code))
             ->when($filters['status'] ?? null, fn($query, $status) => $query->where('status', $status))
-            ->when($filters['created_at'] ?? null, fn($query, $date) => $query->whereDate('created_at', $date))
+            ->when($createdAt, fn($query, $date) => $query->whereDate('created_at', $date))
             ->when($filters['created_from'] ?? null, fn($query, $date) => $query->whereDate('created_at', '>=', $date))
             ->when($filters['created_to'] ?? null, fn($query, $date) => $query->whereDate('created_at', '<=', $date))
             ->latest('created_at')
@@ -39,7 +41,7 @@ class PublicJobController extends Controller
             'message' => 'Public jobs retrieved successfully.',
             'filters' => [
                 'status' => $filters['status'] ?? null,
-                'created_at' => $filters['created_at'] ?? null,
+                'created_at' => $createdAt,
                 'created_from' => $filters['created_from'] ?? null,
                 'created_to' => $filters['created_to'] ?? null,
                 'code_id' => $code,
