@@ -271,6 +271,14 @@ class CandidateProfileController extends Controller
                 $safeName = $this->safeOriginalName($cv->getClientOriginalName());
                 $path = $cv->storeAs($userFolder . '/cv', Str::uuid() . '_' . $safeName, 'public');
                 $profile->cv_path = $path;
+                $profile->attachments()->updateOrCreate(
+                    ['label' => 'CV'],
+                    [
+                        'path' => $path,
+                        'mime' => $cv->getClientMimeType(),
+                        'size_bytes' => $cv->getSize(),
+                    ]
+                );
             }
 
             $docs = (array) ($profile->documents ?? []);
@@ -287,6 +295,12 @@ class CandidateProfileController extends Controller
                     $safeName = $this->safeOriginalName($f->getClientOriginalName());
                     $p = $f->storeAs($userFolder . '/docs', Str::uuid() . '_' . $safeName, 'public');
                     $docs[] = ['name' => $safeName, 'path' => $p];
+                    $profile->attachments()->create([
+                        'label' => $safeName,
+                        'path' => $p,
+                        'mime' => $f->getClientMimeType(),
+                        'size_bytes' => $f->getSize(),
+                    ]);
                 }
                 $profile->documents = $docs;
             }

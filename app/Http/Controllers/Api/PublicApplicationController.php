@@ -83,13 +83,21 @@ class PublicApplicationController extends Controller
         );
 
         $profile->forceFill(['cv_path' => $path])->save();
+        $attachment = $profile->attachments()->updateOrCreate(
+            ['label' => 'CV'],
+            [
+                'path' => $path,
+                'mime' => $file->getClientMimeType(),
+                'size_bytes' => $file->getSize(),
+            ]
+        );
         $profile->loadCount(['trainings', 'employments', 'references'])->loadMissing('attachments');
 
         $missing = $profile->missingRequiredForApplication();
         $application = null;
 
         if (($data['apply'] ?? false) && $missing === []) {
-            $application = DB::transaction(function () use ($user, $job) {
+            $application = DB::transaction(function () use ($user, $job, $path, $file) {
                 $app = JobApplication::firstOrCreate(
                     [
                         'job_id' => $job->id,
@@ -114,6 +122,15 @@ class PublicApplicationController extends Controller
                     ]);
                 }
 
+                $app->attachments()->updateOrCreate(
+                    ['label' => 'CV'],
+                    [
+                        'path' => $path,
+                        'mime' => $file->getClientMimeType(),
+                        'size_bytes' => $file->getSize(),
+                    ]
+                );
+
                 return $app->fresh(['job.site', 'job.company', 'stages']);
             });
         }
@@ -129,6 +146,7 @@ class PublicApplicationController extends Controller
                 'job' => $job->loadMissing('site', 'company'),
                 'user_id' => $user->id,
                 'cv_path' => $path,
+                'attachment' => $attachment,
                 'profile_complete' => $missing === [],
                 'missing_required_fields' => $missing,
                 'application' => $application,
