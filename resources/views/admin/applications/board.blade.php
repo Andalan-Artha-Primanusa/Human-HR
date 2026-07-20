@@ -421,6 +421,8 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
         <option value="{{ $k }}" @selected(request('only') === $k)>{{ $v }}</option>
       @endforeach
     </select>
+    <input type="date" name="minepro_start_date" value="{{ $mineproStartDate ?? now()->startOfMonth()->format('Y-m-d') }}" title="StartDate MinePro" />
+    <input type="date" name="minepro_end_date" value="{{ $mineproEndDate ?? now()->endOfMonth()->format('Y-m-d') }}" title="EndDate MinePro" />
     <button type="submit" class="btn-filter">Filter</button>
   </form>
 
@@ -501,6 +503,14 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
                 <div class="kn-card-job">{{ $a->job->title }}</div>
                 <div class="kn-card-email">{{ $a->user->email }}</div>
                 <div class="kn-card-role">{{ $a->user->role === 'karyawan' ? 'User' : ($a->user->role === 'pelamar' ? 'Applicant' : ucfirst($a->user->role)) }}</div>
+                @if($a->minepro_current_process)
+                  <div class="mt-2 rounded-lg border border-amber-200 bg-amber-50 px-2 py-1 text-[11px] text-amber-800">
+                    MinePro: {{ $a->minepro_current_process['process'] ?? '-' }}
+                    @if(!empty($a->minepro_current_process['result']))
+                      · {{ $a->minepro_current_process['result'] }}
+                    @endif
+                  </div>
+                @endif
 
                 <div id="detail-{{ $a->id }}" class="hidden kn-subcard">
                   <div class="kn-subcard-head">
@@ -524,6 +534,16 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
                       <span class="kn-subcard-label">Status</span>
                       <span class="kn-subcard-value">{{ strtoupper($a->overall_status) }}</span>
                     </div>
+                    @if($a->minepro_current_process)
+                      <div class="kn-subcard-item">
+                        <span class="kn-subcard-label">MinePro Process</span>
+                        <span class="kn-subcard-value">{{ $a->minepro_current_process['process'] ?? '-' }}</span>
+                      </div>
+                      <div class="kn-subcard-item">
+                        <span class="kn-subcard-label">MinePro Result</span>
+                        <span class="kn-subcard-value">{{ $a->minepro_current_process['result'] ?? '-' }}</span>
+                      </div>
+                    @endif
                   </div>
 
                   <div class="mt-3 overflow-hidden border rounded-lg border-[#eadbcb] bg-white" style="font-size: 0.7rem;">

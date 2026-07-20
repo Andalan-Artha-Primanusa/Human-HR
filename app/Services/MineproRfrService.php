@@ -8,6 +8,53 @@ use Illuminate\Support\Facades\Log;
 
 class MineproRfrService
 {
+    public function processList(string $startDate, string $endDate): array
+    {
+        $url = (string) config('services.minepro.rfr_process_url');
+        $apiKey = (string) config('services.minepro.api_key');
+        $username = (string) config('services.minepro.basic_username');
+        $password = (string) config('services.minepro.basic_password');
+
+        if ($url === '' || $apiKey === '' || $username === '' || $password === '') {
+            return [];
+        }
+
+        try {
+            $response = Http::timeout((int) config('services.minepro.timeout', 15))
+                ->withBasicAuth($username, $password)
+                ->withHeaders([
+                    'x-api-key' => $apiKey,
+                    'Accept' => 'application/json',
+                ])
+                ->asMultipart()
+                ->post($url, [
+                    ['name' => 'StartDate', 'contents' => $startDate],
+                    ['name' => 'EndDate', 'contents' => $endDate],
+                ]);
+
+            if (! $response->successful()) {
+                Log::warning('MinePro RFR process request failed.', [
+                    'status' => $response->status(),
+                    'body' => $response->body(),
+                ]);
+
+                return [];
+            }
+
+            return collect(Arr::flatten($response->json('results', []), 1))
+                ->filter(fn($row) => is_array($row) && ! empty($row['RFRRefID']) && ! empty($row['NIK']))
+                ->map(fn($row) => $this->normalizeProcess($row))
+                ->values()
+                ->all();
+        } catch (\Throwable $e) {
+            Log::warning('MinePro RFR process request exception.', [
+                'message' => $e->getMessage(),
+            ]);
+
+            return [];
+        }
+    }
+
     public function approvedVacancies(string $startDate): array
     {
         $url = (string) config('services.minepro.rfr_url');
@@ -93,6 +140,46 @@ class MineproRfrService
             'description' => implode("\n\n", $descriptionParts),
             'raw' => $row,
         ];
+    }
+
+    private function normalizeProcess(array $row): array
+    {
+        return [
+            'id' => $row['IDTr'] ?? null,
+            'rfr_ref_id' => trim((string) ($row['RFRRefID'] ?? '')),
+            'candidate_id' => $row['CandidateID'] ?? null,
+            'nik' => trim((string) ($row['NIK'] ?? '')),
+            'process' => trim((string) ($row['Process'] ?? '')),
+            'stage' => $this->processToStage($row['Process'] ?? null),
+            'doc_status' => $row['DocStatus'] ?? null,
+            'start_date' => $row['StartDate'] ?? null,
+            'end_date' => $row['EndDate'] ?? null,
+            'result' => $row['Result'] ?? null,
+            'link' => $row['Link'] ?? null,
+            'notes' => $row['Notes'] ?? null,
+            'created_date' => $row['CreatedDate'] ?? null,
+            'created_by' => $row['CreatedBy'] ?? null,
+            'updated_date' => $row['UpdatedDate'] ?? null,
+            'updated_by' => $row['UpdateBy'] ?? null,
+            'file_name' => $row['FileName'] ?? null,
+            'raw' => $row,
+        ];
+    }
+
+    private function processToStage(?string $process): ?string
+    {
+        return match (strtolower(trim((string) $process))) {
+            'psikotest', 'psychotest' => 'psychotest',
+            'hrinterview', 'hr interview', 'hr_interview' => 'hr_iv',
+            'userinterview', 'user interview', 'user_interview' => 'user_trainer_iv',
+            'usertrainerinterview', 'trainerinterview' => 'user_trainer_iv',
+            'offering', 'offer' => 'offer',
+            'mcu' => 'mcu',
+            'mobilisasi', 'mobilization' => 'mobilisasi',
+            'groundtest', 'ground test', 'ground_test' => 'ground_test',
+            'onsite', 'on site', 'on_site' => 'onsite',
+            default => null,
+        };
     }
 
     private function splitWorkLocation(?string $workLocation): array

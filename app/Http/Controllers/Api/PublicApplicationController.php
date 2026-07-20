@@ -11,6 +11,7 @@ use App\Models\CandidateTraining;
 use App\Models\Job;
 use App\Models\JobApplication;
 use App\Models\User;
+use App\Support\ApiDateFormatter;
 use App\Support\UploadPath;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -135,8 +136,8 @@ class PublicApplicationController extends Controller
                 'user_id' => $user->id,
                 'profile_complete' => $missing === [],
                 'missing_required_fields' => $missing,
-                'profile' => $profile,
-                'application' => $application,
+                'profile' => ApiDateFormatter::format($profile->toArray()),
+                'application' => $application ? ApiDateFormatter::format($application->toArray()) : null,
             ],
         ], $application ? 201 : 200);
     }
@@ -237,13 +238,13 @@ class PublicApplicationController extends Controller
             'data' => [
                 'job_id' => $job->id,
                 'code_id' => $job->code,
-                'job' => $job->loadMissing('site', 'company'),
+                'job' => ApiDateFormatter::format($job->loadMissing('site', 'company')->toArray()),
                 'user_id' => $user->id,
                 'cv_path' => $path,
-                'attachment' => $attachment,
+                'attachment' => ApiDateFormatter::format($attachment->toArray()),
                 'profile_complete' => $missing === [],
                 'missing_required_fields' => $missing,
-                'application' => $application,
+                'application' => $application ? ApiDateFormatter::format($application->toArray()) : null,
             ],
         ], $application ? 201 : 200);
     }

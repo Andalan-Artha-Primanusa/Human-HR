@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Job;
+use App\Support\ApiDateFormatter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -47,7 +48,7 @@ class PublicJobController extends Controller
                 'code_id' => $code,
             ],
             'count' => $jobs->count(),
-            'data' => $jobs,
+            'data' => ApiDateFormatter::format($jobs->toArray()),
         ]);
     }
 
@@ -58,7 +59,7 @@ class PublicJobController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'Public job retrieved successfully.',
-            'data' => $job,
+            'data' => ApiDateFormatter::format($job->toArray()),
         ]);
     }
 
@@ -80,7 +81,7 @@ class PublicJobController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'Public job retrieved successfully.',
-            'data' => $job,
+            'data' => ApiDateFormatter::format($job->toArray()),
         ]);
     }
 

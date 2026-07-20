@@ -37,6 +37,7 @@ return [
 
     'minepro' => [
         'rfr_url' => env('MINEPRO_RFR_URL'),
+        'rfr_process_url' => env('MINEPRO_RFR_PROCESS_URL'),
         'api_key' => env('MINEPRO_API_KEY'),
         'basic_username' => env('MINEPRO_BASIC_USERNAME'),
         'basic_password' => env('MINEPRO_BASIC_PASSWORD'),

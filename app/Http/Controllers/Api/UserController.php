@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Support\ApiDateFormatter;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
@@ -65,15 +66,21 @@ class UserController extends Controller
             'created_at' => ['nullable', 'date_format:Y-m-d'],
             'created_from' => ['nullable', 'date_format:Y-m-d'],
             'created_to' => ['nullable', 'date_format:Y-m-d'],
+            'code' => ['nullable', 'string', 'max:80'],
+            'code_id' => ['nullable', 'string', 'max:80'],
         ]);
 
         $createdAt = $filters['created_at'] ?? $filters['create_at'] ?? null;
         $createdFrom = $filters['created_from'] ?? null;
         $createdTo = $filters['created_to'] ?? null;
+        $code = $filters['code_id'] ?? $filters['code'] ?? null;
 
         $users = User::query()
             ->select(['id', 'name', 'role', 'created_at'])
-            ->with($this->userRelations())
+            ->with($this->userRelations($code))
+            ->when($code, function ($query) use ($code) {
+                $query->whereHas('jobApplications.job', fn($job) => $job->where('code', $code));
+            })
             ->when($createdAt, fn($query) => $query->whereDate('created_at', $createdAt))
             ->when($createdFrom, fn($query) => $query->whereDate('created_at', '>=', $createdFrom))
             ->when($createdTo, fn($query) => $query->whereDate('created_at', '<=', $createdTo))
@@ -88,9 +95,10 @@ class UserController extends Controller
                 'created_at' => $createdAt,
                 'created_from' => $createdFrom,
                 'created_to' => $createdTo,
+                'code' => $code,
             ],
             'count' => $users->count(),
-            'data' => $users,
+            'data' => ApiDateFormatter::format($users->toArray()),
         ]);
     }
 
@@ -99,11 +107,11 @@ class UserController extends Controller
         $user->load($this->userRelations());
 
         return response()->json([
-            'user' => $user,
+            'user' => ApiDateFormatter::format($user->toArray()),
         ]);
     }
 
-    private function userRelations(): array
+    private function userRelations(?string $jobCode = null): array
     {
         return [
             'candidateProfile.poh',
@@ -111,6 +119,11 @@ class UserController extends Controller
             'candidateProfile.employments',
             'candidateProfile.references',
             'candidateProfile.attachments',
+            'jobApplications' => function ($query) use ($jobCode) {
+                $query
+                    ->when($jobCode, fn($q) => $q->whereHas('job', fn($job) => $job->where('code', $jobCode)))
+                    ->latest('created_at');
+            },
             'jobApplications.job.site',
             'jobApplications.job.company',
             'jobApplications.poh',

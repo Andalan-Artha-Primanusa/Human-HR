@@ -21,6 +21,7 @@ use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Support\Carbon;
 use App\Models\Poh;
 use App\Models\Site;
+use App\Services\MineproRfrService;
 use App\Support\UploadPath;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
@@ -278,7 +279,7 @@ class ApplicationController extends Controller
     }
 
     /** Kanban board */
-    public function board(Request $request)
+    public function board(Request $request, MineproRfrService $mineproRfrService)
     {
         $this->authorize('viewAdmin', JobApplication::class);
         $user   = auth()->user();
@@ -290,7 +291,8 @@ class ApplicationController extends Controller
         $query = JobApplication::with([
             'job:id,title,division,site_id',
             'job.site:id,code,name',
-            'user:id,name,role',
+            'user:id,name,email,role',
+            'user.candidateProfile:id,user_id,nik',
             'stages.actor:id,name',
             'stages.user:id,name',
             'feedbacks',
@@ -323,9 +325,34 @@ class ApplicationController extends Controller
             ->orderBy('id')
             ->get();
 
+        $mineproStartDate = $this->validDate(
+            $request->query('minepro_start_date'),
+            now()->startOfMonth()->format('Y-m-d')
+        );
+        $mineproEndDate = $this->validDate(
+            $request->query('minepro_end_date'),
+            now()->endOfMonth()->format('Y-m-d')
+        );
+        $mineproRows = $mineproRfrService->processList($mineproStartDate, $mineproEndDate);
+        $mineproByCandidate = collect($mineproRows)
+            ->groupBy(fn($row) => $this->mineproProcessKey($row['rfr_ref_id'] ?? '', $row['nik'] ?? ''));
+
+        foreach ($apps as $app) {
+            $key = $this->mineproProcessKey($app->job?->code ?? '', $app->user?->candidateProfile?->nik ?? '');
+            $processes = $mineproByCandidate->get($key, collect())->values();
+            $latest = $processes
+                ->filter(fn($row) => ! empty($row['stage']))
+                ->sortByDesc(fn($row) => $row['updated_date'] ?? $row['created_date'] ?? $row['start_date'] ?? '')
+                ->first();
+
+            $app->setAttribute('minepro_processes', $processes->all());
+            $app->setAttribute('minepro_current_process', $latest);
+            $app->setAttribute('minepro_stage', $latest['stage'] ?? null);
+        }
+
         $grouped = collect($stages)->mapWithKeys(fn($label, $key) => [$key => collect()]);
         foreach ($apps as $a) {
-            $key = $this->normalizeStage($a->current_stage) ?: 'applied';
+            $key = $this->normalizeStage($a->minepro_stage ?: $a->current_stage) ?: 'applied';
             if ($key === 'user_iv') $key = 'user_trainer_iv';
             if (!array_key_exists($key, $stages)) $key = 'applied';
             $grouped[$key]->push($a);
@@ -335,7 +362,19 @@ class ApplicationController extends Controller
         $sites = Site::all(['id', 'code', 'name']);
         $mcuTemplate = McuTemplate::where('is_active', true)->first() ?: McuTemplate::first();
 
-        return view('admin.applications.board', compact('stages', 'grouped', 'pohs', 'sites', 'mcuTemplate'));
+        return view('admin.applications.board', compact('stages', 'grouped', 'pohs', 'sites', 'mcuTemplate', 'mineproStartDate', 'mineproEndDate'));
+    }
+
+    private function validDate(mixed $date, string $fallback): string
+    {
+        return is_string($date) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)
+            ? $date
+            : $fallback;
+    }
+
+    private function mineproProcessKey(string $rfrRefId, string $nik): string
+    {
+        return strtoupper(trim($rfrRefId)) . '|' . preg_replace('/\D+/', '', $nik);
     }
 
     /**
