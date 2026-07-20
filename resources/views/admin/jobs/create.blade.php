@@ -76,7 +76,7 @@
           Ambil RFR
         </button>
         <div class="text-xs text-slate-500">
-          Data code diambil dari RFR fully approved MinePro.
+          Data lowongan diambil dari RFR fully approved MinePro berdasarkan StartDate.
         </div>
       </form>
 
@@ -102,7 +102,7 @@
           {{-- Code --}}
           <div class="grid gap-4 md:col-span-2 md:grid-cols-2">
             <div>
-              <label class="label">Pilih RFR dari API</label>
+              <label class="label">Pilih RFR MinePro</label>
               <select class="input" id="rfr_select" style="--tw-ring-color: {{ $ACCENT }}">
                 <option value="">— Pilih RFR —</option>
                 @foreach(($rfrVacancies ?? []) as $rfr)
