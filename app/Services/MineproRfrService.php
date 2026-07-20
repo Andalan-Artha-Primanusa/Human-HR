@@ -8,6 +8,19 @@ use Illuminate\Support\Facades\Log;
 
 class MineproRfrService
 {
+    private array $lastProcessMeta = [
+        'ok' => false,
+        'message' => null,
+        'status' => null,
+        'url' => null,
+        'count' => 0,
+    ];
+
+    public function lastProcessMeta(): array
+    {
+        return $this->lastProcessMeta;
+    }
+
     public function processList(string $startDate, string $endDate): array
     {
         $url = (string) config('services.minepro.rfr_process_url');
@@ -16,6 +29,14 @@ class MineproRfrService
         $password = (string) config('services.minepro.basic_password');
 
         if ($url === '' || $apiKey === '' || $username === '' || $password === '') {
+            $this->lastProcessMeta = [
+                'ok' => false,
+                'message' => 'Konfigurasi MinePro RFR Process belum lengkap.',
+                'status' => null,
+                'url' => $url,
+                'count' => 0,
+            ];
+
             return [];
         }
 
@@ -33,6 +54,13 @@ class MineproRfrService
                 ]);
 
             if (! $response->successful()) {
+                $this->lastProcessMeta = [
+                    'ok' => false,
+                    'message' => 'Request MinePro RFR Process gagal.',
+                    'status' => $response->status(),
+                    'url' => $url,
+                    'count' => 0,
+                ];
                 Log::warning('MinePro RFR process request failed.', [
                     'status' => $response->status(),
                     'body' => $response->body(),
@@ -41,18 +69,54 @@ class MineproRfrService
                 return [];
             }
 
-            return collect(Arr::flatten($response->json('results', []), 1))
+            $rows = collect($this->resultRows($response->json('results', [])))
                 ->filter(fn($row) => is_array($row) && ! empty($row['RFRRefID']) && ! empty($row['NIK']))
                 ->map(fn($row) => $this->normalizeProcess($row))
                 ->values()
                 ->all();
+
+            $this->lastProcessMeta = [
+                'ok' => true,
+                'message' => 'MinePro RFR Process berhasil dibaca.',
+                'status' => $response->status(),
+                'url' => $url,
+                'count' => count($rows),
+            ];
+
+            return $rows;
         } catch (\Throwable $e) {
+            $this->lastProcessMeta = [
+                'ok' => false,
+                'message' => $e->getMessage(),
+                'status' => null,
+                'url' => $url,
+                'count' => 0,
+            ];
             Log::warning('MinePro RFR process request exception.', [
                 'message' => $e->getMessage(),
             ]);
 
             return [];
         }
+    }
+
+    private function resultRows(mixed $results): array
+    {
+        if (! is_array($results)) {
+            return [];
+        }
+
+        if (isset($results['RFRRefID'])) {
+            return [$results];
+        }
+
+        $first = reset($results);
+
+        if (is_array($first) && isset($first['RFRRefID'])) {
+            return $results;
+        }
+
+        return Arr::flatten($results, 1);
     }
 
     public function approvedVacancies(string $startDate): array

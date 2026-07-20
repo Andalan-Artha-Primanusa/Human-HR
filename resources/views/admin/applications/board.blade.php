@@ -429,6 +429,12 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
     Board memakai API MinePro RFR Process sebagai sumber stage.
     Range: {{ $mineproStartDate ?? '-' }} sampai {{ $mineproEndDate ?? '-' }}.
     Row API terbaca: {{ $mineproRowsCount ?? 0 }}.
+    @if(!data_get($mineproMeta ?? [], 'ok'))
+      <span class="font-semibold text-red-700">Status API: {{ data_get($mineproMeta ?? [], 'message', 'Gagal membaca API') }}</span>
+      @if(data_get($mineproMeta ?? [], 'status'))
+        <span class="text-red-700">({{ data_get($mineproMeta ?? [], 'status') }})</span>
+      @endif
+    @endif
   </div>
 
   {{-- BOARD --}}

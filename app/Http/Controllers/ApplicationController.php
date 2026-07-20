@@ -326,6 +326,7 @@ class ApplicationController extends Controller
             now()->endOfMonth()->format('Y-m-d')
         );
         $mineproRows = $mineproRfrService->processList($mineproStartDate, $mineproEndDate);
+        $mineproMeta = $mineproRfrService->lastProcessMeta();
         $mineproRowsCount = count($mineproRows);
         $mineproByCandidate = collect($mineproRows)
             ->groupBy(fn($row) => $this->mineproProcessKey($row['rfr_ref_id'] ?? '', $row['nik'] ?? ''));
@@ -365,7 +366,7 @@ class ApplicationController extends Controller
         $sites = Site::all(['id', 'code', 'name']);
         $mcuTemplate = McuTemplate::where('is_active', true)->first() ?: McuTemplate::first();
 
-        return view('admin.applications.board', compact('stages', 'grouped', 'pohs', 'sites', 'mcuTemplate', 'mineproStartDate', 'mineproEndDate', 'mineproRowsCount'));
+        return view('admin.applications.board', compact('stages', 'grouped', 'pohs', 'sites', 'mcuTemplate', 'mineproStartDate', 'mineproEndDate', 'mineproRowsCount', 'mineproMeta'));
     }
 
     private function validDate(mixed $date, string $fallback): string
