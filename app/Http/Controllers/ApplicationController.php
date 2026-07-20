@@ -330,6 +330,8 @@ class ApplicationController extends Controller
         $mineproRowsCount = count($mineproRows);
         $mineproByCandidate = collect($mineproRows)
             ->groupBy(fn($row) => $this->mineproProcessKey($row['rfr_ref_id'] ?? '', $row['nik'] ?? ''));
+        $mineproByRfr = collect($mineproRows)
+            ->groupBy(fn($row) => strtoupper(trim((string) ($row['rfr_ref_id'] ?? ''))));
         $onlyStages = collect(explode(',', (string) $request->query('only', '')))
             ->map(fn($s) => $this->normalizeStage($s))
             ->filter()
@@ -339,6 +341,9 @@ class ApplicationController extends Controller
         foreach ($apps as $app) {
             $key = $this->mineproProcessKey($app->job?->code ?? '', $app->user?->candidateProfile?->nik ?? '');
             $processes = $mineproByCandidate->get($key, collect())->values();
+            if ($processes->isEmpty() && filled($app->job?->code)) {
+                $processes = $mineproByRfr->get(strtoupper(trim((string) $app->job->code)), collect())->values();
+            }
             $latest = $processes
                 ->filter(fn($row) => ! empty($row['stage']))
                 ->sortByDesc(fn($row) => $row['updated_date'] ?? $row['created_date'] ?? $row['start_date'] ?? '')
@@ -349,6 +354,7 @@ class ApplicationController extends Controller
             $app->setAttribute('minepro_stage', $latest['stage'] ?? null);
         }
 
+        $mineproMatchedApplications = $apps->filter(fn($app) => filled($app->minepro_stage))->count();
         $apps = $apps
             ->filter(fn($app) => filled($app->minepro_stage))
             ->when($onlyStages !== [], fn($items) => $items->filter(fn($app) => in_array($app->minepro_stage, $onlyStages, true)))
@@ -366,7 +372,7 @@ class ApplicationController extends Controller
         $sites = Site::all(['id', 'code', 'name']);
         $mcuTemplate = McuTemplate::where('is_active', true)->first() ?: McuTemplate::first();
 
-        return view('admin.applications.board', compact('stages', 'grouped', 'pohs', 'sites', 'mcuTemplate', 'mineproStartDate', 'mineproEndDate', 'mineproRowsCount', 'mineproMeta'));
+        return view('admin.applications.board', compact('stages', 'grouped', 'pohs', 'sites', 'mcuTemplate', 'mineproStartDate', 'mineproEndDate', 'mineproRowsCount', 'mineproMatchedApplications', 'mineproMeta'));
     }
 
     private function validDate(mixed $date, string $fallback): string
