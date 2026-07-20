@@ -430,6 +430,15 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
     Range: {{ $mineproStartDate ?? '-' }} sampai {{ $mineproEndDate ?? '-' }}.
     Row API terbaca: {{ $mineproRowsCount ?? 0 }}.
     Aplikasi match: {{ $mineproMatchedApplications ?? 0 }}.
+    @if(!empty($mineproMatchedStageCounts ?? []))
+      <span>
+        Masuk kolom:
+        @foreach($mineproMatchedStageCounts as $stage => $count)
+          {{ $stages[$stage] ?? ucfirst(str_replace('_', ' ', $stage)) }} {{ $count }}{{ !$loop->last ? ',' : '.' }}
+        @endforeach
+        Geser board ke kanan kalau kolomnya belum terlihat.
+      </span>
+    @endif
     @if(!data_get($mineproMeta ?? [], 'ok'))
       <span class="font-semibold text-red-700">Status API: {{ data_get($mineproMeta ?? [], 'message', 'Gagal membaca API') }}</span>
       @if(data_get($mineproMeta ?? [], 'status'))

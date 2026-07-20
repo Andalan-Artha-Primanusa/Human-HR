@@ -62,13 +62,17 @@ class ApplicationController extends Controller
         'psikotest'          => 'psychotest',
         'hr_iv'              => 'hr_iv',
         'hriv'               => 'hr_iv',
+        'hrinterview'        => 'hr_iv',
         'hr-interview'       => 'hr_iv',
         'user_iv'            => 'user_iv',
         'useriv'             => 'user_iv',
+        'userinterview'      => 'user_iv',
         'user-interview'     => 'user_iv',
         'user_trainer_iv'    => 'user_trainer_iv',
         'user-trainer'       => 'user_trainer_iv',
+        'usertrainerinterview' => 'user_trainer_iv',
         'trainer_iv'         => 'user_trainer_iv',
+        'trainerinterview'   => 'user_trainer_iv',
         'trainer-interview'  => 'user_trainer_iv',
         'offering'           => 'offer',
         'offer'              => 'offer',
@@ -78,6 +82,7 @@ class ApplicationController extends Controller
         'mobilisasi'         => 'mobilisasi',
         'mobilization'       => 'mobilisasi',
         'ground_test'        => 'ground_test',
+        'groundtest'         => 'ground_test',
         'ground-test'        => 'ground_test',
         'diterima'           => 'hired',
         'hired'              => 'hired',
@@ -346,15 +351,29 @@ class ApplicationController extends Controller
             }
             $latest = $processes
                 ->filter(fn($row) => ! empty($row['stage']))
-                ->sortByDesc(fn($row) => $row['updated_date'] ?? $row['created_date'] ?? $row['start_date'] ?? '')
+                ->sortByDesc(function ($row) {
+                    $stage = $this->normalizeStage($row['stage'] ?? null);
+                    $stageIndex = $stage ? $this->stageIndex($stage) : -1;
+                    $date = $row['updated_date'] ?? $row['created_date'] ?? $row['start_date'] ?? '';
+
+                    return str_pad((string) $stageIndex, 3, '0', STR_PAD_LEFT) . '|' . $date;
+                })
                 ->first();
+            $normalizedStage = $this->normalizeStage($latest['stage'] ?? null);
+            if ($normalizedStage === 'user_iv') {
+                $normalizedStage = 'user_trainer_iv';
+            }
 
             $app->setAttribute('minepro_processes', $processes->all());
             $app->setAttribute('minepro_current_process', $latest);
-            $app->setAttribute('minepro_stage', $latest['stage'] ?? null);
+            $app->setAttribute('minepro_stage', $normalizedStage);
         }
 
         $mineproMatchedApplications = $apps->filter(fn($app) => filled($app->minepro_stage))->count();
+        $mineproMatchedStageCounts = $apps
+            ->filter(fn($app) => filled($app->minepro_stage))
+            ->countBy('minepro_stage')
+            ->all();
         $apps = $apps
             ->filter(fn($app) => filled($app->minepro_stage))
             ->when($onlyStages !== [], fn($items) => $items->filter(fn($app) => in_array($app->minepro_stage, $onlyStages, true)))
@@ -372,7 +391,7 @@ class ApplicationController extends Controller
         $sites = Site::all(['id', 'code', 'name']);
         $mcuTemplate = McuTemplate::where('is_active', true)->first() ?: McuTemplate::first();
 
-        return view('admin.applications.board', compact('stages', 'grouped', 'pohs', 'sites', 'mcuTemplate', 'mineproStartDate', 'mineproEndDate', 'mineproRowsCount', 'mineproMatchedApplications', 'mineproMeta'));
+        return view('admin.applications.board', compact('stages', 'grouped', 'pohs', 'sites', 'mcuTemplate', 'mineproStartDate', 'mineproEndDate', 'mineproRowsCount', 'mineproMatchedApplications', 'mineproMatchedStageCounts', 'mineproMeta'));
     }
 
     private function validDate(mixed $date, string $fallback): string
