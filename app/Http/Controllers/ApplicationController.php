@@ -335,8 +335,6 @@ class ApplicationController extends Controller
         $mineproRowsCount = count($mineproRows);
         $mineproByCandidate = collect($mineproRows)
             ->groupBy(fn($row) => $this->mineproProcessKey($row['rfr_ref_id'] ?? '', $row['nik'] ?? ''));
-        $mineproByRfr = collect($mineproRows)
-            ->groupBy(fn($row) => strtoupper(trim((string) ($row['rfr_ref_id'] ?? ''))));
         $onlyStages = collect(explode(',', (string) $request->query('only', '')))
             ->map(fn($s) => $this->normalizeStage($s))
             ->filter()
@@ -346,9 +344,6 @@ class ApplicationController extends Controller
         foreach ($apps as $app) {
             $key = $this->mineproProcessKey($app->job?->code ?? '', $app->user?->candidateProfile?->nik ?? '');
             $processes = $mineproByCandidate->get($key, collect())->values();
-            if ($processes->isEmpty() && filled($app->job?->code)) {
-                $processes = $mineproByRfr->get(strtoupper(trim((string) $app->job->code)), collect())->values();
-            }
             $latest = $processes
                 ->filter(fn($row) => ! empty($row['stage']))
                 ->sortByDesc(function ($row) {
