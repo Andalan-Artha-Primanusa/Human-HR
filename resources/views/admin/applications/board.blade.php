@@ -425,6 +425,11 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
     <input type="date" name="minepro_end_date" value="{{ $mineproEndDate ?? now()->endOfMonth()->format('Y-m-d') }}" title="EndDate MinePro" />
     <button type="submit" class="btn-filter">Filter</button>
   </form>
+  <div class="mb-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-900">
+    Board memakai API MinePro RFR Process sebagai sumber stage.
+    Range: {{ $mineproStartDate ?? '-' }} sampai {{ $mineproEndDate ?? '-' }}.
+    Row API terbaca: {{ $mineproRowsCount ?? 0 }}.
+  </div>
 
   {{-- BOARD --}}
   <div class="kn-board-wrap">

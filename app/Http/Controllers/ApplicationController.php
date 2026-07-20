@@ -306,14 +306,6 @@ class ApplicationController extends Controller
 
         $apps = $query
             ->when($request->filled('job_id'), fn($q) => $q->where('job_id', $request->job_id))
-            ->when($request->filled('only'), function ($q) use ($request) {
-                $only = collect(explode(',', $request->only))
-                    ->map(fn($s) => $this->normalizeStage($s))
-                    ->filter()
-                    ->values()
-                    ->all();
-                return $q->whereIn('current_stage', $only);
-            })
             ->when($request->filled('q'), function ($q) use ($request) {
                 $like = '%' . addcslashes(trim($request->q), '\\%_') . '%';
                 return $q->where(function ($w) use ($like) {
@@ -334,8 +326,14 @@ class ApplicationController extends Controller
             now()->endOfMonth()->format('Y-m-d')
         );
         $mineproRows = $mineproRfrService->processList($mineproStartDate, $mineproEndDate);
+        $mineproRowsCount = count($mineproRows);
         $mineproByCandidate = collect($mineproRows)
             ->groupBy(fn($row) => $this->mineproProcessKey($row['rfr_ref_id'] ?? '', $row['nik'] ?? ''));
+        $onlyStages = collect(explode(',', (string) $request->query('only', '')))
+            ->map(fn($s) => $this->normalizeStage($s))
+            ->filter()
+            ->values()
+            ->all();
 
         foreach ($apps as $app) {
             $key = $this->mineproProcessKey($app->job?->code ?? '', $app->user?->candidateProfile?->nik ?? '');
@@ -350,9 +348,14 @@ class ApplicationController extends Controller
             $app->setAttribute('minepro_stage', $latest['stage'] ?? null);
         }
 
+        $apps = $apps
+            ->filter(fn($app) => filled($app->minepro_stage))
+            ->when($onlyStages !== [], fn($items) => $items->filter(fn($app) => in_array($app->minepro_stage, $onlyStages, true)))
+            ->values();
+
         $grouped = collect($stages)->mapWithKeys(fn($label, $key) => [$key => collect()]);
         foreach ($apps as $a) {
-            $key = $this->normalizeStage($a->minepro_stage ?: $a->current_stage) ?: 'applied';
+            $key = $this->normalizeStage($a->minepro_stage) ?: 'applied';
             if ($key === 'user_iv') $key = 'user_trainer_iv';
             if (!array_key_exists($key, $stages)) $key = 'applied';
             $grouped[$key]->push($a);
@@ -362,7 +365,7 @@ class ApplicationController extends Controller
         $sites = Site::all(['id', 'code', 'name']);
         $mcuTemplate = McuTemplate::where('is_active', true)->first() ?: McuTemplate::first();
 
-        return view('admin.applications.board', compact('stages', 'grouped', 'pohs', 'sites', 'mcuTemplate', 'mineproStartDate', 'mineproEndDate'));
+        return view('admin.applications.board', compact('stages', 'grouped', 'pohs', 'sites', 'mcuTemplate', 'mineproStartDate', 'mineproEndDate', 'mineproRowsCount'));
     }
 
     private function validDate(mixed $date, string $fallback): string
