@@ -344,33 +344,39 @@ class ApplicationController extends Controller
         foreach ($apps as $app) {
             $key = $this->mineproProcessKey($app->job?->code ?? '', $app->user?->candidateProfile?->nik ?? '');
             $processes = $mineproByCandidate->get($key, collect())->values();
-            $latest = $processes
-                ->filter(fn($row) => ! empty($row['stage']))
-                ->sortByDesc(function ($row) {
-                    $stage = $this->normalizeStage($row['stage'] ?? null);
-                    $stageIndex = $stage ? $this->stageIndex($stage) : -1;
-                    $date = $row['updated_date'] ?? $row['created_date'] ?? $row['start_date'] ?? '';
-
-                    return str_pad((string) $stageIndex, 3, '0', STR_PAD_LEFT) . '|' . $date;
-                })
-                ->first();
-            $normalizedStage = $this->normalizeStage($latest['stage'] ?? null);
-            if ($normalizedStage === 'user_iv') {
-                $normalizedStage = 'user_trainer_iv';
-            }
 
             $app->setAttribute('minepro_processes', $processes->all());
-            $app->setAttribute('minepro_current_process', $latest);
-            $app->setAttribute('minepro_stage', $normalizedStage);
         }
 
-        $mineproMatchedApplications = $apps->filter(fn($app) => filled($app->minepro_stage))->count();
+        $matchedApps = $apps->filter(fn($app) => count($app->minepro_processes ?? []) > 0);
+        $mineproMatchedApplications = $matchedApps->count();
+        $apps = $matchedApps
+            ->flatMap(function ($app) {
+                return collect($app->minepro_processes ?? [])
+                    ->filter(fn($process) => filled($process['stage'] ?? null))
+                    ->map(function ($process) use ($app) {
+                        $stage = $this->normalizeStage($process['stage'] ?? null);
+                        if ($stage === 'user_iv') {
+                            $stage = 'user_trainer_iv';
+                        }
+                        if (! $stage) {
+                            return null;
+                        }
+
+                        $processApp = clone $app;
+                        $processApp->setAttribute('minepro_current_process', $process);
+                        $processApp->setAttribute('minepro_stage', $stage);
+
+                        return $processApp;
+                    })
+                    ->filter();
+            })
+            ->values();
+        $mineproMatchedProcessRows = $apps->count();
         $mineproMatchedStageCounts = $apps
-            ->filter(fn($app) => filled($app->minepro_stage))
             ->countBy('minepro_stage')
             ->all();
         $apps = $apps
-            ->filter(fn($app) => filled($app->minepro_stage))
             ->when($onlyStages !== [], fn($items) => $items->filter(fn($app) => in_array($app->minepro_stage, $onlyStages, true)))
             ->values();
 
@@ -386,7 +392,7 @@ class ApplicationController extends Controller
         $sites = Site::all(['id', 'code', 'name']);
         $mcuTemplate = McuTemplate::where('is_active', true)->first() ?: McuTemplate::first();
 
-        return view('admin.applications.board', compact('stages', 'grouped', 'pohs', 'sites', 'mcuTemplate', 'mineproStartDate', 'mineproEndDate', 'mineproRowsCount', 'mineproMatchedApplications', 'mineproMatchedStageCounts', 'mineproMeta'));
+        return view('admin.applications.board', compact('stages', 'grouped', 'pohs', 'sites', 'mcuTemplate', 'mineproStartDate', 'mineproEndDate', 'mineproRowsCount', 'mineproMatchedApplications', 'mineproMatchedProcessRows', 'mineproMatchedStageCounts', 'mineproMeta'));
     }
 
     private function validDate(mixed $date, string $fallback): string

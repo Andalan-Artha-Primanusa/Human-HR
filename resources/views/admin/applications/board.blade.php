@@ -430,6 +430,7 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
     Range: {{ $mineproStartDate ?? '-' }} sampai {{ $mineproEndDate ?? '-' }}.
     Row API terbaca: {{ $mineproRowsCount ?? 0 }}.
     Aplikasi match: {{ $mineproMatchedApplications ?? 0 }}.
+    Proses tampil: {{ $mineproMatchedProcessRows ?? 0 }}.
     @if(!empty($mineproMatchedStageCounts ?? []))
       <span>
         Masuk kolom:
