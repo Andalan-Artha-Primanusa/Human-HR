@@ -289,7 +289,7 @@ class ApplicationController extends Controller
         }
 
         $query = JobApplication::with([
-            'job:id,title,division,site_id',
+            'job:id,code,title,division,site_id',
             'job.site:id,code,name',
             'user:id,name,email,role',
             'user.candidateProfile:id,user_id,nik',
