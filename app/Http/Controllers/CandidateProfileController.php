@@ -109,6 +109,9 @@ class CandidateProfileController extends Controller
             'applied_before_position' => 'nullable|string|max:190',
             'willing_out_of_town' => 'nullable|boolean',
             'not_willing_reason' => 'nullable|string|max:255',
+            // === Tambahan ===
+            'status_pernikahan' => ['nullable', Rule::in(['single', 'married', 'divorced', 'widowed'])],
+            'source_channel' => ['nullable', Rule::in(['website', 'job_fair', 'referral', 'social_media', 'other'])],
             // File (4MB, PDF only)
             'cv' => 'nullable|file|mimes:pdf|max:4096',
             'documents' => "nullable|array|max:{$maxDocuments}",
@@ -246,6 +249,9 @@ class CandidateProfileController extends Controller
                 'work_motivation' => $validated['work_motivation'] ?? '',
                 'medical_history' => $validated['medical_history'] ?? '',
                 'last_medical_checkup' => $validated['last_medical_checkup'] ?? '',
+                // Tambahan
+                'status_pernikahan' => $request->input('status_pernikahan', null),
+                'source_channel' => $request->input('source_channel', null),
             ]);
 
             // Handle SMA/SMK and other education extras

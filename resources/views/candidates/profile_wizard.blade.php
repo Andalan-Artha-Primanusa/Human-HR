@@ -253,9 +253,9 @@
 
           <div class="grid gap-4 mt-4 sm:grid-cols-3">
             <div>
-              <label class="text-sm text-slate-600">Pendidikan Terakhir</label>
+              <label class="text-sm text-slate-600">Pendidikan Terakhir <span class="text-red-600">*</span></label>
               @php $ed = old('last_education', $profile->last_education); @endphp
-              <select name="last_education" id="last_education" class="w-full px-3 py-2 mt-1 border rounded-lg" onchange="document.getElementById('sma-smk-group').style.display = this.value === 'SMA_SMK' ? 'flex' : 'none'; document.getElementById('lainnya-group').style.display = this.value === 'LAINNYA' ? 'block' : 'none';">
+              <select required name="last_education" id="last_education" class="w-full px-3 py-2 mt-1 border rounded-lg" onchange="document.getElementById('sma-smk-group').style.display = this.value === 'SMA_SMK' ? 'flex' : 'none'; document.getElementById('lainnya-group').style.display = this.value === 'LAINNYA' ? 'block' : 'none';">
                 <option value="">—</option>
                 @foreach(['SD', 'SMP', 'SMA_SMK', 'D1', 'D2', 'D3', 'D4', 'S1', 'S2', 'S3', 'LAINNYA'] as $e)
                       <option value="{{ $e }}" @selected($ed === $e)>{{ $e }}</option>
@@ -281,12 +281,12 @@
               <input name="other_education" value="{{ old('other_education', $profile->extras['other_education'] ?? '') }}" class="w-full px-3 py-2 border rounded-lg">
             </div>
             <div>
-              <label class="text-sm text-slate-600">Jurusan</label>
-              <input name="education_major" value="{{ old('education_major', $profile->education_major) }}" class="w-full px-3 py-2 mt-1 border rounded-lg">
+              <label class="text-sm text-slate-600">Jurusan <span class="text-red-600">*</span></label>
+              <input required name="education_major" value="{{ old('education_major', $profile->education_major) }}" class="w-full px-3 py-2 mt-1 border rounded-lg">
             </div>
             <div>
-              <label class="text-sm text-slate-600">Sekolah/Kampus</label>
-              <input name="education_school" value="{{ old('education_school', $profile->education_school) }}" class="w-full px-3 py-2 mt-1 border rounded-lg">
+              <label class="text-sm text-slate-600">Sekolah/Kampus <span class="text-red-600">*</span></label>
+              <input required name="education_school" value="{{ old('education_school', $profile->education_school) }}" class="w-full px-3 py-2 mt-1 border rounded-lg">
             </div>
           </div>
         </div>
@@ -555,6 +555,87 @@
   </div>
 </div>
 
+      {{-- Pernyataan & Riwayat --}}
+      <div class="p-5 bg-white shadow-sm card rounded-2xl">
+        <h2 class="flex items-center gap-2 text-lg font-semibold">
+          <svg class="w-5 h-5 text-brand-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          Pernyataan & Riwayat
+        </h2>
+
+        <div class="grid gap-4 mt-4 sm:grid-cols-2">
+          <div>
+            <label class="text-sm text-slate-600">Status Pernikahan</label>
+            <select name="status_pernikahan" class="w-full px-3 py-2 mt-1 border rounded-lg">
+              <option value="">—</option>
+              @foreach(['single' => 'Belum Menikah', 'married' => 'Menikah', 'divorced' => 'Cerai', 'widowed' => 'Janda/Duda'] as $k => $v)
+                <option value="{{ $k }}" @selected(old('status_pernikahan', $profile->status_pernikahan) === $k)>{{ $v }}</option>
+              @endforeach
+            </select>
+          </div>
+          <div>
+            <label class="text-sm text-slate-600">Sumber Informasi</label>
+            <select name="source_channel" class="w-full px-3 py-2 mt-1 border rounded-lg">
+              <option value="">—</option>
+              @foreach(['website' => 'Website', 'job_fair' => 'Job Fair', 'referral' => 'Referral/Karyawan', 'social_media' => 'Media Sosial', 'other' => 'Lainnya'] as $k => $v)
+                <option value="{{ $k }}" @selected(old('source_channel', $profile->source_channel) === $k)>{{ $v }}</option>
+              @endforeach>
+            </select>
+          </div>
+          <div>
+            <label class="text-sm text-slate-600">Pernah bekerja sebelumnya?</label>
+            <select name="worked_before" class="w-full px-3 py-2 mt-1 border rounded-lg">
+              <option value="0" @selected(!old('worked_before', $profile->worked_before))>Tidak</option>
+              <option value="1" @selected(old('worked_before', $profile->worked_before))>Ya</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-sm text-slate-600">Pernah melamar di Andalan sebelumnya?</label>
+            <select name="applied_before" class="w-full px-3 py-2 mt-1 border rounded-lg">
+              <option value="0" @selected(!old('applied_before', $profile->applied_before))>Tidak</option>
+              <option value="1" @selected(old('applied_before', $profile->applied_before))>Ya</option>
+            </select>
+          </div>
+          <div class="sm:col-span-2">
+            <label class="text-sm text-slate-600">Posisi yang pernah dilamar</label>
+            <input name="applied_before_position" value="{{ old('applied_before_position', $profile->applied_before_position) }}" class="w-full px-3 py-2 mt-1 border rounded-lg" placeholder="Isi jika pernah melamar">
+          </div>
+          <div>
+            <label class="text-sm text-slate-600">Posisi sebelumnya</label>
+            <input name="worked_before_position" value="{{ old('worked_before_position', $profile->worked_before_position) }}" class="w-full px-3 py-2 mt-1 border rounded-lg" placeholder="Jabatan terakhir">
+          </div>
+          <div>
+            <label class="text-sm text-slate-600">Durasi bekerja</label>
+            <input name="worked_before_duration" value="{{ old('worked_before_duration', $profile->worked_before_duration) }}" class="w-full px-3 py-2 mt-1 border rounded-lg" placeholder="Contoh: 2 tahun">
+          </div>
+          <div>
+            <label class="text-sm text-slate-600">Bersedia ditempatkan di luar kota?</label>
+            <select name="willing_out_of_town" class="w-full px-3 py-2 mt-1 border rounded-lg">
+              <option value="0" @selected(!old('willing_out_of_town', $profile->willing_out_of_town))>Tidak</option>
+              <option value="1" @selected(old('willing_out_of_town', $profile->willing_out_of_town))>Ya</option>
+            </select>
+          </div>
+          <div class="sm:col-span-2">
+            <label class="text-sm text-slate-600">Alasan tidak bersedia ditempatkan di luar kota</label>
+            <input name="not_willing_reason" value="{{ old('not_willing_reason', $profile->not_willing_reason) }}" class="w-full px-3 py-2 mt-1 border rounded-lg" placeholder="Isi jika tidak bersedia">
+          </div>
+          <div class="sm:col-span-2">
+            <label class="text-sm text-slate-600">Adanya kerabat di Andalan Group?</label>
+            <select name="has_relatives" class="w-full px-3 py-2 mt-1 border rounded-lg">
+              <option value="0" @selected(!old('has_relatives', $profile->has_relatives))>Tidak</option>
+              <option value="1" @selected(old('has_relatives', $profile->has_relatives))>Ya</option>
+            </select>
+          </div>
+          <div class="sm:col-span-2">
+            <label class="text-sm text-slate-600">Detail kerabat (nama & hubungan)</label>
+            <input name="relatives_detail" value="{{ old('relatives_detail', $profile->relatives_detail) }}" class="w-full px-3 py-2 mt-1 border rounded-lg" placeholder="Contoh: Budi (Paman), HRD">
+          </div>
+          <div class="sm:col-span-2">
+            <label class="text-sm text-slate-600">Motivasi melamar</label>
+            <textarea name="motivation" rows="3" class="w-full px-3 py-2 mt-1 border rounded-lg" placeholder="Ceritakan motivasi kamu melamar di Andalan Group">{{ old('motivation', $profile->motivation) }}</textarea>
+          </div>
+        </div>
+      </div>
+
       <div class="p-5 bg-white shadow-sm card rounded-2xl" x-data="{ items: $store.form.references }">
           <div class="flex items-center justify-between">
             <h2 class="flex items-center gap-2 text-lg font-semibold">
@@ -806,6 +887,7 @@
           const req = [
             ['full_name','Nama Lengkap'], ['gender','Jenis Kelamin'], ['age','Usia'], ['birthplace','Tempat Lahir'], ['birthdate','Tanggal Lahir'],
             ['nik','NIK KTP'], ['email','Email'], ['phone','Nomor HP'],
+            ['last_education','Pendidikan Terakhir'], ['education_major','Jurusan'], ['education_school','Sekolah/Kampus'],
             ['ktp_address','Alamat KTP'], ['ktp_village','Desa/Kelurahan (KTP)'], ['ktp_district','Kecamatan (KTP)'], ['ktp_city','Kab/Kota (KTP)'], ['ktp_province','Provinsi (KTP)'], ['ktp_postal_code','Kode Pos (KTP)'],
             ['domicile_address','Alamat Domisili'], ['domicile_village','Desa/Kelurahan (Domisili)'], ['domicile_district','Kecamatan (Domisili)'], ['domicile_city','Kab/Kota (Domisili)'], ['domicile_province','Provinsi (Domisili)'], ['domicile_postal_code','Kode Pos (Domisili)']
           ];
