@@ -15,16 +15,21 @@ class JobApplication extends Model
     use HasFactory, HasUuidPrimaryKey;
 
     protected $fillable = [
-        'job_id', 'user_id', 'poh_id', 'current_stage', 'overall_status', 
-        'feedback_hr', 'approve_hr', 
-        'feedback_trainer', 'approve_trainer', 
-        'feedback_user', 'approve_user', 
+        'job_id', 'user_id', 'poh_id', 'current_stage', 'overall_status',
+        'motivation', 'work_motivation', 'current_salary', 'expected_salary',
+        'expected_facilities', 'available_start_date',
+        'feedback_hr', 'approve_hr',
+        'feedback_trainer', 'approve_trainer',
+        'feedback_user', 'approve_user',
         'feedback_employee', 'approve_employee',
         'mcu_meta', 'mcu_result',
         'mobilisasi_meta', 'ground_test_meta', 'ground_test_result'
     ];
 
     protected $casts = [
+        'current_salary' => 'decimal:2',
+        'expected_salary' => 'decimal:2',
+        'available_start_date' => 'date',
         'mcu_meta' => 'array',
         'mobilisasi_meta' => 'array',
         'ground_test_meta' => 'array',

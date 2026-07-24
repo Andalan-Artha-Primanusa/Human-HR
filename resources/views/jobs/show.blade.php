@@ -341,9 +341,9 @@
 
               @auth
                 @if(($job->status ?? 'draft') === 'open' && !$myApp)
-                      <form method="POST" action="{{ route('applications.store', $job) }}">@csrf
+                      <form method="POST" action="{{ route('applications.store', $job) }}" id="applyForm">@csrf
                         @if(isset($pohs) && $pohs->count())
-                          <div class="mb-2">
+                          <div class="mb-3">
                             <label for="poh_id" class="block mb-1 text-xs font-medium text-slate-700">Pilih POH (Tempat Penempatan)</label>
                             <select name="poh_id" id="poh_id" class="block w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#a77d52]/30 focus:border-[#a77d52]/40 bg-white">
                               <option value="">-- Pilih POH --</option>
@@ -353,6 +353,38 @@
                             </select>
                           </div>
                         @endif
+
+                        <div class="mb-3">
+                          <label for="motivation" class="block mb-1 text-xs font-medium text-slate-700">Motivasi Melamar</label>
+                          <textarea name="motivation" id="motivation" rows="2" class="block w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#a77d52]/30 focus:border-[#a77d52]/40" placeholder="Ceritakan motivasi kamu melamar di posisi ini"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                          <label for="work_motivation" class="block mb-1 text-xs font-medium text-slate-700">Motivasi Kerja di Andalan Group</label>
+                          <textarea name="work_motivation" id="work_motivation" rows="2" class="block w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#a77d52]/30 focus:border-[#a77d52]/40" placeholder="Mengapa kamu ingin bergabung?"></textarea>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3 mb-3">
+                          <div>
+                            <label for="current_salary" class="block mb-1 text-xs font-medium text-slate-700">Gaji Saat Ini</label>
+                            <input type="text" inputmode="numeric" name="current_salary" id="current_salary" class="block w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#a77d52]/30 focus:border-[#a77d52]/40" placeholder="Contoh: 5000000">
+                          </div>
+                          <div>
+                            <label for="expected_salary" class="block mb-1 text-xs font-medium text-slate-700">Gaji Diharapkan</label>
+                            <input type="text" inputmode="numeric" name="expected_salary" id="expected_salary" class="block w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#a77d52]/30 focus:border-[#a77d52]/40" placeholder="Contoh: 7000000">
+                          </div>
+                        </div>
+
+                        <div class="mb-3">
+                          <label for="expected_facilities" class="block mb-1 text-xs font-medium text-slate-700">Fasilitas Diharapkan</label>
+                          <input type="text" name="expected_facilities" id="expected_facilities" class="block w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#a77d52]/30 focus:border-[#a77d52]/40" placeholder="Mess, transport, asuransi, dll">
+                        </div>
+
+                        <div class="mb-3">
+                          <label for="available_start_date" class="block mb-1 text-xs font-medium text-slate-700">Tanggal Siap Mulai Bekerja</label>
+                          <input type="date" name="available_start_date" id="available_start_date" class="block w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#a77d52]/30 focus:border-[#a77d52]/40">
+                        </div>
+
                         <button class="px-4 py-2 text-sm font-semibold text-white rounded-lg"
                                 style="background: linear-gradient(90deg, {{ $ACCENT }} 0%, {{ $ACCENT_DARK }} 100%);">
                           Lamar Sekarang

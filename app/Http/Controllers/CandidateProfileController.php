@@ -54,15 +54,8 @@ class CandidateProfileController extends Controller
         $maxReferences = 100;
         $maxDocuments = 20;
 
-        // Parse gaji: string format 1.000.000 → 1000000
-        $request->merge([
-            'current_salary' => $this->parseCurrency($request->input('current_salary')),
-            'expected_salary' => $this->parseCurrency($request->input('expected_salary')),
-        ]);
-
         // ===== VALIDASI UTAMA =====
         $validated = $request->validate([
-            'poh_id' => ['required', 'uuid', 'exists:pohs,id'],
             'full_name' => 'bail|required|string|max:190',
             'gender' => ['bail', 'required', Rule::in(['male', 'female'])],
             'age' => 'bail|required|integer|between:15,80',
@@ -99,7 +92,6 @@ class CandidateProfileController extends Controller
             'domicile_rt' => 'nullable|string|max:10',
             'domicile_rw' => 'nullable|string|max:10',
             'domicile_residence_status' => ['nullable', Rule::in(['OWN', 'RENT', 'DORM', 'FAMILY', 'COMPANY', 'OTHER'])],
-            'motivation' => 'nullable|string',
             'has_relatives' => 'nullable|boolean',
             'relatives_detail' => 'nullable|string|max:255',
             'worked_before' => 'nullable|boolean',
@@ -141,12 +133,6 @@ class CandidateProfileController extends Controller
             'references.*.job_title' => 'required|string|max:190',
             'references.*.company' => 'required|string|max:190',
             'references.*.contact' => 'required|string|max:190',
-            // === Gaji & Kesiapan Kerja ===
-            'current_salary' => 'nullable|numeric|min:0|max:999999999999.99',
-            'expected_salary' => 'nullable|numeric|min:0|max:999999999999.99',
-            'expected_facilities' => 'nullable|string',
-            'available_start_date' => 'nullable|date|after_or_equal:today',
-            'work_motivation' => 'nullable|string',
             // === Kesehatan ===
             'medical_history' => 'nullable|string',
             'last_medical_checkup' => 'nullable|string|max:255'
@@ -197,7 +183,6 @@ class CandidateProfileController extends Controller
 
             // Isi field profil
             $profile->fill([
-                'poh_id' => $validated['poh_id'],
                 'full_name' => $validated['full_name'],
                 'nickname' => $request->input('nickname', ''),
                 'gender' => $validated['gender'],
@@ -242,11 +227,6 @@ class CandidateProfileController extends Controller
                 'applied_before_position' => $request->input('applied_before_position', ''),
                 'willing_out_of_town' => $request->boolean('willing_out_of_town'),
                 'not_willing_reason' => $request->input('not_willing_reason', ''),
-                'current_salary' => $validated['current_salary'] ?? null,
-                'expected_salary' => $validated['expected_salary'] ?? null,
-                'expected_facilities' => $validated['expected_facilities'] ?? '',
-                'available_start_date' => $validated['available_start_date'] ?? null,
-                'work_motivation' => $validated['work_motivation'] ?? '',
                 'medical_history' => $validated['medical_history'] ?? '',
                 'last_medical_checkup' => $validated['last_medical_checkup'] ?? '',
                 // Tambahan

@@ -169,12 +169,14 @@ class ApplicationController extends Controller
             );
 
         $data = $request->validate([
-            'poh_id' => ['nullable', 'uuid', 'exists:pohs,id'],
+            'poh_id'               => ['nullable', 'uuid', 'exists:pohs,id'],
+            'motivation'           => ['nullable', 'string', 'max:5000'],
+            'work_motivation'      => ['nullable', 'string', 'max:5000'],
+            'current_salary'       => ['nullable', 'numeric', 'min:0', 'max:999999999999.99'],
+            'expected_salary'      => ['nullable', 'numeric', 'min:0', 'max:999999999999.99'],
+            'expected_facilities'  => ['nullable', 'string', 'max:5000'],
+            'available_start_date' => ['nullable', 'date'],
         ]);
-
-        if (! $profile->poh_id && ! empty($data['poh_id'])) {
-            $profile->forceFill(['poh_id' => $data['poh_id']])->save();
-        }
 
         $missingProfileFields = $profile->missingRequiredForApplication();
 
@@ -200,11 +202,17 @@ class ApplicationController extends Controller
 
         DB::transaction(function () use ($request, $job, $data) {
             $app = JobApplication::create([
-                'job_id'         => $job->id,
-                'user_id'        => $request->user()->id,
-                'poh_id'         => $data['poh_id'] ?? null,
-                'current_stage'  => 'applied',
-                'overall_status' => 'active',
+                'job_id'              => $job->id,
+                'user_id'             => $request->user()->id,
+                'poh_id'              => $data['poh_id'] ?? null,
+                'motivation'          => $data['motivation'] ?? null,
+                'work_motivation'     => $data['work_motivation'] ?? null,
+                'current_salary'      => $data['current_salary'] ?? null,
+                'expected_salary'     => $data['expected_salary'] ?? null,
+                'expected_facilities' => $data['expected_facilities'] ?? null,
+                'available_start_date'=> $data['available_start_date'] ?? null,
+                'current_stage'       => 'applied',
+                'overall_status'      => 'active',
             ]);
 
             ApplicationStage::create([

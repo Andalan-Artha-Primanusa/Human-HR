@@ -201,15 +201,6 @@
               <input required name="full_name" value="{{ old('full_name', $profile->full_name) }}" class="w-full px-3 py-2 mt-1 border rounded-lg">
             </div>
             <div>
-              <label class="text-sm text-slate-600">Pilih POH (Tempat Penempatan) <span class="text-red-600">*</span></label>
-              <select required name="poh_id" class="w-full px-3 py-2 mt-1 border rounded-lg">
-                <option value="">— Pilih POH —</option>
-                @foreach($pohs as $poh)
-                  <option value="{{ $poh->id }}" @selected(old('poh_id', $profile->poh_id ?? null) == $poh->id)>{{ $poh->name }}</option>
-                @endforeach
-              </select>
-            </div>
-            <div>
               <label class="text-sm text-slate-600">Nama Panggilan</label>
               <input name="nickname" value="{{ old('nickname', $profile->nickname) }}" class="w-full px-3 py-2 mt-1 border rounded-lg">
             </div>
@@ -447,88 +438,12 @@
         <div class="p-5 bg-white shadow-sm card rounded-2xl">
   <h2 class="flex items-center gap-2 text-lg font-semibold">
     <svg class="w-5 h-5 text-brand-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-3.314 0-6 2.239-6 5v5h12v-5c0-2.761-2.686-5-6-5z"/>
-      <path stroke-linecap="round" stroke-linejoin="round" d="M12 4a4 4 0 110 8 4 4 0 010-8z"/>
+      <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
     </svg>
-    Informasi Tambahan
+    Kesehatan
   </h2>
 
   <div class="grid gap-4 mt-4 sm:grid-cols-2">
-
-    {{-- Gaji Saat Ini --}}
-    <div>
-      <label class="text-sm text-slate-600">Gaji Saat Ini</label>
-      <input
-        type="text"
-        inputmode="numeric"
-        name="current_salary"
-        class="w-full px-3 py-2 mt-1 border rounded-lg format-currency"
-        placeholder="Contoh: 5.000.000"
-        value="{{ old('current_salary', $profile->current_salary ? number_format($profile->current_salary, 0, ',', '.') : '') }}"
-        autocomplete="off"
-      >
-    </div>
-
-    {{-- Gaji Diharapkan --}}
-    <div>
-      <label class="text-sm text-slate-600">Gaji Yang Diharapkan</label>
-      <input
-        type="text"
-        inputmode="numeric"
-        name="expected_salary"
-        class="w-full px-3 py-2 mt-1 border rounded-lg format-currency"
-        placeholder="Contoh: 7.000.000"
-        value="{{ old('expected_salary', $profile->expected_salary ? number_format($profile->expected_salary, 0, ',', '.') : '') }}"
-        autocomplete="off"
-      >
-    </div>
-  <script>
-    // Format input currency (titik ribuan, tanpa nol otomatis)
-    document.addEventListener('DOMContentLoaded', function() {
-      document.querySelectorAll('input.format-currency').forEach(function(input) {
-        input.addEventListener('input', function(e) {
-          let value = this.value.replace(/[^\d]/g, '');
-          if (value) {
-            this.value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-          } else {
-            this.value = '';
-          }
-        });
-      });
-    });
-  </script>
-
-    {{-- Fasilitas --}}
-    <div class="sm:col-span-2">
-      <label class="text-sm text-slate-600">Fasilitas Yang Diharapkan</label>
-      <textarea
-        name="expected_facilities"
-        rows="3"
-        class="w-full px-3 py-2 mt-1 border rounded-lg"
-        placeholder="Mess, transport, asuransi, dll"
-      >{{ old('expected_facilities', $profile->expected_facilities) }}</textarea>
-    </div>
-
-    {{-- Tanggal Siap Bekerja --}}
-    <div>
-      <label class="text-sm text-slate-600">Tanggal Siap Mulai Bekerja</label>
-      <input
-        type="date"
-        name="available_start_date"
-        class="w-full px-3 py-2 mt-1 border rounded-lg"
-        value="{{ old('available_start_date', optional($profile->available_start_date)->format('Y-m-d')) }}"
-      >
-    </div>
-
-    {{-- Motivasi Kerja --}}
-    <div class="sm:col-span-2">
-      <label class="text-sm text-slate-600">Motivasi Kerja di Andalan Group</label>
-      <textarea
-        name="work_motivation"
-        rows="4"
-        class="w-full px-3 py-2 mt-1 border rounded-lg"
-      >{{ old('work_motivation', $profile->work_motivation) }}</textarea>
-    </div>
 
     {{-- Riwayat Kesehatan --}}
     <div class="sm:col-span-2">
@@ -537,6 +452,7 @@
         name="medical_history"
         rows="3"
         class="w-full px-3 py-2 mt-1 border rounded-lg"
+        placeholder="Ceritakan riwayat penyakit, operasi, atau cacat fisik (jika ada)"
       >{{ old('medical_history', $profile->medical_history) }}</textarea>
     </div>
 
@@ -556,7 +472,7 @@
 </div>
 
       {{-- Pernyataan & Riwayat --}}
-      <div class="p-5 bg-white shadow-sm card rounded-2xl">
+      <div class="p-5 bg-white shadow-sm card rounded-2xl" x-data="{ worked_before: '{{ old('worked_before', $profile->worked_before) ? '1' : '0' }}', applied_before: '{{ old('applied_before', $profile->applied_before) ? '1' : '0' }}', willing_out_of_town: '{{ old('willing_out_of_town', $profile->willing_out_of_town) ? '1' : '0' }}', has_relatives: '{{ old('has_relatives', $profile->has_relatives) ? '1' : '0' }}' }">
         <h2 class="flex items-center gap-2 text-lg font-semibold">
           <svg class="w-5 h-5 text-brand-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
           Pernyataan & Riwayat
@@ -583,55 +499,51 @@
           </div>
           <div>
             <label class="text-sm text-slate-600">Pernah bekerja sebelumnya?</label>
-            <select name="worked_before" class="w-full px-3 py-2 mt-1 border rounded-lg">
-              <option value="0" @selected(!old('worked_before', $profile->worked_before))>Tidak</option>
-              <option value="1" @selected(old('worked_before', $profile->worked_before))>Ya</option>
+            <select name="worked_before" x-model="worked_before" class="w-full px-3 py-2 mt-1 border rounded-lg">
+              <option value="0">Tidak</option>
+              <option value="1">Ya</option>
             </select>
           </div>
           <div>
             <label class="text-sm text-slate-600">Pernah melamar di Andalan sebelumnya?</label>
-            <select name="applied_before" class="w-full px-3 py-2 mt-1 border rounded-lg">
-              <option value="0" @selected(!old('applied_before', $profile->applied_before))>Tidak</option>
-              <option value="1" @selected(old('applied_before', $profile->applied_before))>Ya</option>
+            <select name="applied_before" x-model="applied_before" class="w-full px-3 py-2 mt-1 border rounded-lg">
+              <option value="0">Tidak</option>
+              <option value="1">Ya</option>
             </select>
           </div>
-          <div class="sm:col-span-2">
+          <div class="sm:col-span-2" x-show="applied_before === '1'" x-transition>
             <label class="text-sm text-slate-600">Posisi yang pernah dilamar</label>
             <input name="applied_before_position" value="{{ old('applied_before_position', $profile->applied_before_position) }}" class="w-full px-3 py-2 mt-1 border rounded-lg" placeholder="Isi jika pernah melamar">
           </div>
-          <div>
+          <div x-show="worked_before === '1'" x-transition>
             <label class="text-sm text-slate-600">Posisi sebelumnya</label>
             <input name="worked_before_position" value="{{ old('worked_before_position', $profile->worked_before_position) }}" class="w-full px-3 py-2 mt-1 border rounded-lg" placeholder="Jabatan terakhir">
           </div>
-          <div>
+          <div x-show="worked_before === '1'" x-transition>
             <label class="text-sm text-slate-600">Durasi bekerja</label>
             <input name="worked_before_duration" value="{{ old('worked_before_duration', $profile->worked_before_duration) }}" class="w-full px-3 py-2 mt-1 border rounded-lg" placeholder="Contoh: 2 tahun">
           </div>
           <div>
             <label class="text-sm text-slate-600">Bersedia ditempatkan di luar kota?</label>
-            <select name="willing_out_of_town" class="w-full px-3 py-2 mt-1 border rounded-lg">
-              <option value="0" @selected(!old('willing_out_of_town', $profile->willing_out_of_town))>Tidak</option>
-              <option value="1" @selected(old('willing_out_of_town', $profile->willing_out_of_town))>Ya</option>
+            <select name="willing_out_of_town" x-model="willing_out_of_town" class="w-full px-3 py-2 mt-1 border rounded-lg">
+              <option value="0">Tidak</option>
+              <option value="1">Ya</option>
             </select>
           </div>
-          <div class="sm:col-span-2">
+          <div class="sm:col-span-2" x-show="willing_out_of_town === '0'" x-transition>
             <label class="text-sm text-slate-600">Alasan tidak bersedia ditempatkan di luar kota</label>
             <input name="not_willing_reason" value="{{ old('not_willing_reason', $profile->not_willing_reason) }}" class="w-full px-3 py-2 mt-1 border rounded-lg" placeholder="Isi jika tidak bersedia">
           </div>
           <div class="sm:col-span-2">
             <label class="text-sm text-slate-600">Adanya kerabat di Andalan Group?</label>
-            <select name="has_relatives" class="w-full px-3 py-2 mt-1 border rounded-lg">
-              <option value="0" @selected(!old('has_relatives', $profile->has_relatives))>Tidak</option>
-              <option value="1" @selected(old('has_relatives', $profile->has_relatives))>Ya</option>
+            <select name="has_relatives" x-model="has_relatives" class="w-full px-3 py-2 mt-1 border rounded-lg">
+              <option value="0">Tidak</option>
+              <option value="1">Ya</option>
             </select>
           </div>
-          <div class="sm:col-span-2">
+          <div class="sm:col-span-2" x-show="has_relatives === '1'" x-transition>
             <label class="text-sm text-slate-600">Detail kerabat (nama & hubungan)</label>
             <input name="relatives_detail" value="{{ old('relatives_detail', $profile->relatives_detail) }}" class="w-full px-3 py-2 mt-1 border rounded-lg" placeholder="Contoh: Budi (Paman), HRD">
-          </div>
-          <div class="sm:col-span-2">
-            <label class="text-sm text-slate-600">Motivasi melamar</label>
-            <textarea name="motivation" rows="3" class="w-full px-3 py-2 mt-1 border rounded-lg" placeholder="Ceritakan motivasi kamu melamar di Andalan Group">{{ old('motivation', $profile->motivation) }}</textarea>
           </div>
         </div>
       </div>
@@ -669,8 +581,8 @@
               @endif
             </div>
             <div>
-              <label class="text-sm text-slate-600">Dokumen pendukung (PDF only, bisa pilih banyak)</label>
-              <input type="file" name="documents[]" multiple accept="application/pdf" class="w-full px-3 py-2 mt-1 border rounded-lg">
+              <label class="text-sm text-slate-600">Dokumen pendukung (bisa pilih banyak)</label>
+              <input type="file" name="documents[]" multiple accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" class="w-full px-3 py-2 mt-1 border rounded-lg">
               @if(is_array($profile->documents) && count($profile->documents))
                 <ul class="pl-5 mt-1 text-xs list-disc">
                   @foreach($profile->documents as $d)
@@ -760,12 +672,20 @@
   </div>
 </template>
 
-</body>
-</html>
-
-  </main>
-
 <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('input.format-currency').forEach(function(input) {
+      input.addEventListener('input', function(e) {
+        let value = this.value.replace(/[^\d]/g, '');
+        if (value) {
+          this.value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        } else {
+          this.value = '';
+        }
+      });
+    });
+  });
+
   function wizard(){
     return {
       // === STATE ===
@@ -798,7 +718,7 @@
         if(Alpine.store('form').employments.length===0){
           Alpine.store('form').employments.push({company:'',position_start:'',position_end:'',period_start:'',period_end:'',reason_for_leaving:'',job_description:''});
         }
-        while(Alpine.store('form').references.length<3){
+        while(Alpine.store('form').references.length<1){
           Alpine.store('form').references.push({name:'',job_title:'',company:'',contact:''});
         }
 
@@ -856,6 +776,9 @@
               } else {
                 el.value = val ?? '';
               }
+              if (name === 'last_education') {
+                el.dispatchEvent(new Event('change'));
+              }
             });
           }
         } catch(e) {}
@@ -892,6 +815,14 @@
             ['domicile_address','Alamat Domisili'], ['domicile_village','Desa/Kelurahan (Domisili)'], ['domicile_district','Kecamatan (Domisili)'], ['domicile_city','Kab/Kota (Domisili)'], ['domicile_province','Provinsi (Domisili)'], ['domicile_postal_code','Kode Pos (Domisili)']
           ];
           req.forEach(([n,l]) => { if(!f[n] || !f[n].value?.trim()) this.errors.push(l); });
+          const edVal = f['last_education']?.value;
+          if(edVal === 'SMA_SMK'){
+            if(!f['sma_smk_type']?.value?.trim()) this.errors.push('Jenis SMA/SMK');
+            if(!f['sma_smk_school']?.value?.trim()) this.errors.push('Nama Sekolah SMA/SMK');
+          }
+          if(edVal === 'LAINNYA'){
+            if(!f['other_education']?.value?.trim()) this.errors.push('Nama Pendidikan Lainnya');
+          }
         }
         if(s===2){
           const T = Alpine.store('form').trainings || [];
