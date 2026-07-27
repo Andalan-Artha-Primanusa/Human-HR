@@ -354,7 +354,7 @@
                 <select required name="ktp_city" x-model="ktpCity" class="px-3 py-2 border rounded-lg w-full">
                   <option value="">Kab/Kota *</option>
                   <template x-for="c in (regions[ktpProvince] || [])" :key="c">
-                    <option :value="c" x-text="c"></option>
+                    <option :value="c" :selected="c === ktpCity" x-text="c"></option>
                   </template>
                 </select>
                 @error('ktp_city')<p class="field-error-msg">{{ $message }}</p>@enderror
@@ -393,7 +393,7 @@
                 <select required name="domicile_city" x-model="domCity" class="px-3 py-2 border rounded-lg w-full">
                   <option value="">Kab/Kota *</option>
                   <template x-for="c in (regions[domProvince] || [])" :key="c">
-                    <option :value="c" x-text="c"></option>
+                    <option :value="c" :selected="c === domCity" x-text="c"></option>
                   </template>
                 </select>
                 @error('domicile_city')<p class="field-error-msg">{{ $message }}</p>@enderror
@@ -937,6 +937,10 @@
               if (name === 'last_education') {
                 el.dispatchEvent(new Event('change'));
               }
+              if (name === 'ktp_province') this.ktpProvince = val ?? '';
+              if (name === 'ktp_city') this.ktpCity = val ?? '';
+              if (name === 'domicile_province') this.domProvince = val ?? '';
+              if (name === 'domicile_city') this.domCity = val ?? '';
               if (name === 'ktp_province' || name === 'ktp_city' || name === 'domicile_province' || name === 'domicile_city') {
                 el.dispatchEvent(new Event('change'));
               }
@@ -972,7 +976,7 @@
         if(s===1){
           const f = this.$refs.form;
           const req = [
-            ['full_name','Nama Lengkap'], ['gender','Jenis Kelamin'], ['age','Usia'], ['birthplace','Tempat Lahir'], ['birthdate','Tanggal Lahir'],
+            ['full_name','Nama Lengkap'], ['poh_id','POH / Tempat Penempatan'], ['gender','Jenis Kelamin'], ['age','Usia'], ['birthplace','Tempat Lahir'], ['birthdate','Tanggal Lahir'],
             ['nik','NIK KTP'], ['email','Email'], ['phone','Nomor HP'],
             ['last_education','Pendidikan Terakhir'], ['education_major','Jurusan'], ['education_school','Sekolah/Kampus'],
             ['ktp_address','Alamat KTP'], ['ktp_village','Desa/Kelurahan (KTP)'], ['ktp_district','Kecamatan (KTP)'], ['ktp_city','Kab/Kota (KTP)'], ['ktp_province','Provinsi (KTP)'], ['ktp_postal_code','Kode Pos (KTP)'],
