@@ -194,7 +194,8 @@ class CandidateProfile extends Model
             $missing[] = 'Minimal 1 pelatihan';
         }
 
-        if ($this->relationCount('employments') < 1) {
+        $isFreshGraduate = (bool) data_get($this->extras ?? [], 'is_fresh_graduate', false);
+        if (! $isFreshGraduate && $this->relationCount('employments') < 1) {
             $missing[] = 'Minimal 1 riwayat pekerjaan';
         }
 

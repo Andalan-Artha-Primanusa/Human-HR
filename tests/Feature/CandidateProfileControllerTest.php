@@ -105,6 +105,27 @@ class CandidateProfileControllerTest extends TestCase
         ]);
     }
 
+    public function test_update_allows_fresh_graduate_without_employment()
+    {
+        Storage::fake('public');
+        $this->actingAs($this->user);
+
+        $payload = $this->validProfilePayload([
+            'nik' => '1234567890123999',
+            'is_fresh_graduate' => '1',
+            'employments' => [],
+        ]);
+
+        $response = $this->post(route('candidate.profiles.update', $this->job), $payload);
+
+        $response->assertRedirect(route('applications.mine'));
+        $this->assertDatabaseHas('job_applications', [
+            'user_id' => $this->user->id,
+            'job_id' => $this->job->id,
+            'current_stage' => 'applied',
+        ]);
+    }
+
     public function test_admin_index_displays_candidates()
     {
         CandidateProfile::factory()->create(['full_name' => 'Candidate Alpha', 'user_id' => User::factory()->create()->id]);

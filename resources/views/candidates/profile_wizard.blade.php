@@ -48,18 +48,21 @@
   {{-- Seed Alpine Store dari server (old()/profile) --}}
   <script>
     document.addEventListener('alpine:init', () => {
+      const defaultTraining = {title:'',institution:'',certificate_name:'',certificate_path:'',period_start:'',period_end:'',cert_valid_from:'',cert_valid_to:'',cert_no_expiry:false};
+      const defaultEmployment = {company:'',position_start:'',position_end:'',period_start:'',period_end:'',reason_for_leaving:'',job_description:''};
+      const defaultReference = {name:'',job_title:'',company:'',contact:''};
       const seed = {
-        trainings: @json(old('trainings', $profile->trainings ?? [])),
-        employments: @json(old('employments', $profile->employments ?? [])),
-        references: @json(old('references', $profile->references ?? [])),
+        trainings: @json(old('trainings', $trainings ?? [])),
+        employments: @json(old('employments', $employments ?? [])),
+        references: @json(old('references', $references ?? [])),
       };
-      const normArr = (v) => Array.isArray(v) ? v : [];
+      const normArr = (v, fallback) => Array.isArray(v) && v.length ? v : [fallback];
       Alpine.store('regions', @json($allRegions));
       Alpine.store('provinces', @json($provincesList));
       Alpine.store('form', {
-        trainings:  normArr(seed.trainings),
-        employments:normArr(seed.employments),
-        references: normArr(seed.references),
+        trainings:  normArr(seed.trainings, defaultTraining),
+        employments:normArr(seed.employments, defaultEmployment),
+        references: normArr(seed.references, defaultReference),
       });
     });
   </script>

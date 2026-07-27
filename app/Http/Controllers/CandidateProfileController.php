@@ -407,10 +407,12 @@ class CandidateProfileController extends Controller
         // Redirect — kalau sudah ada lamaran, langsung ke daftar lamaran
         $missingProfileFields = $profile->missingRequiredForApplication();
         if ($missingProfileFields !== []) {
+            $missingText = implode(', ', $missingProfileFields);
+
             return redirect()
                 ->route('candidate.profiles.edit', ['job' => $job->id])
                 ->withErrors([
-                    'profile_incomplete' => 'Data profil belum lengkap. Lengkapi semua field wajib sebelum lamaran dibuat.',
+                    'profile_incomplete' => 'Data profil belum lengkap. Field yang masih kurang: ' . $missingText,
                 ])
                 ->with('missing_profile_fields', $missingProfileFields)
                 ->with('info', 'Data berhasil disimpan, tapi lamaran belum dibuat karena profil masih belum lengkap.');
