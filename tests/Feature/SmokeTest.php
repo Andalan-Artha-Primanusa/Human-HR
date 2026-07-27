@@ -47,7 +47,8 @@ class SmokeTest extends TestCase
         // Store
         $this->post(route('admin.companies.store'), [
             'name' => 'PT Test Company',
-            'code' => 'TC01'
+            'code' => 'TC01',
+            'status' => 'active',
         ])->assertRedirect(route('admin.companies.index'));
 
         $company = Company::first();
@@ -55,7 +56,8 @@ class SmokeTest extends TestCase
         // Update
         $this->put(route('admin.companies.update', $company->id), [
             'name' => 'PT Test Updated',
-            'code' => 'TC02'
+            'code' => 'TC02',
+            'status' => 'active',
         ])->assertRedirect(route('admin.companies.index'));
 
         // Delete
@@ -112,16 +114,18 @@ class SmokeTest extends TestCase
 
     public function test_job_listing()
     {
+        $site = Site::factory()->create();
         $job = Job::create([
             'title' => 'Software Engineer Test',
-            'slug' => 'software-engineer-test',
             'code' => 'SE-001',
             'description' => 'Test Deskripsi',
             'requirements' => 'Test Syarat',
             'status' => 'open',
-            'level' => 1,
+            'level' => 'staff',
+            'employment_type' => 'fulltime',
+            'site_id' => $site->id,
         ]);
 
-        $this->get(route('jobs.show', $job->slug))->assertStatus(200);
+        $this->get(route('jobs.show', $job))->assertStatus(200);
     }
 }

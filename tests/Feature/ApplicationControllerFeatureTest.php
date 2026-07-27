@@ -11,6 +11,7 @@ use App\Models\CandidateTraining;
 use App\Models\Poh;
 use App\Models\Site;
 use App\Models\User;
+use App\Services\MineproRfrService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
@@ -59,6 +60,30 @@ class ApplicationControllerFeatureTest extends TestCase
             'current_stage' => 'applied',
             'overall_status' => 'active',
         ]);
+
+        $this->app->instance(MineproRfrService::class, new class extends MineproRfrService {
+            public function processList(string $startDate, string $endDate): array
+            {
+                return [[
+                    'rfr_ref_id' => 'SE-01',
+                    'nik' => '3201010101010001',
+                    'process' => 'GroundTest',
+                    'stage' => 'ground_test',
+                    'result' => 'Lulus',
+                ]];
+            }
+
+            public function lastProcessMeta(): array
+            {
+                return [
+                    'ok' => true,
+                    'message' => 'Fake MinePro RFR Process berhasil dibaca.',
+                    'status' => 200,
+                    'url' => 'fake://minepro-rfr-process',
+                    'count' => 1,
+                ];
+            }
+        });
     }
 
     public function test_pelamar_index_requires_auth()
@@ -276,13 +301,14 @@ class ApplicationControllerFeatureTest extends TestCase
 
     public function test_admin_board_groups_applications_by_stage()
     {
+        $this->createCompleteProfile($this->pelamar, Poh::factory()->create(['is_active' => true]));
         $this->actingAs($this->hr);
         $response = $this->get(route('admin.applications.board'));
         $response->assertStatus(200);
 
         $grouped = $response->viewData('grouped');
-        $this->assertTrue($grouped->has('applied'));
-        $this->assertEquals(1, $grouped['applied']->count());
+        $this->assertTrue($grouped->has('ground_test'));
+        $this->assertEquals(1, $grouped['ground_test']->count());
     }
 
     public function test_admin_board_filters_by_job_id()

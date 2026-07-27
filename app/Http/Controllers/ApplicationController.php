@@ -167,6 +167,9 @@ class ApplicationController extends Controller
         abort_if($job->status !== 'open', 403, 'Job is not open');
 
         $user = $request->user();
+        $validated = $request->validate([
+            'poh_id' => ['nullable', 'uuid', 'exists:pohs,id'],
+        ]);
 
         /** @var CandidateProfile $profile */
         $profile = CandidateProfile::withCount(['trainings', 'employments', 'references'])
@@ -181,6 +184,17 @@ class ApplicationController extends Controller
             ->first();
 
         if ($already) {
+            $missingProfileFields = $profile->missingRequiredForApplication();
+            if ($missingProfileFields !== []) {
+                return redirect()
+                    ->route('candidate.profiles.edit', ['job' => $job->id])
+                    ->withErrors([
+                        'profile_incomplete' => 'Data profil belum lengkap. Lengkapi semua field wajib sebelum melihat progres lamaran.',
+                    ])
+                    ->with('missing_profile_fields', $missingProfileFields)
+                    ->with('info', 'Lengkapi data profil kamu dulu sebelum melihat progres lamaran.');
+            }
+
             return redirect()
                 ->route('applications.mine')
                 ->with('info', 'Kamu sudah melamar untuk posisi ini.');
@@ -197,10 +211,11 @@ class ApplicationController extends Controller
         }
 
         // Buat lamaran hanya setelah profil lengkap.
-        DB::transaction(function () use ($user, $job) {
+        DB::transaction(function () use ($user, $job, $validated, $profile) {
             $app = JobApplication::create([
                 'job_id'              => $job->id,
                 'user_id'             => $user->id,
+                'poh_id'              => $validated['poh_id'] ?? $profile->poh_id ?? null,
                 'current_stage'       => 'applied',
                 'overall_status'      => 'active',
             ]);

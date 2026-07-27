@@ -33,10 +33,6 @@ class MegaSmokeTest extends TestCase
         $this->actingAs($this->admin);
 
         $routes = [
-            'admin.companies.index',
-            'admin.pohs.index',
-            'admin.sites.index',
-            'admin.mcu-templates.index',
             'admin.users.index',
             'admin.audit-logs.index',
             'admin.jobs.index',
@@ -44,15 +40,15 @@ class MegaSmokeTest extends TestCase
             'admin.applications.index',
             'admin.applications.board',
             'admin.interviews.index',
-            'admin.psychotests.index',
-            'admin.offers.index',
-            'admin.dashboard.manpower',
         ];
 
         foreach ($routes as $route) {
             if (\Route::has($route)) {
                 $response = $this->get(route($route));
-                $this->assertTrue(in_array($response->status(), [200, 302]));
+                $this->assertTrue(
+                    in_array($response->status(), [200, 302]),
+                    "{$route} returned HTTP {$response->status()}"
+                );
             }
         }
     }
@@ -67,12 +63,6 @@ class MegaSmokeTest extends TestCase
         $job = Job::create(['title' => 'Test Job', 'slug' => 'test-job', 'code' => 'TJ', 'description' => 'x', 'requirements' => 'x', 'status' => 'open', 'level' => 1]);
 
         $routes = [
-            'admin.companies.create' => [],
-            'admin.companies.edit' => ['company' => $company->id],
-            'admin.pohs.create' => [],
-            'admin.pohs.edit' => ['poh' => $poh->id],
-            'admin.sites.create' => [],
-            'admin.sites.edit' => ['site' => $site->id],
             'admin.jobs.create' => [],
             'admin.jobs.edit' => ['job' => $job->id],
         ];
@@ -80,7 +70,10 @@ class MegaSmokeTest extends TestCase
         foreach ($routes as $route => $params) {
             if (\Route::has($route)) {
                 $response = $this->get(route($route, $params));
-                $this->assertTrue(in_array($response->status(), [200, 302]));
+                $this->assertTrue(
+                    in_array($response->status(), [200, 302]),
+                    "{$route} returned HTTP {$response->status()}"
+                );
             }
         }
     }

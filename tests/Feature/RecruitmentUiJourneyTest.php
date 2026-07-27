@@ -76,7 +76,7 @@ class RecruitmentUiJourneyTest extends TestCase
         $response = $this->post(route('applications.store', $this->job), [
             'poh_id' => $poh->id,
         ]);
-        $response->assertRedirect(route('candidate.profiles.edit', ['job' => $this->job->id]));
+        $response->assertRedirect(route('applications.mine'));
         
         $application = JobApplication::where('user_id', $this->pelamar->id)
             ->where('job_id', $this->job->id)
