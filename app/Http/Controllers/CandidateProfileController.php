@@ -62,6 +62,8 @@ class CandidateProfileController extends Controller
         $tempPaths = $this->storeTempUploads($request);
         $request->session()->flash('temp_uploads', $tempPaths);
 
+        $currentProfile = CandidateProfile::where('user_id', $user->id)->first();
+
         // ===== VALIDASI UTAMA =====
         $validated = $request->validate([
             'full_name' => 'bail|required|string|max:190',
@@ -70,7 +72,12 @@ class CandidateProfileController extends Controller
             'age' => 'bail|required|integer|between:15,80',
             'birthplace' => 'bail|required|string|max:190',
             'birthdate' => 'bail|required|date',
-            'nik' => ['bail', 'required', 'digits:16'],
+            'nik' => [
+                'bail',
+                'required',
+                'digits:16',
+                Rule::unique('candidate_profiles', 'nik')->ignore($currentProfile?->id),
+            ],
             'email' => 'bail|required|email:rfc',
             'phone' => [
                 'bail',
@@ -145,6 +152,9 @@ class CandidateProfileController extends Controller
             // === Kesehatan ===
             'medical_history' => 'nullable|string',
             'last_medical_checkup' => 'nullable|string|max:255'
+        ], [
+            'nik.unique' => 'NIK KTP sudah terdaftar pada kandidat lain. Gunakan NIK yang benar atau hubungi admin/HR.',
+            'poh_id.required' => 'POH / tempat penempatan wajib dipilih.',
         ]);
 
 

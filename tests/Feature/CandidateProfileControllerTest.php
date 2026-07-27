@@ -49,58 +49,7 @@ class CandidateProfileControllerTest extends TestCase
         Storage::fake('public');
         $this->actingAs($this->user);
 
-        $data = [
-            'poh_id' => $this->poh->id,
-            'full_name' => 'John Doe',
-            'gender' => 'male',
-            'age' => 30,
-            'birthplace' => 'Jakarta',
-            'birthdate' => '1994-01-01',
-            'nik' => '1234567890123456',
-            'email' => 'john@example.com',
-            'phone' => '081234567890',
-            'last_education' => 'S1',
-            'education_major' => 'Informatics',
-            'education_school' => 'University A',
-            'ktp_address' => 'Street A',
-            'ktp_village' => 'Village A',
-            'ktp_district' => 'District A',
-            'ktp_city' => 'City A',
-            'ktp_province' => 'Province A',
-            'ktp_postal_code' => '12345',
-            'domicile_address' => 'Street B',
-            'domicile_village' => 'Village B',
-            'domicile_district' => 'District B',
-            'domicile_city' => 'City B',
-            'domicile_province' => 'Province B',
-            'domicile_postal_code' => '54321',
-            'cv' => UploadedFile::fake()->create('cv.pdf', 100, 'application/pdf'),
-            'trainings' => [
-                [
-                    'title' => 'Training A',
-                    'institution' => 'Inst A',
-                    'period_start' => '2020-01-01',
-                    'period_end' => '2020-01-02',
-                    'certificate_name' => 'Certificate A',
-                    'certificate_file' => UploadedFile::fake()->create('certificate-a.pdf', 100, 'application/pdf'),
-                ]
-            ],
-            'employments' => [
-                [
-                    'company' => 'Company A',
-                    'position_start' => 'Junior',
-                    'period_start' => '2021-01-01',
-                ]
-            ],
-            'references' => [
-                [
-                    'name' => 'Ref A',
-                    'job_title' => 'Manager',
-                    'company' => 'Comp Ref',
-                    'contact' => '08111',
-                ]
-            ],
-        ];
+        $data = $this->validProfilePayload();
 
         $response = $this->post(route('candidate.profiles.update', $this->job), $data);
 
@@ -132,6 +81,28 @@ class CandidateProfileControllerTest extends TestCase
         $training = $profile->trainings()->first();
         $this->assertNotNull($training->certificate_path);
         Storage::disk('public')->assertExists($training->certificate_path);
+    }
+
+    public function test_update_rejects_duplicate_nik()
+    {
+        CandidateProfile::factory()->create([
+            'user_id' => User::factory()->create()->id,
+            'full_name' => 'Existing Candidate',
+            'nik' => '1234567890123456',
+        ]);
+
+        Storage::fake('public');
+        $this->actingAs($this->user);
+
+        $response = $this->from(route('candidate.profiles.edit', $this->job))
+            ->post(route('candidate.profiles.update', $this->job), $this->validProfilePayload());
+
+        $response->assertRedirect(route('candidate.profiles.edit', $this->job));
+        $response->assertSessionHasErrors('nik');
+        $this->assertDatabaseMissing('job_applications', [
+            'user_id' => $this->user->id,
+            'job_id' => $this->job->id,
+        ]);
     }
 
     public function test_admin_index_displays_candidates()
@@ -178,5 +149,55 @@ class CandidateProfileControllerTest extends TestCase
 
         $response->assertStatus(200);
         $this->assertStringContainsString('application/pdf', $response->headers->get('Content-Type'));
+    }
+
+    private function validProfilePayload(array $overrides = []): array
+    {
+        return array_replace_recursive([
+            'poh_id' => $this->poh->id,
+            'full_name' => 'John Doe',
+            'gender' => 'male',
+            'age' => 30,
+            'birthplace' => 'Jakarta',
+            'birthdate' => '1994-01-01',
+            'nik' => '1234567890123456',
+            'email' => 'john@example.com',
+            'phone' => '081234567890',
+            'last_education' => 'S1',
+            'education_major' => 'Informatics',
+            'education_school' => 'University A',
+            'ktp_address' => 'Street A',
+            'ktp_village' => 'Village A',
+            'ktp_district' => 'District A',
+            'ktp_city' => 'City A',
+            'ktp_province' => 'Province A',
+            'ktp_postal_code' => '12345',
+            'domicile_address' => 'Street B',
+            'domicile_village' => 'Village B',
+            'domicile_district' => 'District B',
+            'domicile_city' => 'City B',
+            'domicile_province' => 'Province B',
+            'domicile_postal_code' => '54321',
+            'cv' => UploadedFile::fake()->create('cv.pdf', 100, 'application/pdf'),
+            'trainings' => [[
+                'title' => 'Training A',
+                'institution' => 'Inst A',
+                'period_start' => '2020-01-01',
+                'period_end' => '2020-01-02',
+                'certificate_name' => 'Certificate A',
+                'certificate_file' => UploadedFile::fake()->create('certificate-a.pdf', 100, 'application/pdf'),
+            ]],
+            'employments' => [[
+                'company' => 'Company A',
+                'position_start' => 'Junior',
+                'period_start' => '2021-01-01',
+            ]],
+            'references' => [[
+                'name' => 'Ref A',
+                'job_title' => 'Manager',
+                'company' => 'Comp Ref',
+                'contact' => '08111',
+            ]],
+        ], $overrides);
     }
 }
