@@ -33,7 +33,7 @@ class SmokeTest extends TestCase
         $hr = User::factory()->create(['role' => 'hr', 'email_verified_at' => now()]);
 
         $this->actingAs($pelamar)->get('/dashboard')->assertStatus(200);
-        $this->actingAs($hr)->get('/dashboard')->assertRedirect(route('admin.dashboard.manpower'));
+        $this->actingAs($hr)->get('/dashboard')->assertRedirect(route('admin.applications.board'));
     }
 
     public function test_admin_company_crud()

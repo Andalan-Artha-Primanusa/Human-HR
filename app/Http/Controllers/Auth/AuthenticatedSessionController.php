@@ -31,7 +31,7 @@ class AuthenticatedSessionController extends Controller
         $user = auth()->user();
         
         $redirectRoute = match ($user->role) {
-            'superadmin', 'hr', 'admin' => 'admin.dashboard.manpower',
+            'superadmin', 'hr', 'admin' => 'admin.applications.board',
             default => 'jobs.index'
         };
 

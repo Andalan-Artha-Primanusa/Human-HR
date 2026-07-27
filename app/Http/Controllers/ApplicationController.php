@@ -161,56 +161,31 @@ class ApplicationController extends Controller
     {
         abort_if($job->status !== 'open', 403, 'Job is not open');
 
+        $user = $request->user();
+
         /** @var CandidateProfile $profile */
         $profile = CandidateProfile::withCount(['trainings', 'employments', 'references'])
             ->firstOrCreate(
-                ['user_id' => $request->user()->id],
-                ['full_name' => $request->user()->name]
+                ['user_id' => $user->id],
+                ['full_name' => $user->name]
             );
 
-        $data = $request->validate([
-            'poh_id'               => ['nullable', 'uuid', 'exists:pohs,id'],
-            'motivation'           => ['nullable', 'string', 'max:5000'],
-            'work_motivation'      => ['nullable', 'string', 'max:5000'],
-            'current_salary'       => ['nullable', 'numeric', 'min:0', 'max:999999999999.99'],
-            'expected_salary'      => ['nullable', 'numeric', 'min:0', 'max:999999999999.99'],
-            'expected_facilities'  => ['nullable', 'string', 'max:5000'],
-            'available_start_date' => ['nullable', 'date'],
-        ]);
-
-        $missingProfileFields = $profile->missingRequiredForApplication();
-
-        if ($missingProfileFields !== []) {
-            return redirect()
-                ->route('candidate.profiles.edit', ['job' => $job->id])
-                ->withErrors([
-                    'profile_incomplete' => 'Data profil belum lengkap. Lengkapi semua field wajib sebelum melamar.',
-                ])
-                ->with('missing_profile_fields', $missingProfileFields)
-                ->with('info', 'Lamaran belum dibuat karena data profil kamu belum lengkap.');
-        }
-
+        // Kalau sudah apply, langsung ke /me/applications
         $already = JobApplication::where('job_id', $job->id)
-            ->where('user_id', $request->user()->id)
+            ->where('user_id', $user->id)
             ->first();
 
         if ($already) {
             return redirect()
-                ->route('candidate.profiles.edit', ['job' => $job->id])
-                ->with('info', 'Kamu sudah melamar dan data profil kamu sudah lengkap.');
+                ->route('applications.mine')
+                ->with('info', 'Kamu sudah melamar untuk posisi ini.');
         }
 
-        DB::transaction(function () use ($request, $job, $data) {
+        // Buat lamaran dulu (data per-application semua optional)
+        DB::transaction(function () use ($user, $job) {
             $app = JobApplication::create([
                 'job_id'              => $job->id,
-                'user_id'             => $request->user()->id,
-                'poh_id'              => $data['poh_id'] ?? null,
-                'motivation'          => $data['motivation'] ?? null,
-                'work_motivation'     => $data['work_motivation'] ?? null,
-                'current_salary'      => $data['current_salary'] ?? null,
-                'expected_salary'     => $data['expected_salary'] ?? null,
-                'expected_facilities' => $data['expected_facilities'] ?? null,
-                'available_start_date'=> $data['available_start_date'] ?? null,
+                'user_id'             => $user->id,
                 'current_stage'       => 'applied',
                 'overall_status'      => 'active',
             ]);
@@ -219,17 +194,26 @@ class ApplicationController extends Controller
                 'application_id' => $app->id,
                 'stage_key'      => 'applied',
                 'status'         => 'pending',
-                'score'          => null,
                 'payload'        => ['note' => 'Initial application submitted'],
-                'acted_by'       => $request->user()->id,
-                'user_id'        => $request->user()->id,
-                'notes'          => null,
+                'acted_by'       => $user->id,
+                'user_id'        => $user->id,
             ]);
         });
 
+        // Cek kelengkapan profil
+        $missingProfileFields = $profile->missingRequiredForApplication();
+
+        if ($missingProfileFields !== []) {
+            return redirect()
+                ->route('candidate.profiles.edit', ['job' => $job->id])
+                ->with('missing_profile_fields', $missingProfileFields)
+                ->with('success', 'Lamaran dibuat! Sekarang lengkapi data profil kamu ya.');
+        }
+
+        // Profil sudah lengkap → langsung ke daftar lamaran
         return redirect()
-            ->route('candidate.profiles.edit', ['job' => $job->id])
-            ->with('success', 'Lamaran dibuat. Lengkapi data profil & riwayat kamu ya.');
+            ->route('applications.mine')
+            ->with('success', 'Lamaran berhasil dibuat!');
     }
 
     /** Pelamar/Admin: detail lamaran */

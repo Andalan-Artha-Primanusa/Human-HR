@@ -9,6 +9,7 @@
         $end = optional($iv->end_at)?->timezone($tz);
         $dur = $start && $end ? $start->diffInMinutes($end) : null;
         $panel = is_array($iv->panel) ? $iv->panel : (empty($iv->panel) ? [] : (json_decode($iv->panel, true) ?: []));
+        $responseStatus = $iv->candidate_response_status ?: 'pending';
     @endphp
 
     <div class="max-w-4xl mx-auto space-y-6">
@@ -54,6 +55,15 @@
           </div>
 
           <div class="flex flex-col gap-2 shrink-0">
+            <div class="rounded-full border px-3 py-1 text-center text-xs font-semibold
+              @class([
+                'border-amber-200 bg-amber-50 text-amber-700' => $responseStatus === 'pending',
+                'border-emerald-200 bg-emerald-50 text-emerald-700' => $responseStatus === 'confirmed',
+                'border-red-200 bg-red-50 text-red-700' => $responseStatus === 'declined',
+                'border-purple-200 bg-purple-50 text-purple-700' => $responseStatus === 'reschedule_requested',
+              ])">
+              {{ Str::of($responseStatus)->replace('_', ' ')->headline() }}
+            </div>
             <a href="{{ route('me.interviews.ics', $iv->id) }}"
                class="px-3 py-2 text-sm text-center text-blue-700 border border-blue-300 rounded-md hover:bg-blue-50">
               Tambah ke Kalender (ICS)
@@ -78,6 +88,51 @@
                 <div class="mt-2 text-sm whitespace-pre-line text-slate-700">{{ $iv->notes }}</div>
               </div>
         @endif
+
+        @if($iv->candidate_response_note)
+              <div class="mt-5">
+                <div class="text-sm font-medium text-slate-700">Respons Kamu</div>
+                <div class="mt-2 text-sm whitespace-pre-line text-slate-700">{{ $iv->candidate_response_note }}</div>
+                @if($iv->candidate_reschedule_time)
+                  <div class="mt-1 text-xs text-slate-500">
+                    Usulan waktu: {{ $iv->candidate_reschedule_time->timezone($tz)->format('d M Y H:i') }}
+                  </div>
+                @endif
+              </div>
+        @endif
+
+        <div class="flex flex-wrap items-center gap-3 mt-5">
+          @if($responseStatus !== 'confirmed')
+            <form action="{{ route('me.interviews.confirm', $iv->id) }}" method="POST">
+              @csrf
+              <button class="px-3 py-2 text-sm font-semibold text-white bg-emerald-600 rounded-md hover:bg-emerald-700">
+                Konfirmasi Hadir
+              </button>
+            </form>
+          @endif
+
+          @if($responseStatus !== 'declined')
+            <form action="{{ route('me.interviews.decline', $iv->id) }}" method="POST" class="flex items-center gap-2">
+              @csrf
+              <input type="text" name="reason" required maxlength="1000" placeholder="Alasan tolak"
+                     class="w-44 rounded-md border border-slate-300 px-3 py-2 text-sm">
+              <button class="px-3 py-2 text-sm font-semibold border border-red-300 rounded-md text-red-700 hover:bg-red-50">
+                Tolak
+              </button>
+            </form>
+          @endif
+
+          <form action="{{ route('me.interviews.request_reschedule', $iv->id) }}" method="POST" class="flex flex-wrap items-center gap-2">
+            @csrf
+            <input type="datetime-local" name="proposed_time"
+                   class="rounded-md border border-slate-300 px-3 py-2 text-sm">
+            <input type="text" name="reason" required maxlength="1000" placeholder="Alasan reschedule"
+                   class="w-52 rounded-md border border-slate-300 px-3 py-2 text-sm">
+            <button class="px-3 py-2 text-sm font-semibold border border-purple-300 rounded-md text-purple-700 hover:bg-purple-50">
+              Minta Reschedule
+            </button>
+          </form>
+        </div>
       </div>
     </div>
 @endsection

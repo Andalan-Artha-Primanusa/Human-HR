@@ -390,7 +390,15 @@ class CandidateProfileController extends Controller
             }
         });
 
-        // Redirect
+        // Redirect — kalau sudah ada lamaran, langsung ke daftar lamaran
+        $hasApplication = \App\Models\JobApplication::where('job_id', $job->id)
+            ->where('user_id', $user->id)
+            ->exists();
+
+        if ($hasApplication) {
+            return redirect()->route('applications.mine')->with('success', 'Data kandidat berhasil disimpan.');
+        }
+
         return redirect()->route('jobs.show', $job)->with('success', 'Data kandidat berhasil disimpan.');
     }
 

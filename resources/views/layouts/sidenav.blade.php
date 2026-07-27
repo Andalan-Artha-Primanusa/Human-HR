@@ -258,26 +258,6 @@
               </div>
 
               <div class="{{ $groupBox }} {{ $lockVisual }}">
-                @if (Route::has('admin.companies.index'))
-                    <a href="{{ $href('admin.companies.index') }}" class="{{ $linkDesk }} {{ $activeMenu('admin.companies.*') }}">
-                      <span class="{{ $iconWrap }}"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 21h18M5 21V5a2 2 0 012-2h10a2 2 0 012 2v16M9 8h.01M9 12h.01M9 16h.01M12 8h.01M12 12h.01M12 16h.01M15 8h.01M15 12h.01M15 16h.01"/></svg></span>
-                      <span class="label text-white">Companies</span>
-                    </a>
-                @endif
-                @if (Route::has('admin.pohs.index'))
-                    <a href="{{ $href('admin.pohs.index') }}" class="{{ $linkDesk }} {{ $activeMenu('admin.pohs.*') }}">
-                      <span class="{{ $iconWrap }}"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg></span>
-                      <span class="label text-white">POH</span>
-                    </a>
-                @endif
-
-                @if (Route::has('admin.sites.index'))
-                    <a href="{{ $href('admin.sites.index') }}" class="{{ $linkDesk }} {{ $activeMenu('admin.sites.*') }}">
-                      <span class="{{ $iconWrap }}"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 21h18M4 21V5a2 2 0 012-2h5v18m7 0V9a2 2 0 00-2-2h-5"/></svg></span>
-                      <span class="label text-white">Sites</span>
-                    </a>
-                @endif
-
                 <a href="{{ $href('admin.jobs.index') }}" class="{{ $linkDesk }} {{ $activeMenu('admin.jobs.*') }}">
                   <span class="{{ $iconWrap }}"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 7V6a3 3 0 116 0v1M6 11h12M5 17h14a2 2 0 002-2v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2z"/></svg></span>
                   <span class="label text-white">Jobs</span>
@@ -307,34 +287,6 @@
                     </a>
                 @endif
 
-                @if (Route::has('admin.psychotests.index'))
-                    <a href="{{ $href('admin.psychotests.index') }}" class="{{ $linkDesk }} {{ $activeMenu('admin.psychotests.*') }}">
-                      <span class="{{ $iconWrap }}"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 2.5v4l-5.5 9A3 3 0 006 20.5h12a3 3 0 002.5-5l-5.5-9v-4"/></svg></span>
-                      <span class="label text-white">Psychotests</span>
-                    </a>
-                @endif
-
-                @if (Route::has('admin.offers.index'))
-                    <a href="{{ $href('admin.offers.index') }}" class="{{ $linkDesk }} {{ $activeMenu('admin.offers.*') }}">
-                      <span class="{{ $iconWrap }}"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 7.5 13.5 1.5H7A2.5 2.5 0 004.5 4v16A2.5 2.5 0 007 22.5h10A2.5 2.5 0 0019.5 20V7.5Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M8.5 13h7M8.5 16h7M8.5 10h4"/></svg></span>
-                      <span class="label text-white">Offers</span>
-                    </a>
-                @endif
-
-                @if (Route::has('admin.mcu-templates.index'))
-                    <a href="{{ $href('admin.mcu-templates.index') }}" class="{{ $linkDesk }} {{ $activeMenu('admin.mcu-templates.*') }}">
-                      <span class="{{ $iconWrap }}"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6M9 16h6M9 8h6m-3-5h-1a2 2 0 00-2 2H7a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2z"/></svg></span>
-                      <span class="label text-white">MCU Templates</span>
-                    </a>
-                @endif
-
-                @if ($offerQuickId && Route::has('admin.offers.pdf'))
-                    <a href="{{ $href('admin.offers.pdf', $offerQuickId ? [$offerQuickId] : []) }}" class="{{ $linkDesk }} {{ $activeMenu('admin.offers.pdf') }}">
-                      <span class="{{ $iconWrap }}"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 12 15.75l3-3m-3-10.5v10.5M6 19.5h12M19.5 7.5 13.5 1.5"/></svg></span>
-                      <span class="label text-white">Offer PDF (quick)</span>
-                    </a>
-                @endif
-
                 @if (Route::has('admin.users.index'))
                     <a href="{{ $href('admin.users.index') }}" class="{{ $linkDesk }} {{ $activeMenu('admin.users.*') }}">
                       <span class="{{ $iconWrap }}"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16 14a4 4 0 10-8 0v2a2 2 0 002 2h4a2 2 0 002-2v-2zM12 10a4 4 0 100-8 4 4 0 000 8z"/></svg></span>
@@ -349,10 +301,6 @@
                     </a>
                 @endif
 
-                <a href="{{ $href('admin.dashboard.manpower') }}" class="{{ $linkDesk }} {{ $activeMenu('admin.dashboard.manpower') }}">
-                  <span class="{{ $iconWrap }}"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 19.5h18M6 17V9m6 8V5m6 12v-6"/></svg></span>
-                  <span class="label text-white">Manpower Dashboard</span>
-                </a>
               </div>
           @endif
       @endauth
@@ -479,26 +427,6 @@
               </div>
 
               <div class="{{ $groupBox }} {{ $lockVisual }}">
-                @if (Route::has('admin.companies.index'))
-                      <a href="{{ $href('admin.companies.index') }}" {!! $closeAttr !!} class="{{ $linkMobile }} {{ $activeMenu('admin.companies.*') }}">
-                        <span class="{{ $iconWrap }}"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 21h18M5 21V5a2 2 0 012-2h10a2 2 0 012 2v16M9 8h.01M9 12h.01M9 16h.01M12 8h.01M12 12h.01M12 16h.01M15 8h.01M15 12h.01M15 16h.01"/></svg></span>
-                        <span>Companies</span>
-                      </a>
-                @endif
-                @if (Route::has('admin.pohs.index'))
-                      <a href="{{ $href('admin.pohs.index') }}" {!! $closeAttr !!} class="{{ $linkMobile }} {{ $activeMenu('admin.pohs.*') }}">
-                        <span class="{{ $iconWrap }}"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg></span>
-                        <span>POH</span>
-                      </a>
-                @endif
-
-                @if (Route::has('admin.sites.index'))
-                      <a href="{{ $href('admin.sites.index') }}" {!! $closeAttr !!} class="{{ $linkMobile }} {{ $activeMenu('admin.sites.*') }}">
-                        <span class="{{ $iconWrap }}"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 21h18M4 21V5a2 2 0 012-2h5v18m7 0V9a2 2 0 00-2-2h-5"/></svg></span>
-                        <span>Sites</span>
-                      </a>
-                @endif
-
                 <a href="{{ $href('admin.jobs.index') }}" {!! $closeAttr !!} class="{{ $linkMobile }} {{ $activeMenu('admin.jobs.*') }}">
                   <span class="{{ $iconWrap }}"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 7V6a3 3 0 116 0v1M6 11h12M5 17h14a2 2 0 002-2v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2z"/></svg></span>
                   <span>Jobs</span>
@@ -528,34 +456,6 @@
                       </a>
                 @endif
 
-                @if (Route::has('admin.psychotests.index'))
-                      <a href="{{ $href('admin.psychotests.index') }}" {!! $closeAttr !!} class="{{ $linkMobile }} {{ $activeMenu('admin.psychotests.*') }}">
-                        <span class="{{ $iconWrap }}"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 2.5v4l-5.5 9A3 3 0 006 20.5h12a3 3 0 002.5-5l-5.5-9v-4"/></svg></span>
-                        <span>Psychotests</span>
-                      </a>
-                @endif
-
-                @if (Route::has('admin.offers.index'))
-                      <a href="{{ $href('admin.offers.index') }}" {!! $closeAttr !!} class="{{ $linkMobile }} {{ $activeMenu('admin.offers.*') }}">
-                        <span class="{{ $iconWrap }}"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 7.5 13.5 1.5H7A2.5 2.5 0 004.5 4v16A2.5 2.5 0 007 22.5h10A2.5 2.5 0 0019.5 20V7.5Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M8.5 13h7M8.5 16h7M8.5 10h4"/></svg></span>
-                        <span>Offers</span>
-                      </a>
-                @endif
-
-                @if (Route::has('admin.mcu-templates.index'))
-                      <a href="{{ $href('admin.mcu-templates.index') }}" {!! $closeAttr !!} class="{{ $linkMobile }} {{ $activeMenu('admin.mcu-templates.*') }}">
-                        <span class="{{ $iconWrap }}"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6M9 16h6M9 8h6m-3-5h-1a2 2 0 00-2 2H7a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2z"/></svg></span>
-                        <span>MCU Templates</span>
-                      </a>
-                @endif
-
-                @if ($offerQuickId && Route::has('admin.offers.pdf'))
-                      <a href="{{ $href('admin.offers.pdf', $offerQuickId ? [$offerQuickId] : []) }}" {!! $closeAttr !!} class="{{ $linkMobile }} {{ $activeMenu('admin.offers.pdf') }}">
-                        <span class="{{ $iconWrap }}"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 12 15.75l3-3m-3-10.5v10.5M6 19.5h12M19.5 7.5 13.5 1.5"/></svg></span>
-                        <span>Offer PDF (quick)</span>
-                      </a>
-                @endif
-
                 @if (Route::has('admin.users.index'))
                       <a href="{{ $href('admin.users.index') }}" {!! $closeAttr !!} class="{{ $linkMobile }} {{ $activeMenu('admin.users.*') }}">
                         <span class="{{ $iconWrap }}"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16 14a4 4 0 10-8 0v2a2 2 0 002 2h4a2 2 0 002-2v-2zM12 10a4 4 0 100-8 4 4 0 000 8z"/></svg></span>
@@ -570,10 +470,6 @@
                       </a>
                 @endif
 
-                <a href="{{ $href('admin.dashboard.manpower') }}" {!! $closeAttr !!} class="{{ $linkMobile }} {{ $activeMenu('admin.dashboard.manpower') }}">
-                  <span class="{{ $iconWrap }}"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 19.5h18M6 17V9m6 8V5m6 12v-6"/></svg></span>
-                  <span>Manpower Dashboard</span>
-                </a>
               </div>
           @endif
       @endauth

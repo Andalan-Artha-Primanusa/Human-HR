@@ -20,13 +20,19 @@ class Interview extends Model
         'start_at',
         'end_at',
         'panel',
-        'notes'
+        'notes',
+        'candidate_response_status',
+        'candidate_response_note',
+        'candidate_response_at',
+        'candidate_reschedule_time',
     ];
 
     protected $casts = [
         'start_at' => 'datetime',
         'end_at' => 'datetime',
         'panel' => 'array',
+        'candidate_response_at' => 'datetime',
+        'candidate_reschedule_time' => 'datetime',
     ];
 
     /** @return BelongsTo<JobApplication,Interview> */

@@ -167,8 +167,8 @@
     $schema[] = [
         "@context" => "https://schema.org",
         "@type" => "SiteNavigationElement",
-        "name" => ["Lowongan", "Masuk", "Daftar", "FAQ"],
-        "url" => [url('/jobs'), url('/login'), url('/register'), url('/faq')]
+        "name" => ["Lowongan", "Masuk", "Daftar", "Lokasi Site"],
+        "url" => [url('/jobs'), url('/login'), url('/register'), url('/sites')]
     ];
 
     // 6. ItemList JobPosting
@@ -637,13 +637,6 @@
             Lowongan Kerja
           </a>
 
-          <a href="/faq" class="mob-nav-item">
-            <span class="mob-icon">
-              <svg class="w-4 h-4"><use href="#i-help"/></svg>
-            </span>
-            FAQ
-          </a>
-
           <a href="/sites" class="mob-nav-item">
             <span class="mob-icon">
               <svg class="w-4 h-4"><use href="#i-map-pin"/></svg>
@@ -792,13 +785,6 @@
             </span>
             <span class="qlink-desc">Lihat semua posisi terbuka</span>
           </a>
-          <a href="/faq" class="qlink-card">
-            <span class="inline-flex items-center gap-2 qlink-title">
-              <svg class="w-4 h-4" aria-hidden="true"><use href="#i-help"/></svg>
-              FAQ
-            </span>
-            <span class="qlink-desc">Panduan &amp; pertanyaan umum</span>
-          </a>
         </div>
       </div>
     </section>
@@ -857,8 +843,28 @@
                     </li>
                 @endforeach
               </ul>
+          @elseif($sitesNorm->isNotEmpty())
+              <div class="rounded-2xl border border-amber-100 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                Koordinat peta belum diisi, tapi daftar site tetap tersedia untuk filter lowongan.
+              </div>
+              <ul class="flex flex-wrap gap-2 mt-4" role="list" aria-label="Filter lowongan berdasarkan lokasi site">
+                @foreach($sitesNorm as $s)
+                    <li>
+                      <a href="{{ route('jobs.index', ['site' => $s['param']]) }}"
+                        class="inline-flex items-center gap-2 px-4 py-2 transition border rounded-full hover:shadow-md"
+                        style="border-color: #e8d5c4; background: #fff; color: #a77d52;"
+                        aria-label="Filter lowongan di site {{ $s['name'] }}">
+                        <span class="inline-block w-2.5 h-2.5 rounded-full shrink-0"
+                          style="background: {{ $s['dot'] }}" aria-hidden="true"></span>
+                        <span class="text-sm">{{ $s['name'] }}</span>
+                      </a>
+                    </li>
+                @endforeach
+              </ul>
           @else
-            {{-- Tidak ada site untuk ditampilkan --}}
+            <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+              Lokasi site belum tersedia.
+            </div>
           @endif
       </div>
     </section>
@@ -1170,13 +1176,6 @@
           @endforeach
         </div>
 
-        <div class="mt-8 text-center">
-          <a href="/faq" class="inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold text-white rounded-2xl"
-            style="background: #a77d52">
-            Lihat Semua FAQ
-            <svg class="w-4 h-4" aria-hidden="true"><use href="#i-arrow-right"/></svg>
-          </a>
-        </div>
       </div>
     </section>
 
@@ -1214,7 +1213,7 @@
             <li><a href="{{ route('jobs.index') }}" class="text-sm transition hover:text-white" style="color:#e8d5c4">Lowongan Kerja</a></li>
             <li><a href="{{ route('register') }}" class="text-sm transition hover:text-white" style="color:#e8d5c4">Daftar</a></li>
             <li><a href="{{ route('login') }}" class="text-sm transition hover:text-white" style="color:#e8d5c4">Masuk</a></li>
-            <li><a href="/faq" class="text-sm transition hover:text-white" style="color:#e8d5c4">FAQ</a></li>
+            <li><a href="#faq-heading" class="text-sm transition hover:text-white" style="color:#e8d5c4">FAQ</a></li>
           </ul>
         </div>
 

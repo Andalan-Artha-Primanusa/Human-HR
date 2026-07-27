@@ -175,6 +175,23 @@ class SiteController extends Controller
         return redirect()->route('admin.sites.index')->with('success', 'Site deleted.');
     }
 
+    public function toggle(Request $request, Site $site)
+    {
+        $site->update(['is_active' => ! (bool) $site->is_active]);
+
+        $message = $site->is_active ? 'Site diaktifkan.' : 'Site dinonaktifkan.';
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'ok' => true,
+                'is_active' => (bool) $site->is_active,
+                'message' => $message,
+            ]);
+        }
+
+        return back()->with('success', $message);
+    }
+
     /* =====================
      * Validation
      * ===================== */

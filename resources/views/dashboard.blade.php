@@ -20,9 +20,9 @@
                             <div class="text-6xl mb-4">👔</div>
                             <h3 class="text-lg font-semibold text-gray-900 mb-2">Admin Dashboard</h3>
                             <p class="text-gray-600 mb-6"> Anda akan diarahkan ke halaman admin...</p>
-                            <a href="{{ route('admin.dashboard.manpower') }}" 
+                            <a href="{{ route('admin.applications.board') }}" 
                                class="inline-flex items-center px-4 py-2 bg-[#a77d52] text-white rounded-lg hover:opacity-90 transition">
-                                Buka Dashboard Admin
+                                Buka Kanban Admin
                             </a>
                         </div>
                     </div>

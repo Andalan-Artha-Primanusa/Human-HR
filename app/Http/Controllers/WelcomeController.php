@@ -44,6 +44,7 @@ class WelcomeController extends Controller
                     $seed = $s->code ?: $name ?: (string) $s->id;
                     return [
                         'id' => $s->id,
+                        'code' => $s->code,
                         'name' => $name,
                         'dot' => $this->colorFromString($seed),
                     ];
@@ -133,7 +134,7 @@ class WelcomeController extends Controller
     {
         $q = Job::query();
 
-        if (Schema::hasColumn('jobs', 'status')) {
+        if (Schema::hasColumn('job_listings', 'status')) {
             $q->where('status', 'open');
         }
 

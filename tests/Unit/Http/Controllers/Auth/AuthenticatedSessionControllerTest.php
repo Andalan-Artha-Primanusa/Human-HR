@@ -54,10 +54,10 @@ class AuthenticatedSessionControllerTest extends TestCase
         $roles = ['superadmin', 'hr', 'admin'];
         foreach ($roles as $role) {
             $redirect = match ($role) {
-                'superadmin', 'hr', 'admin' => 'admin.dashboard.manpower',
+                'superadmin', 'hr', 'admin' => 'admin.applications.board',
                 default => 'jobs.index',
             };
-            $this->assertEquals('admin.dashboard.manpower', $redirect);
+            $this->assertEquals('admin.applications.board', $redirect);
         }
     }
 
@@ -65,7 +65,7 @@ class AuthenticatedSessionControllerTest extends TestCase
     {
         $role = 'pelamar';
         $redirect = match ($role) {
-            'superadmin', 'hr', 'admin' => 'admin.dashboard.manpower',
+            'superadmin', 'hr', 'admin' => 'admin.applications.board',
             default => 'jobs.index',
         };
         $this->assertEquals('jobs.index', $redirect);

@@ -77,7 +77,7 @@ Route::get('/sites/{site}', [SitePublicController::class, 'show'])->name('sites.
 Route::get('/dashboard', function () {
     $user = auth()->user();
     if ($user && in_array($user->role, ['superadmin', 'hr', 'admin'])) {
-        return redirect()->route('admin.dashboard.manpower');
+        return redirect()->route('admin.applications.board');
     }
     
     $openJobsCount = \App\Models\Job::where('status', 'open')->count();
@@ -111,7 +111,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Lamaran saya
     Route::get('/me/applications', [ApplicationController::class, 'index'])
-        ->middleware('candidate.complete')
         ->name('applications.mine');
     Route::post('/me/applications/{application}/reject-offer', [ApplicationController::class, 'rejectOffer'])
         ->middleware('candidate.complete')
@@ -148,6 +147,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/me/interviews/{interview}/ics', [MyInterviewController::class, 'ics'])
         ->middleware('candidate.complete')
         ->name('me.interviews.ics');
+    Route::post('/me/interviews/{interview}/confirm', [MyInterviewController::class, 'confirm'])
+        ->middleware('candidate.complete')
+        ->name('me.interviews.confirm');
+    Route::post('/me/interviews/{interview}/decline', [MyInterviewController::class, 'decline'])
+        ->middleware('candidate.complete')
+        ->name('me.interviews.decline');
+    Route::post('/me/interviews/{interview}/request-reschedule', [MyInterviewController::class, 'requestReschedule'])
+        ->middleware('candidate.complete')
+        ->name('me.interviews.request_reschedule');
 
     // =========================================================
     // Kanban untuk karyawan/trainer (tidak untuk pelamar)
@@ -183,9 +191,11 @@ Route::prefix('admin')
 
         // ================= Jobs (admin) =================
         Route::resource('jobs', JobController::class)->except(['show']);
+        Route::post('jobs/{job}/toggle', [JobController::class, 'toggle'])->name('jobs.toggle');
 
         // ================= Sites (admin) =================
         Route::resource('sites', AdminSiteController::class);
+        Route::post('sites/{site}/toggle', [AdminSiteController::class, 'toggle'])->name('sites.toggle');
 
         // ================= Companies (admin) =================
         Route::resource('companies', CompanyController::class);
@@ -213,6 +223,7 @@ Route::prefix('admin')
         Route::get('applications/{application}/ground-test/lap', [ApplicationController::class, 'showGroundTestLap'])->name('applications.ground-test.lap');
         Route::get('applications/{application}/stages-history', [ApplicationController::class, 'stagesHistory'])->name('applications.stages-history');
         Route::post('applications/{application}/reject-offer', [ApplicationController::class, 'rejectOffer'])->name('applications.reject-offer');
+        Route::get('applications/{application}', [ApplicationController::class, 'show'])->name('applications.show');
 
         // Move via form POST (tombol blade)
         Route::post('applications/{application}/move', [ApplicationController::class, 'moveStage'])
@@ -277,8 +288,6 @@ Route::middleware('guest')->group(function () {
 | Extra SEO Pages
 |--------------------------------------------------------------------------
 */
-Route::view('/faq', 'faq')->name('faq');
-Route::view('/blog', 'blog')->name('blog');
 Route::view('/terms-and-conditions', 'legal.terms')->name('terms');
 Route::get('/search', [JobController::class, 'index'])->name('search');
 

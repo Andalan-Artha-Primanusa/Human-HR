@@ -335,6 +335,27 @@ class JobController extends Controller
         return redirect()->route('admin.jobs.index')->with('success', 'Job deleted.');
     }
 
+    public function toggle(Request $request, Job $job)
+    {
+        $this->authorize('update', $job);
+
+        $nextStatus = $job->status === 'open' ? 'closed' : 'open';
+        $job->update([
+            'status' => $nextStatus,
+            'updated_by' => Auth::id(),
+        ]);
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'ok' => true,
+                'status' => $nextStatus,
+                'message' => $nextStatus === 'open' ? 'Lowongan dibuka.' : 'Lowongan ditutup.',
+            ]);
+        }
+
+        return back()->with('success', $nextStatus === 'open' ? 'Lowongan dibuka.' : 'Lowongan ditutup.');
+    }
+
     // =====================
     // Helpers (aman & rapi)
     // =====================

@@ -20,7 +20,7 @@ class MyInterviewController extends Controller
         abort_if(!$u, 401);
 
         return Interview::query()
-            ->select(['id', 'application_id', 'title', 'mode', 'start_at', 'end_at', 'location', 'meeting_link', 'notes'])
+            ->select(['id', 'application_id', 'title', 'mode', 'start_at', 'end_at', 'location', 'meeting_link', 'notes', 'candidate_response_status', 'candidate_response_note', 'candidate_response_at', 'candidate_reschedule_time'])
             ->with([
                 'application:id,user_id,job_id',
                 'application.user:id,name,email',
@@ -45,7 +45,7 @@ class MyInterviewController extends Controller
         abort_if(!$u, 401);
 
         $interviews = Interview::query()
-            ->select(['id', 'application_id', 'title', 'mode', 'start_at', 'end_at', 'location', 'meeting_link'])
+            ->select(['id', 'application_id', 'title', 'mode', 'start_at', 'end_at', 'location', 'meeting_link', 'candidate_response_status', 'candidate_response_at', 'candidate_reschedule_time'])
             ->with([
                 'application:id,job_id,user_id',
                 'application.job:id,title,division,site_id',
@@ -64,6 +64,58 @@ class MyInterviewController extends Controller
     {
         $iv = $this->forUserOrFail($request, $interview);
         return view('me.interviews.show', compact('iv'));
+    }
+
+    public function confirm(Request $request, string $interview)
+    {
+        $iv = $this->forUserOrFail($request, $interview);
+        $data = $request->validate([
+            'note' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        $iv->update([
+            'candidate_response_status' => 'confirmed',
+            'candidate_response_note' => $data['note'] ?? null,
+            'candidate_response_at' => now(),
+            'candidate_reschedule_time' => null,
+        ]);
+
+        return back()->with('ok', 'Kehadiran interview berhasil dikonfirmasi.');
+    }
+
+    public function decline(Request $request, string $interview)
+    {
+        $iv = $this->forUserOrFail($request, $interview);
+        $data = $request->validate([
+            'reason' => ['required', 'string', 'max:1000'],
+        ]);
+
+        $iv->update([
+            'candidate_response_status' => 'declined',
+            'candidate_response_note' => $data['reason'],
+            'candidate_response_at' => now(),
+            'candidate_reschedule_time' => null,
+        ]);
+
+        return back()->with('ok', 'Penolakan interview berhasil dikirim.');
+    }
+
+    public function requestReschedule(Request $request, string $interview)
+    {
+        $iv = $this->forUserOrFail($request, $interview);
+        $data = $request->validate([
+            'proposed_time' => ['nullable', 'date'],
+            'reason' => ['required', 'string', 'max:1000'],
+        ]);
+
+        $iv->update([
+            'candidate_response_status' => 'reschedule_requested',
+            'candidate_response_note' => $data['reason'],
+            'candidate_response_at' => now(),
+            'candidate_reschedule_time' => $data['proposed_time'] ?? null,
+        ]);
+
+        return back()->with('ok', 'Permintaan reschedule berhasil dikirim.');
     }
 
     /**
