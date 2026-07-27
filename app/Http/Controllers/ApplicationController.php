@@ -153,7 +153,12 @@ class ApplicationController extends Controller
             ->orderByDesc('id')
             ->paginate(12);
 
-        return view('applications.mine', compact('apps'));
+        $latestOpenJob = Job::query()
+            ->where('status', 'open')
+            ->latest('created_at')
+            ->first(['id']);
+
+        return view('applications.mine', compact('apps', 'latestOpenJob'));
     }
 
     /** Pelamar: apply job -> redirect ke wizard profile */
@@ -181,7 +186,17 @@ class ApplicationController extends Controller
                 ->with('info', 'Kamu sudah melamar untuk posisi ini.');
         }
 
-        // Buat lamaran dulu (data per-application semua optional)
+        // Cek kelengkapan profil
+        $missingProfileFields = $profile->missingRequiredForApplication();
+
+        if ($missingProfileFields !== []) {
+            return redirect()
+                ->route('candidate.profiles.edit', ['job' => $job->id])
+                ->with('missing_profile_fields', $missingProfileFields)
+                ->with('info', 'Lengkapi data profil kamu dulu sebelum melamar posisi ini.');
+        }
+
+        // Buat lamaran hanya setelah profil lengkap.
         DB::transaction(function () use ($user, $job) {
             $app = JobApplication::create([
                 'job_id'              => $job->id,
@@ -199,16 +214,6 @@ class ApplicationController extends Controller
                 'user_id'        => $user->id,
             ]);
         });
-
-        // Cek kelengkapan profil
-        $missingProfileFields = $profile->missingRequiredForApplication();
-
-        if ($missingProfileFields !== []) {
-            return redirect()
-                ->route('candidate.profiles.edit', ['job' => $job->id])
-                ->with('missing_profile_fields', $missingProfileFields)
-                ->with('success', 'Lamaran dibuat! Sekarang lengkapi data profil kamu ya.');
-        }
 
         // Profil sudah lengkap → langsung ke daftar lamaran
         return redirect()

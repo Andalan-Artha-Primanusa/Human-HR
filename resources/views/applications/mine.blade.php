@@ -343,7 +343,26 @@
       @if(!$apps->count())
           <div class="p-6 mt-6 text-center border rounded-xl"
                style="border-color: {{ $BORD }}; background: {{ $CARD }}">
-            <p style="color: {{ $TEXT }}">Belum ada lamaran</p>
+            <p class="text-lg font-semibold" style="color: {{ $TEXT }}">Belum ada lamaran yang tersimpan</p>
+            <p class="max-w-xl mx-auto mt-2 text-sm text-slate-600">
+              Lamaran baru akan masuk ke halaman ini setelah profil kandidat lengkap dan kamu menekan tombol Lamar pada lowongan.
+            </p>
+            <div class="flex flex-wrap justify-center gap-2 mt-4">
+              <a href="{{ route('jobs.index') }}"
+                 class="px-4 py-2 text-sm font-semibold text-white rounded-lg hover:opacity-90"
+                 style="background: {{ $PRIMARY }}">
+                Cari Lowongan
+              </a>
+              @if(Route::has('candidate.profiles.edit'))
+                @if(!empty($latestOpenJob))
+                  <a href="{{ route('candidate.profiles.edit', ['job' => $latestOpenJob->id]) }}"
+                     class="px-4 py-2 text-sm font-semibold border rounded-lg hover:bg-white"
+                     style="border-color: {{ $PRIMARY }}; color: {{ $PRIMARY }}">
+                    Lengkapi Profil
+                  </a>
+                @endif
+              @endif
+            </div>
           </div>
       @endif
 
