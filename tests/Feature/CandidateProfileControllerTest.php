@@ -41,6 +41,7 @@ class CandidateProfileControllerTest extends TestCase
         $response->assertStatus(200);
         $response->assertViewIs('candidates.profile_wizard');
         $response->assertViewHas('profile');
+        $response->assertSee('name="poh_id"', false);
     }
 
     public function test_update_validates_and_saves_profile()
