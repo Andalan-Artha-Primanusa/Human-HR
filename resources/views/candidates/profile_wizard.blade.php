@@ -492,7 +492,7 @@
           {{-- Fresh Graduate Toggle --}}
           <label class="inline-flex items-center gap-2 mt-3 px-4 py-2.5 rounded-xl border border-amber-200 bg-amber-50 cursor-pointer select-none hover:bg-amber-100 transition">
             <input type="hidden" name="is_fresh_graduate" value="0">
-            <input type="checkbox" x-model="isFreshGrad" :true-value="1" :false-value="0" name="is_fresh_graduate" class="rounded" @change="if(isFreshGrad){ items.splice(1); }">
+            <input type="checkbox" x-model="isFreshGrad" :true-value="1" :false-value="0" name="is_fresh_graduate" class="rounded" @change="if(isFreshGrad){ items.splice(0); }">
             <span class="text-sm text-amber-900 font-medium">Saya Fresh Graduate (Belum ada pengalaman kerja)</span>
           </label>
           <p class="mt-1 text-xs text-slate-500">Centang jika belum pernah bekerja sebelumnya. Riwayat pekerjaan tidak wajib diisi.</p>
@@ -980,7 +980,7 @@
           const T = Alpine.store('form').trainings || [];
           const E = Alpine.store('form').employments || [];
           const f = this.$refs.form;
-          const isFreshGrad = f['is_fresh_graduate']?.checked;
+          const isFreshGrad = !!f.querySelector('input[name="is_fresh_graduate"]:checked');
           if(!isFreshGrad && E.length<1) errs.push('Minimal 1 riwayat pekerjaan');
           T.forEach((r,i)=>{ if(r.title?.trim() || r.institution?.trim() || r.period_start?.trim()){ if(!r.title?.trim()) errs.push(`Pelatihan #${i+1}: Nama`); if(!r.institution?.trim()) errs.push(`Pelatihan #${i+1}: Institusi`); if(!r.period_start?.trim()) errs.push(`Pelatihan #${i+1}: Tanggal Mulai`); } });
           if(!isFreshGrad) E.forEach((r,i)=>{ if(!r.company?.trim()) errs.push(`Pekerjaan #${i+1}: Perusahaan`); if(!r.position_start?.trim()) errs.push(`Pekerjaan #${i+1}: Jabatan Awal`); if(!r.period_start?.trim()) errs.push(`Pekerjaan #${i+1}: Tanggal Mulai`); });
