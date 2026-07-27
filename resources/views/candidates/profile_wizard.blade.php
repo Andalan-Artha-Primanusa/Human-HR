@@ -36,6 +36,11 @@
       border-color:#a77d52!important;
       box-shadow:0 0 0 3px rgba(167,125,82,.18);
     }
+    main input.field-error, main select.field-error, main textarea.field-error{
+      border-color:#dc2626!important;
+      box-shadow:0 0 0 3px rgba(220,38,38,.12);
+    }
+    .field-error-msg{color:#dc2626;font-size:0.75rem;margin-top:0.25rem;}
   </style>
   {{-- Alpine --}}
   <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -49,6 +54,8 @@
         references: @json(old('references', $profile->references ?? [])),
       };
       const normArr = (v) => Array.isArray(v) ? v : [];
+      Alpine.store('regions', @json($allRegions));
+      Alpine.store('provinces', @json($provincesList));
       Alpine.store('form', {
         trainings:  normArr(seed.trainings),
         employments:normArr(seed.employments),
@@ -102,7 +109,10 @@
           <div class="px-4 py-3 mb-4 border rounded-xl border-brand-200 bg-brand-50 text-brand-800">{{ session('info') }}</div>
     @endif
     @if(session('success'))
-          <div class="px-4 py-3 mb-4 border rounded-xl border-brand-200 bg-brand-50 text-brand-800">{{ session('success') }}</div>
+          <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => { show = false; }, 5000)" x-transition class="px-4 py-3 mb-4 border rounded-xl border-green-200 bg-green-50 text-green-900 flex items-center justify-between">
+            <span>{{ session('success') }}</span>
+            <button @click="show = false" class="text-green-600 hover:text-green-800">&times;</button>
+          </div>
     @endif
     @php
       $missingProfileFieldsForView = collect(session('missing_profile_fields', $missingProfileFields ?? []))
@@ -121,7 +131,10 @@
           </div>
     @endif
     @if($errors->any())
-          <div class="px-4 py-3 mb-4 border rounded-xl border-brand-200 bg-[#fbf3ea] text-brand-900">
+          <div x-data="{ open: true }" x-init="$nextTick(() => {
+            const first = document.querySelector('[data-error]');
+            if(first) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          })" class="px-4 py-3 mb-4 border rounded-xl border-red-200 bg-red-50 text-red-900">
             <div class="mb-1 font-semibold">Periksa kembali isian kamu:</div>
             <ul class="pl-5 text-sm list-disc">
               @foreach($errors->all() as $e)
@@ -198,7 +211,8 @@
           <div class="grid gap-4 mt-4 sm:grid-cols-2">
             <div>
               <label class="text-sm text-slate-600">Nama Lengkap <span class="text-red-600">*</span></label>
-              <input required name="full_name" value="{{ old('full_name', $profile->full_name) }}" class="w-full px-3 py-2 mt-1 border rounded-lg">
+              <input required name="full_name" value="{{ old('full_name', $profile->full_name) }}" class="w-full px-3 py-2 mt-1 border rounded-lg" data-error="{{ $errors->has('full_name') ? '1' : '' }}" @class(['field-error' => $errors->has('full_name')])>
+              @error('full_name')<p class="field-error-msg">{{ $message }}</p>@enderror
             </div>
             <div>
               <label class="text-sm text-slate-600">Nama Panggilan</label>
@@ -206,11 +220,12 @@
             </div>
             <div>
               <label class="text-sm text-slate-600">Jenis Kelamin <span class="text-red-600">*</span></label>
-              <select required name="gender" class="w-full px-3 py-2 mt-1 border rounded-lg">
+              <select required name="gender" class="w-full px-3 py-2 mt-1 border rounded-lg" @class(['field-error' => $errors->has('gender')])>
                 <option value="">—</option>
                 <option value="male"   @selected(old('gender', $profile->gender) === 'male')>Laki-laki</option>
                 <option value="female" @selected(old('gender', $profile->gender) === 'female')>Perempuan</option>
               </select>
+              @error('gender')<p class="field-error-msg">{{ $message }}</p>@enderror
             </div>
             <div>
               <label class="text-sm text-slate-600">Tempat Lahir <span class="text-red-600">*</span></label>
@@ -226,15 +241,18 @@
             </div>
             <div>
               <label class="text-sm text-slate-600">NIK KTP <span class="text-red-600">*</span></label>
-              <input required name="nik" value="{{ old('nik', $profile->nik) }}" maxlength="16" class="w-full px-3 py-2 mt-1 border rounded-lg">
+              <input required name="nik" value="{{ old('nik', $profile->nik) }}" maxlength="16" class="w-full px-3 py-2 mt-1 border rounded-lg" @class(['field-error' => $errors->has('nik')])>
+              @error('nik')<p class="field-error-msg">{{ $message }}</p>@enderror
             </div>
             <div>
               <label class="text-sm text-slate-600">Email <span class="text-red-600">*</span></label>
-              <input required type="email" name="email" value="{{ old('email', $profile->email ?? auth()->user()->email) }}" class="w-full px-3 py-2 mt-1 border rounded-lg">
+              <input required type="email" name="email" value="{{ old('email', $profile->email ?? auth()->user()->email) }}" class="w-full px-3 py-2 mt-1 border rounded-lg" @class(['field-error' => $errors->has('email')])>
+              @error('email')<p class="field-error-msg">{{ $message }}</p>@enderror
             </div>
             <div>
               <label class="text-sm text-slate-600">Nomor HP <span class="text-red-600">*</span></label>
-              <input required name="phone" pattern="[0-9]{12,13}" maxlength="13" minlength="12" value="{{ old('phone', $profile->phone) }}" class="w-full px-3 py-2 mt-1 border rounded-lg" title="Nomor HP harus 12-13 digit angka" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+              <input required name="phone" pattern="[0-9]{12,13}" maxlength="13" minlength="12" value="{{ old('phone', $profile->phone) }}" class="w-full px-3 py-2 mt-1 border rounded-lg" title="Nomor HP harus 12-13 digit angka" oninput="this.value=this.value.replace(/[^0-9]/g,'')" @class(['field-error' => $errors->has('phone')])>
+              @error('phone')<p class="field-error-msg">{{ $message }}</p>@enderror
             </div>
             <div>
               <label class="text-sm text-slate-600">Nomor WhatsApp</label>
@@ -282,7 +300,7 @@
           </div>
         </div>
 
-        <div class="p-5 bg-white shadow-sm card rounded-2xl">
+        <div class="p-5 bg-white shadow-sm card rounded-2xl" x-data="addressSection()">
           <h2 class="flex items-center gap-2 text-lg font-semibold">
             <svg class="w-5 h-5 text-brand-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 7h18M5 7v10a2 2 0 002 2h10a2 2 0 002-2V7"/></svg>
             Alamat KTP & Domisili
@@ -290,14 +308,31 @@
 
           <div class="grid gap-3 mt-4">
             <label class="text-sm text-slate-600">Alamat KTP <span class="text-red-600">*</span></label>
-            <textarea required name="ktp_address" class="w-full px-3 py-2 border rounded-lg" rows="2">{{ old('ktp_address', $profile->ktp_address) }}</textarea>
+            <textarea required name="ktp_address" class="w-full px-3 py-2 border rounded-lg" rows="2" @class(['field-error' => $errors->has('ktp_address')])>{{ old('ktp_address', $profile->ktp_address) }}</textarea>
+            @error('ktp_address')<p class="field-error-msg">{{ $message }}</p>@enderror
             <div class="grid gap-3 sm:grid-cols-6">
               <input name="ktp_rt"  placeholder="RT"  value="{{ old('ktp_rt', $profile->ktp_rt) }}"  class="px-3 py-2 border rounded-lg">
               <input name="ktp_rw"  placeholder="RW"  value="{{ old('ktp_rw', $profile->ktp_rw) }}"  class="px-3 py-2 border rounded-lg">
               <input required name="ktp_village"  placeholder="Desa/Kelurahan" value="{{ old('ktp_village', $profile->ktp_village) }}" class="px-3 py-2 border rounded-lg">
               <input required name="ktp_district" placeholder="Kecamatan" value="{{ old('ktp_district', $profile->ktp_district) }}" class="px-3 py-2 border rounded-lg">
-              <input required name="ktp_city"     placeholder="Kab/Kota" value="{{ old('ktp_city', $profile->ktp_city) }}" class="px-3 py-2 border rounded-lg">
-              <input required name="ktp_province" placeholder="Provinsi" value="{{ old('ktp_province', $profile->ktp_province) }}" class="px-3 py-2 border rounded-lg">
+              <div>
+                <select required name="ktp_province" x-model="ktpProvince" @change="ktpCity = ''" class="px-3 py-2 border rounded-lg w-full">
+                  <option value="">Provinsi *</option>
+                  @foreach($provincesList as $p)
+                    <option value="{{ $p }}" @selected(old('ktp_province', $profile->ktp_province) === $p)>{{ $p }}</option>
+                  @endforeach
+                </select>
+                @error('ktp_province')<p class="field-error-msg">{{ $message }}</p>@enderror
+              </div>
+              <div>
+                <select required name="ktp_city" x-model="ktpCity" class="px-3 py-2 border rounded-lg w-full">
+                  <option value="">Kab/Kota *</option>
+                  <template x-for="c in (regions[ktpProvince] || [])" :key="c">
+                    <option :value="c" x-text="c"></option>
+                  </template>
+                </select>
+                @error('ktp_city')<p class="field-error-msg">{{ $message }}</p>@enderror
+              </div>
             </div>
             <div class="grid gap-3 sm:grid-cols-3">
               <input required name="ktp_postal_code" placeholder="Kode Pos" value="{{ old('ktp_postal_code', $profile->ktp_postal_code) }}" class="px-3 py-2 border rounded-lg">
@@ -319,8 +354,24 @@
               <input name="domicile_rw"  placeholder="RW"  x-model="domicile_rw"  class="px-3 py-2 border rounded-lg">
               <input required name="domicile_village"  placeholder="Desa/Kelurahan" x-model="domicile_village" class="px-3 py-2 border rounded-lg">
               <input required name="domicile_district" placeholder="Kecamatan" x-model="domicile_district" class="px-3 py-2 border rounded-lg">
-              <input required name="domicile_city"     placeholder="Kab/Kota" x-model="domicile_city" class="px-3 py-2 border rounded-lg">
-              <input required name="domicile_province" placeholder="Provinsi" x-model="domicile_province" class="px-3 py-2 border rounded-lg">
+              <div>
+                <select required name="domicile_province" x-model="domProvince" @change="domCity = ''" class="px-3 py-2 border rounded-lg w-full">
+                  <option value="">Provinsi *</option>
+                  @foreach($provincesList as $p)
+                    <option value="{{ $p }}" @selected(old('domicile_province', $profile->domicile_province) === $p)>{{ $p }}</option>
+                  @endforeach
+                </select>
+                @error('domicile_province')<p class="field-error-msg">{{ $message }}</p>@enderror
+              </div>
+              <div>
+                <select required name="domicile_city" x-model="domCity" class="px-3 py-2 border rounded-lg w-full">
+                  <option value="">Kab/Kota *</option>
+                  <template x-for="c in (regions[domProvince] || [])" :key="c">
+                    <option :value="c" x-text="c"></option>
+                  </template>
+                </select>
+                @error('domicile_city')<p class="field-error-msg">{{ $message }}</p>@enderror
+              </div>
             </div>
             <div class="grid gap-3 sm:grid-cols-3">
               <input required name="domicile_postal_code" placeholder="Kode Pos" x-model="domicile_postal_code" class="px-3 py-2 border rounded-lg">
@@ -346,7 +397,7 @@
             </h2>
             <button type="button" class="rounded-xl border border-brand-200 px-3 py-1.5 text-sm text-brand-800 hover:bg-brand-50" @click="items.push({title:'',institution:'',certificate_name:'',certificate_path:'',cert_valid_from:'',cert_valid_to:'',cert_no_expiry:false})">+ Tambah</button>
           </div>
-          <p class="mt-1 text-xs text-slate-500">Opsional.</p>
+          <p class="mt-1 text-xs text-slate-500">Opsional — silakan lewati jika tidak ada.</p>
           <template x-for="(it,idx) in items" :key="idx">
             <div class="grid gap-3 p-3 mt-4 border rounded-xl">
               <input class="px-3 py-2 border rounded-lg" :name="`trainings[${idx}][title]`" x-model="it.title" placeholder="Nama Training/Sertifikasi *" required>
@@ -558,10 +609,22 @@
           <p class="mt-1 text-xs text-slate-500">Isi minimal 1 referensi.</p>
           <template x-for="(it,idx) in items.slice(0,1)" :key="idx">
             <div class="grid gap-3 p-3 mt-4 border rounded-xl sm:grid-cols-2">
-              <input class="px-3 py-2 border rounded-lg" :name="`references[${idx}][name]`" x-model="it.name" placeholder="Nama *" required>
-              <input class="px-3 py-2 border rounded-lg" :name="`references[${idx}][job_title]`" x-model="it.job_title" placeholder="Jabatan *" required>
-              <input class="px-3 py-2 border rounded-lg" :name="`references[${idx}][company]`" x-model="it.company" placeholder="Perusahaan *" required>
-              <input class="px-3 py-2 border rounded-lg" :name="`references[${idx}][contact]`" x-model="it.contact" placeholder="Kontak (HP/Email) *" required>
+              <div>
+                <input class="px-3 py-2 border rounded-lg" :name="`references[${idx}][name]`" x-model="it.name" placeholder="Nama *" required>
+                @error('references.0.name')<p class="field-error-msg">{{ $message }}</p>@enderror
+              </div>
+              <div>
+                <input class="px-3 py-2 border rounded-lg" :name="`references[${idx}][job_title]`" x-model="it.job_title" placeholder="Jabatan *" required>
+                @error('references.0.job_title')<p class="field-error-msg">{{ $message }}</p>@enderror
+              </div>
+              <div>
+                <input class="px-3 py-2 border rounded-lg" :name="`references[${idx}][company]`" x-model="it.company" placeholder="Perusahaan *" required>
+                @error('references.0.company')<p class="field-error-msg">{{ $message }}</p>@enderror
+              </div>
+              <div>
+                <input class="px-3 py-2 border rounded-lg" :name="`references[${idx}][contact]`" x-model="it.contact" placeholder="Kontak (HP/Email) *" required>
+                @error('references.0.contact')<p class="field-error-msg">{{ $message }}</p>@enderror
+              </div>
             </div>
           </template>
         </div>
@@ -642,7 +705,7 @@
           <p class="mt-1 text-sm text-slate-600">Pastikan semua data sudah benar. Kamu tetap bisa mengubahnya lagi nanti.</p>
           <div class="flex items-center justify-end gap-2 mt-4">
             <button type="button" class="px-4 py-2 text-sm border rounded-xl border-brand-200 text-brand-800 hover:bg-brand-50" @click="confirmOpen=false">Batal</button>
-            <button type="button" class="rounded-xl bg-[#a77d52] px-4 py-2 text-sm font-semibold text-white hover:opacity-95" @click="confirmOpen=false; $refs.form.submit()">Ya, Simpan</button>
+            <button type="button" class="rounded-xl bg-[#a77d52] px-4 py-2 text-sm font-semibold text-white hover:opacity-95" @click="confirmOpen=false; submitting=true; $refs.form.submit()" :disabled="submitting" x-text="submitting ? 'Menyimpan...' : 'Ya, Simpan'">Ya, Simpan</button>
           </div>
         </div>
       </div>
@@ -686,6 +749,42 @@
     });
   });
 
+  function addressSection(){
+    const regions = Alpine.store('regions');
+    return {
+      regions,
+      sameAsKtp: false,
+      ktpProvince: @json(old('ktp_province', $profile->ktp_province)),
+      ktpCity: @json(old('ktp_city', $profile->ktp_city)),
+      domProvince: @json(old('domicile_province', $profile->domicile_province)),
+      domCity: @json(old('domicile_city', $profile->domicile_city)),
+
+      init(){
+        this.$watch('sameAsKtp', v => { if(v) this.copyKtpToDomisili(); });
+        this.$watch('ktpProvince', () => { if(this.sameAsKtp) this.copyKtpToDomisili(); });
+        this.$watch('ktpCity', () => { if(this.sameAsKtp) this.copyKtpToDomisili(); });
+      },
+      copyKtpToDomisili(){
+        this.domProvince = this.ktpProvince;
+        this.$nextTick(() => { this.domCity = this.ktpCity; });
+        const f = this.$el.closest('form');
+        if(!f) return;
+        const map = [
+          ['domicile_address','ktp_address'], ['domicile_rt','ktp_rt'], ['domicile_rw','ktp_rw'],
+          ['domicile_village','ktp_village'], ['domicile_district','ktp_district'],
+          ['domicile_postal_code','ktp_postal_code']
+        ];
+        map.forEach(([to,from]) => {
+          const el = f.elements.namedItem(to);
+          if(el && f.elements.namedItem(from)) el.value = f.elements[from].value;
+        });
+        const rs = f.elements['domicile_residence_status'];
+        const ks = f.elements['ktp_residence_status'];
+        if(rs && ks) rs.value = ks.value;
+      }
+    };
+  }
+
   function wizard(){
     return {
       // === STATE ===
@@ -693,19 +792,8 @@
       progress: 0,
       errors: [],
       confirmOpen: false,
-      sameAsKtp: false,
+      submitting: false,
       hasCv: {{ $profile->cv_path ? 'true' : 'false' }},
-
-      // domisili (buat copy KTP + restore draft)
-      domicile_address: @json(old('domicile_address', $profile->domicile_address)),
-      domicile_rt: @json(old('domicile_rt', $profile->domicile_rt)),
-      domicile_rw: @json(old('domicile_rw', $profile->domicile_rw)),
-      domicile_village: @json(old('domicile_village', $profile->domicile_village)),
-      domicile_district: @json(old('domicile_district', $profile->domicile_district)),
-      domicile_city: @json(old('domicile_city', $profile->domicile_city)),
-      domicile_province: @json(old('domicile_province', $profile->domicile_province)),
-      domicile_postal_code: @json(old('domicile_postal_code', $profile->domicile_postal_code)),
-      domicile_residence_status: @json(old('domicile_residence_status', $profile->domicile_residence_status)),
 
       // === DRAFT KEY PER USER x JOB ===
       get DRAFT_KEY(){ return `cand_wizard:{{ auth()->id() }}:{{ $job->id }}`; },
@@ -725,7 +813,6 @@
         this.loadDraft();
 
         this.$watch('step', () => { this.computeProgress(); this.saveDraft(); });
-        this.$watch('sameAsKtp', v => { if(v) this.copyKtpToDomisili(); });
 
         this.$watch(() => JSON.stringify(Alpine.store('form').trainings),  () => this.saveDraft());
         this.$watch(() => JSON.stringify(Alpine.store('form').employments),() => this.saveDraft());
@@ -779,25 +866,15 @@
               if (name === 'last_education') {
                 el.dispatchEvent(new Event('change'));
               }
+              if (name === 'ktp_province' || name === 'ktp_city' || name === 'domicile_province' || name === 'domicile_city') {
+                el.dispatchEvent(new Event('change'));
+              }
             });
           }
         } catch(e) {}
       },
 
       // === HELPERS ===
-      copyKtpToDomisili(){
-        const f = this.$refs.form;
-        this.domicile_address  = f.ktp_address.value;
-        this.domicile_rt       = f.ktp_rt.value;
-        this.domicile_rw       = f.ktp_rw.value;
-        this.domicile_village  = f.ktp_village.value;
-        this.domicile_district = f.ktp_district.value;
-        this.domicile_city     = f.ktp_city.value;
-        this.domicile_province = f.ktp_province.value;
-        this.domicile_postal_code    = f.ktp_postal_code.value;
-        this.domicile_residence_status = f.ktp_residence_status.value;
-        this.saveDraft();
-      },
       computeProgress(){ this.progress = Math.round(((this.step-1)/2)*100); },
       next(){ if(this.validate(this.step)) { this.step = Math.min(3, this.step+1); } },
       prev(){ this.step = Math.max(1, this.step-1); },

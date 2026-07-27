@@ -37,7 +37,11 @@ class CandidateProfileController extends Controller
         $pohs = \App\Models\Poh::query()->orderBy('name')->get(['id', 'name']);
         $missingProfileFields = session('missing_profile_fields', $profile->missingRequiredForApplication());
 
-        return view('candidates.profile_wizard', compact('job', 'profile', 'trainings', 'employments', 'references', 'pohs', 'missingProfileFields'));
+        // Wilayah Indonesia
+        $provincesList = \App\Support\IndonesianRegions::provinces();
+        $allRegions = \App\Support\IndonesianRegions::provincesWithCities();
+
+        return view('candidates.profile_wizard', compact('job', 'profile', 'trainings', 'employments', 'references', 'pohs', 'missingProfileFields', 'provincesList', 'allRegions'));
     }
 
     /**
@@ -109,7 +113,7 @@ class CandidateProfileController extends Controller
             'documents' => "nullable|array|max:{$maxDocuments}",
             'documents.*' => 'nullable|file|max:5120|mimetypes:application/pdf,image/jpeg,image/png,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document',
             // Repeater
-            'trainings' => "bail|required|array|min:1|max:{$maxTrainings}",
+            'trainings' => "bail|nullable|array|max:{$maxTrainings}",
             'trainings.*.title' => 'required|string|max:190',
             'trainings.*.institution' => 'required|string|max:190',
             'trainings.*.period_start' => 'required|date',
@@ -217,7 +221,6 @@ class CandidateProfileController extends Controller
                 'domicile_postal_code' => $validated['domicile_postal_code'],
                 'domicile_residence_status' => $nullIfBlank($request->input('domicile_residence_status', '')),
                 // Pernyataan
-                'motivation' => $request->input('motivation', ''),
                 'has_relatives' => $request->boolean('has_relatives'),
                 'relatives_detail' => $request->input('relatives_detail', ''),
                 'worked_before' => $request->boolean('worked_before'),
