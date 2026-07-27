@@ -65,6 +65,7 @@ class CandidateProfileController extends Controller
         // ===== VALIDASI UTAMA =====
         $validated = $request->validate([
             'full_name' => 'bail|required|string|max:190',
+            'poh_id' => ['bail', 'required', 'uuid', 'exists:pohs,id'],
             'gender' => ['bail', 'required', Rule::in(['male', 'female'])],
             'age' => 'bail|required|integer|between:15,80',
             'birthplace' => 'bail|required|string|max:190',
@@ -185,13 +186,14 @@ class CandidateProfileController extends Controller
         $nullIfBlank = static fn($v) => (isset($v) && $v !== '') ? $v : null;
 
         // ===== SIMPAN DALAM TRANSAKSI =====
-        DB::transaction(function () use ($user, $validated, $request, $nullIfBlank, $maxDocuments) {
+        $profile = DB::transaction(function () use ($user, $validated, $request, $nullIfBlank, $maxDocuments) {
             /** @var CandidateProfile $profile */
             $profile = CandidateProfile::firstOrCreate(['user_id' => $user->id], ['full_name' => $user->name]);
 
             // Isi field profil
             $profile->fill([
                 'full_name' => $validated['full_name'],
+                'poh_id' => $validated['poh_id'],
                 'nickname' => $request->input('nickname', ''),
                 'gender' => $validated['gender'],
                 'age' => (int) $validated['age'],
@@ -388,18 +390,52 @@ class CandidateProfileController extends Controller
             if ($refRows) {
                 DB::table('candidate_references')->insert($refRows);
             }
+
+            return $profile->fresh()->loadCount(['trainings', 'employments', 'references']);
         });
 
         // Redirect — kalau sudah ada lamaran, langsung ke daftar lamaran
-        $hasApplication = \App\Models\JobApplication::where('job_id', $job->id)
-            ->where('user_id', $user->id)
-            ->exists();
+        $missingProfileFields = $profile->missingRequiredForApplication();
+        if ($missingProfileFields !== []) {
+            return redirect()
+                ->route('candidate.profiles.edit', ['job' => $job->id])
+                ->withErrors([
+                    'profile_incomplete' => 'Data profil belum lengkap. Lengkapi semua field wajib sebelum lamaran dibuat.',
+                ])
+                ->with('missing_profile_fields', $missingProfileFields)
+                ->with('info', 'Data berhasil disimpan, tapi lamaran belum dibuat karena profil masih belum lengkap.');
+        }
 
-        if ($hasApplication) {
+        $existingApplication = \App\Models\JobApplication::where('job_id', $job->id)
+            ->where('user_id', $user->id)
+            ->first();
+
+        if ($existingApplication) {
             return redirect()->route('applications.mine')->with('success', 'Data kandidat berhasil disimpan.');
         }
 
-        return redirect()->route('jobs.show', $job)->with('success', 'Data kandidat berhasil disimpan.');
+        abort_if($job->status !== 'open', 403, 'Job is not open');
+
+        DB::transaction(function () use ($user, $job, $profile) {
+            $application = \App\Models\JobApplication::create([
+                'job_id' => $job->id,
+                'user_id' => $user->id,
+                'poh_id' => $profile->poh_id,
+                'current_stage' => 'applied',
+                'overall_status' => 'active',
+            ]);
+
+            \App\Models\ApplicationStage::create([
+                'application_id' => $application->id,
+                'stage_key' => 'applied',
+                'status' => 'pending',
+                'payload' => ['note' => 'Initial application submitted after candidate profile completed'],
+                'acted_by' => $user->id,
+                'user_id' => $user->id,
+            ]);
+        });
+
+        return redirect()->route('applications.mine')->with('success', 'Data kandidat berhasil disimpan dan lamaran berhasil dibuat.');
     }
 
     /**

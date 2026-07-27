@@ -103,11 +103,18 @@ class CandidateProfileControllerTest extends TestCase
 
         $response = $this->post(route('candidate.profiles.update', $this->job), $data);
 
-        $response->assertRedirect(route('jobs.show', $this->job));
+        $response->assertRedirect(route('applications.mine'));
         $this->assertDatabaseHas('candidate_profiles', [
             'user_id' => $this->user->id,
             'full_name' => 'John Doe',
             'nik' => '1234567890123456',
+            'poh_id' => $this->poh->id,
+        ]);
+        $this->assertDatabaseHas('job_applications', [
+            'user_id' => $this->user->id,
+            'job_id' => $this->job->id,
+            'poh_id' => $this->poh->id,
+            'current_stage' => 'applied',
         ]);
 
         $this->assertDatabaseHas('candidate_trainings', [
