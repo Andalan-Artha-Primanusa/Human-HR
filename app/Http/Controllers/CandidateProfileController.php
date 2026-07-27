@@ -123,8 +123,8 @@ class CandidateProfileController extends Controller
             'trainings.*.certificate_file' => 'nullable|file|mimes:pdf|max:4096',
             'trainings.*.cert_valid_from' => 'nullable|date',
             'trainings.*.cert_valid_to' => 'nullable|date',
-            'trainings.*.cert_no_expiry' => 'nullable|boolean',
-            'employments' => "bail|required|array|min:1|max:{$maxEmployments}",
+            'trainings.*.cert_no_expiry' => 'nullable',
+            'employments' => $request->boolean('is_fresh_graduate') ? "bail|nullable|array|max:{$maxEmployments}" : "bail|required|array|min:1|max:{$maxEmployments}",
             'employments.*.company' => 'required|string|max:190',
             'employments.*.position_start' => 'required|string|max:190',
             'employments.*.position_end' => 'nullable|string|max:190',
@@ -237,7 +237,7 @@ class CandidateProfileController extends Controller
                 'source_channel' => $request->input('source_channel', null),
             ]);
 
-            // Handle SMA/SMK and other education extras
+            // Handle SMA/SMK, other education, and fresh graduate flag
             $extras = $profile->extras ?? [];
             if ($validated['last_education'] === 'SMA_SMK') {
                 $extras['sma_smk_type'] = $request->input('sma_smk_type', 'SMA');
@@ -250,6 +250,7 @@ class CandidateProfileController extends Controller
             } else {
                 unset($extras['other_education']);
             }
+            $extras['is_fresh_graduate'] = $request->boolean('is_fresh_graduate');
             $profile->extras = $extras;
 
             // Upload aman

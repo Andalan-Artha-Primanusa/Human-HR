@@ -203,6 +203,19 @@
 
       {{-- STEP 1 --}}
       <section x-show="step===1" x-cloak class="space-y-6">
+        {{-- Alert error step 1 --}}
+        <div data-step-alert x-show="step1Errors.length" x-transition class="px-4 py-3 border rounded-xl border-red-200 bg-red-50 text-red-800">
+          <div class="flex items-start gap-2">
+            <svg class="w-5 h-5 mt-0.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <div>
+              <div class="font-semibold text-sm">Mohon lengkapi data berikut:</div>
+              <ul class="mt-1 text-sm list-disc pl-4">
+                <template x-for="(e,i) in step1Errors" :key="i"><li x-text="e"></li></template>
+              </ul>
+            </div>
+          </div>
+        </div>
+
         <div class="p-5 bg-white shadow-sm card rounded-2xl">
           <h2 class="flex items-center gap-2 text-lg font-semibold">
             <svg class="w-5 h-5 text-brand-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5.121 17.804A13.937 13.937 0 0112 15c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -389,6 +402,19 @@
 
       {{-- STEP 2 --}}
       <section x-show="step===2" x-cloak class="space-y-6">
+        {{-- Alert error step 2 --}}
+        <div data-step-alert x-show="step2Errors.length" x-transition class="px-4 py-3 border rounded-xl border-red-200 bg-red-50 text-red-800">
+          <div class="flex items-start gap-2">
+            <svg class="w-5 h-5 mt-0.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <div>
+              <div class="font-semibold text-sm">Mohon lengkapi data berikut:</div>
+              <ul class="mt-1 text-sm list-disc pl-4">
+                <template x-for="(e,i) in step2Errors" :key="i"><li x-text="e"></li></template>
+              </ul>
+            </div>
+          </div>
+        </div>
+
         <div class="p-5 bg-white shadow-sm card rounded-2xl" x-data="{ items: $store.form.trainings }">
           <div class="flex items-center justify-between">
             <h2 class="flex items-center gap-2 text-lg font-semibold">
@@ -443,7 +469,8 @@
               </div>
 
               <div class="flex items-center gap-2">
-                <input type="checkbox" :id="`cert_no_expiry_${idx}`" :name="`trainings[${idx}][cert_no_expiry]`" x-model="it.cert_no_expiry" @change="if(it.cert_no_expiry){ it.cert_valid_to=''; }">
+                <input type="hidden" :name="`trainings[${idx}][cert_no_expiry]`" value="0">
+                <input type="checkbox" :id="`cert_no_expiry_${idx}`" :name="`trainings[${idx}][cert_no_expiry]`" x-model="it.cert_no_expiry" :true-value="1" :false-value="0" @change="if(it.cert_no_expiry){ it.cert_valid_to=''; }">
                 <label :for="`cert_no_expiry_${idx}`" class="text-sm">Tanpa masa berlaku sertifikat</label>
               </div>
 
@@ -454,31 +481,47 @@
           </template>
         </div>
 
-        <div class="p-5 bg-white shadow-sm card rounded-2xl" x-data="{ items: $store.form.employments }">
+        <div class="p-5 bg-white shadow-sm card rounded-2xl" x-data="{ items: $store.form.employments, isFreshGrad: @json(old('is_fresh_graduate', $profile->extras['is_fresh_graduate'] ?? false)) }">
           <div class="flex items-center justify-between">
             <h2 class="flex items-center gap-2 text-lg font-semibold">
               <svg class="w-5 h-5 text-brand-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 7h18M7 7v10a2 2 0 002 2h6a2 2 0 002-2V7"/></svg>
               Riwayat Pekerjaan
             </h2>
-            <button type="button" class="rounded-xl border border-brand-200 px-3 py-1.5 text-sm text-brand-800 hover:bg-brand-50" @click="items.push({company:'',position_start:'',position_end:'',period_start:'',period_end:'',reason_for_leaving:'',job_description:''})">+ Tambah</button>
           </div>
-          <p class="mt-1 text-xs text-slate-500">Minimal 1 riwayat pekerjaan diisi.</p>
-          <template x-for="(it,idx) in items" :key="idx">
-            <div class="grid gap-3 p-3 mt-4 border rounded-xl">
-              <input class="px-3 py-2 border rounded-lg" :name="`employments[${idx}][company]`" x-model="it.company" placeholder="Nama Perusahaan *" required>
-              <div class="grid gap-3 sm:grid-cols-2">
-                <input class="px-3 py-2 border rounded-lg" :name="`employments[${idx}][position_start]`" x-model="it.position_start" placeholder="Jabatan Awal *" required>
-                <input class="px-3 py-2 border rounded-lg" :name="`employments[${idx}][position_end]`"   x-model="it.position_end"   placeholder="Jabatan Akhir">
+
+          {{-- Fresh Graduate Toggle --}}
+          <label class="inline-flex items-center gap-2 mt-3 px-4 py-2.5 rounded-xl border border-amber-200 bg-amber-50 cursor-pointer select-none hover:bg-amber-100 transition">
+            <input type="hidden" name="is_fresh_graduate" value="0">
+            <input type="checkbox" x-model="isFreshGrad" :true-value="1" :false-value="0" name="is_fresh_graduate" class="rounded" @change="if(isFreshGrad){ items.splice(1); }">
+            <span class="text-sm text-amber-900 font-medium">Saya Fresh Graduate (Belum ada pengalaman kerja)</span>
+          </label>
+          <p class="mt-1 text-xs text-slate-500">Centang jika belum pernah bekerja sebelumnya. Riwayat pekerjaan tidak wajib diisi.</p>
+
+          {{-- Repeater Riwayat Pekerjaan --}}
+          <template x-if="!isFreshGrad">
+            <div>
+              <div class="flex justify-end mt-3">
+                <button type="button" class="rounded-xl border border-brand-200 px-3 py-1.5 text-sm text-brand-800 hover:bg-brand-50" @click="items.push({company:'',position_start:'',position_end:'',period_start:'',period_end:'',reason_for_leaving:'',job_description:''})">+ Tambah</button>
               </div>
-              <div class="grid gap-3 sm:grid-cols-2">
-                <input type="date" class="px-3 py-2 border rounded-lg" :name="`employments[${idx}][period_start]`" x-model="it.period_start" required>
-                <input type="date" class="px-3 py-2 border rounded-lg" :name="`employments[${idx}][period_end]`"   x-model="it.period_end">
-              </div>
-              <input class="px-3 py-2 border rounded-lg" :name="`employments[${idx}][reason_for_leaving]`" x-model="it.reason_for_leaving" placeholder="Alasan Berhenti">
-              <textarea class="px-3 py-2 border rounded-lg" rows="2" :name="`employments[${idx}][job_description]`" x-model="it.job_description" placeholder="Deskripsi Pekerjaan"></textarea>
-              <div class="text-right">
-                <button type="button" class="text-sm text-brand-700 hover:underline" @click="items.splice(idx,1)">Hapus</button>
-              </div>
+              <p class="mt-1 text-xs text-slate-500">Minimal 1 riwayat pekerjaan diisi.</p>
+              <template x-for="(it,idx) in items" :key="idx">
+                <div class="grid gap-3 p-3 mt-4 border rounded-xl">
+                  <input class="px-3 py-2 border rounded-lg" :name="`employments[${idx}][company]`" x-model="it.company" placeholder="Nama Perusahaan *" required>
+                  <div class="grid gap-3 sm:grid-cols-2">
+                    <input class="px-3 py-2 border rounded-lg" :name="`employments[${idx}][position_start]`" x-model="it.position_start" placeholder="Jabatan Awal *" required>
+                    <input class="px-3 py-2 border rounded-lg" :name="`employments[${idx}][position_end]`"   x-model="it.position_end"   placeholder="Jabatan Akhir">
+                  </div>
+                  <div class="grid gap-3 sm:grid-cols-2">
+                    <input type="date" class="px-3 py-2 border rounded-lg" :name="`employments[${idx}][period_start]`" x-model="it.period_start" required>
+                    <input type="date" class="px-3 py-2 border rounded-lg" :name="`employments[${idx}][period_end]`"   x-model="it.period_end">
+                  </div>
+                  <input class="px-3 py-2 border rounded-lg" :name="`employments[${idx}][reason_for_leaving]`" x-model="it.reason_for_leaving" placeholder="Alasan Berhenti">
+                  <textarea class="px-3 py-2 border rounded-lg" rows="2" :name="`employments[${idx}][job_description]`" x-model="it.job_description" placeholder="Deskripsi Pekerjaan"></textarea>
+                  <div class="text-right">
+                    <button type="button" class="text-sm text-brand-700 hover:underline" @click="items.splice(idx,1)">Hapus</button>
+                  </div>
+                </div>
+              </template>
             </div>
           </template>
         </div>
@@ -486,6 +529,19 @@
 
       {{-- STEP 3 --}}
       <section x-show="step===3" x-cloak class="space-y-6">
+        {{-- Alert error step 3 --}}
+        <div x-show="step3Errors.length" x-transition class="px-4 py-3 border rounded-xl border-red-200 bg-red-50 text-red-800">
+          <div class="flex items-start gap-2">
+            <svg class="w-5 h-5 mt-0.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <div>
+              <div class="font-semibold text-sm">Mohon lengkapi data berikut:</div>
+              <ul class="mt-1 text-sm list-disc pl-4">
+                <template x-for="(e,i) in step3Errors" :key="i"><li x-text="e"></li></template>
+              </ul>
+            </div>
+          </div>
+        </div>
+
         <div class="p-5 bg-white shadow-sm card rounded-2xl">
   <h2 class="flex items-center gap-2 text-lg font-semibold">
     <svg class="w-5 h-5 text-brand-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -790,7 +846,9 @@
       // === STATE ===
       step: 1,
       progress: 0,
-      errors: [],
+      step1Errors: [],
+      step2Errors: [],
+      step3Errors: [],
       confirmOpen: false,
       submitting: false,
       hasCv: {{ $profile->cv_path ? 'true' : 'false' }},
@@ -876,12 +934,28 @@
 
       // === HELPERS ===
       computeProgress(){ this.progress = Math.round(((this.step-1)/2)*100); },
-      next(){ if(this.validate(this.step)) { this.step = Math.min(3, this.step+1); } },
-      prev(){ this.step = Math.max(1, this.step-1); },
+      next(){
+        if(this.validate(this.step)){
+          this['step'+this.step+'Errors'] = [];
+          this.step = Math.min(3, this.step+1);
+        } else {
+          this.scrollToError();
+        }
+      },
+      prev(){
+        this['step'+this.step+'Errors'] = [];
+        this.step = Math.max(1, this.step-1);
+      },
+      scrollToError(){
+        this.$nextTick(() => {
+          const el = document.querySelector('[data-step-alert]:not([style*="display: none"])');
+          if(el) el.scrollIntoView({ behavior:'smooth', block:'center' });
+        });
+      },
 
       // === VALIDATION (client-side guard antar step) ===
       validate(s){
-        this.errors = [];
+        const errs = [];
         if(s===1){
           const f = this.$refs.form;
           const req = [
@@ -891,30 +965,35 @@
             ['ktp_address','Alamat KTP'], ['ktp_village','Desa/Kelurahan (KTP)'], ['ktp_district','Kecamatan (KTP)'], ['ktp_city','Kab/Kota (KTP)'], ['ktp_province','Provinsi (KTP)'], ['ktp_postal_code','Kode Pos (KTP)'],
             ['domicile_address','Alamat Domisili'], ['domicile_village','Desa/Kelurahan (Domisili)'], ['domicile_district','Kecamatan (Domisili)'], ['domicile_city','Kab/Kota (Domisili)'], ['domicile_province','Provinsi (Domisili)'], ['domicile_postal_code','Kode Pos (Domisili)']
           ];
-          req.forEach(([n,l]) => { if(!f[n] || !f[n].value?.trim()) this.errors.push(l); });
+          req.forEach(([n,l]) => { if(!f[n] || !f[n].value?.trim()) errs.push(l); });
           const edVal = f['last_education']?.value;
           if(edVal === 'SMA_SMK'){
-            if(!f['sma_smk_type']?.value?.trim()) this.errors.push('Jenis SMA/SMK');
-            if(!f['sma_smk_school']?.value?.trim()) this.errors.push('Nama Sekolah SMA/SMK');
+            if(!f['sma_smk_type']?.value?.trim()) errs.push('Jenis SMA/SMK');
+            if(!f['sma_smk_school']?.value?.trim()) errs.push('Nama Sekolah SMA/SMK');
           }
           if(edVal === 'LAINNYA'){
-            if(!f['other_education']?.value?.trim()) this.errors.push('Nama Pendidikan Lainnya');
+            if(!f['other_education']?.value?.trim()) errs.push('Nama Pendidikan Lainnya');
           }
+          this.step1Errors = errs;
         }
         if(s===2){
           const T = Alpine.store('form').trainings || [];
           const E = Alpine.store('form').employments || [];
-          if(E.length<1) this.errors.push('Minimal 1 riwayat pekerjaan');
-          T.forEach((r,i)=>{ if(r.title?.trim() || r.institution?.trim() || r.period_start?.trim()){ if(!r.title?.trim()) this.errors.push(`Pelatihan #${i+1}: Nama`); if(!r.institution?.trim()) this.errors.push(`Pelatihan #${i+1}: Institusi`); if(!r.period_start?.trim()) this.errors.push(`Pelatihan #${i+1}: Tanggal Mulai`); } });
-          E.forEach((r,i)=>{ if(!r.company?.trim()) this.errors.push(`Pekerjaan #${i+1}: Perusahaan`); if(!r.position_start?.trim()) this.errors.push(`Pekerjaan #${i+1}: Jabatan Awal`); if(!r.period_start?.trim()) this.errors.push(`Pekerjaan #${i+1}: Tanggal Mulai`); });
+          const f = this.$refs.form;
+          const isFreshGrad = f['is_fresh_graduate']?.checked;
+          if(!isFreshGrad && E.length<1) errs.push('Minimal 1 riwayat pekerjaan');
+          T.forEach((r,i)=>{ if(r.title?.trim() || r.institution?.trim() || r.period_start?.trim()){ if(!r.title?.trim()) errs.push(`Pelatihan #${i+1}: Nama`); if(!r.institution?.trim()) errs.push(`Pelatihan #${i+1}: Institusi`); if(!r.period_start?.trim()) errs.push(`Pelatihan #${i+1}: Tanggal Mulai`); } });
+          if(!isFreshGrad) E.forEach((r,i)=>{ if(!r.company?.trim()) errs.push(`Pekerjaan #${i+1}: Perusahaan`); if(!r.position_start?.trim()) errs.push(`Pekerjaan #${i+1}: Jabatan Awal`); if(!r.period_start?.trim()) errs.push(`Pekerjaan #${i+1}: Tanggal Mulai`); });
+          this.step2Errors = errs;
         }
         if(s===3){
           const R = Alpine.store('form').references || [];
-          if(R.length<1) this.errors.push('Minimal 1 referensi');
-          R.slice(0,1).forEach((r,i)=>{ if(!r.name?.trim()) this.errors.push(`Referensi #${i+1}: Nama`); if(!r.job_title?.trim()) this.errors.push(`Referensi #${i+1}: Jabatan`); if(!r.company?.trim()) this.errors.push(`Referensi #${i+1}: Perusahaan`); if(!r.contact?.trim()) this.errors.push(`Referensi #${i+1}: Kontak`); });
-          if(!this.hasCv){ const f=this.$refs.form; if(!f.cv?.files?.length){ this.errors.push('CV'); } }
+          if(R.length<1) errs.push('Minimal 1 referensi');
+          R.slice(0,1).forEach((r,i)=>{ if(!r.name?.trim()) errs.push(`Referensi #${i+1}: Nama`); if(!r.job_title?.trim()) errs.push(`Referensi #${i+1}: Jabatan`); if(!r.company?.trim()) errs.push(`Referensi #${i+1}: Perusahaan`); if(!r.contact?.trim()) errs.push(`Referensi #${i+1}: Kontak`); });
+          if(!this.hasCv){ const f=this.$refs.form; if(!f.cv?.files?.length){ errs.push('CV'); } }
+          this.step3Errors = errs;
         }
-        return this.errors.length===0;
+        return errs.length===0;
       }
     }
   }
