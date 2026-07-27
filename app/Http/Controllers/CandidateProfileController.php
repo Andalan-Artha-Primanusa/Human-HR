@@ -58,6 +58,10 @@ class CandidateProfileController extends Controller
         $maxReferences = 100;
         $maxDocuments = 20;
 
+        // ===== SIMPAN FILE KE TEMP SEBELUM VALIDASI =====
+        $tempPaths = $this->storeTempUploads($request);
+        $request->session()->flash('temp_uploads', $tempPaths);
+
         // ===== VALIDASI UTAMA =====
         $validated = $request->validate([
             'full_name' => 'bail|required|string|max:190',
@@ -253,34 +257,35 @@ class CandidateProfileController extends Controller
             $extras['is_fresh_graduate'] = $request->boolean('is_fresh_graduate');
             $profile->extras = $extras;
 
-            // Upload aman
+            // Upload aman — gunakan file dari request langsung (sudah disimpan ke temp sebelumnya)
             $userFolder = UploadPath::forUser($user, 'candidate-profile');
 
-            if ($request->hasFile('cv')) {
-                $cv = $request->file('cv');
-                $safeName = $this->safeOriginalName($cv->getClientOriginalName());
-                $path = $cv->storeAs($userFolder . '/cv', Str::uuid() . '_' . $safeName, 'public');
+            // CV
+            $cvFile = $request->file('cv');
+            if ($cvFile && $cvFile->isValid()) {
+                $safeName = $this->safeOriginalName($cvFile->getClientOriginalName());
+                $path = $cvFile->storeAs($userFolder . '/cv', Str::uuid() . '_' . $safeName, 'public');
                 $profile->cv_path = $path;
                 $profile->attachments()->updateOrCreate(
                     ['label' => 'CV'],
                     [
                         'path' => $path,
-                        'mime' => $cv->getClientMimeType(),
-                        'size_bytes' => $cv->getSize(),
+                        'mime' => $cvFile->getClientMimeType(),
+                        'size_bytes' => $cvFile->getSize(),
                     ]
                 );
             }
 
             $docs = (array) ($profile->documents ?? []);
-            if ($request->hasFile('documents')) {
-                $incomingDocs = array_values(array_filter((array) $request->file('documents')));
+            $incomingDocs = array_values(array_filter((array) $request->file('documents')));
+            if ($incomingDocs) {
                 if (count($docs) + count($incomingDocs) > $maxDocuments) {
                     throw ValidationException::withMessages([
                         'documents' => "Maksimal total dokumen adalah {$maxDocuments} file.",
                     ]);
                 }
                 foreach ($incomingDocs as $f) {
-                    if (!$f)
+                    if (!$f || !$f->isValid())
                         continue;
                     $safeName = $this->safeOriginalName($f->getClientOriginalName());
                     $p = $f->storeAs($userFolder . '/docs', Str::uuid() . '_' . $safeName, 'public');
@@ -555,6 +560,88 @@ class CandidateProfileController extends Controller
             return false;
         }
         return !str_contains($path, '..');
+    }
+
+    /**
+     * Simpan file upload ke folder temp (sebelum validasi).
+     * Mengembalikan array paths relative ke disk 'public'.
+     */
+    private function storeTempUploads(Request $request): array
+    {
+        $sessionId = $request->session()->getId();
+        $tempDir = 'temp/' . $sessionId;
+        $paths = [];
+
+        // CV
+        if ($request->hasFile('cv') && $request->file('cv')->isValid()) {
+            $cv = $request->file('cv');
+            $safeName = $this->safeOriginalName($cv->getClientOriginalName());
+            $paths['cv'] = $cv->storeAs($tempDir, 'cv_' . Str::uuid() . '_' . $safeName, 'public');
+        }
+
+        // Documents (multi-upload)
+        if ($request->hasFile('documents')) {
+            $paths['documents'] = [];
+            foreach ($request->file('documents') as $i => $doc) {
+                if (!$doc || !$doc->isValid()) continue;
+                $safeName = $this->safeOriginalName($doc->getClientOriginalName());
+                $paths['documents'][] = $doc->storeAs($tempDir, "doc_{$i}_" . Str::uuid() . '_' . $safeName, 'public');
+            }
+        }
+
+        // Training certificate files
+        foreach ((array) $request->input('trainings', []) as $i => $row) {
+            $certFile = $request->file("trainings.{$i}.certificate_file");
+            if ($certFile && $certFile->isValid()) {
+                $safeName = $this->safeOriginalName($certFile->getClientOriginalName());
+                $paths["training_cert_{$i}"] = $certFile->storeAs($tempDir, "cert_{$i}_" . Str::uuid() . '_' . $safeName, 'public');
+            }
+        }
+
+        return $paths;
+    }
+
+    /**
+     * Pindahkan file dari temp ke lokasi final.
+     * Mengembalikan path final.
+     */
+    private function promoteTempFile(string $tempPath, string $destDir, string $destName): string
+    {
+        $tempFull = Storage::disk('public')->path($tempPath);
+        $finalPath = $destDir . '/' . $destName;
+
+        if (Storage::disk('public')->exists($tempPath)) {
+            Storage::disk('public')->makeDirectory($destDir);
+            Storage::disk('public')->move($tempPath, $finalPath);
+        }
+
+        return $finalPath;
+    }
+
+    /**
+     * Bersihkan folder temp untuk session ini.
+     */
+    private function cleanupTempUploads(array $tempPaths): void
+    {
+        foreach ($tempPaths as $key => $val) {
+            if (is_array($val)) {
+                foreach ($val as $p) {
+                    if (is_string($p) && Storage::disk('public')->exists($p)) {
+                        Storage::disk('public')->delete($p);
+                    }
+                }
+            } elseif (is_string($val) && Storage::disk('public')->exists($val)) {
+                Storage::disk('public')->delete($val);
+            }
+        }
+        // Hapus folder temp juga
+        $firstPath = reset($tempPaths);
+        if (is_string($firstPath)) {
+            $tempDir = dirname($firstPath);
+            if ($tempDir !== '.' && Storage::disk('public')->exists($tempDir)) {
+                Storage::disk('public')->deleteDirectory($tempDir);
+            }
+        }
     }
 
     /**
