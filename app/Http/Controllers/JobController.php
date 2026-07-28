@@ -153,7 +153,7 @@ class JobController extends Controller
     /**
      * PUBLIC DETAIL
      */
-    public function show(Job $job)
+    public function show(Request $request, Job $job, MineproRfrService $mineproRfrService)
     {
         $this->authorize('view', $job);
 
@@ -162,6 +162,24 @@ class JobController extends Controller
             'company:id,code,name',
         ])->loadCount('applications');
 
+        $myApp = null;
+        $mineproProgress = null;
+        if (Auth::check()) {
+            $myApp = $job->applications()
+                ->where('user_id', Auth::id())
+                ->with(['stages', 'stages.actor', 'stages.user', 'offer', 'job:id,code', 'user.candidateProfile:id,user_id,nik'])
+                ->latest()
+                ->first();
+
+            if ($myApp) {
+                $mineproProgress = $mineproRfrService->progressForApplication(
+                    $myApp,
+                    $request->query('minepro_start_date'),
+                    $request->query('minepro_end_date')
+                );
+            }
+        }
+
         // Ambil POH hanya jika user superadmin/hr/admin
         $user = auth()->user();
         $pohs = null;
@@ -169,7 +187,7 @@ class JobController extends Controller
             $pohs = \App\Models\Poh::query()->orderBy('name')->get(['id', 'name']);
         }
 
-        return view('jobs.show', compact('job', 'pohs'));
+        return view('jobs.show', compact('job', 'pohs', 'myApp', 'mineproProgress'));
     }
 
     /**

@@ -2,12 +2,30 @@
 
 namespace App\Services;
 
+use App\Models\JobApplication;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class MineproRfrService
 {
+    private const PROCESS_STAGE_ORDER = [
+        'applied',
+        'screening',
+        'psychotest',
+        'hr_iv',
+        'user_iv',
+        'user_trainer_iv',
+        'offer',
+        'mcu',
+        'mobilisasi',
+        'ground_test',
+        'onsite',
+        'hired',
+        'not_qualified',
+    ];
+
     private array $lastProcessMeta = [
         'ok' => false,
         'message' => null,
@@ -98,6 +116,144 @@ class MineproRfrService
 
             return [];
         }
+    }
+
+    public function progressForApplication(JobApplication $application, ?string $startDate = null, ?string $endDate = null): array
+    {
+        $application->loadMissing([
+            'job:id,code',
+            'user.candidateProfile:id,user_id,nik',
+        ]);
+
+        [$defaultStartDate, $defaultEndDate] = $this->processRangeForApplication($application);
+        $startDate = $this->validDate($startDate) ?: $defaultStartDate;
+        $endDate = $this->validDate($endDate) ?: $defaultEndDate;
+
+        $jobCode = (string) ($application->job?->code ?? '');
+        $nik = (string) ($application->user?->candidateProfile?->nik ?? '');
+        $key = $this->processKey($jobCode, $nik);
+
+        if ($key === '|') {
+            return [
+                'start_date' => $startDate,
+                'end_date' => $endDate,
+                'processes' => [],
+                'current_process' => null,
+                'current_stage' => null,
+                'meta' => $this->lastProcessMeta(),
+            ];
+        }
+
+        $processes = collect($this->processList($startDate, $endDate))
+            ->filter(fn($row) => $this->processKey($row['rfr_ref_id'] ?? '', $row['nik'] ?? '') === $key)
+            ->values()
+            ->all();
+
+        $currentProcess = $this->currentProcess($processes);
+
+        return [
+            'start_date' => $startDate,
+            'end_date' => $endDate,
+            'processes' => $processes,
+            'current_process' => $currentProcess,
+            'current_stage' => $currentProcess['stage'] ?? null,
+            'meta' => $this->lastProcessMeta(),
+        ];
+    }
+
+    public function progressForApplications(iterable $applications): array
+    {
+        $apps = collect($applications)->values();
+        $progress = [];
+
+        $apps->each(fn($application) => $application->loadMissing([
+            'job:id,code',
+            'user.candidateProfile:id,user_id,nik',
+        ]));
+
+        $appsByRange = $apps->groupBy(function (JobApplication $application) {
+            [$startDate, $endDate] = $this->processRangeForApplication($application);
+
+            return $startDate . '|' . $endDate;
+        });
+
+        foreach ($appsByRange as $rangeKey => $rangeApps) {
+            [$startDate, $endDate] = explode('|', (string) $rangeKey, 2);
+            $rows = collect($this->processList($startDate, $endDate));
+            $rowsByCandidate = $rows->groupBy(fn($row) => $this->processKey($row['rfr_ref_id'] ?? '', $row['nik'] ?? ''));
+
+            foreach ($rangeApps as $application) {
+                $key = $this->processKey(
+                    (string) ($application->job?->code ?? ''),
+                    (string) ($application->user?->candidateProfile?->nik ?? '')
+                );
+
+                $processes = $key === '|'
+                    ? []
+                    : $rowsByCandidate->get($key, collect())->values()->all();
+                $currentProcess = $this->currentProcess($processes);
+
+                $progress[$application->getKey()] = [
+                    'start_date' => $startDate,
+                    'end_date' => $endDate,
+                    'processes' => $processes,
+                    'current_process' => $currentProcess,
+                    'current_stage' => $currentProcess['stage'] ?? null,
+                    'meta' => $this->lastProcessMeta(),
+                ];
+            }
+        }
+
+        return $progress;
+    }
+
+    public function processKey(string $rfrRefId, string $nik): string
+    {
+        return strtoupper(trim($rfrRefId)) . '|' . preg_replace('/\D+/', '', $nik);
+    }
+
+    private function processRangeForApplication(JobApplication $application): array
+    {
+        $code = (string) ($application->job?->code ?? '');
+        if (preg_match('#/(\d{2})/(\d{4})$#', $code, $matches)) {
+            $month = (int) $matches[1];
+            $year = (int) $matches[2];
+
+            if ($month >= 1 && $month <= 12 && $year >= 2000) {
+                $date = Carbon::create($year, $month, 1, 0, 0, 0, config('app.timezone'));
+
+                return [
+                    $date->copy()->startOfMonth()->format('Y-m-d'),
+                    $date->copy()->endOfMonth()->format('Y-m-d'),
+                ];
+            }
+        }
+
+        $date = $application->created_at instanceof Carbon
+            ? $application->created_at->copy()
+            : Carbon::parse($application->created_at ?? now());
+
+        return [
+            $date->copy()->startOfMonth()->format('Y-m-d'),
+            $date->copy()->endOfMonth()->format('Y-m-d'),
+        ];
+    }
+
+    private function currentProcess(array $processes): ?array
+    {
+        $rank = array_flip(self::PROCESS_STAGE_ORDER);
+
+        return collect($processes)
+            ->filter(fn($process) => ! empty($process['stage']) && array_key_exists($process['stage'], $rank))
+            ->sortBy(fn($process) => $rank[$process['stage']] ?? -1)
+            ->last();
+    }
+
+    private function validDate(?string $date): ?string
+    {
+        return is_string($date) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)
+            ? $date
+            : null;
     }
 
     private function resultRows(mixed $results): array
@@ -233,15 +389,19 @@ class MineproRfrService
     private function processToStage(?string $process): ?string
     {
         return match (strtolower(trim((string) $process))) {
+            'applied', 'apply', 'lamaran', 'pengajuan berkas' => 'applied',
+            'screening', 'screening cv', 'screening berkas', 'screening cv/berkas', 'screening_cv', 'screening_berkas' => 'screening',
             'psikotest', 'psychotest' => 'psychotest',
             'hrinterview', 'hr interview', 'hr_interview' => 'hr_iv',
             'userinterview', 'user interview', 'user_interview' => 'user_trainer_iv',
-            'usertrainerinterview', 'trainerinterview' => 'user_trainer_iv',
-            'offering', 'offer' => 'offer',
+            'usertrainerinterview', 'trainerinterview', 'user & trainer interview', 'user/trainer interview' => 'user_trainer_iv',
+            'offering', 'offering (ol)', 'offer', 'ol' => 'offer',
             'mcu' => 'mcu',
             'mobilisasi', 'mobilization' => 'mobilisasi',
             'groundtest', 'ground test', 'ground_test' => 'ground_test',
             'onsite', 'on site', 'on_site' => 'onsite',
+            'hired', 'diterima' => 'hired',
+            'tidak lolos', 'not qualified', 'not_qualified', 'rejected', 'ditolak' => 'not_qualified',
             default => null,
         };
     }

@@ -41,9 +41,9 @@
     $abbrTz = fn(string $tz) => (str_ends_with($tz, 'Jakarta') ? 'WIB' : (str_ends_with($tz, 'Makassar') ? 'WITA' : (str_ends_with($tz, 'Jayapura') ? 'WIT' : '')));
 
     /** @var \App\Models\JobApplication|null $myApp */
-    $myApp = auth()->check()
+    $myApp = ($myApp ?? null) ?: (auth()->check()
         ? $job->applications()->where('user_id', auth()->id())->with(['stages', 'stages.actor', 'stages.user', 'offer'])->latest()->first()
-        : null;
+        : null);
 
     /** @var \App\Models\CandidateProfile|null $meProfile */
     $meProfile = auth()->check()
@@ -74,16 +74,30 @@
         'rejected' => 'Tidak Lolos',
     ];
 
+    $mineproProcesses = collect(data_get($mineproProgress ?? [], 'processes', []));
+    $mineproCurrentProcess = data_get($mineproProgress ?? [], 'current_process');
+    $mineproStage = strtolower((string) data_get($mineproProgress ?? [], 'current_stage', ''));
+    $mineproStage = in_array($mineproStage, $stageOrder, true) ? $mineproStage : null;
+    $mineproStageMap = $mineproProcesses
+        ->filter(fn($process) => in_array(strtolower((string) ($process['stage'] ?? '')), $stageOrder, true))
+        ->groupBy(fn($process) => strtolower((string) ($process['stage'] ?? '')))
+        ->map(fn($items) => $items->last());
+
     // Status & stage saat ini
     $overall = strtolower($myApp?->overall_status ?? 'in_progress');
-    $currRaw = strtolower($myApp?->current_stage ?? 'applied');
+    $currRaw = strtolower($mineproStage ?: ($myApp?->current_stage ?? 'applied'));
     $currKey = in_array($currRaw, $stageOrder, true) ? $currRaw : 'applied';
 
     // Koleksi stage
     $stagesColl = collect($myApp?->stages ?? []);
     $stageMap = $stagesColl->mapWithKeys(fn($s) => ($k = strtolower($s->stage_key ?? '')) ? [$k => $s] : []);
+    $mineproVisited = $mineproProcesses->pluck('stage')
+        ->map(fn($v) => strtolower((string) $v))
+        ->filter(fn($v) => in_array($v, $stageOrder, true));
     $visited = $stagesColl->pluck('stage_key')->map(fn($v) => strtolower($v))
-        ->filter(fn($v) => in_array($v, $stageOrder, true))->unique()
+        ->filter(fn($v) => in_array($v, $stageOrder, true))
+        ->merge($mineproVisited)
+        ->unique()
         ->push($currKey)->unique()->values()->all();
 
     $idxNow = array_search($currKey, $stageOrder, true);
@@ -171,9 +185,18 @@
 
     // Terakhir diubah
     $latestStage = $stagesColl->sortByDesc(fn($s) => $s->updated_at ?? $s->created_at ?? null)->first();
-    $lastChangedAt = $latestStage?->updated_at ?? $myApp?->updated_at;
-    $lastChangedBy = $latestStage ? $actorName($latestStage)
-        : (($myApp && method_exists($myApp, 'updatedBy')) ? ($myApp->updatedBy->name ?? null) : null);
+    $mineproChangedAt = data_get($mineproCurrentProcess ?? [], 'updated_date')
+        ?: data_get($mineproCurrentProcess ?? [], 'end_date')
+        ?: data_get($mineproCurrentProcess ?? [], 'start_date')
+        ?: data_get($mineproCurrentProcess ?? [], 'created_date');
+    $mineproChangedBy = data_get($mineproCurrentProcess ?? [], 'updated_by')
+        ?: data_get($mineproCurrentProcess ?? [], 'created_by');
+    $lastChangedAt = $mineproChangedAt ?: ($latestStage?->updated_at ?? $myApp?->updated_at);
+    $lastChangedBy = $mineproChangedBy ?: (
+        $latestStage
+            ? $actorName($latestStage)
+            : (($myApp && method_exists($myApp, 'updatedBy')) ? ($myApp->updatedBy->name ?? null) : null)
+    );
 
     $closingAt = $job->closing_at ?? null;
 
@@ -647,6 +670,12 @@
                   <p class="mt-1 text-xs leading-relaxed text-slate-500">
                     Pantau status seleksi untuk posisi ini dari satu tempat.
                   </p>
+                  @if($mineproCurrentProcess)
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 mt-2 text-[11px] font-semibold rounded-full bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-200">
+                      <svg class="w-3.5 h-3.5" aria-hidden="true"><use href="#i-check"/></svg>
+                      Tersinkron MinePro
+                    </span>
+                  @endif
                 </div>
 
                 @if($myApp && $isAdmin && Route::has('admin.applications.move') && (!in_array($overall, ['rejected', 'not_qualified'], true)))
@@ -774,11 +803,15 @@
                                 $dotBg = $done ? '#16a34a' : ($isNow ? $ACCENT : '#f59e0b');
 
                                 $st = $stageMap[$key] ?? null;
-                                $ts = $done ? ($st->updated_at ?? $st->created_at ?? null) : ($isNow ? ($st->created_at ?? null) : null);
+                                $mp = $mineproStageMap[$key] ?? null;
+                                $ts = $done
+                                    ? ($mp['updated_date'] ?? $mp['end_date'] ?? $mp['start_date'] ?? $mp['created_date'] ?? $st->updated_at ?? $st->created_at ?? null)
+                                    : ($isNow ? ($mp['updated_date'] ?? $mp['end_date'] ?? $mp['start_date'] ?? $mp['created_date'] ?? $st->created_at ?? null) : null);
 
                                 $waktuTampil = $ts ? $formatTs($ts) : null;
-                                $who = $st ? $actorName($st) : null;
+                                $who = ($mp['updated_by'] ?? $mp['created_by'] ?? null) ?: ($st ? $actorName($st) : null);
                                 $label = $pretty[$key] ?? strtoupper(str_replace('_', ' ', $key));
+                                $mineproResult = $mp['result'] ?? null;
                             @endphp
                             <div class="relative pr-12">
                               <span class="absolute right-0 grid w-4 h-4 rounded-full top-1 place-items-center ring-4 ring-white" style="background: {{ $dotBg }}"></span>
@@ -792,7 +825,7 @@
                                     @endif
                                   </div>
 
-                                  @if($waktuTampil || $who || !empty($st?->notes))
+                                  @if($waktuTampil || $who || !empty($st?->notes) || $mineproResult)
                                     <div class="mt-1 text-[11px] text-slate-500">
                                       @if($waktuTampil)
                                         <div class="inline-flex items-center gap-1">
@@ -805,6 +838,9 @@
                                       @endif
                                       @if(!empty($st?->notes))
                                         <div class="mt-0.5">Catatan: <span class="text-slate-700">{{ e($st->notes) }}</span></div>
+                                      @endif
+                                      @if($mineproResult)
+                                        <div class="mt-0.5">Hasil: <span class="font-medium text-slate-700">{{ e($mineproResult) }}</span></div>
                                       @endif
                                     </div>
                                   @endif
@@ -885,7 +921,7 @@
 
                       @php
                         $olStatus = $myApp->relationLoaded('offer') && $myApp->offer ? strtolower($myApp->offer->status) : null;
-                        $canAcceptOl = (in_array(strtolower((string) $myApp->current_stage), ['final', 'offer'], true) || $olStatus === 'sent')
+                        $canAcceptOl = (in_array(strtolower((string) $currKey), ['final', 'offer'], true) || $olStatus === 'sent')
                           && strtolower((string) $myApp->overall_status) !== 'hired'
                           && strtolower((string) $myApp->overall_status) !== 'rejected';
                       @endphp
@@ -1067,6 +1103,9 @@
           <symbol id="i-brief" viewBox="0 0 24 24" fill="none" stroke="currentColor">
             <path stroke-width="2" d="M3 8a2 2 0 012-2h14a2 2 0 012 2v9a3 3 0 01-3 3H6a3 3 0 0 1-3-3V8z"/>
             <path stroke-width="2" d="M9 6a3 3 0 0 1 3-3h0a3 3 0 0 1 3 3v0"/>
+          </symbol>
+          <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
           </symbol>
           <symbol id="i-chevron-left" viewBox="0 0 24 24" fill="none" stroke="currentColor">
             <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>

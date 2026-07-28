@@ -13,16 +13,21 @@
     $BORD = '#e7ded6';
 
     // === STAGES ===
-    $stageOrder = ['applied', 'psychotest', 'hr_iv', 'user_iv', 'final', 'offer', 'onsite', 'hired'];
+    $stageOrder = ['applied', 'screening', 'psychotest', 'hr_iv', 'user_iv', 'user_trainer_iv', 'offer', 'mcu', 'mobilisasi', 'ground_test', 'onsite', 'hired', 'not_qualified'];
     $pretty = [
         'applied' => 'Pengajuan Berkas',
+        'screening' => 'Screening Berkas',
         'psychotest' => 'Psikotes',
         'hr_iv' => 'HR Interview',
         'user_iv' => 'User Interview',
-        'final' => 'Final',
-        'offer' => 'Offering',
+        'user_trainer_iv' => 'User/Trainer Interview',
+        'offer' => 'Offering (OL)',
+        'mcu' => 'MCU',
+        'mobilisasi' => 'Mobilisasi',
+        'ground_test' => 'Ground Test',
         'onsite' => 'Onsite',
         'hired' => 'Diterima',
+        'not_qualified' => 'Tidak Lolos',
         'rejected' => 'Ditolak'
     ];
 
@@ -227,9 +232,16 @@
                 </div>
 
                 {{-- STATUS --}}
-                <span class="shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold ring-1 ring-inset {{ $badge($app->overall_status) }}">
-                  {{ $statusLabel($app->overall_status) }}
-                </span>
+                <div class="flex shrink-0 flex-col items-end gap-1.5">
+                  <span class="rounded-full px-2.5 py-1 text-[11px] font-semibold ring-1 ring-inset {{ $badge($app->overall_status) }}">
+                    {{ $statusLabel($app->overall_status) }}
+                  </span>
+                  @if(data_get($app->minepro_progress ?? [], 'current_process'))
+                    <span class="rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-200">
+                      Sinkron MinePro
+                    </span>
+                  @endif
+                </div>
               </div>
 
               {{-- PROGRESS --}}

@@ -137,12 +137,13 @@ class ApplicationController extends Controller
      * ================================================================ */
 
     /** Pelamar: daftar lamaran saya */
-    public function index(Request $request)
+    public function index(Request $request, MineproRfrService $mineproRfrService)
     {
         $this->authorize('viewAny', JobApplication::class);
         $apps = JobApplication::with([
-            'job:id,title,division,site_id',
+            'job:id,code,title,division,site_id',
             'job.site:id,code,name',
+            'user.candidateProfile:id,user_id,nik',
             'stages.actor:id,name',
             'stages.user:id,name',
             'interviews',
@@ -152,6 +153,16 @@ class ApplicationController extends Controller
             ->orderByDesc('created_at')
             ->orderByDesc('id')
             ->paginate(12);
+
+        $mineproProgressByApplication = $mineproRfrService->progressForApplications($apps->getCollection());
+        $apps->getCollection()->each(function (JobApplication $application) use ($mineproProgressByApplication) {
+            $progress = $mineproProgressByApplication[$application->getKey()] ?? null;
+            $application->setAttribute('minepro_progress', $progress);
+
+            if (! empty($progress['current_stage'])) {
+                $application->setAttribute('current_stage', $progress['current_stage']);
+            }
+        });
 
         $latestOpenJob = Job::query()
             ->where('status', 'open')

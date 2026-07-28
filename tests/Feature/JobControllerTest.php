@@ -3,9 +3,12 @@
 namespace Tests\Feature;
 
 use App\Models\Company;
+use App\Models\CandidateProfile;
 use App\Models\Job;
+use App\Models\JobApplication;
 use App\Models\Site;
 use App\Models\User;
+use App\Services\MineproRfrService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -154,6 +157,40 @@ class JobControllerTest extends TestCase
         $job = $response->viewData('job');
         $this->assertTrue($job->relationLoaded('site'));
         $this->assertTrue($job->relationLoaded('company'));
+    }
+
+    public function test_public_show_uses_minepro_progress_for_current_user()
+    {
+        CandidateProfile::create([
+            'user_id' => $this->pelamar->id,
+            'full_name' => $this->pelamar->name,
+            'nik' => '3201010101010001',
+        ]);
+
+        JobApplication::create([
+            'user_id' => $this->pelamar->id,
+            'job_id' => $this->job->id,
+            'current_stage' => 'applied',
+            'overall_status' => 'active',
+        ]);
+
+        $this->app->instance(MineproRfrService::class, new class extends MineproRfrService {
+            public function processList(string $startDate, string $endDate): array
+            {
+                return [[
+                    'rfr_ref_id' => 'SE-01',
+                    'nik' => '3201010101010001',
+                    'process' => 'GroundTest',
+                    'stage' => 'ground_test',
+                    'result' => 'Lulus',
+                ]];
+            }
+        });
+
+        $response = $this->actingAs($this->pelamar)->get(route('jobs.show', $this->job));
+
+        $response->assertStatus(200);
+        $response->assertViewHas('mineproProgress', fn($progress) => ($progress['current_stage'] ?? null) === 'ground_test');
     }
 
     public function test_admin_index_requires_auth()
