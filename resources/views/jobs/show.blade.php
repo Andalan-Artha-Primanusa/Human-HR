@@ -53,6 +53,7 @@
         : null;
     $missingProfileFields = $meProfile?->missingRequiredForApplication() ?? ['Profil kandidat'];
     $profileCompleteForApplication = auth()->guest() || $missingProfileFields === [];
+    $emailVerifiedForApplication = auth()->guest() || auth()->user()->hasVerifiedEmail();
 
     // ==== Tahapan & label (FLOW BARU) ====
     $stageOrder = ['applied', 'screening', 'psychotest', 'hr_iv', 'user_iv', 'user_trainer_iv', 'offer', 'mcu', 'mobilisasi', 'ground_test', 'onsite', 'hired', 'not_qualified'];
@@ -340,7 +341,13 @@
               @endif
 
               @auth
-                @if(($job->status ?? 'draft') === 'open' && !$myApp)
+                @if(!$emailVerifiedForApplication)
+                      <a href="{{ route('verification.notice') }}"
+                         class="px-4 py-2 text-sm font-semibold text-white rounded-lg"
+                         style="background: {{ $ACCENT_DARK }}">
+                        Verifikasi Email Dulu
+                      </a>
+                @elseif(($job->status ?? 'draft') === 'open' && !$myApp)
                       <form method="POST" action="{{ route('applications.store', $job) }}" id="applyForm" class="inline">@csrf
                         <button class="px-4 py-2 text-sm font-semibold text-white rounded-lg"
                                 style="background: linear-gradient(90deg, {{ $ACCENT }} 0%, {{ $ACCENT_DARK }} 100%);">
@@ -649,12 +656,20 @@
                       <div class="px-4 py-3 mt-3 text-sm border rounded-xl border-slate-200">
                         Belum ada lamaran untuk posisi ini.
                         @if(($job->status ?? 'draft') === 'open')
+                          @if(!$emailVerifiedForApplication)
+                            <a href="{{ route('verification.notice') }}"
+                               class="inline-flex items-center justify-center w-full px-3 py-2 mt-3 text-sm font-semibold text-white rounded-lg"
+                               style="background: {{ $ACCENT_DARK }};">
+                              Verifikasi Email Dulu
+                            </a>
+                          @else
                             <form method="POST" action="{{ route('applications.store', $job) }}" class="mt-3">@csrf
                               <button class="w-full px-3 py-2 text-sm font-semibold text-white rounded-lg"
                                       style="background: linear-gradient(90deg, {{ $ACCENT }} 0%, {{ $ACCENT_DARK }} 100%);">
                                 Lamar Sekarang
                               </button>
                             </form>
+                          @endif
                         @endif
                       </div>
                 @elseif(!$profileCompleteForApplication)

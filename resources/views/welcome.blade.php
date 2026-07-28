@@ -1091,6 +1091,14 @@
                       </a>
 
                       @auth
+                        @if(! auth()->user()->hasVerifiedEmail())
+                          <a href="{{ route('verification.notice') }}"
+                            class="inline-flex items-center gap-1.5 text-xs font-bold px-3.5 py-2 rounded-xl text-white hover:opacity-90 transition shadow-sm"
+                            style="background: #8b5e3c">
+                            <svg class="w-3.5 h-3.5" aria-hidden="true"><use href="#i-user"/></svg>
+                            Verifikasi Email
+                          </a>
+                        @else
                         <form action="{{ route('applications.store', $job) }}" method="POST">
                           @csrf
                           <button type="submit"
@@ -1101,6 +1109,7 @@
                             Lamar Sekarang
                           </button>
                         </form>
+                        @endif
                       @else
                         <a href="{{ route('login') }}?intended={{ urlencode(route('jobs.show', $job)) }}"
                           class="inline-flex items-center gap-1.5 text-xs font-bold px-3.5 py-2 rounded-xl text-white hover:opacity-90 transition shadow-sm"

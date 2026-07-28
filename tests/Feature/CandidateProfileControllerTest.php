@@ -44,6 +44,16 @@ class CandidateProfileControllerTest extends TestCase
         $response->assertSee('name="poh_id"', false);
     }
 
+    public function test_unverified_user_cannot_open_apply_profile_wizard()
+    {
+        $unverified = User::factory()->unverified()->create(['role' => 'pelamar']);
+        $this->actingAs($unverified);
+
+        $response = $this->get(route('candidate.profiles.edit', $this->job));
+
+        $response->assertRedirect(route('verification.notice'));
+    }
+
     public function test_update_validates_and_saves_profile()
     {
         Storage::fake('public');

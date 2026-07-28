@@ -182,7 +182,7 @@
         @endif
 
         {{-- Form --}}
-        <form method="POST" action="{{ route('register') }}" class="space-y-3">
+        <form method="POST" action="{{ route('register') }}" class="space-y-3" id="registerForm">
           @csrf
 
           <div>
@@ -257,7 +257,7 @@
           </div>
 
           <div style="padding-top:.25rem;">
-            <button id="registerSubmit" type="submit" class="auth-btn" disabled>
+            <button id="registerSubmit" type="submit" class="auth-btn" disabled data-default-label="Buat Akun" data-loading-label="Mendaftar...">
               Buat Akun
             </button>
           </div>
@@ -325,8 +325,26 @@
     (function () {
       const agree  = document.getElementById('agree');
       const submit = document.getElementById('registerSubmit');
-      function sync() { if (submit) submit.disabled = !agree?.checked; }
+      const form = document.getElementById('registerForm');
+      let isSubmitting = false;
+
+      function sync() {
+        if (submit) submit.disabled = isSubmitting || !agree?.checked;
+      }
+
       agree?.addEventListener('change', sync);
+      form?.addEventListener('submit', function (event) {
+        if (isSubmitting) {
+          event.preventDefault();
+          return;
+        }
+
+        isSubmitting = true;
+        if (submit) {
+          submit.textContent = submit.dataset.loadingLabel || 'Mendaftar...';
+        }
+        sync();
+      });
       sync();
 
       // Password toggle for register form

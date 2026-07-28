@@ -148,6 +148,20 @@ class ApplicationControllerFeatureTest extends TestCase
         ]);
     }
 
+    public function test_unverified_user_cannot_start_application()
+    {
+        $unverified = User::factory()->unverified()->create(['role' => 'pelamar']);
+        $this->actingAs($unverified);
+
+        $response = $this->post(route('applications.store', $this->job));
+
+        $response->assertRedirect(route('verification.notice'));
+        $this->assertDatabaseMissing('job_applications', [
+            'job_id' => $this->job->id,
+            'user_id' => $unverified->id,
+        ]);
+    }
+
     public function test_pelamar_store_with_poh()
     {
         $this->application->delete();

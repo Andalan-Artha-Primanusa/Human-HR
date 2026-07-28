@@ -38,11 +38,19 @@ class SiteControllerTest extends TestCase
         $response = $this->post(route('admin.sites.store'), [
             'code' => 'SITE01',
             'name' => 'New Site',
-            'region' => 'Jakarta'
+            'region' => 'Jakarta',
+            'latitude' => -6.2088,
+            'longitude' => 106.8456,
         ]);
 
         $response->assertRedirect(route('admin.sites.index'));
-        $this->assertDatabaseHas('sites', ['code' => 'SITE01', 'name' => 'New Site', 'is_active' => 1]);
+        $this->assertDatabaseHas('sites', [
+            'code' => 'SITE01',
+            'name' => 'New Site',
+            'is_active' => 1,
+            'latitude' => -6.2088,
+            'longitude' => 106.8456,
+        ]);
     }
 
     public function test_update_modifies_site()
@@ -52,11 +60,34 @@ class SiteControllerTest extends TestCase
         $this->actingAs($this->admin);
         $response = $this->put(route('admin.sites.update', $site), [
             'code' => $site->code,
-            'name' => 'Updated Site'
+            'name' => 'Updated Site',
+            'latitude' => -0.5022,
+            'longitude' => 117.1536,
         ]);
 
         $response->assertRedirect(route('admin.sites.index'));
-        $this->assertDatabaseHas('sites', ['id' => $site->id, 'name' => 'Updated Site']);
+        $this->assertDatabaseHas('sites', [
+            'id' => $site->id,
+            'name' => 'Updated Site',
+            'latitude' => -0.5022,
+            'longitude' => 117.1536,
+        ]);
+    }
+
+    public function test_store_rejects_invalid_coordinates()
+    {
+        $this->actingAs($this->admin);
+
+        $response = $this->from(route('admin.sites.create'))->post(route('admin.sites.store'), [
+            'code' => 'BADMAP',
+            'name' => 'Bad Map Site',
+            'latitude' => -100,
+            'longitude' => 200,
+        ]);
+
+        $response->assertRedirect(route('admin.sites.create'));
+        $response->assertSessionHasErrors(['latitude', 'longitude']);
+        $this->assertDatabaseMissing('sites', ['code' => 'BADMAP']);
     }
 
     public function test_destroy_deletes_site_without_jobs()

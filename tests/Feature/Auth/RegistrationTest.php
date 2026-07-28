@@ -2,8 +2,10 @@
 
 namespace Tests\Feature\Auth;
 
+use App\Notifications\CustomVerifyEmail;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
 
 class RegistrationTest extends TestCase
@@ -19,6 +21,8 @@ class RegistrationTest extends TestCase
 
     public function test_new_users_can_register(): void
     {
+        Notification::fake();
+
         $response = $this->post('/register', [
             'name' => 'Test User',
             'email' => 'test@example.com',
@@ -30,6 +34,20 @@ class RegistrationTest extends TestCase
         $this->assertAuthenticated();
         $response->assertRedirect(route('jobs.index', absolute: false));
         $response->assertSessionHas('verify_email_notice', 'Cek email kamu untuk verifikasi akun.');
-        $this->assertFalse(User::where('email', 'test@example.com')->first()->hasVerifiedEmail());
+        $user = User::where('email', 'test@example.com')->first();
+        $this->assertFalse($user->hasVerifiedEmail());
+        $this->assertCount(1, Notification::sent($user, CustomVerifyEmail::class));
+    }
+
+    public function test_duplicate_verification_send_is_suppressed_by_cooldown(): void
+    {
+        Notification::fake();
+
+        $user = User::factory()->unverified()->create();
+
+        $user->sendEmailVerificationNotification();
+        $user->sendEmailVerificationNotification();
+
+        $this->assertCount(1, Notification::sent($user, CustomVerifyEmail::class));
     }
 }

@@ -112,4 +112,16 @@ return [
 
     'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Email Verification Cooldown
+    |--------------------------------------------------------------------------
+    |
+    | Prevent duplicate verification emails when a registration form is submitted
+    | twice quickly or a resend action is repeated too soon.
+    |
+    */
+
+    'verification_resend_cooldown' => (int) env('VERIFY_RESEND_COOLDOWN', 60),
+
 ];

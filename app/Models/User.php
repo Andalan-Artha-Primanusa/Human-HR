@@ -126,6 +126,17 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function sendEmailVerificationNotification()
     {
+        $cooldown = max(1, (int) config('auth.verification_resend_cooldown', 60));
+        $cacheKey = sprintf(
+            'email-verification:%s:%s',
+            $this->getKey(),
+            sha1((string) $this->email)
+        );
+
+        if (! cache()->add($cacheKey, true, now()->addSeconds($cooldown))) {
+            return;
+        }
+
         $this->notify(new \App\Notifications\CustomVerifyEmail);
     }
 }
