@@ -164,7 +164,12 @@ class JobController extends Controller
 
         $myApp = null;
         $mineproProgress = null;
+        $meProfile = null;
         if (Auth::check()) {
+            $meProfile = \App\Models\CandidateProfile::query()
+                ->where('user_id', Auth::id())
+                ->first(['id', 'user_id', 'nik']);
+
             $myApp = $job->applications()
                 ->where('user_id', Auth::id())
                 ->with(['stages', 'stages.actor', 'stages.user', 'offer', 'job:id,code', 'user.candidateProfile:id,user_id,nik'])
@@ -174,6 +179,13 @@ class JobController extends Controller
             if ($myApp) {
                 $mineproProgress = $mineproRfrService->progressForApplication(
                     $myApp,
+                    $request->query('minepro_start_date'),
+                    $request->query('minepro_end_date')
+                );
+            } elseif ($meProfile && filled($meProfile->nik)) {
+                $mineproProgress = $mineproRfrService->progressForRfrAndNik(
+                    (string) $job->code,
+                    (string) $meProfile->nik,
                     $request->query('minepro_start_date'),
                     $request->query('minepro_end_date')
                 );

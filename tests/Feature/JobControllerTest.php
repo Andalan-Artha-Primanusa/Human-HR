@@ -193,6 +193,45 @@ class JobControllerTest extends TestCase
         $response->assertViewHas('mineproProgress', fn($progress) => ($progress['current_stage'] ?? null) === 'ground_test');
     }
 
+    public function test_public_show_can_display_minepro_progress_without_local_application()
+    {
+        $this->job->update(['code' => '0001/AAP-BGG/RFR/NS/06/2026']);
+        CandidateProfile::create([
+            'user_id' => $this->pelamar->id,
+            'full_name' => $this->pelamar->name,
+            'nik' => '34710709078300011',
+        ]);
+
+        $this->app->instance(MineproRfrService::class, new class extends MineproRfrService {
+            public function processList(string $startDate, string $endDate): array
+            {
+                return [
+                    [
+                        'rfr_ref_id' => '0001/AAP-BGG/RFR/NS/06/2026',
+                        'nik' => '34710709078300011',
+                        'process' => 'Psikotest',
+                        'stage' => 'psychotest',
+                        'result' => 'Progress',
+                    ],
+                    [
+                        'rfr_ref_id' => '0001/AAP-BGG/RFR/NS/06/2026',
+                        'nik' => '34710709078300011',
+                        'process' => 'GroundTest',
+                        'stage' => 'ground_test',
+                        'result' => 'Lulus',
+                    ],
+                ];
+            }
+        });
+
+        $response = $this->actingAs($this->pelamar)->get(route('jobs.show', $this->job));
+
+        $response->assertStatus(200);
+        $response->assertViewHas('mineproProgress', fn($progress) => ($progress['current_stage'] ?? null) === 'ground_test');
+        $response->assertSee('Tersinkron MinePro');
+        $response->assertSee('Ground Test');
+    }
+
     public function test_admin_index_requires_auth()
     {
         $response = $this->get(route('admin.jobs.index'));

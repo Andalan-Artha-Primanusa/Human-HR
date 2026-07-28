@@ -76,6 +76,7 @@
 
     $mineproProcesses = collect(data_get($mineproProgress ?? [], 'processes', []));
     $mineproCurrentProcess = data_get($mineproProgress ?? [], 'current_process');
+    $hasMineproProgress = filled($mineproCurrentProcess);
     $mineproStage = strtolower((string) data_get($mineproProgress ?? [], 'current_stage', ''));
     $mineproStage = in_array($mineproStage, $stageOrder, true) ? $mineproStage : null;
     $mineproStageMap = $mineproProcesses
@@ -105,8 +106,8 @@
     $prevKey = $idxNow > 0 ? $stageOrder[$idxNow - 1] : null;
     $nextKey = $idxNow < count($stageOrder) - 1 ? $stageOrder[$idxNow + 1] : null;
 
-    $progressPct = function () use ($myApp, $stageOrder, $overall, $currKey) {
-        if (!$myApp)
+    $progressPct = function () use ($myApp, $hasMineproProgress, $stageOrder, $overall, $currKey) {
+        if (!$myApp && !$hasMineproProgress)
             return 0;
         $idx = array_search($currKey, $stageOrder, true);
         if ($idx === false)
@@ -670,7 +671,7 @@
                   <p class="mt-1 text-xs leading-relaxed text-slate-500">
                     Pantau status seleksi untuk posisi ini dari satu tempat.
                   </p>
-                  @if($mineproCurrentProcess)
+                  @if($hasMineproProgress)
                     <span class="inline-flex items-center gap-1.5 px-2.5 py-1 mt-2 text-[11px] font-semibold rounded-full bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-200">
                       <svg class="w-3.5 h-3.5" aria-hidden="true"><use href="#i-check"/></svg>
                       Tersinkron MinePro
@@ -725,7 +726,7 @@
                   </div>
                 </div>
               @else
-                @if(!$myApp)
+                @if(!$myApp && !$hasMineproProgress)
                       <div class="p-4 mt-4 text-sm border rounded-xl border-[#ead8c5] bg-[#fffaf5]">
                         <div class="flex items-start gap-3">
                           <div class="grid w-10 h-10 rounded-full place-items-center bg-white text-[#8b5e3c] ring-1 ring-[#ead8c5]">
@@ -759,7 +760,7 @@
                           </div>
                         </div>
                       </div>
-                @elseif(!$profileCompleteForApplication)
+                @elseif(!$profileCompleteForApplication && !$hasMineproProgress)
                       <div class="p-4 mt-4 text-sm border rounded-xl border-amber-200 bg-amber-50 text-amber-950">
                         <div class="flex items-start gap-3">
                           <div class="grid w-10 h-10 bg-white rounded-full place-items-center text-amber-700 ring-1 ring-amber-200">
@@ -920,8 +921,9 @@
                       </div>
 
                       @php
-                        $olStatus = $myApp->relationLoaded('offer') && $myApp->offer ? strtolower($myApp->offer->status) : null;
-                        $canAcceptOl = (in_array(strtolower((string) $currKey), ['final', 'offer'], true) || $olStatus === 'sent')
+                        $olStatus = $myApp && $myApp->relationLoaded('offer') && $myApp->offer ? strtolower($myApp->offer->status) : null;
+                        $canAcceptOl = $myApp
+                          && (in_array(strtolower((string) $currKey), ['final', 'offer'], true) || $olStatus === 'sent')
                           && strtolower((string) $myApp->overall_status) !== 'hired'
                           && strtolower((string) $myApp->overall_status) !== 'rejected';
                       @endphp

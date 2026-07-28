@@ -125,23 +125,25 @@ class MineproRfrService
             'user.candidateProfile:id,user_id,nik',
         ]);
 
-        [$defaultStartDate, $defaultEndDate] = $this->processRangeForApplication($application);
+        [$defaultStartDate, $defaultEndDate] = $this->defaultProcessRange($application->created_at);
         $startDate = $this->validDate($startDate) ?: $defaultStartDate;
         $endDate = $this->validDate($endDate) ?: $defaultEndDate;
 
         $jobCode = trim((string) ($application->job?->code ?? ''));
         $nik = trim((string) ($application->user?->candidateProfile?->nik ?? ''));
-        $key = $this->processKey($jobCode, $nik);
+
+        return $this->progressForRfrAndNik($jobCode, $nik, $startDate, $endDate);
+    }
+
+    public function progressForRfrAndNik(string $rfrRefId, string $nik, ?string $startDate = null, ?string $endDate = null): array
+    {
+        [$defaultStartDate, $defaultEndDate] = $this->defaultProcessRange();
+        $startDate = $this->validDate($startDate) ?: $defaultStartDate;
+        $endDate = $this->validDate($endDate) ?: $defaultEndDate;
+        $key = $this->processKey($rfrRefId, $nik);
 
         if ($key === '|') {
-            return [
-                'start_date' => $startDate,
-                'end_date' => $endDate,
-                'processes' => [],
-                'current_process' => null,
-                'current_stage' => null,
-                'meta' => $this->lastProcessMeta(),
-            ];
+            return $this->emptyProgress($startDate, $endDate);
         }
 
         $processes = collect($this->processList($startDate, $endDate))
@@ -172,7 +174,7 @@ class MineproRfrService
         ]));
 
         $appsByRange = $apps->groupBy(function (JobApplication $application) {
-            [$startDate, $endDate] = $this->processRangeForApplication($application);
+            [$startDate, $endDate] = $this->defaultProcessRange($application->created_at);
 
             return $startDate . '|' . $endDate;
         });
@@ -212,7 +214,19 @@ class MineproRfrService
         return strtoupper(trim($rfrRefId)) . '|' . preg_replace('/\D+/', '', $nik);
     }
 
-    private function processRangeForApplication(JobApplication $application): array
+    private function emptyProgress(string $startDate, string $endDate): array
+    {
+        return [
+            'start_date' => $startDate,
+            'end_date' => $endDate,
+            'processes' => [],
+            'current_process' => null,
+            'current_stage' => null,
+            'meta' => $this->lastProcessMeta(),
+        ];
+    }
+
+    private function defaultProcessRange(mixed $fallbackDate = null): array
     {
         $configuredStart = $this->validDate((string) config('services.minepro.process_start_date'));
         $configuredEnd = $this->validDate((string) config('services.minepro.process_end_date'));
@@ -221,9 +235,9 @@ class MineproRfrService
             return [$configuredStart, $configuredEnd];
         }
 
-        $date = $application->created_at instanceof Carbon
-            ? $application->created_at->copy()
-            : Carbon::parse($application->created_at ?? now());
+        $date = $fallbackDate instanceof Carbon
+            ? $fallbackDate->copy()
+            : Carbon::parse($fallbackDate ?? now());
 
         return [
             $date->copy()->startOfMonth()->format('Y-m-d'),
