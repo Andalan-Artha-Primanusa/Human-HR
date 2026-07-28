@@ -270,7 +270,7 @@
             </div>
             <div>
               <label class="text-sm text-slate-600">NIK KTP <span class="text-red-600">*</span></label>
-              <input required name="nik" value="{{ old('nik', $profile->nik) }}" maxlength="16" class="w-full px-3 py-2 mt-1 border rounded-lg" @class(['field-error' => $errors->has('nik')])>
+              <input required name="nik" value="{{ old('nik', $profile->nik) }}" maxlength="17" class="w-full px-3 py-2 mt-1 border rounded-lg" inputmode="numeric" oninput="this.value=this.value.replace(/[^0-9]/g,'')" @class(['field-error' => $errors->has('nik')])>
               @error('nik')<p class="field-error-msg">{{ $message }}</p>@enderror
             </div>
             <div>
@@ -777,7 +777,7 @@
           <p class="mt-1 text-sm text-slate-600">Pastikan semua data sudah benar. Kamu tetap bisa mengubahnya lagi nanti.</p>
           <div class="flex items-center justify-end gap-2 mt-4">
             <button type="button" class="px-4 py-2 text-sm border rounded-xl border-brand-200 text-brand-800 hover:bg-brand-50" @click="confirmOpen=false">Batal</button>
-            <button type="button" class="rounded-xl bg-[#a77d52] px-4 py-2 text-sm font-semibold text-white hover:opacity-95" @click="confirmOpen=false; submitting=true; localStorage.removeItem(DRAFT_KEY); $refs.form.submit()" :disabled="submitting" x-text="submitting ? 'Menyimpan...' : 'Ya, Simpan'">Ya, Simpan</button>
+            <button type="button" class="rounded-xl bg-[#a77d52] px-4 py-2 text-sm font-semibold text-white hover:opacity-95" @click="submitFinal()" :disabled="submitting" x-text="submitting ? 'Menyimpan...' : 'Ya, Simpan'">Ya, Simpan</button>
           </div>
         </div>
       </div>
@@ -970,6 +970,30 @@
       prev(){
         this['step'+this.step+'Errors'] = [];
         this.step = Math.max(1, this.step-1);
+      },
+      submitFinal(){
+        if(!this.validate(3)){
+          this.confirmOpen = false;
+          this.scrollToError();
+          return;
+        }
+
+        const maxTotalBytes = 60 * 1024 * 1024;
+        let totalBytes = 0;
+        this.$refs.form.querySelectorAll('input[type="file"]').forEach(input => {
+          Array.from(input.files || []).forEach(file => { totalBytes += file.size || 0; });
+        });
+
+        if(totalBytes > maxTotalBytes){
+          this.confirmOpen = false;
+          this.errors = ['Total ukuran file terlalu besar. Maksimal total upload 60MB sekali simpan. Kurangi dokumen atau kompres file dulu.'];
+          return;
+        }
+
+        this.confirmOpen = false;
+        this.submitting = true;
+        localStorage.removeItem(this.DRAFT_KEY);
+        this.$refs.form.submit();
       },
       scrollToError(){
         this.$nextTick(() => {

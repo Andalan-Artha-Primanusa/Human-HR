@@ -19,7 +19,7 @@ return new class extends Migration {
             $t->string('birthplace')->nullable();            // Tempat Lahir
             $t->date('birthdate')->nullable();               // Tanggal Lahir
             $t->unsignedTinyInteger('age')->nullable()->comment('Opsional; snapshot usia saat isi form (redundan dgn birthdate)');
-            $t->char('nik', 16)->nullable()->unique();       // NIK KTP (16 digit)
+            $t->char('nik', 17)->nullable()->unique();       // NIK KTP (17 digit)
 
             $t->string('phone', 32)->nullable();             // Nomor HP
             $t->string('whatsapp', 32)->nullable();          // Nomor WA

@@ -67,7 +67,7 @@ class CandidateProfileControllerTest extends TestCase
         $this->assertDatabaseHas('candidate_profiles', [
             'user_id' => $this->user->id,
             'full_name' => 'John Doe',
-            'nik' => '1234567890123456',
+            'nik' => '12345678901234567',
             'poh_id' => $this->poh->id,
         ]);
         $this->assertDatabaseHas('job_applications', [
@@ -98,7 +98,7 @@ class CandidateProfileControllerTest extends TestCase
         CandidateProfile::factory()->create([
             'user_id' => User::factory()->create()->id,
             'full_name' => 'Existing Candidate',
-            'nik' => '1234567890123456',
+            'nik' => '12345678901234567',
         ]);
 
         Storage::fake('public');
@@ -121,7 +121,7 @@ class CandidateProfileControllerTest extends TestCase
         $this->actingAs($this->user);
 
         $payload = $this->validProfilePayload([
-            'nik' => '1234567890123999',
+            'nik' => '12345678901239999',
             'is_fresh_graduate' => '1',
             'employments' => [],
         ]);
@@ -191,7 +191,7 @@ class CandidateProfileControllerTest extends TestCase
             'age' => 30,
             'birthplace' => 'Jakarta',
             'birthdate' => '1994-01-01',
-            'nik' => '1234567890123456',
+            'nik' => '12345678901234567',
             'email' => 'john@example.com',
             'phone' => '081234567890',
             'last_education' => 'S1',
