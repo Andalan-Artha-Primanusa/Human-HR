@@ -356,30 +356,6 @@
       transform: translateY(0);
     }
 
-    /* Marquee */
-    .marquee {
-      position: relative;
-      overflow: hidden;
-      mask-image: linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%);
-      -webkit-mask-image: linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%);
-    }
-    .marquee__track {
-      display: flex;
-      gap: .75rem;
-      width: max-content;
-      animation: marquee-scroll 32s linear infinite;
-      will-change: transform;
-    }
-    .marquee:hover .marquee__track,
-    .marquee:focus-within .marquee__track { animation-play-state: paused; }
-    @keyframes marquee-scroll {
-      from { transform: translateX(0); }
-      to   { transform: translateX(-50%); }
-    }
-    @media (prefers-reduced-motion: reduce) {
-      .marquee__track { animation: none; }
-    }
-
     /* Quick link cards */
     .qlink-card {
       border: 1px solid #e5e7eb;
@@ -799,7 +775,6 @@
                 $param = $s['code'] ?? $s['id'] ?? $name;
                 return ['name' => $name, 'dot' => $dot, 'param' => $param];
             })->values();
-        $sitesDup = $sitesNorm->concat($sitesNorm);
     @endphp
 
     <section class="border-b" style="border-color: #e8d5c4; background: #ffffff"
