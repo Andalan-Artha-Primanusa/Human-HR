@@ -971,7 +971,7 @@
         this['step'+this.step+'Errors'] = [];
         this.step = Math.max(1, this.step-1);
       },
-      submitFinal(){
+      async submitFinal(){
         if(!this.validate(3)){
           this.confirmOpen = false;
           this.scrollToError();
@@ -993,7 +993,28 @@
         this.confirmOpen = false;
         this.submitting = true;
         localStorage.removeItem(this.DRAFT_KEY);
+        await this.refreshCsrfToken();
         this.$refs.form.submit();
+      },
+      async refreshCsrfToken(){
+        try {
+          const response = await fetch('{{ route('csrf.token') }}', {
+            method: 'GET',
+            credentials: 'same-origin',
+            headers: {
+              'Accept': 'application/json',
+              'X-Requested-With': 'XMLHttpRequest',
+            },
+            cache: 'no-store',
+          });
+          if(!response.ok) return;
+          const data = await response.json();
+          if(!data?.token) return;
+          const tokenInput = this.$refs.form.querySelector('input[name="_token"]');
+          if(tokenInput) tokenInput.value = data.token;
+          const meta = document.querySelector('meta[name="csrf-token"]');
+          if(meta) meta.setAttribute('content', data.token);
+        } catch(e) {}
       },
       scrollToError(){
         this.$nextTick(() => {

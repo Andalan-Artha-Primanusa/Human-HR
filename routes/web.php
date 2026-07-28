@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\CompanyController;
@@ -57,6 +58,11 @@ Route::pattern('notification', '[0-9a-fA-F-]{36}');
 */
 
 Route::get('/', WelcomeController::class)->name('welcome');
+Route::get('/csrf-token', function (Request $request) {
+    return response()
+        ->json(['token' => csrf_token()])
+        ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+})->name('csrf.token');
 
 Route::get('/jobs', [JobController::class, 'index'])->name('jobs.index');
 Route::get('/jobs/{job}', [JobController::class, 'show'])->name('jobs.show');
