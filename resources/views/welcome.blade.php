@@ -813,36 +813,6 @@
                 style="border-color: #f4f0eb" role="region" aria-label="Peta lokasi site PT Andalan Artha Primanusa">
               </div>
 
-              {{-- Marquee animasi (aria-hidden, navigasi lewat list di bawah) --}}
-              <div class="marquee" role="presentation" aria-hidden="true">
-                <div class="marquee__track">
-                  @foreach($sitesDup as $s)
-                      <div class="shrink-0">
-                        <span class="inline-flex items-center gap-2 px-4 py-2 border rounded-full"
-                          style="border-color: #e8d5c4; background: #fff; color: #a77d52;">
-                          <span class="inline-block w-2.5 h-2.5 rounded-full shrink-0"
-                            style="background: {{ $s['dot'] }}"></span>
-                          <span class="text-sm whitespace-nowrap">{{ $s['name'] }}</span>
-                        </span>
-                      </div>
-                  @endforeach
-                </div>
-              </div>
-              {{-- List yang bisa difokus untuk aksesibilitas --}}
-              <ul class="flex flex-wrap gap-2 mt-3" role="list" aria-label="Filter lowongan berdasarkan lokasi site">
-                @foreach($sitesNorm as $s)
-                    <li>
-                      <a href="{{ route('jobs.index', ['site' => $s['param']]) }}"
-                        class="inline-flex items-center gap-2 px-4 py-2 transition border rounded-full hover:shadow-md"
-                        style="border-color: #e8d5c4; background: #fff; color: #a77d52;"
-                        aria-label="Filter lowongan di site {{ $s['name'] }}">
-                        <span class="inline-block w-2.5 h-2.5 rounded-full shrink-0"
-                          style="background: {{ $s['dot'] }}" aria-hidden="true"></span>
-                        <span class="text-sm">{{ $s['name'] }}</span>
-                      </a>
-                    </li>
-                @endforeach
-              </ul>
           @else
             <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
               Lokasi site belum tersedia.
