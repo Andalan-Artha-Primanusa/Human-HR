@@ -76,6 +76,9 @@ class RecruitmentUiJourneyTest extends TestCase
         $response = $this->post(route('applications.store', $this->job), [
             'poh_id' => $poh->id,
         ]);
+        $response->assertRedirect(route('candidate.profiles.edit', $this->job));
+
+        $response = $this->post(route('candidate.profiles.update', $this->job), $this->profilePayload($poh));
         $response->assertRedirect(route('applications.mine'));
         
         $application = JobApplication::where('user_id', $this->pelamar->id)
@@ -247,5 +250,51 @@ class RecruitmentUiJourneyTest extends TestCase
         ]);
 
         return $profile;
+    }
+
+    private function profilePayload(Poh $poh): array
+    {
+        return [
+            'poh_id' => $poh->id,
+            'full_name' => $this->pelamar->name,
+            'gender' => 'male',
+            'age' => 25,
+            'birthplace' => 'Jakarta',
+            'birthdate' => '2001-01-01',
+            'nik' => '3201010101010001',
+            'email' => $this->pelamar->email,
+            'phone' => '081234567890',
+            'last_education' => 'S1',
+            'education_major' => 'Informatika',
+            'education_school' => 'Universitas Test',
+            'ktp_address' => 'Jl. KTP',
+            'ktp_village' => 'KTP Village',
+            'ktp_district' => 'KTP District',
+            'ktp_city' => 'Jakarta',
+            'ktp_province' => 'DKI Jakarta',
+            'ktp_postal_code' => '12345',
+            'domicile_address' => 'Jl. Domisili',
+            'domicile_village' => 'Dom Village',
+            'domicile_district' => 'Dom District',
+            'domicile_city' => 'Jakarta',
+            'domicile_province' => 'DKI Jakarta',
+            'domicile_postal_code' => '12345',
+            'trainings' => [[
+                'title' => 'Safety Training',
+                'institution' => 'Training Center',
+                'period_start' => '2025-01-01',
+            ]],
+            'employments' => [[
+                'company' => 'Company Test',
+                'position_start' => 'Staff',
+                'period_start' => '2024-01-01',
+            ]],
+            'references' => [[
+                'name' => 'Reference Test',
+                'job_title' => 'Manager',
+                'company' => 'Company Test',
+                'contact' => '081234567891',
+            ]],
+        ];
     }
 }

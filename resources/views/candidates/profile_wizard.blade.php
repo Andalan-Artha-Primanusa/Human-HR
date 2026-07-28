@@ -777,7 +777,7 @@
           <p class="mt-1 text-sm text-slate-600">Pastikan semua data sudah benar. Kamu tetap bisa mengubahnya lagi nanti.</p>
           <div class="flex items-center justify-end gap-2 mt-4">
             <button type="button" class="px-4 py-2 text-sm border rounded-xl border-brand-200 text-brand-800 hover:bg-brand-50" @click="confirmOpen=false">Batal</button>
-            <button type="button" class="rounded-xl bg-[#a77d52] px-4 py-2 text-sm font-semibold text-white hover:opacity-95" @click="confirmOpen=false; submitting=true; $refs.form.submit()" :disabled="submitting" x-text="submitting ? 'Menyimpan...' : 'Ya, Simpan'">Ya, Simpan</button>
+            <button type="button" class="rounded-xl bg-[#a77d52] px-4 py-2 text-sm font-semibold text-white hover:opacity-95" @click="confirmOpen=false; submitting=true; localStorage.removeItem(DRAFT_KEY); $refs.form.submit()" :disabled="submitting" x-text="submitting ? 'Menyimpan...' : 'Ya, Simpan'">Ya, Simpan</button>
           </div>
         </div>
       </div>
@@ -868,6 +868,7 @@
       confirmOpen: false,
       submitting: false,
       hasCv: {{ $profile->cv_path ? 'true' : 'false' }},
+      profileUpdatedAt: {{ $profile->updated_at ? $profile->updated_at->timestamp * 1000 : 0 }},
 
       // === DRAFT KEY PER USER x JOB ===
       get DRAFT_KEY(){ return `cand_wizard:{{ auth()->id() }}:{{ $job->id }}`; },
@@ -922,6 +923,10 @@
           const raw = localStorage.getItem(this.DRAFT_KEY);
           if(!raw) return;
           const d = JSON.parse(raw);
+          if (this.profileUpdatedAt && (!d.ts || d.ts <= this.profileUpdatedAt)) {
+            localStorage.removeItem(this.DRAFT_KEY);
+            return;
+          }
 
           if (d.step) this.step = d.step;
           if (Array.isArray(d.trainings))   Alpine.store('form').trainings   = d.trainings;

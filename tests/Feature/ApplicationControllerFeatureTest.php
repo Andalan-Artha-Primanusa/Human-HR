@@ -136,15 +136,15 @@ class ApplicationControllerFeatureTest extends TestCase
 
     public function test_pelamar_store_creates_application()
     {
+        $this->application->delete();
         $this->actingAs($this->pelamar);
 
         $response = $this->post(route('applications.store', $this->job));
 
         $response->assertRedirect(route('candidate.profiles.edit', ['job' => $this->job->id]));
-        $this->assertDatabaseHas('job_applications', [
+        $this->assertDatabaseMissing('job_applications', [
             'job_id' => $this->job->id,
             'user_id' => $this->pelamar->id,
-            'current_stage' => 'applied',
         ]);
     }
 
@@ -168,20 +168,12 @@ class ApplicationControllerFeatureTest extends TestCase
             'poh_id' => $poh->id,
         ]);
 
-        $response->assertRedirect();
+        $response->assertRedirect(route('candidate.profiles.edit', ['job' => $this->job->id]));
         
-        // Check the application was created with poh_id
-        $this->assertDatabaseHas('job_applications', [
+        $this->assertDatabaseMissing('job_applications', [
             'job_id' => $this->job->id,
             'user_id' => $this->pelamar->id,
         ]);
-        
-        $app = \App\Models\JobApplication::where('user_id', $this->pelamar->id)
-            ->where('job_id', $this->job->id)
-            ->first();
-            
-        $this->assertNotNull($app);
-        $this->assertEquals($poh->id, $app->poh_id);
     }
 
     public function test_pelamar_store_creates_application_stage()
@@ -195,9 +187,7 @@ class ApplicationControllerFeatureTest extends TestCase
             'poh_id' => $poh->id,
         ]);
 
-        $app = JobApplication::where('user_id', $this->pelamar->id)->first();
-        $this->assertDatabaseHas('application_stages', [
-            'application_id' => $app->id,
+        $this->assertDatabaseMissing('application_stages', [
             'stage_key' => 'applied',
             'status' => 'pending',
         ]);

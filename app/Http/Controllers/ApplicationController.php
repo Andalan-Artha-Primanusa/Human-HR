@@ -161,15 +161,12 @@ class ApplicationController extends Controller
         return view('applications.mine', compact('apps', 'latestOpenJob'));
     }
 
-    /** Pelamar: apply job -> redirect ke wizard profile */
+    /** Pelamar: klik Lamar selalu masuk wizard biodata untuk job baru. */
     public function store(Request $request, Job $job)
     {
         abort_if($job->status !== 'open', 403, 'Job is not open');
 
         $user = $request->user();
-        $validated = $request->validate([
-            'poh_id' => ['nullable', 'uuid', 'exists:pohs,id'],
-        ]);
 
         /** @var CandidateProfile $profile */
         $profile = CandidateProfile::withCount(['trainings', 'employments', 'references'])
@@ -178,7 +175,6 @@ class ApplicationController extends Controller
                 ['full_name' => $user->name]
             );
 
-        // Kalau sudah apply, langsung ke /me/applications
         $already = JobApplication::where('job_id', $job->id)
             ->where('user_id', $user->id)
             ->first();
@@ -200,41 +196,16 @@ class ApplicationController extends Controller
                 ->with('info', 'Kamu sudah melamar untuk posisi ini.');
         }
 
-        // Cek kelengkapan profil
         $missingProfileFields = $profile->missingRequiredForApplication();
 
-        if ($missingProfileFields !== []) {
-            return redirect()
-                ->route('candidate.profiles.edit', ['job' => $job->id])
-                ->with('missing_profile_fields', $missingProfileFields)
-                ->with('info', 'Lengkapi data profil kamu dulu sebelum melamar posisi ini.');
-        }
-
-        // Buat lamaran hanya setelah profil lengkap.
-        DB::transaction(function () use ($user, $job, $validated, $profile) {
-            $app = JobApplication::create([
-                'job_id'              => $job->id,
-                'user_id'             => $user->id,
-                'poh_id'              => $validated['poh_id'] ?? $profile->poh_id ?? null,
-                'current_stage'       => 'applied',
-                'overall_status'      => 'active',
-            ]);
-
-            ApplicationStage::create([
-                'application_id' => $app->id,
-                'stage_key'      => 'applied',
-                'status'         => 'pending',
-                'payload'        => ['note' => 'Initial application submitted'],
-                'acted_by'       => $user->id,
-                'user_id'        => $user->id,
-            ]);
-        });
-
-        // Profil sudah lengkap → langsung ke daftar lamaran
         return redirect()
-            ->route('applications.mine')
-            ->with('success', 'Lamaran berhasil dibuat!');
+            ->route('candidate.profiles.edit', ['job' => $job->id])
+            ->with('missing_profile_fields', $missingProfileFields)
+            ->with('info', $missingProfileFields === []
+                ? 'Periksa dan submit biodata kamu untuk melamar posisi ini.'
+                : 'Lengkapi data profil kamu dulu sebelum melamar posisi ini.');
     }
+
 
     /** Pelamar/Admin: detail lamaran */
     public function show(JobApplication $application)
