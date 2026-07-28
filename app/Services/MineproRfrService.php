@@ -129,8 +129,8 @@ class MineproRfrService
         $startDate = $this->validDate($startDate) ?: $defaultStartDate;
         $endDate = $this->validDate($endDate) ?: $defaultEndDate;
 
-        $jobCode = (string) ($application->job?->code ?? '');
-        $nik = (string) ($application->user?->candidateProfile?->nik ?? '');
+        $jobCode = trim((string) ($application->job?->code ?? ''));
+        $nik = trim((string) ($application->user?->candidateProfile?->nik ?? ''));
         $key = $this->processKey($jobCode, $nik);
 
         if ($key === '|') {
@@ -184,8 +184,8 @@ class MineproRfrService
 
             foreach ($rangeApps as $application) {
                 $key = $this->processKey(
-                    (string) ($application->job?->code ?? ''),
-                    (string) ($application->user?->candidateProfile?->nik ?? '')
+                    trim((string) ($application->job?->code ?? '')),
+                    trim((string) ($application->user?->candidateProfile?->nik ?? ''))
                 );
 
                 $processes = $key === '|'
@@ -214,7 +214,7 @@ class MineproRfrService
 
     private function processRangeForApplication(JobApplication $application): array
     {
-        $code = (string) ($application->job?->code ?? '');
+        $code = trim((string) ($application->job?->code ?? ''));
         if (preg_match('#/(\d{2})/(\d{4})$#', $code, $matches)) {
             $month = (int) $matches[1];
             $year = (int) $matches[2];
@@ -388,7 +388,54 @@ class MineproRfrService
 
     private function processToStage(?string $process): ?string
     {
-        return match (strtolower(trim((string) $process))) {
+        $value = strtolower(trim((string) $process));
+        $compact = preg_replace('/[^a-z0-9]+/', '', $value) ?? '';
+
+        if ($compact === '') {
+            return null;
+        }
+
+        if (str_contains($compact, 'notqualified') || str_contains($compact, 'tidaklolos') || str_contains($compact, 'rejected') || str_contains($compact, 'ditolak')) {
+            return 'not_qualified';
+        }
+
+        if (str_contains($compact, 'groundtest')) {
+            return 'ground_test';
+        }
+
+        if (str_contains($compact, 'usertrainer') || str_contains($compact, 'trainerinterview') || str_contains($compact, 'userinterview')) {
+            return 'user_trainer_iv';
+        }
+
+        if (str_contains($compact, 'hrinterview')) {
+            return 'hr_iv';
+        }
+
+        if (str_contains($compact, 'psychotest') || str_contains($compact, 'psikotest')) {
+            return 'psychotest';
+        }
+
+        if (str_contains($compact, 'screening')) {
+            return 'screening';
+        }
+
+        if (str_contains($compact, 'offering') || $compact === 'offer' || $compact === 'ol') {
+            return 'offer';
+        }
+
+        if (str_contains($compact, 'mobilisasi') || str_contains($compact, 'mobilization')) {
+            return 'mobilisasi';
+        }
+
+        if (str_contains($compact, 'onsite')) {
+            return 'onsite';
+        }
+
+        if (str_contains($compact, 'hired') || str_contains($compact, 'diterima')) {
+            return 'hired';
+        }
+
+        return match ($value) {
             'applied', 'apply', 'lamaran', 'pengajuan berkas' => 'applied',
             'screening', 'screening cv', 'screening berkas', 'screening cv/berkas', 'screening_cv', 'screening_berkas' => 'screening',
             'psikotest', 'psychotest' => 'psychotest',
