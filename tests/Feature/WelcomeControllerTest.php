@@ -220,6 +220,24 @@ class WelcomeControllerTest extends TestCase
         $this->assertNotEmpty($sitesWithCoords);
     }
 
+    public function test_landing_still_shows_map_when_sites_have_no_coordinates()
+    {
+        Site::factory()->create([
+            'code' => 'NOCOORD',
+            'name' => 'Site Tanpa Koordinat',
+            'latitude' => null,
+            'longitude' => null,
+            'is_active' => true,
+        ]);
+
+        $response = $this->get(route('welcome'));
+
+        $response->assertStatus(200);
+        $response->assertSee('id="sites-map"', false);
+        $response->assertDontSee('Koordinat peta belum diisi');
+        $response->assertSee('Site Tanpa Koordinat');
+    }
+
     public function test_color_from_string_is_consistent()
     {
         $controller = new \App\Http\Controllers\WelcomeController();

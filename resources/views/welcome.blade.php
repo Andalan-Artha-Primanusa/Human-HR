@@ -102,7 +102,7 @@
         ],
         "image" => asset('storage/media/og-careers.jpg'),
         "description" => "Portal karier resmi pt andalan artha primanusa. Lowongan terverifikasi dan proses rekrutmen transparan.",
-        "email" => "hr@andalan.co.id",
+        "email" => "recruitment@andalanarthaprimanusa.com",
         "address" => [
             "@type" => "PostalAddress",
             "streetAddress" => "Jl. Plaju No.11, Kebon Melati, Tanah Abang",
@@ -807,7 +807,7 @@
       <div class="px-6 py-8 mx-auto max-w-7xl lg:px-8">
         <h2 id="sites-heading" class="mb-4 text-base font-semibold" style="color: #1f2937">Lokasi Site</h2>
 
-        @if($sitesWithCoords->isNotEmpty())
+        @if($sitesNorm->isNotEmpty())
               {{-- PETA INTERAKTIF --}}
               <div id="sites-map" class="w-full mb-6 overflow-hidden border shadow-md h-96 rounded-2xl"
                 style="border-color: #f4f0eb" role="region" aria-label="Peta lokasi site PT Andalan Artha Primanusa">
@@ -843,24 +843,6 @@
                     </li>
                 @endforeach
               </ul>
-          @elseif($sitesNorm->isNotEmpty())
-              <div class="rounded-2xl border border-amber-100 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-                Koordinat peta belum diisi, tapi daftar site tetap tersedia untuk filter lowongan.
-              </div>
-              <ul class="flex flex-wrap gap-2 mt-4" role="list" aria-label="Filter lowongan berdasarkan lokasi site">
-                @foreach($sitesNorm as $s)
-                    <li>
-                      <a href="{{ route('jobs.index', ['site' => $s['param']]) }}"
-                        class="inline-flex items-center gap-2 px-4 py-2 transition border rounded-full hover:shadow-md"
-                        style="border-color: #e8d5c4; background: #fff; color: #a77d52;"
-                        aria-label="Filter lowongan di site {{ $s['name'] }}">
-                        <span class="inline-block w-2.5 h-2.5 rounded-full shrink-0"
-                          style="background: {{ $s['dot'] }}" aria-hidden="true"></span>
-                        <span class="text-sm">{{ $s['name'] }}</span>
-                      </a>
-                    </li>
-                @endforeach
-              </ul>
           @else
             <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
               Lokasi site belum tersedia.
@@ -877,14 +859,22 @@
         const sitesData = @json($sitesWithCoords ?? []);
         const mapContainer = document.getElementById('sites-map');
 
-        if (!mapContainer || sitesData.length === 0) return;
+        if (!mapContainer) return;
 
-        // Hitung center peta dari rata-rata semua koordinat
-        const avgLat = sitesData.reduce((sum, s) => sum + s.latitude, 0) / sitesData.length;
-        const avgLng = sitesData.reduce((sum, s) => sum + s.longitude, 0) / sitesData.length;
+        const sitesWithCoords = sitesData.filter(function (site) {
+          return Number.isFinite(Number(site.latitude)) && Number.isFinite(Number(site.longitude));
+        });
+
+        // Kalau koordinat belum tersedia, tetap tampilkan peta default Indonesia.
+        const avgLat = sitesWithCoords.length
+          ? sitesWithCoords.reduce((sum, s) => sum + Number(s.latitude), 0) / sitesWithCoords.length
+          : -2.5489;
+        const avgLng = sitesWithCoords.length
+          ? sitesWithCoords.reduce((sum, s) => sum + Number(s.longitude), 0) / sitesWithCoords.length
+          : 118.0149;
 
         // Inisialisasi peta
-        const map = L.map('sites-map').setView([avgLat, avgLng], 5);
+        const map = L.map('sites-map').setView([avgLat, avgLng], sitesWithCoords.length ? 5 : 4);
 
         // Tambahkan tile layer (OpenStreetMap)
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -894,7 +884,7 @@
 
         // Tambahkan marker untuk setiap site
         const markers = [];
-        sitesData.forEach(function (site) {
+        sitesWithCoords.forEach(function (site) {
           const marker = L.circleMarker([site.latitude, site.longitude], {
             radius: 10,
             fillColor: site.dot || '#a77d52',
@@ -1236,7 +1226,7 @@
             </li>
             <li class="flex items-center gap-2">
               <svg class="w-4 h-4 shrink-0" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" fill="none" stroke="currentColor" stroke-width="2"/><polyline points="22,6 12,13 2,6" fill="none" stroke="currentColor" stroke-width="2"/></svg>
-              <span>hr@andalan.co.id</span>
+              <a href="mailto:recruitment@andalanarthaprimanusa.com" class="transition hover:text-white">recruitment@andalanarthaprimanusa.com</a>
             </li>
           </ul>
         </div>
