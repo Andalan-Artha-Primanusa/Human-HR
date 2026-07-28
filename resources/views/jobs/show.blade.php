@@ -376,7 +376,7 @@
       </div>
 
       {{-- GRID UTAMA --}}
-      <div class="mt-6 space-y-6">
+      <div class="grid gap-6 mt-6 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-start">
         {{-- LEFT --}}
         <div class="space-y-6">
           {{-- Ringkasan --}}
@@ -609,12 +609,18 @@
         </div>
 
         {{-- RIGHT: Progres / Site / Profil Kandidat --}}
-        <aside class="space-y-6">
+        <aside id="apply" class="space-y-6 scroll-mt-24 lg:sticky lg:top-24">
           {{-- Progres Lamaran --}}
-          <div class="bg-white border shadow-sm rounded-2xl border-slate-200">
+          <div class="overflow-hidden bg-white border shadow-sm rounded-2xl border-slate-200">
+            <div class="h-1.5" style="background: linear-gradient(90deg, {{ $ACCENT }} 0%, {{ $ACCENT_DARK }} 100%);"></div>
             <div class="p-5 md:p-6">
-              <div class="flex items-center justify-between">
-                <h3 class="text-base font-semibold text-slate-900">Progres Lamaran Kamu</h3>
+              <div class="flex items-start justify-between gap-4">
+                <div>
+                  <h3 class="text-base font-semibold text-slate-900">Progres Lamaran Kamu</h3>
+                  <p class="mt-1 text-xs leading-relaxed text-slate-500">
+                    Pantau status seleksi untuk posisi ini dari satu tempat.
+                  </p>
+                </div>
 
                 @if($myApp && $isAdmin && Route::has('admin.applications.move') && (!in_array($overall, ['rejected', 'not_qualified'], true)))
                       @php $canPrev = filled($prevKey);
@@ -647,43 +653,75 @@
               </div>
 
               @guest
-                <p class="mt-2 text-sm text-slate-600">Masuk untuk melihat timeline lamaran pribadi.</p>
-                <a href="{{ route('login') }}" class="inline-flex items-center gap-2 px-3 py-2 mt-3 text-sm border rounded-lg border-slate-200 text-slate-900 hover:bg-slate-50">
-                  Login
-                </a>
+                <div class="p-4 mt-4 border rounded-xl border-slate-200 bg-slate-50">
+                  <div class="flex items-start gap-3">
+                    <div class="grid w-10 h-10 rounded-full place-items-center bg-white text-[#8b5e3c] ring-1 ring-slate-200">
+                      <svg class="w-5 h-5" aria-hidden="true"><use href="#i-user"/></svg>
+                    </div>
+                    <div class="min-w-0">
+                      <div class="text-sm font-semibold text-slate-900">Masuk untuk melamar</div>
+                      <p class="mt-1 text-xs leading-relaxed text-slate-600">Login dulu agar sistem bisa menyimpan profil dan progres lamaran kamu.</p>
+                      <a href="{{ route('login') }}" class="inline-flex items-center justify-center px-4 py-2 mt-3 text-sm font-semibold text-white rounded-lg"
+                         style="background: linear-gradient(90deg, {{ $ACCENT }} 0%, {{ $ACCENT_DARK }} 100%);">
+                        Login Sekarang
+                      </a>
+                    </div>
+                  </div>
+                </div>
               @else
                 @if(!$myApp)
-                      <div class="px-4 py-3 mt-3 text-sm border rounded-xl border-slate-200">
-                        Belum ada lamaran untuk posisi ini.
+                      <div class="p-4 mt-4 text-sm border rounded-xl border-[#ead8c5] bg-[#fffaf5]">
+                        <div class="flex items-start gap-3">
+                          <div class="grid w-10 h-10 rounded-full place-items-center bg-white text-[#8b5e3c] ring-1 ring-[#ead8c5]">
+                            <svg class="w-5 h-5" aria-hidden="true"><use href="#i-brief"/></svg>
+                          </div>
+                          <div class="min-w-0">
+                            <div class="font-semibold text-slate-900">Belum melamar posisi ini</div>
+                            <p class="mt-1 text-xs leading-relaxed text-slate-600">
+                              Klik tombol di bawah untuk cek biodata, upload CV, lalu kirim lamaran.
+                            </p>
                         @if(($job->status ?? 'draft') === 'open')
                           @if(!$emailVerifiedForApplication)
                             <a href="{{ route('verification.notice') }}"
-                               class="inline-flex items-center justify-center w-full px-3 py-2 mt-3 text-sm font-semibold text-white rounded-lg"
+                               class="inline-flex items-center justify-center w-full px-4 py-2.5 mt-4 text-sm font-semibold text-white rounded-lg shadow-sm"
                                style="background: {{ $ACCENT_DARK }};">
                               Verifikasi Email Dulu
                             </a>
                           @else
                             <form method="POST" action="{{ route('applications.store', $job) }}" class="mt-3">@csrf
-                              <button class="w-full px-3 py-2 text-sm font-semibold text-white rounded-lg"
+                              <button class="w-full px-4 py-2.5 text-sm font-semibold text-white rounded-lg shadow-sm hover:brightness-105"
                                       style="background: linear-gradient(90deg, {{ $ACCENT }} 0%, {{ $ACCENT_DARK }} 100%);">
                                 Lamar Sekarang
                               </button>
                             </form>
                           @endif
+                        @else
+                          <div class="px-3 py-2 mt-4 text-xs font-medium border rounded-lg border-slate-200 bg-white text-slate-600">
+                            Lowongan sedang tidak dibuka.
+                          </div>
                         @endif
+                          </div>
+                        </div>
                       </div>
                 @elseif(!$profileCompleteForApplication)
-                      <div class="px-4 py-4 mt-3 text-sm border rounded-xl border-amber-200 bg-amber-50 text-amber-950">
-                        <div class="font-semibold">Lengkapi profil dulu</div>
-                        <p class="mt-1">Progres lamaran belum bisa dilihat karena data kandidat kamu belum lengkap.</p>
-                        <div class="flex flex-wrap gap-2 mt-3">
+                      <div class="p-4 mt-4 text-sm border rounded-xl border-amber-200 bg-amber-50 text-amber-950">
+                        <div class="flex items-start gap-3">
+                          <div class="grid w-10 h-10 bg-white rounded-full place-items-center text-amber-700 ring-1 ring-amber-200">
+                            <svg class="w-5 h-5" aria-hidden="true"><use href="#i-help"/></svg>
+                          </div>
+                          <div class="min-w-0">
+                            <div class="font-semibold">Lengkapi profil dulu</div>
+                            <p class="mt-1 text-xs leading-relaxed">Progres lamaran dikunci sampai semua data wajib kandidat lengkap.</p>
+                          </div>
+                        </div>
+                        <div class="flex flex-wrap gap-2 mt-4 max-h-32 overflow-y-auto pr-1">
                           @foreach($missingProfileFields as $field)
                             <span class="inline-flex items-center px-2.5 py-1 text-xs font-medium bg-white border rounded-full border-amber-200 text-amber-900">{{ $field }}</span>
                           @endforeach
                         </div>
                         @if(Route::has('candidate.profiles.edit'))
                           <a href="{{ route('candidate.profiles.edit', $job) }}"
-                             class="inline-flex items-center justify-center w-full px-3 py-2 mt-4 text-sm font-semibold text-white rounded-lg"
+                             class="inline-flex items-center justify-center w-full px-4 py-2.5 mt-4 text-sm font-semibold text-white rounded-lg shadow-sm"
                              style="background: linear-gradient(90deg, {{ $ACCENT }} 0%, {{ $ACCENT_DARK }} 100%);">
                             Isi Profil Sekarang
                           </a>
@@ -691,14 +729,14 @@
                       </div>
                 @else
                       @php $pct = $progressPct(); @endphp
-                      <div class="mt-3">
+                      <div class="mt-4">
                         <div class="flex items-center justify-between text-xs text-slate-600"><span>Progress</span><span>{{ $pct }}%</span></div>
                         <div class="w-full h-2 mt-1 overflow-hidden rounded-full bg-slate-100">
                           <div class="h-full rounded-full" style="width: {{ $pct }}%; background: {{ in_array($overall, ['rejected', 'not_qualified'], true) ? $ACCENT_DARK : $ACCENT }}"></div>
                         </div>
                       </div>
 
-                      <div class="relative mt-5">
+                      <div class="relative mt-5 max-h-[520px] overflow-y-auto pr-1">
                         <div class="absolute right-3 top-0 bottom-0 w-0.5 bg-slate-200"></div>
                         <div class="space-y-3">
                           @foreach($stageOrder as $key)
