@@ -235,6 +235,7 @@ class WelcomeControllerTest extends TestCase
         $response->assertStatus(200);
         $response->assertSee('id="sites-map"', false);
         $response->assertDontSee('Koordinat peta belum diisi');
+        $response->assertSee('Site Tanpa Koordinat');
     }
 
     public function test_color_from_string_is_consistent()

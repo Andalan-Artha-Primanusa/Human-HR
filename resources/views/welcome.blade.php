@@ -389,6 +389,29 @@
     }
     .badge-open { background: #f4ebe0; color: #7a5530; }
     .badge-new  { background: #f4ebe0; color: #a77d52; }
+
+    .site-marquee {
+      position: relative;
+      overflow: hidden;
+      mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+      -webkit-mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+    }
+    .site-marquee__track {
+      display: flex;
+      gap: .75rem;
+      width: max-content;
+      animation: site-marquee-scroll 34s linear infinite;
+      will-change: transform;
+    }
+    .site-marquee:hover .site-marquee__track,
+    .site-marquee:focus-within .site-marquee__track { animation-play-state: paused; }
+    @keyframes site-marquee-scroll {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .site-marquee__track { animation: none; }
+    }
   </style>
 </head>
 
@@ -775,6 +798,7 @@
                 $param = $s['code'] ?? $s['id'] ?? $name;
                 return ['name' => $name, 'dot' => $dot, 'param' => $param];
             })->values();
+        $sitesTicker = $sitesNorm->concat($sitesNorm);
     @endphp
 
     <section class="border-b" style="border-color: #e8d5c4; background: #ffffff"
@@ -786,6 +810,21 @@
               {{-- PETA INTERAKTIF --}}
               <div id="sites-map" class="w-full mb-6 overflow-hidden border shadow-md h-96 rounded-2xl"
                 style="border-color: #f4f0eb" role="region" aria-label="Peta lokasi site PT Andalan Artha Primanusa">
+              </div>
+
+              <div class="site-marquee" role="presentation" aria-hidden="true">
+                <div class="site-marquee__track">
+                  @foreach($sitesTicker as $s)
+                    <div class="shrink-0">
+                      <span class="inline-flex items-center gap-2 px-4 py-2 border rounded-full"
+                        style="border-color: #e8d5c4; background: #fff; color: #a77d52;">
+                        <span class="inline-block w-2.5 h-2.5 rounded-full shrink-0"
+                          style="background: {{ $s['dot'] }}"></span>
+                        <span class="text-sm whitespace-nowrap">{{ $s['name'] }}</span>
+                      </span>
+                    </div>
+                  @endforeach
+                </div>
               </div>
 
           @else
