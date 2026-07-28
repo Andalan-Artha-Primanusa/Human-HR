@@ -376,7 +376,7 @@
       </div>
 
       {{-- GRID UTAMA --}}
-      <div class="grid gap-6 mt-6 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-start">
+      <div class="mt-6 space-y-6">
         {{-- LEFT --}}
         <div class="space-y-6">
           {{-- Ringkasan --}}
@@ -609,7 +609,7 @@
         </div>
 
         {{-- RIGHT: Progres / Site / Profil Kandidat --}}
-        <aside id="apply" class="space-y-6 scroll-mt-24 lg:sticky lg:top-24">
+        <aside id="apply" class="space-y-6 scroll-mt-24">
           {{-- Progres Lamaran --}}
           <div class="overflow-hidden bg-white border shadow-sm rounded-2xl border-slate-200">
             <div class="h-1.5" style="background: linear-gradient(90deg, {{ $ACCENT }} 0%, {{ $ACCENT_DARK }} 100%);"></div>
