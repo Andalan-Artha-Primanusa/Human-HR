@@ -4,10 +4,11 @@
 @section('title', 'Lamaran Saya • karir-andalan')
 
 @php
-    // === THEME (GANTI TOTAL KE COKLAT) ===
+    // === THEME ===
     $PRIMARY = '#a77d52';
+    $PRIMARY_DARK = '#8b5e3c';
     $SOFT = '#f5efe8';
-    $CARD = '#ede5dc';
+    $CARD = '#fffaf5';
     $TEXT = '#6b4f3a';
     $BORD = '#e7ded6';
 
@@ -44,10 +45,10 @@
 
     $badge = function ($overall) {
         return match (strtolower((string) $overall)) {
-            'hired' => 'bg-[#ede5dc] text-[#6b4f3a]',
-            'rejected' => 'bg-[#f5efe8] text-[#6b4f3a]',
-            'active' => 'bg-[#ede5dc] text-[#a77d52]',
-            default => 'bg-[#f5efe8] text-[#6b4f3a]',
+        'hired' => 'bg-emerald-50 text-emerald-700 ring-emerald-200',
+        'rejected' => 'bg-rose-50 text-rose-700 ring-rose-200',
+        'active' => 'bg-[#fffaf5] text-[#8b5e3c] ring-[#ead8c5]',
+        default => 'bg-slate-50 text-slate-700 ring-slate-200',
         };
     };
 
@@ -70,6 +71,7 @@
       <symbol id="i-check" viewBox="0 0 24 24"><path d="M4 12l5 5 11-11"/></symbol>
       <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6l-12 12"/></symbol>
       <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></symbol>
+      <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s7-4.4 7-11a7 7 0 1 0-14 0c0 6.6 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></symbol>
     </svg>
 
 
@@ -90,29 +92,33 @@
       <script>setTimeout(()=>{const e=document.getElementById('flash-alert');if(e)e.remove()},5000)</script>
     @endif
 
-    <div class="px-6 py-8 mx-auto max-w-7xl">
+    <div class="px-4 py-6 mx-auto max-w-7xl sm:px-6 lg:px-8">
 
       {{-- HEADER --}}
-      <section class="overflow-hidden border shadow-sm rounded-2xl"
-               style="border-color: {{ $BORD }}">
+      <section class="overflow-hidden border shadow-sm rounded-2xl border-[#ead8c5]"
+               style="background: linear-gradient(135deg, #ffffff 0%, #fffaf5 58%, #f7ede3 100%);">
 
-        <div class="flex items-center justify-between p-6"
-             style="background: {{ $PRIMARY }}">
-          <div>
-            <h1 class="text-2xl font-semibold text-white">Lamaran Saya</h1>
-            <p class="text-sm text-white/80">Pantau progres seleksi kamu secara ringkas</p>
+        <div class="flex flex-col gap-4 p-6 md:flex-row md:items-center md:justify-between">
+          <div class="min-w-0">
+            <div class="inline-flex items-center gap-2 rounded-full bg-white/80 px-3 py-1 text-xs font-semibold text-[#8b5e3c] ring-1 ring-[#ead8c5]">
+              <svg class="w-4 h-4" aria-hidden="true"><use href="#i-brief"/></svg>
+              Dashboard Pelamar
+            </div>
+            <h1 class="mt-3 text-2xl font-bold text-slate-950 md:text-4xl">Lamaran Saya</h1>
+            <p class="mt-1 text-sm text-slate-600">Pantau progres seleksi, jadwal interview, dan offering dari satu halaman.</p>
           </div>
 
           <a href="{{ route('jobs.index') }}"
-             class="px-4 py-2 text-sm font-semibold bg-white rounded-lg"
-             style="color: {{ $PRIMARY }}">
+             class="inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold text-white shadow-sm hover:brightness-105"
+             style="background: linear-gradient(90deg, {{ $PRIMARY }} 0%, {{ $PRIMARY_DARK }} 100%);">
              Cari Lowongan
+             <svg class="w-4 h-4" aria-hidden="true"><use href="#i-arrow"/></svg>
           </a>
         </div>
 
     {{-- STATS --}}
-    <div class="grid gap-4 p-5 sm:grid-cols-2 xl:grid-cols-4"
-         style="background: #ffffff">
+    <div class="grid gap-4 p-5 border-t sm:grid-cols-2 xl:grid-cols-4"
+         style="border-color: {{ $BORD }}; background: #ffffff">
 
       @php
         $stats = [
@@ -124,7 +130,7 @@
       @endphp
 
       @foreach($stats as [$label, $val, $color, $icon])
-          <div class="flex items-center gap-4 px-4 py-4 transition border rounded-xl hover:shadow-md"
+          <div class="flex items-center gap-4 px-4 py-4 transition border rounded-xl bg-[#fffaf5] hover:shadow-md"
                style="border-color: {{ $BORD }}">
 
             {{-- ICON --}}
@@ -177,29 +183,29 @@
       </section>
 
       {{-- GRID --}}
-      <section class="grid gap-4 mt-6 sm:grid-cols-2 xl:grid-cols-3">
+      <section class="grid gap-5 mt-6 lg:grid-cols-2 xl:grid-cols-3">
         @foreach($apps as $app)
                 @php
                     $job = $app->job;
                     $pct = $progressOf($app);
+                    $siteLabel = $job?->site?->name ?? $job?->site?->code ?? '-';
                 @endphp
 
-                <article class="transition border shadow-sm rounded-2xl hover:shadow-md"
-                         style="border-color: {{ $BORD }}; background: {{ $CARD }}">
+                <article class="overflow-hidden transition bg-white border shadow-sm rounded-2xl hover:-translate-y-0.5 hover:shadow-md"
+                         style="border-color: {{ $BORD }}">
 
                   {{-- STRIP --}}
                   <div class="h-1.5 rounded-t-2xl"
-                       style="background: {{ $PRIMARY }}"></div>
+                       style="background: linear-gradient(90deg, {{ $PRIMARY }} 0%, {{ $PRIMARY_DARK }} 100%);"></div>
 
-            <div class="p-5 transition bg-white border rounded-xl hover:shadow-md"
-                 style="border-color: {{ $BORD }}">
+            <div class="p-5">
 
               {{-- HEADER --}}
               <div class="flex items-start justify-between gap-3">
-                <div class="flex items-center gap-2">
+                <div class="flex min-w-0 items-start gap-3">
 
                   {{-- ICON JOB --}}
-                  <div class="p-2 rounded-lg"
+                  <div class="grid h-11 w-11 shrink-0 place-items-center rounded-xl"
                        style="background: {{ $PRIMARY }}20; color: {{ $PRIMARY }}">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none"
                          viewBox="0 0 24 24" stroke="currentColor">
@@ -208,22 +214,29 @@
                     </svg>
                   </div>
 
-                  <h3 class="font-semibold leading-tight">
-                    {{ $job->title ?? '-' }}
-                  </h3>
+                  <div class="min-w-0">
+                    <h3 class="font-semibold leading-tight text-slate-950">
+                      {{ $job->title ?? '-' }}
+                    </h3>
+                    <div class="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                      <span>{{ $job->division ?? '-' }}</span>
+                      <span class="text-slate-300">•</span>
+                      <span>{{ $siteLabel }}</span>
+                    </div>
+                  </div>
                 </div>
 
                 {{-- STATUS --}}
-                <span class="text-[11px] px-2.5 py-1 rounded-full font-medium {{ $badge($app->overall_status) }}">
+                <span class="shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold ring-1 ring-inset {{ $badge($app->overall_status) }}">
                   {{ $statusLabel($app->overall_status) }}
                 </span>
               </div>
 
               {{-- PROGRESS --}}
-              <div class="mt-4">
+              <div class="mt-5 rounded-xl border border-slate-200 bg-slate-50/70 p-4">
                 <div class="flex justify-between mb-1 text-xs"
                      style="color: {{ $TEXT }}">
-                  <span class="flex items-center gap-1">
+                  <span class="flex items-center gap-1 font-semibold">
                     {{-- ICON STEP --}}
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 opacity-70"
                          fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -233,26 +246,26 @@
                     {{ $pretty[$app->current_stage] ?? '-' }}
                   </span>
 
-                  <span class="font-medium">{{ $pct }}%</span>
+                  <span class="font-semibold">{{ $pct }}%</span>
                 </div>
 
                 {{-- BAR --}}
-                <div class="h-2 overflow-hidden bg-gray-200 rounded-full">
+                <div class="h-2.5 overflow-hidden bg-white rounded-full ring-1 ring-slate-200">
                   <div class="h-full transition-all duration-500 rounded-full"
-                       style="width: {{ $pct }}%; background: linear-gradient(to right, {{ $PRIMARY }}, #6366f1)">
+                       style="width: {{ $pct }}%; background: linear-gradient(90deg, {{ $PRIMARY }} 0%, {{ $PRIMARY_DARK }} 100%);">
                   </div>
                 </div>
               </div>
 
               {{-- STAGES --}}
-              <div class="mt-4 flex flex-wrap gap-1.5">
+              <div class="mt-4 flex flex-wrap gap-1.5 max-h-20 overflow-y-auto pr-1">
                 @foreach($stageOrder as $key)
-                    <span class="text-[11px] px-2 py-1 rounded-full flex items-center gap-1"
-                          style="background: {{ $SOFT }}; color: {{ $TEXT }}">
+                    @php $isCurrentStage = strtolower((string) $app->current_stage) === $key; @endphp
+                    <span class="text-[11px] px-2 py-1 rounded-full flex items-center gap-1 ring-1 ring-inset {{ $isCurrentStage ? 'bg-[#fffaf5] text-[#8b5e3c] ring-[#ead8c5] font-semibold' : 'bg-slate-50 text-slate-500 ring-slate-200' }}">
 
                       {{-- DOT --}}
                       <span class="w-1.5 h-1.5 rounded-full"
-                            style="background: {{ $PRIMARY }}"></span>
+                            style="background: {{ $isCurrentStage ? $PRIMARY : '#cbd5e1' }}"></span>
 
                       {{ $pretty[$key] }}
                     </span>
@@ -260,8 +273,8 @@
               </div>
 
               {{-- FOOTER --}}
-              <div class="flex flex-col gap-1 mt-5 text-sm">
-                <div class="flex items-center justify-between">
+              <div class="mt-5 border-t pt-4 text-sm" style="border-color: {{ $BORD }}">
+                <div class="flex flex-col gap-3">
                   <span class="flex items-center gap-1.5" style="color: {{ $TEXT }}">
                     {{-- ICON DATE --}}
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 opacity-70"
@@ -271,10 +284,10 @@
                     </svg>
                     {{ optional($app->created_at)->format('d M Y') }}
                   </span>
-                  <div class="flex items-center gap-2">
+                  <div class="flex flex-wrap items-center gap-2">
                     @if($app->interviews && $app->interviews->count())
                       <a href="{{ route('me.interviews.show', $app->interviews->first()) }}"
-                         class="px-3 py-1.5 rounded-lg text-[#a77d52] border border-[#a77d52] text-xs font-medium flex items-center gap-1 hover:bg-[#a77d52] hover:text-white transition"
+                         class="inline-flex items-center gap-1 rounded-lg border border-[#a77d52] px-3 py-1.5 text-xs font-semibold text-[#a77d52] transition hover:bg-[#a77d52] hover:text-white"
                          title="Lihat Jadwal Interview">
                         Interview
                       </a>
@@ -290,31 +303,31 @@
                           <form method="POST" action="{{ route('applications.accept-offer', $app) }}" class="inline-flex">
                             @csrf
                             <button type="submit"
-                                    class="px-3 py-1.5 rounded-lg text-white text-xs font-medium flex items-center gap-1 hover:opacity-90 transition"
+                                    class="inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-semibold text-white transition hover:opacity-90"
                                     style="background: {{ $PRIMARY }}">
                               @if($olStatus === 'sent') ⏳ @endif Terima OL
                             </button>
                           </form>
                           <button type="button"
-                                  class="px-3 py-1.5 rounded-lg text-white text-xs font-medium flex items-center gap-1 hover:opacity-90 transition border border-red-500"
+                                  class="inline-flex items-center gap-1 rounded-lg border border-red-500 px-3 py-1.5 text-xs font-semibold text-white transition hover:opacity-90"
                                   style="background: rgba(220,38,38,0.8)"
                                   onclick="openRejectOlModal('{{ $app->id }}', '{{ $app->user->name }}')">
                             Tolak OL
                           </button>
                         </div>
                       @elseif($olStatus === 'accepted')
-                        <span class="px-3 py-1.5 rounded-lg text-xs font-medium"
+                        <span class="rounded-lg px-3 py-1.5 text-xs font-semibold"
                               style="background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7;">
                           ✔ Sudah Terima OL
                         </span>
                       @elseif($olStatus === 'rejected')
-                        <span class="px-3 py-1.5 rounded-lg text-xs font-medium"
+                        <span class="rounded-lg px-3 py-1.5 text-xs font-semibold"
                               style="background: #ffebee; color: #c62828; border: 1px solid #ef9a9a;">
                           ✕ OL Ditolak
                         </span>
                       @endif
                     <a href="{{ route('jobs.show', $app->job_id) }}"
-                       class="px-3 py-1.5 rounded-lg text-white text-xs font-medium flex items-center gap-1 hover:opacity-90 transition"
+                       class="inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-semibold text-white transition hover:opacity-90"
                        style="background: {{ $PRIMARY }}">
                       Detail
                       {{-- ICON ARROW --}}
@@ -327,7 +340,7 @@
                   </div>
                 </div>
                 @if($app->poh)
-                  <div class="flex items-center gap-1 mt-1 text-xs text-slate-600">
+                  <div class="flex items-center gap-1 text-xs text-slate-600">
                     <svg class="w-4 h-4 text-slate-400" aria-hidden="true"><use href="#i-pin"/></svg>
                     <span>POH: {{ $app->poh->name }}</span>
                   </div>
@@ -341,27 +354,32 @@
 
       {{-- EMPTY --}}
       @if(!$apps->count())
-          <div class="p-6 mt-6 text-center border rounded-xl"
-               style="border-color: {{ $BORD }}; background: {{ $CARD }}">
-            <p class="text-lg font-semibold" style="color: {{ $TEXT }}">Belum ada lamaran yang tersimpan</p>
+          <div class="mt-6 overflow-hidden border bg-white text-center shadow-sm rounded-2xl"
+               style="border-color: {{ $BORD }}">
+            <div class="p-8" style="background: linear-gradient(135deg, #ffffff 0%, #fffaf5 100%);">
+            <div class="mx-auto grid h-14 w-14 place-items-center rounded-full bg-white text-[#a77d52] ring-1 ring-[#ead8c5]">
+              <svg class="h-7 w-7" aria-hidden="true"><use href="#i-brief"/></svg>
+            </div>
+            <p class="mt-4 text-lg font-semibold" style="color: {{ $TEXT }}">Belum ada lamaran yang tersimpan</p>
             <p class="max-w-xl mx-auto mt-2 text-sm text-slate-600">
               Lamaran baru akan masuk ke halaman ini setelah profil kandidat lengkap dan kamu menekan tombol Lamar pada lowongan.
             </p>
             <div class="flex flex-wrap justify-center gap-2 mt-4">
               <a href="{{ route('jobs.index') }}"
-                 class="px-4 py-2 text-sm font-semibold text-white rounded-lg hover:opacity-90"
-                 style="background: {{ $PRIMARY }}">
+                 class="rounded-xl px-5 py-3 text-sm font-semibold text-white shadow-sm hover:brightness-105"
+                 style="background: linear-gradient(90deg, {{ $PRIMARY }} 0%, {{ $PRIMARY_DARK }} 100%);">
                 Cari Lowongan
               </a>
               @if(Route::has('candidate.profiles.edit'))
                 @if(!empty($latestOpenJob))
                   <a href="{{ route('candidate.profiles.edit', ['job' => $latestOpenJob->id]) }}"
-                     class="px-4 py-2 text-sm font-semibold border rounded-lg hover:bg-white"
+                     class="rounded-xl border bg-white px-5 py-3 text-sm font-semibold hover:bg-[#fffaf5]"
                      style="border-color: {{ $PRIMARY }}; color: {{ $PRIMARY }}">
                     Lengkapi Profil
                   </a>
                 @endif
               @endif
+            </div>
             </div>
           </div>
       @endif
