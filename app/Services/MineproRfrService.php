@@ -214,19 +214,11 @@ class MineproRfrService
 
     private function processRangeForApplication(JobApplication $application): array
     {
-        $code = trim((string) ($application->job?->code ?? ''));
-        if (preg_match('#/(\d{2})/(\d{4})$#', $code, $matches)) {
-            $month = (int) $matches[1];
-            $year = (int) $matches[2];
+        $configuredStart = $this->validDate((string) config('services.minepro.process_start_date'));
+        $configuredEnd = $this->validDate((string) config('services.minepro.process_end_date'));
 
-            if ($month >= 1 && $month <= 12 && $year >= 2000) {
-                $date = Carbon::create($year, $month, 1, 0, 0, 0, config('app.timezone'));
-
-                return [
-                    $date->copy()->startOfMonth()->format('Y-m-d'),
-                    $date->copy()->endOfMonth()->format('Y-m-d'),
-                ];
-            }
+        if ($configuredStart && $configuredEnd) {
+            return [$configuredStart, $configuredEnd];
         }
 
         $date = $application->created_at instanceof Carbon

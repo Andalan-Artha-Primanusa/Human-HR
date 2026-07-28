@@ -42,6 +42,8 @@ return [
         'basic_username' => env('MINEPRO_BASIC_USERNAME'),
         'basic_password' => env('MINEPRO_BASIC_PASSWORD'),
         'timeout' => env('MINEPRO_TIMEOUT', 15),
+        'process_start_date' => env('MINEPRO_PROCESS_START_DATE', '2020-01-01'),
+        'process_end_date' => env('MINEPRO_PROCESS_END_DATE', '2030-12-31'),
     ],
 
 ];
