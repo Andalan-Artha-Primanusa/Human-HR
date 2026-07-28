@@ -356,11 +356,19 @@
                         </button>
                       </form>
                 @elseif($myApp)
+                    <div class="flex flex-col gap-2 sm:flex-row">
                       <a href="{{ route('applications.mine') }}"
                          class="px-5 py-3 text-sm font-semibold text-white rounded-xl shadow-sm hover:brightness-105"
                          style="background: {{ $ACCENT_DARK }}">
                         Lihat Progres
                       </a>
+                      @if(Route::has('candidate.profiles.edit'))
+                        <a href="{{ route('candidate.profiles.edit', $job) }}"
+                           class="px-5 py-3 text-sm font-semibold bg-white border rounded-xl border-[#ead8c5] text-[#8b5e3c] shadow-sm hover:bg-[#fffaf5]">
+                          Perbarui Profil
+                        </a>
+                      @endif
+                    </div>
                 @else
                       <button disabled class="px-5 py-3 text-sm font-semibold text-white rounded-xl opacity-60" style="background: {{ $ACCENT_DARK }}">Tutup</button>
                 @endif
@@ -976,13 +984,6 @@
                         </div>
                       @endif
 
-                      <div class="mt-4">
-                        @if(Route::has('candidate.profiles.edit'))
-                              <a href="{{ route('candidate.profiles.edit', $job) }}" class="inline-flex items-center px-3 py-2 text-sm border rounded-lg border-slate-200 hover:bg-slate-50">
-                                Perbarui Profil
-                              </a>
-                        @endif
-                      </div>
                 @else
                       {{-- ALERT MODAL KELENGKAPAN PROFIL --}}
                       <div x-data="{ open: true }">
