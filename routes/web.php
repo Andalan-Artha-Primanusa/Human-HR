@@ -82,20 +82,29 @@ Route::get('/sites/{site}', [SitePublicController::class, 'show'])->name('sites.
 */
 Route::get('/dashboard', function () {
     $user = auth()->user();
-    if ($user && in_array($user->role, ['superadmin', 'hr', 'admin'])) {
-        return redirect()->route('admin.applications.board');
-    }
-    
+    $isAdmin = $user && in_array($user->role, ['superadmin', 'hr', 'admin']);
+
     $openJobsCount = \App\Models\Job::where('status', 'open')->count();
     $myApplicationsCount = $user->applications()->count();
     $unreadNotificationsCount = $user->notifications()->whereNull('read_at')->count();
+    $applicationsCount = $isAdmin ? \App\Models\JobApplication::count() : 0;
+    $candidatesCount = $isAdmin ? \App\Models\CandidateProfile::count() : 0;
+    $interviewsCount = $isAdmin ? \App\Models\Interview::count() : 0;
     $latestJobs = \App\Models\Job::where('status', 'open')
         ->with('site')
         ->orderByDesc('created_at')
         ->limit(5)
         ->get();
     
-    return view('dashboard', compact('openJobsCount', 'myApplicationsCount', 'unreadNotificationsCount', 'latestJobs'));
+    return view('dashboard', compact(
+        'openJobsCount',
+        'myApplicationsCount',
+        'unreadNotificationsCount',
+        'applicationsCount',
+        'candidatesCount',
+        'interviewsCount',
+        'latestJobs'
+    ));
 })
     ->middleware(['auth', 'verified'])
     ->name('dashboard');

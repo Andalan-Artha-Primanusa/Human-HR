@@ -228,6 +228,11 @@
         </a>
 
         @auth
+            <a href="{{ $href('dashboard') }}" class="{{ $linkDesk }} {{ $activeMenu('dashboard') }}">
+              <span class="{{ $iconWrap }}"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.5h6.5v6.5h-6.5zM13.75 4.5h6.5v6.5h-6.5zM3.75 14.5h6.5v6.5h-6.5zM13.75 14.5h6.5v6.5h-6.5z"/></svg></span>
+              <span class="label text-white">Dashboard</span>
+            </a>
+
             <a href="{{ $href('applications.mine') }}" class="{{ $linkDesk }} {{ $activeMenu('applications.mine') }}">
               <span class="{{ $iconWrap }}"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6M9 16h6M9 8h6M9 3H8a2 2 0 00-2 2H7a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-1"/></svg></span>
               <span class="label text-white">Lamaran Saya</span>
