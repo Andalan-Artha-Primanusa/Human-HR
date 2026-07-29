@@ -84,12 +84,13 @@ Route::get('/dashboard', function () {
     $user = auth()->user();
     $isAdmin = $user && in_array($user->role, ['superadmin', 'hr', 'admin']);
 
+    if ($isAdmin) {
+        return app(ManpowerDashboardController::class)();
+    }
+
     $openJobsCount = \App\Models\Job::where('status', 'open')->count();
     $myApplicationsCount = $user->applications()->count();
     $unreadNotificationsCount = $user->notifications()->whereNull('read_at')->count();
-    $applicationsCount = $isAdmin ? \App\Models\JobApplication::count() : 0;
-    $candidatesCount = $isAdmin ? \App\Models\CandidateProfile::count() : 0;
-    $interviewsCount = $isAdmin ? \App\Models\Interview::count() : 0;
     $latestJobs = \App\Models\Job::where('status', 'open')
         ->with('site')
         ->orderByDesc('created_at')
@@ -100,9 +101,6 @@ Route::get('/dashboard', function () {
         'openJobsCount',
         'myApplicationsCount',
         'unreadNotificationsCount',
-        'applicationsCount',
-        'candidatesCount',
-        'interviewsCount',
         'latestJobs'
     ));
 })
