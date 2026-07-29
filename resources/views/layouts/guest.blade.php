@@ -27,5 +27,6 @@
                 @yield('content')   
             </div>
         </div>
+        @include('layouts.partials.global-feedback')
     </body>
 </html>

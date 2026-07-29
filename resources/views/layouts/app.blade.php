@@ -231,6 +231,7 @@
   @endpush
 @endauth
 
+@include('layouts.partials.global-feedback')
 @stack('scripts')
 </body>
 </html>

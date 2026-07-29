@@ -1068,5 +1068,6 @@
     }
   }
 </script>
+@include('layouts.partials.global-feedback')
 </body>
 </html>
