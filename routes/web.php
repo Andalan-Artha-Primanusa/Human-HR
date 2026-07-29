@@ -88,21 +88,7 @@ Route::get('/dashboard', function () {
         return app(ManpowerDashboardController::class)();
     }
 
-    $openJobsCount = \App\Models\Job::where('status', 'open')->count();
-    $myApplicationsCount = $user->applications()->count();
-    $unreadNotificationsCount = $user->notifications()->whereNull('read_at')->count();
-    $latestJobs = \App\Models\Job::where('status', 'open')
-        ->with('site')
-        ->orderByDesc('created_at')
-        ->limit(5)
-        ->get();
-    
-    return view('dashboard', compact(
-        'openJobsCount',
-        'myApplicationsCount',
-        'unreadNotificationsCount',
-        'latestJobs'
-    ));
+    return redirect()->route('jobs.index');
 })
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
