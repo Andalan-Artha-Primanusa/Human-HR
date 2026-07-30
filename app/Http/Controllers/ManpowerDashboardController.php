@@ -440,12 +440,16 @@ class ManpowerDashboardController extends Controller
                 'other' => (int) ($genderRaw->except(['male', 'female'])->sum()),
             ];
 
+            $monthExpression = DB::connection()->getDriverName() === 'sqlite'
+                ? "CAST(strftime('%m', job_applications.created_at) AS INTEGER)"
+                : 'MONTH(job_applications.created_at)';
+
             $trendSource = DB::table('job_applications')
                 ->join('job_listings as j', 'j.id', '=', 'job_applications.job_id')
                 ->when($siteId !== '', fn ($q) => $q->where('j.site_id', $siteId))
-                ->selectRaw('MONTH(job_applications.created_at) as month, COUNT(*) as total')
+                ->selectRaw($monthExpression . ' as month, COUNT(*) as total')
                 ->whereBetween('job_applications.created_at', [$periodStartAt->copy()->startOfYear(), $periodEndAt])
-                ->groupByRaw('MONTH(job_applications.created_at)')
+                ->groupByRaw($monthExpression)
                 ->pluck('total', 'month');
 
             $interviewRows = Interview::query()
