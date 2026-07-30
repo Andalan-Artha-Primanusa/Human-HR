@@ -19,6 +19,10 @@
     $selectedSite = $selectedSiteId !== '' ? $sites->firstWhere('id', $selectedSiteId) : null;
     $mppRows = collect($mppRows ?? []);
     $mppTotals = $mppTotals ?? [];
+    $periodStart = $periodStart ?? now()->startOfMonth()->toDateString();
+    $periodEnd = $periodEnd ?? now()->toDateString();
+    $interviewRows = collect($interviewRows ?? []);
+    $interviewTotals = $interviewTotals ?? ['total' => 0, 'online' => 0, 'onsite' => 0];
 @endphp
 
 @section('content')
@@ -43,9 +47,9 @@
     <form method="GET" action="{{ route('dashboard') }}" class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
       <div>
         <h2 class="text-sm font-semibold text-slate-900">Filter Dashboard</h2>
-        <p class="mt-1 text-xs text-slate-500">Pilih site untuk melihat manpower, progress stage, dan grafik khusus lokasi tersebut.</p>
+        <p class="mt-1 text-xs text-slate-500">Pilih site dan periode untuk melihat manpower, progress stage, interview, dan grafik khusus data tersebut.</p>
       </div>
-      <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+      <div class="flex flex-col gap-2 lg:flex-row lg:items-center">
         <select name="site_id" class="min-w-[260px] rounded-xl border-slate-200 text-sm focus:border-[#a77d52] focus:ring-[#a77d52]">
           <option value="">Semua Site</option>
           @foreach($sites as $site)
@@ -54,14 +58,19 @@
             </option>
           @endforeach
         </select>
+        <input type="date" name="start_date" value="{{ $periodStart }}" class="rounded-xl border-slate-200 text-sm focus:border-[#a77d52] focus:ring-[#a77d52]">
+        <input type="date" name="end_date" value="{{ $periodEnd }}" class="rounded-xl border-slate-200 text-sm focus:border-[#a77d52] focus:ring-[#a77d52]">
         <button class="rounded-xl bg-[#a77d52] px-4 py-2 text-sm font-semibold text-white hover:opacity-95">Terapkan</button>
-        @if($selectedSiteId !== '')
-          <a href="{{ route('dashboard') }}" class="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Reset</a>
-        @endif
+        <a href="{{ route('dashboard') }}" class="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Reset</a>
       </div>
     </form>
-    <div class="mt-3 inline-flex rounded-full bg-[#f8f5f1] px-3 py-1 text-xs font-semibold text-[#8b5e3c] ring-1 ring-inset ring-[#ead8c5]">
-      Tampilan: {{ $selectedSite ? (($selectedSite->code ?? '') . ' - ' . ($selectedSite->name ?? '')) : 'Semua Site' }}
+    <div class="mt-3 flex flex-wrap gap-2">
+      <span class="inline-flex rounded-full bg-[#f8f5f1] px-3 py-1 text-xs font-semibold text-[#8b5e3c] ring-1 ring-inset ring-[#ead8c5]">
+        Tampilan: {{ $selectedSite ? (($selectedSite->code ?? '') . ' - ' . ($selectedSite->name ?? '')) : 'Semua Site' }}
+      </span>
+      <span class="inline-flex rounded-full bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-600 ring-1 ring-inset ring-slate-200">
+        Periode: {{ $periodStart }} sampai {{ $periodEnd }}
+      </span>
     </div>
   </section>
 
@@ -312,6 +321,72 @@
           @empty
             <tr>
               <td colspan="6" class="px-3 py-6 text-center text-slate-500">Belum ada data level performance.</td>
+            </tr>
+          @endforelse
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="p-4 bg-white border shadow-sm rounded-2xl">
+    <div class="flex flex-col gap-2 mb-4 md:flex-row md:items-end md:justify-between">
+      <div>
+        <h2 class="text-sm font-semibold text-slate-900">Interview Selesai per Periode</h2>
+        <p class="text-[11px] text-slate-500">Menampilkan interview yang waktunya sudah lewat: kapan interview, kandidat, lowongan, site, mode, dan interviewer/PIC.</p>
+      </div>
+      <div class="grid grid-cols-3 gap-2 text-center">
+        <div class="rounded-xl bg-[#f8f5f1] px-4 py-2">
+          <div class="text-[10px] uppercase tracking-[0.18em] text-[#8b5e3c]">Total</div>
+          <div class="text-lg font-bold text-[#8b5e3c]">{{ (int) ($interviewTotals['total'] ?? 0) }}</div>
+        </div>
+        <div class="px-4 py-2 rounded-xl bg-sky-50">
+          <div class="text-[10px] uppercase tracking-[0.18em] text-sky-700">Online</div>
+          <div class="text-lg font-bold text-sky-700">{{ (int) ($interviewTotals['online'] ?? 0) }}</div>
+        </div>
+        <div class="px-4 py-2 rounded-xl bg-emerald-50">
+          <div class="text-[10px] uppercase tracking-[0.18em] text-emerald-700">Onsite</div>
+          <div class="text-lg font-bold text-emerald-700">{{ (int) ($interviewTotals['onsite'] ?? 0) }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="overflow-x-auto border rounded-2xl border-slate-200">
+      <table class="min-w-[1050px] w-full text-sm">
+        <thead class="text-xs uppercase bg-slate-50 text-slate-500">
+          <tr>
+            <th class="px-3 py-2 text-left">Waktu</th>
+            <th class="px-3 py-2 text-left">Kandidat</th>
+            <th class="px-3 py-2 text-left">Lowongan</th>
+            <th class="px-3 py-2 text-left">Site</th>
+            <th class="px-3 py-2 text-left">Interview</th>
+            <th class="px-3 py-2 text-left">Mode</th>
+            <th class="px-3 py-2 text-left">Interviewer / PIC</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          @forelse($interviewRows as $row)
+            <tr class="hover:bg-[#f8f5f1]/70">
+              <td class="px-3 py-3 font-semibold text-slate-900">
+                {{ $row['date'] }}
+                @if($row['end'] && $row['end'] !== '-')
+                  <span class="text-slate-400">- {{ $row['end'] }}</span>
+                @endif
+              </td>
+              <td class="px-3 py-3">
+                <div class="font-semibold text-slate-900">{{ $row['candidate'] }}</div>
+                <div class="text-xs text-slate-500">{{ $row['email'] }}</div>
+              </td>
+              <td class="px-3 py-3 text-slate-700">{{ $row['job'] }}</td>
+              <td class="px-3 py-3 text-slate-700">{{ $row['site'] }}</td>
+              <td class="px-3 py-3 font-medium text-slate-800">{{ $row['title'] }}</td>
+              <td class="px-3 py-3">
+                <span class="rounded-full bg-slate-50 px-2 py-1 text-xs font-semibold text-slate-700 ring-1 ring-inset ring-slate-200">{{ strtoupper($row['mode']) }}</span>
+              </td>
+              <td class="px-3 py-3 text-slate-700">{{ $row['interviewers'] }}</td>
+            </tr>
+          @empty
+            <tr>
+              <td colspan="7" class="px-3 py-8 text-center text-slate-500">Belum ada interview selesai pada periode ini.</td>
             </tr>
           @endforelse
         </tbody>

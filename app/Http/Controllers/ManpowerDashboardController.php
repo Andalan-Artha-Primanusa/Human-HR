@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Job;
 use App\Models\JobApplication;
+use App\Models\Interview;
 use App\Models\Site;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -22,6 +24,7 @@ class ManpowerDashboardController extends Controller
             'offers',
             'pohs',
             'sites',
+            'interviews',
         ];
 
         foreach ($requiredTables as $table) {
@@ -42,8 +45,20 @@ class ManpowerDashboardController extends Controller
             $siteId = '';
         }
 
-        $cacheKey = 'dashboard.manpower.' . ($siteId !== '' ? $siteId : 'all');
-        $metrics = Cache::remember($cacheKey, 30, function () use ($siteId) {
+        $periodStart = $this->parseDate($request->query('start_date'), now()->startOfMonth())->toDateString();
+        $periodEnd = $this->parseDate($request->query('end_date'), now())->toDateString();
+        if (Carbon::parse($periodEnd)->lt(Carbon::parse($periodStart))) {
+            [$periodStart, $periodEnd] = [$periodEnd, $periodStart];
+        }
+        $periodStartAt = Carbon::parse($periodStart)->startOfDay();
+        $periodEndAt = Carbon::parse($periodEnd)->endOfDay();
+
+        $cacheKey = 'dashboard.manpower.' . ($siteId !== '' ? $siteId : 'all') . '.' . $periodStart . '.' . $periodEnd;
+        if (app()->runningUnitTests()) {
+            Cache::forget($cacheKey);
+        }
+
+        $metrics = Cache::remember($cacheKey, 30, function () use ($siteId, $periodStartAt, $periodEndAt) {
             $levels = Job::LEVEL_LABELS;
             $hasSourceChannel = Schema::hasColumn('candidate_profiles', 'source_channel');
 
@@ -61,22 +76,26 @@ class ManpowerDashboardController extends Controller
             $openJobs = $openJobsQuery->count();
             $activeApps = JobApplication::query()
                 ->when($siteId !== '', fn ($q) => $q->whereHas('job', fn ($job) => $job->where('site_id', $siteId)))
+                ->whereBetween('created_at', [$periodStartAt, $periodEndAt])
                 ->count();
             $openJobApplicants = (int) $openJobsQuery->sum('applicants_count');
             $hiredCount = JobApplication::query()
                 ->where('overall_status', 'hired')
                 ->when($siteId !== '', fn ($q) => $q->whereHas('job', fn ($job) => $job->where('site_id', $siteId)))
+                ->whereBetween('updated_at', [$periodStartAt, $periodEndAt])
                 ->count();
             $acceptedOlCount = DB::table('offers as o')
                 ->join('job_applications as ja', 'ja.id', '=', 'o.application_id')
                 ->join('job_listings as j', 'j.id', '=', 'ja.job_id')
                 ->when($siteId !== '', fn ($q) => $q->where('j.site_id', $siteId))
+                ->whereBetween('o.created_at', [$periodStartAt, $periodEndAt])
                 ->where('o.status', 'accepted')
                 ->count();
             $declinedOlCount = DB::table('offers as o')
                 ->join('job_applications as ja', 'ja.id', '=', 'o.application_id')
                 ->join('job_listings as j', 'j.id', '=', 'ja.job_id')
                 ->when($siteId !== '', fn ($q) => $q->where('j.site_id', $siteId))
+                ->whereBetween('o.created_at', [$periodStartAt, $periodEndAt])
                 ->where('o.status', 'declined')
                 ->count();
 
@@ -84,6 +103,7 @@ class ManpowerDashboardController extends Controller
                 ->join('job_applications as ja', 'ja.id', '=', 'o.application_id')
                 ->join('job_listings as j', 'j.id', '=', 'ja.job_id')
                 ->when($siteId !== '', fn ($q) => $q->where('j.site_id', $siteId))
+                ->whereBetween('o.created_at', [$periodStartAt, $periodEndAt])
                 ->where('o.status', 'declined')
                 ->whereNotNull('o.rejection_reason')
                 ->where('o.rejection_reason', '<>', '')
@@ -104,6 +124,7 @@ class ManpowerDashboardController extends Controller
                         ->where('o.status', '=', 'sent');
                 })
                 ->when($siteId !== '', fn ($q) => $q->where('j.site_id', $siteId))
+                ->whereBetween('o.created_at', [$periodStartAt, $periodEndAt])
                 ->whereNotNull('j.created_at')
                 ->selectRaw('j.id, j.created_at as job_created_at, MIN(o.created_at) as first_ol_at')
                 ->groupBy('j.id', 'j.created_at')
@@ -124,7 +145,13 @@ class ManpowerDashboardController extends Controller
                     ->join('users as u', 'u.id', '=', 'cp.user_id')
                     ->join('job_applications as ja', 'ja.user_id', '=', 'u.id')
                     ->join('job_listings as j', 'j.id', '=', 'ja.job_id')
+                    ->whereBetween('ja.created_at', [$periodStartAt, $periodEndAt])
                     ->where('j.site_id', $siteId);
+            } else {
+                $candidateQuery
+                    ->join('users as u', 'u.id', '=', 'cp.user_id')
+                    ->join('job_applications as ja', 'ja.user_id', '=', 'u.id')
+                    ->whereBetween('ja.created_at', [$periodStartAt, $periodEndAt]);
             }
 
             $sourceRaw = $hasSourceChannel
@@ -188,6 +215,7 @@ class ManpowerDashboardController extends Controller
                     ->join('job_applications as ja', 'ja.user_id', '=', 'u.id')
                     ->join('job_listings as j', 'j.id', '=', 'ja.job_id')
                     ->when($siteId !== '', fn ($q) => $q->where('j.site_id', $siteId))
+                    ->whereBetween('ja.updated_at', [$periodStartAt, $periodEndAt])
                     ->whereIn('cp.source_channel', ['sourcing', 'onsite'])
                     ->where('ja.overall_status', 'hired')
                     ->count()
@@ -204,6 +232,7 @@ class ManpowerDashboardController extends Controller
             $jobApplicationsByLevel = DB::table('job_applications as ja')
                 ->join('job_listings as j', 'j.id', '=', 'ja.job_id')
                 ->when($siteId !== '', fn ($q) => $q->where('j.site_id', $siteId))
+                ->whereBetween('ja.created_at', [$periodStartAt, $periodEndAt])
                 ->select(['j.level'])
                 ->get()
                 ->groupBy(fn ($row) => $row->level ?: 'unknown')
@@ -213,6 +242,7 @@ class ManpowerDashboardController extends Controller
                 ->join('job_listings as j', 'j.id', '=', 'ja.job_id')
                 ->when($siteId !== '', fn ($q) => $q->where('j.site_id', $siteId))
                 ->where('ja.overall_status', 'hired')
+                ->whereBetween('ja.updated_at', [$periodStartAt, $periodEndAt])
                 ->select(['j.level'])
                 ->get()
                 ->groupBy(fn ($row) => $row->level ?: 'unknown')
@@ -222,6 +252,7 @@ class ManpowerDashboardController extends Controller
                 ->join('job_listings as j', 'j.id', '=', 'ja.job_id')
                 ->when($siteId !== '', fn ($q) => $q->where('j.site_id', $siteId))
                 ->where('ja.overall_status', 'hired')
+                ->whereBetween('ja.updated_at', [$periodStartAt, $periodEndAt])
                 ->select(['j.level', 'j.created_at as job_created_at', 'ja.updated_at as hired_updated_at'])
                 ->get();
 
@@ -241,6 +272,7 @@ class ManpowerDashboardController extends Controller
                 ->join('job_applications as ja', 'ja.id', '=', 'ast.application_id')
                 ->join('job_listings as j', 'j.id', '=', 'ja.job_id')
                 ->when($siteId !== '', fn ($q) => $q->where('j.site_id', $siteId))
+                ->whereBetween('ast.updated_at', [$periodStartAt, $periodEndAt])
                 ->whereIn('ast.status', ['failed', 'no-show'])
                 ->select(['ast.stage_key'])
                 ->get()
@@ -273,15 +305,15 @@ class ManpowerDashboardController extends Controller
                 ->when($siteId !== '', fn ($q) => $q->where('site_id', $siteId))
                 ->with(['site:id,code,name'])
                 ->withCount([
-                    'applications as screening_count' => fn ($q) => $q->where('current_stage', 'screening'),
-                    'applications as hr_count' => fn ($q) => $q->where('current_stage', 'hr_iv'),
-                    'applications as user_count' => fn ($q) => $q->whereIn('current_stage', ['user_iv', 'user_trainer_iv']),
-                    'applications as practical_ground_count' => fn ($q) => $q->whereIn('current_stage', ['psychotest', 'ground_test']),
-                    'applications as ol_count' => fn ($q) => $q->where('current_stage', 'offer'),
-                    'applications as mcu_count' => fn ($q) => $q->where('current_stage', 'mcu'),
-                    'applications as waiting_inbound_count' => fn ($q) => $q->where('current_stage', 'onsite'),
-                    'applications as travel_count' => fn ($q) => $q->where('current_stage', 'mobilisasi'),
-                    'applications as hired_count' => fn ($q) => $q->where(function ($w) {
+                    'applications as screening_count' => fn ($q) => $q->where('current_stage', 'screening')->whereBetween('created_at', [$periodStartAt, $periodEndAt]),
+                    'applications as hr_count' => fn ($q) => $q->where('current_stage', 'hr_iv')->whereBetween('created_at', [$periodStartAt, $periodEndAt]),
+                    'applications as user_count' => fn ($q) => $q->whereIn('current_stage', ['user_iv', 'user_trainer_iv'])->whereBetween('created_at', [$periodStartAt, $periodEndAt]),
+                    'applications as practical_ground_count' => fn ($q) => $q->whereIn('current_stage', ['psychotest', 'ground_test'])->whereBetween('created_at', [$periodStartAt, $periodEndAt]),
+                    'applications as ol_count' => fn ($q) => $q->where('current_stage', 'offer')->whereBetween('created_at', [$periodStartAt, $periodEndAt]),
+                    'applications as mcu_count' => fn ($q) => $q->where('current_stage', 'mcu')->whereBetween('created_at', [$periodStartAt, $periodEndAt]),
+                    'applications as waiting_inbound_count' => fn ($q) => $q->where('current_stage', 'onsite')->whereBetween('created_at', [$periodStartAt, $periodEndAt]),
+                    'applications as travel_count' => fn ($q) => $q->where('current_stage', 'mobilisasi')->whereBetween('created_at', [$periodStartAt, $periodEndAt]),
+                    'applications as hired_count' => fn ($q) => $q->whereBetween('updated_at', [$periodStartAt, $periodEndAt])->where(function ($w) {
                         $w->where('overall_status', 'hired')->orWhere('current_stage', 'hired');
                     }),
                 ])
@@ -412,9 +444,56 @@ class ManpowerDashboardController extends Controller
                 ->join('job_listings as j', 'j.id', '=', 'job_applications.job_id')
                 ->when($siteId !== '', fn ($q) => $q->where('j.site_id', $siteId))
                 ->selectRaw('MONTH(job_applications.created_at) as month, COUNT(*) as total')
-                ->whereYear('job_applications.created_at', now()->year)
+                ->whereBetween('job_applications.created_at', [$periodStartAt->copy()->startOfYear(), $periodEndAt])
                 ->groupByRaw('MONTH(job_applications.created_at)')
                 ->pluck('total', 'month');
+
+            $interviewRows = Interview::query()
+                ->with([
+                    'application:id,job_id,user_id,current_stage,overall_status',
+                    'application.user:id,name,email',
+                    'application.job:id,title,division,site_id',
+                    'application.job.site:id,code,name',
+                ])
+                ->whereBetween('start_at', [$periodStartAt, $periodEndAt])
+                ->where('start_at', '<=', now())
+                ->when($siteId !== '', fn ($q) => $q->whereHas('application.job', fn ($job) => $job->where('site_id', $siteId)))
+                ->orderByDesc('start_at')
+                ->limit(50)
+                ->get()
+                ->map(function (Interview $interview) {
+                    $panel = collect($interview->panel ?? [])
+                        ->map(function ($person) {
+                            if (is_array($person)) {
+                                return trim((string) ($person['name'] ?? $person['email'] ?? ''));
+                            }
+
+                            return trim((string) $person);
+                        })
+                        ->filter()
+                        ->values();
+
+                    $job = $interview->application?->job;
+                    $site = $job?->site;
+
+                    return [
+                        'date' => optional($interview->start_at)->timezone(config('app.timezone'))->format('Y-m-d H:i'),
+                        'end' => optional($interview->end_at)->timezone(config('app.timezone'))->format('H:i'),
+                        'candidate' => $interview->application?->user?->name ?: '-',
+                        'email' => $interview->application?->user?->email ?: '-',
+                        'job' => $job?->title ?: '-',
+                        'site' => trim(($site?->code ? $site->code . ' - ' : '') . ($site?->name ?? '-')),
+                        'title' => $interview->title ?: 'Interview',
+                        'mode' => $interview->mode ?: '-',
+                        'interviewers' => $panel->isNotEmpty() ? $panel->implode(', ') : '-',
+                    ];
+                });
+
+            $interviewTotals = [
+                'total' => $interviewRows->count(),
+                'online' => $interviewRows->filter(fn ($row) => str_contains(strtolower((string) $row['mode']), 'online'))->count(),
+                'onsite' => $interviewRows->filter(fn ($row) => str_contains(strtolower((string) $row['mode']), 'offline') || str_contains(strtolower((string) $row['mode']), 'onsite'))->count(),
+            ];
 
             $monthNames = [1 => 'Jan', 2 => 'Feb', 3 => 'Mar', 4 => 'Apr', 5 => 'May', 6 => 'Jun', 7 => 'Jul', 8 => 'Aug', 9 => 'Sep', 10 => 'Oct', 11 => 'Nov', 12 => 'Dec'];
             $applicationTrend = collect();
@@ -453,6 +532,8 @@ class ManpowerDashboardController extends Controller
                 'failureRows' => $failureRows,
                 'mppRows' => $mppRows,
                 'mppTotals' => $mppTotals,
+                'interviewRows' => $interviewRows,
+                'interviewTotals' => $interviewTotals,
                 'failedStageName' => $failedStageName,
                 'failedStageCount' => $failedStageCount,
                 'slaByLevel' => $slaByLevel,
@@ -464,12 +545,23 @@ class ManpowerDashboardController extends Controller
             'generatedAt' => now(),
             'sites' => $sites,
             'selectedSiteId' => $siteId,
+            'periodStart' => $periodStart,
+            'periodEnd' => $periodEnd,
         ]);
     }
 
     public function data()
     {
         return response()->json(Cache::get('dashboard.manpower') ?? $this->emptyMetrics());
+    }
+
+    protected function parseDate(mixed $value, Carbon $fallback): Carbon
+    {
+        try {
+            return $value ? Carbon::parse($value) : $fallback->copy();
+        } catch (\Throwable) {
+            return $fallback->copy();
+        }
     }
 
     protected function emptyMetrics(): array
@@ -518,6 +610,8 @@ class ManpowerDashboardController extends Controller
                 'total_progress' => 0,
                 'update_dev' => 0,
             ],
+            'interviewRows' => collect(),
+            'interviewTotals' => ['total' => 0, 'online' => 0, 'onsite' => 0],
             'failedStageName' => '-',
             'failedStageCount' => 0,
             'slaByLevel' => collect(),
