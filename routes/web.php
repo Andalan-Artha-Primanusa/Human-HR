@@ -80,12 +80,12 @@ Route::get('/sites/{site}', [SitePublicController::class, 'show'])->name('sites.
 | Authenticated (SEMUA wajib verified)
 |--------------------------------------------------------------------------
 */
-Route::get('/dashboard', function () {
+Route::get('/dashboard', function (Request $request) {
     $user = auth()->user();
     $isAdmin = $user && in_array($user->role, ['superadmin', 'hr', 'admin']);
 
     if ($isAdmin) {
-        return app(ManpowerDashboardController::class)();
+        return app(ManpowerDashboardController::class)($request);
     }
 
     return redirect()->route('jobs.index');

@@ -4,13 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Models\Job;
 use App\Models\JobApplication;
+use App\Models\Site;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 class ManpowerDashboardController extends Controller
 {
-    public function __invoke()
+    public function __invoke(Request $request)
     {
         $requiredTables = [
             'job_listings',
@@ -19,6 +21,7 @@ class ManpowerDashboardController extends Controller
             'application_stages',
             'offers',
             'pohs',
+            'sites',
         ];
 
         foreach ($requiredTables as $table) {
@@ -31,33 +34,61 @@ class ManpowerDashboardController extends Controller
             Cache::forget('dashboard.manpower');
         }
 
-        $metrics = Cache::remember('dashboard.manpower', 30, function () {
+        $sites = Site::query()
+            ->orderBy('code')
+            ->get(['id', 'code', 'name']);
+        $siteId = (string) $request->query('site_id', '');
+        if ($siteId !== '' && ! $sites->contains('id', $siteId)) {
+            $siteId = '';
+        }
+
+        $cacheKey = 'dashboard.manpower.' . ($siteId !== '' ? $siteId : 'all');
+        $metrics = Cache::remember($cacheKey, 30, function () use ($siteId) {
             $levels = Job::LEVEL_LABELS;
             $hasSourceChannel = Schema::hasColumn('candidate_profiles', 'source_channel');
 
             $openJobsQuery = Job::query()
                 ->where('status', 'open')
+                ->when($siteId !== '', fn ($q) => $q->where('site_id', $siteId))
                 ->withCount([
                     'applications as applicants_count',
                     'applications as hired_count' => fn ($q) => $q->where('overall_status', 'hired'),
                     'applications as accepted_ol_count' => fn ($q) => $q->whereHas('offer', fn ($offerQuery) => $offerQuery->where('status', 'accepted')),
                 ])
                 ->orderByDesc('created_at')
-                ->get(['id', 'title', 'level', 'openings', 'created_at']);
+                ->get(['id', 'title', 'division', 'level', 'openings', 'created_at', 'site_id']);
 
             $openJobs = $openJobsQuery->count();
-            $activeApps = JobApplication::count();
+            $activeApps = JobApplication::query()
+                ->when($siteId !== '', fn ($q) => $q->whereHas('job', fn ($job) => $job->where('site_id', $siteId)))
+                ->count();
             $openJobApplicants = (int) $openJobsQuery->sum('applicants_count');
-            $hiredCount = JobApplication::where('overall_status', 'hired')->count();
-            $acceptedOlCount = DB::table('offers')->where('status', 'accepted')->count();
-            $declinedOlCount = DB::table('offers')->where('status', 'declined')->count();
+            $hiredCount = JobApplication::query()
+                ->where('overall_status', 'hired')
+                ->when($siteId !== '', fn ($q) => $q->whereHas('job', fn ($job) => $job->where('site_id', $siteId)))
+                ->count();
+            $acceptedOlCount = DB::table('offers as o')
+                ->join('job_applications as ja', 'ja.id', '=', 'o.application_id')
+                ->join('job_listings as j', 'j.id', '=', 'ja.job_id')
+                ->when($siteId !== '', fn ($q) => $q->where('j.site_id', $siteId))
+                ->where('o.status', 'accepted')
+                ->count();
+            $declinedOlCount = DB::table('offers as o')
+                ->join('job_applications as ja', 'ja.id', '=', 'o.application_id')
+                ->join('job_listings as j', 'j.id', '=', 'ja.job_id')
+                ->when($siteId !== '', fn ($q) => $q->where('j.site_id', $siteId))
+                ->where('o.status', 'declined')
+                ->count();
 
-            $olRejectionReasons = DB::table('offers')
-                ->where('status', 'declined')
-                ->whereNotNull('rejection_reason')
-                ->where('rejection_reason', '<>', '')
-                ->selectRaw('rejection_reason, COUNT(*) as total')
-                ->groupBy('rejection_reason')
+            $olRejectionReasons = DB::table('offers as o')
+                ->join('job_applications as ja', 'ja.id', '=', 'o.application_id')
+                ->join('job_listings as j', 'j.id', '=', 'ja.job_id')
+                ->when($siteId !== '', fn ($q) => $q->where('j.site_id', $siteId))
+                ->where('o.status', 'declined')
+                ->whereNotNull('o.rejection_reason')
+                ->where('o.rejection_reason', '<>', '')
+                ->selectRaw('o.rejection_reason, COUNT(*) as total')
+                ->groupBy('o.rejection_reason')
                 ->orderByDesc('total')
                 ->limit(5)
                 ->get()
@@ -72,6 +103,7 @@ class ManpowerDashboardController extends Controller
                     $join->on('o.application_id', '=', 'ja.id')
                         ->where('o.status', '=', 'sent');
                 })
+                ->when($siteId !== '', fn ($q) => $q->where('j.site_id', $siteId))
                 ->whereNotNull('j.created_at')
                 ->selectRaw('j.id, j.created_at as job_created_at, MIN(o.created_at) as first_ol_at')
                 ->groupBy('j.id', 'j.created_at')
@@ -86,9 +118,19 @@ class ManpowerDashboardController extends Controller
                 }), 1)
                 : 0;
 
+            $candidateQuery = DB::table('candidate_profiles as cp');
+            if ($siteId !== '') {
+                $candidateQuery
+                    ->join('users as u', 'u.id', '=', 'cp.user_id')
+                    ->join('job_applications as ja', 'ja.user_id', '=', 'u.id')
+                    ->join('job_listings as j', 'j.id', '=', 'ja.job_id')
+                    ->where('j.site_id', $siteId);
+            }
+
             $sourceRaw = $hasSourceChannel
-                ? DB::table('candidate_profiles')
-                    ->pluck('source_channel')
+                ? (clone $candidateQuery)
+                    ->distinct()
+                    ->pluck('cp.source_channel')
                     ->map(function ($value) {
                         $value = is_string($value) ? trim($value) : '';
                         return $value !== '' ? $value : 'unknown';
@@ -96,8 +138,9 @@ class ManpowerDashboardController extends Controller
                     ->countBy()
                 : collect();
 
-            $candidateRows = DB::table('candidate_profiles')
-                ->select(['gender', 'last_education', 'poh_id', 'source_channel', 'birthdate', 'age'])
+            $candidateRows = (clone $candidateQuery)
+                ->distinct()
+                ->select(['cp.id', 'cp.gender', 'cp.last_education', 'cp.poh_id', 'cp.source_channel', 'cp.birthdate', 'cp.age'])
                 ->get();
 
             $genderRaw = $candidateRows
@@ -125,16 +168,17 @@ class ManpowerDashboardController extends Controller
                 ->countBy();
 
             $ageExpr = app()->runningUnitTests()
-                ? "COALESCE(age, CAST(strftime('%Y', 'now') AS INTEGER) - CAST(strftime('%Y', birthdate) AS INTEGER))"
-                : "COALESCE(age, TIMESTAMPDIFF(YEAR, birthdate, CURDATE()))";
+                ? "COALESCE(cp.age, CAST(strftime('%Y', 'now') AS INTEGER) - CAST(strftime('%Y', cp.birthdate) AS INTEGER))"
+                : "COALESCE(cp.age, TIMESTAMPDIFF(YEAR, cp.birthdate, CURDATE()))";
 
-            $ageStats = DB::table('candidate_profiles')
+            $ageStats = (clone $candidateQuery)
                 ->selectRaw("ROUND(AVG($ageExpr), 1) as avg_age, MIN($ageExpr) as min_age, MAX($ageExpr) as max_age")
                 ->first();
 
             $sourcingOnsiteTotal = $hasSourceChannel
-                ? DB::table('candidate_profiles')
-                    ->whereIn('source_channel', ['sourcing', 'onsite'])
+                ? (clone $candidateQuery)
+                    ->whereIn('cp.source_channel', ['sourcing', 'onsite'])
+                    ->distinct('cp.id')
                     ->count()
                 : 0;
 
@@ -142,6 +186,8 @@ class ManpowerDashboardController extends Controller
                 ? DB::table('candidate_profiles as cp')
                     ->join('users as u', 'u.id', '=', 'cp.user_id')
                     ->join('job_applications as ja', 'ja.user_id', '=', 'u.id')
+                    ->join('job_listings as j', 'j.id', '=', 'ja.job_id')
+                    ->when($siteId !== '', fn ($q) => $q->where('j.site_id', $siteId))
                     ->whereIn('cp.source_channel', ['sourcing', 'onsite'])
                     ->where('ja.overall_status', 'hired')
                     ->count()
@@ -157,6 +203,7 @@ class ManpowerDashboardController extends Controller
 
             $jobApplicationsByLevel = DB::table('job_applications as ja')
                 ->join('job_listings as j', 'j.id', '=', 'ja.job_id')
+                ->when($siteId !== '', fn ($q) => $q->where('j.site_id', $siteId))
                 ->select(['j.level'])
                 ->get()
                 ->groupBy(fn ($row) => $row->level ?: 'unknown')
@@ -164,6 +211,7 @@ class ManpowerDashboardController extends Controller
 
             $jobHiredByLevel = DB::table('job_applications as ja')
                 ->join('job_listings as j', 'j.id', '=', 'ja.job_id')
+                ->when($siteId !== '', fn ($q) => $q->where('j.site_id', $siteId))
                 ->where('ja.overall_status', 'hired')
                 ->select(['j.level'])
                 ->get()
@@ -172,6 +220,7 @@ class ManpowerDashboardController extends Controller
 
             $hiredRows = DB::table('job_applications as ja')
                 ->join('job_listings as j', 'j.id', '=', 'ja.job_id')
+                ->when($siteId !== '', fn ($q) => $q->where('j.site_id', $siteId))
                 ->where('ja.overall_status', 'hired')
                 ->select(['j.level', 'j.created_at as job_created_at', 'ja.updated_at as hired_updated_at'])
                 ->get();
@@ -188,9 +237,12 @@ class ManpowerDashboardController extends Controller
                     return round((float) $durations->avg(), 1);
                 });
 
-            $failureRows = DB::table('application_stages')
-                ->whereIn('status', ['failed', 'no-show'])
-                ->select(['stage_key'])
+            $failureRows = DB::table('application_stages as ast')
+                ->join('job_applications as ja', 'ja.id', '=', 'ast.application_id')
+                ->join('job_listings as j', 'j.id', '=', 'ja.job_id')
+                ->when($siteId !== '', fn ($q) => $q->where('j.site_id', $siteId))
+                ->whereIn('ast.status', ['failed', 'no-show'])
+                ->select(['ast.stage_key'])
                 ->get()
                 ->groupBy(fn ($row) => $row->stage_key ?: 'unknown')
                 ->map(fn ($rows) => $rows->count())
@@ -206,6 +258,7 @@ class ManpowerDashboardController extends Controller
                 return [
                     'id' => $job->id,
                     'title' => $job->title,
+                    'division' => Job::DIVISIONS[$job->division ?: ''] ?? strtoupper((string) ($job->division ?: '-')),
                     'level_key' => $job->level ?: 'unknown',
                     'level_label' => Job::LEVEL_LABELS[$job->level ?: ''] ?? strtoupper((string) ($job->level ?: 'unknown')),
                     'openings' => (int) ($job->openings ?? 0),
@@ -214,6 +267,87 @@ class ManpowerDashboardController extends Controller
                     'accepted_ol' => (int) ($job->accepted_ol_count ?? 0),
                 ];
             });
+
+            $mppRows = Job::query()
+                ->where('status', 'open')
+                ->when($siteId !== '', fn ($q) => $q->where('site_id', $siteId))
+                ->with(['site:id,code,name'])
+                ->withCount([
+                    'applications as screening_count' => fn ($q) => $q->where('current_stage', 'screening'),
+                    'applications as hr_count' => fn ($q) => $q->where('current_stage', 'hr_iv'),
+                    'applications as user_count' => fn ($q) => $q->whereIn('current_stage', ['user_iv', 'user_trainer_iv']),
+                    'applications as practical_ground_count' => fn ($q) => $q->whereIn('current_stage', ['psychotest', 'ground_test']),
+                    'applications as ol_count' => fn ($q) => $q->where('current_stage', 'offer'),
+                    'applications as mcu_count' => fn ($q) => $q->where('current_stage', 'mcu'),
+                    'applications as waiting_inbound_count' => fn ($q) => $q->where('current_stage', 'onsite'),
+                    'applications as travel_count' => fn ($q) => $q->where('current_stage', 'mobilisasi'),
+                    'applications as hired_count' => fn ($q) => $q->where(function ($w) {
+                        $w->where('overall_status', 'hired')->orWhere('current_stage', 'hired');
+                    }),
+                ])
+                ->orderBy('division')
+                ->orderBy('level')
+                ->orderBy('title')
+                ->get(['id', 'title', 'division', 'level', 'openings', 'site_id'])
+                ->map(function (Job $job, int $index) {
+                    $mpp = (int) ($job->openings ?? 0);
+                    $qty = (int) ($job->hired_count ?? 0);
+                    $dev = $qty - $mpp;
+                    $totalProgress = collect([
+                        $job->screening_count,
+                        $job->hr_count,
+                        $job->user_count,
+                        $job->practical_ground_count,
+                        $job->ol_count,
+                        $job->mcu_count,
+                        0,
+                        $job->waiting_inbound_count,
+                        $job->travel_count,
+                    ])->sum();
+
+                    return [
+                        'no' => $index + 1,
+                        'site' => trim(($job->site?->code ? $job->site->code . ' - ' : '') . ($job->site?->name ?? '-')),
+                        'department' => Job::DIVISIONS[$job->division ?: ''] ?? strtoupper((string) ($job->division ?: '-')),
+                        'level' => Job::LEVEL_LABELS[$job->level ?: ''] ?? strtoupper((string) ($job->level ?: '-')),
+                        'position' => $job->title,
+                        'mpp' => $mpp,
+                        'qty' => $qty,
+                        'fulfillment' => $mpp > 0 ? round(($qty / $mpp) * 100) : 0,
+                        'dev' => $dev,
+                        'screening' => (int) $job->screening_count,
+                        'hr' => (int) $job->hr_count,
+                        'user' => (int) $job->user_count,
+                        'practical_ground' => (int) $job->practical_ground_count,
+                        'ol' => (int) $job->ol_count,
+                        'mcu' => (int) $job->mcu_count,
+                        'fu_mcu' => 0,
+                        'waiting_inbound' => (int) $job->waiting_inbound_count,
+                        'travel' => (int) $job->travel_count,
+                        'total_progress' => (int) $totalProgress,
+                        'update_dev' => (int) ($totalProgress + $dev),
+                    ];
+                });
+
+            $mppTotals = [
+                'mpp' => (int) $mppRows->sum('mpp'),
+                'qty' => (int) $mppRows->sum('qty'),
+                'dev' => (int) $mppRows->sum('dev'),
+                'screening' => (int) $mppRows->sum('screening'),
+                'hr' => (int) $mppRows->sum('hr'),
+                'user' => (int) $mppRows->sum('user'),
+                'practical_ground' => (int) $mppRows->sum('practical_ground'),
+                'ol' => (int) $mppRows->sum('ol'),
+                'mcu' => (int) $mppRows->sum('mcu'),
+                'fu_mcu' => (int) $mppRows->sum('fu_mcu'),
+                'waiting_inbound' => (int) $mppRows->sum('waiting_inbound'),
+                'travel' => (int) $mppRows->sum('travel'),
+                'total_progress' => (int) $mppRows->sum('total_progress'),
+                'update_dev' => (int) $mppRows->sum('update_dev'),
+            ];
+            $mppTotals['fulfillment'] = $mppTotals['mpp'] > 0
+                ? round(($mppTotals['qty'] / $mppTotals['mpp']) * 100)
+                : 0;
 
             $levelStats = collect($levels)->map(function ($label, $levelKey) use ($openJobsQuery, $jobApplicationsByLevel, $jobHiredByLevel, $slaByLevel) {
                 $jobCount = $openJobsQuery->where('level', $levelKey)->count();
@@ -275,9 +409,11 @@ class ManpowerDashboardController extends Controller
             ];
 
             $trendSource = DB::table('job_applications')
-                ->selectRaw('MONTH(created_at) as month, COUNT(*) as total')
-                ->whereYear('created_at', now()->year)
-                ->groupByRaw('MONTH(created_at)')
+                ->join('job_listings as j', 'j.id', '=', 'job_applications.job_id')
+                ->when($siteId !== '', fn ($q) => $q->where('j.site_id', $siteId))
+                ->selectRaw('MONTH(job_applications.created_at) as month, COUNT(*) as total')
+                ->whereYear('job_applications.created_at', now()->year)
+                ->groupByRaw('MONTH(job_applications.created_at)')
                 ->pluck('total', 'month');
 
             $monthNames = [1 => 'Jan', 2 => 'Feb', 3 => 'Mar', 4 => 'Apr', 5 => 'May', 6 => 'Jun', 7 => 'Jul', 8 => 'Aug', 9 => 'Sep', 10 => 'Oct', 11 => 'Nov', 12 => 'Dec'];
@@ -291,8 +427,11 @@ class ManpowerDashboardController extends Controller
                 'activeApps' => $activeApps,
                 'totalApplicants' => $activeApps,
                 'openJobApplicants' => $openJobApplicants,
-                'pohCandidates' => (int) DB::table('candidate_profiles')->whereNotNull('poh_id')->count(),
-                'budget' => (int) Job::query()->where('status', 'open')->sum('openings'),
+                'pohCandidates' => (int) $candidateRows->whereNotNull('poh_id')->count(),
+                'budget' => (int) Job::query()
+                    ->where('status', 'open')
+                    ->when($siteId !== '', fn ($q) => $q->where('site_id', $siteId))
+                    ->sum('openings'),
                 'filled' => $hiredCount,
                 'fulfillment' => $fulfillment,
                 'acceptanceRate' => $acceptanceRate,
@@ -312,6 +451,8 @@ class ManpowerDashboardController extends Controller
                 'levelStats' => $levelStats,
                 'openJobCards' => $openJobCards,
                 'failureRows' => $failureRows,
+                'mppRows' => $mppRows,
+                'mppTotals' => $mppTotals,
                 'failedStageName' => $failedStageName,
                 'failedStageCount' => $failedStageCount,
                 'slaByLevel' => $slaByLevel,
@@ -321,6 +462,8 @@ class ManpowerDashboardController extends Controller
 
         return view('admin.dashboard.manpower', $metrics + [
             'generatedAt' => now(),
+            'sites' => $sites,
+            'selectedSiteId' => $siteId,
         ]);
     }
 
@@ -357,6 +500,24 @@ class ManpowerDashboardController extends Controller
             'levelStats' => collect(),
             'openJobCards' => collect(),
             'failureRows' => collect(),
+            'mppRows' => collect(),
+            'mppTotals' => [
+                'mpp' => 0,
+                'qty' => 0,
+                'fulfillment' => 0,
+                'dev' => 0,
+                'screening' => 0,
+                'hr' => 0,
+                'user' => 0,
+                'practical_ground' => 0,
+                'ol' => 0,
+                'mcu' => 0,
+                'fu_mcu' => 0,
+                'waiting_inbound' => 0,
+                'travel' => 0,
+                'total_progress' => 0,
+                'update_dev' => 0,
+            ],
             'failedStageName' => '-',
             'failedStageCount' => 0,
             'slaByLevel' => collect(),

@@ -14,6 +14,11 @@
     $hasSlaChartData = $slaLevelStats->isNotEmpty();
     $failureRows = collect($failureRows ?? []);
     $olRejectionReasons = collect($olRejectionReasons ?? []);
+    $sites = collect($sites ?? []);
+    $selectedSiteId = (string) ($selectedSiteId ?? '');
+    $selectedSite = $selectedSiteId !== '' ? $sites->firstWhere('id', $selectedSiteId) : null;
+    $mppRows = collect($mppRows ?? []);
+    $mppTotals = $mppTotals ?? [];
 @endphp
 
 @section('content')
@@ -31,6 +36,32 @@
         <p class="text-xs opacity-75">Last Updated</p>
         <p class="text-sm font-semibold">{{ ($generatedAt ?? now())->format('d M Y H:i') }}</p>
       </div>
+    </div>
+  </section>
+
+  <section class="p-4 bg-white border shadow-sm rounded-2xl">
+    <form method="GET" action="{{ route('dashboard') }}" class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+      <div>
+        <h2 class="text-sm font-semibold text-slate-900">Filter Dashboard</h2>
+        <p class="mt-1 text-xs text-slate-500">Pilih site untuk melihat manpower, progress stage, dan grafik khusus lokasi tersebut.</p>
+      </div>
+      <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+        <select name="site_id" class="min-w-[260px] rounded-xl border-slate-200 text-sm focus:border-[#a77d52] focus:ring-[#a77d52]">
+          <option value="">Semua Site</option>
+          @foreach($sites as $site)
+            <option value="{{ $site->id }}" @selected($selectedSiteId === $site->id)>
+              {{ $site->code }} - {{ $site->name }}
+            </option>
+          @endforeach
+        </select>
+        <button class="rounded-xl bg-[#a77d52] px-4 py-2 text-sm font-semibold text-white hover:opacity-95">Terapkan</button>
+        @if($selectedSiteId !== '')
+          <a href="{{ route('dashboard') }}" class="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Reset</a>
+        @endif
+      </div>
+    </form>
+    <div class="mt-3 inline-flex rounded-full bg-[#f8f5f1] px-3 py-1 text-xs font-semibold text-[#8b5e3c] ring-1 ring-inset ring-[#ead8c5]">
+      Tampilan: {{ $selectedSite ? (($selectedSite->code ?? '') . ' - ' . ($selectedSite->name ?? '')) : 'Semua Site' }}
     </div>
   </section>
 
@@ -284,6 +315,102 @@
             </tr>
           @endforelse
         </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="p-4 bg-white border shadow-sm rounded-2xl">
+    <div class="flex flex-col gap-2 mb-4 md:flex-row md:items-end md:justify-between">
+      <div>
+        <h2 class="text-sm font-semibold text-slate-900">MPP Fulfillment & Stage Progress</h2>
+        <p class="text-[11px] text-slate-500">Format monitoring MPP: MPP dari openings job, QTY dari hired, DEV = QTY - MPP, UPDATE DEV = Total Progress + DEV.</p>
+      </div>
+      <span class="text-[11px] font-semibold text-[#8b5e3c]">{{ $mppRows->count() }} posisi</span>
+    </div>
+
+    <div class="overflow-x-auto border rounded-2xl border-slate-200">
+      <table class="min-w-[1500px] w-full text-xs">
+        <thead class="text-[10px] uppercase text-slate-600">
+          <tr class="bg-[#f8f5f1]">
+            <th rowspan="2" class="sticky left-0 z-20 px-3 py-3 text-left bg-[#f8f5f1] border-r border-slate-200">No</th>
+            <th rowspan="2" class="px-3 py-3 text-left">Site</th>
+            <th rowspan="2" class="px-3 py-3 text-left">Departement</th>
+            <th rowspan="2" class="px-3 py-3 text-left">Level</th>
+            <th rowspan="2" class="px-3 py-3 text-left">Jabatan</th>
+            <th rowspan="2" class="px-3 py-3 text-right">MPP</th>
+            <th rowspan="2" class="px-3 py-3 text-right">QTY</th>
+            <th rowspan="2" class="px-3 py-3 text-right">% Pemenuhan</th>
+            <th rowspan="2" class="px-3 py-3 text-right">DEV</th>
+            <th colspan="10" class="px-3 py-2 text-center border-b border-slate-200">Stage Progress</th>
+            <th rowspan="2" class="px-3 py-3 text-right">Update DEV</th>
+          </tr>
+          <tr class="bg-white">
+            <th class="px-3 py-2 text-right">Screening CV</th>
+            <th class="px-3 py-2 text-right">Interview HR</th>
+            <th class="px-3 py-2 text-right">Interview User</th>
+            <th class="px-3 py-2 text-right">Practical & Ground Test</th>
+            <th class="px-3 py-2 text-right">OL</th>
+            <th class="px-3 py-2 text-right">MCU</th>
+            <th class="px-3 py-2 text-right">FU MCU</th>
+            <th class="px-3 py-2 text-right">Waiting Inbound</th>
+            <th class="px-3 py-2 text-right">Travel</th>
+            <th class="px-3 py-2 text-right">Total Progress</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          @forelse($mppRows as $row)
+            <tr class="hover:bg-[#f8f5f1]/70">
+              <td class="sticky left-0 z-10 px-3 py-2 font-semibold bg-white border-r border-slate-100">{{ $row['no'] }}</td>
+              <td class="px-3 py-2 text-slate-600">{{ $row['site'] }}</td>
+              <td class="px-3 py-2 font-semibold text-slate-800">{{ $row['department'] }}</td>
+              <td class="px-3 py-2 text-slate-700">{{ $row['level'] }}</td>
+              <td class="px-3 py-2 font-medium text-slate-900">{{ $row['position'] }}</td>
+              <td class="px-3 py-2 text-right">{{ number_format($row['mpp'], 0, ',', '.') }}</td>
+              <td class="px-3 py-2 text-right">{{ number_format($row['qty'], 0, ',', '.') }}</td>
+              <td class="px-3 py-2 text-right">
+                <span class="rounded-full px-2 py-0.5 font-semibold {{ $row['fulfillment'] >= 100 ? 'bg-emerald-50 text-emerald-700' : ($row['fulfillment'] >= 75 ? 'bg-amber-50 text-amber-700' : 'bg-red-50 text-red-700') }}">
+                  {{ $row['fulfillment'] }}%
+                </span>
+              </td>
+              <td class="px-3 py-2 text-right font-semibold {{ $row['dev'] < 0 ? 'text-red-700' : 'text-emerald-700' }}">{{ $row['dev'] }}</td>
+              <td class="px-3 py-2 text-right">{{ $row['screening'] }}</td>
+              <td class="px-3 py-2 text-right">{{ $row['hr'] }}</td>
+              <td class="px-3 py-2 text-right">{{ $row['user'] }}</td>
+              <td class="px-3 py-2 text-right">{{ $row['practical_ground'] }}</td>
+              <td class="px-3 py-2 text-right">{{ $row['ol'] }}</td>
+              <td class="px-3 py-2 text-right">{{ $row['mcu'] }}</td>
+              <td class="px-3 py-2 text-right">{{ $row['fu_mcu'] }}</td>
+              <td class="px-3 py-2 text-right">{{ $row['waiting_inbound'] }}</td>
+              <td class="px-3 py-2 text-right">{{ $row['travel'] }}</td>
+              <td class="px-3 py-2 font-semibold text-right text-[#8b5e3c]">{{ $row['total_progress'] }}</td>
+              <td class="px-3 py-2 text-right font-semibold {{ $row['update_dev'] < 0 ? 'text-red-700' : 'text-slate-800' }}">{{ $row['update_dev'] }}</td>
+            </tr>
+          @empty
+            <tr>
+              <td colspan="20" class="px-3 py-8 text-center text-slate-500">Belum ada open job untuk site ini.</td>
+            </tr>
+          @endforelse
+        </tbody>
+        <tfoot class="font-semibold bg-slate-50 text-slate-900">
+          <tr>
+            <td class="sticky left-0 z-10 px-3 py-3 bg-slate-50 border-r border-slate-200" colspan="5">Grand Total</td>
+            <td class="px-3 py-3 text-right">{{ number_format((int) ($mppTotals['mpp'] ?? 0), 0, ',', '.') }}</td>
+            <td class="px-3 py-3 text-right">{{ number_format((int) ($mppTotals['qty'] ?? 0), 0, ',', '.') }}</td>
+            <td class="px-3 py-3 text-right">{{ (int) ($mppTotals['fulfillment'] ?? 0) }}%</td>
+            <td class="px-3 py-3 text-right">{{ (int) ($mppTotals['dev'] ?? 0) }}</td>
+            <td class="px-3 py-3 text-right">{{ (int) ($mppTotals['screening'] ?? 0) }}</td>
+            <td class="px-3 py-3 text-right">{{ (int) ($mppTotals['hr'] ?? 0) }}</td>
+            <td class="px-3 py-3 text-right">{{ (int) ($mppTotals['user'] ?? 0) }}</td>
+            <td class="px-3 py-3 text-right">{{ (int) ($mppTotals['practical_ground'] ?? 0) }}</td>
+            <td class="px-3 py-3 text-right">{{ (int) ($mppTotals['ol'] ?? 0) }}</td>
+            <td class="px-3 py-3 text-right">{{ (int) ($mppTotals['mcu'] ?? 0) }}</td>
+            <td class="px-3 py-3 text-right">{{ (int) ($mppTotals['fu_mcu'] ?? 0) }}</td>
+            <td class="px-3 py-3 text-right">{{ (int) ($mppTotals['waiting_inbound'] ?? 0) }}</td>
+            <td class="px-3 py-3 text-right">{{ (int) ($mppTotals['travel'] ?? 0) }}</td>
+            <td class="px-3 py-3 text-right text-[#8b5e3c]">{{ (int) ($mppTotals['total_progress'] ?? 0) }}</td>
+            <td class="px-3 py-3 text-right">{{ (int) ($mppTotals['update_dev'] ?? 0) }}</td>
+          </tr>
+        </tfoot>
       </table>
     </div>
   </section>
