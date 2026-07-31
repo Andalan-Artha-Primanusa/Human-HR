@@ -134,9 +134,9 @@ class PsychotestController extends Controller
                 // 'is_active'  => ...  <-- sengaja tidak disentuh
             ]);
 
-            // catat / update stage psychotest
+            // catat / update stage psychological test
             $stage = $attempt->application->stages()
-                ->where('stage_key', 'psychotest')
+                ->whereIn('stage_key', ['psychological_test', 'psychotest'])
                 ->latest()
                 ->first();
 
@@ -154,7 +154,7 @@ class PsychotestController extends Controller
                 ]);
             } else {
                 $attempt->application->stages()->create([
-                    'stage_key' => 'psychotest',
+                    'stage_key' => 'psychological_test',
                     'status' => $isPassed ? 'passed' : 'failed',
                     'score' => $score,
                     'payload' => $payload,

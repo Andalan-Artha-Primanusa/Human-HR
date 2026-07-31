@@ -375,19 +375,34 @@
               $mon  = strtoupper(Str::substr((string) ($job->division ?: $job->code ?: 'JD'), 0, 2));
 
               $prettyStage = [
-                'applied'         => 'Pengajuan Berkas',
+                'applied'         => 'Screening',
                 'screening'       => 'Screening',
-                'psychotest'      => 'Psikotes',
+                'psychotest'      => 'Psychological Test',
+                'psychological_test' => 'Psychological Test',
                 'hr_iv'           => 'HR Interview',
+                'post_test'       => 'Post Test',
                 'user_iv'         => 'User Interview',
-                'user_trainer_iv' => 'Trainer Interview',
-                'offer'           => 'Offering',
-                'mcu'             => 'MCU',
-                'mobilisasi'      => 'Mobilisasi',
-                'ground_test'     => 'Ground Test',
-                'hired'           => 'Diterima',
-                'not_qualified'   => 'Tidak Lolos',
-                'rejected'        => 'Tidak Lolos',
+                'user_trainer_iv' => 'User Interview',
+                'offer'           => 'Offering Letter (OL)',
+                'mcu'             => 'Medical Check Up',
+                'mobilisasi'      => 'Mobilisasi (Travel)',
+                'ground_test'     => 'Skill Test',
+                'skill_test'      => 'Skill Test',
+                'hired'           => 'Finish',
+                'onsite'          => 'Finish',
+                'not_qualified'   => 'Finish',
+                'rejected'        => 'Finish',
+                'finish'          => 'Finish',
+              ];
+              $stageAlias = [
+                'applied' => 'screening',
+                'psychotest' => 'psychological_test',
+                'user_trainer_iv' => 'user_iv',
+                'ground_test' => 'skill_test',
+                'onsite' => 'finish',
+                'hired' => 'finish',
+                'not_qualified' => 'finish',
+                'rejected' => 'finish',
               ];
               $myApp = Auth::check() ? ($job->applications->first() ?? null) : null;
             @endphp
@@ -460,7 +475,8 @@
                       @if($myApp)
                         <span class="rounded-full border border-blue-200 bg-blue-50
                                      px-2 py-0.5 text-[10px] font-semibold text-blue-700">
-                          DILAMAR: {{ strtoupper($prettyStage[$myApp->current_stage ?? 'applied'] ?? $myApp->current_stage ?? 'APPLIED') }}
+                          @php $myStageKey = $stageAlias[strtolower((string) ($myApp->current_stage ?? 'screening'))] ?? strtolower((string) ($myApp->current_stage ?? 'screening')); @endphp
+                          DILAMAR: {{ strtoupper($prettyStage[$myStageKey] ?? $myStageKey) }}
                         </span>
                       @elseif($isOpen)
                         <span class="rounded-full border border-emerald-200 bg-emerald-50

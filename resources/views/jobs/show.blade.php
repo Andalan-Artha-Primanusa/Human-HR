@@ -56,46 +56,71 @@
     $emailVerifiedForApplication = auth()->guest() || auth()->user()->hasVerifiedEmail();
 
     // ==== Tahapan & label (FLOW BARU) ====
-    $stageOrder = ['applied', 'screening', 'psychotest', 'hr_iv', 'user_iv', 'user_trainer_iv', 'offer', 'mcu', 'mobilisasi', 'ground_test', 'onsite', 'hired', 'not_qualified'];
+    $stageOrder = ['screening', 'psychological_test', 'hr_iv', 'post_test', 'user_iv', 'offer', 'mcu', 'mobilisasi', 'skill_test', 'finish'];
     $pretty = [
-        'applied' => 'Pengajuan Berkas',
-        'screening' => 'Screening Berkas',
-        'psychotest' => 'Psikotes',
+        'applied' => 'Screening',
+        'screening' => 'Screening',
+        'psychotest' => 'Psychological Test',
+        'psychological_test' => 'Psychological Test',
         'hr_iv' => 'HR Interview',
+        'post_test' => 'Post Test',
         'user_iv' => 'User Interview',
-        'user_trainer_iv' => 'User/Trainer Interview',
-        'offer' => 'Offering (OL)',
-        'mcu' => 'MCU',
-        'mobilisasi' => 'Mobilisasi',
-        'ground_test' => 'Ground Test',
-        'onsite' => 'Onsite',
-        'hired' => 'Diterima',
-        'not_qualified' => 'Tidak Lolos',
-        'rejected' => 'Tidak Lolos',
+        'user_trainer_iv' => 'User Interview',
+        'offer' => 'Offering Letter (OL)',
+        'mcu' => 'Medical Check Up',
+        'mobilisasi' => 'Mobilisasi (Travel)',
+        'ground_test' => 'Skill Test',
+        'skill_test' => 'Skill Test',
+        'onsite' => 'Finish',
+        'hired' => 'Finish',
+        'not_qualified' => 'Finish',
+        'rejected' => 'Finish',
+        'finish' => 'Finish',
     ];
 
     $mineproProcesses = collect(data_get($mineproProgress ?? [], 'processes', []));
     $mineproCurrentProcess = data_get($mineproProgress ?? [], 'current_process');
     $hasMineproProgress = filled($mineproCurrentProcess);
     $mineproStage = strtolower((string) data_get($mineproProgress ?? [], 'current_stage', ''));
+    $stageAlias = [
+        'applied' => 'screening',
+        'psychotest' => 'psychological_test',
+        'user_trainer_iv' => 'user_iv',
+        'ground_test' => 'skill_test',
+        'onsite' => 'finish',
+        'hired' => 'finish',
+        'not_qualified' => 'finish',
+        'rejected' => 'finish',
+    ];
+    $mineproStage = $stageAlias[$mineproStage] ?? $mineproStage;
     $mineproStage = in_array($mineproStage, $stageOrder, true) ? $mineproStage : null;
     $mineproStageMap = $mineproProcesses
+        ->map(function ($process) use ($stageAlias) {
+            $stage = strtolower((string) ($process['stage'] ?? ''));
+            $process['stage'] = $stageAlias[$stage] ?? $stage;
+            return $process;
+        })
         ->filter(fn($process) => in_array(strtolower((string) ($process['stage'] ?? '')), $stageOrder, true))
         ->groupBy(fn($process) => strtolower((string) ($process['stage'] ?? '')))
         ->map(fn($items) => $items->last());
 
     // Status & stage saat ini
     $overall = strtolower($myApp?->overall_status ?? 'in_progress');
-    $currRaw = strtolower($mineproStage ?: ($myApp?->current_stage ?? 'applied'));
-    $currKey = in_array($currRaw, $stageOrder, true) ? $currRaw : 'applied';
+    $currRaw = strtolower($mineproStage ?: ($myApp?->current_stage ?? 'screening'));
+    $currRaw = $stageAlias[$currRaw] ?? $currRaw;
+    $currKey = in_array($currRaw, $stageOrder, true) ? $currRaw : 'screening';
 
     // Koleksi stage
     $stagesColl = collect($myApp?->stages ?? []);
-    $stageMap = $stagesColl->mapWithKeys(fn($s) => ($k = strtolower($s->stage_key ?? '')) ? [$k => $s] : []);
+    $stageMap = $stagesColl->mapWithKeys(function ($s) use ($stageAlias) {
+        $raw = strtolower((string) ($s->stage_key ?? ''));
+        $key = $stageAlias[$raw] ?? $raw;
+        return $key ? [$key => $s] : [];
+    });
     $mineproVisited = $mineproProcesses->pluck('stage')
-        ->map(fn($v) => strtolower((string) $v))
+        ->map(fn($v) => $stageAlias[strtolower((string) $v)] ?? strtolower((string) $v))
         ->filter(fn($v) => in_array($v, $stageOrder, true));
-    $visited = $stagesColl->pluck('stage_key')->map(fn($v) => strtolower($v))
+    $visited = $stagesColl->pluck('stage_key')->map(fn($v) => $stageAlias[strtolower((string) $v)] ?? strtolower((string) $v))
         ->filter(fn($v) => in_array($v, $stageOrder, true))
         ->merge($mineproVisited)
         ->unique()

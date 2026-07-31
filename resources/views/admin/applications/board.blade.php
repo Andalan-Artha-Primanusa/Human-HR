@@ -381,21 +381,29 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
 
 @php
   $stages = [
-    'applied'         => 'Applied',
-    'screening'       => 'Screening CV/Berkas',
-    'psychotest'      => 'Psikotest',
+    'screening'       => 'Screening',
+    'psychological_test' => 'Psychological Test',
     'hr_iv'           => 'HR Interview',
-    'user_trainer_iv' => 'User & Trainer Interview',
-    'offer'           => 'OL (Offering Letter)',
-    'mcu'             => 'MCU',
-    'mobilisasi'      => 'Mobilisasi',
-    'ground_test'     => 'Ground Test',
-    'onsite'          => 'Onsite',
-    'hired'           => 'Hired',
-    'not_qualified'   => 'TIDAK lOLOS',
+    'post_test'       => 'Post Test',
+    'user_iv'         => 'User Interview',
+    'offer'           => 'Offering Letter (OL)',
+    'mcu'             => 'Medical Check Up',
+    'mobilisasi'      => 'Mobilisasi (Travel)',
+    'skill_test'      => 'Skill Test',
+    'finish'          => 'Finish',
   ];
 
-  $freeAfter = ['offer','mcu','mobilisasi','ground_test','onsite','hired','not_qualified'];
+  $freeAfter = ['offer','mcu','mobilisasi','skill_test','finish'];
+  $stageAlias = [
+    'applied' => 'screening',
+    'psychotest' => 'psychological_test',
+    'user_trainer_iv' => 'user_iv',
+    'ground_test' => 'skill_test',
+    'onsite' => 'finish',
+    'hired' => 'finish',
+    'not_qualified' => 'finish',
+    'rejected' => 'finish',
+  ];
 
   $authRole  = auth()->user()->role ?? 'guest';
   $isHR      = in_array($authRole, ['admin', 'hr', 'superadmin']);
@@ -475,7 +483,7 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
 
                 $stageOrder = array_keys($stages);
                 $curIdx     = array_search($stageKey, $stageOrder);
-                $trainerIdx = array_search('user_trainer_iv', $stageOrder);
+                $trainerIdx = array_search('user_iv', $stageOrder);
                 $isFreeMove = ($isSuperHR && $curIdx > $trainerIdx);
 
                 $draggable  = !$isHrLocked;
@@ -624,13 +632,13 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
                       <button type="button" class="btn-xs btn-outline" onclick="openFbModal(this)">View Feedbacks</button>
                     @endif
 
-                    @if(in_array($stageKey, ['hr_iv','user_trainer_iv']))
+                    @if(in_array($stageKey, ['hr_iv','user_iv']))
                       <button type="button" class="btn-xs btn-sched" onclick="openSchedModal(this, '{{ $stageKey }}')">
                         Schedule
                       </button>
                     @endif
 
-                    @if($stageKey === 'user_trainer_iv' && ($isHR || $isTrainer || $isKaryawan))
+                    @if($stageKey === 'user_iv' && ($isHR || $isTrainer || $isKaryawan))
                       <button type="button" class="btn-xs fb-panel-toggle"
                         onclick="toggleFbPanel('fbp-{{ $a->id }}', this)" title="Tampilkan form feedback">
                         ⚠️ Feedback
@@ -664,28 +672,28 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
                       </button>
                     @endif
 
-                    @if($stageKey === 'ground_test' && ($isHR || $isTrainer))
+                    @if($stageKey === 'skill_test' && ($isHR || $isTrainer))
                       <button type="button" class="btn-xs btn-primary"
                         onclick="openGroundTestModal('{{ $a->id }}', '{{ addslashes($a->user->name) }}', this)">
                         📄 Update LAP & Hasil GT
                       </button>
                     @endif
 
-                    @if($stageKey === 'ground_test' && $isHR)
+                    @if($stageKey === 'skill_test' && $isHR)
                       <button type="button" class="btn-xs btn-outline"
-                        onclick="openFbForm(this, '{{ $a->id }}', '{{ $a->user->name }}', 'ground_test', 'hr')">
+                        onclick="openFbForm(this, '{{ $a->id }}', '{{ $a->user->name }}', 'skill_test', 'hr')">
                         + Feedback HR GT
                       </button>
                     @endif
-                    @if($stageKey === 'ground_test' && $isTrainer)
+                    @if($stageKey === 'skill_test' && $isTrainer)
                       <button type="button" class="btn-xs btn-outline"
-                        onclick="openFbForm(this, '{{ $a->id }}', '{{ $a->user->name }}', 'ground_test', 'trainer')">
+                        onclick="openFbForm(this, '{{ $a->id }}', '{{ $a->user->name }}', 'skill_test', 'trainer')">
                         + Feedback Trainer GT
                       </button>
                     @endif
-                    @if($stageKey === 'ground_test' && $isKaryawan)
+                    @if($stageKey === 'skill_test' && $isKaryawan)
                       <button type="button" class="btn-xs btn-outline"
-                        onclick="openFbForm(this, '{{ $a->id }}', '{{ $a->user->name }}', 'ground_test', 'karyawan')">
+                        onclick="openFbForm(this, '{{ $a->id }}', '{{ $a->user->name }}', 'skill_test', 'karyawan')">
                         + Feedback User GT
                       </button>
                     @endif
@@ -758,23 +766,23 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
                   </button>
                 </div>
 
-                @if($stageKey === 'user_trainer_iv')
+                @if($stageKey === 'user_iv')
                   <div id="fbp-{{ $a->id }}" class="hidden fb-panel">
                     @if($isHR)
                       <button type="button" class="btn-xs btn-primary"
-                        onclick="openFbForm(this, '{{ $a->id }}', '{{ $a->user->name }}', 'user_trainer_iv', 'hr')">
+                        onclick="openFbForm(this, '{{ $a->id }}', '{{ $a->user->name }}', 'user_iv', 'hr')">
                         + Isi Feedback HR
                       </button>
                     @endif
                     @if($isTrainer)
                       <button type="button" class="btn-xs btn-primary"
-                        onclick="openFbForm(this, '{{ $a->id }}', '{{ $a->user->name }}', 'user_trainer_iv', 'trainer')">
+                        onclick="openFbForm(this, '{{ $a->id }}', '{{ $a->user->name }}', 'user_iv', 'trainer')">
                         + Isi Feedback Trainer
                       </button>
                     @endif
                     @if($isKaryawan)
                       <button type="button" class="btn-xs btn-primary"
-                        onclick="openFbForm(this, '{{ $a->id }}', '{{ $a->user->name }}', 'user_trainer_iv', 'karyawan')">
+                        onclick="openFbForm(this, '{{ $a->id }}', '{{ $a->user->name }}', 'user_iv', 'karyawan')">
                         + Isi Feedback User
                       </button>
                     @endif
@@ -1048,8 +1056,8 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
   <div class="kn-modal">
     <div class="kn-modal-head">
       <div>
-        <div class="kn-modal-title">📄 Ground Test</div>
-        <div class="kn-modal-sub" id="gt-sub">Update LAP dan Hasil Ground Test</div>
+        <div class="kn-modal-title">📄 Skill Test</div>
+        <div class="kn-modal-sub" id="gt-sub">Update LAP dan hasil Skill Test</div>
       </div>
       <button class="kn-modal-close" onclick="closeModal('overlay-gt')">✕</button>
     </div>
@@ -1069,7 +1077,7 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
           </div>
         </div>
         <div class="fm-group">
-          <label class="fm-label">Hasil Ground Test (Tidak Wajib)</label>
+          <label class="fm-label">Hasil Skill Test (Tidak Wajib)</label>
           <select name="result" id="gt-result" class="fm-ctrl">
             <option value="">— Belum Ada Hasil —</option>
             <option value="lolos">✓ Lolos</option>
@@ -1452,7 +1460,7 @@ function submitFbForm() {
       }
       const fbToggle = fbFormCardEl.querySelector('.fb-panel-toggle');
       const stage = fbFormCardEl.dataset.stage;
-      if (fbToggle && stage === 'user_trainer_iv') {
+      if (fbToggle && stage === 'user_iv') {
         fbToggle.style.display = 'none';
         const fbPanel = fbFormCardEl.querySelector('[id^="fbp-"]');
         if (fbPanel) fbPanel.classList.add('hidden');

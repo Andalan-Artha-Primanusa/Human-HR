@@ -423,7 +423,7 @@
             <th class="px-3 py-2 text-right">Screening CV</th>
             <th class="px-3 py-2 text-right">Interview HR</th>
             <th class="px-3 py-2 text-right">Interview User</th>
-            <th class="px-3 py-2 text-right">Practical & Ground Test</th>
+            <th class="px-3 py-2 text-right">Psychological/Post/Skill Test</th>
             <th class="px-3 py-2 text-right">OL</th>
             <th class="px-3 py-2 text-right">MCU</th>
             <th class="px-3 py-2 text-right">FU MCU</th>

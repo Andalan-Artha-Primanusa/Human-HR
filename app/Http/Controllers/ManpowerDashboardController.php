@@ -305,16 +305,16 @@ class ManpowerDashboardController extends Controller
                 ->when($siteId !== '', fn ($q) => $q->where('site_id', $siteId))
                 ->with(['site:id,code,name'])
                 ->withCount([
-                    'applications as screening_count' => fn ($q) => $q->where('current_stage', 'screening')->whereBetween('created_at', [$periodStartAt, $periodEndAt]),
+                    'applications as screening_count' => fn ($q) => $q->whereIn('current_stage', ['screening', 'applied'])->whereBetween('created_at', [$periodStartAt, $periodEndAt]),
                     'applications as hr_count' => fn ($q) => $q->where('current_stage', 'hr_iv')->whereBetween('created_at', [$periodStartAt, $periodEndAt]),
                     'applications as user_count' => fn ($q) => $q->whereIn('current_stage', ['user_iv', 'user_trainer_iv'])->whereBetween('created_at', [$periodStartAt, $periodEndAt]),
-                    'applications as practical_ground_count' => fn ($q) => $q->whereIn('current_stage', ['psychotest', 'ground_test'])->whereBetween('created_at', [$periodStartAt, $periodEndAt]),
+                    'applications as practical_ground_count' => fn ($q) => $q->whereIn('current_stage', ['psychological_test', 'psychotest', 'post_test', 'skill_test', 'ground_test'])->whereBetween('created_at', [$periodStartAt, $periodEndAt]),
                     'applications as ol_count' => fn ($q) => $q->where('current_stage', 'offer')->whereBetween('created_at', [$periodStartAt, $periodEndAt]),
                     'applications as mcu_count' => fn ($q) => $q->where('current_stage', 'mcu')->whereBetween('created_at', [$periodStartAt, $periodEndAt]),
-                    'applications as waiting_inbound_count' => fn ($q) => $q->where('current_stage', 'onsite')->whereBetween('created_at', [$periodStartAt, $periodEndAt]),
+                    'applications as waiting_inbound_count' => fn ($q) => $q->whereIn('current_stage', ['finish', 'onsite'])->whereBetween('created_at', [$periodStartAt, $periodEndAt]),
                     'applications as travel_count' => fn ($q) => $q->where('current_stage', 'mobilisasi')->whereBetween('created_at', [$periodStartAt, $periodEndAt]),
                     'applications as hired_count' => fn ($q) => $q->whereBetween('updated_at', [$periodStartAt, $periodEndAt])->where(function ($w) {
-                        $w->where('overall_status', 'hired')->orWhere('current_stage', 'hired');
+                        $w->where('overall_status', 'hired')->orWhereIn('current_stage', ['finish', 'hired']);
                     }),
                 ])
                 ->orderBy('division')

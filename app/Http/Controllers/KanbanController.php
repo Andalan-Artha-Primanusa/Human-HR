@@ -14,9 +14,9 @@ class KanbanController extends Controller
         
         // Hanya tampilkan stages yang relevan untuk trainer/karyawan
         $stages = [
+            'post_test' => 'Post Test',
             'user_iv' => 'User Interview',
-            'user_trainer_iv' => 'User/Trainer Interview',
-            'ground_test' => 'Ground Test',
+            'skill_test' => 'Skill Test',
         ];
 
         // Filter khusus:
@@ -39,7 +39,12 @@ class KanbanController extends Controller
 
         $grouped = collect($stages)->mapWithKeys(fn($label, $key) => [$key => collect()]);
         foreach ($apps as $a) {
-            $key = $a->current_stage ?? 'applied';
+            $key = match ($a->current_stage ?? 'screening') {
+                'user_trainer_iv' => 'user_iv',
+                'ground_test' => 'skill_test',
+                'psychotest' => 'psychological_test',
+                default => $a->current_stage ?? 'screening',
+            };
             // Hanya masukkan aplikasi dengan stage yang sesuai
             if (array_key_exists($key, $stages)) {
                 $grouped[$key]->push($a);

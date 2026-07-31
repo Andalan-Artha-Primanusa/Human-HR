@@ -433,13 +433,13 @@ class CandidateProfileController extends Controller
                 'job_id' => $job->id,
                 'user_id' => $user->id,
                 'poh_id' => $profile->poh_id,
-                'current_stage' => 'applied',
+                'current_stage' => 'screening',
                 'overall_status' => 'active',
             ]);
 
             \App\Models\ApplicationStage::create([
                 'application_id' => $application->id,
-                'stage_key' => 'applied',
+                'stage_key' => 'screening',
                 'status' => 'pending',
                 'payload' => ['note' => 'Initial application submitted after candidate profile completed'],
                 'acted_by' => $user->id,

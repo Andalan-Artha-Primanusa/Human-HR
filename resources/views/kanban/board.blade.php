@@ -211,17 +211,16 @@ textarea.fm-ctrl { resize: vertical; min-height: 68px; }
 
 @php
   $stages = [
-    'applied'         => 'Applied',
-    'screening'       => 'Screening CV',
-    'psychotest'      => 'Psikotest',
+    'screening'       => 'Screening',
+    'psychological_test' => 'Psychological Test',
     'hr_iv'           => 'HR Interview',
-    'user_trainer_iv' => 'User & Trainer Interview',
-    'offer'           => 'OL',
-    'mcu'             => 'MCU',
-    'mobilisasi'      => 'Mobilisasi',
-    'ground_test'     => 'Ground Test',
-    'hired'           => 'Hired',
-    'not_qualified'   => 'TIDAK lOLOS',
+    'post_test'       => 'Post Test',
+    'user_iv'         => 'User Interview',
+    'offer'           => 'Offering Letter (OL)',
+    'mcu'             => 'Medical Check Up',
+    'mobilisasi'      => 'Mobilisasi (Travel)',
+    'skill_test'      => 'Skill Test',
+    'finish'          => 'Finish',
   ];
 
   $authUser   = auth()->user();
@@ -231,7 +230,7 @@ textarea.fm-ctrl { resize: vertical; min-height: 68px; }
   $isTrainer  = $authRole === 'trainer';
 
   // Stage-stage yg tampilkan form feedback langsung di kartu
-  $feedbackStages = ['hr_iv', 'user_trainer_iv'];
+  $feedbackStages = ['hr_iv', 'user_iv', 'skill_test'];
 @endphp
 
 {{-- HEADER --}}
@@ -239,7 +238,7 @@ textarea.fm-ctrl { resize: vertical; min-height: 68px; }
   <h1>Kanban proses saya</h1>
   <p>
     @if($isKaryawan || $isTrainer)
-      Isi feedback di stage <strong>User & Trainer Interview</strong> untuk melanjutkan kandidat.
+      Isi feedback di stage <strong>User Interview</strong> atau <strong>Skill Test</strong> untuk melanjutkan kandidat.
     @else
       Lihat progres lamaran kamu di setiap stage rekrutmen.
     @endif
@@ -273,9 +272,9 @@ textarea.fm-ctrl { resize: vertical; min-height: 68px; }
               // Apakah user ini yang sedang login adalah si pelamar
               $isOwner = (string)$authUser->id === (string)$a->user_id;
 
-              // Karyawan dan trainer bisa isi feedback di user_trainer_iv
-              $canKaryawanFeedback = $isKaryawan && $stageKey === 'user_trainer_iv';
-              $canTrainerFeedback  = $isTrainer && $stageKey === 'user_trainer_iv';
+              // Karyawan dan trainer bisa isi feedback di user_iv
+              $canKaryawanFeedback = $isKaryawan && $stageKey === 'user_iv';
+              $canTrainerFeedback  = $isTrainer && $stageKey === 'user_iv';
 
               $karyawanFeedbackFormId = 'fb-user-form-'.$a->id;
               $trainerFeedbackFormId  = 'fb-trainer-form-'.$a->id;
@@ -395,12 +394,12 @@ textarea.fm-ctrl { resize: vertical; min-height: 68px; }
                    RIWAYAT STAGE (klik buka modal)
                    ==================================================== --}}
               @php
-                $stageHistory = $a->stages->whereIn('stage_key', ['hr_iv','user_trainer_iv'])->values();
+                $stageHistory = $a->stages->whereIn('stage_key', ['hr_iv','user_iv','skill_test'])->values();
               @endphp
 
               {{-- ACTIONS --}}
               <div class="kn-card-actions">
-                @if($stageKey === 'ground_test' && ($isKaryawan || $isTrainer))
+                @if($stageKey === 'skill_test' && ($isKaryawan || $isTrainer))
                   <button type="button" class="btn-xs btn-primary"
                     onclick="openGroundTestModal(this, '{{ $a->id }}', '{{ addslashes($a->user->name ?? $a->job->title ?? 'Kandidat') }}')">
                     📄 Upload Hasil GT
@@ -457,7 +456,7 @@ textarea.fm-ctrl { resize: vertical; min-height: 68px; }
                 <div id="{{ $karyawanFeedbackFormId }}" class="hidden fb-panel">
                   <form method="POST" action="{{ route('admin.applications.move', $a) }}" class="fb-form">
                     @csrf
-                    <input type="hidden" name="to" value="user_trainer_iv">
+                    <input type="hidden" name="to" value="user_iv">
                     <div>
                       <label class="fm-label">Feedback User</label>
                       <textarea name="feedback_user" class="fm-ctrl" required placeholder="Tulis penilaian kandidat..."></textarea>
@@ -481,7 +480,7 @@ textarea.fm-ctrl { resize: vertical; min-height: 68px; }
                 <div id="{{ $trainerFeedbackFormId }}" class="hidden fb-panel">
                   <form method="POST" action="{{ route('admin.applications.move', $a) }}" class="fb-form">
                     @csrf
-                    <input type="hidden" name="to" value="user_trainer_iv">
+                    <input type="hidden" name="to" value="user_iv">
                     <div>
                       <label class="fm-label">Feedback Trainer</label>
                       <textarea name="feedback_trainer" class="fm-ctrl" required placeholder="Tulis penilaian kandidat..."></textarea>
@@ -536,8 +535,8 @@ textarea.fm-ctrl { resize: vertical; min-height: 68px; }
   <div class="kn-modal">
     <div class="kn-modal-head">
       <div>
-        <div class="kn-modal-title">📄 Ground Test</div>
-        <div class="kn-modal-sub" id="gt-sub">Upload hasil Ground Test</div>
+        <div class="kn-modal-title">📄 Skill Test</div>
+        <div class="kn-modal-sub" id="gt-sub">Upload hasil Skill Test</div>
       </div>
       <button class="kn-modal-close" onclick="document.getElementById('overlay-gt').classList.add('hidden')">✕</button>
     </div>
@@ -550,7 +549,7 @@ textarea.fm-ctrl { resize: vertical; min-height: 68px; }
           <div id="gt-lap-existing" style="font-size:0.65rem; color:#888; margin-top:4px;"></div>
         </div>
         <div class="fm-group">
-          <label class="fm-label">Hasil Ground Test</label>
+          <label class="fm-label">Hasil Skill Test</label>
           <select name="result" id="gt-result" class="fm-ctrl">
             <option value="">— Belum Ada Hasil —</option>
             <option value="lolos">✓ Lolos</option>
@@ -652,10 +651,10 @@ textarea.fm-ctrl { resize: vertical; min-height: 68px; }
 
 <script>
 const stageLabels = {
-  applied:'Applied', screening:'Screening CV', psychotest:'Psikotest',
-  hr_iv:'HR Interview', user_trainer_iv:'User & Trainer Interview',
-  offer:'OL', mcu:'MCU', mobilisasi:'Mobilisasi', ground_test:'Ground Test',
-  hired:'Hired', not_qualified:'TIDAK lOLOS'
+  applied:'Screening', screening:'Screening', psychotest:'Psychological Test', psychological_test:'Psychological Test',
+  hr_iv:'HR Interview', post_test:'Post Test', user_iv:'User Interview', user_trainer_iv:'User Interview',
+  offer:'Offering Letter (OL)', mcu:'Medical Check Up', mobilisasi:'Mobilisasi (Travel)', ground_test:'Skill Test', skill_test:'Skill Test',
+  hired:'Finish', not_qualified:'Finish', finish:'Finish'
 };
 
 function roleLabel(r) { 

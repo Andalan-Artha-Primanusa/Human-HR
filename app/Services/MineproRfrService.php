@@ -11,19 +11,16 @@ use Illuminate\Support\Facades\Log;
 class MineproRfrService
 {
     private const PROCESS_STAGE_ORDER = [
-        'applied',
         'screening',
-        'psychotest',
+        'psychological_test',
         'hr_iv',
+        'post_test',
         'user_iv',
-        'user_trainer_iv',
         'offer',
         'mcu',
         'mobilisasi',
-        'ground_test',
-        'onsite',
-        'hired',
-        'not_qualified',
+        'skill_test',
+        'finish',
     ];
 
     private array $lastProcessMeta = [
@@ -402,23 +399,27 @@ class MineproRfrService
         }
 
         if (str_contains($compact, 'notqualified') || str_contains($compact, 'tidaklolos') || str_contains($compact, 'rejected') || str_contains($compact, 'ditolak')) {
-            return 'not_qualified';
+            return 'finish';
         }
 
-        if (str_contains($compact, 'groundtest')) {
-            return 'ground_test';
+        if (str_contains($compact, 'skilltest') || str_contains($compact, 'groundtest')) {
+            return 'skill_test';
         }
 
         if (str_contains($compact, 'usertrainer') || str_contains($compact, 'trainerinterview') || str_contains($compact, 'userinterview')) {
-            return 'user_trainer_iv';
+            return 'user_iv';
         }
 
         if (str_contains($compact, 'hrinterview')) {
             return 'hr_iv';
         }
 
-        if (str_contains($compact, 'psychotest') || str_contains($compact, 'psikotest')) {
-            return 'psychotest';
+        if (str_contains($compact, 'posttest')) {
+            return 'post_test';
+        }
+
+        if (str_contains($compact, 'psychologicaltest') || str_contains($compact, 'psychotest') || str_contains($compact, 'psikotest')) {
+            return 'psychological_test';
         }
 
         if (str_contains($compact, 'screening')) {
@@ -433,28 +434,29 @@ class MineproRfrService
             return 'mobilisasi';
         }
 
-        if (str_contains($compact, 'onsite')) {
-            return 'onsite';
+        if (str_contains($compact, 'finish') || str_contains($compact, 'onsite')) {
+            return 'finish';
         }
 
         if (str_contains($compact, 'hired') || str_contains($compact, 'diterima')) {
-            return 'hired';
+            return 'finish';
         }
 
         return match ($value) {
-            'applied', 'apply', 'lamaran', 'pengajuan berkas' => 'applied',
+            'applied', 'apply', 'lamaran', 'pengajuan berkas' => 'screening',
             'screening', 'screening cv', 'screening berkas', 'screening cv/berkas', 'screening_cv', 'screening_berkas' => 'screening',
-            'psikotest', 'psychotest' => 'psychotest',
+            'psikotest', 'psychotest', 'psychological test', 'psychological_test' => 'psychological_test',
             'hrinterview', 'hr interview', 'hr_interview' => 'hr_iv',
-            'userinterview', 'user interview', 'user_interview' => 'user_trainer_iv',
-            'usertrainerinterview', 'trainerinterview', 'user & trainer interview', 'user/trainer interview' => 'user_trainer_iv',
+            'posttest', 'post test', 'post_test' => 'post_test',
+            'userinterview', 'user interview', 'user_interview' => 'user_iv',
+            'usertrainerinterview', 'trainerinterview', 'user & trainer interview', 'user/trainer interview' => 'user_iv',
             'offering', 'offering (ol)', 'offer', 'ol' => 'offer',
             'mcu' => 'mcu',
-            'mobilisasi', 'mobilization' => 'mobilisasi',
-            'groundtest', 'ground test', 'ground_test' => 'ground_test',
-            'onsite', 'on site', 'on_site' => 'onsite',
-            'hired', 'diterima' => 'hired',
-            'tidak lolos', 'not qualified', 'not_qualified', 'rejected', 'ditolak' => 'not_qualified',
+            'medical check up', 'medical_checkup' => 'mcu',
+            'mobilisasi', 'mobilization', 'mobilisasi travel', 'mobilisasi (travel)' => 'mobilisasi',
+            'skilltest', 'skill test', 'skill_test', 'groundtest', 'ground test', 'ground_test' => 'skill_test',
+            'finish', 'onsite', 'on site', 'on_site', 'hired', 'diterima' => 'finish',
+            'tidak lolos', 'not qualified', 'not_qualified', 'rejected', 'ditolak' => 'finish',
             default => null,
         };
     }

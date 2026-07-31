@@ -294,7 +294,7 @@ class PublicApplicationController extends Controller
                     'user_id' => $user->id,
                 ],
                 [
-                    'current_stage' => 'applied',
+                    'current_stage' => 'screening',
                     'overall_status' => 'active',
                 ]
             );
@@ -302,7 +302,7 @@ class PublicApplicationController extends Controller
             if ($app->wasRecentlyCreated) {
                 ApplicationStage::create([
                     'application_id' => $app->id,
-                    'stage_key' => 'applied',
+                    'stage_key' => 'screening',
                     'status' => 'pending',
                     'score' => null,
                     'payload' => ['note' => $note],

@@ -36,19 +36,23 @@
     @php
         // === Pretty labels (selaras controller)
         $PRETTY = [
-            'applied' => 'Applied',
-            'screening' => 'Screening CV/Berkas Lamaran',
-            'psychotest' => 'Psikotest',
+            'applied' => 'Screening',
+            'screening' => 'Screening',
+            'psychotest' => 'Psychological Test',
+            'psychological_test' => 'Psychological Test',
             'hr_iv' => 'HR Interview',
+            'post_test' => 'Post Test',
             'user_iv' => 'User Interview',
-            'user_trainer_iv' => 'User/Trainer Interview',
-            'offer' => 'OL',
-            'mcu' => 'MCU',
-            'mobilisasi' => 'Mobilisasi',
-            'ground_test' => 'Ground Test',
-            'onsite' => 'Onsite',
-            'hired' => 'Hired',
-            'not_qualified' => 'TIDAK lOLOS',
+            'user_trainer_iv' => 'User Interview',
+            'offer' => 'Offering Letter (OL)',
+            'mcu' => 'Medical Check Up',
+            'mobilisasi' => 'Mobilisasi (Travel)',
+            'ground_test' => 'Skill Test',
+            'skill_test' => 'Skill Test',
+            'onsite' => 'Finish',
+            'hired' => 'Finish',
+            'not_qualified' => 'Finish',
+            'finish' => 'Finish',
         ];
 
         // === Options filter stage
@@ -59,15 +63,29 @@
             'applied' => 'badge-blue',
             'screening' => 'badge-sky',
             'psychotest' => 'badge-indigo',
+            'psychological_test' => 'badge-indigo',
             'hr_iv' => 'badge-amber',
+            'post_test' => 'badge-violet',
             'user_iv' => 'badge-emerald',
             'user_trainer_iv' => 'badge-lime',
             'offer' => 'badge-pink',
             'mcu' => 'badge-cyan',
             'mobilisasi' => 'badge-orange',
             'ground_test' => 'badge-purple',
+            'skill_test' => 'badge-purple',
             'hired' => 'badge-green',
             'not_qualified' => 'badge-rose',
+            'finish' => 'badge-green',
+        ];
+        $stageAlias = [
+            'applied' => 'screening',
+            'psychotest' => 'psychological_test',
+            'user_trainer_iv' => 'user_iv',
+            'ground_test' => 'skill_test',
+            'onsite' => 'finish',
+            'hired' => 'finish',
+            'not_qualified' => 'finish',
+            'rejected' => 'finish',
         ];
     @endphp
 
@@ -167,7 +185,8 @@
               <tbody class="text-black divide-y divide-slate-100">
                 @foreach($apps as $app)
                       @php
-                        $stageKey = $app->current_stage ?? 'applied';
+                        $stageKey = strtolower((string) ($app->current_stage ?? 'screening'));
+                        $stageKey = $stageAlias[$stageKey] ?? $stageKey;
                         $stageLabel = $PRETTY[$stageKey] ?? strtoupper(str_replace('_', ' ', $stageKey));
                         $stageBadge = $stageBadgeMap[$stageKey] ?? 'badge-slate';
 

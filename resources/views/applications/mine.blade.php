@@ -13,22 +13,36 @@
     $BORD = '#e7ded6';
 
     // === STAGES ===
-    $stageOrder = ['applied', 'screening', 'psychotest', 'hr_iv', 'user_iv', 'user_trainer_iv', 'offer', 'mcu', 'mobilisasi', 'ground_test', 'onsite', 'hired', 'not_qualified'];
+    $stageOrder = ['screening', 'psychological_test', 'hr_iv', 'post_test', 'user_iv', 'offer', 'mcu', 'mobilisasi', 'skill_test', 'finish'];
     $pretty = [
-        'applied' => 'Pengajuan Berkas',
-        'screening' => 'Screening Berkas',
-        'psychotest' => 'Psikotes',
+        'applied' => 'Screening',
+        'screening' => 'Screening',
+        'psychotest' => 'Psychological Test',
+        'psychological_test' => 'Psychological Test',
         'hr_iv' => 'HR Interview',
+        'post_test' => 'Post Test',
         'user_iv' => 'User Interview',
-        'user_trainer_iv' => 'User/Trainer Interview',
-        'offer' => 'Offering (OL)',
-        'mcu' => 'MCU',
-        'mobilisasi' => 'Mobilisasi',
-        'ground_test' => 'Ground Test',
-        'onsite' => 'Onsite',
-        'hired' => 'Diterima',
-        'not_qualified' => 'Tidak Lolos',
-        'rejected' => 'Ditolak'
+        'user_trainer_iv' => 'User Interview',
+        'offer' => 'Offering Letter (OL)',
+        'mcu' => 'Medical Check Up',
+        'mobilisasi' => 'Mobilisasi (Travel)',
+        'ground_test' => 'Skill Test',
+        'skill_test' => 'Skill Test',
+        'onsite' => 'Finish',
+        'hired' => 'Finish',
+        'not_qualified' => 'Finish',
+        'rejected' => 'Finish',
+        'finish' => 'Finish',
+    ];
+    $stageAlias = [
+        'applied' => 'screening',
+        'psychotest' => 'psychological_test',
+        'user_trainer_iv' => 'user_iv',
+        'ground_test' => 'skill_test',
+        'onsite' => 'finish',
+        'hired' => 'finish',
+        'not_qualified' => 'finish',
+        'rejected' => 'finish',
     ];
 
     $col = $apps->getCollection();
@@ -39,8 +53,9 @@
         'rejected' => $col->where('overall_status', 'rejected')->count(),
     ];
 
-    $progressOf = function ($app) use ($stageOrder) {
-        $key = strtolower($app->current_stage ?? 'applied');
+    $progressOf = function ($app) use ($stageOrder, $stageAlias) {
+        $key = strtolower($app->current_stage ?? 'screening');
+        $key = $stageAlias[$key] ?? $key;
         $idx = array_search($key, $stageOrder, true);
         if ($idx === false)
             $idx = 0;
@@ -255,7 +270,7 @@
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M9 5l7 7-7 7"/>
                     </svg>
-                    {{ $pretty[$app->current_stage] ?? '-' }}
+                    {{ $pretty[$stageAlias[strtolower((string) $app->current_stage)] ?? $app->current_stage] ?? '-' }}
                   </span>
 
                   <span class="font-semibold">{{ $pct }}%</span>
@@ -272,7 +287,7 @@
               {{-- STAGES --}}
               <div class="mt-4 flex flex-wrap gap-1.5 max-h-20 overflow-y-auto pr-1">
                 @foreach($stageOrder as $key)
-                    @php $isCurrentStage = strtolower((string) $app->current_stage) === $key; @endphp
+                    @php $currentStageKey = $stageAlias[strtolower((string) $app->current_stage)] ?? strtolower((string) $app->current_stage); $isCurrentStage = $currentStageKey === $key; @endphp
                     <span class="text-[11px] px-2 py-1 rounded-full flex items-center gap-1 ring-1 ring-inset {{ $isCurrentStage ? 'bg-[#fffaf5] text-[#8b5e3c] ring-[#ead8c5] font-semibold' : 'bg-slate-50 text-slate-500 ring-slate-200' }}">
 
                       {{-- DOT --}}
@@ -306,7 +321,8 @@
                     @endif
                       @php
                         $olStatus = $app->relationLoaded('offer') && $app->offer ? strtolower($app->offer->status) : null;
-                        $canAcceptOl = (in_array(strtolower((string) $app->current_stage), ['final', 'offer'], true) || $olStatus === 'sent')
+                        $currentStageKey = $stageAlias[strtolower((string) $app->current_stage)] ?? strtolower((string) $app->current_stage);
+                        $canAcceptOl = (in_array($currentStageKey, ['finish', 'offer'], true) || $olStatus === 'sent')
                           && strtolower((string) $app->overall_status) !== 'hired'
                           && strtolower((string) $app->overall_status) !== 'rejected';
                       @endphp
