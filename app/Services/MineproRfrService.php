@@ -295,7 +295,7 @@ class MineproRfrService
 
     public function approvedVacancies(string $startDate): array
     {
-        $url = (string) config('services.minepro.rfr_url');
+        $url = $this->normalizeRfrUrl((string) config('services.minepro.rfr_url'));
         $apiKey = (string) config('services.minepro.api_key');
         $username = (string) config('services.minepro.basic_username');
         $password = (string) config('services.minepro.basic_password');
@@ -415,6 +415,17 @@ class MineproRfrService
             'description' => implode("\n\n", $descriptionParts),
             'raw' => $row,
         ];
+    }
+
+    private function normalizeRfrUrl(string $url): string
+    {
+        $url = trim($url);
+
+        if ($url === '' || str_contains($url, '103.191.63.8:8088')) {
+            return 'http://160.19.165.213/minepro-api/public/api/humanresources/rfr-list';
+        }
+
+        return $url;
     }
 
     private function normalizeProcess(array $row): array
