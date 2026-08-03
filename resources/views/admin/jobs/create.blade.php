@@ -137,6 +137,11 @@
               @else
                 <p class="mt-1 text-xs text-slate-500">{{ count($rfrVacancies) }} row RFR ditemukan dari API. RFR yang sama tetap ditampilkan kalau detail pendidikan/jurusannya berbeda.</p>
               @endif
+              @if(!empty($rfrMeta))
+                <p class="mt-1 text-[11px] text-slate-400 break-all">
+                  MinePro: {{ $rfrMeta['url'] ?? '-' }} · StartDate {{ $rfrMeta['start_date'] ?? ($rfrStartDate ?? '-') }} · raw {{ (int) ($rfrMeta['raw_count'] ?? 0) }} · dropdown {{ (int) ($rfrMeta['count'] ?? count($rfrVacancies ?? [])) }}{{ empty($rfrMeta['ok']) && !empty($rfrMeta['message']) ? ' · '.$rfrMeta['message'] : '' }}
+                </p>
+              @endif
             </div>
             <div>
             <label class="label">Code <span class="text-rose-600">*</span></label>

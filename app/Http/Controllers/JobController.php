@@ -221,8 +221,9 @@ class JobController extends Controller
             ? (string) $rfrStartDate
             : now()->startOfMonth()->format('Y-m-d');
         $rfrVacancies = $rfrService->approvedVacancies($rfrStartDate);
+        $rfrMeta = $rfrService->lastVacancyMeta();
 
-        return view('admin.jobs.create', compact('sites', 'companies', 'rfrVacancies', 'rfrStartDate'));
+        return view('admin.jobs.create', compact('sites', 'companies', 'rfrVacancies', 'rfrStartDate', 'rfrMeta'));
     }
 
     /**

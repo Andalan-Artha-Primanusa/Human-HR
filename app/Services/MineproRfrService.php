@@ -31,9 +31,24 @@ class MineproRfrService
         'count' => 0,
     ];
 
+    private array $lastVacancyMeta = [
+        'ok' => false,
+        'message' => null,
+        'status' => null,
+        'url' => null,
+        'start_date' => null,
+        'raw_count' => 0,
+        'count' => 0,
+    ];
+
     public function lastProcessMeta(): array
     {
         return $this->lastProcessMeta;
+    }
+
+    public function lastVacancyMeta(): array
+    {
+        return $this->lastVacancyMeta;
     }
 
     public function processList(string $startDate, string $endDate): array
@@ -286,6 +301,16 @@ class MineproRfrService
         $password = (string) config('services.minepro.basic_password');
 
         if ($url === '' || $apiKey === '' || $username === '' || $password === '') {
+            $this->lastVacancyMeta = [
+                'ok' => false,
+                'message' => 'Konfigurasi MinePro RFR belum lengkap.',
+                'status' => null,
+                'url' => $url,
+                'start_date' => $startDate,
+                'raw_count' => 0,
+                'count' => 0,
+            ];
+
             return [];
         }
 
@@ -310,7 +335,8 @@ class MineproRfrService
                 return [];
             }
 
-            $rows = collect(Arr::flatten($response->json('results', []), 1))
+            $rawRows = $this->resultRows($response->json('results', []));
+            $rows = collect($rawRows)
                 ->filter(fn($row) => is_array($row) && ! empty($row['RFRRefID']))
                 ->map(fn($row) => $this->normalizeRfr($row))
                 ->sortByDesc('posting_date')
@@ -321,8 +347,27 @@ class MineproRfrService
                 })
                 ->all();
 
+            $this->lastVacancyMeta = [
+                'ok' => true,
+                'message' => 'MinePro RFR berhasil dibaca.',
+                'status' => $response->status(),
+                'url' => $url,
+                'start_date' => $startDate,
+                'raw_count' => count($rawRows),
+                'count' => count($rows),
+            ];
+
             return $rows;
         } catch (\Throwable $e) {
+            $this->lastVacancyMeta = [
+                'ok' => false,
+                'message' => $e->getMessage(),
+                'status' => null,
+                'url' => $url,
+                'start_date' => $startDate,
+                'raw_count' => 0,
+                'count' => 0,
+            ];
             Log::warning('MinePro RFR request exception.', [
                 'message' => $e->getMessage(),
             ]);
