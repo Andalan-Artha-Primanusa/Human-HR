@@ -106,6 +106,13 @@
               <select class="input" id="rfr_select" style="--tw-ring-color: {{ $ACCENT }}">
                 <option value="">— Pilih RFR —</option>
                 @foreach(($rfrVacancies ?? []) as $rfr)
+                  @php
+                    $educationLabel = collect([
+                      $rfr['education_level'] ?? null,
+                      $rfr['discipline'] ?? null,
+                      $rfr['program_study'] ?? null,
+                    ])->filter(fn($value) => filled($value) && trim((string) $value) !== '-')->implode(' / ');
+                  @endphp
                   <option value="{{ $rfr['code'] }}"
                           data-title="{{ e($rfr['title']) }}"
                           data-department="{{ e($rfr['department'] ?? '') }}"
@@ -116,16 +123,19 @@
                           data-facilities="{{ e($rfr['facilities'] ?? '') }}"
                           data-experience="{{ e($rfr['work_experience'] ?? '') }}"
                           data-education="{{ e($rfr['education_level'] ?? '') }}"
+                          data-education-detail-id="{{ e($rfr['education_detail_id'] ?? '') }}"
+                          data-discipline="{{ e($rfr['discipline'] ?? '') }}"
+                          data-program-study="{{ e($rfr['program_study'] ?? '') }}"
                           data-candidate-type="{{ e($rfr['candidate_type'] ?? '') }}"
                           data-qty="{{ e($rfr['qty_required'] ?? '') }}">
-                    {{ $rfr['code'] }} — {{ $rfr['title'] ?: 'Tanpa posisi' }}{{ !empty($rfr['project_id']) ? ' · '.$rfr['project_id'] : '' }}
+                    #{{ $rfr['api_row_no'] ?? $loop->iteration }} · {{ $rfr['code'] }} — {{ $rfr['title'] ?: 'Tanpa posisi' }}{{ !empty($rfr['project_id']) ? ' · '.$rfr['project_id'] : '' }}{{ $educationLabel ? ' · '.$educationLabel : '' }}
                   </option>
                 @endforeach
               </select>
               @if(empty($rfrVacancies))
                 <p class="mt-1 text-xs text-amber-700">Data RFR belum tersedia. Kamu tetap bisa isi Code manual.</p>
               @else
-                <p class="mt-1 text-xs text-slate-500">{{ count($rfrVacancies) }} RFR ditemukan dari API.</p>
+                <p class="mt-1 text-xs text-slate-500">{{ count($rfrVacancies) }} row RFR ditemukan dari API. RFR yang sama tetap ditampilkan kalau detail pendidikan/jurusannya berbeda.</p>
               @endif
             </div>
             <div>
@@ -427,6 +437,8 @@
             opt.dataset.department,
             opt.dataset.location,
             opt.dataset.education,
+            opt.dataset.discipline,
+            opt.dataset.programStudy,
             opt.dataset.candidateType,
           ].filter(Boolean);
           if (kw && keywordParts.length) {
@@ -437,6 +449,8 @@
           const skillParts = [
             opt.dataset.experience ? `Pengalaman ${opt.dataset.experience}` : '',
             opt.dataset.education ? `Pendidikan ${opt.dataset.education}` : '',
+            opt.dataset.discipline ? `Disiplin ${opt.dataset.discipline}` : '',
+            opt.dataset.programStudy ? `Program ${opt.dataset.programStudy}` : '',
             opt.dataset.facilities ? `Fasilitas ${opt.dataset.facilities}` : '',
           ].filter(Boolean);
           if (skills && skillParts.length) {

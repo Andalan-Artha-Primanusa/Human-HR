@@ -313,9 +313,12 @@ class MineproRfrService
             $rows = collect(Arr::flatten($response->json('results', []), 1))
                 ->filter(fn($row) => is_array($row) && ! empty($row['RFRRefID']))
                 ->map(fn($row) => $this->normalizeRfr($row))
-                ->unique('code')
                 ->sortByDesc('posting_date')
                 ->values()
+                ->map(function (array $row, int $index) {
+                    $row['api_row_no'] = $index + 1;
+                    return $row;
+                })
                 ->all();
 
             return $rows;
@@ -359,6 +362,10 @@ class MineproRfrService
             'company_code' => $companyCode,
             'site_code' => $siteCode,
             'education_level' => $row['LevelEducation'] ?? null,
+            'education_detail_id' => $row['EducationDetailID'] ?? null,
+            'education_type' => $row['TypeEducation'] ?? null,
+            'discipline' => $row['Discipline'] ?? null,
+            'program_study' => $row['Program_Study'] ?? null,
             'discipline_description' => $row['DisciplineDescription'] ?? null,
             'description' => implode("\n\n", $descriptionParts),
             'raw' => $row,
