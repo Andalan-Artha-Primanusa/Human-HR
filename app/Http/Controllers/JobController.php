@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class JobController extends Controller
 {
@@ -236,9 +237,8 @@ class JobController extends Controller
         $siteId = $this->resolveSiteId($payload['site_id'] ?? null, $payload['site_code'] ?? null);
         $companyId = $this->resolveCompanyId($payload['company_id'] ?? null, $payload['company_code'] ?? null);
 
-        // Validasi: code unik global → auto-generate suffix bila RFR/code sudah dipakai
-        $requestedCode = $payload['code'];
-        $payload['code'] = $this->resolveUniqueJobCode($payload['code']);
+        // Validasi: code unik GLOBAL → RFR yang sudah dipakai bikin job tidak boleh di-create lagi
+        $this->validateUniqueJobCodeGlobal($payload['code']);
 
         $this->checkUserCanUseSite($siteId);
 
@@ -278,13 +278,11 @@ class JobController extends Controller
             return response()->json([
                 'message' => 'Job created (openings disinkron dari manpower).',
                 'job' => $job,
-                'code_renamed' => $requestedCode !== $payload['code'],
                 'redirect' => route('admin.jobs.index'),
             ], 201);
         }
 
-        $note = $requestedCode !== $payload['code'] ? ' (code diganti menjadi ' . $payload['code'] . ' karena sudah dipakai)' : '';
-        return redirect()->route('admin.jobs.index')->with('success', 'Job created.' . $note);
+        return redirect()->route('admin.jobs.index')->with('success', 'Job created.');
     }
 
     /**
@@ -316,7 +314,7 @@ class JobController extends Controller
         $companyId = $this->resolveCompanyId($payload['company_id'] ?? null, $payload['company_code'] ?? null);
 
         // Validasi: code unik per company (abaikan baris saat ini)
-        $this->validateUniqueJobCodePerCompany($payload['code'], $job->id);
+        $this->validateUniqueJobCodeGlobal($payload['code'], $job->id);
 
         if ($siteId) {
             $this->checkUserCanUseSite($siteId);
@@ -453,40 +451,19 @@ class JobController extends Controller
         return null; // jobs boleh tanpa company
     }
 
-    /** Enforce unik (code) global — RFR code sama tidak boleh dipakai 2x, tanpa peduli company. */
-    private function validateUniqueJobCodePerCompany(string $code, ?string $ignoreJobId = null): void
+    /** Enforce unik (code) global — RFR/code yang sudah dipakai tidak boleh di-create lagi. */
+    private function validateUniqueJobCodeGlobal(string $code, ?string $ignoreJobId = null): void
     {
         $exists = Job::query()
             ->when($ignoreJobId, fn($q) => $q->where('id', '!=', $ignoreJobId))
-            ->where('code', $code)
+            ->where('code', trim($code))
             ->exists();
 
-        abort_if($exists, 422, 'Kode lowongan sudah dipakai.');
-    }
-
-    /** Kembalikan code unik: jika code sudah dipakai, tambahkan suffix -2, -3, dst. */
-    private function resolveUniqueJobCode(string $code, ?string $companyId = null, ?string $ignoreJobId = null): string
-    {
-        $candidate = trim($code);
-        $suffix = 2;
-
-        while ($this->jobCodeExists($candidate, $ignoreJobId)) {
-            $base = (string) preg_replace('/-\d+$/', '', $candidate);
-            $suffixText = '-' . $suffix;
-            // jaga panjang maks 50 karakter kolom `code`
-            $candidate = mb_substr($base, 0, 50 - mb_strlen($suffixText)) . $suffixText;
-            $suffix++;
+        if ($exists) {
+            throw ValidationException::withMessages([
+                'code' => 'Kode lowongan sudah dipakai. RFR ini sudah pernah dijadikan lowongan.',
+            ]);
         }
-
-        return $candidate;
-    }
-
-    private function jobCodeExists(string $code, ?string $ignoreJobId = null): bool
-    {
-        return Job::query()
-            ->when($ignoreJobId, fn($q) => $q->where('id', '!=', $ignoreJobId))
-            ->where('code', $code)
-            ->exists();
     }
 
     private function checkUserCanUseSite(string $siteId): void
