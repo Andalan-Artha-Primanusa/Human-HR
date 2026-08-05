@@ -107,11 +107,17 @@
                 <option value="">— Pilih RFR —</option>
                 @foreach(($rfrVacancies ?? []) as $rfr)
                   @php
-                    $educationLabel = collect([
-                      $rfr['education_level'] ?? null,
-                      $rfr['discipline'] ?? null,
-                      $rfr['program_study'] ?? null,
-                    ])->filter(fn($value) => filled($value) && trim((string) $value) !== '-')->implode(' / ');
+                    $educationLabels = collect($rfr['educations'] ?? [])
+                        ->map(function ($edu) {
+                            return collect([
+                                $edu['education_level'] ?? null,
+                                $edu['discipline'] ?? null,
+                                $edu['program_study'] ?? null,
+                            ])->filter(fn($value) => filled($value) && trim((string) $value) !== '-')->implode(' / ');
+                        })
+                        ->filter(fn($value) => filled($value))
+                        ->values();
+                    $educationLabel = $educationLabels->implode('  |  ');
                   @endphp
                   <option value="{{ $rfr['code'] }}"
                           data-title="{{ e($rfr['title']) }}"
@@ -135,7 +141,7 @@
               @if(empty($rfrVacancies))
                 <p class="mt-1 text-xs text-amber-700">Data RFR belum tersedia. Kamu tetap bisa isi Code manual.</p>
               @else
-                <p class="mt-1 text-xs text-slate-500">{{ count($rfrVacancies) }} row RFR ditemukan dari API. RFR yang sama tetap ditampilkan kalau detail pendidikan/jurusannya berbeda.</p>
+                <p class="mt-1 text-xs text-slate-500">{{ count($rfrVacancies) }} RFR ditemukan dari API, tiap RFR menampilkan detail pendidikan/jurusannya.</p>
               @endif
               @if(!empty($rfrMeta))
                 <p class="mt-1 text-[11px] text-slate-400 break-all">

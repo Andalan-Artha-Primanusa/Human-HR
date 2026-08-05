@@ -293,6 +293,79 @@ class MineproRfrService
         return Arr::flatten($results, 1);
     }
 
+    /**
+     * Parse hasil API RFR yang bisa berbentuk:
+     *  - dua bagian: [ [baris RFR...], [baris pendidikan...] ]  (format MinePro saat ini)
+     *  - flat list baris RFR
+     *  - single row asosiatif
+     *
+     * Mengembalikan [listBarisRFR, educationGroupedByRfrCode].
+     */
+    private function parseVacancyResponse(mixed $results): array
+    {
+        if (! is_array($results)) {
+            return [[], []];
+        }
+
+        // Single row asosiatif
+        if (isset($results['RFRRefID']) && isset($results['Position_Description'])) {
+            return [[$results], []];
+        }
+
+        $first = reset($results);
+
+        // Format dua bagian: index 0 = RFR headers, index 1 = education details
+        if (is_array($first) && array_is_list($results) && count($results) >= 2) {
+            $headers = $results[0];
+            $educationRows = $results[1];
+
+            if (is_array($headers) && is_array($educationRows)) {
+                $headersAreRfr = collect($headers)
+                    ->contains(fn($row) => is_array($row) && ! empty($row['Position_Description']));
+                $educationAreRows = collect($educationRows)
+                    ->contains(fn($row) => is_array($row) && ! empty($row['RFRRefID']));
+
+                if ($headersAreRfr && $educationAreRows) {
+                    return [
+                        array_values($headers),
+                        $this->groupEducationByRfr($educationRows),
+                    ];
+                }
+            }
+        }
+
+        // Flat list baris RFR (format lama)
+        if (is_array($first) && isset($first['RFRRefID'])) {
+            return [$results, []];
+        }
+
+        return [$this->resultRows($results), []];
+    }
+
+    /** Kelompokkan baris pendidikan berdasarkan RFRRefID, normalisasi field. */
+    private function groupEducationByRfr(array $rows): array
+    {
+        $grouped = [];
+
+        foreach ($rows as $row) {
+            if (! is_array($row) || empty($row['RFRRefID'])) {
+                continue;
+            }
+
+            $key = trim((string) $row['RFRRefID']);
+            $grouped[$key][] = [
+                'education_detail_id' => $row['EducationDetailID'] ?? null,
+                'education_type' => $row['TypeEducation'] ?? null,
+                'education_level' => $row['LevelEducation'] ?? null,
+                'discipline' => $row['Discipline'] ?? null,
+                'program_study' => $row['Program_Study'] ?? null,
+                'discipline_description' => $row['DisciplineDescription'] ?? null,
+            ];
+        }
+
+        return $grouped;
+    }
+
     public function approvedVacancies(string $startDate): array
     {
         $url = $this->normalizeRfrUrl((string) config('services.minepro.rfr_url'));
@@ -335,10 +408,28 @@ class MineproRfrService
                 return [];
             }
 
-            $rawRows = $this->resultRows($response->json('results', []));
-            $rows = collect($rawRows)
-                ->filter(fn($row) => is_array($row) && ! empty($row['RFRRefID']))
-                ->map(fn($row) => $this->normalizeRfr($row))
+            [$headerRows, $educationByRfr] = $this->parseVacancyResponse($response->json('results', []));
+
+            $rows = collect($headerRows)
+                ->filter(fn($row) => is_array($row) && ! empty($row['RFRRefID']) && ! empty($row['Position_Description']))
+                ->map(function (array $row) use ($educationByRfr) {
+                    $normalized = $this->normalizeRfr($row);
+
+                    $educations = $educationByRfr[$normalized['code']] ?? [];
+                    $normalized['educations'] = $educations;
+
+                    // Back-compat: isi field pendidikan utama dari pendidikan pertama
+                    if (($firstEdu = ($educations[0] ?? null)) !== null) {
+                        $normalized['education_level'] = $firstEdu['education_level'];
+                        $normalized['education_detail_id'] = $firstEdu['education_detail_id'];
+                        $normalized['education_type'] = $firstEdu['education_type'];
+                        $normalized['discipline'] = $firstEdu['discipline'];
+                        $normalized['program_study'] = $firstEdu['program_study'];
+                        $normalized['discipline_description'] = $firstEdu['discipline_description'];
+                    }
+
+                    return $normalized;
+                })
                 ->sortByDesc('posting_date')
                 ->values()
                 ->map(function (array $row, int $index) {
@@ -353,7 +444,7 @@ class MineproRfrService
                 'status' => $response->status(),
                 'url' => $url,
                 'start_date' => $startDate,
-                'raw_count' => count($rawRows),
+                'raw_count' => count($headerRows),
                 'count' => count($rows),
             ];
 

@@ -796,7 +796,8 @@
                 $name = (string) ($s['name'] ?? '-');
                 $dot = preg_match('/^#([0-9a-f]{3}|[0-9a-f]{6})$/i', (string) ($s['dot'] ?? '')) ? $s['dot'] : '#a77d52';
                 $param = $s['code'] ?? $s['id'] ?? $name;
-                return ['name' => $name, 'dot' => $dot, 'param' => $param];
+                $id = (string) ($s['id'] ?? '');
+                return ['name' => $name, 'dot' => $dot, 'param' => $param, 'id' => $id];
             })->values();
         $sitesTicker = $sitesNorm->concat($sitesNorm);
     @endphp
@@ -808,9 +809,23 @@
 
         @if($sitesNorm->isNotEmpty())
               {{-- PETA INTERAKTIF --}}
+              @if(($sitesWithCoords ?? collect())->filter(fn($s) => is_numeric($s['latitude'] ?? null) && is_numeric($s['longitude'] ?? null))->isNotEmpty())
               <div id="sites-map" class="w-full mb-6 overflow-hidden border shadow-md h-96 rounded-2xl"
                 style="border-color: #f4f0eb" role="region" aria-label="Peta lokasi site PT Andalan Artha Primanusa">
               </div>
+              @else
+              {{-- FALLBACK: daftar site sebagai kartu saat koordinat belum tersedia --}}
+              <div class="grid gap-3 mb-6 sm:grid-cols-2 lg:grid-cols-3">
+                @foreach($sitesNorm as $s)
+                  <a href="{{ $s['id'] ? route('sites.show', $s['id']) : route('sites.index') }}"
+                    class="flex items-center gap-3 px-4 py-3 rounded-2xl border transition hover:shadow-md"
+                    style="border-color: #f4f0eb; background: #fff">
+                    <span class="inline-block w-3 h-3 rounded-full shrink-0" style="background: {{ $s['dot'] }}"></span>
+                    <span class="text-sm font-medium" style="color: #1f2937">{{ $s['name'] }}</span>
+                  </a>
+                @endforeach
+              </div>
+              @endif
 
               <div class="site-marquee" role="presentation" aria-hidden="true">
                 <div class="site-marquee__track">
