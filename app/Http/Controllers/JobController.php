@@ -236,9 +236,9 @@ class JobController extends Controller
         $siteId = $this->resolveSiteId($payload['site_id'] ?? null, $payload['site_code'] ?? null);
         $companyId = $this->resolveCompanyId($payload['company_id'] ?? null, $payload['company_code'] ?? null);
 
-        // Validasi: code unik per company → auto-generate suffix bila RFR/code sudah dipakai
+        // Validasi: code unik global → auto-generate suffix bila RFR/code sudah dipakai
         $requestedCode = $payload['code'];
-        $payload['code'] = $this->resolveUniqueJobCode($payload['code'], $companyId);
+        $payload['code'] = $this->resolveUniqueJobCode($payload['code']);
 
         $this->checkUserCanUseSite($siteId);
 
@@ -316,7 +316,7 @@ class JobController extends Controller
         $companyId = $this->resolveCompanyId($payload['company_id'] ?? null, $payload['company_code'] ?? null);
 
         // Validasi: code unik per company (abaikan baris saat ini)
-        $this->validateUniqueJobCodePerCompany($payload['code'], $companyId, $job->id);
+        $this->validateUniqueJobCodePerCompany($payload['code'], $job->id);
 
         if ($siteId) {
             $this->checkUserCanUseSite($siteId);
@@ -453,31 +453,24 @@ class JobController extends Controller
         return null; // jobs boleh tanpa company
     }
 
-    /** Enforce unik (company_id, code). Jika $companyId null → unik untuk company_id NULL saja (ikut perilaku DB). */
-    private function validateUniqueJobCodePerCompany(string $code, ?string $companyId, ?string $ignoreJobId = null): void
+    /** Enforce unik (code) global — RFR code sama tidak boleh dipakai 2x, tanpa peduli company. */
+    private function validateUniqueJobCodePerCompany(string $code, ?string $ignoreJobId = null): void
     {
         $exists = Job::query()
             ->when($ignoreJobId, fn($q) => $q->where('id', '!=', $ignoreJobId))
             ->where('code', $code)
-            ->where(function ($q) use ($companyId) {
-                if (is_null($companyId)) {
-                    $q->whereNull('company_id');
-                } else {
-                    $q->where('company_id', $companyId);
-                }
-            })
             ->exists();
 
-        abort_if($exists, 422, 'Kode lowongan sudah dipakai pada company tersebut.');
+        abort_if($exists, 422, 'Kode lowongan sudah dipakai.');
     }
 
-    /** Kembalikan code unik: jika code sudah dipakai (per company), tambahkan suffix -2, -3, dst. */
-    private function resolveUniqueJobCode(string $code, ?string $companyId, ?string $ignoreJobId = null): string
+    /** Kembalikan code unik: jika code sudah dipakai, tambahkan suffix -2, -3, dst. */
+    private function resolveUniqueJobCode(string $code, ?string $companyId = null, ?string $ignoreJobId = null): string
     {
         $candidate = trim($code);
         $suffix = 2;
 
-        while ($this->jobCodeExists($candidate, $companyId, $ignoreJobId)) {
+        while ($this->jobCodeExists($candidate, $ignoreJobId)) {
             $base = (string) preg_replace('/-\d+$/', '', $candidate);
             $suffixText = '-' . $suffix;
             // jaga panjang maks 50 karakter kolom `code`
@@ -488,18 +481,11 @@ class JobController extends Controller
         return $candidate;
     }
 
-    private function jobCodeExists(string $code, ?string $companyId, ?string $ignoreJobId = null): bool
+    private function jobCodeExists(string $code, ?string $ignoreJobId = null): bool
     {
         return Job::query()
             ->when($ignoreJobId, fn($q) => $q->where('id', '!=', $ignoreJobId))
             ->where('code', $code)
-            ->where(function ($q) use ($companyId) {
-                if (is_null($companyId)) {
-                    $q->whereNull('company_id');
-                } else {
-                    $q->where('company_id', $companyId);
-                }
-            })
             ->exists();
     }
 
