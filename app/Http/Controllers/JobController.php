@@ -236,8 +236,9 @@ class JobController extends Controller
         $siteId = $this->resolveSiteId($payload['site_id'] ?? null, $payload['site_code'] ?? null);
         $companyId = $this->resolveCompanyId($payload['company_id'] ?? null, $payload['company_code'] ?? null);
 
-        // Validasi: code unik per company
-        $this->validateUniqueJobCodePerCompany($payload['code'], $companyId);
+        // Validasi: code unik per company → auto-generate suffix bila RFR/code sudah dipakai
+        $requestedCode = $payload['code'];
+        $payload['code'] = $this->resolveUniqueJobCode($payload['code'], $companyId);
 
         $this->checkUserCanUseSite($siteId);
 
@@ -277,11 +278,13 @@ class JobController extends Controller
             return response()->json([
                 'message' => 'Job created (openings disinkron dari manpower).',
                 'job' => $job,
+                'code_renamed' => $requestedCode !== $payload['code'],
                 'redirect' => route('admin.jobs.index'),
             ], 201);
         }
 
-        return redirect()->route('admin.jobs.index')->with('success', 'Job created.');
+        $note = $requestedCode !== $payload['code'] ? ' (code diganti menjadi ' . $payload['code'] . ' karena sudah dipakai)' : '';
+        return redirect()->route('admin.jobs.index')->with('success', 'Job created.' . $note);
     }
 
     /**
@@ -466,6 +469,38 @@ class JobController extends Controller
             ->exists();
 
         abort_if($exists, 422, 'Kode lowongan sudah dipakai pada company tersebut.');
+    }
+
+    /** Kembalikan code unik: jika code sudah dipakai (per company), tambahkan suffix -2, -3, dst. */
+    private function resolveUniqueJobCode(string $code, ?string $companyId, ?string $ignoreJobId = null): string
+    {
+        $candidate = trim($code);
+        $suffix = 2;
+
+        while ($this->jobCodeExists($candidate, $companyId, $ignoreJobId)) {
+            $base = (string) preg_replace('/-\d+$/', '', $candidate);
+            $suffixText = '-' . $suffix;
+            // jaga panjang maks 50 karakter kolom `code`
+            $candidate = mb_substr($base, 0, 50 - mb_strlen($suffixText)) . $suffixText;
+            $suffix++;
+        }
+
+        return $candidate;
+    }
+
+    private function jobCodeExists(string $code, ?string $companyId, ?string $ignoreJobId = null): bool
+    {
+        return Job::query()
+            ->when($ignoreJobId, fn($q) => $q->where('id', '!=', $ignoreJobId))
+            ->where('code', $code)
+            ->where(function ($q) use ($companyId) {
+                if (is_null($companyId)) {
+                    $q->whereNull('company_id');
+                } else {
+                    $q->where('company_id', $companyId);
+                }
+            })
+            ->exists();
     }
 
     private function checkUserCanUseSite(string $siteId): void
