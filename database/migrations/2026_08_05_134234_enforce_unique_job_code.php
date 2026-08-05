@@ -17,6 +17,12 @@ return new class extends Migration
     {
         $this->dedupeExistingCodes();
 
+        // FK `company_id` memakai index unique lama sebagai backing index.
+        // Buat index biasa dulu agar FK tetap valid setelah index unique di-drop.
+        Schema::table('job_listings', function (Blueprint $table) {
+            $table->index('company_id', 'jobs_company_id_idx');
+        });
+
         Schema::table('job_listings', function (Blueprint $table) {
             $table->dropUnique('jobs_company_code_unique');
         });
@@ -34,6 +40,10 @@ return new class extends Migration
 
         Schema::table('job_listings', function (Blueprint $table) {
             $table->unique(['company_id', 'code'], 'jobs_company_code_unique');
+        });
+
+        Schema::table('job_listings', function (Blueprint $table) {
+            $table->dropIndex('jobs_company_id_idx');
         });
     }
 
