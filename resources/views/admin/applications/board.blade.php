@@ -26,22 +26,25 @@
 
 /* ===== PAGE HEADER (pakai shared .page-header komponen) ===== */
 
-/* ===== FILTER BAR ===== */
+/* ===== FILTER BAR — kartu putih konsisten dgn halaman admin lain ===== */
 .kn-filter {
-  display: flex; flex-wrap: wrap; gap: .6rem; align-items: center;
-  background: #fff; border-bottom: 1px solid #e2d9cf;
-  padding: .75rem 1.5rem;
+  display: flex; flex-wrap: wrap; gap: .75rem; align-items: center;
+  background: #fff;
+  border: 1px solid #ede4dc;
+  border-radius: 1rem;
+  padding: 1rem 1.25rem;
   position: sticky;
   top: 0;
   z-index: 20;
-  box-shadow: 0 8px 18px -18px rgba(107,63,31,.35);
+  box-shadow: 0 1px 2px rgba(48,31,15,.06), 0 2px 8px rgba(48,31,15,.05);
+  margin-bottom: 1rem;
 }
 .kn-filter input,
 .kn-filter select {
-  border: 1.5px solid #d4c4b0; border-radius: .55rem;
-  padding: .42rem .85rem; font-size: .82rem;
-  background: #faf7f4; color: #5a3e28; outline: none;
-  min-width: 140px;
+  border: 1px solid #e2d9cf; border-radius: .75rem;
+  padding: .75rem 1rem; font-size: .875rem;
+  background: #fff; color: #5a3e28; outline: none;
+  min-width: 160px;
   transition: border-color .15s, box-shadow .15s;
 }
 .kn-filter input:focus,
@@ -49,14 +52,7 @@
   border-color: var(--br-light);
   box-shadow: 0 0 0 3px rgba(167,125,82,.18);
 }
-.kn-filter .btn-filter {
-  background: #a77d52;
-  color: #fff; border: none; border-radius: .55rem;
-  padding: .44rem 1.1rem; font-size: .82rem; font-weight: 700;
-  cursor: pointer; letter-spacing: .2px;
-  transition: opacity .15s;
-}
-.kn-filter .btn-filter:hover { opacity: .9; }
+.kn-filter .btn-filter { align-self: flex-start; }
 
 /* ===== MAIN WRAPPER — FIX UTAMA ===== */
 .kn-wrap {
@@ -74,7 +70,7 @@
   padding: 1.25rem 2.2rem 1.5rem;
   -webkit-overflow-scrolling: touch;
   width: 100%;
-  height: calc(100vh - 235px);
+  height: calc(100vh - 275px);
   min-height: 560px;
   box-sizing: border-box;
   /* TIDAK pakai flex:1 */
@@ -401,8 +397,8 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
     description="Drag &amp; drop kartu antar stage. Klik Schedule untuk kirim undangan interview. Klik View Feedback untuk melihat penilaian."
     style="margin-bottom: 0;"></x-admin.page-header>
 
-  {{-- FILTER --}}
-  <form method="GET" class="kn-filter">
+  {{-- FILTER / TOOLBAR — konsisten dgn halaman admin lain --}}
+  <form method="GET" class="kn-filter" role="search" aria-label="Filter Kanban">
     <input name="q" value="{{ request('q') }}" placeholder="Cari nama / posisi..." />
     <select name="only">
       <option value="">Semua Stage</option>
@@ -412,7 +408,7 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
     </select>
     <input type="date" name="minepro_start_date" value="{{ $mineproStartDate ?? now()->startOfMonth()->format('Y-m-d') }}" title="StartDate MinePro" />
     <input type="date" name="minepro_end_date" value="{{ $mineproEndDate ?? now()->endOfMonth()->format('Y-m-d') }}" title="EndDate MinePro" />
-    <button type="submit" class="btn-filter">Filter</button>
+    <button type="submit" class="abtn abtn-primary btn-filter">Filter</button>
   </form>
   <div class="mb-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-900">
     Board memakai API MinePro RFR Process sebagai sumber stage.

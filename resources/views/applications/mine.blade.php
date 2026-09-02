@@ -114,93 +114,79 @@
 
     <div class="px-4 py-6 mx-auto max-w-7xl sm:px-6 lg:px-8">
 
-      {{-- HEADER --}}
-      <section class="overflow-hidden border shadow-sm rounded-2xl border-[#ead8c5]"
-               style="background: linear-gradient(135deg, #ffffff 0%, #fffaf5 58%, #f7ede3 100%);">
+      {{-- HEADER — shared component --}}
+      <x-admin.page-header eyebrow="Dashboard Pelamar" title="Lamaran Saya"
+        description="Pantau progres seleksi, jadwal interview, dan offering dari satu halaman.">
+        <a href="{{ route('jobs.index') }}" class="ph-action">
+          Cari Lowongan
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M13 5l7 7-7 7"/></svg>
+        </a>
+      </x-admin.page-header>
 
-        <div class="flex flex-col gap-4 p-6 md:flex-row md:items-center md:justify-between">
-          <div class="min-w-0">
-            <div class="inline-flex items-center gap-2 rounded-full bg-white/80 px-3 py-1 text-xs font-semibold text-[#8b5e3c] ring-1 ring-[#ead8c5]">
-              <svg class="w-4 h-4" aria-hidden="true"><use href="#i-brief"/></svg>
-              Dashboard Pelamar
-            </div>
-            <h1 class="mt-3 text-2xl font-bold text-slate-950 md:text-4xl">Lamaran Saya</h1>
-            <p class="mt-1 text-sm text-slate-600">Pantau progres seleksi, jadwal interview, dan offering dari satu halaman.</p>
-          </div>
+      {{-- STATS --}}
+      <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
+           style="border-color: {{ $BORD }}">
 
-          <a href="{{ route('jobs.index') }}"
-             class="inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold text-white shadow-sm hover:brightness-105"
-             style="background: linear-gradient(90deg, {{ $PRIMARY }} 0%, {{ $PRIMARY_DARK }} 100%);">
-             Cari Lowongan
-             <svg class="w-4 h-4" aria-hidden="true"><use href="#i-arrow"/></svg>
-          </a>
-        </div>
+        @php
+          $stats = [
+              ['Total', $summary['total'], $TEXT, 'users'],
+              ['Aktif', $summary['active'], $PRIMARY, 'clock'],
+              ['Hired', $summary['hired'], '#16a34a', 'check'],
+              ['Rejected', $summary['rejected'], '#dc2626', 'x'],
+          ];
+        @endphp
 
-    {{-- STATS --}}
-    <div class="grid gap-4 p-5 border-t sm:grid-cols-2 xl:grid-cols-4"
-         style="border-color: {{ $BORD }}; background: #ffffff">
+        @foreach($stats as [$label, $val, $color, $icon])
+            <div class="flex items-center gap-4 px-4 py-4 transition border rounded-xl bg-white shadow-sm hover:shadow-md"
+                 style="border-color: {{ $BORD }}">
 
-      @php
-        $stats = [
-            ['Total', $summary['total'], $TEXT, 'users'],
-            ['Aktif', $summary['active'], $PRIMARY, 'clock'],
-            ['Hired', $summary['hired'], '#16a34a', 'check'],
-            ['Rejected', $summary['rejected'], '#dc2626', 'x'],
-        ];
-      @endphp
+              {{-- ICON --}}
+              <div class="p-2 rounded-lg"
+                   style="background: {{ $color }}20; color: {{ $color }}">
 
-      @foreach($stats as [$label, $val, $color, $icon])
-          <div class="flex items-center gap-4 px-4 py-4 transition border rounded-xl bg-[#fffaf5] hover:shadow-md"
-               style="border-color: {{ $BORD }}">
+                @if($icon === 'users')
+                  <!-- Users -->
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none"
+                       viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M17 20h5v-1a4 4 0 00-5-3.87M9 20H4v-1a4 4 0 015-3.87m0 0a4 4 0 110-8 4 4 0 010 8zm8 0a4 4 0 10-8 0"/>
+                  </svg>
+                @elseif($icon === 'clock')
+                  <!-- Clock -->
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none"
+                       viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
+                @elseif($icon === 'check')
+                  <!-- Check -->
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none"
+                       viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M5 13l4 4L19 7"/>
+                  </svg>
+                @elseif($icon === 'x')
+                  <!-- X -->
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none"
+                       viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M6 18L18 6M6 6l12 12"/>
+                  </svg>
+                @endif
 
-            {{-- ICON --}}
-            <div class="p-2 rounded-lg"
-                 style="background: {{ $color }}20; color: {{ $color }}">
-
-              @if($icon === 'users')
-                <!-- Users -->
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none"
-                     viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M17 20h5v-1a4 4 0 00-5-3.87M9 20H4v-1a4 4 0 015-3.87m0 0a4 4 0 110-8 4 4 0 010 8zm8 0a4 4 0 10-8 0"/>
-                </svg>
-              @elseif($icon === 'clock')
-                <!-- Clock -->
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none"
-                     viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-              @elseif($icon === 'check')
-                <!-- Check -->
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none"
-                     viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M5 13l4 4L19 7"/>
-                </svg>
-              @elseif($icon === 'x')
-                <!-- X -->
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none"
-                     viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M6 18L18 6M6 6l12 12"/>
-                </svg>
-              @endif
-
-            </div>
-
-            {{-- TEXT --}}
-            <div>
-              <div class="text-xs text-slate-500">{{ $label }}</div>
-              <div class="text-2xl font-semibold" style="color: {{ $color }}">
-                {{ $val }}
               </div>
-            </div>
 
-          </div>
-      @endforeach
-    </div>
-      </section>
+              {{-- TEXT --}}
+              <div>
+                <div class="text-xs text-slate-500">{{ $label }}</div>
+                <div class="text-2xl font-semibold" style="color: {{ $color }}">
+                  {{ $val }}
+                </div>
+              </div>
+
+            </div>
+        @endforeach
+      </div>
 
       {{-- GRID --}}
       <section class="grid gap-5 mt-6 lg:grid-cols-2 xl:grid-cols-3">
@@ -216,7 +202,7 @@
 
                   {{-- STRIP --}}
                   <div class="h-1.5 rounded-t-2xl"
-                       style="background: linear-gradient(90deg, {{ $PRIMARY }} 0%, {{ $PRIMARY_DARK }} 100%);"></div>
+                       style="background: {{ $PRIMARY }};"></div>
 
             <div class="p-5">
 
@@ -279,7 +265,7 @@
                 {{-- BAR --}}
                 <div class="h-2.5 overflow-hidden bg-white rounded-full ring-1 ring-slate-200">
                   <div class="h-full transition-all duration-500 rounded-full"
-                       style="width: {{ $pct }}%; background: linear-gradient(90deg, {{ $PRIMARY }} 0%, {{ $PRIMARY_DARK }} 100%);">
+                       style="width: {{ $pct }}%; background: {{ $PRIMARY }};">
                   </div>
                 </div>
               </div>
@@ -384,7 +370,7 @@
       @if(!$apps->count())
           <div class="mt-6 overflow-hidden border bg-white text-center shadow-sm rounded-2xl"
                style="border-color: {{ $BORD }}">
-            <div class="p-8" style="background: linear-gradient(135deg, #ffffff 0%, #fffaf5 100%);">
+            <div class="p-8" style="background: {{ $CARD }};">
             <div class="mx-auto grid h-14 w-14 place-items-center rounded-full bg-white text-[#a77d52] ring-1 ring-[#ead8c5]">
               <svg class="h-7 w-7" aria-hidden="true"><use href="#i-brief"/></svg>
             </div>
@@ -394,15 +380,13 @@
             </p>
             <div class="flex flex-wrap justify-center gap-2 mt-4">
               <a href="{{ route('jobs.index') }}"
-                 class="rounded-xl px-5 py-3 text-sm font-semibold text-white shadow-sm hover:brightness-105"
-                 style="background: linear-gradient(90deg, {{ $PRIMARY }} 0%, {{ $PRIMARY_DARK }} 100%);">
+                 class="abtn abtn-primary">
                 Cari Lowongan
               </a>
               @if(Route::has('candidate.profiles.edit'))
                 @if(!empty($latestOpenJob))
                   <a href="{{ route('candidate.profiles.edit', ['job' => $latestOpenJob->id]) }}"
-                     class="rounded-xl border bg-white px-5 py-3 text-sm font-semibold hover:bg-[#fffaf5]"
-                     style="border-color: {{ $PRIMARY }}; color: {{ $PRIMARY }}">
+                     class="abtn abtn-neutral">
                     Lengkapi Profil
                   </a>
                 @endif
