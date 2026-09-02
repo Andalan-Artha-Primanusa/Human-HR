@@ -322,115 +322,103 @@
         </div>
       </nav>
 
-{{-- HEADER --}}
-      <div class="overflow-hidden border shadow-sm rounded-2xl" style="background:#ffffff;border-color:#ead8c5">
-        <div class="flex w-full h-2"><div class="flex-1" style="background: {{ $ACCENT }}"></div><div class="w-32" style="background: {{ $ACCENT_DARK }}"></div></div>
-
-        <div class="p-5 md:p-6">
-          <div class="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
-            <div class="min-w-0">
-              <h1 class="text-2xl font-bold leading-tight md:text-4xl text-slate-950">{{ e($job->title) ?? '—' }}</h1>
-
-              <div class="flex flex-wrap items-center gap-2 mt-3 text-sm text-slate-600">
-                <span class="inline-flex items-center gap-1">
-                  <svg class="w-4 h-4 text-slate-500" aria-hidden="true"><use href="#i-brief"/></svg>
-                  {{ e($job->division ?: '—') }}
-                </span>
-                <span class="text-slate-300">•</span>
-                <span class="inline-flex items-center gap-1">
-                  <svg class="w-4 h-4 text-slate-500" aria-hidden="true"><use href="#i-pin"/></svg>
-                  {{ e($job->site?->code ? ($job->site->code . ' — ' . ($job->site->name ?? '')) : '—') }}
-                </span>
-                @if($closingAt)
-                      <span class="text-slate-300">•</span>
-                      <span class="inline-flex items-center gap-1">
-                        <svg class="w-4 h-4 text-slate-500" aria-hidden="true"><use href="#i-clock"/></svg>
-                        Tutup: {{ e(Carbon::parse($closingAt)->timezone($TZ)->format('d M Y, H:i')) }} {{ $abbrTz($TZ) }}
-                      </span>
-                @endif
-              </div>
-
-              <div class="flex flex-wrap items-center gap-2 mt-4 text-xs">
-                <span class="rounded-full bg-white/80 px-3 py-1.5 font-semibold text-[#8b5e3c] ring-1 ring-inset ring-[#e6d4c0]">
-                  Diposting: {{ e(optional($job->created_at)->timezone($TZ)->format('d M Y, H:i') ?? '—') }}
-                </span>
-                <span class="rounded-full bg-white/70 px-3 py-1.5 font-semibold text-[#7a5236] ring-1 ring-inset ring-[#ddc6b0]">
-                  Diubah: {{ e(optional($job->updated_at)->timezone($TZ)->format('d M Y, H:i') ?? '—') }}
-                </span>
-                @if(isset($job->applications_count))
-                      <span class="rounded-full bg-white/80 px-3 py-1.5 font-semibold text-slate-700 ring-1 ring-inset ring-slate-200">
-                        Jumlah Pelamar: {{ (int) $job->applications_count }}
-                      </span>
-                @endif
-                @if($countdownText)
-                      <span class="rounded-full bg-amber-50 px-3 py-1.5 font-semibold text-amber-700 ring-1 ring-inset ring-amber-200">
-                        Tutup: {{ e($countdownText) }}
-                      </span>
-                @endif
-              </div>
+{{-- HEADER (shared solid-brown page-header) --}}
+      <section class="page-header" aria-labelledby="job-detail-title">
+        <div class="page-header__inner">
+          <div class="page-header__copy">
+            <p class="page-header__eyebrow">Detail Lowongan</p>
+            <div class="flex flex-wrap items-center gap-2">
+              <h1 id="job-detail-title" class="page-header__title">{{ e($job->title) ?? '—' }}</h1>
+              @if(($job->status ?? '') === 'open')
+                <span class="rounded-full bg-white/20 px-2.5 py-0.5 text-[11px] font-semibold text-white ring-1 ring-inset ring-white/40">Buka</span>
+              @else
+                <span class="rounded-full bg-white/20 px-2.5 py-0.5 text-[11px] font-semibold text-white ring-1 ring-inset ring-white/40">Tutup</span>
+              @endif
             </div>
 
-            {{-- CTA kandidat + admin quick actions --}}
-            <div class="flex flex-wrap items-center gap-2 md:pt-4">
-              @if($isAdmin)
-                @if(Route::has('admin.jobs.edit'))
-                      <a href="{{ route('admin.jobs.edit', $job) }}" class="px-4 py-2 text-sm font-semibold bg-white border rounded-xl border-slate-200 hover:bg-slate-50">Edit</a>
-                @endif
-                @if(Route::has('admin.applications.index'))
-                      <a href="{{ route('admin.applications.index', ['job' => $job->id]) }}" class="px-4 py-2 text-sm font-semibold bg-white border rounded-xl border-slate-200 hover:bg-slate-50">Kandidat</a>
-                @endif
-                @if(Route::has('admin.jobs.toggle'))
-                      <form method="POST" action="{{ route('admin.jobs.toggle', $job) }}" onsubmit="return confirm('Ubah status lowongan?');">
-                        @csrf @method('PATCH')
-                        <button type="submit" class="px-4 py-2 text-sm font-semibold bg-white border rounded-xl border-slate-200 hover:bg-slate-50">
-                          {{ ($job->status === 'open') ? 'Tutup' : 'Buka' }}
-                        </button>
-                      </form>
-                @endif
+            <p class="page-header__desc">
+              <span class="inline-flex items-center gap-1"><svg class="w-3.5 h-3.5" aria-hidden="true"><use href="#i-brief"/></svg> {{ e($job->division ?: '—') }}</span>
+              <span class="mx-1.5 opacity-50">•</span>
+              <span class="inline-flex items-center gap-1"><svg class="w-3.5 h-3.5" aria-hidden="true"><use href="#i-pin"/></svg> {{ e($job->site?->code ? ($job->site->code . ' — ' . ($job->site->name ?? '')) : '—') }}</span>
+              @if($closingAt)
+                <span class="mx-1.5 opacity-50">•</span>
+                <span class="inline-flex items-center gap-1"><svg class="w-3.5 h-3.5" aria-hidden="true"><use href="#i-clock"/></svg> Tutup: {{ e(Carbon::parse($closingAt)->timezone($TZ)->format('d M Y, H:i')) }} {{ $abbrTz($TZ) }}</span>
               @endif
+            </p>
 
-              @auth
-                @if(!$emailVerifiedForApplication)
-                      <a href="{{ route('verification.notice') }}"
-                         class="px-5 py-3 text-sm font-semibold text-white rounded-xl shadow-sm hover:brightness-105"
-                         style="background: {{ $ACCENT_DARK }}">
-                        Verifikasi Email Dulu
-                      </a>
-                @elseif(($job->status ?? 'draft') === 'open' && !$myApp)
-                      <form method="POST" action="{{ route('applications.store', $job) }}" id="applyForm" class="inline">@csrf
-                        <button class="px-5 py-3 text-sm font-semibold text-white rounded-xl shadow-sm hover:brightness-105"
-                                style="background: {{ $ACCENT }};">
-                          Lamar Sekarang
-                        </button>
-                      </form>
-                @elseif($myApp)
-                    <div class="flex flex-col gap-2 sm:flex-row">
-                      <a href="{{ route('applications.mine') }}"
-                         class="px-5 py-3 text-sm font-semibold text-white rounded-xl shadow-sm hover:brightness-105"
-                         style="background: {{ $ACCENT_DARK }}">
-                        Lihat Progres
-                      </a>
-                      @if(Route::has('candidate.profiles.edit'))
-                        <a href="{{ route('candidate.profiles.edit', $job) }}"
-                           class="px-5 py-3 text-sm font-semibold bg-white border rounded-xl border-[#ead8c5] text-[#8b5e3c] shadow-sm hover:bg-[#fffaf5]">
-                          Perbarui Profil
-                        </a>
-                      @endif
-                    </div>
-                @else
-                      <button disabled class="px-5 py-3 text-sm font-semibold text-white rounded-xl opacity-60" style="background: {{ $ACCENT_DARK }}">Tutup</button>
-                @endif
-              @else
-                <a class="px-5 py-3 text-sm font-semibold text-white rounded-xl shadow-sm hover:brightness-105"
-                   style="background: {{ $ACCENT }};"
-                   href="{{ route('login') }}">
-                  Login untuk Melamar
-                </a>
-              @endauth
+            <div class="flex flex-wrap items-center gap-2 mt-3">
+              <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-semibold" style="background:rgba(255,255,255,.15);color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.3)">Diposting: {{ $formatTs($job->created_at) ?? '—' }}</span>
+              <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-semibold" style="background:rgba(255,255,255,.12);color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.25)">Diubah: {{ $formatTs($job->updated_at) ?? '—' }}</span>
+              @if(isset($job->applications_count))
+                <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-semibold" style="background:rgba(255,255,255,.15);color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.3)">Pelamar: {{ (int) $job->applications_count }}</span>
+              @endif
+              @if($countdownText)
+                <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-semibold text-amber-100" style="background:rgba(245,158,11,.25);box-shadow:inset 0 0 0 1px rgba(245,158,11,.5)">Tutup: {{ e($countdownText) }}</span>
+              @endif
             </div>
           </div>
+
+          <div class="page-header__actions">
+            @if($isAdmin)
+              @if(Route::has('admin.jobs.edit'))
+                    <a href="{{ route('admin.jobs.edit', $job) }}" class="ph-action">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                      Edit
+                    </a>
+              @endif
+              @if(Route::has('admin.applications.index'))
+                    <a href="{{ route('admin.applications.index', ['job' => $job->id]) }}" class="ph-action">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg>
+                      Kandidat
+                    </a>
+              @endif
+              @if(Route::has('admin.jobs.toggle'))
+                    <form method="POST" action="{{ route('admin.jobs.toggle', $job) }}" onsubmit="return confirm('Ubah status lowongan?');" class="inline">
+                      @csrf @method('PATCH')
+                      <button type="submit" class="ph-action">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12"/><path d="M5 10 12 3l7 7"/><path d="M5 21h14"/></svg>
+                        {{ ($job->status === 'open') ? 'Tutup' : 'Buka' }}
+                      </button>
+                    </form>
+              @endif
+            @endif
+
+            @auth
+              @if(!$emailVerifiedForApplication)
+                    <a href="{{ route('verification.notice') }}" class="ph-action ph-action--brand">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                      Verifikasi Email Dulu
+                    </a>
+              @elseif(($job->status ?? 'draft') === 'open' && !$myApp)
+                    <form method="POST" action="{{ route('applications.store', $job) }}" id="applyForm" class="inline">@csrf
+                      <button type="submit" class="ph-action ph-action--brand">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
+                        Lamar Sekarang
+                      </button>
+                    </form>
+              @elseif($myApp)
+                    <a href="{{ route('applications.mine') }}" class="ph-action">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
+                      Lihat Progres
+                    </a>
+                    @if(Route::has('candidate.profiles.edit'))
+                      <a href="{{ route('candidate.profiles.edit', $job) }}" class="ph-action">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        Perbarui Profil
+                      </a>
+                    @endif
+              @else
+                    <button type="button" disabled class="ph-action" aria-disabled="true">Tutup</button>
+              @endif
+            @else
+              <a href="{{ route('login') }}" class="ph-action ph-action--brand">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/></svg>
+                Login untuk Melamar
+              </a>
+            @endauth
+          </div>
         </div>
-      </div>
+      </section>
 
       {{-- GRID UTAMA --}}
       <div class="mt-6 space-y-6">
@@ -556,8 +544,8 @@
 
               <div class="rounded-xl border border-[#eeddC9] bg-[#fdf7f0] p-3 sm:grid sm:grid-cols-3 sm:gap-2">
                 <dt class="text-xs font-semibold uppercase tracking-wide text-[#8b5e3c]">Diposting</dt>
-                <dd class="col-span-2 text-slate-800">
-                  {{ e(optional($job->created_at)->timezone($TZ)->format('d M Y, H:i') ?? '—') }}
+<dd class="col-span-2 text-slate-800">
+                  {{ $formatTs($job->created_at) ?? '—' }}
                   @if($createdByName) · oleh <span class="font-medium">{{ e($createdByName) }}</span>@endif
                 </dd>
               </div>
@@ -565,7 +553,7 @@
               <div class="rounded-xl border border-[#eeddC9] bg-[#fdf7f0] p-3 sm:grid sm:grid-cols-3 sm:gap-2">
                 <dt class="text-xs font-semibold uppercase tracking-wide text-[#8b5e3c]">Diubah</dt>
                 <dd class="col-span-2 text-slate-800">
-                  {{ e(optional($job->updated_at)->timezone($TZ)->format('d M Y, H:i') ?? '—') }}
+                  {{ $formatTs($job->updated_at) ?? '—' }}
                   @if($updatedByName) · oleh <span class="font-medium">{{ e($updatedByName) }}</span>@endif
                 </dd>
               </div>

@@ -105,6 +105,17 @@
   .page-header a.ph-action:hover { background-color: #f7efe1 !important; box-shadow: 0 3px 10px rgba(48,31,15,.18); }
   .page-header__actions .ph-action:active { transform: translateY(1px); }
   .page-header__actions .ph-action svg { width: 1.05rem; height: 1.05rem; flex-shrink: 0; }
+  /* Primary CTA pada page-header (mis. "Lamar Sekarang") — solid brown, putih teks */
+  .page-header__actions .ph-action--brand,
+  .page-header a.ph-action--brand,
+  .page-header__actions button.ph-action--brand {
+    background-color: #a77d52 !important;
+    color: #fff !important;
+    box-shadow: 0 3px 10px rgba(48,31,15,.28);
+  }
+  .page-header__actions .ph-action--brand:hover,
+  .page-header a.ph-action--brand:hover { background-color: #8b5e3c !important; box-shadow: 0 4px 12px rgba(48,31,15,.32); }
+  .page-header__actions button.ph-action--brand:disabled { opacity: .6; cursor: not-allowed; }
   /* Meta info kanan (mis. Last Updated) */
   .page-header__meta { text-align: right; color: rgba(255,255,255,.92) !important; }
   .page-header__meta .label { margin: 0; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: rgba(255,255,255,.7) !important; }
