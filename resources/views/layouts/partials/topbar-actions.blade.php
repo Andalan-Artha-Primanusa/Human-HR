@@ -1,8 +1,6 @@
 {{-- resources/views/layouts/partials/topbar-actions.blade.php --}}
 @php
     use Illuminate\Support\Facades\Schema;
-    use Illuminate\Support\Facades\DB;
-    use Illuminate\Support\Str;
 
     /** @var \App\Models\User|null $u */
     $u = auth()->user();
@@ -20,46 +18,6 @@
         }
     }
 
-    // ====== Upcoming Interviews (punya user) - initial ======
-    $interviewUpcoming = 0;
-    $interviewItems = collect();
-    if ($u && Schema::hasTable('interviews') && Schema::hasTable('job_applications')) {
-        try {
-            $base = DB::table('interviews')
-                ->join('job_applications', 'interviews.application_id', '=', 'job_applications.id')
-                ->where('job_applications.user_id', $u->id)
-                ->orderBy('interviews.start_at', 'asc');
-
-            $interviewUpcoming = (clone $base)->where('interviews.start_at', '>=', now())->count();
-
-            $interviewItems = (clone $base)
-                ->where('interviews.start_at', '>=', now()->subDays(7))
-                ->select([
-                    'interviews.id',
-                    'interviews.title',
-                    'interviews.mode',
-                    'interviews.location',
-                    'interviews.meeting_link',
-                    'interviews.start_at',
-                    'interviews.end_at',
-                ])
-                ->limit(10)
-                ->get();
-        } catch (\Throwable $e) {
-            $interviewUpcoming = 0;
-            $interviewItems = collect();
-        }
-    }
-
-    // Helper format tanggal singkat
-    $acDt = function ($dt) {
-        try {
-            return \Carbon\Carbon::parse($dt)->locale('id')->isoFormat('ddd, D MMM HH:mm');
-        } catch (\Throwable $e) {
-            return (string) $dt;
-        }
-    };
-
     // URL JSON notifikasi untuk JS (kalau route tersedia)
     $notifJsonUrl = (Route::has('me.notifications.index') && $u)
         ? route('me.notifications.index', ['format' => 'json'])
@@ -69,78 +27,6 @@
 <div class="relative flex items-center gap-1 ml-auto md:gap-2">
 
   @auth
-    {{-- ====== DROPDOWN: Interviews ====== --}}
-    <div class="relative">
-      <button type="button"
-              class="relative flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg hover:bg-slate-100 text-slate-700"
-              data-dd-trigger="dd-interviews"
-              aria-haspopup="true"
-              aria-expanded="false"
-              aria-label="Interview Saya"
-              title="Interview Saya">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V5m8 2V5M4 9h16M7 11h10a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2z" />
-        </svg>
-        <span>Interview</span>
-        <span class="sr-only">Interview Saya (klik untuk melihat jadwal interview Anda)</span>
-        @if($interviewUpcoming > 0)
-              <span class="absolute -top-0.5 -right-0.5 text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-500 text-white">
-                {{ $interviewUpcoming }}
-              </span>
-        @endif
-      </button>
-
-      <div id="dd-interviews"
-           class="dropdown-panel hidden absolute right-0 mt-2 w-[22rem] bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden z-40">
-        <div class="flex items-center justify-between px-3 py-2 border-b border-slate-200">
-          <div class="font-semibold text-slate-800">Interview</div>
-          @if($interviewUpcoming > 0)
-            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">
-              {{ $interviewUpcoming }} mendatang
-            </span>
-          @endif
-        </div>
-
-        @if($interviewItems->isEmpty())
-              <div class="p-4 text-sm text-slate-500">Belum ada jadwal interview.</div>
-        @else
-              <ul class="overflow-y-auto divide-y max-h-96 divide-slate-100">
-                @foreach($interviewItems as $iv)
-                      <li class="p-3 hover:bg-slate-50">
-                        <div class="flex items-start gap-3">
-                          <div class="mt-0.5">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V5m8 2V5M4 9h16M7 11h10a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2z" />
-                            </svg>
-                          </div>
-                          <div class="min-w-0">
-                            <div class="font-medium truncate text-slate-800">{{ $iv->title ?? 'Interview' }}</div>
-                            <div class="text-xs text-slate-600 mt-0.5">
-                              {{ $acDt($iv->start_at) }}
-                              @if($iv->mode) • {{ Str::title($iv->mode) }} @endif
-                            </div>
-                            @if($iv->location)
-                                  <div class="text-xs truncate text-slate-600">Lokasi: {{ $iv->location }}</div>
-                            @elseif($iv->meeting_link)
-                                  <div class="text-xs">
-                                    <a href="{{ $iv->meeting_link }}" target="_blank" class="text-blue-600 hover:underline">Link meeting</a>
-                                  </div>
-                            @endif
-                          </div>
-                        </div>
-                      </li>
-                @endforeach
-              </ul>
-        @endif
-
-        <div class="px-3 py-2 text-right border-t border-slate-200">
-          @if (Route::has('me.interviews.index'))
-            <a href="{{ route('me.interviews.index') }}" class="text-sm text-blue-600 hover:underline">Lihat semua</a>
-          @endif
-        </div>
-      </div>
-    </div>
-
     {{-- ====== DROPDOWN: Notifications ====== --}}
     <div class="relative">
       <button type="button"

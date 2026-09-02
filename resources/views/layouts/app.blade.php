@@ -106,15 +106,15 @@
 
   {{-- ===== Main ===== --}}
   <div class="flex flex-col flex-1 min-w-0">
-    <header class="sticky top-0 z-30 flex items-center gap-2 px-3 bg-white border-b h-14 border-slate-200 md:px-5" style="margin:0;padding-top:0;padding-bottom:0;">
-      <button id="drawerOpenBtn" class="p-2 rounded-lg md:hidden hover:bg-slate-100" aria-label="Buka menu">
+    <header class="sticky top-0 z-30 flex items-center gap-2 px-3 border-b h-14 md:px-5 topbar-nav" style="margin:0;padding-top:0;padding-bottom:0;">
+      <button id="drawerOpenBtn" class="p-2 rounded-lg md:hidden topbar-nav__icon" aria-label="Buka menu">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5"/>
         </svg>
       </button>
 
       {{-- Desktop collapse/expand --}}
-      <button id="toggleSidebarBtn" class="hidden p-2 rounded-lg md:inline-flex hover:bg-slate-100" aria-label="Ubah ukuran sidebar" aria-pressed="false">
+      <button id="toggleSidebarBtn" class="hidden p-2 rounded-lg md:inline-flex topbar-nav__icon" aria-label="Ubah ukuran sidebar" aria-pressed="false">
         <svg id="iconExpand" xmlns="http://www.w3.org/2000/svg" class="hidden w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" d="M4 12h16M4 6h10M4 18h10"/>
         </svg>
@@ -123,7 +123,13 @@
         </svg>
       </button>
 
-      <div class="font-semibold">@yield('title', 'Dashboard')</div>
+      @php
+        $navTitle = trim(@yield('title', 'Dashboard'));
+        // Buang suffix branding sehingga navbar hanya menampilkan nama halaman.
+        $navTitle = preg_replace('/\s*[-•·]\s*karir\s*[- ]?\s*andalan\s*$/iu', '', $navTitle);
+        $navTitle = trim($navTitle);
+      @endphp
+      <div class="topbar-nav__title"><span class="topbar-nav__dot"></span>{{ $navTitle }}</div>
       @include('layouts.partials.topbar-actions')
     </header>
 

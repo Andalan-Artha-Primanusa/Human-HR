@@ -119,6 +119,47 @@
     .page-header__actions .ph-action { width: 100%; }
   }
 
+  /* ===== 0d. TOP NAVBAR (inside main column) ===== */
+  .topbar-nav {
+    background-color: #ffffff;
+    border-color: #e7ded6 !important;
+  }
+  .topbar-nav__icon {
+    color: #8c6843 !important;
+    transition: background-color .15s, color .15s !important;
+  }
+  .topbar-nav__icon:hover {
+    background-color: #fdf7f0 !important;
+    color: #5c3d1e !important;
+  }
+  .topbar-nav__title {
+    display: flex;
+    align-items: center;
+    gap: .55rem;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #5c3d1e !important;
+    padding: .35rem .9rem;
+    border-radius: .75rem;
+    background-color: #fdf7f0;
+    border: 1px solid #f0e7dc;
+    letter-spacing: -.01em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+  }
+  .topbar-nav__dot {
+    width: .5rem;
+    height: .5rem;
+    border-radius: 9999px;
+    background-color: #a77d52;
+    flex-shrink: 0;
+  }
+  @media (max-width: 767px) {
+    .topbar-nav__title { font-size: .95rem; }
+  }
+
   /* ===== 1. FILTER / SEARCH BUTTON ===== */
   /* Ganti semua tombol hitam/biru filter → #a77d52 */
   button[style*="background-color:#0f172a"],
