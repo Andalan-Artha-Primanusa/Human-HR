@@ -103,14 +103,12 @@
             </select>
 
             <div class="flex flex-col gap-2 md:col-span-5 sm:flex-row sm:justify-end">
-              <button class="inline-flex items-center justify-center gap-2 px-5 py-3 text-sm font-semibold text-white rounded-xl bg-[#a77d52] shadow-sm hover:brightness-105 focus:outline-none focus:ring-2"
-                      style="--tw-ring-color: {{ $ACCENT }}">
+              <button class="abtn abtn-primary">
                 <svg class="w-4 h-4"><use href="#i-search"/></svg>
                 Filter
               </button>
               @if(request()->filled('term') || request()->filled('site') || request()->filled('company') || request()->filled('status'))
-                <a href="{{ route('admin.jobs.index') }}"
-                   class="inline-flex items-center justify-center px-5 py-3 text-sm bg-white border shadow-sm rounded-xl border-slate-200 hover:bg-slate-50">Reset</a>
+                <a href="{{ route('admin.jobs.index') }}" class="abtn abtn-neutral">Reset</a>
               @endif
             </div>
           </form>
@@ -203,16 +201,16 @@
                         {{-- Actions --}}
                         <td class="px-4 py-3">
                           <div class="flex justify-end gap-2">
-                            <a class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs hover:bg-slate-50"
+                            <a class="abtn abtn-xs abtn-secondary"
                                href="{{ route('admin.jobs.edit', $job) }}">
-                              <svg class="w-4 h-4 text-slate-700"><use href="#i-edit"/></svg>
+                              <svg class="w-4 h-4"><use href="#i-edit"/></svg>
                               Edit
                             </a>
                             <form method="POST" action="{{ route('admin.jobs.destroy', $job) }}"
                                   onsubmit="return confirm('Delete this job?')">
                               @csrf @method('DELETE')
-                              <button class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs hover:bg-red-50">
-                                <svg class="w-4 h-4 text-slate-700"><use href="#i-trash"/></svg>
+                              <button class="abtn abtn-xs abtn-danger">
+                                <svg class="w-4 h-4"><use href="#i-trash"/></svg>
                                 Delete
                               </button>
                             </form>
@@ -232,8 +230,7 @@
               </div>
               <div class="font-medium text-slate-700">Belum ada data yang cocok.</div>
               <div class="mt-1 text-sm text-slate-500">Coba ubah filter atau buat lowongan baru.</div>
-              <a class="inline-flex items-center gap-2 px-4 py-2 mt-4 text-sm font-semibold text-white rounded-lg bg-[#a77d52] focus:outline-none focus:ring-2"
-                 style="--tw-ring-color: {{ $ACCENT }}"
+              <a class="abtn abtn-primary mt-4"
                  href="{{ route('admin.jobs.create') }}">
                 <svg class="w-4 h-4"><use href="#i-plus"/></svg>
                 Create Job

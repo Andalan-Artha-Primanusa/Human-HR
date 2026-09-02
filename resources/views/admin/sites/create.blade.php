@@ -27,13 +27,11 @@
             </div>
             <div class="flex gap-2">
               <a href="{{ route('admin.sites.index') }}"
-                 class="inline-flex items-center px-4 py-2 text-sm font-semibold bg-white border rounded-lg border-slate-200 text-slate-900 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2"
-                 style="--tw-ring-color: {{ $ACCENT }}">
+                 class="abtn abtn-neutral">
                 Kembali
               </a>
               <button form="siteCreateForm" type="submit"
-                      class="inline-flex items-center rounded-lg bg-[#a77d52] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-offset-2"
-                      style="--tw-ring-color: {{ $ACCENT }}">
+                      class="abtn abtn-primary">
                 Simpan
               </button>
             </div>
@@ -67,7 +65,7 @@
               </label>
               <input type="text" name="code" value="{{ old('code') }}" required
                      placeholder="Mis. DBK / SBS (A–Z, 0–9, - _ .)"
-                     class="w-full px-3 py-2 mt-1 text-sm border rounded-lg input border-slate-200 focus:outline-none focus:ring-2"
+                     class="w-full px-3 py-2 mt-1 text-sm border rounded-xl border-slate-200 focus:outline-none focus:ring-2"
                    style="--tw-ring-color: {{ $ACCENT }}" autocomplete="off">
               @error('code') <div class="mt-1 text-xs text-rose-600">{{ $message }}</div> @enderror
             </div>
@@ -78,7 +76,7 @@
               </label>
               <input type="text" name="name" value="{{ old('name') }}" required
                      placeholder="Nama Site"
-                     class="w-full px-3 py-2 mt-1 text-sm border rounded-lg input border-slate-200 focus:outline-none focus:ring-2"
+                     class="w-full px-3 py-2 mt-1 text-sm border rounded-xl border-slate-200 focus:outline-none focus:ring-2"
                    style="--tw-ring-color: {{ $ACCENT }}">
               @error('name') <div class="mt-1 text-xs text-rose-600">{{ $message }}</div> @enderror
             </div>
@@ -90,7 +88,7 @@
               <label class="block text-sm font-medium text-slate-700">Region (opsional)</label>
               <input type="text" name="region" value="{{ old('region') }}"
                      placeholder="Mis. Kalimantan Timur"
-                     class="w-full px-3 py-2 mt-1 text-sm border rounded-lg input border-slate-200 focus:outline-none focus:ring-2"
+                     class="w-full px-3 py-2 mt-1 text-sm border rounded-xl border-slate-200 focus:outline-none focus:ring-2"
                    style="--tw-ring-color: {{ $ACCENT }}">
               @error('region') <div class="mt-1 text-xs text-rose-600">{{ $message }}</div> @enderror
             </div>
@@ -98,7 +96,7 @@
               <label class="block text-sm font-medium text-slate-700">Timezone (opsional)</label>
               <input type="text" name="timezone" value="{{ old('timezone') }}"
                      placeholder="Mis. Asia/Makassar"
-                     class="w-full px-3 py-2 mt-1 text-sm border rounded-lg input border-slate-200 focus:outline-none focus:ring-2"
+                     class="w-full px-3 py-2 mt-1 text-sm border rounded-xl border-slate-200 focus:outline-none focus:ring-2"
                    style="--tw-ring-color: {{ $ACCENT }}">
               @error('timezone') <div class="mt-1 text-xs text-rose-600">{{ $message }}</div> @enderror
             </div>
@@ -106,7 +104,7 @@
               <label class="block text-sm font-medium text-slate-700">Latitude (opsional)</label>
               <input type="number" step="any" id="latInput" name="latitude" value="{{ old('latitude') }}"
                      placeholder="-6.2000000"
-                     class="w-full px-3 py-2 mt-1 text-sm border rounded-lg input border-slate-200 focus:outline-none focus:ring-2"
+                     class="w-full px-3 py-2 mt-1 text-sm border rounded-xl border-slate-200 focus:outline-none focus:ring-2"
                    style="--tw-ring-color: {{ $ACCENT }}">
               @error('latitude') <div class="mt-1 text-xs text-rose-600">{{ $message }}</div> @enderror
             </div>
@@ -114,7 +112,7 @@
               <label class="block text-sm font-medium text-slate-700">Longitude (opsional)</label>
               <input type="number" step="any" id="lngInput" name="longitude" value="{{ old('longitude') }}"
                      placeholder="106.8000000"
-                     class="w-full px-3 py-2 mt-1 text-sm border rounded-lg input border-slate-200 focus:outline-none focus:ring-2"
+                     class="w-full px-3 py-2 mt-1 text-sm border rounded-xl border-slate-200 focus:outline-none focus:ring-2"
                    style="--tw-ring-color: {{ $ACCENT }}">
               @error('longitude') <div class="mt-1 text-xs text-rose-600">{{ $message }}</div> @enderror
             </div>
@@ -132,7 +130,7 @@
             <label class="block text-sm font-medium text-slate-700">Alamat (opsional)</label>
             <input type="text" name="address" value="{{ old('address') }}"
                    placeholder="Jl. ..."
-                   class="w-full px-3 py-2 mt-1 text-sm border rounded-lg input border-slate-200 focus:outline-none focus:ring-2"
+                   class="w-full px-3 py-2 mt-1 text-sm border rounded-xl border-slate-200 focus:outline-none focus:ring-2"
                style="--tw-ring-color: {{ $ACCENT }}">
             @error('address') <div class="mt-1 text-xs text-rose-600">{{ $message }}</div> @enderror
           </div>
@@ -142,7 +140,7 @@
             <div>
               <label class="block text-sm font-medium text-slate-700">Meta (JSON, opsional)</label>
               <textarea name="meta_json" rows="6"
-                        class="w-full px-3 py-2 mt-1 font-mono text-xs border rounded-lg input border-slate-200 focus:outline-none focus:ring-2"
+                        class="w-full px-3 py-2 mt-1 font-mono text-xs border rounded-xl border-slate-200 focus:outline-none focus:ring-2"
                         style="--tw-ring-color: {{ $ACCENT }}"
                         placeholder='{"timezone":"Asia/Makassar","address":"Jl. ..."}'>{{ old('meta_json') }}</textarea>
               {{-- catatan: controller akan decode meta_json jika valid --}}
@@ -154,7 +152,7 @@
             <div>
               <label class="block text-sm font-medium text-slate-700">Catatan (opsional)</label>
               <textarea name="notes" rows="6"
-                        class="w-full px-3 py-2 mt-1 text-sm border rounded-lg input border-slate-200 focus:outline-none focus:ring-2"
+                        class="w-full px-3 py-2 mt-1 text-sm border rounded-xl border-slate-200 focus:outline-none focus:ring-2"
                         style="--tw-ring-color: {{ $ACCENT }}"
                         placeholder="Catatan internal untuk site">{{ old('notes') }}</textarea>
               @error('notes') <div class="mt-1 text-xs text-rose-600">{{ $message }}</div> @enderror
@@ -226,5 +224,4 @@
         });
       </script>
     @endpush
-    </div>
 @endsection

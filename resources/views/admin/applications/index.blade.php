@@ -18,6 +18,14 @@
             <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor">
               <path stroke-linecap="round" stroke-width="2" d="M12 5v14M5 12h14" />
             </symbol>
+            <symbol id="i-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path stroke-linecap="round" stroke-width="2" d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/>
+              <circle cx="12" cy="12" r="3" stroke-width="2"/>
+            </symbol>
+            <symbol id="i-user" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <circle cx="12" cy="8" r="4" stroke-width="2"/>
+              <path stroke-linecap="round" stroke-width="2" d="M4 21a8 8 0 0 1 16 0"/>
+            </symbol>
             <symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M13 5l7 7-7 7" />
             </symbol>
@@ -117,11 +125,14 @@
             <input name="q"
                    value="{{ e(request('q', '')) }}"
                    placeholder="Cari kandidat / posisi / site"
-                   class="input md:col-span-2"
+                   class="w-full px-4 py-3 text-sm bg-white border shadow-sm rounded-xl border-slate-200 focus:outline-none focus:ring-2 md:col-span-2"
+                   style="--tw-ring-color: {{ $ACCENT }}"
                    autocomplete="off" />
 
             {{-- stage --}}
-            <select name="stage" class="input">
+            <select name="stage"
+                    class="w-full px-4 py-3 text-sm bg-white border shadow-sm rounded-xl border-slate-200 focus:outline-none focus:ring-2"
+                    style="--tw-ring-color: {{ $ACCENT }}">
               @foreach($stageOptions as $k => $v)
                 <option value="{{ $k }}" @selected(request('stage') === $k)>{{ $v }}</option>
               @endforeach
@@ -130,32 +141,29 @@
             {{-- site --}}
             @php $siteVal = request('site'); @endphp
             @if(!empty($sites ?? null) && is_iterable($sites))
-                  <select name="site" class="input">
+                  <select name="site"
+                          class="w-full px-4 py-3 text-sm bg-white border shadow-sm rounded-xl border-slate-200 focus:outline-none focus:ring-2"
+                          style="--tw-ring-color: {{ $ACCENT }}">
                     <option value="">Semua Site</option>
                     @foreach($sites as $code => $name)
                           <option value="{{ $code }}" @selected($siteVal === $code)>{{ $code }} — {{ $name }}</option>
                     @endforeach
                   </select>
             @else
-                  <input name="site" value="{{ e($siteVal) }}" class="input" placeholder="DBK / POS / SBS">
+                  <input name="site" value="{{ e($siteVal) }}"
+                         class="w-full px-4 py-3 text-sm bg-white border shadow-sm rounded-xl border-slate-200 focus:outline-none focus:ring-2"
+                         style="--tw-ring-color: {{ $ACCENT }}" placeholder="DBK / POS / SBS">
             @endif
 
             {{-- actions --}}
             <div class="flex gap-2">
-              <button type="submit"
-                      class="inline-flex items-center justify-center w-full gap-2 px-4 py-2 text-sm font-semibold text-white rounded-lg hover:opacity-95 focus:outline-none focus:ring-2 focus:ring-offset-2"
-                      style="background: #a77d52; --tw-ring-color: #a77d52;"
-                      aria-label="Filter">
-                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                  <circle cx="11" cy="11" r="7" stroke="#ffffff" stroke-width="2"/>
-                  <path d="M21 21l-3.5-3.5" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
-                </svg>
+              <button type="submit" class="abtn abtn-primary w-full" aria-label="Filter">
+                <svg class="w-4 h-4 text-white"><use href="#i-search"/></svg>
                 <span>Filter</span>
               </button>
 
               @if(request()->hasAny(['q', 'stage', 'site']))
-                <a href="{{ route('admin.applications.index') }}"
-                   class="w-full px-4 py-2 text-sm text-center border rounded-lg border-slate-200 hover:bg-slate-50">
+                <a href="{{ route('admin.applications.index') }}" class="abtn abtn-neutral w-full">
                   Reset
                 </a>
               @endif
@@ -201,7 +209,7 @@
                         $candidate = $app->candidate->name ?? ($app->user->name ?? ($app->name ?? '—'));
                       @endphp
 
-                      <tr class="align-top" style="background-color: #faf9f7;" onmouseover="this.style.backgroundColor='#f8f5f2'" onmouseout="this.style.backgroundColor='#faf9f7'">
+                      <tr class="align-top transition hover:bg-[#f8f5f2]">
                         <td class="px-4 py-3">
                           <div class="font-medium text-black">
                             @if(optional($app->candidate)->id && Route::has('admin.candidates.show'))
@@ -248,35 +256,32 @@
                         <td class="px-4 py-3 text-black">{{ optional($app->created_at)->format('d M Y') }}</td>
 
                         <td class="px-4 py-3">
-                          <div class="flex justify-end gap-2">
+                          <div class="flex flex-wrap justify-end gap-1.5">
                             @if(optional($app->candidate)->id && Route::has('admin.candidates.show'))
-                              <a class="btn btn-outline btn-sm inline-flex items-center gap-1.5"
+                              <a class="abtn abtn-sm abtn-secondary"
                                  target="_blank" href="{{ route('admin.candidates.show', $app->candidate) }}">
-                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                  <path stroke-linecap="round" stroke-width="2" d="M12 12m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"/>
-                                </svg>
+                                <svg class="w-4 h-4"><use href="#i-user"/></svg>
                                 Profil
                               </a>
                             @endif
 
-                            <a class="btn btn-outline btn-sm inline-flex items-center gap-1.5"
+                            <a class="abtn abtn-sm abtn-secondary"
                                target="_blank" href="{{ route('jobs.show', $app->job ?? 0) }}">
-                              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-width="2" d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/>
-                                <circle cx="12" cy="12" r="3" stroke-width="2"/>
-                              </svg>
+                              <svg class="w-4 h-4"><use href="#i-eye"/></svg>
                               Lihat Job
                             </a>
 
                             {{-- Dropdown pindah stage (pakai key baru) --}}
-                            <form action="{{ route('admin.applications.move', $app) }}" method="POST" class="inline-flex items-center gap-2">
+                            <form action="{{ route('admin.applications.move', $app) }}" method="POST" class="inline-flex items-center gap-1.5">
                               @csrf
-                              <select name="to" class="input !h-8 !py-1 !px-2 text-xs">
+                              <select name="to"
+                                      class="w-full px-2 py-1.5 text-xs bg-white border shadow-sm rounded-xl border-slate-200 focus:outline-none focus:ring-2"
+                                      style="--tw-ring-color: {{ $ACCENT }}">
                                 @foreach(array_keys($PRETTY) as $opt)
                                       <option value="{{ $opt }}" @selected($opt === $stageKey)>{{ $PRETTY[$opt] }}</option>
                                 @endforeach
                               </select>
-                              <button class="btn btn-primary btn-sm inline-flex items-center gap-1.5">
+                              <button class="abtn abtn-xs abtn-primary">
                                 <svg class="w-4 h-4"><use href="#i-arrow"/></svg>
                                 Pindah
                               </button>
@@ -296,7 +301,7 @@
               </div>
               <div class="font-medium text-slate-700">Belum ada data aplikasi.</div>
               <div class="mt-1 text-sm text-slate-500">Coba ubah filter atau cari lowongan.</div>
-              <a href="{{ route('admin.jobs.index') }}" class="inline-flex items-center gap-2 mt-4 btn btn-primary">
+<a href="{{ route('admin.jobs.index') }}" class="abtn abtn-primary mt-4">
                 <svg class="w-4 h-4"><use href="#i-search"/></svg>
                 Cari Lowongan
               </a>
@@ -341,7 +346,7 @@
             </div>
 
             <nav aria-label="Pagination" class="self-center sm:self-auto">
-              <ul class="inline-flex items-stretch overflow-hidden bg-white rounded-full ring-1 ring-slate-200">
+              <ul class="inline-flex items-stretch overflow-hidden bg-white border rounded-xl border-slate-200">
                 {{-- Prev --}}
                 <li>
                   @if($current > 1)

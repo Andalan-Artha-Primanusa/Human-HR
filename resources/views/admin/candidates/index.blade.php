@@ -28,6 +28,10 @@
             <circle cx="11" cy="11" r="7" stroke-width="2" />
             <path d="M21 21l-3.5-3.5" stroke-width="2" stroke-linecap="round" />
           </symbol>
+          <symbol id="i-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path stroke-linecap="round" stroke-width="2" d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/>
+            <circle cx="12" cy="12" r="3" stroke-width="2"/>
+          </symbol>
           <symbol id="i-chevron-left" viewBox="0 0 24 24" fill="none" stroke="currentColor">
             <path d="M15 19l-7-7 7-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
           </symbol>
@@ -66,13 +70,13 @@
               name="q"
               value="{{ e($q ?? '') }}"
               placeholder="Cari nama / email / HP / NIK"
-              class="w-full px-4 py-3 text-sm bg-white border shadow-sm rounded-xl input border-slate-200 focus:outline-none focus:ring-2"
+              class="w-full px-4 py-3 text-sm bg-white border shadow-sm rounded-xl border-slate-200 focus:outline-none focus:ring-2"
               style="--tw-ring-color: {{ $ACCENT }}"
               autocomplete="off">
 
             <label class="sr-only" for="job_id">Posisi</label>
             <select id="job_id" name="job_id"
-                class="w-full px-4 py-3 text-sm bg-white border shadow-sm rounded-xl input border-slate-200 focus:outline-none focus:ring-2"
+                class="w-full px-4 py-3 text-sm bg-white border shadow-sm rounded-xl border-slate-200 focus:outline-none focus:ring-2"
                 style="--tw-ring-color: {{ $ACCENT }}">
                 <option value="">Semua Posisi</option>
                 @foreach($jobs ?? [] as $id => $title)
@@ -82,7 +86,7 @@
 
             <label class="sr-only" for="age_range">Usia</label>
             <select id="age_range" name="age_range"
-                class="w-full px-4 py-3 text-sm bg-white border shadow-sm rounded-xl input border-slate-200 focus:outline-none focus:ring-2"
+                class="w-full px-4 py-3 text-sm bg-white border shadow-sm rounded-xl border-slate-200 focus:outline-none focus:ring-2"
                 style="--tw-ring-color: {{ $ACCENT }}">
                 <option value="">Semua Usia</option>
                 <option value="lt25" @selected(($ageRange ?? '') === 'lt25')>&lt; 25</option>
@@ -93,7 +97,7 @@
 
             <label class="sr-only" for="poh_id">POH</label>
             <select id="poh_id" name="poh_id"
-                class="w-full px-4 py-3 text-sm bg-white border shadow-sm rounded-xl input border-slate-200 focus:outline-none focus:ring-2"
+                class="w-full px-4 py-3 text-sm bg-white border shadow-sm rounded-xl border-slate-200 focus:outline-none focus:ring-2"
                 style="--tw-ring-color: {{ $ACCENT }}">
                 <option value="">Semua POH</option>
                 @foreach($pohs ?? [] as $id => $name)
@@ -103,7 +107,7 @@
 
             <label class="sr-only" for="province">Provinsi</label>
             <select id="province" name="province"
-                class="w-full px-4 py-3 text-sm bg-white border shadow-sm rounded-xl input border-slate-200 focus:outline-none focus:ring-2"
+                class="w-full px-4 py-3 text-sm bg-white border shadow-sm rounded-xl border-slate-200 focus:outline-none focus:ring-2"
                 style="--tw-ring-color: {{ $ACCENT }}">
                 <option value="">Semua Provinsi</option>
                 @foreach($provinces ?? [] as $name)
@@ -111,21 +115,15 @@
                 @endforeach
             </select>
 
-            <button type="submit"
-              class="inline-flex items-center justify-center gap-2 px-5 py-3 text-sm font-semibold text-white rounded-xl bg-[#a77d52] shadow-sm hover:brightness-105 focus:outline-none focus:ring-2"
-              style="--tw-ring-color: {{ $ACCENT }}"
-              aria-label="Filter">
-              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <circle cx="11" cy="11" r="7" stroke="#ffffff" stroke-width="2"/>
-                <path d="M21 21l-3.5-3.5" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
-              </svg>
+            <button type="submit" class="abtn abtn-primary" aria-label="Filter">
+              <svg class="w-4 h-4 text-white"><use href="#i-search"/></svg>
               <span>Filter</span>
             </button>
 
             @if(filled($q ?? '') || filled($jobId ?? '') || filled($ageRange ?? '') || filled($pohId ?? '') || filled($province ?? ''))
                   <a href="{{ route('admin.candidates.index') }}"
                      id="candidate-filter-reset"
-                     class="inline-flex items-center justify-center px-5 py-3 text-sm bg-white border shadow-sm rounded-xl border-slate-200 hover:bg-slate-50">
+                     class="abtn abtn-neutral">
                     Reset
                   </a>
             @endif
@@ -208,7 +206,8 @@
                         </td>
                         <td class="px-4 py-3 text-right">
                           <a href="{{ route('admin.candidates.show', $p) }}"
-                            class="inline-flex items-center rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-900 hover:bg-slate-50">
+                            class="abtn abtn-sm abtn-secondary">
+                            <svg class="w-4 h-4"><use href="#i-eye"/></svg>
                             Lihat
                           </a>
                         </td>
@@ -269,7 +268,7 @@
                   </div>
 
                   <nav aria-label="Pagination">
-                    <ul class="inline-flex items-stretch overflow-hidden bg-white rounded-full ring-1 ring-slate-200">
+                    <ul class="inline-flex items-stretch overflow-hidden bg-white border rounded-xl border-slate-200">
                       {{-- Prev --}}
                       <li>
                         @if($current > 1)

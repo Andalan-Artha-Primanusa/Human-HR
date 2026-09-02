@@ -12,6 +12,10 @@
     @once
           {{-- Sprite ikon kecil yang dipakai di halaman ini --}}
           <svg xmlns="http://www.w3.org/2000/svg" class="hidden" aria-hidden="true" focusable="false">
+            <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <circle cx="11" cy="11" r="7" stroke-width="2"/>
+              <path d="M21 21l-3.5-3.5" stroke-width="2" stroke-linecap="round"/>
+            </symbol>
             <symbol id="i-chevron-left" viewBox="0 0 24 24" fill="none" stroke="currentColor">
               <path d="M15 19l-7-7 7-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </symbol>
@@ -46,32 +50,27 @@
                    style="--tw-ring-color: {{ $ACCENT }}" autocomplete="off">
 
             <div class="flex flex-col gap-2 sm:flex-row sm:justify-end">
-              <button type="submit" class="inline-flex items-center justify-center gap-2 px-5 py-3 text-sm font-semibold text-white rounded-xl bg-[#a77d52] shadow-sm hover:opacity-95 focus:outline-none focus:ring-2"
-                      style="--tw-ring-color: {{ $ACCENT }}">
-                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                  <circle cx="11" cy="11" r="7" stroke="#ffffff" stroke-width="2"/>
-                  <path d="M21 21l-3.5-3.5" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
-                </svg>
+              <button type="submit" class="abtn abtn-primary">
+                <svg class="w-4 h-4 text-white"><use href="#i-search"/></svg>
                 <span>Filter</span>
               </button>
 
               @if(filled($q ?? request('q')))
-                <a href="{{ route('admin.interviews.index') }}"
-                   class="inline-flex items-center justify-center px-5 py-3 text-sm bg-white border shadow-sm rounded-xl border-slate-200 hover:bg-slate-50">
+                <a href="{{ route('admin.interviews.index') }}" class="abtn abtn-neutral">
                   Reset
                 </a>
               @endif
             </div>
           </form>
         </div>
-      </div>
+      </section>
 
       {{-- TABEL --}}
-      <div class="overflow-hidden bg-white border shadow-sm rounded-2xl" style="border-color: {{ $BORD }}">
+      <section class="overflow-hidden bg-white border shadow-sm rounded-2xl" style="border-color: {{ $BORD }}">
         <div class="overflow-x-auto">
           @if(($interviews->count() ?? 0) > 0)
             <table class="min-w-[960px] w-full text-sm">
-              <thead class="text-white" class="text-white bg-[#a77d52]">
+              <thead class="text-white bg-[#a77d52]">
                 <tr>
                   <th class="w-56 px-4 py-3 text-left">Tanggal</th>
                   <th class="px-4 py-3 text-left w-60">Kandidat</th>
@@ -95,7 +94,7 @@
                         $mode = strtolower($iv->mode ?? 'online');
                         $badge = $mode === 'onsite' ? 'badge-amber' : 'badge-blue';
                       @endphp
-                      <tr class="align-top" style="background-color: #faf9f7;" onmouseover="this.style.backgroundColor='#f8f5f2'" onmouseout="this.style.backgroundColor='#faf9f7'">
+                      <tr class="align-top transition hover:bg-[#f8f5f2]">
                         <td class="px-4 py-3">
                           <div class="font-medium text-slate-900">
                             {{ $start->format('d M Y, H:i') }} — {{ $end->format('H:i') }}

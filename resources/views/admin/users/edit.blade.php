@@ -21,24 +21,12 @@
               <p class="text-xs sm:text-sm text-white/90">Perbarui data akun pengguna dengan tema konsisten admin.</p>
             </div>
             <a href="{{ route('admin.users.index') }}"
-               class="inline-flex items-center justify-center w-full gap-2 px-4 py-2 text-sm font-semibold bg-white rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-offset-2 sm:w-auto"
-               style="--tw-ring-color: {{ $ACCENT }}">
+               class="abtn abtn-neutral">
               Kembali ke Users
             </a>
           </div>
         </div>
       </section>
-
-      @if ($errors->any())
-        <div class="px-4 py-3 border rounded-xl border-rose-200 bg-rose-50 text-rose-800">
-          <div class="mb-1 font-semibold">Periksa kembali isian berikut:</div>
-          <ul class="ml-5 text-sm list-disc">
-            @foreach ($errors->all() as $error)
-                  <li>{{ $error }}</li>
-            @endforeach
-          </ul>
-        </div>
-      @endif
 
       <section class="overflow-hidden bg-white border shadow-sm rounded-2xl" style="border-color: {{ $BORD }}">
         <div class="p-6 border-t md:p-7 bg-white" style="border-color: {{ $BORD }}">
@@ -106,11 +94,10 @@
 
             <div class="flex flex-col gap-2 mt-2 sm:flex-row sm:justify-end">
               <a href="{{ route('admin.users.index') }}"
-                 class="inline-flex items-center justify-center px-5 py-3 text-sm bg-white border shadow-sm rounded-xl border-slate-200 hover:bg-slate-50">
+                 class="abtn abtn-neutral">
                 Cancel
               </a>
-              <button class="inline-flex items-center justify-center gap-2 px-5 py-3 text-sm font-semibold text-white rounded-xl bg-[#a77d52] shadow-sm hover:brightness-105 focus:outline-none focus:ring-2"
-                      style="--tw-ring-color: {{ $ACCENT }}">
+              <button class="abtn abtn-primary">
                 Update User
               </button>
             </div>

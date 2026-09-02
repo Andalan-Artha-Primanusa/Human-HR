@@ -60,11 +60,9 @@
 
             <div class="flex gap-2">
               <a href="{{ route('admin.jobs.index') }}"
-                 class="inline-flex items-center px-4 py-2 text-sm font-semibold bg-white border rounded-lg border-slate-200 text-slate-900 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2"
-                 style="--tw-ring-color: {{ $ACCENT }}">Kembali</a>
+                 class="abtn abtn-neutral">Kembali</a>
               <button form="jobEditForm"
-                      class="inline-flex items-center rounded-lg px-4 py-2 text-sm font-semibold text-white bg-[#a77d52] hover:opacity-95 focus:outline-none focus:ring-2 focus:ring-offset-2"
-                      style="--tw-ring-color: {{ $ACCENT }}">Simpan Perubahan</button>
+                      class="abtn abtn-primary">Simpan Perubahan</button>
             </div>
           </div>
         </div>
@@ -76,17 +74,7 @@
         mempengaruhi keunikan kode.
       </div>
 
-      {{-- Error summary --}}
-      @if ($errors->any())
-        <div class="px-4 py-3 border rounded-xl bg-rose-50 text-rose-700" style="border-color:#fecaca">
-          <div class="font-medium">Periksa kembali isian Anda:</div>
-          <ul class="mt-1 text-sm list-disc list-inside">
-            @foreach ($errors->all() as $error)
-                  <li>{{ $error }}</li>
-            @endforeach
-          </ul>
-        </div>
-      @endif
+      {{-- Error summary ditangani AJAX/modal global (KarirFeedback) --}}
 
       {{-- FORM utama --}}
       <form id="jobEditForm" class="overflow-hidden bg-white border shadow-sm rounded-2xl"

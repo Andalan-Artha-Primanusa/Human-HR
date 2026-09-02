@@ -26,6 +26,68 @@
     box-shadow: 0 0 0 3px rgba(167,125,82,.15) !important;
   }
 
+  /* ===== 1b. BASE BUTTON ADMIN `.abtn` (batch admin; tidak mengganggu `.btn` logout) ===== */
+  .abtn {
+    display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+    font-size: .875rem; font-weight: 600; line-height: 1;
+    padding: .625rem 1rem; border-radius: .625rem; cursor: pointer;
+    transition: background-color .15s, border-color .15s, box-shadow .15s, opacity .15s !important;
+  }
+  .abtn-sm { font-size: .8125rem; padding: .4375rem .75rem; border-radius: .625rem; }
+  .abtn-xs { font-size: .75rem; padding: .3125rem .625rem; border-radius: .5rem; }
+  /* tombol ikon saja (baris tabel) */
+  .abtn-icon {
+    width: 2rem; height: 2rem; padding: 0; border-radius: .625rem;
+    display: inline-flex; align-items: center; justify-content: center;
+    background-color: #fff !important; border: 1px solid #e5e7eb !important; color: #5c3d1e !important;
+    transition: background-color .15s, border-color .15s, color .15s !important;
+  }
+  .abtn-icon:hover { background-color: #fdf7f0 !important; border-color: rgba(167,125,82,.4) !important; }
+  .abtn-icon svg { width: 1rem; height: 1rem; }
+  .abtn-icon-danger { color: #dc2626 !important; }
+  .abtn-icon-danger:hover {
+    background-color: #fef2f2 !important; border-color: #fecaca !important; color: #dc2626 !important;
+  }
+
+  /* ===== 1c. WARNA SEMANTIK AKSI — bukan coklat semua ===== */
+  /* Coklat = CTA utama (Create/Save/Submit) */
+  .abtn-primary {
+    background-color: #a77d52 !important; color: #fff !important;
+    border: none !important;
+    box-shadow: 0 2px 8px rgba(167,125,82,.3) !important;
+  }
+  .abtn-primary:hover { background-color: #8b5e3c !important; }
+  /* Merah = destruktif (Delete/Reject) */
+  .abtn-danger {
+    background-color: #dc2626 !important; color: #fff !important;
+    border: none !important;
+  }
+  .abtn-danger:hover { background-color: #b91c1c !important; }
+  /* Hijau = aksi setuju/aktif/publish */
+  .abtn-success {
+    background-color: #059669 !important; color: #fff !important;
+    border: none !important;
+  }
+  .abtn-success:hover { background-color: #047857 !important; }
+  /* Kuning = aksi warning/pending/reopen */
+  .abtn-warning {
+    background-color: #d97706 !important; color: #fff !important;
+    border: none !important;
+  }
+  .abtn-warning:hover { background-color: #b45309 !important; }
+  /* Outline coklat = aksi sekunder bertema (View/Edit/Detail) */
+  .abtn-secondary {
+    background-color: #fff !important; color: #a77d52 !important;
+    border: 1px solid #a77d52 !important; border-radius: .625rem !important;
+  }
+  .abtn-secondary:hover { background-color: #fdf7f0 !important; }
+  /* Outline abu = aksi sekunder netral (Cancel/Back/Reset/Export) */
+  .abtn-neutral {
+    background-color: #fff !important; color: #5c3d1e !important;
+    border: 1px solid #e5e7eb !important;
+  }
+  .abtn-neutral:hover { background-color: #fdf7f0 !important; }
+
   /* ===== 2. TOMBOL AKSI PRIMER (Create/Save/Submit) ===== */
   .btn-primary,
   button.btn-create,
@@ -51,6 +113,9 @@
     color: #fff !important;
     border-radius: .625rem !important;
     font-weight: 600 !important;
+  }
+  .btn-danger:hover, button.btn-delete:hover, a.btn-delete:hover, [data-action="delete"]:hover {
+    background-color: #b91c1c !important;
   }
 
   /* ===== 4. TOMBOL SECONDARY (Edit/Cancel/View) ===== */

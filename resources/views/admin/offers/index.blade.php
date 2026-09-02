@@ -18,6 +18,10 @@
             <symbol id="i-chevron-right" viewBox="0 0 24 24" fill="none" stroke="currentColor">
               <path d="M9 5l7 7-7 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </symbol>
+            <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <circle cx="11" cy="11" r="7" stroke-width="2"/>
+              <path d="M21 21l-3.5-3.5" stroke-width="2" stroke-linecap="round"/>
+            </symbol>
           </svg>
     @endonce
 
@@ -65,19 +69,14 @@
             </select>
 
             <div class="flex flex-col gap-2 sm:flex-row sm:justify-end">
-              <button type="submit"
-                      class="inline-flex items-center justify-center gap-2 px-5 py-3 text-sm font-semibold text-white rounded-xl bg-[#a77d52] shadow-sm hover:brightness-105 focus:outline-none focus:ring-2"
-                      style="--tw-ring-color: {{ $ACCENT }}">
-                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                  <circle cx="11" cy="11" r="7" stroke="#ffffff" stroke-width="2"/>
-                  <path d="M21 21l-3.5-3.5" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
-                </svg>
+              <button type="submit" class="abtn abtn-primary">
+                <svg class="w-4 h-4"><use href="#i-search"/></svg>
                 Cari
               </button>
 
               @if(request()->filled('q') || request()->filled('status'))
                 <a href="{{ route('admin.offers.index') }}"
-                   class="inline-flex items-center justify-center px-5 py-3 text-sm bg-white border shadow-sm rounded-xl border-slate-200 hover:bg-slate-50 text-slate-900">
+                   class="abtn abtn-neutral text-slate-900">
                   Reset
                 </a>
               @endif
@@ -190,7 +189,7 @@
                         <div class="flex justify-end gap-2">
                           <button type="button" 
                             onclick="openEditOfferModal('{{ $offer->id }}', '{{ addslashes($user) }}', '{{ $grossV }}', '{{ $allowV }}', `{{ addslashes($offer->body_template ?? '') }}`, '{{ $offer->status }}', {{ json_encode($offer->meta ?? []) }}, '{{ optional($offer->application->job->company)->name }}', '{{ $offer->application->job->level_label }}', '{{ optional($offer->application->poh)->name }}')"
-                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 text-sm text-amber-600 font-medium">
+                            class="abtn abtn-sm abtn-secondary">
                             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                               <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
                               <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
@@ -200,7 +199,7 @@
 
                           @if(Route::has('admin.offers.pdf'))
                                 <a href="{{ route('admin.offers.pdf', $offer) }}"
-                                   class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 text-sm">
+                                   class="abtn abtn-sm abtn-neutral">
                                   <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
                                     <path d="M14 2v6h6"/>
@@ -335,8 +334,7 @@
         </section>
       @endif
     </div>
-    </div>
-    
+
     {{-- MODAL: EDIT OFFER --}}
     <div id="modal-edit-offer" class="fixed inset-0 z-50 flex items-center justify-center hidden p-4 bg-[#a77d52]/50 backdrop-blur-sm">
         <div class="w-full max-w-lg overflow-hidden bg-white shadow-2xl rounded-2xl animate-in fade-in zoom-in duration-200">
@@ -511,11 +509,11 @@
 
                 <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-50">
                     <button type="button" onclick="closeEditOfferModal()"
-                        class="px-5 py-2.5 text-sm font-semibold transition bg-white border border-slate-200 rounded-xl text-slate-700 hover:bg-slate-50">
+                        class="abtn abtn-neutral">
                         Batal
                     </button>
                     <button type="submit"
-                        class="px-5 py-2.5 text-sm font-semibold text-white transition rounded-xl bg-[#a77d52] shadow-md hover:brightness-105">
+                        class="abtn abtn-primary">
                         Simpan Perubahan
                     </button>
                 </div>

@@ -8,6 +8,31 @@
 @endphp
 
 @section('content')
+    @once
+          {{-- Sprite ikon yang dipakai di halaman --}}
+          <svg xmlns="http://www.w3.org/2000/svg" class="hidden" aria-hidden="true" focusable="false">
+            <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path stroke-linecap="round" stroke-width="2" d="M12 5v14M5 12h14"/>
+            </symbol>
+            <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <circle cx="11" cy="11" r="7" stroke-width="2"/>
+              <path d="M21 21l-3.5-3.5" stroke-width="2" stroke-linecap="round"/>
+            </symbol>
+            <symbol id="i-edit" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path stroke-width="2" stroke-linecap="round" d="M12 20h9"/>
+              <path stroke-width="2" stroke-linecap="round" d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/>
+            </symbol>
+            <symbol id="i-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path stroke-width="2" stroke-linecap="round" d="M3 6h18M8 6v12m8-12v12M5 6l1 14a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-14"/>
+            </symbol>
+            <symbol id="i-chevron-left" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M15 19l-7-7 7-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </symbol>
+            <symbol id="i-chevron-right" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M9 5l7 7-7 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </symbol>
+          </svg>
+    @endonce
 
     @php
         $hasActive = \Illuminate\Support\Facades\Schema::hasColumn('users', 'active');
@@ -35,9 +60,7 @@
             <a href="{{ route('admin.users.create') }}"
                class="inline-flex items-center justify-center w-full gap-2 px-4 py-2 text-sm font-semibold bg-white rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-offset-2 sm:w-auto"
                style="--tw-ring-color: #a77d52">
-              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" aria-hidden="true" style="color: #a77d52">
-                <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-              </svg>
+              <svg class="w-4 h-4" style="color: #a77d52"><use href="#i-plus"/></svg>
               Tambah User
             </a>
           </div>
@@ -70,19 +93,13 @@
             </select>
 
             <div class="flex flex-col gap-2 sm:flex-row sm:justify-end">
-              <button type="submit"
-                      class="inline-flex items-center justify-center gap-2 px-5 py-3 text-sm font-semibold text-white rounded-xl bg-[#a77d52] shadow-sm hover:brightness-105 focus:outline-none focus:ring-2"
-                      style="--tw-ring-color: {{ $ACCENT }}">
-                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                  <circle cx="11" cy="11" r="7" stroke="#ffffff" stroke-width="2"/>
-                  <path d="M21 21l-3.5-3.5" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
-                </svg>
+              <button type="submit" class="abtn abtn-primary">
+                <svg class="w-4 h-4 text-white"><use href="#i-search"/></svg>
                 Cari
               </button>
 
               @if(request()->filled('q') || request()->filled('role') || request()->filled('status'))
-                <a href="{{ route('admin.users.index') }}"
-                   class="inline-flex items-center justify-center px-5 py-3 text-sm bg-white border shadow-sm rounded-xl border-slate-200 hover:bg-slate-50 text-slate-900">
+                <a href="{{ route('admin.users.index') }}" class="abtn abtn-neutral">
                   Reset
                 </a>
               @endif
@@ -140,12 +157,25 @@
                           {{ optional($user->created_at)->format('Y-m-d') }}
                         </td>
 
-                        <td class="px-4 py-3 text-right">
-                          <a href="{{ route('admin.users.edit', $user) }}"
-                             class="text-sm font-medium hover:underline"
-                             style="color: {{ $ACCENT }}">
-                            Edit
-                          </a>
+                        <td class="px-4 py-3">
+                          <div class="flex items-center justify-end gap-1.5">
+                            @if(Route::has('admin.users.edit'))
+                              <a href="{{ route('admin.users.edit', $user) }}"
+                                 class="abtn-icon" aria-label="Edit">
+                                <svg class="w-4 h-4"><use href="#i-edit"/></svg>
+                              </a>
+                            @endif
+
+                            @if(Route::has('admin.users.destroy'))
+                              <form action="{{ route('admin.users.destroy', $user) }}" method="POST"
+                                    onsubmit="return confirm('Hapus user ini?');">
+                                @csrf @method('DELETE')
+                                <button class="abtn-icon abtn-icon-danger" aria-label="Hapus">
+                                  <svg class="w-4 h-4"><use href="#i-trash"/></svg>
+                                </button>
+                              </form>
+                            @endif
+                          </div>
                         </td>
 
                       </tr>
@@ -171,6 +201,98 @@
           @endif
         </div>
       </section>
+
+      {{-- PAGINATION --}}
+      @if(($users->count() ?? 0) > 0 && method_exists($users, 'lastPage'))
+        @php
+            $perPage = max(1, (int) $users->perPage());
+            $current = (int) $users->currentPage();
+            $last = (int) $users->lastPage();
+            $total = (int) $users->total();
+            $from = ($current - 1) * $perPage + 1;
+            $to = min($current * $perPage, $total);
+
+            $pages = [];
+            if ($last <= 7) {
+                $pages = range(1, $last);
+            } else {
+                $pages = [1];
+                $left = max(2, $current - 1);
+                $right = min($last - 1, $current + 1);
+                if ($left > 2)
+                    $pages[] = '...';
+                for ($i = $left; $i <= $right; $i++)
+                    $pages[] = $i;
+                if ($right < $last - 1)
+                    $pages[] = '...';
+                $pages[] = $last;
+            }
+
+            $pageUrl = function (int $p) use ($users) {
+                return $users->appends(request()->except('page'))->url($p);
+            };
+        @endphp
+
+        <section class="p-3 mt-4 bg-white border shadow-sm rounded-2xl border-slate-200 md:p-4">
+          <div class="flex flex-col gap-3 text-sm md:flex-row md:items-center md:justify-between">
+            <div class="text-slate-700">
+              Menampilkan <span class="font-semibold text-slate-900">{{ $from }}–{{ $to }}</span>
+              dari <span class="font-semibold text-slate-900">{{ $total }}</span>
+            </div>
+            <nav class="ml-auto" aria-label="Pagination">
+              <ul class="inline-flex items-stretch overflow-hidden bg-white border rounded-xl border-slate-200">
+                {{-- Prev --}}
+                <li>
+                  @if($current > 1)
+                    <a href="{{ $pageUrl($current - 1) }}"
+                       class="grid place-items-center px-2.5 h-9 hover:bg-slate-50 focus:outline-none focus:ring-2"
+                       style="--tw-ring-color: {{ $ACCENT }}" aria-label="Sebelumnya">
+                      <svg class="w-4 h-4 text-slate-700"><use href="#i-chevron-left"/></svg>
+                    </a>
+                  @else
+                    <span class="grid place-items-center px-2.5 h-9 opacity-40 cursor-not-allowed" aria-hidden="true">
+                      <svg class="w-4 h-4 text-slate-700"><use href="#i-chevron-left"/></svg>
+                    </span>
+                  @endif
+                </li>
+
+                {{-- Pages --}}
+                @foreach($pages as $p)
+                      @if($p === '...')
+                        <li class="grid px-3 select-none place-items-center h-9 text-slate-500">…</li>
+                      @else
+                        @php $isCur = ((int) $p === $current); @endphp
+                        <li class="grid place-items-center h-9">
+                          @if($isCur)
+                            <span class="inline-flex items-center h-full px-3 font-semibold border-l select-none text-slate-900 bg-slate-100 border-slate-200">{{ $p }}</span>
+                          @else
+                            <a href="{{ $pageUrl((int) $p) }}"
+                               class="inline-flex items-center h-full px-3 border-l text-slate-700 hover:bg-slate-50 border-slate-200 focus:outline-none focus:ring-2"
+                               style="--tw-ring-color: {{ $ACCENT }}" aria-label="Halaman {{ $p }}">{{ $p }}</a>
+                          @endif
+                        </li>
+                      @endif
+                @endforeach
+
+                {{-- Next --}}
+                <li class="border-l border-slate-200">
+                  @if($current < $last)
+                    <a href="{{ $pageUrl($current + 1) }}"
+                       class="grid place-items-center px-2.5 h-9 hover:bg-slate-50 focus:outline-none focus:ring-2"
+                       style="--tw-ring-color: {{ $ACCENT }}" aria-label="Berikutnya">
+                      <svg class="w-4 h-4 text-slate-700"><use href="#i-chevron-right"/></svg>
+                    </a>
+                  @else
+                    <span class="grid place-items-center px-2.5 h-9 opacity-40 cursor-not-allowed" aria-hidden="true">
+                      <svg class="w-4 h-4 text-slate-700"><use href="#i-chevron-right"/></svg>
+                    </span>
+                  @endif
+                </li>
+              </ul>
+            </nav>
+          </div>
+        </section>
+      @endif
 
     </div>
 @endsection

@@ -5,21 +5,37 @@
 @php
     $ACCENT = '#a77d52';
     $ACCENT_DARK = '#8b5e3c';
+    $BORD = '#e5e7eb';
     $GREEN_FOOTER = '#8b9f6f';
 @endphp
 
 @section('content')
-<div class="mx-auto w-full max-w-[1200px] px-4 py-6 space-y-6">
-    <!-- Header -->
-    <div class="flex items-center gap-4 mb-8">
-        <a href="{{ route('admin.mcu-templates.index') }}" class="p-2 bg-white border border-slate-200 rounded-xl text-slate-500 hover:text-slate-900 transition shadow-sm">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-        </a>
-        <div>
-            <h1 class="text-3xl font-bold text-slate-800">Buat Template MCU Baru</h1>
-            <p class="text-sm text-slate-500 mt-1">Tentukan format dan isi default surat undangan MCU</p>
+<div class="mx-auto w-full max-w-[1200px] px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+    {{-- HEADER hero bar (konsisten dgn form lainnya) --}}
+    <section class="overflow-hidden bg-white border shadow-sm rounded-2xl" style="border-color: {{ $BORD }}">
+      <div class="relative">
+        <div class="w-full h-20 sm:h-24 bg-[#a77d52]"></div>
+        <div class="absolute inset-0 flex flex-col gap-3 px-5 py-4 text-white md:px-6 sm:flex-row sm:items-center sm:justify-between">
+          <div class="min-w-0">
+            <h1 class="text-2xl font-semibold tracking-tight text-white sm:text-3xl">Buat Template MCU Baru</h1>
+            <p class="text-xs sm:text-sm text-white/90">Tentukan format dan isi default surat undangan MCU.</p>
+          </div>
+          <a href="{{ route('admin.mcu-templates.index') }}" class="abtn abtn-neutral">Kembali ke Daftar</a>
         </div>
-    </div>
+      </div>
+    </section>
+
+    @if(session('ok'))
+      <div class="px-4 py-3 border rounded-2xl border-emerald-200 bg-emerald-50 text-emerald-700">{{ session('ok') }}</div>
+    @endif
+    @if ($errors->any())
+      <div class="px-4 py-3 border rounded-2xl border-rose-200 bg-rose-50 text-rose-800">
+        <div class="font-semibold">Periksa kembali isian berikut:</div>
+        <ul class="mt-1 ml-5 text-sm list-disc">
+          @foreach ($errors->all() as $e) <li>{{ $e }}</li> @endforeach
+        </ul>
+      </div>
+    @endif
 
     <form action="{{ route('admin.mcu-templates.store') }}" method="POST" class="space-y-6">
         @csrf
@@ -182,8 +198,8 @@
 
         <!-- ACTIONS -->
         <div class="flex justify-end gap-3 pt-4">
-            <a href="{{ route('admin.mcu-templates.index') }}" class="px-6 py-2.5 bg-white border border-slate-200 rounded-lg text-slate-700 font-semibold hover:bg-slate-50 transition">Batal</a>
-            <button type="submit" class="px-8 py-2.5 bg-[#a77d52] text-white rounded-lg font-semibold hover:bg-[#8b5e3c] transition shadow-md shadow-[#a77d52]/20">Simpan Template</button>
+            <a href="{{ route('admin.mcu-templates.index') }}" class="abtn abtn-neutral">Batal</a>
+            <button type="submit" class="abtn abtn-primary">Simpan Template</button>
         </div>
     </form>
 </div>

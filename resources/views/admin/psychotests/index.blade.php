@@ -150,7 +150,7 @@
 
                         <td class="px-4 py-3 text-right">
                           @if(isset($application) && \Illuminate\Support\Facades\Route::has('admin.applications.index'))
-                            <a class="btn btn-outline btn-sm" href="{{ route('admin.applications.index', ['q' => '#App ' . $at->application_id]) }}">Lihat</a>
+                            <a class="abtn abtn-xs abtn-secondary" href="{{ route('admin.applications.index', ['q' => '#App ' . $at->application_id]) }}">Lihat</a>
                           @endif
                         </td>
                       </tr>

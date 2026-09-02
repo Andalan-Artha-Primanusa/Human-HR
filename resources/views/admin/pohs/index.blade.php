@@ -90,14 +90,14 @@
                                 </td>
                                 <td class="px-2 py-2">
                                     <div class="flex items-center justify-end gap-1.5">
-                                        <a href="{{ route('admin.pohs.edit', $poh) }}" class="rounded-lg px-3 py-1.5 text-xs hover:bg-slate-50 border border-slate-200 inline-flex items-center gap-1.5">
-                                            <svg class="w-4 h-4 text-slate-700"><use href="#i-edit"/></svg>
+                                        <a href="{{ route('admin.pohs.edit', $poh) }}" class="abtn abtn-xs abtn-secondary">
+                                            <svg class="w-4 h-4"><use href="#i-edit"/></svg>
                                             Edit
                                         </a>
                                         <form action="{{ route('admin.pohs.destroy', $poh) }}" method="POST" onsubmit="return confirm('Hapus POH ini?');">
                                             @csrf @method('DELETE')
-                                            <button class="rounded-lg px-3 py-1.5 text-xs hover:bg-red-50 border border-slate-200 inline-flex items-center gap-1.5">
-                                                <svg class="w-4 h-4 text-slate-700"><use href="#i-trash"/></svg>
+                                            <button class="abtn abtn-xs abtn-danger">
+                                                <svg class="w-4 h-4"><use href="#i-trash"/></svg>
                                                 Hapus
                                             </button>
                                         </form>

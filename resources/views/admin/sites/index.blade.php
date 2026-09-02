@@ -180,27 +180,27 @@
                         <form action="{{ route('admin.sites.toggle', $site) }}" method="POST"
                               onsubmit="return confirm('Ubah status site?')">
                           @csrf @method('PATCH')
-                          <button class="rounded-lg px-3 py-1.5 text-xs hover:bg-slate-50 border border-slate-200">Toggle</button>
+                          <button class="abtn abtn-xs abtn-warning">Toggle</button>
                         </form>
                       @endif
 
                       <a href="{{ route('admin.sites.show', $site) }}"
-                         class="rounded-lg px-3 py-1.5 text-xs hover:bg-slate-50 border border-slate-200 inline-flex items-center gap-1.5">
-                        <svg class="w-4 h-4 text-slate-700"><use href="#i-eye"/></svg>
+                         class="abtn abtn-xs abtn-secondary">
+                        <svg class="w-4 h-4"><use href="#i-eye"/></svg>
                         View
                       </a>
 
                       <a href="{{ route('admin.sites.edit', $site) }}"
-                         class="rounded-lg px-3 py-1.5 text-xs hover:bg-slate-50 border border-slate-200 inline-flex items-center gap-1.5">
-                        <svg class="w-4 h-4 text-slate-700"><use href="#i-edit"/></svg>
+                         class="abtn abtn-xs abtn-secondary">
+                        <svg class="w-4 h-4"><use href="#i-edit"/></svg>
                         Edit
                       </a>
 
                       <form action="{{ route('admin.sites.destroy', $site) }}" method="POST"
                             onsubmit="return confirm('Hapus site ini?');">
                         @csrf @method('DELETE')
-                        <button class="rounded-lg px-3 py-1.5 text-xs hover:bg-red-50 border border-slate-200 inline-flex items-center gap-1.5">
-                          <svg class="w-4 h-4 text-slate-700"><use href="#i-trash"/></svg>
+                        <button class="abtn abtn-xs abtn-danger">
+                          <svg class="w-4 h-4"><use href="#i-trash"/></svg>
                           Delete
                         </button>
                       </form>

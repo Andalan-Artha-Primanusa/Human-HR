@@ -5,21 +5,37 @@
 @php
     $ACCENT = '#a77d52';
     $ACCENT_DARK = '#8b5e3c';
+    $BORD = '#e5e7eb';
     $GREEN_FOOTER = '#8b9f6f';
 @endphp
 
 @section('content')
-<div class="mx-auto w-full max-w-[1200px] px-4 py-6 space-y-6">
-    <!-- Header -->
-    <div class="flex items-center gap-4 mb-8">
-        <a href="{{ route('admin.mcu-templates.index') }}" class="p-2 transition bg-white border shadow-sm border-slate-200 rounded-xl text-slate-500 hover:text-slate-900">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-        </a>
-        <div>
-            <h1 class="text-3xl font-bold text-slate-800">Edit Template MCU</h1>
-            <p class="mt-1 text-sm text-slate-500">Sesuaikan format dan isi surat undangan MCU</p>
+<div class="mx-auto w-full max-w-[1200px] px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+    {{-- HEADER hero bar (konsisten dgn form lainnya) --}}
+    <section class="overflow-hidden bg-white border shadow-sm rounded-2xl" style="border-color: {{ $BORD }}">
+      <div class="relative">
+        <div class="w-full h-20 sm:h-24 bg-[#a77d52]"></div>
+        <div class="absolute inset-0 flex flex-col gap-3 px-5 py-4 text-white md:px-6 sm:flex-row sm:items-center sm:justify-between">
+          <div class="min-w-0">
+            <h1 class="text-2xl font-semibold tracking-tight text-white sm:text-3xl">Edit Template MCU</h1>
+            <p class="text-xs sm:text-sm text-white/90">Sesuaikan format dan isi surat undangan MCU.</p>
+          </div>
+          <a href="{{ route('admin.mcu-templates.index') }}" class="abtn abtn-neutral">Kembali ke Daftar</a>
         </div>
-    </div>
+      </div>
+    </section>
+
+    @if(session('ok'))
+      <div class="px-4 py-3 border rounded-2xl border-emerald-200 bg-emerald-50 text-emerald-700">{{ session('ok') }}</div>
+    @endif
+    @if ($errors->any())
+      <div class="px-4 py-3 border rounded-2xl border-rose-200 bg-rose-50 text-rose-800">
+        <div class="font-semibold">Periksa kembali isian berikut:</div>
+        <ul class="mt-1 ml-5 text-sm list-disc">
+          @foreach ($errors->all() as $e) <li>{{ $e }}</li> @endforeach
+        </ul>
+      </div>
+    @endif
 
     <form action="{{ route('admin.mcu-templates.update', $mcuTemplate) }}" method="POST" class="space-y-6">
         @csrf
@@ -182,14 +198,14 @@
         </div>
 
         <!-- ACTIONS -->
-        <div class="flex justify-between gap-3 pt-4">
-            <a href="{{ route('admin.mcu-templates.preview', $mcuTemplate) }}" target="_blank" class="px-6 py-2.5 bg-blue-50 text-blue-600 border border-blue-200 rounded-lg font-semibold hover:bg-blue-100 transition inline-flex items-center gap-2">
+        <div class="flex flex-wrap justify-between gap-3 pt-4">
+            <a href="{{ route('admin.mcu-templates.preview', $mcuTemplate) }}" target="_blank" class="abtn abtn-secondary">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                 Lihat Preview
             </a>
             <div class="flex gap-3">
-                <a href="{{ route('admin.mcu-templates.index') }}" class="px-6 py-2.5 bg-white border border-slate-200 rounded-lg text-slate-700 font-semibold hover:bg-slate-50 transition">Batal</a>
-                <button type="submit" class="px-8 py-2.5 bg-[#a77d52] text-white rounded-lg font-semibold hover:bg-[#8b5e3c] transition shadow-md shadow-[#a77d52]/20">Perbarui Template</button>
+                <a href="{{ route('admin.mcu-templates.index') }}" class="abtn abtn-neutral">Batal</a>
+                <button type="submit" class="abtn abtn-primary">Perbarui Template</button>
             </div>
         </div>
     </form>

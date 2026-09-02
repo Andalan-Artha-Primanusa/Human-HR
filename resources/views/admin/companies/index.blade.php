@@ -25,6 +25,13 @@
               <rect x="3" y="4" width="18" height="16" rx="2" stroke-width="1.8"/>
               <path d="M8 8h2M8 12h2M8 16h2M14 8h2M14 12h2M14 16h2M3 14h18" stroke-width="1.8" stroke-linecap="round"/>
             </symbol>
+            <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <circle cx="11" cy="11" r="7" stroke-width="2"/>
+              <path d="M21 21l-3.5-3.5" stroke-width="2" stroke-linecap="round"/>
+            </symbol>
+            <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path stroke-linecap="round" stroke-width="2" d="M12 5v14M5 12h14"/>
+            </symbol>
           </svg>
     @endonce
 
@@ -43,7 +50,7 @@
             <a href="{{ route('admin.companies.create') }}"
                class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold bg-white rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-offset-2"
                style="--tw-ring-color: #a77d52">
-              <svg class="w-4 h-4" style="color: #a77d52"><use href="#i-arrow"/></svg>
+              <svg class="w-4 h-4" style="color: #a77d52"><use href="#i-plus"/></svg>
               New Company
             </a>
           </div>
@@ -63,15 +70,8 @@
               <option value="inactive" @selected(($status ?? '') === 'inactive')>Inactive</option>
             </select>
            <div class="flex gap-2">
-      <button type="submit"
-              class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-lg hover:opacity-95 focus:outline-none focus:ring-2"
-              style="background-color:#a77d52; border:1px solid #a77d52; --tw-ring-color:#a77d52;"
-              aria-label="Filter">
-        {{-- ICON inline: putih fix, tanpa currentColor --}}
-        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <circle cx="11" cy="11" r="7" stroke="#ffffff" stroke-width="2"/>
-          <path d="M21 21l-3.5-3.5" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
-        </svg>
+      <button type="submit" class="abtn abtn-primary" aria-label="Filter">
+        <svg class="w-4 h-4"><use href="#i-search"/></svg>
         <span>Filter</span>
       </button>
     </div>

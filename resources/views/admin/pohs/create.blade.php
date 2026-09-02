@@ -23,13 +23,11 @@
                 </div>
                 <div class="flex gap-2">
                     <a href="{{ route('admin.pohs.index') }}"
-                       class="inline-flex items-center px-4 py-2 text-sm font-semibold bg-white border rounded-lg border-slate-200 text-slate-900 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2"
-                       style="--tw-ring-color: {{ $ACCENT }}">
+                       class="abtn abtn-neutral">
                         Kembali
                     </a>
                     <button form="pohCreateForm" type="submit"
-                            class="inline-flex items-center rounded-lg bg-[#a77d52] px-4 py-2 text-sm font-semibold text-white hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-offset-2"
-                            style="--tw-ring-color: {{ $ACCENT }}">
+                            class="abtn abtn-primary">
                         Simpan
                     </button>
                 </div>

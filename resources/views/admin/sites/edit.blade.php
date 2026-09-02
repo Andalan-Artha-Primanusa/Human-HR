@@ -159,19 +159,17 @@
           <div class="flex items-center justify-between pt-2">
             <div class="flex gap-2">
               <button type="submit"
-                      class="inline-flex items-center rounded-lg bg-[#a77d52] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-offset-2"
-                      style="--tw-ring-color: {{ $ACCENT }}">
+                      class="abtn abtn-primary">
                 Simpan Perubahan
               </button>
               <a href="{{ route('admin.sites.index') }}"
-                 class="inline-flex items-center rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2"
-                 style="--tw-ring-color: {{ $ACCENT }}">
+                 class="abtn abtn-neutral">
                 Batal
               </a>
             </div>
             {{-- tombol hapus trigger form delete di bawah --}}
             <button type="submit" form="siteDeleteForm"
-                    class="inline-flex items-center rounded-lg border border-rose-200 bg-white px-4 py-2 text-sm font-semibold text-rose-700 hover:bg-rose-50 focus:outline-none focus:ring-2 focus:ring-offset-2"
+                    class="abtn abtn-danger"
               style="--tw-ring-color: {{ $ACCENT }}"
                     onclick="return confirm('Hapus site ini? Aksi tidak dapat dibatalkan.');">
               Hapus

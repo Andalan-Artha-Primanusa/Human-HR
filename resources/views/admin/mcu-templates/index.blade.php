@@ -9,6 +9,24 @@
 @endphp
 
 @section('content')
+    @once
+      <svg xmlns="http://www.w3.org/2000/svg" class="hidden" aria-hidden="true" focusable="false">
+        <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path stroke-linecap="round" stroke-width="2" d="M12 5v14M5 12h14"/>
+        </symbol>
+        <symbol id="i-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path stroke-linecap="round" stroke-width="2" d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/>
+          <circle cx="12" cy="12" r="3" stroke-width="2"/>
+        </symbol>
+        <symbol id="i-edit" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path stroke-width="2" stroke-linecap="round" d="M12 20h9"/>
+          <path stroke-width="2" stroke-linecap="round" d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/>
+        </symbol>
+        <symbol id="i-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path stroke-width="2" stroke-linecap="round" d="M3 6h18M8 6v12m8-12v12M5 6l1 14a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-14"/>
+        </symbol>
+      </svg>
+    @endonce
     <div class="mx-auto w-full max-w-[1440px] px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
     <section class="overflow-hidden bg-white border shadow-sm rounded-2xl" style="border-color: {{ $BORD }}">
@@ -23,7 +41,7 @@
           <a href="{{ route('admin.mcu-templates.create') }}"
              class="inline-flex items-center justify-center w-full gap-2 px-4 py-2 text-sm font-semibold bg-white rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-offset-2 sm:w-auto"
              style="--tw-ring-color: {{ $ACCENT }}">
-            <svg class="w-4 h-4" style="color: {{ $ACCENT }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M12 5v14M5 12h14"/></svg>
+            <svg class="w-4 h-4" style="color: {{ $ACCENT }}"><use href="#i-plus"/></svg>
             Tambah Template
           </a>
         </div>
@@ -67,16 +85,16 @@
                 </td>
                 <td class="px-4 py-3 text-right">
                   <div class="flex items-center justify-end gap-2">
-                    <a href="{{ route('admin.mcu-templates.preview', $tpl) }}" target="_blank" class="p-2 text-slate-400 hover:text-blue-600 transition" title="Preview PDF">
-                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                    <a href="{{ route('admin.mcu-templates.preview', $tpl) }}" target="_blank" class="abtn-icon" title="Preview PDF">
+                      <svg class="w-5 h-5"><use href="#i-eye"/></svg>
                     </a>
-                    <a href="{{ route('admin.mcu-templates.edit', $tpl) }}" class="p-2 text-slate-400 hover:text-slate-600 transition">
-                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                    <a href="{{ route('admin.mcu-templates.edit', $tpl) }}" class="abtn-icon" aria-label="Edit">
+                      <svg class="w-5 h-5"><use href="#i-edit"/></svg>
                     </a>
                     <form action="{{ route('admin.mcu-templates.destroy', $tpl) }}" method="POST" onsubmit="return confirm('Hapus template ini?')">
                       @csrf @method('DELETE')
-                      <button type="submit" class="p-2 text-slate-400 hover:text-red-600 transition">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                      <button type="submit" class="abtn-icon abtn-icon-danger" aria-label="Hapus">
+                        <svg class="w-5 h-5"><use href="#i-trash"/></svg>
                       </button>
                     </form>
                   </div>
@@ -92,7 +110,8 @@
     @else
       <div class="p-12 text-center bg-white border border-dashed rounded-2xl border-slate-300">
         <p class="text-slate-500">Belum ada template MCU. Silakan tambah template pertama Anda.</p>
-        <a href="{{ route('admin.mcu-templates.create') }}" class="inline-flex items-center px-4 py-2 mt-4 text-sm font-semibold text-white bg-[#a77d52] rounded-lg">
+        <a href="{{ route('admin.mcu-templates.create') }}" class="abtn abtn-primary mt-4">
+          <svg class="w-4 h-4"><use href="#i-plus"/></svg>
           Tambah Template
         </a>
       </div>

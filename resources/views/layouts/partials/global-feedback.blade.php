@@ -19,24 +19,90 @@
   }
 @endphp
 
-<div id="globalFeedbackModal" class="fixed inset-0 z-[9999] hidden items-center justify-center px-4 py-6 bg-slate-950/50" role="dialog" aria-modal="true">
-  <div class="w-full max-w-md overflow-hidden bg-white shadow-2xl rounded-2xl ring-1 ring-slate-200">
-    <div id="globalFeedbackAccent" class="h-1.5 bg-[#a77d52]"></div>
-    <div class="p-6">
-      <div class="flex items-start gap-4">
-        <div id="globalFeedbackIcon" class="grid w-11 h-11 rounded-full place-items-center bg-[#f5ede4] text-[#8b5e3c] shrink-0">
-          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+<style>
+  @keyframes gfFloat {
+    0%,100% { transform: translateY(0); }
+    50%     { transform: translateY(-6px); }
+  }
+  @keyframes gfPop {
+    0%   { transform: scale(.6); opacity: 0; }
+    60%  { transform: scale(1.06); opacity: 1; }
+    100% { transform: scale(1); }
+  }
+  @keyframes gfRingPulse {
+    0%   { transform: scale(.8); opacity: .6; }
+    100% { transform: scale(1.7); opacity: 0; }
+  }
+  @keyframes gfSpin {
+    to { transform: rotate(360deg); }
+  }
+  @keyframes gfShake {
+    0%,100%{ transform: translateX(0); }
+    20%{ transform: translateX(-5px); }
+    40%{ transform: translateX(5px); }
+    60%{ transform: translateX(-3px); }
+    80%{ transform: translateX(3px); }
+  }
+  @keyframes gfBreathe {
+    0%,100%{ transform: scale(1); }
+    50%{ transform: scale(1.06); }
+  }
+  #globalFeedbackModal {
+    --gf-brown: #a77d52;
+    --gf-brown-dark: #8b5e3c;
+    --gf-cream: #f7efdf;
+    --gf-fade: rgba(48,31,15,.55);
+  }
+  #globalFeedbackModal .gf-icon { position: relative; display: grid; place-items: center; width: 5.5rem; height: 5.5rem; margin: 0 auto; }
+  #globalFeedbackModal .gf-ring {
+    position: absolute; inset: 0; border-radius: 9999px;
+    border: 3px solid rgba(167,125,82,.35);
+    animation: gfRingPulse 1.8s ease-out infinite;
+  }
+  #globalFeedbackModal .gf-badge {
+    position: relative; z-index: 1; display: grid; place-items: center;
+    width: 5rem; height: 5rem; border-radius: 1.5rem;
+    background: linear-gradient(145deg, var(--gf-brown), var(--gf-brown-dark));
+    color: #fff;
+    box-shadow: 0 14px 30px rgba(139,94,60,.35);
+    animation: gfFloat 2.6s ease-in-out infinite, gfPop .5s cubic-bezier(.34,1.56,.64,1) both;
+  }
+  #globalFeedbackModal.gf-error .gf-ring { border-color: rgba(220,38,38,.35); animation-name: gfShake; }
+  #globalFeedbackModal.gf-error .gf-badge { background: linear-gradient(145deg,#ef4444,#dc2626); box-shadow: 0 14px 30px rgba(220,38,38,.35); }
+  #globalFeedbackModal.gf-warning .gf-ring { border-color: rgba(217,119,6,.35); }
+  #globalFeedbackModal.gf-warning .gf-badge { background: linear-gradient(145deg,#f59e0b,#d97706); box-shadow: 0 14px 30px rgba(217,119,6,.35); animation-name: gfBreathe; }
+  #globalFeedbackModal.gf-success .gf-ring { border-color: rgba(5,150,105,.35); }
+  #globalFeedbackModal.gf-success .gf-badge { background: linear-gradient(145deg,#10b981,#059669); box-shadow: 0 14px 30px rgba(5,150,105,.35); animation-name: gfBreathe, gfPop; }
+  #globalFeedbackModal .gf-badge.spin .gf-glyph { animation: gfSpin 6s linear infinite; }
+  #globalFeedbackModal .gf-glyph { width: 2.25rem; height: 2.25rem; }
+</style>
+
+<div id="globalFeedbackModal"
+     class="gf-info fixed inset-0 z-[9999] hidden items-center justify-center px-4 py-6"
+     style="background: var(--gf-fade); backdrop-filter: blur(2px);"
+     role="dialog" aria-modal="true">
+
+  <div class="w-full max-w-sm overflow-hidden bg-white shadow-2xl rounded-3xl ring-1 ring-slate-200"
+       style="animation: gfPop .35s cubic-bezier(.34,1.56,.64,1) both;">
+
+    <div class="px-7 pt-8 pb-7 text-center">
+      <div class="gf-icon">
+        <div class="gf-ring"></div>
+        <div class="gf-badge">
+          <svg class="gf-glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 13l4 4L19 7"/>
           </svg>
         </div>
-        <div class="min-w-0">
-          <h2 id="globalFeedbackTitle" class="text-base font-semibold text-slate-950">Berhasil</h2>
-          <p id="globalFeedbackMessage" class="mt-1 text-sm leading-6 text-slate-600">Data berhasil disimpan.</p>
-        </div>
       </div>
-      <div id="globalFeedbackActions" class="flex justify-end gap-2 mt-6">
-        <button type="button" id="globalFeedbackCancel" class="hidden px-4 py-2 text-sm font-semibold bg-white border rounded-lg border-slate-200 text-slate-700 hover:bg-slate-50">Batal</button>
-        <button type="button" id="globalFeedbackOk" class="px-4 py-2 text-sm font-semibold text-white rounded-lg bg-[#a77d52] hover:opacity-95">Oke</button>
+
+      <h2 id="globalFeedbackTitle" class="mt-6 text-lg font-bold text-slate-950">Berhasil</h2>
+      <p id="globalFeedbackMessage" class="mt-1.5 text-sm leading-6 text-slate-600">Data berhasil disimpan.</p>
+
+      <div id="globalFeedbackActions" class="flex justify-center gap-3 mt-7">
+        <button type="button" id="globalFeedbackCancel" class="hidden px-5 py-2.5 rounded-2xl text-sm font-semibold text-white"
+                style="background: linear-gradient(145deg,#ef4444,#dc2626); box-shadow: 0 8px 20px rgba(220,38,38,.3);">Batal</button>
+        <button type="button" id="globalFeedbackOk" class="px-6 py-2.5 rounded-2xl text-sm font-semibold text-white transition"
+                style="background: linear-gradient(145deg,var(--gf-brown),var(--gf-brown-dark)); box-shadow: 0 8px 20px rgba(139,94,60,.35);">Oke</button>
       </div>
     </div>
   </div>
@@ -52,27 +118,27 @@
     const modal = document.getElementById('globalFeedbackModal');
     const title = document.getElementById('globalFeedbackTitle');
     const message = document.getElementById('globalFeedbackMessage');
-    const icon = document.getElementById('globalFeedbackIcon');
-    const accent = document.getElementById('globalFeedbackAccent');
+    const glyph = modal.querySelector('.gf-glyph');
+    const badge = modal.querySelector('.gf-badge');
     const ok = document.getElementById('globalFeedbackOk');
     const cancel = document.getElementById('globalFeedbackCancel');
     let onConfirm = null;
 
-    const themes = {
-      success: { accent: 'bg-emerald-500', icon: 'bg-emerald-50 text-emerald-700' },
-      error: { accent: 'bg-red-500', icon: 'bg-red-50 text-red-700' },
-      warning: { accent: 'bg-amber-500', icon: 'bg-amber-50 text-amber-700' },
-      info: { accent: 'bg-[#a77d52]', icon: 'bg-[#f5ede4] text-[#8b5e3c]' },
-      confirm: { accent: 'bg-red-500', icon: 'bg-red-50 text-red-700' },
+    const GLYPHS = {
+      success: '<path d="M5 13l4 4L19 7"/>',
+      error:   '<path d="M12 9v4m0 4h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/>',
+      warning: '<path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><path d="M12 9v4m0 4h.01"/>',
+      info:    '<path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>',
+      confirm: '<path d="M12 9v4m0 4h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/>',
     };
+    const SPIN = { info: true, confirm: true };
 
     function setTheme(type){
-      const theme = themes[type] || themes.info;
-      accent.className = 'h-1.5 ' + theme.accent;
-      icon.className = 'grid w-11 h-11 rounded-full place-items-center shrink-0 ' + theme.icon;
-      icon.innerHTML = type === 'error' || type === 'warning' || type === 'confirm'
-        ? '<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/></svg>'
-        : '<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>';
+      const t = type || 'info';
+      modal.classList.remove('gf-success','gf-error','gf-warning','gf-info');
+      modal.classList.add('gf-' + (GLYPHS[t] ? t : 'info'));
+      badge.classList.toggle('spin', !!SPIN[t]);
+      glyph.innerHTML = GLYPHS[t] || GLYPHS.info;
     }
 
     function openFeedback(options){
