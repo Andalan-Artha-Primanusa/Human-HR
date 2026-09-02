@@ -4,6 +4,7 @@
 
     /** @var \App\Models\User|null $u */
     $u = auth()->user();
+    $accountInitial = $u && $u->name ? mb_strtoupper(mb_substr(trim($u->name), 0, 1)) : 'U';
 
     // ====== Notifications (initial render sebagai fallback) ======
     $notifUnread = 0;
@@ -104,17 +105,67 @@
       </div>
     </div>
 
-    {{-- ====== Avatar ====== --}}
-    <a href="{{ route('profile.edit') }}" class="p-1 border rounded-full border-slate-200 hover:bg-slate-50" title="Profil">
-      @if($u && property_exists($u, 'profile_photo_url') && $u->profile_photo_url)
-        <img src="{{ $u->profile_photo_url }}" class="object-cover w-8 h-8 rounded-full" alt="{{ $u->name }}">
-      @else
-        @php $initial = $u && $u->name ? mb_strtoupper(mb_substr(trim($u->name), 0, 1)) : 'U'; @endphp
-        <div class="grid w-8 h-8 text-sm font-semibold text-blue-700 bg-blue-100 rounded-full place-content-center">
-          {{ $initial }}
+    {{-- ====== Account Dropdown ====== --}}
+    <div class="relative">
+      <button type="button"
+              class="flex items-center gap-2 rounded-full border border-slate-200 bg-white p-1 pr-2 shadow-sm transition hover:bg-slate-50"
+              data-dd-trigger="dd-account"
+              aria-haspopup="true"
+              aria-expanded="false"
+              aria-label="Menu akun"
+              title="Menu akun">
+        @if($u && property_exists($u, 'profile_photo_url') && $u->profile_photo_url)
+          <img src="{{ $u->profile_photo_url }}" class="object-cover w-8 h-8 rounded-full" alt="{{ $u->name }}">
+        @else
+          <div class="grid w-8 h-8 text-sm font-semibold text-white bg-[#8b5e3c] rounded-full place-content-center">
+            {{ $accountInitial }}
+          </div>
+        @endif
+        <svg class="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+          <path d="m6 9 6 6 6-6"/>
+        </svg>
+      </button>
+
+      <div id="dd-account"
+           class="dropdown-panel absolute right-0 z-40 mt-2 hidden w-72 overflow-hidden rounded-2xl border border-slate-200 bg-white p-2 shadow-2xl shadow-slate-900/10">
+        <div class="mb-1 flex items-center gap-3 rounded-xl bg-[#f7efe7] px-3 py-3">
+          <div class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#8b5e3c] text-sm font-bold text-white">
+            {{ $accountInitial }}
+          </div>
+          <div class="min-w-0">
+            <div class="truncate text-sm font-bold text-slate-950">{{ $u->name }}</div>
+            <div class="truncate text-xs text-slate-500">{{ $u->email }}</div>
+          </div>
         </div>
-      @endif
-    </a>
+
+        <a href="{{ route('profile.edit') }}" class="group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+          <span class="grid h-9 w-9 place-items-center rounded-lg bg-slate-100 text-slate-500 transition group-hover:bg-[#f5ede4] group-hover:text-[#8b5e3c]">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="7" r="4"/></svg>
+          </span>
+          <span>Profil Saya</span>
+        </a>
+
+        @if(Route::has('applications.mine'))
+          <a href="{{ route('applications.mine') }}" class="group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+            <span class="grid h-9 w-9 place-items-center rounded-lg bg-slate-100 text-slate-500 transition group-hover:bg-[#f5ede4] group-hover:text-[#8b5e3c]">
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M3 13h18"/></svg>
+            </span>
+            <span>Lamaran Saya</span>
+          </a>
+        @endif
+
+        <div class="my-2 border-t border-slate-100"></div>
+        <form action="{{ route('logout') }}" method="POST">
+          @csrf
+          <button type="submit" class="group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-red-600 transition hover:bg-red-50">
+            <span class="grid h-9 w-9 place-items-center rounded-lg bg-red-50 text-red-500 transition group-hover:bg-red-100">
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/><path d="M21 19V5a2 2 0 0 0-2-2h-5"/><path d="M14 21h5a2 2 0 0 0 2-2"/></svg>
+            </span>
+            <span>Keluar</span>
+          </button>
+        </form>
+      </div>
+    </div>
   @endauth
 </div>
 
