@@ -288,7 +288,7 @@
       {{-- BREADCRUMB --}}
       <nav class="mb-4" aria-label="Breadcrumb">
         <div class="relative rounded-xl border border-slate-200 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 shadow-sm">
-          <div class="w-full h-1 overflow-hidden rounded-t-xl"><div class="w-full h-full" style="background: linear-gradient(90deg, {{ $ACCENT_DARK }} 0%, {{ $ACCENT }} 100%);"></div></div>
+          <div class="w-full h-1 overflow-hidden rounded-t-xl" style="background: {{ $ACCENT }};"></div>
           <ol class="flex items-center gap-2 px-3 py-2 overflow-x-auto text-sm text-slate-600" itemscope itemtype="https://schema.org/BreadcrumbList">
             <li class="flex items-center gap-2 shrink-0" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
               <a href="{{ route('dashboard') }}" itemprop="item" class="inline-flex items-center gap-1 px-2 py-1 rounded-lg group hover:bg-slate-50">
@@ -322,9 +322,8 @@
         </div>
       </nav>
 
-      {{-- HEADER --}}
-      <div class="overflow-hidden border shadow-sm rounded-2xl border-[#ead8c5]"
-           style="background: linear-gradient(135deg, #ffffff 0%, #fffaf5 58%, #f7ede3 100%);">
+{{-- HEADER --}}
+      <div class="overflow-hidden border shadow-sm rounded-2xl" style="background:#ffffff;border-color:#ead8c5">
         <div class="flex w-full h-2"><div class="flex-1" style="background: {{ $ACCENT }}"></div><div class="w-32" style="background: {{ $ACCENT_DARK }}"></div></div>
 
         <div class="p-5 md:p-6">
@@ -400,7 +399,7 @@
                 @elseif(($job->status ?? 'draft') === 'open' && !$myApp)
                       <form method="POST" action="{{ route('applications.store', $job) }}" id="applyForm" class="inline">@csrf
                         <button class="px-5 py-3 text-sm font-semibold text-white rounded-xl shadow-sm hover:brightness-105"
-                                style="background: linear-gradient(90deg, {{ $ACCENT }} 0%, {{ $ACCENT_DARK }} 100%);">
+                                style="background: {{ $ACCENT }};">
                           Lamar Sekarang
                         </button>
                       </form>
@@ -423,7 +422,7 @@
                 @endif
               @else
                 <a class="px-5 py-3 text-sm font-semibold text-white rounded-xl shadow-sm hover:brightness-105"
-                   style="background: linear-gradient(90deg, {{ $ACCENT }} 0%, {{ $ACCENT_DARK }} 100%);"
+                   style="background: {{ $ACCENT }};"
                    href="{{ route('login') }}">
                   Login untuk Melamar
                 </a>
@@ -495,26 +494,19 @@
             @endif
           </div>
 
-          {{-- ===== INFORMASI LENGKAP (ini yang kemarin hilang) ===== --}}
+{{-- ===== INFORMASI LENGKAP (ini yang kemarin hilang) ===== --}}
           <div class="p-5 bg-white border shadow-sm rounded-2xl border-[#ead8c5] md:p-6">
-            <div class="flex items-start justify-between gap-4">
-              <div>
-                <h2 class="text-lg font-semibold text-slate-900">Informasi Lengkap</h2>
-                <p class="mt-1 text-sm text-slate-500">Ringkasan data lowongan yang dipakai selama proses rekrutmen.</p>
-              </div>
-              <span class="hidden rounded-full bg-[#fffaf5] px-3 py-1 text-xs font-semibold text-[#8b5e3c] ring-1 ring-[#ead8c5] sm:inline-flex">
-                Job Detail
-              </span>
-            </div>
+            <x-section-title title="Informasi Lengkap" badge="Job Detail" />
+            <p class="mt-2 text-sm text-slate-500">Ringkasan data lowongan yang dipakai selama proses rekrutmen.</p>
 
             <dl class="grid grid-cols-1 gap-3 mt-5 text-sm sm:grid-cols-2">
-              <div class="rounded-xl border border-slate-200/70 bg-slate-50/60 p-3 sm:grid sm:grid-cols-3 sm:gap-2">
-                <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Kode Lowongan</dt>
+              <div class="rounded-xl border border-[#eeddC9] bg-[#fdf7f0] p-3 sm:grid sm:grid-cols-3 sm:gap-2">
+                <dt class="text-xs font-semibold uppercase tracking-wide text-[#8b5e3c]">Kode Lowongan</dt>
                 <dd class="col-span-2 text-slate-800">{{ e($job->code ?? '—') }}</dd>
               </div>
 
-              <div class="rounded-xl border border-slate-200/70 bg-slate-50/60 p-3 sm:grid sm:grid-cols-3 sm:gap-2">
-                <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Perusahaan</dt>
+              <div class="rounded-xl border border-[#eeddC9] bg-[#fdf7f0] p-3 sm:grid sm:grid-cols-3 sm:gap-2">
+                <dt class="text-xs font-semibold uppercase tracking-wide text-[#8b5e3c]">Perusahaan</dt>
                 <dd class="col-span-2 text-slate-800">
                   @if($job->company)
                     {{ e(($job->company->code ?? '')) }}{{ $job->company->code ? ' — ' : '' }}{{ e(($job->company->name ?? '')) }}
@@ -524,13 +516,13 @@
                 </dd>
               </div>
 
-              <div class="rounded-xl border border-slate-200/70 bg-slate-50/60 p-3 sm:grid sm:grid-cols-3 sm:gap-2">
-                <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Level</dt>
+              <div class="rounded-xl border border-[#eeddC9] bg-[#fdf7f0] p-3 sm:grid sm:grid-cols-3 sm:gap-2">
+                <dt class="text-xs font-semibold uppercase tracking-wide text-[#8b5e3c]">Level</dt>
                 <dd class="col-span-2 text-slate-800">{{ e($levelLabels[strtolower((string) $job->level)] ?? (ucwords(str_replace('_', ' ', (string) $job->level)) ?: '—')) }}</dd>
               </div>
 
-              <div class="rounded-xl border border-slate-200/70 bg-slate-50/60 p-3 sm:grid sm:grid-cols-3 sm:gap-2">
-                <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Status</dt>
+              <div class="rounded-xl border border-[#eeddC9] bg-[#fdf7f0] p-3 sm:grid sm:grid-cols-3 sm:gap-2">
+                <dt class="text-xs font-semibold uppercase tracking-wide text-[#8b5e3c]">Status</dt>
                 <dd class="col-span-2">
                   <span class="rounded-full px-2.5 py-1 text-[11px] font-semibold ring-1 ring-inset
                     {{ $job->status === 'open' ? 'bg-emerald-50 text-emerald-700 ring-emerald-200' : 'bg-slate-100 text-slate-700 ring-slate-200' }}">
@@ -539,8 +531,8 @@
                 </dd>
               </div>
 
-              <div class="rounded-xl border border-slate-200/70 bg-slate-50/60 p-3 sm:grid sm:grid-cols-3 sm:gap-2">
-                <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Lokasi (Site)</dt>
+              <div class="rounded-xl border border-[#eeddC9] bg-[#fdf7f0] p-3 sm:grid sm:grid-cols-3 sm:gap-2">
+                <dt class="text-xs font-semibold uppercase tracking-wide text-[#8b5e3c]">Lokasi (Site)</dt>
                 <dd class="col-span-2 text-slate-800">
                   @if($job->site)
                     {{ e($job->site->code ?? '—') }}{{ ($job->site->code && $job->site->name) ? ' — ' : '' }}{{ e($job->site->name ?? '') }}
@@ -550,36 +542,36 @@
                 </dd>
               </div>
 
-              <div class="rounded-xl border border-slate-200/70 bg-slate-50/60 p-3 sm:grid sm:grid-cols-3 sm:gap-2">
-                <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Tipe Pekerjaan</dt>
+              <div class="rounded-xl border border-[#eeddC9] bg-[#fdf7f0] p-3 sm:grid sm:grid-cols-3 sm:gap-2">
+                <dt class="text-xs font-semibold uppercase tracking-wide text-[#8b5e3c]">Tipe Pekerjaan</dt>
                 <dd class="col-span-2 text-slate-800">
                   {{ e($employmentPretty[$job->employment_type] ?? strtoupper($job->employment_type ?? '—')) }}
                 </dd>
               </div>
 
-              <div class="rounded-xl border border-slate-200/70 bg-slate-50/60 p-3 sm:grid sm:grid-cols-3 sm:gap-2">
-                <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Openings</dt>
+              <div class="rounded-xl border border-[#eeddC9] bg-[#fdf7f0] p-3 sm:grid sm:grid-cols-3 sm:gap-2">
+                <dt class="text-xs font-semibold uppercase tracking-wide text-[#8b5e3c]">Openings</dt>
                 <dd class="col-span-2 text-slate-800">{{ (int) ($job->openings ?? 1) }}</dd>
               </div>
 
-              <div class="rounded-xl border border-slate-200/70 bg-slate-50/60 p-3 sm:grid sm:grid-cols-3 sm:gap-2">
-                <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Diposting</dt>
+              <div class="rounded-xl border border-[#eeddC9] bg-[#fdf7f0] p-3 sm:grid sm:grid-cols-3 sm:gap-2">
+                <dt class="text-xs font-semibold uppercase tracking-wide text-[#8b5e3c]">Diposting</dt>
                 <dd class="col-span-2 text-slate-800">
                   {{ e(optional($job->created_at)->timezone($TZ)->format('d M Y, H:i') ?? '—') }}
                   @if($createdByName) · oleh <span class="font-medium">{{ e($createdByName) }}</span>@endif
                 </dd>
               </div>
 
-              <div class="rounded-xl border border-slate-200/70 bg-slate-50/60 p-3 sm:grid sm:grid-cols-3 sm:gap-2">
-                <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Diubah</dt>
+              <div class="rounded-xl border border-[#eeddC9] bg-[#fdf7f0] p-3 sm:grid sm:grid-cols-3 sm:gap-2">
+                <dt class="text-xs font-semibold uppercase tracking-wide text-[#8b5e3c]">Diubah</dt>
                 <dd class="col-span-2 text-slate-800">
                   {{ e(optional($job->updated_at)->timezone($TZ)->format('d M Y, H:i') ?? '—') }}
                   @if($updatedByName) · oleh <span class="font-medium">{{ e($updatedByName) }}</span>@endif
                 </dd>
               </div>
 
-              <div class="rounded-xl border border-slate-200/70 bg-slate-50/60 p-3 sm:grid sm:grid-cols-3 sm:gap-2">
-                <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Tutup</dt>
+              <div class="rounded-xl border border-[#eeddC9] bg-[#fdf7f0] p-3 sm:grid sm:grid-cols-3 sm:gap-2">
+                <dt class="text-xs font-semibold uppercase tracking-wide text-[#8b5e3c]">Tutup</dt>
                 <dd class="col-span-2 text-slate-800">
                   @if($closingAt)
                     {{ e(Carbon::parse($closingAt)->timezone($TZ)->format('d M Y, H:i')) }} {{ $abbrTz($TZ) }}
@@ -594,17 +586,17 @@
 
           {{-- ===== Kualifikasi ===== --}}
           @if(filled($job->qualifications))
-              <div class="p-5 bg-white border shadow-sm rounded-2xl border-slate-200 md:p-6">
-                <h2 class="text-lg font-semibold text-slate-900">Kualifikasi</h2>
+<div class="p-5 bg-white border shadow-sm rounded-2xl border-slate-200 md:p-6">
+                <x-section-title title="Kualifikasi" />
                 <div class="prose max-w-none text-slate-800">
                   {!! $sanitize($job->qualifications) !!}
                 </div>
               </div>
           @endif
 
-          {{-- Deskripsi Pekerjaan --}}
-          <div class="p-5 bg-white border shadow-sm rounded-2xl border-slate-200 md:p-6">
-            <h2 class="text-lg font-semibold text-slate-900">Deskripsi Pekerjaan</h2>
+{{-- Deskripsi Pekerjaan --}}
+  <div class="p-5 bg-white border shadow-sm rounded-2xl border-slate-200 md:p-6">
+    <x-section-title title="Deskripsi Pekerjaan" />
             <div class="prose max-w-none text-slate-800">
               <style>.prose ul{list-style:disc;padding-left:1.25rem}.prose ol{list-style:decimal;padding-left:1.25rem}.prose li{margin:.25rem 0}</style>
               @if(filled($job->description))
@@ -618,7 +610,7 @@
           {{-- Tanggung Jawab --}}
           @if(filled($job->responsibilities))
               <div class="p-5 bg-white border shadow-sm rounded-2xl border-slate-200 md:p-6">
-                <h2 class="text-lg font-semibold text-slate-900">Tanggung Jawab</h2>
+<x-section-title title="Tanggung Jawab" />
                 <div class="prose max-w-none text-slate-800">
                   {!! $sanitize($job->responsibilities) !!}
                 </div>
@@ -628,7 +620,7 @@
           {{-- Benefit --}}
           @if(filled($job->benefits))
               <div class="p-5 bg-white border shadow-sm rounded-2xl border-slate-200 md:p-6">
-                <h2 class="text-lg font-semibold text-slate-900">Benefit</h2>
+<x-section-title title="Benefit" />
                 <div class="prose max-w-none text-slate-800">
                   {!! $sanitize($job->benefits) !!}
                 </div>
@@ -645,7 +637,7 @@
           @endphp
           @if($keywords->count() || $skills->count() || $tags->count())
               <div class="p-5 bg-white border shadow-sm rounded-2xl border-slate-200 md:p-6">
-                <h2 class="text-lg font-semibold text-slate-900">Kata Kunci & Keahlian</h2>
+<x-section-title title="Kata Kunci & Keahlian" />
 
                 @if($keywords->count())
                       <div class="mt-2">
@@ -687,12 +679,12 @@
         <aside id="apply" class="space-y-6 scroll-mt-24">
           {{-- Progres Lamaran --}}
           <div class="overflow-hidden border shadow-sm rounded-2xl border-[#ead8c5]"
-           style="background: linear-gradient(135deg, #ffffff 0%, #fffaf5 58%, #f7ede3 100%);">
-            <div class="h-1.5" style="background: linear-gradient(90deg, {{ $ACCENT }} 0%, {{ $ACCENT_DARK }} 100%);"></div>
+           style="background:#ffffff;">
+            <div class="h-1.5" style="background: {{ $ACCENT }};"></div>
             <div class="p-5 md:p-6">
               <div class="flex items-start justify-between gap-4">
                 <div>
-                  <h3 class="text-base font-semibold text-slate-900">Progres Lamaran Kamu</h3>
+                  <h3 class="text-base font-bold text-[#5c3d1e]">Progres Lamaran Kamu</h3>
                   <p class="mt-1 text-xs leading-relaxed text-slate-500">
                     Pantau status seleksi untuk posisi ini dari satu tempat.
                   </p>
@@ -744,7 +736,7 @@
                       <div class="text-sm font-semibold text-slate-900">Masuk untuk melamar</div>
                       <p class="mt-1 text-xs leading-relaxed text-slate-600">Login dulu agar sistem bisa menyimpan profil dan progres lamaran kamu.</p>
                       <a href="{{ route('login') }}" class="inline-flex items-center justify-center px-4 py-2 mt-3 text-sm font-semibold text-white rounded-lg"
-                         style="background: linear-gradient(90deg, {{ $ACCENT }} 0%, {{ $ACCENT_DARK }} 100%);">
+                         style="background: {{ $ACCENT }};">
                         Login Sekarang
                       </a>
                     </div>
@@ -772,7 +764,7 @@
                           @else
                             <form method="POST" action="{{ route('applications.store', $job) }}" class="mt-3">@csrf
                               <button class="w-full px-4 py-2.5 text-sm font-semibold text-white rounded-lg shadow-sm hover:brightness-105"
-                                      style="background: linear-gradient(90deg, {{ $ACCENT }} 0%, {{ $ACCENT_DARK }} 100%);">
+                                      style="background: {{ $ACCENT }};">
                                 Lamar Sekarang
                               </button>
                             </form>
@@ -804,7 +796,7 @@
                         @if(Route::has('candidate.profiles.edit'))
                           <a href="{{ route('candidate.profiles.edit', $job) }}"
                              class="inline-flex items-center justify-center w-full px-4 py-2.5 mt-4 text-sm font-semibold text-white rounded-lg shadow-sm"
-                             style="background: linear-gradient(90deg, {{ $ACCENT }} 0%, {{ $ACCENT_DARK }} 100%);">
+                             style="background: {{ $ACCENT }};">
                             Isi Profil Sekarang
                           </a>
                         @endif
@@ -985,9 +977,9 @@
             </div>
           </div>
 
-          {{-- Tentang Site --}}
+{{-- Tentang Site --}}
           <div class="p-5 bg-white border shadow-sm rounded-2xl border-slate-200 md:p-6">
-            <h3 class="text-base font-semibold text-slate-900">Tentang Site</h3>
+            <x-section-title title="Tentang Site" />
             @if($job->site)
                   @php
                     $s = $job->site;
@@ -1016,9 +1008,12 @@
 
           {{-- PROFIL KANDIDAT --}}
           @auth
-              <div class="p-5 bg-white border shadow-sm rounded-2xl border-slate-200 md:p-6">
-                <div class="flex items-center justify-between">
-                  <h3 class="text-base font-semibold text-slate-900">Profil Kandidat Kamu</h3>
+<div class="p-5 bg-white border shadow-sm rounded-2xl border-slate-200 md:p-6">
+                <div class="flex items-center justify-between gap-3">
+                  <div class="flex items-center gap-3">
+                    <span class="h-5 w-1 shrink-0 rounded-full bg-[#a77d52]"></span>
+                    <h2 class="text-base font-bold text-[#5c3d1e]">Profil Kandidat Kamu</h2>
+                  </div>
                   @if(Route::has('candidate.profiles.edit'))
                     <a href="{{ route('candidate.profiles.edit', $job) }}" class="text-sm text-[#8b5e3c] hover:underline">Ubah</a>
                   @endif
@@ -1097,7 +1092,7 @@
           @isset($relatedJobs)
             @if($relatedJobs->count())
                   <div class="p-5 bg-white border shadow-sm rounded-2xl border-slate-200 md:p-6">
-                    <h3 class="text-base font-semibold text-slate-900">Lowongan Serupa</h3>
+                    <x-section-title title="Lowongan Serupa" />
                     <ul class="mt-3 space-y-2">
                       @foreach($relatedJobs as $r)
                         <li class="flex items-center justify-between gap-3">
