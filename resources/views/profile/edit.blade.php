@@ -106,72 +106,93 @@
 @endphp
 
 @section('content')
-<div class="mx-auto w-full max-w-[1180px] px-4 py-6 sm:px-6 lg:px-8">
-  <section class="overflow-hidden rounded-[18px] border bg-white shadow-sm" style="border-color: {{ $BORD }}">
-    <div class="relative min-h-[210px] bg-[#ede4da]">
-      <div class="absolute inset-0">
-        <div class="h-full w-full bg-[linear-gradient(120deg,#8b5e3c_0%,#a77d52_42%,#efe7dc_42%,#f8fafc_100%)]"></div>
-      </div>
-      <div class="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-white to-transparent"></div>
-    </div>
-
-    <div class="relative px-5 pb-5 sm:px-8">
-      <div class="-mt-16 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div class="flex flex-col gap-4 sm:flex-row sm:items-end">
-          <div class="flex h-32 w-32 shrink-0 items-center justify-center rounded-full border-4 border-white bg-[#8b5e3c] text-4xl font-bold text-white shadow-md">
-            {{ $initials }}
-          </div>
-          <div class="pb-2">
-            <h1 class="text-3xl font-bold tracking-tight text-slate-950">{{ $displayName }}</h1>
-            <div class="mt-2 flex flex-wrap items-center gap-2 text-sm text-slate-600">
-              <span>{{ $displayEmail }}</span>
-              <span class="h-1 w-1 rounded-full bg-slate-300"></span>
-              <span>{{ $profile?->phone ?: 'Nomor HP belum diisi' }}</span>
-              @if($user->email_verified_at)
-                <span class="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">Verified</span>
-              @else
-                <span class="rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700">Belum Verifikasi</span>
-              @endif
-            </div>
-          </div>
+<div class="page-container">
+  {{-- ===== PROFILE HEADER (solid brown, shared design) ===== --}}
+  <section class="page-header" aria-labelledby="profile-name">
+    <div class="page-header__inner">
+      <div class="flex items-center gap-4 min-w-0">
+        <div class="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl bg-white/15 text-3xl font-bold text-white ring-1 ring-white/30">
+          {{ $initials }}
         </div>
+        <div class="page-header__copy min-w-0">
+          <p class="page-header__eyebrow">Profil Kandidat</p>
+          <h1 id="profile-name" class="page-header__title truncate" style="max-width:100%">{{ $displayName }}</h1>
+          <p class="page-header__desc mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+            <span class="inline-flex items-center gap-1.5">
+              <svg class="w-4 h-4 opacity-80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+              {{ $displayEmail }}
+            </span>
+            <span class="inline-flex items-center gap-1.5">
+              <svg class="w-4 h-4 opacity-80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .3 1.9.6 2.8a2 2 0 0 1-.4 2.1L8 10a16 16 0 0 0 6 6l1.4-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.5 2.8.6a2 2 0 0 1 1.7 2Z"/></svg>
+              {{ $profile?->phone ?: 'Nomor HP belum diisi' }}
+            </span>
+            @if($user->email_verified_at)
+              <span class="inline-flex items-center gap-1 rounded-full bg-white/20 px-2.5 py-1 text-xs font-semibold text-white ring-1 ring-white/30">Verified</span>
+            @else
+              <span class="inline-flex items-center gap-1 rounded-full bg-white/20 px-2.5 py-1 text-xs font-semibold text-white ring-1 ring-white/30">Belum Verifikasi</span>
+            @endif
+          </p>
+        </div>
+      </div>
 
-        <div class="flex flex-wrap gap-2 pb-2">
-          <a href="{{ $profileEditUrl }}" class="inline-flex items-center justify-center rounded-lg bg-[#8b5e3c] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#744d31]">
-            Perbarui Biodata
+      <div class="page-header__actions pt-2">
+        <a href="{{ $profileEditUrl }}" class="ph-action">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+          Perbarui Biodata
+        </a>
+        @if(Route::has('applications.mine'))
+          <a href="{{ route('applications.mine') }}" class="ph-action">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h18v10a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V7Z"/><path d="M8 7V6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v1"/></svg>
+            Lihat Lamaran
           </a>
-          @if(Route::has('applications.mine'))
-            <a href="{{ route('applications.mine') }}" class="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
-              Lihat Lamaran
-            </a>
-          @endif
-        </div>
+        @endif
       </div>
+    </div>
+  </section>
 
-      <div class="mt-5 grid gap-3 sm:grid-cols-4">
-        <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
-          <div class="text-xs font-medium text-slate-500">Kelengkapan</div>
-          <div class="mt-1 text-2xl font-bold text-slate-950">{{ $profileCompleteness }}%</div>
-          <div class="mt-2 h-2 rounded-full bg-white">
-            <div class="h-2 rounded-full bg-[#a77d52]" style="width: {{ $profileCompleteness }}%"></div>
-          </div>
-        </div>
-        <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
-          <div class="text-xs font-medium text-slate-500">Lamaran</div>
-          <div class="mt-1 text-2xl font-bold text-slate-950">{{ $user->applications->count() }}</div>
-          <div class="mt-1 text-xs text-slate-500">Total posisi yang dilamar</div>
-        </div>
-        <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
-          <div class="text-xs font-medium text-slate-500">Pelatihan</div>
-          <div class="mt-1 text-2xl font-bold text-slate-950">{{ $profile?->trainings?->count() ?? 0 }}</div>
-          <div class="mt-1 text-xs text-slate-500">Data sertifikasi</div>
-        </div>
-        <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
-          <div class="text-xs font-medium text-slate-500">Pengalaman</div>
-          <div class="mt-1 text-2xl font-bold text-slate-950">{{ $profile?->employments?->count() ?? 0 }}</div>
-          <div class="mt-1 text-xs text-slate-500">Riwayat pekerjaan</div>
-        </div>
+  {{-- ===== STAT CARDS ===== --}}
+  <section class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4" aria-label="Ringkasan profil">
+    <div class="rounded-2xl border border-[#ede4dc] bg-white p-5 shadow-sm">
+      <div class="flex items-center justify-between">
+        <div class="text-xs font-semibold uppercase tracking-wide text-slate-500">Kelengkapan</div>
+        <span class="grid h-9 w-9 place-items-center rounded-xl bg-[#fdf7f0] text-[#a77d52]">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg>
+        </span>
       </div>
+      <div class="mt-2 text-3xl font-bold text-[#5c3d1e]">{{ $profileCompleteness }}%</div>
+      <div class="mt-3 h-2.5 overflow-hidden rounded-full bg-[#f0e7dc]">
+        <div class="h-2.5 rounded-full bg-[#a77d52]" style="width: {{ $profileCompleteness }}%"></div>
+      </div>
+    </div>
+    <div class="rounded-2xl border border-[#ede4dc] bg-white p-5 shadow-sm">
+      <div class="flex items-center justify-between">
+        <div class="text-xs font-semibold uppercase tracking-wide text-slate-500">Lamaran</div>
+        <span class="grid h-9 w-9 place-items-center rounded-xl bg-[#fdf7f0] text-[#a77d52]">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 7h18v10a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V7Z"/><path d="M8 7V6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v1"/></svg>
+        </span>
+      </div>
+      <div class="mt-2 text-3xl font-bold text-[#5c3d1e]">{{ $user->applications->count() }}</div>
+      <div class="mt-1 text-sm text-slate-500">Total posisi yang dilamar</div>
+    </div>
+    <div class="rounded-2xl border border-[#ede4dc] bg-white p-5 shadow-sm">
+      <div class="flex items-center justify-between">
+        <div class="text-xs font-semibold uppercase tracking-wide text-slate-500">Pelatihan</div>
+        <span class="grid h-9 w-9 place-items-center rounded-xl bg-[#fdf7f0] text-[#a77d52]">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m12 3 10 5-10 5L2 8Z"/><path d="M6 10v5c0 1 3 3 6 3s6-2 6-3v-5"/></svg>
+        </span>
+      </div>
+      <div class="mt-2 text-3xl font-bold text-[#5c3d1e]">{{ $profile?->trainings?->count() ?? 0 }}</div>
+      <div class="mt-1 text-sm text-slate-500">Data sertifikasi</div>
+    </div>
+    <div class="rounded-2xl border border-[#ede4dc] bg-white p-5 shadow-sm">
+      <div class="flex items-center justify-between">
+        <div class="text-xs font-semibold uppercase tracking-wide text-slate-500">Pengalaman</div>
+        <span class="grid h-9 w-9 place-items-center rounded-xl bg-[#fdf7f0] text-[#a77d52]">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 21h18M5 21V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v14M9 9h6M9 13h6M9 17h4"/></svg>
+        </span>
+      </div>
+      <div class="mt-2 text-3xl font-bold text-[#5c3d1e]">{{ $profile?->employments?->count() ?? 0 }}</div>
+      <div class="mt-1 text-sm text-slate-500">Riwayat pekerjaan</div>
     </div>
   </section>
 
@@ -179,13 +200,13 @@
     <section class="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-6 text-amber-900">
       <h2 class="text-lg font-semibold">Biodata kandidat belum dibuat</h2>
       <p class="mt-1 text-sm">Lengkapi biodata saat melamar lowongan supaya data lengkap kamu muncul di halaman ini.</p>
-      <a href="{{ Route::has('jobs.index') ? route('jobs.index') : url('/jobs') }}" class="mt-4 inline-flex rounded-lg bg-[#8b5e3c] px-4 py-2 text-sm font-semibold text-white">Cari Lowongan</a>
+      <a href="{{ Route::has('jobs.index') ? route('jobs.index') : url('/jobs') }}" class="abtn abtn-primary mt-4">Cari Lowongan</a>
     </section>
   @else
     <div class="mt-6 grid gap-6 lg:grid-cols-[360px_minmax(0,1fr)]">
       <aside class="space-y-6">
         <section class="rounded-2xl border bg-white p-5 shadow-sm" style="border-color: {{ $BORD }}">
-          <h2 class="text-base font-semibold text-slate-950">Intro</h2>
+          <x-section-title title="Intro" />
           <dl class="mt-4 space-y-3 text-sm">
             <div>
               <dt class="text-xs font-medium uppercase text-slate-500">Nama panggilan</dt>
@@ -207,17 +228,17 @@
         </section>
 
         <section class="rounded-2xl border bg-white p-5 shadow-sm" style="border-color: {{ $BORD }}">
-          <h2 class="text-base font-semibold text-slate-950">Kontak</h2>
+          <x-section-title title="Kontak" />
           <div class="mt-4 space-y-3 text-sm">
-            <div class="rounded-xl bg-slate-50 p-3">
+            <div class="rounded-xl border border-[#f0e7dc] bg-[#fdf7f0] p-3">
               <div class="text-xs font-medium text-slate-500">Email</div>
               <div class="mt-1 break-all font-semibold text-slate-900">{{ $displayEmail ?: '-' }}</div>
             </div>
-            <div class="rounded-xl bg-slate-50 p-3">
+            <div class="rounded-xl border border-[#f0e7dc] bg-[#fdf7f0] p-3">
               <div class="text-xs font-medium text-slate-500">HP</div>
               <div class="mt-1 font-semibold text-slate-900">{{ $profile->phone ?: '-' }}</div>
             </div>
-            <div class="rounded-xl bg-slate-50 p-3">
+            <div class="rounded-xl border border-[#f0e7dc] bg-[#fdf7f0] p-3">
               <div class="text-xs font-medium text-slate-500">WhatsApp</div>
               <div class="mt-1 font-semibold text-slate-900">{{ $profile->whatsapp ?: '-' }}</div>
             </div>
@@ -225,10 +246,7 @@
         </section>
 
         <section class="rounded-2xl border bg-white p-5 shadow-sm" style="border-color: {{ $BORD }}">
-          <div class="flex items-center justify-between gap-3">
-            <h2 class="text-base font-semibold text-slate-950">Dokumen</h2>
-            <span class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">{{ $documents->count() }}</span>
-          </div>
+          <x-section-title title="Dokumen" :badge="$documents->count()" />
           <div class="mt-4 space-y-2">
             @forelse($documents as $document)
               <a target="_blank" href="{{ Storage::disk('public')->url($document['path']) }}" class="flex items-center justify-between gap-3 rounded-xl border border-slate-200 px-3 py-2 text-sm hover:bg-slate-50">
@@ -244,21 +262,21 @@
 
       <main class="space-y-6">
         <section class="rounded-2xl border bg-white p-5 shadow-sm" style="border-color: {{ $BORD }}">
-          <h2 class="text-base font-semibold text-slate-950">Tentang Kandidat</h2>
+          <x-section-title title="Tentang Kandidat" />
           <div class="mt-4 grid gap-3 sm:grid-cols-2">
-            <div class="rounded-xl bg-slate-50 p-4">
+            <div class="rounded-xl border border-[#f0e7dc] bg-[#fdf7f0] p-4">
               <div class="text-xs font-medium text-slate-500">Gender</div>
               <div class="mt-1 font-semibold capitalize text-slate-950">{{ $profile->gender ?: '-' }}</div>
             </div>
-            <div class="rounded-xl bg-slate-50 p-4">
+            <div class="rounded-xl border border-[#f0e7dc] bg-[#fdf7f0] p-4">
               <div class="text-xs font-medium text-slate-500">Usia</div>
               <div class="mt-1 font-semibold text-slate-950">{{ $profile->age ? $profile->age . ' tahun' : '-' }}</div>
             </div>
-            <div class="rounded-xl bg-slate-50 p-4">
+            <div class="rounded-xl border border-[#f0e7dc] bg-[#fdf7f0] p-4">
               <div class="text-xs font-medium text-slate-500">Status pernikahan</div>
               <div class="mt-1 font-semibold capitalize text-slate-950">{{ $profile->status_pernikahan ?: '-' }}</div>
             </div>
-            <div class="rounded-xl bg-slate-50 p-4">
+            <div class="rounded-xl border border-[#f0e7dc] bg-[#fdf7f0] p-4">
               <div class="text-xs font-medium text-slate-500">Sumber informasi</div>
               <div class="mt-1 font-semibold text-slate-950">{{ $profile->source_channel ? Str::headline($profile->source_channel) : '-' }}</div>
             </div>
@@ -266,7 +284,7 @@
         </section>
 
         <section class="rounded-2xl border bg-white p-5 shadow-sm" style="border-color: {{ $BORD }}">
-          <h2 class="text-base font-semibold text-slate-950">Alamat</h2>
+          <x-section-title title="Alamat" />
           <div class="mt-4 grid gap-4 md:grid-cols-2">
             <div class="rounded-xl border border-slate-200 p-4">
               <div class="text-xs font-semibold uppercase text-slate-500">KTP</div>
@@ -282,29 +300,29 @@
         </section>
 
         <section class="rounded-2xl border bg-white p-5 shadow-sm" style="border-color: {{ $BORD }}">
-          <h2 class="text-base font-semibold text-slate-950">Pendidikan & Kesiapan Kerja</h2>
+          <x-section-title title="Pendidikan & Kesiapan Kerja" icon='<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 9-10-5L2 9l10 5 10-5Z"/><path d="M6 11.5V16c0 1.5 2.7 3 6 3s6-1.5 6-3v-4.5"/></svg>' />
           <div class="mt-4 grid gap-3 sm:grid-cols-3">
-            <div class="rounded-xl bg-slate-50 p-4">
+            <div class="rounded-xl border border-[#f0e7dc] bg-[#fdf7f0] p-4">
               <div class="text-xs font-medium text-slate-500">Pendidikan</div>
               <div class="mt-1 font-semibold text-slate-950">{{ $profile->last_education ?: '-' }}</div>
             </div>
-            <div class="rounded-xl bg-slate-50 p-4">
+            <div class="rounded-xl border border-[#f0e7dc] bg-[#fdf7f0] p-4">
               <div class="text-xs font-medium text-slate-500">Jurusan</div>
               <div class="mt-1 font-semibold text-slate-950">{{ $profile->education_major ?: '-' }}</div>
             </div>
-            <div class="rounded-xl bg-slate-50 p-4">
+            <div class="rounded-xl border border-[#f0e7dc] bg-[#fdf7f0] p-4">
               <div class="text-xs font-medium text-slate-500">Sekolah / Kampus</div>
               <div class="mt-1 font-semibold text-slate-950">{{ $profile->education_school ?: '-' }}</div>
             </div>
-            <div class="rounded-xl bg-slate-50 p-4">
+            <div class="rounded-xl border border-[#f0e7dc] bg-[#fdf7f0] p-4">
               <div class="text-xs font-medium text-slate-500">Siap mulai</div>
               <div class="mt-1 font-semibold text-slate-950">{{ $fmtDate($profile->available_start_date) }}</div>
             </div>
-            <div class="rounded-xl bg-slate-50 p-4">
+            <div class="rounded-xl border border-[#f0e7dc] bg-[#fdf7f0] p-4">
               <div class="text-xs font-medium text-slate-500">Gaji saat ini</div>
               <div class="mt-1 font-semibold text-slate-950">{{ $fmtMoney($profile->current_salary) }}</div>
             </div>
-            <div class="rounded-xl bg-slate-50 p-4">
+            <div class="rounded-xl border border-[#f0e7dc] bg-[#fdf7f0] p-4">
               <div class="text-xs font-medium text-slate-500">Ekspektasi gaji</div>
               <div class="mt-1 font-semibold text-slate-950">{{ $fmtMoney($profile->expected_salary) }}</div>
             </div>
@@ -312,7 +330,7 @@
         </section>
 
         <section class="rounded-2xl border bg-white p-5 shadow-sm" style="border-color: {{ $BORD }}">
-          <h2 class="text-base font-semibold text-slate-950">Riwayat Lamaran</h2>
+          <x-section-title title="Riwayat Lamaran" icon='<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h18v10a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V7Z"/><path d="M8 7V6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v1"/></svg>' />
           <div class="mt-4 space-y-3">
             @forelse($user->applications->sortByDesc('created_at') as $application)
               <div class="rounded-xl border border-slate-200 p-4">
@@ -332,7 +350,7 @@
         </section>
 
         <section class="rounded-2xl border bg-white p-5 shadow-sm" style="border-color: {{ $BORD }}">
-          <h2 class="text-base font-semibold text-slate-950">Pengalaman Kerja</h2>
+          <x-section-title title="Pengalaman Kerja" icon='<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v14M9 9h6M9 13h6M9 17h4"/></svg>' />
           <div class="mt-4 space-y-3">
             @forelse($profile->employments as $employment)
               <div class="rounded-xl border border-slate-200 p-4">
@@ -350,7 +368,7 @@
         </section>
 
         <section class="rounded-2xl border bg-white p-5 shadow-sm" style="border-color: {{ $BORD }}">
-          <h2 class="text-base font-semibold text-slate-950">Pelatihan & Referensi</h2>
+          <x-section-title title="Pelatihan & Referensi" icon='<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V4H6.5A2.5 2.5 0 0 0 4 6.5v13Z"/><path d="M20 17v3a1 1 0 0 1-1 1H6.5a2.5 2.5 0 0 1 0-5"/></svg>' />
           <div class="mt-4 grid gap-4 lg:grid-cols-2">
             <div class="space-y-3">
               @forelse($profile->trainings as $training)
@@ -382,14 +400,14 @@
 
   <div class="mt-6 grid gap-6 lg:grid-cols-2">
     <section class="rounded-2xl border bg-white p-5 shadow-sm" style="border-color: {{ $BORD }}">
-      <h2 class="text-base font-semibold text-slate-950">Informasi Akun</h2>
+      <x-section-title title="Informasi Akun" icon='<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21a8 8 0 1 0-16 0"/><circle cx="12" cy="7" r="4"/></svg>' />
       <div class="mt-4 max-w-xl">
         @include('profile.partials.update-profile-information-form')
       </div>
     </section>
 
     <section class="rounded-2xl border bg-white p-5 shadow-sm" style="border-color: {{ $BORD }}">
-      <h2 class="text-base font-semibold text-slate-950">Keamanan</h2>
+      <x-section-title title="Keamanan" icon='<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>' />
       <div class="mt-4 max-w-xl">
         @include('profile.partials.update-password-form')
       </div>
@@ -397,7 +415,7 @@
   </div>
 
   <section class="mt-6 rounded-2xl border bg-white p-5 shadow-sm" style="border-color: {{ $BORD }}">
-    <h2 class="text-base font-semibold text-slate-950">Hapus Akun</h2>
+    <x-section-title title="Hapus Akun" icon='<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>' />
     <div class="mt-4 max-w-xl">
       @include('profile.partials.delete-user-form')
     </div>

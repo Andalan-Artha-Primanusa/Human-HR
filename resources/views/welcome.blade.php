@@ -521,191 +521,191 @@
         </div>
       </div>
     </div>
+  </header>
 
-    {{-- ===== MOBILE MENU (Bottom Sheet Premium) ===== --}}
-    <style>
-      #mobile-menu {
-        display: flex;
-        align-items: flex-end;
-      }
-      #mobile-menu-backdrop {
-        position: fixed;
-        inset: 0;
-        background: rgba(0,0,0,0.45);
-        backdrop-filter: blur(3px);
-        -webkit-backdrop-filter: blur(3px);
-        transition: opacity 0.3s ease;
-        opacity: 0;
-      }
-      #mobile-menu-sheet {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background: #ffffff;
-        border-radius: 1.5rem 1.5rem 0 0;
-        padding-bottom: env(safe-area-inset-bottom, 1rem);
-        transform: translateY(100%);
-        transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
-        box-shadow: 0 -8px 40px rgba(167,125,82,0.18);
-        max-height: 92vh;
-        overflow-y: auto;
-      }
-      #mobile-menu.open #mobile-menu-backdrop { opacity: 1; }
-      #mobile-menu.open #mobile-menu-sheet { transform: translateY(0); }
+  {{-- ===== MOBILE MENU (Bottom Sheet Premium) ===== --}}
+  <style>
+    #mobile-menu {
+      display: flex;
+      align-items: flex-end;
+    }
+    #mobile-menu-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      backdrop-filter: blur(3px);
+      -webkit-backdrop-filter: blur(3px);
+      transition: opacity 0.3s ease;
+      opacity: 0;
+    }
+    #mobile-menu-sheet {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #ffffff;
+      border-radius: 1.5rem 1.5rem 0 0;
+      padding-bottom: env(safe-area-inset-bottom, 1rem);
+      transform: translateY(100%);
+      transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+      box-shadow: 0 -8px 40px rgba(167,125,82,0.18);
+      max-height: 92vh;
+      overflow-y: auto;
+    }
+    #mobile-menu.open #mobile-menu-backdrop { opacity: 1; }
+    #mobile-menu.open #mobile-menu-sheet { transform: translateY(0); }
 
-      .mob-nav-item {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        padding: 0.9rem 1.25rem;
-        border-radius: 1rem;
-        text-decoration: none;
-        font-weight: 600;
-        font-size: 0.95rem;
-        color: #3b2209;
-        transition: background 0.18s, color 0.18s;
-        border: 1.5px solid transparent;
-      }
-      .mob-nav-item:hover {
-        background: #fff8f2;
-        border-color: rgba(167,125,82,0.25);
-        color: #a77d52;
-      }
-      .mob-nav-item .mob-icon {
-        width: 2.25rem;
-        height: 2.25rem;
-        border-radius: 0.625rem;
-        background: #fff8f2;
-        border: 1.5px solid rgba(167,125,82,0.2);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #a77d52;
-        flex-shrink: 0;
-        transition: background 0.18s;
-      }
-      .mob-nav-item:hover .mob-icon {
-        background: #a77d52;
-        color: #fff;
-      }
-    </style>
+    .mob-nav-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.9rem 1.25rem;
+      border-radius: 1rem;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: #3b2209;
+      transition: background 0.18s, color 0.18s;
+      border: 1.5px solid transparent;
+    }
+    .mob-nav-item:hover {
+      background: #fff8f2;
+      border-color: rgba(167,125,82,0.25);
+      color: #a77d52;
+    }
+    .mob-nav-item .mob-icon {
+      width: 2.25rem;
+      height: 2.25rem;
+      border-radius: 0.625rem;
+      background: #fff8f2;
+      border: 1.5px solid rgba(167,125,82,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #a77d52;
+      flex-shrink: 0;
+      transition: background 0.18s;
+    }
+    .mob-nav-item:hover .mob-icon {
+      background: #a77d52;
+      color: #fff;
+    }
+  </style>
 
-    <div id="mobile-menu" class="fixed inset-0 z-[100] pointer-events-none opacity-0 transition-opacity duration-300">
-      {{-- Backdrop --}}
-      <div id="mobile-menu-backdrop"></div>
+  <div id="mobile-menu" class="fixed inset-0 z-[100] pointer-events-none opacity-0 transition-opacity duration-300">
+    {{-- Backdrop --}}
+    <div id="mobile-menu-backdrop"></div>
 
-      {{-- Bottom Sheet --}}
-      <div id="mobile-menu-sheet">
-        {{-- Handle bar --}}
-        <div class="flex justify-center pt-3 pb-1">
-          <div class="w-10 h-1 rounded-full bg-slate-200"></div>
-        </div>
+    {{-- Bottom Sheet --}}
+    <div id="mobile-menu-sheet">
+      {{-- Handle bar --}}
+      <div class="flex justify-center pt-3 pb-1">
+        <div class="w-10 h-1 rounded-full bg-slate-200"></div>
+      </div>
 
-        {{-- Sheet Header --}}
-        <div class="flex items-center justify-between px-5 py-3 border-b" style="border-color: rgba(167,125,82,0.15)">
-          <img src="{{ asset('assets/logofix.png') }}" alt="Logo PT Andalan" class="w-auto h-8">
-          <button id="btn-menu-close"
-            class="w-9 h-9 rounded-xl flex items-center justify-center text-[#a77d52] transition hover:bg-[#a77d52]/10"
-            aria-label="Tutup menu">
-            <svg class="w-5 h-5"><path d="M6 18L18 6M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </button>
-        </div>
+      {{-- Sheet Header --}}
+      <div class="flex items-center justify-between px-5 py-3 border-b" style="border-color: rgba(167,125,82,0.15)">
+        <img src="{{ asset('assets/logofix.png') }}" alt="Logo PT Andalan" class="w-auto h-8">
+        <button id="btn-menu-close"
+          class="w-9 h-9 rounded-xl flex items-center justify-center text-[#a77d52] transition hover:bg-[#a77d52]/10"
+          aria-label="Tutup menu">
+          <svg class="w-5 h-5"><path d="M6 18L18 6M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
 
-        {{-- Search --}}
-        <div class="px-5 pt-4 pb-2">
-          <form action="{{ route('jobs.index') }}" method="GET" class="relative">
-            <div class="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#a77d52]">
-              <svg class="w-4 h-4"><use href="#i-search"/></svg>
+      {{-- Search --}}
+      <div class="px-5 pt-4 pb-2">
+        <form action="{{ route('jobs.index') }}" method="GET" class="relative">
+          <div class="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#a77d52]">
+            <svg class="w-4 h-4"><use href="#i-search"/></svg>
+          </div>
+          <input type="search" name="q" placeholder="Cari posisi atau lokasi..."
+            class="w-full py-3 pl-10 pr-4 text-sm transition outline-none rounded-xl"
+            style="background:#fff8f2; border:1.5px solid rgba(167,125,82,0.25); color:#3b2209;"
+            onfocus="this.style.borderColor='#a77d52'" onblur="this.style.borderColor='rgba(167,125,82,0.25)'">
+        </form>
+      </div>
+
+      {{-- Nav Items --}}
+      <div class="px-4 pt-2 pb-3 space-y-1">
+        <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 px-2 pb-1">Menu</p>
+
+        <a href="{{ route('jobs.index') }}" class="mob-nav-item">
+          <span class="mob-icon">
+            <svg class="w-4 h-4"><use href="#i-briefcase"/></svg>
+          </span>
+          Lowongan Kerja
+        </a>
+
+        <a href="/sites" class="mob-nav-item">
+          <span class="mob-icon">
+            <svg class="w-4 h-4"><use href="#i-map-pin"/></svg>
+          </span>
+          Lokasi Site
+        </a>
+      </div>
+
+      {{-- Divider --}}
+      <div class="mx-5 border-t" style="border-color: rgba(167,125,82,0.12)"></div>
+
+      @auth
+        {{-- Logged in user --}}
+        <div class="px-4 pt-3 pb-2 space-y-1">
+          <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 px-2 pb-1">Akun Saya</p>
+          <div class="flex items-center gap-3 px-3 py-3 rounded-xl" style="background:#fff8f2;">
+            <div class="flex items-center justify-center flex-shrink-0 w-10 h-10 text-sm font-bold text-white rounded-xl"
+              style="background:#a77d52">
+              {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
             </div>
-            <input type="search" name="q" placeholder="Cari posisi atau lokasi..."
-              class="w-full py-3 pl-10 pr-4 text-sm transition outline-none rounded-xl"
-              style="background:#fff8f2; border:1.5px solid rgba(167,125,82,0.25); color:#3b2209;"
-              onfocus="this.style.borderColor='#a77d52'" onblur="this.style.borderColor='rgba(167,125,82,0.25)'">
+            <div>
+              <div class="text-sm font-bold" style="color:#3b2209">{{ auth()->user()->name }}</div>
+              <div class="text-xs capitalize" style="color:#a77d52">{{ auth()->user()->role ?? 'Pelamar' }}</div>
+            </div>
+          </div>
+          <a href="{{ route('profile.edit') }}" class="mob-nav-item">
+            <span class="mob-icon"><svg class="w-4 h-4"><use href="#i-user"/></svg></span>
+            Profil Saya
+          </a>
+          <a href="{{ route('applications.mine') }}" class="mob-nav-item">
+            <span class="mob-icon"><svg class="w-4 h-4"><use href="#i-briefcase"/></svg></span>
+            Lamaran Saya
+          </a>
+        </div>
+        <div class="px-4 pb-5">
+          <form action="{{ route('logout') }}" method="POST">
+            @csrf
+            <button type="submit"
+              class="flex items-center justify-center w-full gap-2 py-3 text-sm font-semibold transition rounded-xl"
+              style="border: 1.5px solid rgba(220,38,38,0.3); color:#dc2626; background:transparent"
+              onmouseover="this.style.background='rgba(220,38,38,0.06)'" onmouseout="this.style.background='transparent'">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                <path d="M15.75 9V5.25A2.25 2.25 0 0013.5 3H6.75A2.25 2.25 0 004.5 5.25v13.5A2.25 2.25 0 006.75 21H13.5a2.25 2.25 0 002.25-2.25V15M9.75 12h10.5m0 0-3-3m3 3-3 3"/>
+              </svg>
+              Keluar
+            </button>
           </form>
         </div>
-
-        {{-- Nav Items --}}
-        <div class="px-4 pt-2 pb-3 space-y-1">
-          <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 px-2 pb-1">Menu</p>
-
-          <a href="{{ route('jobs.index') }}" class="mob-nav-item">
-            <span class="mob-icon">
-              <svg class="w-4 h-4"><use href="#i-briefcase"/></svg>
-            </span>
-            Lowongan Kerja
+      @else
+        {{-- Guest CTA --}}
+        <div class="grid grid-cols-2 gap-3 px-4 pt-4 pb-6">
+          <a href="{{ route('login') }}"
+            class="flex items-center justify-center gap-2 py-3.5 rounded-xl text-sm font-bold transition"
+            style="border:2px solid #a77d52; color:#a77d52; background:#fff"
+            onmouseover="this.style.background='#fff8f2'" onmouseout="this.style.background='#fff'">
+            <svg class="w-4 h-4"><use href="#i-user"/></svg>
+            Masuk
           </a>
-
-          <a href="/sites" class="mob-nav-item">
-            <span class="mob-icon">
-              <svg class="w-4 h-4"><use href="#i-map-pin"/></svg>
-            </span>
-            Lokasi Site
+          <a href="{{ route('register') }}"
+            class="flex items-center justify-center gap-2 py-3.5 rounded-xl text-sm font-bold text-white transition shadow-md"
+            style="background:#a77d52"
+            onmouseover="this.style.filter='brightness(1.1)'" onmouseout="this.style.filter='none'">
+            <svg class="w-4 h-4"><use href="#i-apply"/></svg>
+            Daftar Gratis
           </a>
         </div>
-
-        {{-- Divider --}}
-        <div class="mx-5 border-t" style="border-color: rgba(167,125,82,0.12)"></div>
-
-        @auth
-          {{-- Logged in user --}}
-          <div class="px-4 pt-3 pb-2 space-y-1">
-            <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 px-2 pb-1">Akun Saya</p>
-            <div class="flex items-center gap-3 px-3 py-3 rounded-xl" style="background:#fff8f2;">
-              <div class="flex items-center justify-center flex-shrink-0 w-10 h-10 text-sm font-bold text-white rounded-xl"
-                style="background:#a77d52">
-                {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
-              </div>
-              <div>
-                <div class="text-sm font-bold" style="color:#3b2209">{{ auth()->user()->name }}</div>
-                <div class="text-xs capitalize" style="color:#a77d52">{{ auth()->user()->role ?? 'Pelamar' }}</div>
-              </div>
-            </div>
-            <a href="{{ route('profile.edit') }}" class="mob-nav-item">
-              <span class="mob-icon"><svg class="w-4 h-4"><use href="#i-user"/></svg></span>
-              Profil Saya
-            </a>
-            <a href="{{ route('applications.mine') }}" class="mob-nav-item">
-              <span class="mob-icon"><svg class="w-4 h-4"><use href="#i-briefcase"/></svg></span>
-              Lamaran Saya
-            </a>
-          </div>
-          <div class="px-4 pb-5">
-            <form action="{{ route('logout') }}" method="POST">
-              @csrf
-              <button type="submit"
-                class="flex items-center justify-center w-full gap-2 py-3 text-sm font-semibold transition rounded-xl"
-                style="border: 1.5px solid rgba(220,38,38,0.3); color:#dc2626; background:transparent"
-                onmouseover="this.style.background='rgba(220,38,38,0.06)'" onmouseout="this.style.background='transparent'">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
-                  <path d="M15.75 9V5.25A2.25 2.25 0 0013.5 3H6.75A2.25 2.25 0 004.5 5.25v13.5A2.25 2.25 0 006.75 21H13.5a2.25 2.25 0 002.25-2.25V15M9.75 12h10.5m0 0-3-3m3 3-3 3"/>
-                </svg>
-                Keluar
-              </button>
-            </form>
-          </div>
-        @else
-          {{-- Guest CTA --}}
-          <div class="grid grid-cols-2 gap-3 px-4 pt-4 pb-6">
-            <a href="{{ route('login') }}"
-              class="flex items-center justify-center gap-2 py-3.5 rounded-xl text-sm font-bold transition"
-              style="border:2px solid #a77d52; color:#a77d52; background:#fff"
-              onmouseover="this.style.background='#fff8f2'" onmouseout="this.style.background='#fff'">
-              <svg class="w-4 h-4"><use href="#i-user"/></svg>
-              Masuk
-            </a>
-            <a href="{{ route('register') }}"
-              class="flex items-center justify-center gap-2 py-3.5 rounded-xl text-sm font-bold text-white transition shadow-md"
-              style="background:#a77d52"
-              onmouseover="this.style.filter='brightness(1.1)'" onmouseout="this.style.filter='none'">
-              <svg class="w-4 h-4"><use href="#i-apply"/></svg>
-              Daftar Gratis
-            </a>
-          </div>
-        @endauth
-      </div>
+      @endauth
     </div>
-  </header>
+  </div>
 
   {{-- ============================================================
        MAIN CONTENT
@@ -808,24 +808,24 @@
         <h2 id="sites-heading" class="mb-4 text-base font-semibold" style="color: #1f2937">Lokasi Site</h2>
 
         @if($sitesNorm->isNotEmpty())
-              {{-- PETA INTERAKTIF --}}
-              @if(($sitesWithCoords ?? collect())->filter(fn($s) => is_numeric($s['latitude'] ?? null) && is_numeric($s['longitude'] ?? null))->isNotEmpty())
-              <div id="sites-map" class="w-full mb-6 overflow-hidden border shadow-md h-96 rounded-2xl"
-                style="border-color: #f4f0eb" role="region" aria-label="Peta lokasi site PT Andalan Artha Primanusa">
+              {{-- PETA INTERAKTIF (selalu tampil, default Indonesia bila tanpa koordinat) --}}
+              <div class="grid gap-4 mb-6 lg:grid-cols-3">
+                <div id="sites-map" class="w-full overflow-hidden border shadow-md h-96 rounded-2xl lg:col-span-2"
+                  style="border-color: #f4f0eb" role="region" aria-label="Peta lokasi site PT Andalan Artha Primanusa">
+                </div>
+
+                {{-- Daftar site di samping peta --}}
+                <div class="grid gap-2 content-start sm:grid-cols-2 lg:grid-cols-1">
+                  @foreach($sitesNorm as $s)
+                    <a href="{{ $s['id'] ? route('sites.show', $s['id']) : route('sites.index') }}"
+                      class="flex items-center gap-3 px-4 py-3 rounded-2xl border transition hover:shadow-md"
+                      style="border-color: #f4f0eb; background: #fff">
+                      <span class="inline-block w-3 h-3 rounded-full shrink-0" style="background: {{ $s['dot'] }}"></span>
+                      <span class="text-sm font-medium" style="color: #1f2937">{{ $s['name'] }}</span>
+                    </a>
+                  @endforeach
+                </div>
               </div>
-              @else
-              {{-- FALLBACK: daftar site sebagai kartu saat koordinat belum tersedia --}}
-              <div class="grid gap-3 mb-6 sm:grid-cols-2 lg:grid-cols-3">
-                @foreach($sitesNorm as $s)
-                  <a href="{{ $s['id'] ? route('sites.show', $s['id']) : route('sites.index') }}"
-                    class="flex items-center gap-3 px-4 py-3 rounded-2xl border transition hover:shadow-md"
-                    style="border-color: #f4f0eb; background: #fff">
-                    <span class="inline-block w-3 h-3 rounded-full shrink-0" style="background: {{ $s['dot'] }}"></span>
-                    <span class="text-sm font-medium" style="color: #1f2937">{{ $s['name'] }}</span>
-                  </a>
-                @endforeach
-              </div>
-              @endif
 
               <div class="site-marquee" role="presentation" aria-hidden="true">
                 <div class="site-marquee__track">

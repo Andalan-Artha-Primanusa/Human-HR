@@ -330,16 +330,6 @@
 
 @else
     <nav class="flex flex-col min-h-full space-y-1 text-sm text-white sidenav-shell">
-      <div class="px-2 py-3">
-        <a href="{{ url('/') }}" {!! $closeAttr !!} class="flex items-center gap-3 px-3 py-2 rounded-2xl bg-white shadow-sm ring-1 ring-black/5 hover:bg-[#a77d52]/10 transition-colors">
-          <img src="{{ $logoUrl }}" alt="Logo" class="object-contain w-7 h-7" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.style.display='none'">
-          <div class="leading-tight">
-            <div class="font-bold text-white">{{ e($appName) }}</div>
-            <div class="text-[10px] text-white/70">Andalan Group</div>
-          </div>
-        </a>
-      </div>
-
       <div class="{{ $sectionTitle }} text-center">
         <span class="inline-block w-1.5 h-1.5 rounded-sm bg-[#a77d52] align-middle mr-2"></span>
         <span class="align-middle">Account</span>
