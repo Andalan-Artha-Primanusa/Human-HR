@@ -18,7 +18,7 @@ class EnsurePublicApiLogin
         if (! $user) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Login dibutuhkan. Pakai Bearer token, Basic Auth, atau parameter email dan password.',
+                'message' => 'Login dibutuhkan. Pakai Bearer token, Basic Auth, atau email dan password pada body request POST.',
             ], 401);
         }
 
@@ -41,8 +41,13 @@ class EnsurePublicApiLogin
             return User::where('api_token', hash('sha256', $token))->first();
         }
 
-        $email = $request->getUser() ?: $request->input('email');
-        $password = $request->getPassword() ?: $request->input('password');
+        $email = $request->getUser();
+        $password = $request->getPassword();
+
+        if (($email === '' || $email === null || $password === '' || $password === null) && ! $request->isMethod('GET')) {
+            $email = $request->post('email');
+            $password = $request->post('password');
+        }
 
         $email = mb_strtolower(trim((string) $email));
         $password = (string) $password;

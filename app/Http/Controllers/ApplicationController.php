@@ -150,14 +150,15 @@ class ApplicationController extends Controller
     public function index(Request $request, MineproRfrService $mineproRfrService)
     {
         $this->authorize('viewAny', JobApplication::class);
-        $apps = JobApplication::with([
+        $apps = JobApplication::query()
+            ->select(['id', 'job_id', 'user_id', 'poh_id', 'current_stage', 'overall_status', 'created_at'])
+            ->with([
             'job:id,code,title,division,site_id',
             'job.site:id,code,name',
             'user.candidateProfile:id,user_id,nik',
-            'stages.actor:id,name',
-            'stages.user:id,name',
-            'interviews',
-            'offer',
+            'poh:id,name',
+            'interviews:id,application_id,scheduled_at,status',
+            'offer:id,application_id,status',
         ])
             ->where('user_id', $request->user()->id)
             ->orderByDesc('created_at')

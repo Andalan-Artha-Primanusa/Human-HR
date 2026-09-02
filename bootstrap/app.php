@@ -19,6 +19,14 @@ return Application::configure(basePath: dirname(__DIR__))
             'public.api.login' => \App\Http\Middleware\EnsurePublicApiLogin::class,
             'candidate.complete' => \App\Http\Middleware\EnsureCandidateProfileComplete::class,
         ]);
+
+        $middleware->web(append: [
+            \App\Http\Middleware\AddSecurityHeaders::class,
+        ]);
+
+        $middleware->api(append: [
+            \App\Http\Middleware\AddSecurityHeaders::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

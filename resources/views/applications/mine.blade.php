@@ -197,22 +197,18 @@
                     $siteLabel = $job?->site?->name ?? $job?->site?->code ?? '-';
                 @endphp
 
-                <article class="overflow-hidden transition bg-white border shadow-sm rounded-2xl hover:-translate-y-0.5 hover:shadow-md"
+                <article class="overflow-hidden transition bg-white border shadow-sm rounded-2xl hover:-translate-y-0.5 hover:shadow-lg"
                          style="border-color: {{ $BORD }}">
 
-                  {{-- STRIP --}}
-                  <div class="h-1.5 rounded-t-2xl"
-                       style="background: {{ $PRIMARY }};"></div>
-
-            <div class="p-5">
+                  <div class="p-5 bg-gradient-to-br from-[#fffaf5] via-white to-white border-b" style="border-color: {{ $BORD }}">
 
               {{-- HEADER --}}
               <div class="flex items-start justify-between gap-3">
                 <div class="flex min-w-0 items-start gap-3">
 
                   {{-- ICON JOB --}}
-                  <div class="grid h-11 w-11 shrink-0 place-items-center rounded-xl"
-                       style="background: {{ $PRIMARY }}20; color: {{ $PRIMARY }}">
+                  <div class="grid h-12 w-12 shrink-0 place-items-center rounded-xl shadow-sm"
+                       style="background: {{ $PRIMARY }}; color: white">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none"
                          viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -233,8 +229,8 @@
                 </div>
 
                 {{-- STATUS --}}
-                <div class="flex shrink-0 flex-col items-end gap-1.5">
-                  <span class="rounded-full px-2.5 py-1 text-[11px] font-semibold ring-1 ring-inset {{ $badge($app->overall_status) }}">
+                <div class="flex shrink-0 flex-col items-end gap-2">
+                  <span class="rounded-full px-3 py-1.5 text-[11px] font-bold ring-1 ring-inset {{ $badge($app->overall_status) }}">
                     {{ $statusLabel($app->overall_status) }}
                   </span>
                   @if(data_get($app->minepro_progress ?? [], 'current_process'))
@@ -244,12 +240,15 @@
                   @endif
                 </div>
               </div>
+                  </div>
+
+            <div class="p-5">
 
               {{-- PROGRESS --}}
-              <div class="mt-5 rounded-xl border border-slate-200 bg-slate-50/70 p-4">
+              <div class="rounded-xl border border-slate-200 bg-slate-50/70 p-4">
                 <div class="flex justify-between mb-1 text-xs"
                      style="color: {{ $TEXT }}">
-                  <span class="flex items-center gap-1 font-semibold">
+                  <span class="flex items-center gap-1 font-bold">
                     {{-- ICON STEP --}}
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 opacity-70"
                          fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -270,37 +269,46 @@
                 </div>
               </div>
 
+              <div class="mt-4 grid grid-cols-2 gap-3 text-sm">
+                <div class="rounded-xl border border-slate-200 bg-white px-3 py-2.5">
+                  <p class="text-[11px] font-medium text-slate-500">Tanggal Lamar</p>
+                  <p class="mt-1 font-semibold text-slate-900">{{ optional($app->created_at)->format('d M Y') }}</p>
+                </div>
+                <div class="rounded-xl border border-slate-200 bg-white px-3 py-2.5">
+                  <p class="text-[11px] font-medium text-slate-500">Lokasi</p>
+                  <p class="mt-1 truncate font-semibold text-slate-900">{{ $siteLabel }}</p>
+                </div>
+              </div>
+
               {{-- STAGES --}}
-              <div class="mt-4 flex flex-wrap gap-1.5 max-h-20 overflow-y-auto pr-1">
+              <div class="mt-5 space-y-2">
                 @foreach($stageOrder as $key)
                     @php $currentStageKey = $stageAlias[strtolower((string) $app->current_stage)] ?? strtolower((string) $app->current_stage); $isCurrentStage = $currentStageKey === $key; @endphp
-                    <span class="text-[11px] px-2 py-1 rounded-full flex items-center gap-1 ring-1 ring-inset {{ $isCurrentStage ? 'bg-[#fffaf5] text-[#8b5e3c] ring-[#ead8c5] font-semibold' : 'bg-slate-50 text-slate-500 ring-slate-200' }}">
-
-                      {{-- DOT --}}
-                      <span class="w-1.5 h-1.5 rounded-full"
-                            style="background: {{ $isCurrentStage ? $PRIMARY : '#cbd5e1' }}"></span>
-
-                      {{ $pretty[$key] }}
-                    </span>
+                    <div class="flex items-center gap-3 text-xs {{ $isCurrentStage ? 'font-bold text-[#8b5e3c]' : 'text-slate-500' }}">
+                      <span class="grid h-6 w-6 shrink-0 place-items-center rounded-full ring-1 ring-inset {{ $isCurrentStage ? 'bg-[#fffaf5] ring-[#ead8c5]' : 'bg-slate-50 ring-slate-200' }}">
+                        @if($isCurrentStage)
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                          </svg>
+                        @else
+                          <span class="h-1.5 w-1.5 rounded-full bg-slate-300"></span>
+                        @endif
+                      </span>
+                      <span class="truncate">{{ $pretty[$key] }}</span>
+                      @if($isCurrentStage)
+                        <span class="ml-auto rounded-full bg-[#fffaf5] px-2 py-0.5 text-[10px] font-bold text-[#8b5e3c] ring-1 ring-inset ring-[#ead8c5]">Aktif</span>
+                      @endif
+                    </div>
                 @endforeach
               </div>
 
               {{-- FOOTER --}}
               <div class="mt-5 border-t pt-4 text-sm" style="border-color: {{ $BORD }}">
                 <div class="flex flex-col gap-3">
-                  <span class="flex items-center gap-1.5" style="color: {{ $TEXT }}">
-                    {{-- ICON DATE --}}
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 opacity-70"
-                         fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M8 7V3m8 4V3m-9 8h10m-11 8h12a2 2 0 002-2V7a2 2 0 00-2-2H6a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                    </svg>
-                    {{ optional($app->created_at)->format('d M Y') }}
-                  </span>
                   <div class="flex flex-wrap items-center gap-2">
                     @if($app->interviews && $app->interviews->count())
                       <a href="{{ route('me.interviews.show', $app->interviews->first()) }}"
-                         class="inline-flex items-center gap-1 rounded-lg border border-[#a77d52] px-3 py-1.5 text-xs font-semibold text-[#a77d52] transition hover:bg-[#a77d52] hover:text-white"
+                         class="inline-flex items-center gap-1 rounded-lg border border-[#a77d52] px-3 py-2 text-xs font-semibold text-[#a77d52] transition hover:bg-[#a77d52] hover:text-white"
                          title="Lihat Jadwal Interview">
                         Interview
                       </a>
@@ -317,13 +325,13 @@
                           <form method="POST" action="{{ route('applications.accept-offer', $app) }}" class="inline-flex">
                             @csrf
                             <button type="submit"
-                                    class="inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-semibold text-white transition hover:opacity-90"
+                                    class="inline-flex items-center gap-1 rounded-lg px-3 py-2 text-xs font-semibold text-white transition hover:opacity-90"
                                     style="background: {{ $PRIMARY }}">
                               @if($olStatus === 'sent') ⏳ @endif Terima OL
                             </button>
                           </form>
                           <button type="button"
-                                  class="inline-flex items-center gap-1 rounded-lg border border-red-500 px-3 py-1.5 text-xs font-semibold text-white transition hover:opacity-90"
+                                  class="inline-flex items-center gap-1 rounded-lg border border-red-500 px-3 py-2 text-xs font-semibold text-white transition hover:opacity-90"
                                   style="background: rgba(220,38,38,0.8)"
                                   onclick="openRejectOlModal('{{ $app->id }}', '{{ $app->user->name }}')">
                             Tolak OL
@@ -341,7 +349,7 @@
                         </span>
                       @endif
                     <a href="{{ route('jobs.show', $app->job_id) }}"
-                       class="inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-semibold text-white transition hover:opacity-90"
+                       class="ml-auto inline-flex items-center gap-1 rounded-lg px-3 py-2 text-xs font-semibold text-white transition hover:opacity-90"
                        style="background: {{ $PRIMARY }}">
                       Detail
                       {{-- ICON ARROW --}}
@@ -354,7 +362,7 @@
                   </div>
                 </div>
                 @if($app->poh)
-                  <div class="flex items-center gap-1 text-xs text-slate-600">
+                  <div class="mt-3 flex items-center gap-1 text-xs text-slate-600">
                     <svg class="w-4 h-4 text-slate-400" aria-hidden="true"><use href="#i-pin"/></svg>
                     <span>POH: {{ $app->poh->name }}</span>
                   </div>

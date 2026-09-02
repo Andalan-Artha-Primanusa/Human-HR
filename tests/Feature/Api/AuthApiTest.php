@@ -24,6 +24,13 @@ class AuthApiTest extends TestCase
         return (string) $response->json('token');
     }
 
+    private function staffToken(): string
+    {
+        return $this->bearerToken(User::factory()->create([
+            'role' => 'hr',
+        ]));
+    }
+
     public function test_login_returns_bearer_token_and_user(): void
     {
         $user = User::factory()->create([
@@ -72,7 +79,7 @@ class AuthApiTest extends TestCase
     public function test_public_user_show_requires_login_token(): void
     {
         $user = User::factory()->create();
-        $token = $this->bearerToken();
+        $token = $this->staffToken();
 
         $response = $this->withHeader('Authorization', 'Bearer ' . $token)
             ->getJson('/api/public/users/' . $user->id);
@@ -86,7 +93,7 @@ class AuthApiTest extends TestCase
     public function test_public_users_index_returns_all_users(): void
     {
         User::factory()->count(3)->create();
-        $token = $this->bearerToken();
+        $token = $this->staffToken();
 
         $response = $this->withHeader('Authorization', 'Bearer ' . $token)
             ->getJson('/api/public/users');
@@ -99,7 +106,7 @@ class AuthApiTest extends TestCase
 
     public function test_public_jobs_index_returns_jobs_with_applicant_count(): void
     {
-        $token = $this->bearerToken();
+        $token = $this->staffToken();
         $job = Job::factory()->create();
         $applicants = User::factory()->count(2)->create();
         foreach ($applicants as $applicant) {
@@ -121,7 +128,9 @@ class AuthApiTest extends TestCase
 
     public function test_public_jobs_index_accepts_basic_auth_login(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create([
+            'role' => 'hr',
+        ]);
         Job::factory()->create();
 
         $response = $this
@@ -133,6 +142,18 @@ class AuthApiTest extends TestCase
         $response->assertOk()
             ->assertJsonPath('status', 'success')
             ->assertJsonCount(1, 'data');
+    }
+
+    public function test_public_jobs_index_rejects_regular_applicant(): void
+    {
+        $token = $this->bearerToken(User::factory()->create([
+            'role' => 'pelamar',
+        ]));
+
+        $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+            ->getJson('/api/public/jobs');
+
+        $response->assertForbidden();
     }
 
     public function test_users_index_requires_token(): void
