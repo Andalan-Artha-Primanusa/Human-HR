@@ -124,7 +124,9 @@
       </button>
 
       @php
-        $navTitle = trim(@yield('title', 'Dashboard'));
+        $navTitle = \Illuminate\Support\Facades\View::hasSection('title')
+            ? trim(\Illuminate\Support\Facades\View::getSection('title'))
+            : 'Dashboard';
         // Buang suffix branding sehingga navbar hanya menampilkan nama halaman.
         $navTitle = preg_replace('/\s*[-•·]\s*karir\s*[- ]?\s*andalan\s*$/iu', '', $navTitle);
         $navTitle = trim($navTitle);
