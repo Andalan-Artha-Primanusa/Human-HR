@@ -65,7 +65,7 @@
     id="desktopSidebar"
     data-cloak
     class="hidden transition-all duration-200 md:flex md:flex-col md:w-64"
-    style="background:#a77d52;">
+    style="background:#263241;">
     <div class="flex-1 overflow-y-auto">
       @include('layouts.sidenav', [
         'variant' => 'desktop',
@@ -82,7 +82,7 @@
       id="mobileDrawer"
       data-cloak
       class="drawer-panel transition-base fixed inset-y-0 left-0 z-50 w-72 max-w-[80vw] shadow-xl flex flex-col"
-      style="background:#a77d52;"
+      style="background:#263241;"
       role="dialog" aria-modal="true" aria-label="Menu">
       {{-- Drawer header --}}
       <div class="flex items-center justify-between px-4 py-3" style="border-bottom:1.5px solid rgba(255,255,255,0.15);">

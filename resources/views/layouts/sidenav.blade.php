@@ -54,79 +54,78 @@
         return Route::has($routeName) ? route($routeName, $params) : url('/');
     };
 
-    // ===== Tema Warna (Putih & Brand #a77d52) =====
+    // ===== Tema Warna: sidebar netral, brown hanya untuk accent =====
     $activeMenu = fn($p) => request()->routeIs($p)
-        ? 'bg-[#5c3d1e] text-white font-bold shadow-md border-l-[#ffffff]'
-        : 'text-white hover:bg-[#5c3d1e]/50 border-l-transparent';
+        ? 'is-active text-white font-bold border-l-[#d7b98e]'
+        : 'text-slate-200 hover:bg-white/8 border-l-transparent';
 
-    $baseLink = 'side-link flex items-center gap-3 px-3 py-2.5 text-white rounded-xl border-l-4 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30';
-    $linkDesk = $baseLink . ' hover:bg-[#5c3d1e]/40';
-    $linkMobile = $baseLink . ' hover:bg-[#5c3d1e]/40';
+    $baseLink = 'side-link flex items-center gap-3 px-3 py-2.5 rounded-xl border-l-4 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30';
+    $linkDesk = $baseLink;
+    $linkMobile = $baseLink;
 
     /* ==== ICON WRAPPERS ==== */
-    $iconWrap = 'grid place-items-center shrink-0 w-9 h-9 rounded-xl bg-white/10 text-white shadow-sm ring-1 ring-white/20 group-hover:scale-110 transition-transform md:w-10 md:h-10';
+    $iconWrap = 'side-icon grid place-items-center shrink-0 w-9 h-9 rounded-lg text-slate-300 transition md:w-9 md:h-9';
 
-    $sectionTitle = 'section-title px-3 pt-5 pb-1 text-[11px] tracking-widest font-bold uppercase text-white/70';
+    $sectionTitle = 'section-title px-3 pt-5 pb-1 text-[11px] tracking-widest font-bold uppercase text-slate-400';
     $lockVisual = !$isVerified ? 'opacity-85' : '';
 
     // Container Menu
-    $groupBox = 'group-box mx-0 mt-2 space-y-1.5 rounded-2xl border border-white/10 bg-black/5 p-2 shadow-sm text-white';
+    $groupBox = 'group-box mx-0 mt-2 space-y-1 rounded-2xl p-1.5 text-slate-200';
 
     // Kartu akun & tombol logout
-    $accountCard = 'rounded-2xl border border-white/15 bg-black/10 hover:bg-black/20 transition-all duration-300 text-white shadow-sm';
-    $logoutBtn = 'w-full rounded-2xl bg-[#5c3d1e] hover:bg-[#4a3118] border border-[#5c3d1e] px-4 py-3 font-bold shadow-sm transition-all text-white active:scale-95';
+    $accountCard = 'rounded-2xl border border-white/10 bg-white/[0.06] hover:bg-white/[0.1] transition-all duration-300 text-white shadow-sm';
+    $logoutBtn = 'w-full rounded-xl bg-transparent hover:bg-red-500/10 border border-red-400/25 px-4 py-3 font-bold transition-all text-red-100 active:scale-95';
 @endphp
 
 {{-- ====== SIDEBAR STYLES ====== --}}
 <style>
   /* ===== SHELL ===== */
-  .sidenav-shell { width:100%; background:#a77d52; border-radius:1rem; overflow:hidden; }
+  .sidenav-shell { width:100%; background:#263241; border-radius:1rem; overflow:hidden; }
   nav.sidenav-shell { color:#fff !important; }
 
   /* ===== LOGO ===== */
-  .logo-wrap { min-height:72px; width:100%; background:rgba(0,0,0,0.15); border-radius:.875rem; display:flex; align-items:center; justify-content:center; padding:.5rem !important; border:1.5px solid rgba(255,255,255,0.15); transition:background .2s; }
-  .logo-wrap:hover { background:rgba(0,0,0,0.22); }
+  .logo-wrap { min-height:72px; width:100%; background:rgba(255,255,255,0.06); border-radius:.875rem; display:flex; align-items:center; justify-content:center; padding:.5rem !important; border:1px solid rgba(255,255,255,0.1); transition:background .2s; }
+  .logo-wrap:hover { background:rgba(255,255,255,0.1); }
   .logo-img { max-height:52px; max-width:100%; width:auto; object-fit:contain; filter:brightness(0) invert(1); }
 
   /* ===== SECTION TITLES ===== */
-  .section-title { color:rgba(255,255,255,0.5) !important; font-size:10px; letter-spacing:.1em; font-weight:700; text-transform:uppercase; padding:1.25rem .75rem .4rem; }
-  .section-title span.inline-block { background:rgba(255,255,255,0.4) !important; }
+  .section-title { color:rgba(226,232,240,0.58) !important; font-size:10px; letter-spacing:.1em; font-weight:700; text-transform:uppercase; padding:1.25rem .75rem .4rem; }
+  .section-title span.inline-block { background:#d7b98e !important; }
 
   /* ===== GROUP BOX ===== */
-  .group-box { background:rgba(0,0,0,0.1) !important; border:1.5px solid rgba(255,255,255,0.1) !important; border-radius:.875rem; padding:.35rem !important; margin-top:.25rem !important; }
+  .group-box { background:rgba(255,255,255,0.035) !important; border:1px solid rgba(255,255,255,0.07) !important; border-radius:.875rem; padding:.35rem !important; margin-top:.25rem !important; }
 
-  /* ===== MENU LINKS — default putih ===== */
-  .side-link { color:#fff !important; border-left-color:transparent !important; border-radius:.75rem !important; padding:.6rem .75rem !important; transition:background .18s !important; font-weight:500; }
-  .side-link:hover { background:rgba(255,255,255,0.15) !important; }
+  /* ===== MENU LINKS — netral, active saja yang brand ===== */
+  .side-link { color:#d7dee8 !important; border-left-color:transparent !important; border-radius:.75rem !important; padding:.58rem .7rem !important; transition:background .18s, color .18s !important; font-weight:600; }
+  .side-link:hover { background:rgba(255,255,255,0.075) !important; color:#fff !important; }
 
   /* ===== ACTIVE — maroon gelap (#5c3d1e) ===== */
-  .side-link.bg-\[#a77d52\]\/15,
-  .side-link.font-bold.text-\[#a77d52\],
-  .side-link.shadow-sm.ring-1 {
-    background:#5c3d1e !important;
+  .side-link.is-active,
+  .side-link.font-bold {
+    background:linear-gradient(90deg, rgba(167,125,82,.95), rgba(139,94,60,.88)) !important;
     color:#fff !important;
     font-weight:700 !important;
-    border-left-color:#fff !important;
-    box-shadow:0 2px 10px rgba(0,0,0,0.3) !important;
+    border-left-color:#d7b98e !important;
+    box-shadow:0 8px 20px rgba(0,0,0,0.16) !important;
   }
 
   /* ===== ICON WRAP ===== */
-  .side-link .grid.place-items-center { background:rgba(255,255,255,0.15) !important; color:#fff !important; border:1.5px solid rgba(255,255,255,0.18) !important; box-shadow:none !important; }
-  .side-link:hover .grid.place-items-center { background:rgba(255,255,255,0.25) !important; }
-  .side-link.bg-\[#a77d52\]\/15 .grid.place-items-center,
-  .side-link.font-bold .grid.place-items-center { background:rgba(255,255,255,0.2) !important; border-color:rgba(255,255,255,0.3) !important; }
+  .side-link .side-icon { background:rgba(255,255,255,0.055) !important; color:#cbd5e1 !important; border:1px solid rgba(255,255,255,0.07) !important; box-shadow:none !important; }
+  .side-link:hover .side-icon { background:rgba(255,255,255,0.1) !important; color:#fff !important; }
+  .side-link.is-active .side-icon,
+  .side-link.font-bold .side-icon { background:rgba(255,255,255,0.18) !important; border-color:rgba(255,255,255,0.22) !important; color:#fff !important; }
 
   /* ===== ACCOUNT CARD ===== */
-  a.account-card { background:rgba(0,0,0,0.12) !important; border:1.5px solid rgba(255,255,255,0.15) !important; border-radius:.875rem !important; color:#fff !important; transition:background .2s !important; }
-  a.account-card:hover { background:rgba(0,0,0,0.2) !important; }
+  a.account-card { background:rgba(255,255,255,0.06) !important; border:1px solid rgba(255,255,255,0.1) !important; border-radius:.875rem !important; color:#fff !important; transition:background .2s !important; }
+  a.account-card:hover { background:rgba(255,255,255,0.1) !important; }
   a.account-card .account-info div, a.account-card .account-info span { color:#fff !important; }
   a.account-card .account-info .text-xs { color:rgba(255,255,255,0.65) !important; }
-  a.account-card div.rounded-full { background:rgba(255,255,255,0.2) !important; color:#fff !important; }
-  a.account-card .inline-flex.rounded-full { background:rgba(255,255,255,0.18) !important; color:rgba(255,255,255,0.9) !important; }
+  a.account-card div.rounded-full { background:#d7b98e !important; color:#263241 !important; }
+  a.account-card .inline-flex.rounded-full { background:rgba(215,185,142,0.16) !important; color:#f8ead6 !important; }
 
   /* ===== LOGOUT ===== */
-  form .btn { background:rgba(0,0,0,0.15) !important; border:1.5px solid rgba(255,255,255,0.22) !important; color:#fff !important; border-radius:.875rem !important; transition:background .2s !important; box-shadow:none !important; }
-  form .btn:hover { background:rgba(0,0,0,0.28) !important; }
+  form .btn { background:transparent !important; border:1px solid rgba(248,113,113,0.28) !important; color:#fee2e2 !important; border-radius:.875rem !important; transition:background .2s, color .2s !important; box-shadow:none !important; }
+  form .btn:hover { background:rgba(239,68,68,0.12) !important; color:#fff !important; }
 
   /* ===== MINI MODE ===== */
   @media (min-width:768px) {
@@ -310,20 +309,6 @@
 
       <div class="flex-1"></div>
 
-      {{-- LOGOUT --}}
-      @auth
-          <form method="POST" action="{{ route('logout') }}" class="px-0 pt-2 pb-2">
-            @csrf
-            <button class="btn {{ $logoutBtn }}" title="Logout">
-              <span class="inline-flex items-center justify-center w-full gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-white/90 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3H6.75A2.25 2.25 0 004.5 5.25v13.5A2.25 2.25 0 006.75 21H13.5a2.25 2.25 0 002.25-2.25V15M9.75 12h10.5m0 0-3-3m3 3-3 3"/>
-                </svg>
-                <span class="label text-white">Logout</span>
-              </span>
-            </button>
-          </form>
-      @endauth
     </nav>
 
 @else
@@ -470,16 +455,5 @@
 
       <div class="flex-1"></div>
 
-      @auth
-          <form method="POST" action="{{ route('logout') }}" class="px-0 pt-2 pb-2">
-            @csrf
-            <button class="btn {{ $logoutBtn }}" title="Logout" {!! $closeAttr !!}>
-              <span class="inline-flex items-center justify-center w-full gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-white/90 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3H6.75A2.25 2.25 0 004.5 5.25v13.5A2.25 2.25 0 006.75 21H13.5a2.25 2.25 0 002.25-2.25V15M9.75 12h10.5m0 0-3-3m3 3-3 3"/></svg>
-                <span class="label text-white">Logout</span>
-              </span>
-            </button>
-          </form>
-      @endauth
     </nav>
 @endif
