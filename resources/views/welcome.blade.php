@@ -457,13 +457,6 @@
             <a href="{{ route('register') }}" class="ml-2 px-5 py-2.5 text-sm font-bold text-white bg-[#a77d52] rounded-2xl shadow-md hover:shadow-lg hover:brightness-110 transition-all">Daftar Gratis</a>
           @endauth
         </nav>
-
-        {{-- Mobile Search Trigger (Hidden on Desktop) --}}
-        <div class="md:hidden">
-          <button id="btn-search-mobile" class="p-2 text-slate-600">
-            <svg class="w-6 h-6"><use href="#i-search"/></svg>
-          </button>
-        </div>
       </div>
     </div>
   </header>

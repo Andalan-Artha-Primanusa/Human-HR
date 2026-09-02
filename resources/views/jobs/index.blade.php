@@ -138,149 +138,128 @@
 <div class="mx-auto w-full max-w-[1480px] px-4 md:px-6 lg:px-8">
 
   {{-- ================================================================
-       HEADER BANNER + SEARCH + FILTER
+       HEADER (shared page-header) + SEARCH + FILTER
        ================================================================ --}}
-  <section class="mb-4 rounded-2xl border border-[#c9a07a]/30 shadow-sm overflow-hidden">
-
-    {{-- Banner --}}
-    <div style="background:#a77d52" class="text-white">
-      <div class="flex flex-col gap-3 p-4 md:p-5 md:flex-row md:items-center md:justify-between">
-
-        <div class="min-w-0 shrink-0">
-          <h1 class="text-lg font-semibold leading-snug">Pekerjaan yang direkomendasikan untuk kamu</h1>
-          <p class="text-sm text-white/75 mt-0.5">Berdasarkan profil dan lamaran kamu</p>
-        </div>
-
-        {{-- Search bar + filter button --}}
-        <div class="w-full md:w-[680px] flex items-stretch gap-2">
-
-          <form method="GET" action="{{ route('jobs.index') }}" role="search" class="flex-1">
-            <label for="job-search" class="sr-only">Cari lowongan</label>
-            <div class="relative">
-              <svg class="absolute w-4 h-4 -translate-y-1/2 pointer-events-none left-3 top-1/2 text-slate-400">
-                <use href="#i-search"/>
-              </svg>
-              <input
-                id="job-search" name="term" value="{{ e($qTerm) }}"
-                placeholder="Cari judul, divisi, site, atau company…"
-                autocomplete="off"
-                class="w-full rounded-xl border border-white/30 bg-white py-2.5 pl-9 pr-28 text-sm
-                       text-slate-900 placeholder-slate-400 outline-none
-                       focus:ring-2 focus:ring-white/60"/>
-
-              <div class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
-                @if($qTerm)
-                  <a href="{{ $rm('term') }}"
-                     class="rounded-lg border border-slate-200 bg-white p-1.5 hover:bg-slate-100 transition">
-                    <svg class="h-3.5 w-3.5 text-slate-500"><use href="#i-x"/></svg>
-                  </a>
-                @endif
-                <button type="submit"
-                  style="background:#8c6843"
-                  class="inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm font-semibold
-                         text-white hover:opacity-90 focus:outline-none">
-                  <svg class="w-4 h-4"><use href="#i-search"/></svg>
-                  Cari
-                </button>
-              </div>
-            </div>
-
-            @foreach(['division','site','company','sort'] as $keep)
-              @if(!empty($keepParams[$keep]))
-                <input type="hidden" name="{{ $keep }}" value="{{ e($keepParams[$keep]) }}">
-              @endif
-            @endforeach
-          </form>
-
-          <button id="btn-filter" type="button" aria-expanded="false" aria-controls="filter-panel"
-            style="background:#8c6843"
-            class="shrink-0 inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-semibold
-                   text-white hover:opacity-90 focus:outline-none transition">
-            <svg class="w-4 h-4"><use href="#i-filter"/></svg>
-            Filter
-            @if($hasAny)
-              <span class="flex h-4 w-4 items-center justify-center rounded-full bg-white/25 text-[10px] font-bold">
-                {{ count(array_filter([$qDivision, $qSite, $qCompany, $qTerm])) }}
-              </span>
-            @endif
-          </button>
-
-        </div>
+  <section class="page-header" aria-labelledby="jobs-page-title">
+    <div class="page-header__inner">
+      <div class="page-header__copy">
+        <p class="page-header__eyebrow">Lowongan Kerja</p>
+        <h1 id="jobs-page-title" class="page-header__title">Pekerjaan yang direkomendasikan untuk kamu</h1>
+        <p class="page-header__desc">Berdasarkan profil dan lamaran kamu. Temukan posisi yang sesuai dan daftar sekarang.</p>
       </div>
 
-      {{-- Accent stripe --}}
-      <div class="h-0.5 w-full" style="background:#8c6843;opacity:.5"></div>
+      <div class="page-header__actions">
+        <button id="btn-filter" type="button" aria-expanded="false" aria-controls="filter-panel" class="ph-action">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M7 12h10M10 18h4"/></svg>
+          Filter
+          @if($hasAny)
+            <span class="flex h-5 w-5 items-center justify-center rounded-full bg-[#a77d52] text-[10px] font-bold text-white">
+              {{ count(array_filter([$qDivision, $qSite, $qCompany, $qTerm])) }}
+            </span>
+          @endif
+        </button>
+      </div>
     </div>
+  </section>
 
-    {{-- Active filter chips --}}
-    @if($hasAny)
-      <div class="flex flex-wrap items-center gap-2 bg-[#fdf6ef] px-4 py-2 border-b border-[#e8d5be]">
-        <span class="text-[11px] font-semibold text-[#8c6843] uppercase tracking-wide">Filter aktif:</span>
-        @foreach(['division' => 'Divisi', 'site' => 'Site', 'company' => 'Company', 'term' => 'Kata kunci'] as $fk => $fl)
-          @if(!empty($keepParams[$fk]))
-            <a href="{{ $rm($fk) }}"
-               class="inline-flex items-center gap-1 rounded-full border border-[#c9a07a] bg-white
-                      px-2.5 py-0.5 text-[11px] font-medium text-[#7a5c36]
-                      hover:bg-[#fdf0e4] transition">
-              {{ $fl }}: {{ e($keepParams[$fk]) }}
-              <svg class="w-3 h-3 opacity-60"><use href="#i-x"/></svg>
+  {{-- ================================================================
+       FILTER CARD (search + panel)
+       ================================================================ --}}
+  <section class="overflow-hidden border rounded-2xl" style="border-color: #ede4dc; border-radius: 1rem;">
+    <div class="p-6 bg-white">
+
+      <form method="GET" action="{{ route('jobs.index') }}" role="search" class="relative">
+        <label for="job-search" class="sr-only">Cari lowongan</label>
+        <svg class="absolute w-4 h-4 -translate-y-1/2 pointer-events-none left-3 top-1/2 text-slate-400">
+          <use href="#i-search"/>
+        </svg>
+        <input
+          id="job-search" name="term" value="{{ e($qTerm) }}"
+          placeholder="Cari judul, divisi, site, atau company…"
+          autocomplete="off"
+          class="w-full rounded-xl border-slate-200 bg-white px-10 py-3 pr-14 text-sm text-slate-800
+                 placeholder-slate-400 outline-none focus:ring-2 focus:ring-[#a77d52]/25 focus:border-[#a77d52]"/>
+
+        <div class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
+          @if($qTerm)
+            <a href="{{ $rm('term') }}"
+               class="rounded-lg border border-slate-200 bg-white p-1.5 hover:bg-slate-100 transition" aria-label="Hapus kata kunci">
+              <svg class="h-3.5 w-3.5 text-slate-500"><use href="#i-x"/></svg>
             </a>
           @endif
-        @endforeach
-        <a href="{{ $resetUrl }}" class="ml-auto text-[11px] text-[#a77d52] hover:underline">Reset semua</a>
-      </div>
-    @endif
-
-    {{-- Filter panel (hidden by default) --}}
-    <div id="filter-panel" class="hidden border-t border-[#e8d5be] bg-[#fdf6ef] p-4 md:p-5">
-      <form method="GET" class="grid gap-3 sm:grid-cols-2 md:grid-cols-4 xl:grid-cols-6"
-            aria-label="Filter Lowongan">
-
-        <div class="sm:col-span-1">
-          <label class="mb-1 block text-[10px] font-semibold text-[#8c6843] uppercase tracking-wide">Divisi</label>
-          <input name="division" value="{{ e($qDivision) }}" placeholder="Plant / SCM / HRGA"
-            class="w-full rounded-lg border border-[#dfc9b0] bg-white px-3 py-2 text-sm text-slate-800
-                   focus:outline-none focus:ring-2 focus:ring-[#a77d52]/30 focus:border-[#c9a07a]"/>
-        </div>
-
-        <div>
-          <label class="mb-1 block text-[10px] font-semibold text-[#8c6843] uppercase tracking-wide">Site</label>
-          <input name="site" value="{{ e($qSite) }}" placeholder="DBK / POS / SBS"
-            class="w-full rounded-lg border border-[#dfc9b0] bg-white px-3 py-2 text-sm text-slate-800
-                   focus:outline-none focus:ring-2 focus:ring-[#a77d52]/30 focus:border-[#c9a07a]"/>
-        </div>
-
-        <div class="sm:col-span-2">
-          <label class="mb-1 block text-[10px] font-semibold text-[#8c6843] uppercase tracking-wide">Company</label>
-          <input name="company" value="{{ e($qCompany) }}" placeholder="ANDALAN / AGR"
-            class="w-full rounded-lg border border-[#dfc9b0] bg-white px-3 py-2 text-sm text-slate-800
-                   focus:outline-none focus:ring-2 focus:ring-[#a77d52]/30 focus:border-[#c9a07a]"/>
-        </div>
-
-        <div class="sm:col-span-2">
-          <label class="mb-1 block text-[10px] font-semibold text-[#8c6843] uppercase tracking-wide">Kata Kunci</label>
-          <input name="term" value="{{ e($qTerm) }}" placeholder="Judul / Deskripsi"
-            class="w-full rounded-lg border border-[#dfc9b0] bg-white px-3 py-2 text-sm text-slate-800
-                   focus:outline-none focus:ring-2 focus:ring-[#a77d52]/30 focus:border-[#c9a07a]"/>
-        </div>
-
-        @if($qSort)<input type="hidden" name="sort" value="{{ e($qSort) }}">@endif
-
-        <div class="flex flex-wrap items-center gap-2 pt-1 sm:col-span-2 md:col-span-4 xl:col-span-6">
-          <button style="background:#a77d52"
-            class="px-5 py-2 text-sm font-semibold text-white transition rounded-lg hover:opacity-90">
-            Terapkan
+          <button type="submit" class="abtn abtn-primary inline-flex items-center gap-1.5 px-4">
+            <svg class="w-4 h-4"><use href="#i-search"/></svg>
+            Cari
           </button>
-          <a href="{{ $resetUrl }}"
-            class="rounded-lg border border-[#dfc9b0] bg-white px-4 py-2 text-sm text-slate-700
-                   hover:bg-[#fdf0e4] transition">
-            Reset
-          </a>
         </div>
 
+        @foreach(['division','site','company','sort'] as $keep)
+          @if(!empty($keepParams[$keep]))
+            <input type="hidden" name="{{ $keep }}" value="{{ e($keepParams[$keep]) }}">
+          @endif
+        @endforeach
       </form>
-    </div>
 
+      @if($hasAny)
+        <div class="flex flex-wrap items-center gap-2 mt-4 pt-3 border-t border-[#ede4dc]">
+          <span class="text-[11px] font-semibold text-[#8c6843] uppercase tracking-wide">Filter aktif:</span>
+          @foreach(['division' => 'Divisi', 'site' => 'Site', 'company' => 'Company', 'term' => 'Kata kunci'] as $fk => $fl)
+            @if(!empty($keepParams[$fk]))
+              <a href="{{ $rm($fk) }}"
+                 class="inline-flex items-center gap-1 rounded-full border border-[#c9a07a] bg-[#fdf6ef]
+                        px-2.5 py-0.5 text-[11px] font-medium text-[#7a5c36]
+                        hover:bg-[#fdf0e4] transition">
+                {{ $fl }}: {{ e($keepParams[$fk]) }}
+                <svg class="w-3 h-3 opacity-60"><use href="#i-x"/></svg>
+              </a>
+            @endif
+          @endforeach
+          <a href="{{ $resetUrl }}" class="ml-auto text-[11px] text-[#a77d52] hover:underline">Reset semua</a>
+        </div>
+      @endif
+
+      <div id="filter-panel" class="hidden mt-4 pt-3 border-t border-[#ede4dc]">
+        <form method="GET" class="grid gap-3 sm:grid-cols-2 md:grid-cols-4 xl:grid-cols-5" aria-label="Filter Lowongan">
+
+          <div>
+            <label class="mb-1 block text-[10px] font-semibold text-[#8c6843] uppercase tracking-wide">Divisi</label>
+            <input name="division" value="{{ e($qDivision) }}" placeholder="Plant / SCM / HRGA"
+              class="w-full rounded-lg border border-[#dfc9b0] bg-white px-3 py-2 text-sm text-slate-800
+                     focus:outline-none focus:ring-2 focus:ring-[#a77d52]/30 focus:border-[#c9a07a]"/>
+          </div>
+
+          <div>
+            <label class="mb-1 block text-[10px] font-semibold text-[#8c6843] uppercase tracking-wide">Site</label>
+            <input name="site" value="{{ e($qSite) }}" placeholder="DBK / POS / SBS"
+              class="w-full rounded-lg border border-[#dfc9b0] bg-white px-3 py-2 text-sm text-slate-800
+                     focus:outline-none focus:ring-2 focus:ring-[#a77d52]/30 focus:border-[#c9a07a]"/>
+          </div>
+
+          <div>
+            <label class="mb-1 block text-[10px] font-semibold text-[#8c6843] uppercase tracking-wide">Company</label>
+            <input name="company" value="{{ e($qCompany) }}" placeholder="ANDALAN / AGR"
+              class="w-full rounded-lg border border-[#dfc9b0] bg-white px-3 py-2 text-sm text-slate-800
+                     focus:outline-none focus:ring-2 focus:ring-[#a77d52]/30 focus:border-[#c9a07a]"/>
+          </div>
+
+          <div>
+            <label class="mb-1 block text-[10px] font-semibold text-[#8c6843] uppercase tracking-wide">Kata Kunci</label>
+            <input name="term" value="{{ e($qTerm) }}" placeholder="Judul / Deskripsi"
+              class="w-full rounded-lg border border-[#dfc9b0] bg-white px-3 py-2 text-sm text-slate-800
+                     focus:outline-none focus:ring-2 focus:ring-[#a77d52]/30 focus:border-[#c9a07a]"/>
+          </div>
+
+          @if($qSort)<input type="hidden" name="sort" value="{{ e($qSort) }}">@endif
+
+          <div class="flex flex-wrap items-end gap-2 md:col-span-2 xl:col-span-1">
+            <button style="background:#a77d52" class="abtn w-full justify-center">Terapkan</button>
+            <a href="{{ $resetUrl }}" class="abtn abtn-neutral w-full">Reset</a>
+          </div>
+
+        </form>
+      </div>
+
+    </div>
   </section>
 
   {{-- ================================================================
