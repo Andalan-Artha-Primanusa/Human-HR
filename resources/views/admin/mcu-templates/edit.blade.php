@@ -11,19 +11,13 @@
 
 @section('content')
 <div class="mx-auto w-full max-w-[1200px] px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-    {{-- HEADER hero bar (konsisten dgn form lainnya) --}}
-    <section class="overflow-hidden bg-white border shadow-sm rounded-2xl" style="border-color: {{ $BORD }}">
-      <div class="relative">
-        <div class="w-full h-20 sm:h-24 bg-[#a77d52]"></div>
-        <div class="absolute inset-0 flex flex-col gap-3 px-5 py-4 text-white md:px-6 sm:flex-row sm:items-center sm:justify-between">
-          <div class="min-w-0">
-            <h1 class="text-2xl font-semibold tracking-tight text-white sm:text-3xl">Edit Template MCU</h1>
-            <p class="text-xs sm:text-sm text-white/90">Sesuaikan format dan isi surat undangan MCU.</p>
-          </div>
-          <a href="{{ route('admin.mcu-templates.index') }}" class="abtn abtn-neutral">Kembali ke Daftar</a>
-        </div>
-      </div>
-    </section>
+    {{-- HEADER hero bar (konsisten dgn halaman admin lain) --}}
+    <x-admin.page-header title="Edit Template MCU" description="Sesuaikan format dan isi surat undangan MCU.">
+      <a href="{{ route('admin.mcu-templates.index') }}" class="ph-action">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+        Kembali ke Daftar
+      </a>
+    </x-admin.page-header>
 
     @if(session('ok'))
       <div class="px-4 py-3 border rounded-2xl border-emerald-200 bg-emerald-50 text-emerald-700">{{ session('ok') }}</div>
@@ -43,7 +37,7 @@
 
         <!-- SECTION 1: INFORMASI TEMPLATE -->
         <div class="overflow-hidden bg-white border shadow-sm border-slate-200 rounded-2xl">
-            <div class="px-6 py-3 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-slate-100">
+            <div class="px-6 py-3 border-b border-slate-100 bg-slate-50">
                 <h2 class="text-sm font-bold tracking-wider uppercase text-slate-600">📋 Informasi Template</h2>
             </div>
             <div class="p-6">
@@ -58,7 +52,7 @@
 
         <!-- SECTION 2: HEADER (Logo & Info Penerbitan) -->
         <div class="overflow-hidden bg-white border shadow-sm border-slate-200 rounded-2xl">
-            <div class="px-6 py-3 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-slate-100">
+            <div class="px-6 py-3 border-b border-slate-100 bg-slate-50">
                 <h2 class="text-sm font-bold tracking-wider uppercase text-slate-600">📄 Header Surat</h2>
             </div>
             <div class="p-6 space-y-6">
@@ -81,7 +75,7 @@
 
         <!-- SECTION 3: PENERIMA & SUBJECT -->
         <div class="overflow-hidden bg-white border shadow-sm border-slate-200 rounded-2xl">
-            <div class="px-6 py-3 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-slate-100">
+            <div class="px-6 py-3 border-b border-slate-100 bg-slate-50">
                 <h2 class="text-sm font-bold tracking-wider uppercase text-slate-600">✉️ Penerima & Subject</h2>
             </div>
             <div class="p-6 space-y-6">
@@ -104,7 +98,7 @@
 
         <!-- SECTION 4: ISI SURAT -->
         <div class="overflow-hidden bg-white border shadow-sm border-slate-200 rounded-2xl">
-            <div class="px-6 py-3 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-slate-100">
+            <div class="px-6 py-3 border-b border-slate-100 bg-slate-50">
                 <h2 class="text-sm font-bold tracking-wider uppercase text-slate-600">📝 Isi Surat</h2>
             </div>
             <div class="p-6 space-y-6">
@@ -141,7 +135,7 @@
 
         <!-- SECTION 5: TANDA TANGAN -->
         <div class="overflow-hidden bg-white border shadow-sm border-slate-200 rounded-2xl">
-            <div class="px-6 py-3 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-slate-100">
+            <div class="px-6 py-3 border-b border-slate-100 bg-slate-50">
                 <h2 class="text-sm font-bold tracking-wider uppercase text-slate-600">✍️ Penanda Tangan</h2>
             </div>
             <div class="p-6">
