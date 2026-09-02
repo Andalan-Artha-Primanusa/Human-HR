@@ -65,12 +65,27 @@
 
     /* ==== ICON WRAPPERS ==== */
     $iconWrap = 'side-icon grid place-items-center shrink-0 w-8 h-8 rounded-md text-slate-300 transition md:w-8 md:h-8';
+    $menuIcon = function (string $name): string {
+        $attrs = 'xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"';
+        $paths = [
+            'login' => '<path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="m10 17 5-5-5-5"/><path d="M15 12H3"/>',
+            'jobs' => '<rect x="3" y="7" width="18" height="13" rx="2.5"/><path d="M8 7V5.5A2.5 2.5 0 0 1 10.5 3h3A2.5 2.5 0 0 1 16 5.5V7"/><path d="M3 13h18"/>',
+            'applications' => '<path d="M8 4h8l2 2v14H6V6l2-2Z"/><path d="M9 12h6"/><path d="M9 16h6"/><path d="M9 8h4"/>',
+            'interviews' => '<rect x="3" y="4" width="18" height="17" rx="2.5"/><path d="M8 2v4"/><path d="M16 2v4"/><path d="M3 9h18"/><path d="M8 14h4"/><path d="M8 17h7"/>',
+            'kanban' => '<rect x="3" y="4" width="5" height="16" rx="1.5"/><rect x="10" y="4" width="5" height="10" rx="1.5"/><rect x="17" y="4" width="4" height="13" rx="1.5"/>',
+            'dashboard' => '<rect x="3" y="3" width="7" height="8" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="15" width="7" height="6" rx="1.5"/>',
+            'candidates' => '<path d="M16 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="9.5" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.65"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+            'users' => '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+            'audit' => '<path d="M9 11h6"/><path d="M9 15h6"/><path d="M9 7h3"/><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 3v3h8V3"/>',
+        ];
+        return '<svg ' . $attrs . '>' . ($paths[$name] ?? $paths['jobs']) . '</svg>';
+    };
 
     $sectionTitle = 'section-title px-3 pt-5 pb-1 text-[11px] tracking-widest font-bold uppercase text-slate-400';
     $lockVisual = !$isVerified ? 'opacity-85' : '';
 
     // Container Menu
-    $groupBox = 'group-box mx-0 mt-2 space-y-0.5 rounded-xl p-1 text-slate-200';
+    $groupBox = 'group-box mx-0 mt-1 space-y-0.5 rounded-xl p-1 text-slate-200';
 
     // Kartu akun
     $accountCard = 'rounded-2xl border border-white/10 bg-white/[0.06] hover:bg-white/[0.1] transition-all duration-300 text-white shadow-sm';
@@ -92,7 +107,7 @@
   .section-title span.inline-block { background:#d7b98e !important; }
 
   /* ===== GROUP BOX ===== */
-  .group-box { background:transparent !important; border:0 !important; border-radius:.75rem; padding:.15rem !important; margin-top:.15rem !important; }
+  .group-box { background:transparent !important; border:0 !important; border-radius:.75rem; padding:.15rem !important; margin-top:.1rem !important; }
 
   /* ===== MENU LINKS — netral, active saja yang brand ===== */
   .side-link { color:#d7dee8 !important; border-left-color:transparent !important; border-radius:.55rem !important; padding:.56rem .72rem !important; transition:background .18s, color .18s, border-color .18s !important; font-weight:650; }
@@ -162,12 +177,6 @@
         </a>
       </div>
 
-      {{-- ACCOUNT --}}
-      <div class="{{ $sectionTitle }} text-center">
-        <span class="inline-block w-1.5 h-1.5 rounded-sm bg-[#a77d52] align-middle mr-2"></span>
-        <span class="align-middle">Account</span>
-      </div>
-
       @auth
           <a href="{{ $href('profile.edit') }}" class="account-card mx-0 mb-2 block {{ $accountCard }} {{ $lockVisual }}">
             <div class="flex items-center gap-3 px-3 py-2">
@@ -208,38 +217,32 @@
       @else
         <div class="{{ $groupBox }} {{ $lockVisual }}">
           <a href="{{ route('login') }}" class="{{ $linkDesk }} {{ $activeMenu('login') }}">
-            <span class="{{ $iconWrap }}"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15V18.75A2.25 2.25 0 0010.5 21h6.75A2.25 2.25 0 0019.5 18.75v-13.5A2 2 0 0017.25 3H10.5A2.25 2.25 0 008.25 5.25V9M15 12H3m0 0 3-3m-3 3 3 3"/></svg></span>
+            <span class="{{ $iconWrap }}">{!! $menuIcon('login') !!}</span>
             <span class="label text-white">Login</span>
           </a>
         </div>
       @endauth
 
-      {{-- GENERAL --}}
-      <div class="{{ $sectionTitle }} text-center">
-        <span class="inline-block w-1.5 h-1.5 rounded-sm bg-[#a77d52] align-middle mr-2"></span>
-        <span class="align-middle">General</span>
-      </div>
-
       <div class="{{ $groupBox }} {{ $lockVisual }}">
         <a href="{{ $href('jobs.index') }}" class="{{ $linkDesk }} {{ $activeMenu('jobs.*') }}">
-          <span class="{{ $iconWrap }}"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 7V6a3 3 0 116 0v1M6 11h12M5 17h14a2 2 0 002-2v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2z"/></svg></span>
+          <span class="{{ $iconWrap }}">{!! $menuIcon('jobs') !!}</span>
           <span class="label text-white">Lowongan</span>
         </a>
 
 @auth
             <a href="{{ $href('applications.mine') }}" class="{{ $linkDesk }} {{ $activeMenu('applications.mine') }}">
-              <span class="{{ $iconWrap }}"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6M9 16h6M9 8h6M9 3H8a2 2 0 00-2 2H7a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-1"/></svg></span>
+              <span class="{{ $iconWrap }}">{!! $menuIcon('applications') !!}</span>
               <span class="label text-white">Lamaran Saya</span>
             </a>
 
             <a href="{{ $href('me.interviews.index') }}" class="{{ $linkDesk }} {{ $activeMenu('me.interviews.*') }}">
-              <span class="{{ $iconWrap }}"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.5 12.75A6.25 6.25 0 018.75 6.5h6.5A6.25 6.25 0 0121.5 12.75v.25a4.75 4.75 0 01-4.75 4.75h-3L9 21.5l.75-3.75H8.75A4.75 4.75 0 014 13v-.25Z"/></svg></span>
+              <span class="{{ $iconWrap }}">{!! $menuIcon('interviews') !!}</span>
               <span class="label text-white">Interview</span>
             </a>
 
             @if(in_array($u->role ?? '', ['trainer', 'karyawan']))
               <a href="{{ route('kanban.mine') }}" class="{{ $linkDesk }} {{ $activeMenu('kanban.mine') }}">
-                <span class="{{ $iconWrap }}"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 5.25h4.5v13.5h-4.5zM9.75 5.25h4.5v13.5h-4.5zM15.75 5.25h4.5v13.5h-4.5z"/></svg></span>
+                <span class="{{ $iconWrap }}">{!! $menuIcon('kanban') !!}</span>
                 <span class="label text-white">Kanban Board</span>
               </a>
             @endif
@@ -249,56 +252,51 @@
       {{-- ADMIN --}}
       @auth
           @if($hasAdminRole)
-              <div class="{{ $sectionTitle }} text-center">
-                <span class="inline-block w-1.5 h-1.5 rounded-sm bg-[#a77d52] align-middle mr-2"></span>
-                <span class="align-middle">Admin</span>
-              </div>
-
               <div class="{{ $groupBox }} {{ $lockVisual }}">
                 <a href="{{ $href('dashboard') }}" class="{{ $linkDesk }} {{ $activeMenu('dashboard') }}">
-                  <span class="{{ $iconWrap }}"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.5h6.5v6.5h-6.5zM13.75 4.5h6.5v6.5h-6.5zM3.75 14.5h6.5v6.5h-6.5zM13.75 14.5h6.5v6.5h-6.5z"/></svg></span>
+                  <span class="{{ $iconWrap }}">{!! $menuIcon('dashboard') !!}</span>
                   <span class="label text-white">Dashboard</span>
                 </a>
 
                 <a href="{{ $href('admin.jobs.index') }}" class="{{ $linkDesk }} {{ $activeMenu('admin.jobs.*') }}">
-                  <span class="{{ $iconWrap }}"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 7V6a3 3 0 116 0v1M6 11h12M5 17h14a2 2 0 002-2v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2z"/></svg></span>
+                  <span class="{{ $iconWrap }}">{!! $menuIcon('jobs') !!}</span>
                   <span class="label text-white">Jobs</span>
                 </a>
 
                 @if (Route::has('admin.candidates.index'))
                     <a href="{{ $href('admin.candidates.index') }}" class="{{ $linkDesk }} {{ $activeMenu('admin.candidates.*') }}">
-                      <span class="{{ $iconWrap }}"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19a4 4 0 10-6 0M12 7a4 4 0 100-8 4 4 0 000 8m6 12v-1a4 4 0 00-4-4H10a4 4 0 00-4 4v1"/></svg></span>
+                      <span class="{{ $iconWrap }}">{!! $menuIcon('candidates') !!}</span>
                       <span class="label text-white">Candidates</span>
                     </a>
                 @endif
 
                 <a href="{{ $href('admin.applications.index') }}" class="{{ $linkDesk }} {{ $activeMenu('admin.applications.index') }}">
-                  <span class="{{ $iconWrap }}"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6M9 16h6M9 8h6m-3-5h-1a2 2 0 00-2 2H7a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2z"/></svg></span>
+                  <span class="{{ $iconWrap }}">{!! $menuIcon('applications') !!}</span>
                   <span class="label text-white">Applications</span>
                 </a>
 
                 <a href="{{ $href('admin.applications.board') }}" class="{{ $linkDesk }} {{ $activeMenu('admin.applications.board') }}">
-                  <span class="{{ $iconWrap }}"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 5.25h4.5v13.5h-4.5zM9.75 5.25h4.5v13.5h-4.5zM15.75 5.25h4.5v13.5h-4.5z"/></svg></span>
+                  <span class="{{ $iconWrap }}">{!! $menuIcon('kanban') !!}</span>
                   <span class="label text-white">Kanban Board</span>
                 </a>
 
                 @if (Route::has('admin.interviews.index'))
                     <a href="{{ $href('admin.interviews.index') }}" class="{{ $linkDesk }} {{ $activeMenu('admin.interviews.*') }}">
-                      <span class="{{ $iconWrap }}"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.5 12.75A6.25 6.25 0 018.75 6.5h6.5A6.25 6.25 0 0121.5 12.75v.25a4.75 4.75 0 01-4.75 4.75h-3L9 21.5l.75-3.75H8.75A4.75 4.75 0 014 13v-.25Z"/></svg></span>
+                      <span class="{{ $iconWrap }}">{!! $menuIcon('interviews') !!}</span>
                       <span class="label text-white">Interviews</span>
                     </a>
                 @endif
 
                 @if (Route::has('admin.users.index'))
                     <a href="{{ $href('admin.users.index') }}" class="{{ $linkDesk }} {{ $activeMenu('admin.users.*') }}">
-                      <span class="{{ $iconWrap }}"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16 14a4 4 0 10-8 0v2a2 2 0 002 2h4a2 2 0 002-2v-2zM12 10a4 4 0 100-8 4 4 0 000 8z"/></svg></span>
+                      <span class="{{ $iconWrap }}">{!! $menuIcon('users') !!}</span>
                       <span class="label text-white">Users</span>
                     </a>
                 @endif
 
                 @if ($roleRaw === 'superadmin' && Route::has('admin.audit_logs.index'))
                     <a href="{{ $href('admin.audit_logs.index') }}" class="{{ $linkDesk }} {{ $activeMenu('admin.audit_logs.*') }}">
-                      <span class="{{ $iconWrap }}"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 7h11M9 12h11M9 17h11M5 7h.01M5 12h.01M5 17h.01"/></svg></span>
+                      <span class="{{ $iconWrap }}">{!! $menuIcon('audit') !!}</span>
                       <span class="label text-white">Audit Logs</span>
                     </a>
                 @endif
@@ -313,11 +311,6 @@
 
 @else
     <nav class="flex flex-col min-h-full space-y-1 text-sm text-white sidenav-shell">
-      <div class="{{ $sectionTitle }} text-center">
-        <span class="inline-block w-1.5 h-1.5 rounded-sm bg-[#a77d52] align-middle mr-2"></span>
-        <span class="align-middle">Account</span>
-      </div>
-
       @auth
           <a href="{{ $href('profile.edit') }}" {!! $closeAttr !!} class="account-card mx-0 mb-2 block {{ $accountCard }} {{ $lockVisual }}">
             <div class="flex items-center gap-3 px-3 py-2">
@@ -355,37 +348,32 @@
       @else
         <div class="{{ $groupBox }} {{ $lockVisual }}">
           <a href="{{ route('login') }}" {!! $closeAttr !!} class="{{ $linkMobile }} {{ $activeMenu('login') }}">
-            <span class="{{ $iconWrap }}"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15V18.75A2.25 2.25 0 0010.5 21h6.75A2.25 2.25 0 0019.5 18.75v-13.5A2 2 0 0017.25 3H10.5A2.25 2.25 0 008.25 5.25V9M15 12H3m0 0 3-3m-3 3 3 3"/></svg></span>
+            <span class="{{ $iconWrap }}">{!! $menuIcon('login') !!}</span>
             <span>Login</span>
           </a>
         </div>
       @endauth
 
-      <div class="{{ $sectionTitle }} text-center">
-        <span class="inline-block w-1.5 h-1.5 rounded-sm bg-[#a77d52] align-middle mr-2"></span>
-        <span class="align-middle">General</span>
-      </div>
-
       <div class="{{ $groupBox }} {{ $lockVisual }}">
         <a href="{{ $href('jobs.index') }}" {!! $closeAttr !!} class="{{ $linkMobile }} {{ $activeMenu('jobs.*') }}">
-          <span class="{{ $iconWrap }}"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 7V6a3 3 0 116 0v1M6 11h12M5 17h14a2 2 0 002-2v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2z"/></svg></span>
+          <span class="{{ $iconWrap }}">{!! $menuIcon('jobs') !!}</span>
           <span>Lowongan</span>
         </a>
 
         @auth
             <a href="{{ $href('applications.mine') }}" {!! $closeAttr !!} class="{{ $linkMobile }} {{ $activeMenu('applications.mine') }}">
-              <span class="{{ $iconWrap }}"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6M9 16h6M9 8h6m-3-5h-1a2 2 0 00-2 2H7a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2z"/></svg></span>
+              <span class="{{ $iconWrap }}">{!! $menuIcon('applications') !!}</span>
               <span>Lamaran Saya</span>
             </a>
 
             <a href="{{ $href('me.interviews.index') }}" {!! $closeAttr !!} class="{{ $linkMobile }} {{ $activeMenu('me.interviews.*') }}">
-              <span class="{{ $iconWrap }}"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.5 12.75A6.25 6.25 0 018.75 6.5h6.5A6.25 6.25 0 0121.5 12.75v.25a4.75 4.75 0 01-4.75 4.75h-3L9 21.5l.75-3.75H8.75A4.75 4.75 0 014 13v-.25Z"/></svg></span>
+              <span class="{{ $iconWrap }}">{!! $menuIcon('interviews') !!}</span>
               <span>Interview</span>
             </a>
 
             @if(in_array($u->role ?? '', ['trainer', 'karyawan']))
               <a href="{{ route('kanban.mine') }}" {!! $closeAttr !!} class="{{ $linkMobile }} {{ $activeMenu('kanban.mine') }}">
-                <span class="{{ $iconWrap }}"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 5.25h4.5v13.5h-4.5zM9.75 5.25h4.5v13.5h-4.5zM15.75 5.25h4.5v13.5h-4.5z"/></svg></span>
+                <span class="{{ $iconWrap }}">{!! $menuIcon('kanban') !!}</span>
                 <span>Kanban Board</span>
               </a>
             @endif
@@ -395,56 +383,51 @@
       {{-- ADMIN --}}
       @auth
           @if($hasAdminRole)
-              <div class="{{ $sectionTitle }} text-center">
-                <span class="inline-block w-1.5 h-1.5 rounded-sm bg-[#a77d52] align-middle mr-2"></span>
-                <span class="align-middle">Admin</span>
-              </div>
-
               <div class="{{ $groupBox }} {{ $lockVisual }}">
                 <a href="{{ $href('dashboard') }}" {!! $closeAttr !!} class="{{ $linkMobile }} {{ $activeMenu('dashboard') }}">
-                  <span class="{{ $iconWrap }}"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.5h6.5v6.5h-6.5zM13.75 4.5h6.5v6.5h-6.5zM3.75 14.5h6.5v6.5h-6.5zM13.75 14.5h6.5v6.5h-6.5z"/></svg></span>
+                  <span class="{{ $iconWrap }}">{!! $menuIcon('dashboard') !!}</span>
                   <span>Dashboard</span>
                 </a>
 
                 <a href="{{ $href('admin.jobs.index') }}" {!! $closeAttr !!} class="{{ $linkMobile }} {{ $activeMenu('admin.jobs.*') }}">
-                  <span class="{{ $iconWrap }}"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 7V6a3 3 0 116 0v1M6 11h12M5 17h14a2 2 0 002-2v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2z"/></svg></span>
+                  <span class="{{ $iconWrap }}">{!! $menuIcon('jobs') !!}</span>
                   <span>Jobs</span>
                 </a>
 
                 @if (Route::has('admin.candidates.index'))
                       <a href="{{ $href('admin.candidates.index') }}" {!! $closeAttr !!} class="{{ $linkMobile }} {{ $activeMenu('admin.candidates.*') }}">
-                        <span class="{{ $iconWrap }}"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19a4 4 0 10-6 0M12 7a4 4 0 100-8 4 4 0 000 8m6 12v-1a4 4 0 00-4-4H10a4 4 0 00-4 4v1"/></svg></span>
+                        <span class="{{ $iconWrap }}">{!! $menuIcon('candidates') !!}</span>
                         <span>Candidates</span>
                       </a>
                 @endif
 
                 <a href="{{ $href('admin.applications.index') }}" {!! $closeAttr !!} class="{{ $linkMobile }} {{ $activeMenu('admin.applications.index') }}">
-                  <span class="{{ $iconWrap }}"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6M9 16h6M9 8h6m-3-5h-1a2 2 0 00-2 2H7a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2z"/></svg></span>
+                  <span class="{{ $iconWrap }}">{!! $menuIcon('applications') !!}</span>
                   <span>Applications</span>
                 </a>
 
                 <a href="{{ $href('admin.applications.board') }}" {!! $closeAttr !!} class="{{ $linkMobile }} {{ $activeMenu('admin.applications.board') }}">
-                  <span class="{{ $iconWrap }}"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 5.25h4.5v13.5h-4.5zM9.75 5.25h4.5v13.5h-4.5zM15.75 5.25h4.5v13.5h-4.5z"/></svg></span>
+                  <span class="{{ $iconWrap }}">{!! $menuIcon('kanban') !!}</span>
                   <span>Kanban Board</span>
                 </a>
 
                 @if (Route::has('admin.interviews.index'))
                       <a href="{{ $href('admin.interviews.index') }}" {!! $closeAttr !!} class="{{ $linkMobile }} {{ $activeMenu('admin.interviews.*') }}">
-                        <span class="{{ $iconWrap }}"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.5 12.75A6.25 6.25 0 018.75 6.5h6.5A6.25 6.25 0 0121.5 12.75v.25a4.75 4.75 0 01-4.75 4.75h-3L9 21.5l.75-3.75H8.75A4.75 4.75 0 014 13v-.25Z"/></svg></span>
+                        <span class="{{ $iconWrap }}">{!! $menuIcon('interviews') !!}</span>
                         <span>Interviews</span>
                       </a>
                 @endif
 
                 @if (Route::has('admin.users.index'))
                       <a href="{{ $href('admin.users.index') }}" {!! $closeAttr !!} class="{{ $linkMobile }} {{ $activeMenu('admin.users.*') }}">
-                        <span class="{{ $iconWrap }}"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16 14a4 4 0 10-8 0v2a2 2 0 002 2h4a2 2 0 002-2v-2zM12 10a4 4 0 100-8 4 4 0 000 8z"/></svg></span>
+                        <span class="{{ $iconWrap }}">{!! $menuIcon('users') !!}</span>
                         <span>Users</span>
                       </a>
                 @endif
 
                 @if ($roleRaw === 'superadmin' && Route::has('admin.audit_logs.index'))
                       <a href="{{ $href('admin.audit_logs.index') }}" {!! $closeAttr !!} class="{{ $linkMobile }} {{ $activeMenu('admin.audit_logs.*') }}">
-                        <span class="{{ $iconWrap }}"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 7h11M9 12h11M9 17h11M5 7h.01M5 12h.01M5 17h.01"/></svg></span>
+                        <span class="{{ $iconWrap }}">{!! $menuIcon('audit') !!}</span>
                         <span>Audit Logs</span>
                       </a>
                 @endif
