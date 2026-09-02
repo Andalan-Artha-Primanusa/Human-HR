@@ -389,29 +389,6 @@
     }
     .badge-open { background: #f4ebe0; color: #7a5530; }
     .badge-new  { background: #f4ebe0; color: #a77d52; }
-
-    .site-marquee {
-      position: relative;
-      overflow: hidden;
-      mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
-      -webkit-mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
-    }
-    .site-marquee__track {
-      display: flex;
-      gap: .75rem;
-      width: max-content;
-      animation: site-marquee-scroll 34s linear infinite;
-      will-change: transform;
-    }
-    .site-marquee:hover .site-marquee__track,
-    .site-marquee:focus-within .site-marquee__track { animation-play-state: paused; }
-    @keyframes site-marquee-scroll {
-      from { transform: translateX(0); }
-      to { transform: translateX(-50%); }
-    }
-    @media (prefers-reduced-motion: reduce) {
-      .site-marquee__track { animation: none; }
-    }
   </style>
 </head>
 
@@ -799,7 +776,6 @@
                 $id = (string) ($s['id'] ?? '');
                 return ['name' => $name, 'dot' => $dot, 'param' => $param, 'id' => $id];
             })->values();
-        $sitesTicker = $sitesNorm->concat($sitesNorm);
     @endphp
 
     <section class="border-b" style="border-color: #e8d5c4; background: #ffffff"
@@ -808,38 +784,8 @@
         <h2 id="sites-heading" class="mb-4 text-base font-semibold" style="color: #1f2937">Lokasi Site</h2>
 
         @if($sitesNorm->isNotEmpty())
-              {{-- PETA INTERAKTIF (selalu tampil, default Indonesia bila tanpa koordinat) --}}
-              <div class="grid gap-4 mb-6 lg:grid-cols-3">
-                <div id="sites-map" class="w-full overflow-hidden border shadow-md h-96 rounded-2xl lg:col-span-2"
-                  style="border-color: #f4f0eb" role="region" aria-label="Peta lokasi site PT Andalan Artha Primanusa">
-                </div>
-
-                {{-- Daftar site di samping peta --}}
-                <div class="grid gap-2 content-start sm:grid-cols-2 lg:grid-cols-1">
-                  @foreach($sitesNorm as $s)
-                    <a href="{{ $s['id'] ? route('sites.show', $s['id']) : route('sites.index') }}"
-                      class="flex items-center gap-3 px-4 py-3 rounded-2xl border transition hover:shadow-md"
-                      style="border-color: #f4f0eb; background: #fff">
-                      <span class="inline-block w-3 h-3 rounded-full shrink-0" style="background: {{ $s['dot'] }}"></span>
-                      <span class="text-sm font-medium" style="color: #1f2937">{{ $s['name'] }}</span>
-                    </a>
-                  @endforeach
-                </div>
-              </div>
-
-              <div class="site-marquee" role="presentation" aria-hidden="true">
-                <div class="site-marquee__track">
-                  @foreach($sitesTicker as $s)
-                    <div class="shrink-0">
-                      <span class="inline-flex items-center gap-2 px-4 py-2 border rounded-full"
-                        style="border-color: #e8d5c4; background: #fff; color: #a77d52;">
-                        <span class="inline-block w-2.5 h-2.5 rounded-full shrink-0"
-                          style="background: {{ $s['dot'] }}"></span>
-                        <span class="text-sm whitespace-nowrap">{{ $s['name'] }}</span>
-                      </span>
-                    </div>
-                  @endforeach
-                </div>
+              <div id="sites-map" class="w-full overflow-hidden border shadow-md h-96 rounded-2xl"
+                style="border-color: #f4f0eb" role="region" aria-label="Peta lokasi site PT Andalan Artha Primanusa">
               </div>
 
           @else
@@ -948,11 +894,16 @@
 
               @php
                 $steps = [
-                    ['Pengajuan Lamaran', 'Kirim CV & data diri melalui sistem kami.', '1-2 hari'],
-                    ['Penyaringan CV', 'Tim HR akan meninjau kesesuaian kandidat.', '2-3 hari'],
-                    ['Wawancara / Tes', 'Interview HR & user + tes kemampuan (jika ada).', '3-5 hari'],
-                    ['Penawaran Kerja', 'Kandidat terpilih menerima offering letter.', '1-2 hari'],
-                    ['Onboarding', 'Mulai bekerja & orientasi perusahaan.', 'Hari pertama'],
+                    ['Screening', 'Tim HR meninjau kesesuaian CV & data diri.', '2-3 hari'],
+                    ['Psychological Test', 'Tes psikologi untuk mengukur potensi kandidat.', '1-2 hari'],
+                    ['HR Interview', 'Wawancara dengan tim HR.', '3-5 hari'],
+                    ['Post Test', 'Evaluasi lanjutan pasca wawancara HR.', '1-2 hari'],
+                    ['User Interview', 'Wawancara dengan user / bagian terkait.', '3-5 hari'],
+                    ['Offering Letter (OL)', 'Kandidat terpilih menerima penawaran kerja.', '1-2 hari'],
+                    ['Medical Check Up', 'Pemeriksaan kesehatan calon karyawan.', '1-2 hari'],
+                    ['Mobilisasi (Travel)', 'Persiapan & perjalanan ke lokasi kerja.', 'Menyesuaikan'],
+                    ['Skill Test', 'Tes keterampilan lapangan (jika relevan).', '1-2 hari'],
+                    ['Finish / Onboarding', 'Diterima & mulai orientasi perusahaan.', 'Hari pertama'],
                 ];
               @endphp
 
