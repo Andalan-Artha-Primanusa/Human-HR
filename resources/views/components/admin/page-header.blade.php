@@ -4,8 +4,8 @@
      <x-admin.page-header eyebrow="MANPOWER INTELLIGENCE"
                          title="Manpower Dashboard"
                          description="...">
-       {{-- content slot: action button(s) and/or meta info, right-aligned --}}
-       <a href="{{ route('admin.jobs.create') }}" class="ph-action">...</a>
+       Slot: action button(s) and/or meta info, right-aligned.
+       <a href="..." class=\"ph-action\">...</a>
      </x-admin.page-header>
 --}}
 @props([
