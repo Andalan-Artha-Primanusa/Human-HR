@@ -356,26 +356,6 @@
       transform: translateY(0);
     }
 
-    /* Quick link cards */
-    .qlink-card {
-      border: 1px solid #e5e7eb;
-      border-radius: 1rem;
-      padding: 1.25rem 1.5rem;
-      background: #fff;
-      transition: box-shadow .2s ease, transform .2s ease, border-color .2s ease;
-      text-decoration: none;
-      display: flex;
-      flex-direction: column;
-      gap: .35rem;
-    }
-    .qlink-card:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 10px 32px rgba(167,125,82,.15);
-      border-color: #a77d52;
-    }
-    .qlink-title { font-size: .95rem; font-weight: 700; color: #a77d52; margin: 0; }
-    .qlink-desc  { font-size: .8rem; color: #6b7280; margin: 0; }
-
     /* Badge */
     .badge {
       display: inline-flex;
@@ -735,36 +715,6 @@
       </div>
     </section>
 
-    {{-- ===== QUICK LINKS ===== --}}
-    <section aria-label="Menu cepat" style="padding: 2.5rem 1.5rem; background: #ffffff">
-      <div class="mx-auto max-w-7xl">
-        <h2 class="sr-only">Menu Cepat</h2>
-        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:1rem">
-          <a href="{{ route('login') }}" class="qlink-card">
-            <span class="inline-flex items-center gap-2 qlink-title">
-              <svg class="w-4 h-4" aria-hidden="true"><use href="#i-user"/></svg>
-              Masuk
-            </span>
-            <span class="qlink-desc">Akses akun Anda</span>
-          </a>
-          <a href="{{ route('register') }}" class="qlink-card">
-            <span class="inline-flex items-center gap-2 qlink-title">
-              <svg class="w-4 h-4" aria-hidden="true"><use href="#i-apply"/></svg>
-              Daftar
-            </span>
-            <span class="qlink-desc">Buat akun baru gratis</span>
-          </a>
-          <a href="{{ route('jobs.index') }}" class="qlink-card">
-            <span class="inline-flex items-center gap-2 qlink-title">
-              <svg class="w-4 h-4" aria-hidden="true"><use href="#i-briefcase"/></svg>
-              Lowongan
-            </span>
-            <span class="qlink-desc">Lihat semua posisi terbuka</span>
-          </a>
-        </div>
-      </div>
-    </section>
-
     {{-- ===== LOKASI SITE DENGAN PETA INTERAKTIF ===== --}}
     @php
         $sitesCol = ($sitesSimple instanceof \Illuminate\Support\Collection) ? $sitesSimple : collect($sitesSimple ?? []);
@@ -784,8 +734,22 @@
         <h2 id="sites-heading" class="mb-4 text-base font-semibold" style="color: #1f2937">Lokasi Site</h2>
 
         @if($sitesNorm->isNotEmpty())
-              <div id="sites-map" class="w-full overflow-hidden border shadow-md h-96 rounded-2xl"
-                style="border-color: #f4f0eb" role="region" aria-label="Peta lokasi site PT Andalan Artha Primanusa">
+              <div class="grid gap-4 lg:grid-cols-3">
+                <div id="sites-map" class="w-full overflow-hidden border shadow-md h-96 rounded-2xl lg:col-span-2"
+                  style="border-color: #f4f0eb" role="region" aria-label="Peta lokasi site PT Andalan Artha Primanusa">
+                </div>
+
+                {{-- Daftar site di samping peta --}}
+                <div class="grid content-start gap-2 sm:grid-cols-2 lg:grid-cols-1">
+                  @foreach($sitesNorm as $s)
+                    <a href="{{ $s['id'] ? route('sites.show', $s['id']) : route('sites.index') }}"
+                      class="flex items-center gap-3 px-4 py-3 rounded-2xl border transition hover:shadow-md"
+                      style="border-color: #f4f0eb; background: #fff">
+                      <span class="inline-block w-3 h-3 rounded-full shrink-0" style="background: {{ $s['dot'] }}"></span>
+                      <span class="text-sm font-medium" style="color: #1f2937">{{ $s['name'] }}</span>
+                    </a>
+                  @endforeach
+                </div>
               </div>
 
           @else
