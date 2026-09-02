@@ -351,6 +351,8 @@
     border-radius: 1rem !important;
     border: 1.5px solid rgba(167,125,82,.2) !important;
     box-shadow: 0 20px 60px rgba(0,0,0,.25) !important;
+    width: 100%;
+    max-width: 42rem !important;
   }
   /* Modal header */
   .modal-header,

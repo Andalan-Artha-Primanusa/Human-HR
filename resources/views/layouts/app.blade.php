@@ -44,7 +44,7 @@
 
 @if (session('verify_email_notice'))
   <div id="verifyEmailModal" class="fixed inset-0 z-50 flex items-center justify-center px-4 bg-black/50" role="dialog" aria-modal="true" aria-labelledby="verifyEmailModalTitle">
-    <div class="w-full max-w-sm p-6 bg-white shadow-2xl rounded-xl ring-1 ring-slate-200">
+    <div class="w-full max-w-md p-6 bg-white shadow-2xl rounded-xl ring-1 ring-slate-200">
       <div class="flex items-center justify-center w-12 h-12 mx-auto mb-4 rounded-full bg-amber-100 text-amber-700">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16v12H4z" />

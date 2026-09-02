@@ -772,7 +772,7 @@
 
       {{-- Popup konfirmasi submit --}}
       <div x-show="confirmOpen" x-cloak class="fixed inset-0 z-40 grid p-4 place-items-center bg-black/35" @click.self="confirmOpen=false">
-        <div class="w-full max-w-md p-5 bg-white border shadow-xl rounded-2xl border-brand-200">
+        <div class="w-full max-w-2xl p-5 bg-white border shadow-xl rounded-2xl border-brand-200">
           <h3 class="text-lg font-semibold text-slate-900">Simpan Data Kandidat?</h3>
           <p class="mt-1 text-sm text-slate-600">Pastikan semua data sudah benar. Kamu tetap bisa mengubahnya lagi nanti.</p>
           <div class="flex items-center justify-end gap-2 mt-4">
@@ -793,7 +793,7 @@
 {{-- Error Modal: kelengkapan wajib, render di akhir body agar floating di atas semua konten --}}
 <template x-if="errors.length">
   <div class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40">
-    <div class="relative w-full max-w-md p-6 text-center bg-white border shadow-xl rounded-2xl border-amber-300">
+    <div class="relative w-full max-w-2xl p-6 text-center bg-white border shadow-xl rounded-2xl border-amber-300">
       <button @click="errors=[]" class="absolute top-3 right-3 text-slate-400 hover:text-slate-700" aria-label="Tutup">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
       </button>

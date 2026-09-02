@@ -38,35 +38,31 @@
 @endphp
 
 @section('content')
-    <div class="space-y-6">
+    <style>
+      #jobEditForm .label { color: #5c3d1e !important; }
+      #jobEditForm .input {
+        border-color: #ede4dc !important;
+        background:#fff;
+      }
+      #jobEditForm .input:focus { border-color: #a77d52 !important; box-shadow: 0 0 0 3px rgba(167,125,82,.18) !important; }
+      #jobEditForm select.input { background:#fff; }
+    </style>
+    <div class="mx-auto w-full max-w-[1200px] space-y-6">
 
-      {{-- HEADER dua-tone + tombol aksi --}}
-      <section class="relative bg-white border shadow-sm rounded-2xl" style="border-color: {{ $BORD }}">
-        <div class="relative h-20 overflow-hidden sm:h-24 rounded-t-2xl">
-          <div class="absolute inset-0 rounded-t-2xl" style="background: linear-gradient(90deg, {{ $ACCENT }}, {{ $ACCENT_DARK }});"></div>
-          <div class="absolute inset-y-0 right-0 w-24 rounded-tr-2xl sm:w-36" style="background: linear-gradient(90deg, {{ $ACCENT_DARK }}, {{ $ACCENT }});"></div>
-
-          <div class="relative flex flex-col h-full gap-3 px-5 md:px-6 sm:flex-row sm:items-center sm:justify-between">
-            <div class="min-w-0">
-              <h1 class="text-2xl font-semibold tracking-tight text-white md:text-3xl">
-                Edit Job: {{ e($job->title) }} <span class="opacity-70">({{ e($job->code) }})</span>
-              </h1>
-              <div class="flex flex-wrap items-center gap-2 mt-1 text-xs sm:text-sm text-white/90">
-                <a href="{{ route('admin.jobs.index') }}" class="hover:text-white">Jobs</a>
-                <span class="opacity-70">/</span>
-                <span class="font-medium text-white">Edit</span>
-              </div>
-            </div>
-
-            <div class="flex gap-2">
-              <a href="{{ route('admin.jobs.index') }}"
-                 class="abtn abtn-neutral">Kembali</a>
-              <button form="jobEditForm"
-                      class="abtn abtn-primary">Simpan Perubahan</button>
-            </div>
-          </div>
-        </div>
-      </section>
+      {{-- HEADER (shared solid-brown page-header) --}}
+      <x-admin.page-header
+        eyebrow="Manajemen Lowongan"
+        title="Edit Job"
+        description="{{ e($job->title) }} ({{ e($job->code) }})">
+        <a href="{{ route('admin.jobs.index') }}" class="ph-action">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+          Kembali
+        </a>
+        <button type="submit" form="jobEditForm" class="ph-action ph-action--brand">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+          Simpan Perubahan
+        </button>
+      </x-admin.page-header>
 
       {{-- Info unik per company --}}
       <div class="rounded-xl bg-white text-[#7a5236] px-4 py-3 border text-sm" style="border-color: {{ $BORD }}">

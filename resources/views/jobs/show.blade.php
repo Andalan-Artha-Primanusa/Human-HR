@@ -1035,7 +1035,7 @@
                       <div x-data="{ open: true }">
                         <template x-if="open">
                           <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-                            <div class="relative w-full max-w-md p-6 text-center bg-white border shadow-xl rounded-2xl border-amber-300">
+                            <div class="relative w-full max-w-2xl p-6 sm:p-8 text-center bg-white border shadow-xl rounded-2xl border-amber-300">
                               <button @click="open=false" class="absolute top-3 right-3 text-slate-400 hover:text-slate-700" aria-label="Tutup">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                               </button>
@@ -1157,7 +1157,7 @@
 
     {{-- REJECT OL MODAL --}}
     <div id="modal-reject-ol" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50" onclick="if(event.target === this) closeRejectOlModal()">
-      <div class="bg-white rounded-xl shadow-lg max-w-md w-full mx-4" onclick="event.stopPropagation()">
+      <div class="bg-white rounded-2xl shadow-lg max-w-2xl w-full mx-4" onclick="event.stopPropagation()">
         <div class="p-6 border-b border-slate-200">
           <h3 class="text-lg font-semibold text-slate-900">Tolak Offering Letter</h3>
           <p class="text-sm mt-1 text-[#9a7558]">Berikan alasan penolakan (opsional). HR akan menghubungi Anda.</p>
