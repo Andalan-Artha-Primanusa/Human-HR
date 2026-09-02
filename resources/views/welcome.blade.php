@@ -416,18 +416,6 @@
           </a>
         </div>
 
-        {{-- Desktop Search (Premium) --}}
-        <div class="flex-1 hidden max-w-md mx-8 md:flex">
-          <form action="{{ route('jobs.index') }}" method="GET" class="relative w-full group">
-            <input type="search" name="q" placeholder="Cari posisi atau lokasi..." 
-              class="w-full pl-11 pr-4 py-2.5 bg-slate-100/50 border border-slate-200/60 rounded-2xl text-sm focus:bg-white focus:ring-2 focus:ring-[#a77d52]/20 focus:border-[#a77d52] transition-all outline-none"
-              value="{{ request('q') }}">
-            <div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#a77d52] transition-colors">
-              <svg class="w-4 h-4"><use href="#i-search"/></svg>
-            </div>
-          </form>
-        </div>
-
         {{-- Desktop Nav --}}
         <nav class="items-center hidden gap-1 md:flex">
           <a href="{{ route('jobs.index') }}" class="px-4 py-2 text-sm font-semibold text-slate-600 hover:text-[#a77d52] transition-colors rounded-xl hover:bg-slate-50">Lowongan</a>
