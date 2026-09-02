@@ -24,26 +24,7 @@
   --br-surface: #f0ebe4;
 }
 
-/* ===== PAGE HEADER ===== */
-.kn-header {
-  background: #a77d52;
-  padding: 1.5rem 2rem 1.25rem;
-  border-radius: 0 0 1.25rem 1.25rem;
-  color: #fff;
-  position: relative;
-  overflow: hidden;
-  margin-bottom: 1.25rem;
-}
-.kn-header::after {
-  content: '';
-  position: absolute;
-  right: -40px; top: -40px;
-  width: 200px; height: 200px;
-  border-radius: 50%;
-  background: rgba(255,255,255,.08);
-}
-.kn-header h1 { font-size: 1.6rem; font-weight: 700; letter-spacing: -.4px; }
-.kn-header p  { font-size: .82rem; opacity: .85; margin-top: .3rem; }
+/* ===== PAGE HEADER (pakai shared .page-header komponen) ===== */
 
 /* ===== FILTER BAR ===== */
 .kn-filter {
@@ -414,11 +395,11 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
 
 <div class="kn-wrap">
 
-  {{-- HEADER --}}
-  <div class="kn-header">
-    <h1>Kanban Kandidat</h1>
-    <p>Drag &amp; drop kartu antar stage · Klik <strong>Schedule</strong> untuk kirim undangan interview · Klik <strong>View Feedback</strong> untuk melihat penilaian</p>
-  </div>
+  {{-- HEADER — shared component --}}
+  <x-admin.page-header
+    title="Kanban Kandidat"
+    description="Drag &amp; drop kartu antar stage. Klik Schedule untuk kirim undangan interview. Klik View Feedback untuk melihat penilaian."
+    style="margin-bottom: 0;"></x-admin.page-header>
 
   {{-- FILTER --}}
   <form method="GET" class="kn-filter">

@@ -33,21 +33,12 @@
 
     <div class="mx-auto w-full max-w-[1440px] px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
-{{-- HEADER --}}
-      <section class="overflow-hidden bg-white border shadow-sm rounded-2xl" style="border-color: {{ $BORD }}">
-        <div class="relative">
-          <div class="w-full h-20 sm:h-24 bg-[#a77d52]"></div>
+{{-- HEADER — shared component --}}
+      <x-admin.page-header title="Audit Log" description="Jejak perubahan data & aktivitas pengguna."></x-admin.page-header>
 
-          <div class="relative flex items-center h-full px-5 text-white md:px-6">
-            <div class="min-w-0">
-              <h1 class="text-2xl font-semibold tracking-tight text-white sm:text-3xl">Audit Logs</h1>
-              <p class="text-xs sm:text-sm text-white/90">Jejak perubahan data & aktivitas pengguna.</p>
-            </div>
-          </div>
-        </div>
-
-        {{-- FILTER --}}
-        <div class="p-6 border-t md:p-7 bg-white" style="border-color: {{ $BORD }}">
+      {{-- FILTER / TOOLBAR --}}
+      <section class="overflow-hidden bg-white border rounded-2xl" style="border-color: {{ $BORD }}; border-radius: 1rem;">
+        <div class="p-6 md:p-6 bg-white">
         <form method="GET"
           class="grid grid-cols-1 gap-3 md:grid-cols-6"
           role="search" aria-label="Filter Audit Logs">

@@ -43,26 +43,16 @@
 
     <div class="mx-auto w-full max-w-[1440px] px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
-    <section class="overflow-hidden bg-white border shadow-sm rounded-2xl" style="border-color: {{ $BORD }}">
-      <div class="relative">
-<div class="w-full h-20 sm:h-24 bg-[#a77d52]"></div>
+    <x-admin.page-header title="Sites" description="Kelola daftar site / lokasi operasional.">
+      <a href="{{ route('admin.sites.create') }}" class="ph-action">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        Tambah Site
+      </a>
+    </x-admin.page-header>
 
-          <div class="absolute inset-0 flex flex-col gap-3 px-5 py-4 text-white md:px-6 sm:flex-row sm:items-center sm:justify-between">
-          <div class="min-w-0">
-            <h1 class="text-2xl font-semibold tracking-tight text-white sm:text-3xl">Sites</h1>
-            <p class="text-xs sm:text-sm text-white/90">Kelola daftar site / lokasi operasional.</p>
-          </div>
-          <a href="{{ route('admin.sites.create') }}"
-             class="inline-flex items-center justify-center w-full gap-2 px-4 py-2 text-sm font-semibold bg-white rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-offset-2 sm:w-auto"
-             style="--tw-ring-color: {{ $ACCENT }}">
-            <svg class="w-4 h-4" style="color: {{ $ACCENT }}"><use href="#i-plus"/></svg>
-            Tambah Site
-          </a>
-        </div>
-      </div>
-
-      {{-- FILTER menyatu di dalam kartu header --}}
-      <div class="p-6 border-t md:p-7 bg-white" style="border-color: {{ $BORD }}">
+    {{-- FILTER / TOOLBAR --}}
+    <section class="overflow-hidden bg-white border rounded-2xl" style="border-color: {{ $BORD }}; border-radius: 1rem;">
+      <div class="p-6 md:p-6 bg-white">
         <form method="GET" class="grid grid-cols-1 gap-4 md:grid-cols-[minmax(0,1fr)_200px_auto] md:items-end" role="search" aria-label="Filter Sites">
           <label class="sr-only" for="q">Cari</label>
           <input id="q" type="text" name="q" value="{{ e(request('q', '')) }}" placeholder="Cari nama / kode…"
@@ -79,13 +69,12 @@
           </select>
 
           <div class="flex flex-col gap-2 sm:flex-row sm:justify-end">
-            <button class="inline-flex items-center justify-center gap-2 px-5 py-3 text-sm font-semibold text-white rounded-xl bg-[#a77d52] shadow-sm hover:brightness-105 focus:outline-none focus:ring-2"
-                    style="--tw-ring-color: {{ $ACCENT }}">
-              <svg class="w-4 h-4"><use href="#i-search"/></svg>
+            <button class="abtn abtn-primary">
+              <svg class="w-4 h-4 text-white"><use href="#i-search"/></svg>
               Cari
             </button>
             @if(request()->filled('q') || request()->filled('status'))
-                  <a href="{{ route('admin.sites.index') }}" class="inline-flex items-center justify-center px-5 py-3 text-sm bg-white border shadow-sm rounded-xl border-slate-200 hover:bg-slate-50">
+                  <a href="{{ route('admin.sites.index') }}" class="abtn abtn-neutral">
                     Reset
                   </a>
             @endif

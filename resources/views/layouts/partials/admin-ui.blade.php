@@ -6,6 +6,119 @@
      Palet: #a77d52 (accent) · #5c3d1e (dark) · #fff (white)
   ============================================================ */
 
+  /* ===== 0. DESIGN TOKENS (shared header system) ===== */
+  :root {
+    --primary-brown: #a77d52;
+    --primary-brown-dark: #8b5e3c;
+    --surface: #ffffff;
+    --border: #ede4dc;
+    --text-primary: #5c3d1e;
+    --text-muted: #6b7280;
+    --radius-lg: 1.5rem;    /* 24px — page header */
+    --radius-md: 1rem;      /* 16px — filter card */
+    --shadow-sm: 0 1px 2px rgba(48,31,15,.06), 0 2px 8px rgba(48,31,15,.05);
+  }
+
+  /* ===== 0b. PAGE CONTAINER (standard for semua halaman) ===== */
+  .page-container {
+    width: 100%;
+    max-width: 1440px;
+    margin-inline: auto;
+    padding-inline: 1rem;
+    padding-block: 1.5rem;
+  }
+  @media (min-width: 640px) { .page-container { padding-inline: 1.5rem; } }
+  @media (min-width: 1024px){ .page-container { padding-inline: 2rem; } }
+
+  /* ===== 0c. SHARED PAGE HEADER (source of truth) ===== */
+  .page-header {
+    background-color: var(--primary-brown) !important;
+    color: #fff !important;
+    border-radius: var(--radius-lg) !important;
+    padding: 26px 30px !important;
+    box-shadow: var(--shadow-sm) !important;
+    margin-bottom: 28px !important;
+  }
+  .page-header__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.25rem;
+    width: 100%;
+  }
+  .page-header__copy {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .page-header__eyebrow {
+    margin: 0 0 6px !important;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .32em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,.78) !important;
+  }
+  .page-header__title {
+    margin: 0 !important;
+    font-size: 31px;
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -.01em;
+    color: #fff !important;
+  }
+  .page-header__desc {
+    margin: 7px 0 0 !important;
+    font-size: 15.5px;
+    line-height: 1.45;
+    color: rgba(255,255,255,.92) !important;
+    max-width: 62ch;
+  }
+  .page-header__actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: .75rem;
+    flex-shrink: 0;
+  }
+  /* Tombol aksi di dalam header — putih, teks gelap, sejajar kanan */
+  .page-header__actions .ph-action,
+  .page-header a.ph-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+    min-height: 44px;
+    padding: .625rem 1.25rem;
+    border-radius: 12px;
+    background-color: #fff !important;
+    color: #5c3d1e !important;
+    font-size: .9rem;
+    font-weight: 700;
+    white-space: nowrap;
+    text-decoration: none;
+    border: none !important;
+    box-shadow: 0 1px 2px rgba(48,31,15,.12);
+    transition: background-color .15s, box-shadow .15s, transform .1s !important;
+  }
+  .page-header__actions .ph-action:hover,
+  .page-header a.ph-action:hover { background-color: #f7efe1 !important; box-shadow: 0 3px 10px rgba(48,31,15,.18); }
+  .page-header__actions .ph-action:active { transform: translateY(1px); }
+  .page-header__actions .ph-action svg { width: 1.05rem; height: 1.05rem; flex-shrink: 0; }
+  /* Meta info kanan (mis. Last Updated) */
+  .page-header__meta { text-align: right; color: rgba(255,255,255,.92) !important; }
+  .page-header__meta .label { margin: 0; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: rgba(255,255,255,.7) !important; }
+  .page-header__meta .value { margin: 2px 0 0; font-size: 14px; font-weight: 600; color: #fff !important; }
+
+  @media (max-width: 767px) {
+    .page-header { padding: 22px 20px !important; border-radius: 18px !important; margin-bottom: 22px !important; }
+    .page-header__inner { flex-direction: column; align-items: stretch; gap: 1rem; }
+    .page-header__title { font-size: 26px; }
+    .page-header__desc { font-size: 14px; }
+    .page-header__actions { justify-content: flex-start; }
+    .page-header__actions .ph-action { width: 100%; }
+  }
+
   /* ===== 1. FILTER / SEARCH BUTTON ===== */
   /* Ganti semua tombol hitam/biru filter → #a77d52 */
   button[style*="background-color:#0f172a"],

@@ -37,45 +37,34 @@
 
     <div class="mx-auto w-full max-w-[1440px] px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
-      {{-- HEADER dua-tone biru/merah --}}
-      <section class="overflow-hidden bg-white border shadow-sm rounded-2xl" style="border-color: {{ $BORD }}">
-        <div class="relative">
-          <div class="w-full h-20 sm:h-24 bg-[#a77d52]"></div>
+      {{-- HEADER — shared component --}}
+      <x-admin.page-header title="Companies" description="Kelola daftar perusahaan dengan cepat.">
+        <a href="{{ route('admin.companies.create') }}" class="ph-action">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+          New Company
+        </a>
+      </x-admin.page-header>
 
-          <div class="absolute inset-0 flex flex-col gap-3 px-5 py-4 md:px-6 sm:flex-row sm:items-center sm:justify-between">
-            <div class="min-w-0">
-              <h1 class="text-2xl font-semibold tracking-tight text-white sm:text-3xl">Companies</h1>
-              <p class="text-xs sm:text-sm text-white/90">Kelola daftar perusahaan dengan cepat.</p>
-            </div>
-            <a href="{{ route('admin.companies.create') }}"
-               class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold bg-white rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-offset-2"
-               style="--tw-ring-color: #a77d52">
-              <svg class="w-4 h-4" style="color: #a77d52"><use href="#i-plus"/></svg>
-              New Company
-            </a>
-          </div>
-        </div>
-
-        {{-- FILTERS --}}
-        <div class="p-5 md:p-6">
+      {{-- FILTERS --}}
+      <section class="overflow-hidden bg-white border rounded-2xl" style="border-color: {{ $BORD }}; border-radius: 1rem;">
+        <div class="p-6 md:p-6 bg-white">
           <form method="GET" class="grid grid-cols-1 gap-3 md:grid-cols-3" role="search" aria-label="Filter Companies">
             <input name="q" value="{{ e($q ?? '') }}" placeholder="Search name/code…"
-                   class="w-full px-3 py-2 text-sm border rounded-lg border-slate-200 focus:outline-none focus:ring-2"
+                   class="w-full px-4 py-3 text-sm bg-white border shadow-sm rounded-xl border-slate-200 focus:outline-none focus:ring-2"
                    style="--tw-ring-color: {{ $ACCENT }}" autocomplete="off" />
             <select name="status"
-                    class="w-full px-3 py-2 text-sm border rounded-lg border-slate-200 focus:outline-none focus:ring-2"
+                    class="w-full px-4 py-3 text-sm bg-white border shadow-sm rounded-xl border-slate-200 focus:outline-none focus:ring-2"
               style="--tw-ring-color: {{ $ACCENT }}">
               <option value="">All status</option>
               <option value="active" @selected(($status ?? '') === 'active')>Active</option>
               <option value="inactive" @selected(($status ?? '') === 'inactive')>Inactive</option>
             </select>
-           <div class="flex gap-2">
-      <button type="submit" class="abtn abtn-primary" aria-label="Filter">
-        <svg class="w-4 h-4"><use href="#i-search"/></svg>
-        <span>Filter</span>
-      </button>
-    </div>
-
+            <div class="flex gap-2">
+              <button type="submit" class="abtn abtn-primary" aria-label="Filter">
+                <svg class="w-4 h-4"><use href="#i-search"/></svg>
+                <span>Filter</span>
+              </button>
+            </div>
           </form>
         </div>
       </section>

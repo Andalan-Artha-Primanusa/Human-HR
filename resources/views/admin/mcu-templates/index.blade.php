@@ -29,24 +29,12 @@
     @endonce
     <div class="mx-auto w-full max-w-[1440px] px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
-    <section class="overflow-hidden bg-white border shadow-sm rounded-2xl" style="border-color: {{ $BORD }}">
-      <div class="relative">
-        <div class="w-full h-20 sm:h-24 bg-[#a77d52]"></div>
-
-        <div class="absolute inset-0 flex flex-col gap-3 px-5 py-4 text-white md:px-6 sm:flex-row sm:items-center sm:justify-between">
-          <div class="min-w-0">
-            <h1 class="text-2xl font-semibold tracking-tight text-white sm:text-3xl">MCU Templates</h1>
-            <p class="text-xs sm:text-sm text-white/90">Atur template dan isi default untuk surat undangan MCU.</p>
-          </div>
-          <a href="{{ route('admin.mcu-templates.create') }}"
-             class="inline-flex items-center justify-center w-full gap-2 px-4 py-2 text-sm font-semibold bg-white rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-offset-2 sm:w-auto"
-             style="--tw-ring-color: {{ $ACCENT }}">
-            <svg class="w-4 h-4" style="color: {{ $ACCENT }}"><use href="#i-plus"/></svg>
-            Tambah Template
-          </a>
-        </div>
-      </div>
-    </section>
+    <x-admin.page-header title="MCU Templates" description="Atur template dan isi default untuk surat undangan MCU.">
+      <a href="{{ route('admin.mcu-templates.create') }}" class="ph-action">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        Tambah Template
+      </a>
+    </x-admin.page-header>
 
     @if(session('ok'))
       <div class="px-4 py-3 border rounded-2xl border-emerald-200 bg-emerald-50 text-emerald-700">

@@ -26,22 +26,17 @@
 @endphp
 
 @section('content')
-<div class="mx-auto w-full max-w-[1320px] px-4 py-4 space-y-4">
+<div class="mx-auto w-full max-w-[1440px] px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
-  <section class="relative overflow-hidden text-white shadow rounded-3xl">
-    <div class="absolute inset-0 bg-gradient-to-r from-[#a77d52] via-[#b88a5c] to-[#8b5e3c]"></div>
-    <div class="relative flex flex-col gap-3 px-5 py-4 md:flex-row md:items-end md:justify-between">
-      <div>
-        <p class="text-[11px] uppercase tracking-[0.35em] text-white/70">Manpower Intelligence</p>
-        <h1 class="mt-1 text-2xl font-bold tracking-wide md:text-3xl">Manpower Dashboard</h1>
-        <p class="max-w-2xl mt-1 text-sm text-white/80">Compact presentation view for SLA per level, applicant source, POH, pendidikan, gender, and stage failure.</p>
-      </div>
-      <div class="text-right">
-        <p class="text-xs opacity-75">Last Updated</p>
-        <p class="text-sm font-semibold">{{ ($generatedAt ?? now())->format('d M Y H:i') }}</p>
-      </div>
+  <x-admin.page-header
+    eyebrow="MANPOWER INTELLIGENCE"
+    title="Manpower Dashboard"
+    description="Compact presentation view for SLA per level, applicant source, POH, pendidikan, gender, dan stage failure.">
+    <div class="page-header__meta">
+      <p class="label">Last Updated</p>
+      <p class="value">{{ ($generatedAt ?? now())->format('d M Y H:i') }}</p>
     </div>
-  </section>
+  </x-admin.page-header>
 
   <section class="p-4 bg-white border shadow-sm rounded-2xl">
     <form method="GET" action="{{ route('dashboard') }}" class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">

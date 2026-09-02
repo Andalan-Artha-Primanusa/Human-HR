@@ -27,32 +27,24 @@
 
     <div class="mx-auto w-full max-w-[1440px] px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
-      {{-- HEADER + FILTER seperti halaman Sites --}}
-      <section class="overflow-hidden bg-white border shadow-sm rounded-2xl" style="border-color: {{ $BORD }}">
-        <div class="relative">
-          <div class="w-full h-20 sm:h-24 bg-[#a77d52]"></div>
+      {{-- HEADER — shared component --}}
+      <x-admin.page-header title="Offers" description="Daftar draft/final offer untuk kandidat."></x-admin.page-header>
 
-          <div class="absolute inset-0 flex flex-col gap-3 px-5 py-4 text-white md:px-6 sm:flex-row sm:items-center sm:justify-between">
-            <div class="min-w-0">
-              <h1 class="text-2xl font-semibold tracking-tight text-white sm:text-3xl">Offers</h1>
-              <p class="text-xs sm:text-sm text-white/90">Daftar draft/final offer untuk kandidat.</p>
-            </div>
-          </div>
-        </div>
+      @php
+          $q = $q ?? request('q');
+          $selStatus = $status ?? request('status');
+          $opts = [
+              '' => 'Semua Status',
+              'draft' => 'Draft',
+              'sent' => 'Sent',
+              'accepted' => 'Accepted',
+              'rejected' => 'Rejected',
+          ];
+      @endphp
 
-        @php
-            $q = $q ?? request('q');
-            $selStatus = $status ?? request('status');
-            $opts = [
-                '' => 'Semua Status',
-                'draft' => 'Draft',
-                'sent' => 'Sent',
-                'accepted' => 'Accepted',
-                'rejected' => 'Rejected',
-            ];
-        @endphp
-
-        <div class="p-6 border-t md:p-7 bg-white" style="border-color: {{ $BORD }}">
+      {{-- FILTER / TOOLBAR --}}
+      <section class="overflow-hidden bg-white border rounded-2xl" style="border-color: {{ $BORD }}; border-radius: 1rem;">
+        <div class="p-6 md:p-6 bg-white">
           <form method="GET" class="grid grid-cols-1 gap-4 md:grid-cols-[minmax(0,1fr)_200px_auto] md:items-end" role="search" aria-label="Filter Offers">
             <label class="sr-only" for="q">Cari</label>
             <input id="q" name="q" value="{{ e($q) }}"
