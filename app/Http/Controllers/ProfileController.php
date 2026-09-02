@@ -19,8 +19,19 @@ class ProfileController extends Controller
         $user = $request->user();
         abort_if(!$user, 401);
 
+        $user->load([
+            'candidateProfile.poh',
+            'candidateProfile.trainings',
+            'candidateProfile.employments',
+            'candidateProfile.references',
+            'applications.job.company',
+            'applications.job.site',
+        ]);
+
         return view('profile.edit', [
             'user' => $user,
+            'candidateProfile' => $user->candidateProfile,
+            'latestApplication' => $user->applications->sortByDesc('created_at')->first(),
         ]);
     }
 
