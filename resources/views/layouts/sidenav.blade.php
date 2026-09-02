@@ -57,24 +57,23 @@
     // ===== Tema Warna: sidebar netral, brown hanya untuk accent =====
     $activeMenu = fn($p) => request()->routeIs($p)
         ? 'is-active text-white font-bold border-l-[#d7b98e]'
-        : 'text-slate-200 hover:bg-white/8 border-l-transparent';
+        : 'text-slate-200 border-l-transparent';
 
     $baseLink = 'side-link flex items-center gap-3 px-3 py-2.5 rounded-xl border-l-4 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30';
     $linkDesk = $baseLink;
     $linkMobile = $baseLink;
 
     /* ==== ICON WRAPPERS ==== */
-    $iconWrap = 'side-icon grid place-items-center shrink-0 w-9 h-9 rounded-lg text-slate-300 transition md:w-9 md:h-9';
+    $iconWrap = 'side-icon grid place-items-center shrink-0 w-8 h-8 rounded-md text-slate-300 transition md:w-8 md:h-8';
 
     $sectionTitle = 'section-title px-3 pt-5 pb-1 text-[11px] tracking-widest font-bold uppercase text-slate-400';
     $lockVisual = !$isVerified ? 'opacity-85' : '';
 
     // Container Menu
-    $groupBox = 'group-box mx-0 mt-2 space-y-1 rounded-2xl p-1.5 text-slate-200';
+    $groupBox = 'group-box mx-0 mt-2 space-y-0.5 rounded-xl p-1 text-slate-200';
 
-    // Kartu akun & tombol logout
+    // Kartu akun
     $accountCard = 'rounded-2xl border border-white/10 bg-white/[0.06] hover:bg-white/[0.1] transition-all duration-300 text-white shadow-sm';
-    $logoutBtn = 'w-full rounded-xl bg-transparent hover:bg-red-500/10 border border-red-400/25 px-4 py-3 font-bold transition-all text-red-100 active:scale-95';
 @endphp
 
 {{-- ====== SIDEBAR STYLES ====== --}}
@@ -93,27 +92,28 @@
   .section-title span.inline-block { background:#d7b98e !important; }
 
   /* ===== GROUP BOX ===== */
-  .group-box { background:rgba(255,255,255,0.035) !important; border:1px solid rgba(255,255,255,0.07) !important; border-radius:.875rem; padding:.35rem !important; margin-top:.25rem !important; }
+  .group-box { background:transparent !important; border:0 !important; border-radius:.75rem; padding:.15rem !important; margin-top:.15rem !important; }
 
   /* ===== MENU LINKS — netral, active saja yang brand ===== */
-  .side-link { color:#d7dee8 !important; border-left-color:transparent !important; border-radius:.75rem !important; padding:.58rem .7rem !important; transition:background .18s, color .18s !important; font-weight:600; }
-  .side-link:hover { background:rgba(255,255,255,0.075) !important; color:#fff !important; }
+  .side-link { color:#d7dee8 !important; border-left-color:transparent !important; border-radius:.55rem !important; padding:.56rem .72rem !important; transition:background .18s, color .18s, border-color .18s !important; font-weight:650; }
+  .side-link:hover { background:rgba(255,255,255,0.055) !important; color:#fff !important; }
 
   /* ===== ACTIVE — maroon gelap (#5c3d1e) ===== */
   .side-link.is-active,
   .side-link.font-bold {
-    background:linear-gradient(90deg, rgba(167,125,82,.95), rgba(139,94,60,.88)) !important;
+    background:rgba(167,125,82,0.2) !important;
     color:#fff !important;
     font-weight:700 !important;
     border-left-color:#d7b98e !important;
-    box-shadow:0 8px 20px rgba(0,0,0,0.16) !important;
+    box-shadow:inset 0 0 0 1px rgba(215,185,142,0.08) !important;
   }
 
   /* ===== ICON WRAP ===== */
-  .side-link .side-icon { background:rgba(255,255,255,0.055) !important; color:#cbd5e1 !important; border:1px solid rgba(255,255,255,0.07) !important; box-shadow:none !important; }
-  .side-link:hover .side-icon { background:rgba(255,255,255,0.1) !important; color:#fff !important; }
+  .side-link .side-icon { background:transparent !important; color:#aeb9c8 !important; border:0 !important; box-shadow:none !important; }
+  .side-link .side-icon svg { width:1.18rem !important; height:1.18rem !important; stroke-width:2.25 !important; }
+  .side-link:hover .side-icon { background:rgba(255,255,255,0.06) !important; color:#fff !important; }
   .side-link.is-active .side-icon,
-  .side-link.font-bold .side-icon { background:rgba(255,255,255,0.18) !important; border-color:rgba(255,255,255,0.22) !important; color:#fff !important; }
+  .side-link.font-bold .side-icon { background:rgba(215,185,142,0.16) !important; color:#f4d9b2 !important; }
 
   /* ===== ACCOUNT CARD ===== */
   a.account-card { background:rgba(255,255,255,0.06) !important; border:1px solid rgba(255,255,255,0.1) !important; border-radius:.875rem !important; color:#fff !important; transition:background .2s !important; }
