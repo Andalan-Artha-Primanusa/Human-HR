@@ -105,7 +105,7 @@
                       {{ $isUnread ? 'Tandai dibaca' : 'Sudah dibaca' }}
                     </button>
                   </form>
-                  <form action="{{ route('me.notifications.destroy', $n->id) }}" method="POST" onsubmit="return confirm('Hapus notifikasi ini?')">
+                  <form action="{{ route('me.notifications.destroy', $n->id) }}" method="POST" data-confirm-title="Hapus notifikasi ini?" data-confirm-message="Notifikasi ini akan dihapus dari daftar kamu.">
                     @csrf @method('DELETE')
                     <button class="px-2.5 py-1 rounded-md border border-red-200 text-xs text-red-700 hover:bg-red-50">
                       Hapus

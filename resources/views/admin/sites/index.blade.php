@@ -167,7 +167,8 @@
                     <div class="flex items-center justify-end gap-1.5">
                       @if(Route::has('admin.sites.toggle'))
                         <form action="{{ route('admin.sites.toggle', $site) }}" method="POST"
-                              onsubmit="return confirm('Ubah status site?')">
+                              data-confirm-title="Ubah status site?"
+                              data-confirm-message="Status site akan diperbarui dan memengaruhi pilihan lokasi kerja.">
                           @csrf
                           <button class="abtn abtn-xs abtn-warning">Toggle</button>
                         </form>
@@ -186,7 +187,8 @@
                       </a>
 
                       <form action="{{ route('admin.sites.destroy', $site) }}" method="POST"
-                            onsubmit="return confirm('Hapus site ini?');">
+                            data-confirm-title="Hapus site ini?"
+                            data-confirm-message="Site yang sudah dipakai lowongan atau kandidat mungkin tidak dapat dihapus.">
                         @csrf @method('DELETE')
                         <button class="abtn abtn-xs abtn-danger">
                           <svg class="w-4 h-4"><use href="#i-trash"/></svg>

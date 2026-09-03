@@ -245,13 +245,17 @@
                 headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
                 body: JSON.stringify({ assets_count: isNaN(assets) ? 0 : assets, ratio_per_asset: isNaN(ratio) ? 0 : ratio })
               });
-              if (!res.ok) throw new Error('Gagal menghitung.');
+              if (!res.ok) throw new Error(await (window.KarirApiError?.message(res) || Promise.resolve('Gagal menghitung kebutuhan manpower.')));
               const data = await res.json();
               out.textContent = (data?.result?.budget_headcount ?? 0).toLocaleString('id-ID');
               outName.textContent = name ? `untuk aset “${name}”` : '';
               result.classList.remove('hidden');
             } catch (err) {
-              alert(err.message || 'Terjadi kesalahan.');
+              window.KarirFeedback?.open({
+                type: 'error',
+                title: 'Gagal menghitung',
+                message: window.KarirApiError?.sanitize(err.message, 'Kebutuhan manpower belum berhasil dihitung. Silakan coba kembali.') || 'Kebutuhan manpower belum berhasil dihitung. Silakan coba kembali.',
+              });
             }
           });
         })();

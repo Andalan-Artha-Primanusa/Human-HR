@@ -158,7 +158,8 @@
 
                             @if(Route::has('admin.users.destroy'))
                               <form action="{{ route('admin.users.destroy', $user) }}" method="POST"
-                                    onsubmit="return confirm('Hapus user ini?');">
+                                    data-confirm-title="Hapus user ini?"
+                                    data-confirm-message="User yang dihapus tidak dapat menggunakan akun ini lagi.">
                                 @csrf @method('DELETE')
                                 <button class="abtn-icon abtn-icon-danger" aria-label="Hapus">
                                   <svg class="w-4 h-4"><use href="#i-trash"/></svg>

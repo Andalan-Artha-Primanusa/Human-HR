@@ -472,17 +472,29 @@
       .then(res => res.json())
       .then(data => {
         if (data.ok || data.message?.includes('berhasil')) {
-          alert('Penolakan berhasil dikirim. HR akan menghubungi Anda.');
+          window.KarirFeedback?.open({
+            type: 'success',
+            title: 'Penolakan berhasil dikirim',
+            message: 'HR akan menghubungi kamu untuk proses berikutnya.',
+          });
           closeRejectOlModal();
           setTimeout(() => location.reload(), 500);
         } else {
-          alert('Error: ' + (data.message || data.error || 'Gagal menolak OL'));
+          window.KarirFeedback?.open({
+            type: 'error',
+            title: 'Penolakan gagal dikirim',
+            message: window.KarirApiError?.sanitize(data.message || data.error, 'Data tidak dapat diproses. Silakan coba kembali.') || 'Data tidak dapat diproses. Silakan coba kembali.',
+          });
           btn.disabled = false;
           btn.textContent = 'Tolak OL';
         }
       })
       .catch(err => {
-        alert('Error: ' + err.message);
+        window.KarirFeedback?.open({
+          type: 'error',
+          title: 'Tidak dapat terhubung',
+          message: window.KarirApiError?.sanitize(err.message, 'Tidak dapat terhubung ke server. Periksa koneksi Anda lalu coba kembali.') || 'Tidak dapat terhubung ke server. Periksa koneksi Anda lalu coba kembali.',
+        });
         btn.disabled = false;
         btn.textContent = 'Tolak OL';
       });

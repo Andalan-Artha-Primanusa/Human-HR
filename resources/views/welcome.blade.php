@@ -1004,7 +1004,8 @@
                           <button type="submit"
                             class="inline-flex items-center gap-1.5 text-xs font-bold px-3.5 py-2 rounded-xl text-white hover:opacity-90 active:scale-95 transition shadow-sm"
                             style="background: #a77d52"
-                            onclick="return confirm('Yakin ingin melamar posisi ini?')">
+                            data-confirm-title="Kirim lamaran?"
+                            data-confirm-message="Profil kandidat akan dicek dulu sebelum lamaran dikirim.">
                             <svg class="w-3.5 h-3.5" aria-hidden="true"><use href="#i-apply"/></svg>
                             Lamar Sekarang
                           </button>

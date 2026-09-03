@@ -92,14 +92,13 @@
                 </div>
                 <button type="submit" form="pohDeleteForm"
                     class="abtn abtn-danger"
-                    style="--tw-ring-color: {{ $ACCENT }}"
-                    onclick="return confirm('Hapus POH ini? Aksi tidak dapat dibatalkan.');">
+                    style="--tw-ring-color: {{ $ACCENT }}">
                     Hapus
                 </button>
             </div>
         </form>
     </section>
-    <form id="pohDeleteForm" action="{{ route('admin.pohs.destroy', $poh) }}" method="POST" class="hidden">
+    <form id="pohDeleteForm" action="{{ route('admin.pohs.destroy', $poh) }}" method="POST" class="hidden" data-confirm-title="Hapus POH ini?" data-confirm-message="POH yang sudah dipakai profil kandidat mungkin tidak dapat dihapus.">
         @csrf @method('DELETE')
     </form>
 </div>

@@ -102,6 +102,60 @@
       confirm: '<path d="M12 9v4m0 4h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/>',
     };
     const SPIN = { info: true, confirm: true };
+    const ERROR_MESSAGES = {
+      400: 'Data yang dikirim belum sesuai. Periksa kembali informasi yang diisi.',
+      401: 'Sesi Anda telah berakhir. Silakan masuk kembali.',
+      403: 'Anda tidak memiliki akses untuk melakukan tindakan ini.',
+      404: 'Data yang Anda cari tidak ditemukan.',
+      409: 'Data tidak dapat diproses karena terdapat konflik dengan data yang sudah ada.',
+      419: 'Sesi halaman kedaluwarsa. Refresh halaman atau login ulang, lalu coba lagi.',
+      422: 'Periksa kembali informasi yang diisi.',
+      429: 'Terlalu banyak permintaan. Silakan tunggu beberapa saat.',
+      500: 'Terjadi gangguan pada sistem. Silakan coba kembali.',
+      502: 'Layanan sedang tidak tersedia. Silakan coba beberapa saat lagi.',
+      503: 'Layanan sedang tidak tersedia. Silakan coba beberapa saat lagi.',
+      504: 'Layanan sedang tidak tersedia. Silakan coba beberapa saat lagi.',
+    };
+
+    function sanitizeMessage(value, fallback){
+      const text = String(value || '').trim();
+      if (!text) return fallback || 'Permintaan belum berhasil diproses. Silakan coba kembali.';
+      if (/SQLSTATE|Integrity constraint|Column not found|Undefined|Exception|Stack trace|AxiosError|Network Error|Request failed|Unexpected response|Internal Server Error|^\[object Object\]$/i.test(text)) {
+        return fallback || 'Permintaan belum berhasil diproses. Silakan coba kembali.';
+      }
+      if (/error\s*(400|401|403|404|409|419|422|429|500|502|503|504)/i.test(text)) {
+        return fallback || 'Permintaan belum berhasil diproses. Silakan coba kembali.';
+      }
+      return text;
+    }
+
+    async function normalizedResponseMessage(response, fallback){
+      if (!response) return fallback || 'Tidak dapat terhubung ke server. Periksa koneksi Anda lalu coba kembali.';
+      const defaultMessage = ERROR_MESSAGES[response.status] || fallback || 'Permintaan belum berhasil diproses. Silakan coba kembali.';
+      try {
+        const cloned = response.clone();
+        const data = await cloned.json();
+        if (response.status === 422 && data?.errors) {
+          const first = Object.values(data.errors).flat().find(Boolean);
+          return sanitizeMessage(first, defaultMessage);
+        }
+        return sanitizeMessage(data?.message || data?.error, defaultMessage);
+      } catch (e) {
+        return defaultMessage;
+      }
+    }
+
+    function errorTitle(status){
+      if (status === 401) return 'Sesi berakhir';
+      if (status === 403) return 'Akses ditolak';
+      if (status === 404) return 'Data tidak ditemukan';
+      if (status === 409) return 'Data konflik';
+      if (status === 419) return 'Sesi halaman kedaluwarsa';
+      if (status === 422) return 'Validasi belum sesuai';
+      if (status === 429) return 'Terlalu banyak permintaan';
+      if (status >= 500) return 'Sistem sedang gangguan';
+      return 'Permintaan gagal';
+    }
 
     function setTheme(type){
       const t = type || 'info';
@@ -227,6 +281,16 @@
       };
     }
 
+    function shouldConfirmForm(form, submitter){
+      if (form.dataset.confirmTitle || form.dataset.confirmMessage) return true;
+      const method = formMethod(form);
+      const label = submitterText(submitter);
+      const action = String(form.action || '').toLowerCase();
+      if (method === 'DELETE' || method === 'PUT' || method === 'PATCH') return true;
+      return /hapus|delete|lamar|apply|kirim|send|jadwal|schedule|undang|tolak|reject|approve|aktif|nonaktif|simpan|update|ubah|tambah|create|buat/.test(label)
+        || /\/apply|\/reject|\/approve|\/toggle|\/destroy|\/delete/.test(action);
+    }
+
     document.addEventListener('submit', function(event){
       const form = event.target;
       if (!(form instanceof HTMLFormElement)) return;
@@ -249,6 +313,7 @@
       if (!(form instanceof HTMLFormElement)) return;
       if (event.defaultPrevented || form.dataset.skipCsrfRefresh === '1' || form.dataset.globalSubmitting === '1') return;
       if (String(form.method || 'GET').toUpperCase() !== 'POST') return;
+      if (!shouldConfirmForm(form, event.submitter)) return;
       event.preventDefault();
       const copy = confirmCopy(form, event.submitter);
       openFeedback({
@@ -283,14 +348,14 @@
         if (sameOrigin && response.status === 419) {
           openFeedback({
             type: 'warning',
-            title: 'Sesi halaman kedaluwarsa',
-            message: 'Refresh halaman atau login ulang, lalu coba aksi ini sekali lagi.',
+            title: errorTitle(response.status),
+            message: await normalizedResponseMessage(response),
           });
         } else if (sameOrigin && response.status >= 500) {
           openFeedback({
             type: 'error',
-            title: 'Sistem sedang gangguan',
-            message: 'Permintaan belum berhasil diproses. Coba ulangi beberapa saat lagi.',
+            title: errorTitle(response.status),
+            message: await normalizedResponseMessage(response),
           });
         }
         return response;
@@ -317,10 +382,32 @@
         openFeedback({
           type: 'info',
           title: 'Informasi',
-          message: String(text || ''),
+          message: sanitizeMessage(text),
         });
       };
+      window.confirm = function(text){
+        openFeedback({
+          type: 'warning',
+          title: 'Konfirmasi diperlukan',
+          message: sanitizeMessage(text, 'Gunakan tombol konfirmasi pada dialog untuk melanjutkan aksi.'),
+        });
+        return false;
+      };
+      window.prompt = function(){
+        openFeedback({
+          type: 'warning',
+          title: 'Input tidak tersedia',
+          message: 'Gunakan form yang tersedia di halaman untuk mengisi data.',
+        });
+        return null;
+      };
     }
+
+    window.KarirApiError = {
+      message: normalizedResponseMessage,
+      sanitize: sanitizeMessage,
+      title: errorTitle,
+    };
 
     if (initialNotice && initialNotice.message) {
       if (document.readyState === 'loading') {

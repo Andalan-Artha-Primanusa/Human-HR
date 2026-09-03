@@ -194,7 +194,8 @@
                               Edit
                             </a>
                             <form method="POST" action="{{ route('admin.jobs.destroy', $job) }}"
-                                  onsubmit="return confirm('Delete this job?')">
+                                  data-confirm-title="Hapus lowongan ini?"
+                                  data-confirm-message="Lowongan yang sudah memiliki lamaran mungkin tidak dapat dihapus.">
                               @csrf @method('DELETE')
                               <button class="abtn abtn-xs abtn-danger">
                                 <svg class="w-4 h-4"><use href="#i-trash"/></svg>

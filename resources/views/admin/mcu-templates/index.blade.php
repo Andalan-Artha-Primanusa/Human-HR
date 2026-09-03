@@ -79,7 +79,7 @@
                     <a href="{{ route('admin.mcu-templates.edit', $tpl) }}" class="abtn-icon" aria-label="Edit">
                       <svg class="w-5 h-5"><use href="#i-edit"/></svg>
                     </a>
-                    <form action="{{ route('admin.mcu-templates.destroy', $tpl) }}" method="POST" onsubmit="return confirm('Hapus template ini?')">
+                    <form action="{{ route('admin.mcu-templates.destroy', $tpl) }}" method="POST" data-confirm-title="Hapus template MCU?" data-confirm-message="Template yang dihapus tidak dapat dipakai untuk pengiriman berikutnya.">
                       @csrf @method('DELETE')
                       <button type="submit" class="abtn-icon abtn-icon-danger" aria-label="Hapus">
                         <svg class="w-5 h-5"><use href="#i-trash"/></svg>

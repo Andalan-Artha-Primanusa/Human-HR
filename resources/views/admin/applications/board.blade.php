@@ -1133,7 +1133,7 @@ function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
 function showToast(msg, type = 'ok') {
   const t = document.getElementById('kn-toast');
-  t.textContent = msg;
+  t.textContent = window.KarirApiError?.sanitize(msg, type === 'err' ? 'Aksi belum berhasil diproses. Silakan coba kembali.' : 'Berhasil diproses.') || msg;
   t.className = 'kn-toast ' + type;
   clearTimeout(t._timer);
   t._timer = setTimeout(() => t.classList.add('hidden'), 2800);
@@ -1286,21 +1286,34 @@ function submitSendMcu() {
     closeModal('overlay-send-mcu');
     window.location.reload();
   })
-  .catch((error) => { showToast(error.message || 'Gagal mengupload dokumen MCU', 'err'); })
+  .catch((error) => { showToast(window.KarirApiError?.sanitize(error.message, 'Dokumen MCU gagal diupload. Silakan coba kembali.') || 'Dokumen MCU gagal diupload. Silakan coba kembali.', 'err'); })
   .finally(() => { button.textContent = 'Upload & Kirim'; button.disabled = false; });
 }
 
 function deleteFeedback(appId, role, csrf) {
-  if (!confirm('Yakin ingin menghapus feedback ini?')) return;
-  fetch('/admin/applications/feedback', {
-    method: 'DELETE',
-    headers: { 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json', 'Content-Type': 'application/json' },
-    body: JSON.stringify({ application_id: appId, role: role })
-  }).then(async res => {
-    if (!res.ok) { const err = await res.json().catch(()=>({})); throw new Error(err.message || 'Gagal menghapus feedback'); }
-    showToast('Feedback berhasil dihapus', 'ok');
-    setTimeout(() => window.location.reload(), 800);
-  }).catch(e => showToast(e.message, 'err'));
+  const runDelete = () => {
+    fetch('/admin/applications/feedback', {
+      method: 'DELETE',
+      headers: { 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json', 'Content-Type': 'application/json' },
+      body: JSON.stringify({ application_id: appId, role: role })
+    }).then(async res => {
+      if (!res.ok) throw new Error(await (window.KarirApiError?.message(res) || Promise.resolve('Feedback gagal dihapus. Silakan coba kembali.')));
+      showToast('Feedback berhasil dihapus', 'ok');
+      setTimeout(() => window.location.reload(), 800);
+    }).catch(e => showToast(window.KarirApiError?.sanitize(e.message, 'Feedback gagal dihapus. Silakan coba kembali.') || 'Feedback gagal dihapus. Silakan coba kembali.', 'err'));
+  };
+
+  if (window.KarirFeedback) {
+    window.KarirFeedback.open({
+      type: 'confirm',
+      title: 'Hapus feedback ini?',
+      message: 'Feedback yang dihapus tidak dapat dikembalikan.',
+      confirmText: 'Ya, Hapus',
+      onConfirm: runDelete,
+    });
+  } else {
+    runDelete();
+  }
 }
 
 function updateMcuResult(selectEl, appId) {

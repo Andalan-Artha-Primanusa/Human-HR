@@ -22,7 +22,9 @@
       {{-- HEADER (shared solid-brown page-header) --}}
       <x-admin.page-header eyebrow="MANAGEMENT" title="{{ e($record->name) }}" description="Profil perusahaan & ringkasan atribut.">
         <form method="POST" action="{{ route('admin.companies.destroy', $record) }}"
-              onsubmit="return confirm('Delete this company?')" class="inline">
+              data-confirm-title="Hapus perusahaan ini?"
+              data-confirm-message="Data perusahaan yang sudah dipakai modul lain mungkin tidak dapat dihapus."
+              class="inline">
           @csrf @method('DELETE')
           <button type="submit" class="ph-action">
             Delete

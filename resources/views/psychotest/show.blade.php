@@ -76,7 +76,17 @@
                     this.ss = ('' + s).padStart(2, '0');
                 },
                 confirmSubmit() {
-                    if (confirm('Kumpulkan jawaban sekarang?')) this.$refs.form.submit();
+                    if (window.KarirFeedback) {
+                        window.KarirFeedback.open({
+                            type: 'confirm',
+                            title: 'Kumpulkan jawaban?',
+                            message: 'Pastikan semua jawaban sudah benar sebelum dikirim.',
+                            confirmText: 'Ya, Kumpulkan',
+                            onConfirm: () => HTMLFormElement.prototype.submit.call(this.$refs.form),
+                        });
+                    } else {
+                        HTMLFormElement.prototype.submit.call(this.$refs.form);
+                    }
                 }
             }
         }

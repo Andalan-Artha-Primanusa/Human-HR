@@ -254,6 +254,41 @@
         popup.querySelector('form button')?.focus();
       });
     });
+
+    const focusableSelector = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+    const focusables = Array.from(popup.querySelectorAll(focusableSelector)).filter((element) => !element.disabled);
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+
+    first && first.focus();
+
+    popup.addEventListener('keydown', (event) => {
+      if(event.key === 'Escape'){
+        event.preventDefault();
+        return;
+      }
+
+      if(event.key !== 'Tab' || focusables.length === 0) return;
+
+      if(event.shiftKey && document.activeElement === first){
+        event.preventDefault();
+        last.focus();
+      }else if(!event.shiftKey && document.activeElement === last){
+        event.preventDefault();
+        first.focus();
+      }
+    });
+
+    popup.querySelector('[data-email-verification-form]')?.addEventListener('submit', (event) => {
+      const button = event.currentTarget.querySelector('button[type="submit"]');
+      if(!button) return;
+
+      button.disabled = true;
+      button.querySelector('[data-send-icon]')?.classList.add('hidden');
+      button.querySelector('[data-loading-icon]')?.classList.remove('hidden');
+      const label = button.querySelector('[data-button-label]');
+      if(label) label.textContent = 'Mengirim...';
+    });
   })();
 </script>
 </body>

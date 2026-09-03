@@ -160,8 +160,7 @@
             {{-- tombol hapus trigger form delete di bawah --}}
             <button type="submit" form="siteDeleteForm"
                     class="abtn abtn-danger"
-              style="--tw-ring-color: {{ $ACCENT }}"
-                    onclick="return confirm('Hapus site ini? Aksi tidak dapat dibatalkan.');">
+                    style="--tw-ring-color: {{ $ACCENT }}">
               Hapus
             </button>
           </div>
@@ -169,7 +168,7 @@
       </section>
 
       {{-- FORM DELETE (terpisah, bukan nested) --}}
-      <form id="siteDeleteForm" action="{{ route('admin.sites.destroy', $site) }}" method="POST" class="hidden">
+      <form id="siteDeleteForm" action="{{ route('admin.sites.destroy', $site) }}" method="POST" class="hidden" data-confirm-title="Hapus site ini?" data-confirm-message="Site yang sudah dipakai lowongan atau kandidat mungkin tidak dapat dihapus.">
         @csrf @method('DELETE')
       </form>
     </div>

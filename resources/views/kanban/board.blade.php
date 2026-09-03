@@ -642,7 +642,7 @@ textarea.fm-ctrl { resize: vertical; min-height: 68px; }
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const t = document.getElementById('kn-toast');
-      t.textContent = '{{ session('error') ?? $errors->first() }}';
+      t.textContent = window.KarirApiError?.sanitize(@json(session('error') ?? $errors->first()), 'Aksi belum berhasil diproses. Silakan coba kembali.') || 'Aksi belum berhasil diproses. Silakan coba kembali.';
       t.className = 'kn-toast err';
       setTimeout(() => t.classList.add('hidden'), 4000);
     });

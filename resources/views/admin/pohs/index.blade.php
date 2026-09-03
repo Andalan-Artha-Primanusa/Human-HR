@@ -84,7 +84,7 @@
                                             <svg class="w-4 h-4"><use href="#i-edit"/></svg>
                                             Edit
                                         </a>
-                                        <form action="{{ route('admin.pohs.destroy', $poh) }}" method="POST" onsubmit="return confirm('Hapus POH ini?');">
+                                        <form action="{{ route('admin.pohs.destroy', $poh) }}" method="POST" data-confirm-title="Hapus POH ini?" data-confirm-message="POH yang sudah dipakai profil kandidat mungkin tidak dapat dihapus.">
                                             @csrf @method('DELETE')
                                             <button class="abtn abtn-xs abtn-danger">
                                                 <svg class="w-4 h-4"><use href="#i-trash"/></svg>

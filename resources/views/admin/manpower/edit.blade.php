@@ -148,7 +148,8 @@
                                     >Edit</button>
 
                                     <form action="{{ route('admin.manpower.destroy', [$job, $r]) }}" method="POST"
-                                          onsubmit="return confirm('Hapus baris ini? Tindakan ini akan memicu sinkron ulang openings.');">
+                                          data-confirm-title="Hapus baris manpower?"
+                                          data-confirm-message="Tindakan ini akan memicu sinkron ulang openings pada lowongan.">
                                       @csrf
                                       @method('DELETE')
                                       <button type="submit"
@@ -211,7 +212,7 @@
                 headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
                 body: fd
               });
-              if (!res.ok) throw new Error('Gagal menyimpan. Periksa input.');
+              if (!res.ok) throw new Error(await (window.KarirApiError?.message(res) || Promise.resolve('Gagal menyimpan. Periksa input.')));
 
               const data = await res.json();
 
@@ -252,7 +253,11 @@
               document.getElementById('ratio_per_asset').value = '2.50';
 
             } catch (err) {
-              alert(err.message || 'Terjadi kesalahan.');
+              window.KarirFeedback?.open({
+                type: 'error',
+                title: 'Gagal menghitung',
+                message: window.KarirApiError?.sanitize(err.message, 'Kebutuhan manpower belum berhasil dihitung. Silakan coba kembali.') || 'Kebutuhan manpower belum berhasil dihitung. Silakan coba kembali.',
+              });
             }
           });
         })();
