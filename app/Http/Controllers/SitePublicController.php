@@ -58,15 +58,28 @@ class SitePublicController extends Controller
     {
         abort_unless((bool) $site->is_active, 404);
 
-        // Hitung total jobs open dan siapkan 5 job open terbaru (untuk panel di view).
+        // Hitung total jobs open dan siapkan job open terbaru untuk panel publik.
         $site->loadCount([
             'jobs as open_jobs_count' => fn($q) => $q->where('status', 'open'),
         ]);
         $site->load([
-            'jobs' => fn($q) => $q->select(['id', 'title', 'status', 'site_id', 'created_at'])
+            'jobs' => fn($q) => $q->select([
+                    'id',
+                    'title',
+                    'slug',
+                    'code',
+                    'division',
+                    'level',
+                    'employment_type',
+                    'openings',
+                    'status',
+                    'site_id',
+                    'created_at',
+                    'closing_at',
+                ])
                 ->where('status', 'open')
                 ->latest('created_at')
-                ->limit(5),
+                ->limit(8),
         ]);
 
         if ($request->wantsJson()) {

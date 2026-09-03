@@ -1,343 +1,238 @@
 {{-- resources/views/sites/show.blade.php --}}
 @extends('layouts.app')
-@section('title', 'Site · ' . $site->code . ' • karir-andalan')
+@section('title', $site->name . ' - Site Karir Andalan')
 
 @php
-    $BORD = '#e5e7eb';
-    // fallback ringan dari meta jika kolom kosong
+    $PRIMARY = '#a77d52';
+    $PRIMARY_DARK = '#8b5e3c';
+    $BORD = '#eadfd4';
     $tz = $site->timezone ?: data_get($site->meta, 'timezone');
     $addr = $site->address ?: data_get($site->meta, 'address');
-
-    // helper money
-    $fmtMoney = function ($n, $cur = 'IDR') {
-        if (!is_numeric($n))
-            return null;
-        return ($cur ?: 'IDR') . ' ' . number_format((float) $n, 0, ',', '.');
-    };
+    $lat = data_get($site->meta, 'lat')
+        ?? data_get($site->meta, 'latitude')
+        ?? data_get($site->meta, 'location.lat')
+        ?? data_get($site->meta, 'location.latitude');
+    $lng = data_get($site->meta, 'lng')
+        ?? data_get($site->meta, 'lon')
+        ?? data_get($site->meta, 'long')
+        ?? data_get($site->meta, 'longitude')
+        ?? data_get($site->meta, 'location.lng')
+        ?? data_get($site->meta, 'location.lon')
+        ?? data_get($site->meta, 'location.long')
+        ?? data_get($site->meta, 'location.longitude');
+    $hasCoords = is_numeric($lat ?? null) && is_numeric($lng ?? null);
+    $gmQuery = trim(collect([$site->name, $addr, $site->region])->filter()->implode(' '));
+    $gmUrl = $hasCoords
+        ? 'https://www.google.com/maps/search/?api=1&query=' . urlencode($lat . ',' . $lng)
+        : 'https://www.google.com/maps/search/?api=1&query=' . urlencode($gmQuery ?: $site->code);
+    $openJobs = $site->jobs ?? collect();
+    $employmentPretty = [
+        'fulltime' => 'Full-time',
+        'contract' => 'Contract',
+        'intern' => 'Intern',
+        'parttime' => 'Part-time',
+        'freelance' => 'Freelance',
+    ];
 @endphp
 
 @section('content')
-    <div class="max-w-5xl mx-auto space-y-6">
-      {{-- HEADER: bar biru–merah --}}
-      <div class="relative rounded-2xl border bg-white shadow-sm" style="border-color: {{ $BORD }}">
-        <div class="h-2 rounded-t-2xl overflow-hidden">
-          <div class="h-full w-full flex">
-            <div class="h-full bg-blue-600" style="width: 90%"></div>
-            <div class="h-full bg-red-500"  style="width: 10%"></div>
-          </div>
-        </div>
+  <svg xmlns="http://www.w3.org/2000/svg" class="hidden">
+    <symbol id="site-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+      <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 21s7-4.35 7-10a7 7 0 1 0-14 0c0 5.65 7 10 7 10Z"/><circle cx="12" cy="11" r="2.5" stroke-width="2"/>
+    </symbol>
+    <symbol id="site-briefcase" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+      <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M10 6V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v1M4 8h16v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8Z"/><path stroke-width="2" stroke-linecap="round" d="M4 12h16"/>
+    </symbol>
+    <symbol id="site-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+      <circle cx="12" cy="12" r="9" stroke-width="2"/><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 7v5l3 2"/>
+    </symbol>
+    <symbol id="site-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+      <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M5 12h14m-6-6 6 6-6 6"/>
+    </symbol>
+  </svg>
 
-        <div class="p-6 md:p-7">
-          <div class="flex items-center justify-between gap-3">
-            <div class="min-w-0">
-              <h1 class="text-2xl md:text-3xl font-semibold tracking-tight text-slate-900">
-                {{ $site->name }} <span class="text-slate-400">({{ $site->code }})</span>
-              </h1>
-              <div class="mt-1 text-sm text-slate-600">
-                {{ $site->region ?: '—' }} @if($tz) · TZ: {{ $tz }} @endif
-              </div>
+  <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+    <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
+      <a href="{{ route('jobs.index', ['site' => $site->code]) }}"
+         class="inline-flex items-center gap-2 rounded-xl border bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-[#a77d52] hover:text-[#8b5e3c]"
+         style="border-color: {{ $BORD }}">
+        <span aria-hidden="true">&larr;</span>
+        Kembali ke Lowongan
+      </a>
+
+      <a href="{{ $gmUrl }}" target="_blank" rel="noopener"
+         class="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:opacity-90"
+         style="background: {{ $PRIMARY_DARK }}">
+        <svg class="h-4 w-4"><use href="#site-pin"/></svg>
+        Buka Maps
+      </a>
+    </div>
+
+    <section class="overflow-hidden rounded-2xl border bg-white shadow-sm" style="border-color: {{ $BORD }}">
+      <div class="grid lg:grid-cols-[1.05fr_.95fr]">
+        <div class="p-6 sm:p-8 lg:p-10">
+          <div class="inline-flex items-center gap-2 rounded-full bg-[#fffaf5] px-3 py-1 text-xs font-bold uppercase tracking-[.18em] text-[#8b5e3c] ring-1 ring-inset ring-[#ead8c5]">
+            <span class="h-2 w-2 rounded-full {{ $site->is_active ? 'bg-emerald-500' : 'bg-amber-500' }}"></span>
+            {{ $site->is_active ? 'Site Aktif' : 'Site Nonaktif' }}
+          </div>
+
+          <h1 class="mt-5 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
+            {{ $site->name }}
+          </h1>
+          <p class="mt-2 text-base font-semibold text-[#8b5e3c]">{{ $site->code }}</p>
+
+          <div class="mt-6 grid gap-3 sm:grid-cols-3">
+            <div class="rounded-xl border bg-[#fffaf5] p-4" style="border-color: {{ $BORD }}">
+              <p class="text-xs font-medium text-slate-500">Lowongan Aktif</p>
+              <p class="mt-2 text-2xl font-bold text-slate-950">{{ (int) ($site->open_jobs_count ?? $openJobs->count()) }}</p>
             </div>
-            {{-- ⬇️ baliknya ke halaman lamar (jobs) dengan filter site --}}
-            <a href="{{ route('jobs.index', ['site' => $site->code]) }}" class="btn btn-ghost">Kembali ke Lowongan</a>
-          </div>
-        </div>
-      </div>
-
-      {{-- INFO UTAMA --}}
-      <section class="rounded-2xl border bg-white shadow-sm p-6" style="border-color: {{ $BORD }}">
-        <div class="grid gap-4 sm:grid-cols-2">
-          <div>
-            <div class="text-slate-500 text-sm">Kode</div>
-            <div class="mt-1 text-lg font-medium text-slate-800">{{ $site->code }}</div>
-          </div>
-
-          <div>
-            <div class="text-slate-500 text-sm">Status</div>
-            <div class="mt-1">
-              <span class="badge {{ $site->is_active ? 'badge-green' : 'badge-amber' }}">
-                {{ $site->is_active ? 'ACTIVE' : 'INACTIVE' }}
-              </span>
+            <div class="rounded-xl border bg-white p-4" style="border-color: {{ $BORD }}">
+              <p class="text-xs font-medium text-slate-500">Region</p>
+              <p class="mt-2 truncate text-base font-bold text-slate-950">{{ $site->region ?: '-' }}</p>
             </div>
-          </div>
-
-          <div>
-            <div class="text-slate-500 text-sm">Region</div>
-            <div class="mt-1 text-slate-800">{{ $site->region ?: '—' }}</div>
-          </div>
-
-          <div>
-            <div class="text-slate-500 text-sm">Timezone</div>
-            <div class="mt-1 text-slate-800">{{ $tz ?: '—' }}</div>
+            <div class="rounded-xl border bg-white p-4" style="border-color: {{ $BORD }}">
+              <p class="text-xs font-medium text-slate-500">Timezone</p>
+              <p class="mt-2 truncate text-base font-bold text-slate-950">{{ $tz ?: '-' }}</p>
+            </div>
           </div>
 
           @if($addr)
-            <div class="sm:col-span-2">
-              <div class="text-slate-500 text-sm">Alamat</div>
-              <div class="mt-1 text-slate-800 leading-relaxed">{{ $addr }}</div>
+            <div class="mt-6 flex gap-3 rounded-xl border bg-white p-4" style="border-color: {{ $BORD }}">
+              <svg class="mt-0.5 h-5 w-5 shrink-0 text-[#a77d52]"><use href="#site-pin"/></svg>
+              <div>
+                <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Alamat</p>
+                <p class="mt-1 leading-relaxed text-slate-800">{{ $addr }}</p>
+              </div>
             </div>
           @endif
 
           @if($site->notes)
-            <div class="sm:col-span-2">
-              <div class="text-slate-500 text-sm">Catatan</div>
-              <div class="mt-1 text-slate-800 whitespace-pre-line">{{ $site->notes }}</div>
+            <div class="mt-4 rounded-xl border bg-slate-50 p-4 text-sm leading-relaxed text-slate-700" style="border-color: {{ $BORD }}">
+              {{ $site->notes }}
             </div>
           @endif
-
-          @if(!empty($site->meta))
-                    <div class="sm:col-span-2">
-                      <div class="text-slate-500 text-sm">Meta</div>
-                      <pre class="mt-1 text-xs bg-slate-50 rounded-xl p-4 border overflow-auto" style="border-color: {{ $BORD }}">
-            {{ json_encode(is_array($site->meta) ? $site->meta : (json_decode($site->meta ?? '[]', true) ?: []), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) }}
-                      </pre>
-                    </div>
-          @endif
-        </div>
-      </section>
-
-      {{-- LOKASI / MAPS --}}
-      @php
-        // Ambil koordinat dari meta (beberapa kemungkinan key)
-        $lat = data_get($site->meta, 'lat')
-            ?? data_get($site->meta, 'latitude')
-            ?? data_get($site->meta, 'location.lat')
-            ?? data_get($site->meta, 'location.latitude');
-
-        $lng = data_get($site->meta, 'lng')
-            ?? data_get($site->meta, 'lon')
-            ?? data_get($site->meta, 'long')
-            ?? data_get($site->meta, 'longitude')
-            ?? data_get($site->meta, 'location.lng')
-            ?? data_get($site->meta, 'location.lon')
-            ?? data_get($site->meta, 'location.long')
-            ?? data_get($site->meta, 'location.longitude');
-
-        $hasCoords = is_numeric($lat ?? null) && is_numeric($lng ?? null);
-
-        // Query Google Maps untuk fallback / tombol "Buka di Google Maps"
-        $gmQuery = trim(collect([
-            $site->name,
-            $addr ?: null,
-            $site->region ?: null,
-            $tz ? "TZ: " . $tz : null,
-        ])->filter()->implode(' '));
-        $gmUrl = $hasCoords
-            ? 'https://www.google.com/maps/search/?api=1&query=' . urlencode($lat . ',' . $lng)
-            : 'https://www.google.com/maps/search/?api=1&query=' . urlencode($gmQuery ?: $site->code);
-      @endphp
-
-      <section class="rounded-2xl border bg-white shadow-sm p-6" style="border-color: {{ $BORD }}">
-        <div class="flex items-center justify-between">
-          <h2 class="text-base font-semibold text-slate-900">Lokasi Peta</h2>
-          <a href="{{ $gmUrl }}" target="_blank" rel="noopener"
-             class="text-sm text-blue-700 hover:underline">Buka di Google Maps</a>
         </div>
 
-        <div class="mt-4">
+        <div class="min-h-[360px] border-t bg-slate-100 lg:border-l lg:border-t-0" style="border-color: {{ $BORD }}">
           @if($hasCoords)
-            {{-- Leaflet Map (tanpa API key) --}}
             @once
-                  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-                        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
-                  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-                          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+              <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+                    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+              <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+                      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
             @endonce
-
-            <div id="map-site-{{ $site->id }}" class="rounded-xl border" style="height: 320px; border-color: {{ $BORD }}"></div>
-
+            <div id="map-site-{{ $site->id }}" class="h-full min-h-[360px] w-full"></div>
             <script>
               (function(){
                 var lat = {{ json_encode((float) $lat) }};
                 var lng = {{ json_encode((float) $lng) }};
                 var name = {!! json_encode($site->name) !!};
-                var addr = {!! json_encode($addr) !!};
                 var code = {!! json_encode($site->code) !!};
-
                 var map = L.map('map-site-{{ $site->id }}', { scrollWheelZoom: false }).setView([lat, lng], 14);
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                   maxZoom: 19,
                   attribution: '&copy; OpenStreetMap'
                 }).addTo(map);
-
-                var popupHtml = '<div style="min-width:180px"><div style="font-weight:600;color:#0f172a;">'
-                                + (name || '-') + ' <span style="color:#94a3b8">(' + (code || '-') + ')</span></div>'
-                                + (addr ? '<div style="margin-top:4px;color:#475569;">'+ addr +'</div>' : '')
-                                + '</div>';
-
-                L.marker([lat, lng]).addTo(map).bindPopup(popupHtml).openPopup();
+                L.marker([lat, lng]).addTo(map).bindPopup('<strong>' + (name || '-') + '</strong><br><span>' + (code || '-') + '</span>').openPopup();
               })();
             </script>
           @else
-            {{-- Fallback: Google Maps iframe pakai query alamat --}}
-            <div class="rounded-xl overflow-hidden border" style="border-color: {{ $BORD }}">
-              <iframe
-                src="https://www.google.com/maps?q={{ urlencode($gmQuery ?: $site->code) }}&output=embed"
-                width="100%" height="320" style="border:0;" allowfullscreen="" loading="lazy"
-                referrerpolicy="no-referrer-when-downgrade"></iframe>
-            </div>
-            <p class="mt-2 text-xs text-slate-500">
-              * Peta berdasarkan pencarian alamat. Untuk akurasi tinggi, simpan koordinat <code>lat</code> & <code>lng</code> di <strong>meta</strong>.
-            </p>
+            <iframe
+              src="https://www.google.com/maps?q={{ urlencode($gmQuery ?: $site->code) }}&output=embed"
+              width="100%" height="100%" class="min-h-[360px]" style="border:0;" allowfullscreen="" loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade"></iframe>
           @endif
         </div>
-      </section>
-
-      {{-- LOWONGAN TERBARU (kartu-kartu refined) --}}
-      @if(isset($site->jobs) && $site->jobs->count())
-        @php
-            // pretty label utk employment_type
-            $employmentPretty = [
-                'fulltime' => 'Full-time',
-                'contract' => 'Contract',
-                'intern' => 'Intern',
-                'parttime' => 'Part-time',
-                'freelance' => 'Freelance',
-            ];
-        @endphp
-
-        <section class="rounded-2xl border bg-white shadow-sm p-6" style="border-color: {{ $BORD }}">
-          <div class="flex items-center justify-between">
-            <h2 class="text-base font-semibold text-slate-900">Lowongan Terbaru di Site Ini</h2>
-            <span class="text-xs text-slate-500">
-              Total lowongan: {{ $site->jobs_count ?? $site->jobs()->count() }}
-            </span>
-          </div>
-
-          <div class="mt-4 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            @foreach($site->jobs as $job)
-                  <article class="group relative overflow-hidden rounded-2xl border bg-white shadow-sm transition hover:shadow-md"
-                           style="border-color: {{ $BORD }}">
-                    {{-- top accent bar --}}
-                    <div class="h-1.5 w-full flex">
-                      <div class="flex-1 bg-blue-600"></div>
-                      <div class="w-10 bg-red-500"></div>
-                    </div>
-
-                    <div class="p-4 flex h-full flex-col">
-                      {{-- header: title + status --}}
-                      <div class="flex items-start justify-between gap-3">
-                        <a href="{{ route('jobs.show', $job) }}"
-                           class="line-clamp-2 font-semibold text-slate-900 hover:underline">
-                          {{ $job->title }}
-                        </a>
-
-                        <span class="shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ring-1 ring-inset
-                          {{ ($job->status ?? 'draft') === 'open'
-                    ? 'bg-blue-50 text-blue-700 ring-blue-200'
-                    : 'bg-slate-100 text-slate-700 ring-slate-200' }}">
-                          {{ strtoupper($job->status ?? 'draft') }}
-                        </span>
-                      </div>
-
-                      {{-- quick meta chips --}}
-                      <div class="mt-2 flex flex-wrap items-center gap-2">
-                        @if(!empty($job->division))
-                              <span class="inline-flex items-center gap-1 rounded-full bg-slate-50 px-2 py-0.5 text-[11px] font-semibold text-slate-700 ring-1 ring-slate-200">
-                                <svg class="h-3.5 w-3.5 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-width="2" d="M3 8a2 2 0 012-2h14a2 2 0 012 2v9a3 3 0 01-3 3H6a3 3 0 01-3-3V8z"/><path stroke-width="2" d="M9 6a3 3 0 013-3a3 3 0 013 3"/></svg>
-                                {{ $job->division }}
-                              </span>
-                        @endif
-
-                        @if(!empty($job->employment_type))
-                              <span class="inline-flex items-center gap-1 rounded-full bg-slate-50 px-2 py-0.5 text-[11px] font-semibold text-slate-700 ring-1 ring-slate-200">
-                                <svg class="h-3.5 w-3.5 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-width="2" d="M12 22v-4M6 12l6-8l6 8v6a4 4 0 0 1-8 0"/></svg>
-                                {{ $employmentPretty[$job->employment_type] ?? ucfirst($job->employment_type) }}
-                              </span>
-                        @endif
-
-                        <span class="inline-flex items-center gap-1 rounded-full bg-slate-50 px-2 py-0.5 text-[11px] font-semibold text-slate-700 ring-1 ring-slate-200">
-                          <svg class="h-3.5 w-3.5 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-width="2" d="M8 7h8M8 12h8M8 17h5"/></svg>
-                          {{ (int) ($job->openings ?? 1) }} openings
-                        </span>
-                      </div>
-
-                      {{-- lokasi row --}}
-                      @php $s = $job->site; @endphp
-                      @if($s)
-                        <div class="mt-3 flex items-start gap-2 text-xs text-slate-600">
-                          <svg class="mt-0.5 h-4 w-4 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 21s7-4.35 7-10a7 7 0 10-14 0c0 5.65 7 10 7 10z"/><circle cx="12" cy="11" r="2"/>
-                          </svg>
-                          <div class="min-w-0">
-                            <div class="truncate font-medium text-slate-700">
-                              {{ $s->name ?? $s->code ?? '—' }}
-                            </div>
-                            <div class="truncate">
-                              @if(!empty($s->region)) {{ $s->region }} @endif
-                              @if(!empty($s->timezone)) <span class="text-slate-400">·</span> TZ: {{ $s->timezone }} @endif
-                            </div>
-                          </div>
-                        </div>
-                      @endif
-
-                      {{-- description --}}
-                      @php
-                        $desc = trim(strip_tags($job->description ?? ''));
-                        $short = \Illuminate\Support\Str::limit($desc, 140);
-                      @endphp
-                      @if($short)
-                        <p class="mt-3 line-clamp-3 text-sm leading-relaxed text-slate-700">{{ $short }}</p>
-                      @endif
-
-                      {{-- salary + closing --}}
-                      @if($job->salary_min || $job->salary_max || $job->currency || $job->closing_at)
-                        <div class="mt-3 rounded-lg border bg-slate-50 px-3 py-2 text-xs text-slate-700"
-                             style="border-color: {{ $BORD }}">
-                          @php
-                            $cur = $job->currency ?: 'IDR';
-                            $min = $fmtMoney($job->salary_min, $cur);
-                            $max = $fmtMoney($job->salary_max, $cur);
-                            $salaryText = null;
-                            if ($min && $max)
-                                $salaryText = $min . ' – ' . $max;
-                            elseif ($min)
-                                $salaryText = '≥ ' . $min;
-                            elseif ($max)
-                                $salaryText = '≤ ' . $max;
-                            elseif ($job->currency)
-                                $salaryText = $cur;
-                          @endphp
-
-                          <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
-                            @if($salaryText)
-                                  <span>Gaji: <span class="font-medium">{{ $salaryText }}</span>
-                                    @if(!empty($job->salary_period)) <span class="text-slate-500">/ {{ $job->salary_period }}</span>@endif
-                                  </span>
-                            @endif
-
-                            @if(!empty($job->closing_at))
-                                  @if($salaryText)<span class="text-slate-300">•</span>@endif
-                                  <span>Tutup: <span class="font-medium">{{ \Illuminate\Support\Carbon::parse($job->closing_at)->format('d M Y') }}</span></span>
-                            @endif
-                          </div>
-                        </div>
-                      @endif
-
-                      {{-- footer --}}
-                      <div class="mt-4 flex items-center justify-between">
-                        <div class="text-xs text-slate-500">
-                          Diposting: {{ optional($job->created_at)->format('d M Y') ?? '—' }}
-                        </div>
-                        <a href="{{ route('jobs.show', $job) }}"
-                           class="btn btn-outline btn-sm group-hover:translate-x-0.5 transition">
-                          Lihat
-                        </a>
-                      </div>
-                    </div>
-                  </article>
-            @endforeach
-          </div>
-        </section>
-      @else
-        <section class="rounded-2xl border bg-white shadow-sm p-6" style="border-color: {{ $BORD }}">
-          <div class="text-sm text-slate-600">Belum ada lowongan aktif di site ini.</div>
-        </section>
-      @endif
-
-      {{-- FOOTER TIMESTAMP --}}
-      <div class="text-xs text-slate-500">
-        Dibuat: {{ optional($site->created_at)->format('d M Y H:i') ?? '-' }} ·
-        Diperbarui: {{ optional($site->updated_at)->format('d M Y H:i') ?? '-' }}
       </div>
-    </div>
+    </section>
+
+    <section class="mt-6 rounded-2xl border bg-white p-5 shadow-sm sm:p-6" style="border-color: {{ $BORD }}">
+      <div class="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <p class="text-xs font-bold uppercase tracking-[.16em] text-[#8b5e3c]">Lowongan Site</p>
+          <h2 class="mt-1 text-xl font-bold text-slate-950">Posisi yang sedang dibuka</h2>
+        </div>
+        <a href="{{ route('jobs.index', ['site' => $site->code]) }}" class="inline-flex items-center gap-2 text-sm font-semibold text-[#8b5e3c] hover:underline">
+          Lihat semua
+          <svg class="h-4 w-4"><use href="#site-arrow"/></svg>
+        </a>
+      </div>
+
+      @if($openJobs->count())
+        <div class="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          @foreach($openJobs as $job)
+            <article class="flex min-h-[220px] flex-col rounded-xl border bg-white p-4 transition hover:-translate-y-0.5 hover:border-[#a77d52] hover:shadow-md"
+                     style="border-color: {{ $BORD }}">
+              <div class="flex items-start justify-between gap-3">
+                <div class="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#fffaf5] text-[#8b5e3c] ring-1 ring-inset ring-[#ead8c5]">
+                  <svg class="h-5 w-5"><use href="#site-briefcase"/></svg>
+                </div>
+                <span class="rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-bold text-emerald-700 ring-1 ring-inset ring-emerald-200">OPEN</span>
+              </div>
+
+              <a href="{{ route('jobs.show', $job) }}" class="mt-4 line-clamp-2 text-base font-bold leading-snug text-slate-950 hover:text-[#8b5e3c]">
+                {{ $job->title }}
+              </a>
+
+              <div class="mt-3 flex flex-wrap gap-2 text-[11px] font-semibold text-slate-600">
+                @if($job->division)
+                  <span class="rounded-full bg-slate-50 px-2 py-1 ring-1 ring-inset ring-slate-200">{{ $job->division }}</span>
+                @endif
+                @if($job->employment_type)
+                  <span class="rounded-full bg-slate-50 px-2 py-1 ring-1 ring-inset ring-slate-200">{{ $employmentPretty[$job->employment_type] ?? ucfirst($job->employment_type) }}</span>
+                @endif
+                <span class="rounded-full bg-slate-50 px-2 py-1 ring-1 ring-inset ring-slate-200">{{ (int) ($job->openings ?? 1) }} opening</span>
+              </div>
+
+              @php
+                $closingLabel = null;
+                if (!empty($job->closing_at)) {
+                    try {
+                        $closingLabel = $job->closing_at instanceof \Illuminate\Support\Carbon
+                            ? $job->closing_at->format('d M Y')
+                            : \Illuminate\Support\Carbon::parse($job->closing_at)->format('d M Y');
+                    } catch (\Throwable $e) {
+                        $closingLabel = null;
+                    }
+                }
+              @endphp
+              @if($job->code || $job->level || $closingLabel)
+                <div class="mt-4 space-y-1.5 text-xs text-slate-600">
+                  @if($job->code)
+                    <p class="truncate"><span class="text-slate-400">Kode:</span> {{ $job->code }}</p>
+                  @endif
+                  @if($job->level)
+                    <p><span class="text-slate-400">Level:</span> {{ $job->level }}</p>
+                  @endif
+                  @if($closingLabel)
+                    <p><span class="text-slate-400">Tutup:</span> {{ $closingLabel }}</p>
+                  @endif
+                </div>
+              @endif
+
+              <div class="mt-auto flex items-center justify-between border-t pt-4 text-xs text-slate-500" style="border-color: {{ $BORD }}">
+                <span class="inline-flex items-center gap-1.5">
+                  <svg class="h-3.5 w-3.5"><use href="#site-clock"/></svg>
+                  {{ optional($job->created_at)->format('d M Y') ?? '-' }}
+                </span>
+                <a href="{{ route('jobs.show', $job) }}" class="font-bold text-[#8b5e3c] hover:underline">Detail</a>
+              </div>
+            </article>
+          @endforeach
+        </div>
+      @else
+        <div class="mt-5 rounded-xl border bg-[#fffaf5] p-8 text-center" style="border-color: {{ $BORD }}">
+          <div class="mx-auto grid h-12 w-12 place-items-center rounded-xl bg-white text-[#8b5e3c] ring-1 ring-inset ring-[#ead8c5]">
+            <svg class="h-6 w-6"><use href="#site-briefcase"/></svg>
+          </div>
+          <p class="mt-4 font-bold text-slate-950">Belum ada lowongan aktif</p>
+          <p class="mt-1 text-sm text-slate-600">Cek lagi nanti atau lihat lowongan dari site lain.</p>
+        </div>
+      @endif
+    </section>
+
+    <p class="mt-5 text-xs text-slate-500">
+      Diperbarui terakhir {{ optional($site->updated_at)->format('d M Y H:i') ?? '-' }}
+    </p>
+  </div>
 @endsection
