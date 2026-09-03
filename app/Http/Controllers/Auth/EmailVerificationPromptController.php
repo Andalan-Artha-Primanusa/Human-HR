@@ -16,6 +16,8 @@ class EmailVerificationPromptController extends Controller
     {
         return $request->user()->hasVerifiedEmail()
             ? redirect()->intended(route('dashboard', absolute: false))
-            : view('auth.verify-email');
+            : redirect()
+                ->route('jobs.index')
+                ->with('verify_email_notice', 'Cek email kamu untuk verifikasi akun.');
     }
 }

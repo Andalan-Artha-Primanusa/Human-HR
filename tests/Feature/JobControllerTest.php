@@ -69,6 +69,19 @@ class JobControllerTest extends TestCase
         $response->assertStatus(200);
     }
 
+    public function test_public_index_shows_verification_popup_for_unverified_user()
+    {
+        $this->pelamar->forceFill(['email_verified_at' => null])->save();
+
+        $this->actingAs($this->pelamar);
+        $response = $this->get(route('jobs.index'));
+
+        $response->assertStatus(200);
+        $response->assertSee('emailVerificationPopup', false);
+        $response->assertSee('Verifikasi email dulu');
+        $response->assertDontSee('Nanti');
+    }
+
     public function test_public_index_filters_by_status_open_only()
     {
         Job::create([

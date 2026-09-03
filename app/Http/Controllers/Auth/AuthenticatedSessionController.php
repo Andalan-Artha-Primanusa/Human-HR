@@ -30,6 +30,12 @@ class AuthenticatedSessionController extends Controller
 
         $user = auth()->user();
         
+        if (! $user->hasVerifiedEmail()) {
+            return redirect()
+                ->route('jobs.index')
+                ->with('verify_email_notice', 'Cek email kamu untuk verifikasi akun.');
+        }
+
         $redirectRoute = match ($user->role) {
             'superadmin', 'hr', 'admin' => 'admin.applications.board',
             default => 'jobs.index'

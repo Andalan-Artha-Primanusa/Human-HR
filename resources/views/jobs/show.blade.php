@@ -373,10 +373,10 @@
 
             @auth
               @if(!$emailVerifiedForApplication)
-                    <a href="{{ route('verification.notice') }}" class="ph-action ph-action--brand">
+                    <button type="button" class="ph-action ph-action--brand" data-focus-email-verification-popup>
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                       Verifikasi Email Dulu
-                    </a>
+                    </button>
               @elseif(($job->status ?? 'draft') === 'open' && !$myApp)
                     <form method="POST" action="{{ route('applications.store', $job) }}" id="applyForm" class="inline">@csrf
                       <button type="submit" class="ph-action ph-action--brand">
@@ -732,11 +732,12 @@
                             </p>
                         @if(($job->status ?? 'draft') === 'open')
                           @if(!$emailVerifiedForApplication)
-                            <a href="{{ route('verification.notice') }}"
+                            <button type="button"
                                class="inline-flex items-center justify-center w-full px-4 py-2.5 mt-4 text-sm font-semibold text-white rounded-lg shadow-sm"
-                               style="background: {{ $ACCENT_DARK }};">
+                               style="background: {{ $ACCENT_DARK }};"
+                               data-focus-email-verification-popup>
                               Verifikasi Email Dulu
-                            </a>
+                            </button>
                           @else
                             <form method="POST" action="{{ route('applications.store', $job) }}" class="mt-3">@csrf
                               <button class="w-full px-4 py-2.5 text-sm font-semibold text-white rounded-lg shadow-sm hover:brightness-105"
