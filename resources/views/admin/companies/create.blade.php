@@ -10,24 +10,21 @@
 @section('content')
     <div class="mx-auto w-full max-w-[960px] px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
-      {{-- HEADER dua-tone --}}
-      <section class="relative bg-white border shadow-sm rounded-2xl" style="border-color: {{ $BORD }}">
-        <div class="relative h-20 overflow-hidden sm:h-24 rounded-t-2xl">
-          <div class="absolute inset-0" style="background: linear-gradient(90deg, {{ $ACCENT }}, {{ $ACCENT_DARK }});"></div>
-          <div class="absolute inset-y-0 right-0 w-24 sm:w-36" style="background: linear-gradient(90deg, {{ $ACCENT_DARK }}, {{ $ACCENT }});"></div>
-
-          <div class="relative flex items-center h-full px-5 md:px-6">
-            <div class="min-w-0">
-              <h1 class="text-2xl font-semibold tracking-tight text-white md:text-3xl">Create Company</h1>
-              <p class="text-sm text-white/90">Tambahkan perusahaan baru ke sistem.</p>
-            </div>
-          </div>
-        </div>
-      </section>
+      {{-- HEADER (shared solid-brown page-header) --}}
+      <x-admin.page-header eyebrow="MANAGEMENT" title="Create Company" description="Tambahkan perusahaan baru ke sistem.">
+        <a href="{{ route('admin.companies.index') }}" class="ph-action">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+          Kembali
+        </a>
+        <button type="submit" form="companyCreateForm" class="ph-action ph-action--brand">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+          Simpan
+        </button>
+      </x-admin.page-header>
 
       {{-- FORM (kartu terpisah, ada jarak) --}}
       <section class="bg-white border shadow-sm rounded-2xl" style="border-color: {{ $BORD }}">
-        <form method="POST" action="{{ route('admin.companies.store') }}" enctype="multipart/form-data" class="p-6 md:p-7 space-y-6 bg-white">
+        <form id="companyCreateForm" method="POST" action="{{ route('admin.companies.store') }}" enctype="multipart/form-data" class="p-6 md:p-7 space-y-6 bg-white">
           @csrf
 
           <div class="grid grid-cols-1 gap-4 md:grid-cols-2">

@@ -12,27 +12,17 @@
 @section('content')
     <div class="mx-auto w-full max-w-[960px] px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
-      {{-- HEADER dua-tone --}}
-      <section class="relative rounded-2xl border bg-white shadow-sm" style="border-color: {{ $BORD }}">
-        <div class="relative h-20 sm:h-24 rounded-t-2xl overflow-hidden">
-          <div class="absolute inset-0 rounded-t-2xl" style="background: linear-gradient(135deg, {{ $ACCENT }}, {{ $ACCENT_DARK }})"></div>
-          <div class="absolute inset-y-0 right-0 rounded-tr-2xl w-24 sm:w-36" style="background: {{ $ACCENT_DARK }}"></div>
-
-          <div class="relative h-full px-5 md:px-6 flex items-center justify-between gap-3">
-            <div class="min-w-0">
-              <h1 class="text-2xl md:text-3xl font-semibold tracking-tight text-white">
-                Edit Site: {{ e($site->code) }}
-              </h1>
-              <p class="text-white/90 text-xs sm:text-sm">Perbarui informasi site.</p>
-            </div>
-            <a href="{{ route('admin.sites.index') }}"
-               class="hidden sm:inline-flex items-center rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2"
-                style="--tw-ring-color: {{ $ACCENT }}">
-              Kembali
-            </a>
-          </div>
-        </div>
-      </section>
+      {{-- HEADER (shared solid-brown page-header) --}}
+      <x-admin.page-header eyebrow="MANAGEMENT" title="Edit Site: {{ e($site->code) }}" description="Perbarui informasi site.">
+        <a href="{{ route('admin.sites.index') }}" class="ph-action">
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+          Kembali
+        </a>
+        <button type="submit" form="siteEditForm" class="ph-action ph-action--brand">
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+          Simpan
+        </button>
+      </x-admin.page-header>
 
       {{-- FLASH --}}
       @if(session('success'))

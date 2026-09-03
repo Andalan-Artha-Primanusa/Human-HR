@@ -168,7 +168,7 @@
                       @if(Route::has('admin.sites.toggle'))
                         <form action="{{ route('admin.sites.toggle', $site) }}" method="POST"
                               onsubmit="return confirm('Ubah status site?')">
-                          @csrf @method('PATCH')
+                          @csrf
                           <button class="abtn abtn-xs abtn-warning">Toggle</button>
                         </form>
                       @endif

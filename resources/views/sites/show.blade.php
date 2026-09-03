@@ -89,19 +89,23 @@
       <div class="grid lg:grid-cols-[1.05fr_.95fr]">
         <div class="p-6 sm:p-8 lg:p-10">
 
-          <div class="grid gap-3 sm:grid-cols-3">
+          <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             <div class="rounded-xl border bg-[#fffaf5] p-4" style="border-color: {{ $BORD }}">
               <p class="text-xs font-medium text-slate-500">Lowongan Aktif</p>
               <p class="mt-2 text-2xl font-bold text-slate-950">{{ (int) ($site->open_jobs_count ?? $openJobs->count()) }}</p>
             </div>
-            <div class="rounded-xl border bg-white p-4" style="border-color: {{ $BORD }}">
-              <p class="text-xs font-medium text-slate-500">Region</p>
-              <p class="mt-2 truncate text-base font-bold text-slate-950">{{ $site->region ?: '-' }}</p>
-            </div>
-            <div class="rounded-xl border bg-white p-4" style="border-color: {{ $BORD }}">
-              <p class="text-xs font-medium text-slate-500">Timezone</p>
-              <p class="mt-2 truncate text-base font-bold text-slate-950">{{ $tz ?: '-' }}</p>
-            </div>
+            @if($site->region)
+              <div class="rounded-xl border bg-white p-4" style="border-color: {{ $BORD }}">
+                <p class="text-xs font-medium text-slate-500">Region</p>
+                <p class="mt-2 truncate text-base font-bold text-slate-950">{{ $site->region }}</p>
+              </div>
+            @endif
+            @if($tz)
+              <div class="rounded-xl border bg-white p-4" style="border-color: {{ $BORD }}">
+                <p class="text-xs font-medium text-slate-500">Timezone</p>
+                <p class="mt-2 truncate text-base font-bold text-slate-950">{{ $tz }}</p>
+              </div>
+            @endif
           </div>
 
           @if($addr)
@@ -201,12 +205,12 @@
                     }
                 }
               @endphp
-              @if($job->code || $job->level || $closingLabel)
+              @if($job->code || (filled($job->level) && $job->level !== '-') || $closingLabel)
                 <div class="mt-4 space-y-1.5 text-xs text-slate-600">
                   @if($job->code)
                     <p class="truncate"><span class="text-slate-400">Kode:</span> {{ $job->code }}</p>
                   @endif
-                  @if($job->level)
+                  @if(filled($job->level) && $job->level !== '-')
                     <p><span class="text-slate-400">Level:</span> {{ $job->level }}</p>
                   @endif
                   @if($closingLabel)

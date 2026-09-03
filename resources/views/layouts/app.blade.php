@@ -240,6 +240,17 @@
 @endauth
 
 @include('layouts.partials.global-feedback')
+@include('layouts.partials.email-verification-popup')
 @stack('scripts')
+<script>
+  (function(){
+    const popup = document.getElementById('emailVerificationPopup');
+    if(!popup) return;
+
+    document.querySelectorAll('[data-dismiss-email-verification-popup]').forEach((button) => {
+      button.addEventListener('click', () => popup.remove());
+    });
+  })();
+</script>
 </body>
 </html>

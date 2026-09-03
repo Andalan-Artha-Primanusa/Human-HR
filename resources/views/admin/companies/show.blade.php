@@ -19,20 +19,20 @@
 
     <div class="mx-auto w-full max-w-[960px] px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
-      {{-- HEADER dua-tone --}}
-      <section class="relative bg-white border shadow-sm rounded-2xl" style="border-color: {{ $BORD }}">
-        <div class="relative h-20 overflow-hidden sm:h-24 rounded-t-2xl">
-          <div class="absolute inset-0" style="background: linear-gradient(90deg, {{ $ACCENT }}, {{ $ACCENT_DARK }});"></div>
-          <div class="absolute inset-y-0 right-0 w-24 sm:w-36" style="background: linear-gradient(90deg, {{ $ACCENT_DARK }}, {{ $ACCENT }});"></div>
-
-          <div class="relative flex items-center h-full px-5 md:px-6">
-            <div class="min-w-0">
-              <h1 class="text-2xl font-semibold tracking-tight text-white md:text-3xl">{{ e($record->name) }}</h1>
-              <p class="text-sm text-white/90">Profil perusahaan & ringkasan atribut.</p>
-            </div>
-          </div>
-        </div>
-      </section>
+      {{-- HEADER (shared solid-brown page-header) --}}
+      <x-admin.page-header eyebrow="MANAGEMENT" title="{{ e($record->name) }}" description="Profil perusahaan & ringkasan atribut.">
+        <form method="POST" action="{{ route('admin.companies.destroy', $record) }}"
+              onsubmit="return confirm('Delete this company?')" class="inline">
+          @csrf @method('DELETE')
+          <button type="submit" class="ph-action">
+            Delete
+          </button>
+        </form>
+        <a href="{{ route('admin.companies.edit', $record) }}" class="ph-action ph-action--brand">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25z"/><path d="M20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+          Edit
+        </a>
+      </x-admin.page-header>
 
       {{-- DETAIL CARD --}}
       <section class="bg-white border shadow-sm rounded-2xl" style="border-color: {{ $BORD }}">
@@ -89,28 +89,6 @@
             </div>
           @endif
         </div>
-      </section>
-
-      {{-- ACTIONS --}}
-      <section class="flex items-center gap-3">
-        <a href="{{ route('admin.companies.edit', $record) }}"
-           class="inline-flex items-center px-4 py-2 text-sm font-semibold rounded-lg bg-[#a77d52] hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-offset-2"
-           style="--tw-ring-color: {{ $ACCENT }}; color:#ffffff;">
-          <svg class="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.8" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25z" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-          <span style="color: #ffffff;">Edit</span>
-        </a>
-        <form method="POST" action="{{ route('admin.companies.destroy', $record) }}"
-              onsubmit="return confirm('Delete this company?')" class="inline">
-          @csrf @method('DELETE')
-          <button type="submit"
-                  class="inline-flex items-center px-4 py-2 text-sm bg-white border rounded-lg border-slate-200 text-rose-700 hover:bg-rose-50 focus:outline-none focus:ring-2 focus:ring-offset-2"
-                  style="--tw-ring-color: {{ $ACCENT }}">
-            Delete
-          </button>
-        </form>
       </section>
     </div>
 @endsection

@@ -4,19 +4,11 @@
 @section('content')
     <div class="mx-auto w-full max-w-[1440px] px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
-      <section class="overflow-hidden bg-white border shadow-sm rounded-2xl" style="border-color: #e5e7eb;">
-        <div class="relative h-20 overflow-hidden sm:h-24 rounded-t-2xl">
-          <div class="absolute inset-0 rounded-t-2xl" style="background: linear-gradient(90deg, #a77d52, #8b5e3c);"></div>
-          <div class="absolute inset-y-0 right-0 w-24 rounded-tr-2xl sm:w-36" style="background: linear-gradient(90deg, #8b5e3c, #a77d52);"></div>
-
-          <div class="relative flex items-center h-full px-5 text-white md:px-6">
-            <div class="min-w-0">
-              <h1 class="text-2xl font-semibold tracking-tight text-white sm:text-3xl">Atur Manpower</h1>
-              <p class="text-xs sm:text-sm text-white/90">Estimator kebutuhan headcount dan pintasan edit per job.</p>
-            </div>
-          </div>
-        </div>
-      </section>
+      <x-admin.page-header
+        eyebrow="Manpower"
+        title="Atur Manpower"
+        description="Estimator kebutuhan headcount dan pintasan edit per job.">
+      </x-admin.page-header>
 
       {{-- ===== Headcount Estimator ===== --}}
       <div class="card">

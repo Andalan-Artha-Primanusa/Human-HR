@@ -10,23 +10,17 @@
 
 @section('content')
 <div class="mx-auto w-full max-w-[960px] px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-    <section class="relative bg-white border shadow-sm rounded-2xl" style="border-color: {{ $BORD }}">
-        <div class="relative h-20 overflow-hidden sm:h-24 rounded-t-2xl">
-            <div class="absolute inset-0 rounded-t-2xl" style="background: linear-gradient(135deg, {{ $ACCENT }}, {{ $ACCENT_DARK }})"></div>
-            <div class="absolute inset-y-0 right-0 w-24 rounded-tr-2xl sm:w-36" style="background: {{ $ACCENT_DARK }}"></div>
-            <div class="relative flex items-center justify-between h-full gap-3 px-5 md:px-6">
-                <div class="min-w-0">
-                    <h1 class="text-2xl font-semibold tracking-tight text-white md:text-3xl">Edit POH: {{ e($poh->code) }}</h1>
-                    <p class="text-xs text-white/90 sm:text-sm">Perbarui informasi Place of Hire.</p>
-                </div>
-                <a href="{{ route('admin.pohs.index') }}"
-                   class="items-center hidden px-4 py-2 text-sm font-semibold bg-white border rounded-lg sm:inline-flex border-slate-200 text-slate-900 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2"
-                   style="--tw-ring-color: {{ $ACCENT }}">
-                    Kembali
-                </a>
-            </div>
-        </div>
-    </section>
+    {{-- HEADER (shared solid-brown page-header) --}}
+    <x-admin.page-header eyebrow="MANAGEMENT" title="Edit POH: {{ e($poh->code) }}" description="Perbarui informasi Place of Hire.">
+      <a href="{{ route('admin.pohs.index') }}" class="ph-action">
+        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+        Kembali
+      </a>
+      <button type="submit" form="pohEditForm" class="ph-action ph-action--brand">
+        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+        Simpan
+      </button>
+    </x-admin.page-header>
 
     @if(session('success'))
         <div class="px-4 py-3 text-green-700 border border-green-200 rounded-xl bg-green-50">{{ session('success') }}</div>

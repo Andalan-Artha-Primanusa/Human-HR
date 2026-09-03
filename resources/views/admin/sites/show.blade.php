@@ -11,89 +11,38 @@
 @section('content')
     <div class="mx-auto w-full max-w-[1120px] px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
-      {{-- HEADER: bar dua-tone cokelat --}}
-      <section class="relative bg-white border shadow-sm rounded-2xl" style="border-color: {{ $BORD }}">
-        <div class="relative h-20 overflow-hidden sm:h-24 rounded-t-2xl">
-          <div class="absolute inset-0 rounded-t-2xl" style="background: linear-gradient(135deg, {{ $ACCENT }}, {{ $ACCENT_DARK }})"></div>
-          <div class="absolute inset-y-0 right-0 w-24 rounded-tr-2xl sm:w-36" style="background: {{ $ACCENT_DARK }}"></div>
+      {{-- HEADER (shared solid-brown page-header) --}}
+      <x-admin.page-header eyebrow="MANAGEMENT" title="{{ e($site->name ?? '—') }} ({{ e($site->code) }})" description="Detail Site">
+        <a href="{{ route('admin.sites.index') }}" class="ph-action">
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+          Kembali
+        </a>
 
-          <div class="relative flex flex-col h-full gap-3 px-5 md:px-6 sm:flex-row sm:items-center sm:justify-between">
-            <div class="min-w-0">
-              <h1 class="text-2xl font-semibold tracking-tight text-white md:text-3xl">
-                {{ e($site->name ?? '—') }}
-                <span class="font-normal text-white/70">({{ e($site->code) }})</span>
-              </h1>
-              <div class="flex flex-wrap items-center gap-2 mt-1 text-xs sm:text-sm">
-                <span class="text-white/90">Detail Site /</span>
-                <a href="{{ route('dashboard') }}" class="text-white/80 hover:text-white">Dashboard</a>
-                <span class="text-white/70">/</span>
-                <a href="{{ route('admin.sites.index') }}" class="text-white/80 hover:text-white">Sites</a>
-                <span class="text-white/70">/</span>
-                <span class="font-medium text-white">{{ e($site->code ?? 'Detail') }}</span>
+        @if(Route::has('admin.sites.toggle'))
+          <form method="POST" action="{{ route('admin.sites.toggle', $site) }}"
+                onsubmit="return confirm('Ubah status site?');" class="inline">
+            @csrf
+            <button type="submit" class="ph-action">
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 3v12"/><path stroke-width="2" stroke-linecap="round" d="M5 10 12 3l7 7"/><path stroke-width="2" stroke-linecap="round" d="M5 21h14"/></svg>
+              {{ $site->is_active ? 'Nonaktifkan' : 'Aktifkan' }}
+            </button>
+          </form>
+        @endif
 
-                {{-- Chip status --}}
-                @if($site->is_active)
-                      <span class="ml-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-white/90 text-emerald-700 ring-1 ring-emerald-200">
-                        Aktif
-                      </span>
-                @else
-                      <span class="ml-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-white/90 text-slate-700 ring-1 ring-slate-200">
-                        Nonaktif
-                      </span>
-                @endif
-              </div>
-            </div>
+        <a href="{{ route('admin.sites.edit', $site) }}" class="ph-action ph-action--brand">
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M11 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5"/><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          Edit
+        </a>
 
-            {{-- Actions --}}
-            <div class="flex flex-wrap gap-2">
-              <a href="{{ route('admin.sites.index') }}"
-                 class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold bg-white border rounded-lg border-slate-200 text-slate-900 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2"
-                 style="--tw-ring-color: {{ $ACCENT }}">
-                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                  <path d="M15 19l-7-7 7-7" stroke="#334155" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-                Kembali
-              </a>
-
-              @if(Route::has('admin.sites.toggle'))
-                <form method="POST" action="{{ route('admin.sites.toggle', $site) }}"
-                      onsubmit="return confirm('Ubah status site?');" class="inline-flex">
-                  @csrf @method('PATCH')
-                  <button type="submit"
-                          class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold bg-white border rounded-lg border-slate-200 text-slate-900 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2"
-                          style="--tw-ring-color: {{ $ACCENT }}">
-                    {{ $site->is_active ? 'Nonaktifkan' : 'Aktifkan' }}
-                  </button>
-                </form>
-              @endif
-
-              <a href="{{ route('admin.sites.edit', $site) }}"
-                 class="inline-flex items-center gap-2 rounded-lg bg-[#a77d52] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-offset-2"
-                 style="--tw-ring-color: {{ $ACCENT }}">
-                {{-- Icon pensil: outline putih --}}
-                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                  <path d="M12 20h9" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
-                  <path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4 12.5-12.5z" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
-                </svg>
-                Edit
-              </a>
-
-              <form method="POST" action="{{ route('admin.sites.destroy', $site) }}"
-                    onsubmit="return confirm('Hapus site ini? Aksi tidak dapat dibatalkan.');" class="inline-flex">
-                @csrf @method('DELETE')
-                <button type="submit"
-                        class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold bg-white border rounded-lg border-rose-200 text-rose-700 hover:bg-rose-50 focus:outline-none focus:ring-2 focus:ring-offset-2"
-                        style="--tw-ring-color: {{ $ACCENT }}">
-                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                    <path d="M3 6h18M8 6v12m8-12v12M5 6l1 14a2 2 0 002 2h8a2 2 0 002-2l1-14" stroke="#be123c" stroke-width="2" stroke-linecap="round"/>
-                  </svg>
-                  Hapus
-                </button>
-              </form>
-            </div>
-          </div>
-        </div>
-      </section>
+        <form method="POST" action="{{ route('admin.sites.destroy', $site) }}"
+              onsubmit="return confirm('Hapus site ini? Aksi tidak dapat dibatalkan.');" class="inline">
+          @csrf @method('DELETE')
+          <button type="submit" class="ph-action">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M3 6h18M8 6v12m8-12v12M5 6l1 14a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-14"/></svg>
+            Hapus
+          </button>
+        </form>
+      </x-admin.page-header>
 
       {{-- Ringkasan angka --}}
       <section class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

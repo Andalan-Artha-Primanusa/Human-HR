@@ -198,22 +198,6 @@
             </div>
           </a>
 
-          @if(!$isVerified)
-            <div class="p-3 mx-0 mb-2 border border-red-200 rounded-lg bg-red-50">
-              <div class="text-[12px] text-red-800 mb-2">Akun belum terverifikasi. Selesaikan verifikasi untuk akses menu.</div>
-              @if (Route::has('verification.send'))
-                  <form method="POST" action="{{ route('verification.send') }}">
-                    @csrf
-                    <button class="inline-flex items-center gap-2 rounded-md bg-red-600 text-white px-3 py-1.5 text-xs font-semibold hover:bg-red-700">
-                      Kirim Ulang Email Verifikasi
-                    </button>
-                  </form>
-              @endif
-              <a href="{{ $verifyNoticeUrl }}" class="mt-2 inline-flex items-center gap-2 rounded-md border border-red-200 text-red-700 px-3 py-1.5 text-xs font-semibold hover:bg-red-100">
-                Buka Halaman Verifikasi
-              </a>
-            </div>
-          @endif
       @else
         <div class="{{ $groupBox }} {{ $lockVisual }}">
           <a href="{{ route('login') }}" class="{{ $linkDesk }} {{ $activeMenu('login') }}">
@@ -329,22 +313,6 @@
             </div>
           </a>
 
-          @if(!$isVerified)
-              <div class="p-3 mx-0 mb-2 border border-red-200 rounded-lg bg-red-50">
-                <div class="text-[12px] text-red-800 mb-2">Akun belum terverifikasi. Selesaikan verifikasi untuk akses menu.</div>
-                @if (Route::has('verification.send'))
-                    <form method="POST" action="{{ route('verification.send') }}" {!! $closeAttr !!}>
-                      @csrf
-                      <button class="inline-flex items-center gap-2 rounded-md bg-red-600 text-white px-3 py-1.5 text-xs font-semibold hover:bg-red-700">
-                        Kirim Ulang Email Verifikasi
-                      </button>
-                    </form>
-                @endif
-                <a href="{{ $verifyNoticeUrl }}" {!! $closeAttr !!} class="mt-2 inline-flex items-center gap-2 rounded-md border border-red-200 text-red-700 px-3 py-1.5 text-xs font-semibold hover:bg-red-100">
-                  Buka Halaman Verifikasi
-                </a>
-              </div>
-          @endif
       @else
         <div class="{{ $groupBox }} {{ $lockVisual }}">
           <a href="{{ route('login') }}" {!! $closeAttr !!} class="{{ $linkMobile }} {{ $activeMenu('login') }}">

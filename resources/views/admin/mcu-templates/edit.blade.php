@@ -154,7 +154,7 @@
 
         <!-- SECTION 6: FOOTER (GREEN SECTION) -->
         <div class="overflow-hidden bg-white border shadow-sm border-slate-200 rounded-2xl">
-            <div class="px-6 py-3 border-b border-slate-100" style="background: linear-gradient(to right, {{ $GREEN_FOOTER }}, #7a8d63)">
+            <div class="px-6 py-3 border-b border-slate-100" style="background: {{ $GREEN_FOOTER }}">
                 <h2 class="text-sm font-bold tracking-wider text-white uppercase">🏢 Bagian Footer (Hijau)</h2>
             </div>
             <div class="p-6 space-y-6">

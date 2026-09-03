@@ -10,27 +10,23 @@
     @endphp
 
     <div class="mx-auto w-full max-w-[1100px] px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-      <section class="overflow-hidden bg-white border shadow-sm rounded-2xl" style="border-color: {{ $BORD }}">
-        <div class="relative">
-          <div class="w-full h-20 sm:h-24" style="background: linear-gradient(90deg, {{ $ACCENT }}, {{ $ACCENT_DARK }});"></div>
-          <div class="absolute inset-y-0 right-0 w-24 sm:w-36" style="background: linear-gradient(90deg, {{ $ACCENT_DARK }}, {{ $ACCENT }});"></div>
-
-          <div class="absolute inset-0 flex flex-col gap-3 px-5 py-4 text-white md:px-6 sm:flex-row sm:items-center sm:justify-between">
-            <div class="min-w-0">
-              <h1 class="text-2xl font-semibold tracking-tight text-white sm:text-3xl">Edit User</h1>
-              <p class="text-xs sm:text-sm text-white/90">Perbarui data akun pengguna dengan tema konsisten admin.</p>
-            </div>
-            <a href="{{ route('admin.users.index') }}"
-               class="abtn abtn-neutral">
-              Kembali ke Users
-            </a>
-          </div>
-        </div>
-      </section>
+      <x-admin.page-header
+        eyebrow="Manajemen Pengguna"
+        title="Edit User"
+        description="Perbarui data akun pengguna dengan tema konsisten admin.">
+        <a href="{{ route('admin.users.index') }}" class="ph-action">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+          Kembali
+        </a>
+        <button type="submit" form="userEditForm" class="ph-action ph-action--brand">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+          Simpan
+        </button>
+      </x-admin.page-header>
 
       <section class="overflow-hidden bg-white border shadow-sm rounded-2xl" style="border-color: {{ $BORD }}">
         <div class="p-6 border-t md:p-7 bg-white" style="border-color: {{ $BORD }}">
-          <form method="POST" action="{{ route('admin.users.update', $user) }}" class="grid max-w-2xl gap-4">
+          <form id="userEditForm" method="POST" action="{{ route('admin.users.update', $user) }}" class="grid max-w-2xl gap-4">
             @csrf @method('PATCH')
 
             <div>
