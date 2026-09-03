@@ -9,12 +9,13 @@
   @if(!$isVerified)
     <div
       id="emailVerificationPopup"
-      class="fixed inset-0 z-[90] flex items-center justify-center bg-slate-950/45 px-4 py-6 backdrop-blur-[2px]"
+      class="fixed inset-0 flex items-start justify-center overflow-y-auto bg-slate-950/55 px-4 py-20 backdrop-blur-[2px] sm:items-center sm:py-6"
+      style="z-index:99999;"
       role="dialog"
       aria-modal="true"
       aria-labelledby="emailVerificationPopupTitle"
     >
-      <div class="w-full max-w-md overflow-hidden rounded-2xl border border-amber-200 bg-white shadow-2xl ring-1 ring-slate-900/5">
+      <div class="relative w-full max-w-md overflow-hidden rounded-2xl border border-amber-200 bg-white shadow-2xl ring-1 ring-slate-900/5">
         <div class="h-1.5 bg-gradient-to-r from-amber-500 via-[#a77d52] to-red-500"></div>
         <div class="p-5">
           <div class="flex items-start gap-4">
