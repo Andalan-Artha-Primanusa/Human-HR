@@ -80,6 +80,7 @@ class Job extends Model
         'employment_type',
         'openings',
         'status',
+        'closing_at',
         'description',
         'skills',
         'keywords',
@@ -89,6 +90,7 @@ class Job extends Model
 
     protected $casts = [
         'openings' => 'integer',
+        'closing_at' => 'datetime',
         'skills' => 'array',
         // HAPUS cast keywords => array (biar kita kontrol via accessor+mutator)
     ];
