@@ -66,7 +66,6 @@ class SitePublicController extends Controller
             'jobs' => fn($q) => $q->select([
                     'id',
                     'title',
-                    'slug',
                     'code',
                     'division',
                     'level',
