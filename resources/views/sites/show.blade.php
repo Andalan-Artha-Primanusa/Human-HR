@@ -51,37 +51,45 @@
     </symbol>
   </svg>
 
-  <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-    <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
-      <a href="{{ route('jobs.index', ['site' => $site->code]) }}"
-         class="inline-flex items-center gap-2 rounded-xl border bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-[#a77d52] hover:text-[#8b5e3c]"
-         style="border-color: {{ $BORD }}">
-        <span aria-hidden="true">&larr;</span>
-        Kembali ke Lowongan
-      </a>
+  <div class="mx-auto w-full max-w-[1400px] px-4 py-6 sm:px-6 lg:px-8">
+    {{-- HEADER (shared solid-brown page-header) --}}
+    <section class="page-header" aria-labelledby="site-detail-title">
+      <div class="page-header__inner">
+        <div class="page-header__copy">
+          <p class="page-header__eyebrow">Profil Site</p>
+          <div class="flex flex-wrap items-center gap-3">
+            <h1 id="site-detail-title" class="page-header__title">{{ $site->name }}</h1>
+            <span class="inline-flex items-center gap-2 rounded-full px-3 py-0.5 text-[11px] font-bold uppercase tracking-[.12em]" style="background:rgba(255,255,255,.16);color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.32)">
+              <span class="h-2 w-2 rounded-full {{ $site->is_active ? 'bg-emerald-400' : 'bg-amber-400' }}"></span>
+              {{ $site->is_active ? 'Site Aktif' : 'Site Nonaktif' }}
+            </span>
+          </div>
+          <p class="page-header__desc">
+            <span>{{ $site->code }}</span>
+            @if($site->region)<span class="mx-1.5 opacity-50">•</span><span>{{ $site->region }}</span>@endif
+            @if($tz)<span class="mx-1.5 opacity-50">•</span><span>{{ $tz }}</span>@endif
+          </p>
+        </div>
 
-      <a href="{{ $gmUrl }}" target="_blank" rel="noopener"
-         class="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:opacity-90"
-         style="background: {{ $PRIMARY_DARK }}">
-        <svg class="h-4 w-4"><use href="#site-pin"/></svg>
-        Buka Maps
-      </a>
-    </div>
+        <div class="page-header__actions">
+          <a href="{{ route('jobs.index', ['site' => $site->code]) }}" class="ph-action">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+            Kembali ke Lowongan
+          </a>
+          <a href="{{ $gmUrl }}" target="_blank" rel="noopener" class="ph-action ph-action--brand">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 0 1 3 16.382V5.618a1 1 0 0 1 1.447-.894L9 7m0 13 6-3m-6 3V7m6 10 5.447 2.724A1 1 0 0 0 21 18.382V7.618a1 1 0 0 0-1.447-.894L15 9m0 10V9"/></svg>
+            Buka Maps
+          </a>
+        </div>
+      </div>
+    </section>
 
+    {{-- Kartu hero: ringkasan + peta --}}
     <section class="overflow-hidden rounded-2xl border bg-white shadow-sm" style="border-color: {{ $BORD }}">
       <div class="grid lg:grid-cols-[1.05fr_.95fr]">
         <div class="p-6 sm:p-8 lg:p-10">
-          <div class="inline-flex items-center gap-2 rounded-full bg-[#fffaf5] px-3 py-1 text-xs font-bold uppercase tracking-[.18em] text-[#8b5e3c] ring-1 ring-inset ring-[#ead8c5]">
-            <span class="h-2 w-2 rounded-full {{ $site->is_active ? 'bg-emerald-500' : 'bg-amber-500' }}"></span>
-            {{ $site->is_active ? 'Site Aktif' : 'Site Nonaktif' }}
-          </div>
 
-          <h1 class="mt-5 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
-            {{ $site->name }}
-          </h1>
-          <p class="mt-2 text-base font-semibold text-[#8b5e3c]">{{ $site->code }}</p>
-
-          <div class="mt-6 grid gap-3 sm:grid-cols-3">
+          <div class="grid gap-3 sm:grid-cols-3">
             <div class="rounded-xl border bg-[#fffaf5] p-4" style="border-color: {{ $BORD }}">
               <p class="text-xs font-medium text-slate-500">Lowongan Aktif</p>
               <p class="mt-2 text-2xl font-bold text-slate-950">{{ (int) ($site->open_jobs_count ?? $openJobs->count()) }}</p>
@@ -97,17 +105,17 @@
           </div>
 
           @if($addr)
-            <div class="mt-6 flex gap-3 rounded-xl border bg-white p-4" style="border-color: {{ $BORD }}">
+            <div class="mt-4 flex gap-3 rounded-xl border bg-[#fffaf5] p-4" style="border-color: {{ $BORD }}">
               <svg class="mt-0.5 h-5 w-5 shrink-0 text-[#a77d52]"><use href="#site-pin"/></svg>
               <div>
-                <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Alamat</p>
+                <p class="text-xs font-semibold uppercase tracking-wide text-[#8b5e3c]">Alamat</p>
                 <p class="mt-1 leading-relaxed text-slate-800">{{ $addr }}</p>
               </div>
             </div>
           @endif
 
           @if($site->notes)
-            <div class="mt-4 rounded-xl border bg-slate-50 p-4 text-sm leading-relaxed text-slate-700" style="border-color: {{ $BORD }}">
+            <div class="mt-4 rounded-xl border bg-[#fffaf5] p-4 text-sm leading-relaxed text-slate-700" style="border-color: {{ $BORD }}">
               {{ $site->notes }}
             </div>
           @endif
@@ -147,11 +155,8 @@
     </section>
 
     <section class="mt-6 rounded-2xl border bg-white p-5 shadow-sm sm:p-6" style="border-color: {{ $BORD }}">
-      <div class="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <p class="text-xs font-bold uppercase tracking-[.16em] text-[#8b5e3c]">Lowongan Site</p>
-          <h2 class="mt-1 text-xl font-bold text-slate-950">Posisi yang sedang dibuka</h2>
-        </div>
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <x-section-title title="Posisi yang sedang dibuka" />
         <a href="{{ route('jobs.index', ['site' => $site->code]) }}" class="inline-flex items-center gap-2 text-sm font-semibold text-[#8b5e3c] hover:underline">
           Lihat semua
           <svg class="h-4 w-4"><use href="#site-arrow"/></svg>
