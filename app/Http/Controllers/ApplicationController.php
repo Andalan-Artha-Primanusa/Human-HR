@@ -157,7 +157,7 @@ class ApplicationController extends Controller
             'job.site:id,code,name',
             'user.candidateProfile:id,user_id,nik',
             'poh:id,name',
-            'interviews:id,application_id,scheduled_at,status',
+            'interviews:id,application_id,title,mode,start_at,end_at',
             'offer:id,application_id,status',
         ])
             ->where('user_id', $request->user()->id)
