@@ -366,8 +366,9 @@ class MineproRfrService
         return $grouped;
     }
 
-    public function approvedVacancies(string $startDate): array
+    public function approvedVacancies(string $startDate, ?string $endDate = null): array
     {
+        $endDate ??= $startDate;
         $url = $this->normalizeRfrUrl((string) config('services.minepro.rfr_url'));
         $apiKey = (string) config('services.minepro.api_key');
         $username = (string) config('services.minepro.basic_username');
@@ -380,6 +381,7 @@ class MineproRfrService
                 'status' => null,
                 'url' => $url,
                 'start_date' => $startDate,
+                'end_date' => $endDate,
                 'raw_count' => 0,
                 'count' => 0,
             ];
@@ -397,9 +399,21 @@ class MineproRfrService
                 ->asMultipart()
                 ->post($url, [
                     ['name' => 'StartDate', 'contents' => $startDate],
+                    ['name' => 'EndDate', 'contents' => $endDate],
                 ]);
 
             if (! $response->successful()) {
+                $this->lastVacancyMeta = [
+                    'ok' => false,
+                    'message' => 'Request MinePro RFR gagal.',
+                    'status' => $response->status(),
+                    'url' => $url,
+                    'start_date' => $startDate,
+                    'end_date' => $endDate,
+                    'raw_count' => 0,
+                    'count' => 0,
+                ];
+
                 Log::warning('MinePro RFR request failed.', [
                     'status' => $response->status(),
                     'body' => $response->body(),
@@ -444,6 +458,7 @@ class MineproRfrService
                 'status' => $response->status(),
                 'url' => $url,
                 'start_date' => $startDate,
+                'end_date' => $endDate,
                 'raw_count' => count($headerRows),
                 'count' => count($rows),
             ];
@@ -456,6 +471,7 @@ class MineproRfrService
                 'status' => null,
                 'url' => $url,
                 'start_date' => $startDate,
+                'end_date' => $endDate,
                 'raw_count' => 0,
                 'count' => 0,
             ];

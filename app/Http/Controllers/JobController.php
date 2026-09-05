@@ -221,10 +221,17 @@ class JobController extends Controller
         $rfrStartDate = preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $rfrStartDate)
             ? (string) $rfrStartDate
             : now()->startOfMonth()->format('Y-m-d');
-        $rfrVacancies = $rfrService->approvedVacancies($rfrStartDate);
+        $rfrEndDate = $request->query('rfr_end_date', now()->endOfMonth()->format('Y-m-d'));
+        $rfrEndDate = preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $rfrEndDate)
+            ? (string) $rfrEndDate
+            : now()->endOfMonth()->format('Y-m-d');
+        if ($rfrEndDate < $rfrStartDate) {
+            $rfrEndDate = $rfrStartDate;
+        }
+        $rfrVacancies = $rfrService->approvedVacancies($rfrStartDate, $rfrEndDate);
         $rfrMeta = $rfrService->lastVacancyMeta();
 
-        return view('admin.jobs.create', compact('sites', 'companies', 'rfrVacancies', 'rfrStartDate', 'rfrMeta'));
+        return view('admin.jobs.create', compact('sites', 'companies', 'rfrVacancies', 'rfrStartDate', 'rfrEndDate', 'rfrMeta'));
     }
 
     /**

@@ -68,12 +68,18 @@
           <input type="date" name="rfr_start_date" value="{{ $rfrStartDate ?? now()->startOfMonth()->format('Y-m-d') }}"
                  class="input min-w-[180px]" style="--tw-ring-color: {{ $ACCENT }}">
         </div>
+        <div>
+          <label class="label">End Date RFR</label>
+          <input type="date" name="rfr_end_date" value="{{ $rfrEndDate ?? now()->endOfMonth()->format('Y-m-d') }}"
+                 min="{{ $rfrStartDate ?? now()->startOfMonth()->format('Y-m-d') }}"
+                 class="input min-w-[180px]" style="--tw-ring-color: {{ $ACCENT }}">
+        </div>
         <button type="submit"
                 class="inline-flex items-center rounded-lg bg-[#a77d52] px-4 py-2 text-sm font-semibold text-white hover:opacity-95">
           Ambil RFR
         </button>
         <div class="text-xs text-slate-500">
-          Data lowongan diambil dari RFR fully approved MinePro berdasarkan StartDate.
+          Data lowongan diambil dari RFR fully approved MinePro berdasarkan rentang StartDate sampai EndDate.
         </div>
       </form>
 
@@ -142,7 +148,7 @@
               @endif
               @if(!empty($rfrMeta))
                 <p class="mt-1 text-[11px] text-slate-400 break-all">
-                  MinePro: {{ $rfrMeta['url'] ?? '-' }} · StartDate {{ $rfrMeta['start_date'] ?? ($rfrStartDate ?? '-') }} · raw {{ (int) ($rfrMeta['raw_count'] ?? 0) }} · dropdown {{ (int) ($rfrMeta['count'] ?? count($rfrVacancies ?? [])) }}{{ empty($rfrMeta['ok']) && !empty($rfrMeta['message']) ? ' · '.$rfrMeta['message'] : '' }}
+                  MinePro: {{ $rfrMeta['url'] ?? '-' }} · StartDate {{ $rfrMeta['start_date'] ?? ($rfrStartDate ?? '-') }} · EndDate {{ $rfrMeta['end_date'] ?? ($rfrEndDate ?? '-') }} · raw {{ (int) ($rfrMeta['raw_count'] ?? 0) }} · dropdown {{ (int) ($rfrMeta['count'] ?? count($rfrVacancies ?? [])) }}{{ empty($rfrMeta['ok']) && !empty($rfrMeta['message']) ? ' · '.$rfrMeta['message'] : '' }}
                 </p>
               @endif
             </div>
