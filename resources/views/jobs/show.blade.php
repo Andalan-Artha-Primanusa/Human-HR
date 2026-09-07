@@ -1,6 +1,8 @@
 {{-- resources/views/jobs/show.blade.php --}}
 @extends('layouts.app', ['title' => e($job->title)])
 
+@section('title', e($job->title ?: 'Detail Lowongan') . ' • karir-andalan')
+
 @php
     use Illuminate\Support\Carbon;
 
@@ -258,12 +260,16 @@
         }
     }
 
+    $homeRoute = auth()->check() ? route('dashboard') : route('welcome');
+    $homeLabel = auth()->check() ? 'Dashboard' : 'Beranda';
+    $loginApplyUrl = route('login', ['intended' => route('jobs.show', $job) . '?apply=1#apply']);
+
     // ====== Breadcrumb JSON-LD (SEO) ======
     $breadcrumbLd = [
         '@context' => 'https://schema.org',
         '@type' => 'BreadcrumbList',
         'itemListElement' => [
-            ['@type' => 'ListItem', 'position' => 1, 'name' => 'Dashboard', 'item' => route('dashboard')],
+            ['@type' => 'ListItem', 'position' => 1, 'name' => $homeLabel, 'item' => $homeRoute],
             ['@type' => 'ListItem', 'position' => 2, 'name' => 'Jobs', 'item' => route('jobs.index')],
             ['@type' => 'ListItem', 'position' => 3, 'name' => (string) $job->title, 'item' => request()->fullUrl()],
         ],
@@ -279,9 +285,9 @@
           <div class="w-full h-1 overflow-hidden rounded-t-xl" style="background: {{ $ACCENT }};"></div>
           <ol class="flex items-center gap-2 px-3 py-2 overflow-x-auto text-sm text-slate-600" itemscope itemtype="https://schema.org/BreadcrumbList">
             <li class="flex items-center gap-2 shrink-0" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-              <a href="{{ route('dashboard') }}" itemprop="item" class="inline-flex items-center gap-1 px-2 py-1 rounded-lg group hover:bg-slate-50">
+              <a href="{{ $homeRoute }}" itemprop="item" class="inline-flex items-center gap-1 px-2 py-1 rounded-lg group hover:bg-slate-50">
                 <svg class="w-4 h-4 text-slate-500 group-hover:text-slate-700" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 10.5l9-7 9 7V20a2 2 0 0 1-2 2h-4.5a.5.5 0 0 1-.5-.5V15a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v6.5a.5.5 0 0 1-.5.5H5a2 2 0 0 1-2-2v-9.5z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
-                <span class="font-medium text-slate-700 group-hover:text-slate-900" itemprop="name">Dashboard</span>
+                <span class="font-medium text-slate-700 group-hover:text-slate-900" itemprop="name">{{ $homeLabel }}</span>
               </a><meta itemprop="position" content="1"/><span class="text-slate-300">/</span>
             </li>
             <li class="flex items-center gap-2 shrink-0" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
@@ -399,7 +405,7 @@
                     <button type="button" disabled class="ph-action" aria-disabled="true">Tutup</button>
               @endif
             @else
-              <a href="{{ route('login') }}" class="ph-action ph-action--brand">
+              <a href="{{ $loginApplyUrl }}" class="ph-action ph-action--brand">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/></svg>
                 Login untuk Melamar
               </a>
@@ -713,7 +719,7 @@
                     <div class="min-w-0">
                       <div class="text-sm font-semibold text-slate-900">Masuk untuk melamar</div>
                       <p class="mt-1 text-xs leading-relaxed text-slate-600">Login dulu agar sistem bisa menyimpan profil dan progres lamaran kamu.</p>
-                      <a href="{{ route('login') }}" class="inline-flex items-center justify-center px-4 py-2 mt-3 text-sm font-semibold text-white rounded-lg"
+                      <a href="{{ $loginApplyUrl }}" class="inline-flex items-center justify-center px-4 py-2 mt-3 text-sm font-semibold text-white rounded-lg"
                          style="background: {{ $ACCENT }};">
                         Login Sekarang
                       </a>
