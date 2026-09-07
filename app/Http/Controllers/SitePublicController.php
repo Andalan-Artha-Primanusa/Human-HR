@@ -59,64 +59,53 @@ class SitePublicController extends Controller
     {
         abort_unless((bool) $site->is_active, 404);
 
-        // Hitung total jobs open dan siapkan job open terbaru untuk panel publik.
-        $site->loadCount([
-            'jobs as open_jobs_count' => fn($q) => $q->where('status', 'open'),
-        ]);
-        $site->load([
-            'jobs' => fn($q) => $q->select([
-                    'id',
-                    'title',
-                    'code',
-                    'division',
-                    'level',
-                    'employment_type',
-                    'openings',
-                    'status',
-                    'site_id',
-                    'created_at',
-                    'closing_at',
-                ])
-                ->where('status', 'open')
-                ->latest('created_at')
-                ->limit(8),
-        ]);
+        $jobColumns = [
+            'id',
+            'title',
+            'code',
+            'division',
+            'level',
+            'employment_type',
+            'openings',
+            'status',
+            'site_id',
+            'created_at',
+            'closing_at',
+        ];
+        $siteCode = Str::lower(trim((string) $site->code));
+        $siteName = Str::lower(trim((string) $site->name));
+        $isAllSitesPage = in_array($siteCode, ['all', 'ast'], true)
+            || in_array($siteName, ['all site', 'all sites', 'semua site'], true);
 
-        $fallbackJobs = $site->jobs->isEmpty()
-            ? Job::query()
-                ->select([
-                    'id',
-                    'title',
-                    'code',
-                    'division',
-                    'level',
-                    'employment_type',
-                    'openings',
-                    'status',
-                    'site_id',
-                    'created_at',
-                    'closing_at',
-                ])
+        if ($isAllSitesPage) {
+            $allOpenJobs = Job::query()
+                ->select($jobColumns)
                 ->with('site:id,code,name')
                 ->where('status', 'open')
                 ->whereHas('site', fn($q) => $q->active())
-                ->latest('created_at')
-                ->limit(8)
-                ->get()
-            : collect();
+                ->latest('created_at');
+
+            $site->open_jobs_count = (clone $allOpenJobs)->count();
+            $site->setRelation('jobs', $allOpenJobs->limit(12)->get());
+        } else {
+            // Hitung total jobs open dan siapkan job open terbaru untuk panel publik.
+            $site->loadCount([
+                'jobs as open_jobs_count' => fn($q) => $q->where('status', 'open'),
+            ]);
+            $site->load([
+                'jobs' => fn($q) => $q->select($jobColumns)
+                    ->where('status', 'open')
+                    ->latest('created_at')
+                    ->limit(8),
+            ]);
+        }
 
         if ($request->wantsJson()) {
             return response()->json([
                 'site' => $site->only(['id', 'code', 'name', 'region', 'timezone', 'address']),
+                'is_all_sites_page' => $isAllSitesPage,
                 'open_jobs_count' => (int) $site->open_jobs_count,
                 'jobs' => $site->jobs->map(fn($job) => [
-                    'id' => $job->id,
-                    'title' => $job->title,
-                    'status' => $job->status,
-                    'site_id' => $job->site_id,
-                    'created_at' => optional($job->created_at)?->toISOString(),
-                ])->values(),
-                'fallback_jobs' => $fallbackJobs->map(fn($job) => [
                     'id' => $job->id,
                     'title' => $job->title,
                     'status' => $job->status,
@@ -127,6 +116,6 @@ class SitePublicController extends Controller
             ]);
         }
 
-        return view('sites.show', compact('site', 'fallbackJobs'));
+        return view('sites.show', compact('site', 'isAllSitesPage'));
     }
 }

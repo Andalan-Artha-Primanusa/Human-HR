@@ -57,24 +57,24 @@ class SitePublicControllerTest extends TestCase
         $response->assertSee('Open Job');
     }
 
-    public function test_show_displays_latest_open_jobs_when_current_site_has_no_jobs()
+    public function test_show_all_site_displays_open_jobs_from_all_active_sites()
     {
-        $site = Site::factory()->create(['is_active' => true, 'name' => 'Current Empty Site']);
+        $site = Site::factory()->create(['is_active' => true, 'code' => 'AST', 'name' => 'All Site']);
         $otherSite = Site::factory()->create(['is_active' => true, 'name' => 'Other Hiring Site']);
         $inactiveSite = Site::factory()->create(['is_active' => false, 'name' => 'Inactive Hiring Site']);
 
-        Job::factory()->create(['site_id' => $otherSite->id, 'status' => 'open', 'title' => 'Visible Fallback Job']);
-        Job::factory()->create(['site_id' => $inactiveSite->id, 'status' => 'open', 'title' => 'Hidden Inactive Fallback Job']);
-        Job::factory()->create(['site_id' => $otherSite->id, 'status' => 'closed', 'title' => 'Hidden Closed Fallback Job']);
+        Job::factory()->create(['site_id' => $otherSite->id, 'status' => 'open', 'title' => 'Visible All Site Job']);
+        Job::factory()->create(['site_id' => $inactiveSite->id, 'status' => 'open', 'title' => 'Hidden Inactive Site Job']);
+        Job::factory()->create(['site_id' => $otherSite->id, 'status' => 'closed', 'title' => 'Hidden Closed Job']);
 
         $response = $this->get(route('sites.show', $site));
 
         $response->assertStatus(200);
-        $response->assertSee('Lowongan terbaru');
-        $response->assertSee('Visible Fallback Job');
+        $response->assertSee('Lowongan terbaru semua site');
+        $response->assertSee('Visible All Site Job');
         $response->assertSee('Other Hiring Site');
-        $response->assertDontSee('Hidden Inactive Fallback Job');
-        $response->assertDontSee('Hidden Closed Fallback Job');
+        $response->assertDontSee('Hidden Inactive Site Job');
+        $response->assertDontSee('Hidden Closed Job');
     }
 
     public function test_show_links_to_all_sites_without_listing_other_sites()

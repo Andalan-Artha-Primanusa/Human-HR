@@ -26,9 +26,8 @@
         ? 'https://www.google.com/maps/search/?api=1&query=' . urlencode($lat . ',' . $lng)
         : 'https://www.google.com/maps/search/?api=1&query=' . urlencode($gmQuery ?: $site->code);
     $openJobs = $site->jobs ?? collect();
-    $fallbackJobs = $fallbackJobs ?? collect();
-    $displayJobs = $openJobs->isNotEmpty() ? $openJobs : $fallbackJobs;
-    $showingFallbackJobs = $openJobs->isEmpty() && $fallbackJobs->isNotEmpty();
+    $displayJobs = $openJobs;
+    $isAllSitesPage = $isAllSitesPage ?? false;
     $employmentPretty = [
         'fulltime' => 'Full-time',
         'contract' => 'Contract',
@@ -64,7 +63,7 @@
             <h1 id="site-detail-title" class="page-header__title">{{ $site->name }}</h1>
             <span class="inline-flex items-center gap-2 rounded-full px-3 py-0.5 text-[11px] font-bold uppercase tracking-[.12em]" style="background:rgba(255,255,255,.16);color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.32)">
               <span class="h-2 w-2 rounded-full {{ $site->is_active ? 'bg-emerald-400' : 'bg-amber-400' }}"></span>
-              {{ $site->is_active ? 'Site Aktif' : 'Site Nonaktif' }}
+              {{ $isAllSitesPage ? 'Semua Site Aktif' : ($site->is_active ? 'Site Aktif' : 'Site Nonaktif') }}
             </span>
           </div>
           <p class="page-header__desc">
@@ -94,7 +93,7 @@
 
           <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             <div class="rounded-xl border bg-[#fffaf5] p-4" style="border-color: {{ $BORD }}">
-              <p class="text-xs font-medium text-slate-500">Lowongan Aktif</p>
+              <p class="text-xs font-medium text-slate-500">{{ $isAllSitesPage ? 'Total Lowongan Aktif' : 'Lowongan Aktif' }}</p>
               <p class="mt-2 text-2xl font-bold text-slate-950">{{ (int) ($site->open_jobs_count ?? $openJobs->count()) }}</p>
             </div>
             @if($site->region)
@@ -163,14 +162,14 @@
 
     <section class="mt-6 rounded-2xl border bg-white p-5 shadow-sm sm:p-6" style="border-color: {{ $BORD }}">
       <div class="flex flex-wrap items-center justify-between gap-3">
-        <x-section-title title="{{ $showingFallbackJobs ? 'Lowongan terbaru' : 'Posisi yang sedang dibuka' }}" />
-        <a href="{{ $showingFallbackJobs ? route('jobs.index') : route('jobs.index', ['site' => $site->code]) }}" class="inline-flex items-center gap-2 text-sm font-semibold text-[#8b5e3c] hover:underline">
-          {{ $showingFallbackJobs ? 'Lihat semua lowongan' : 'Lihat lowongan site ini' }}
+        <x-section-title title="{{ $isAllSitesPage ? 'Lowongan terbaru semua site' : 'Posisi yang sedang dibuka' }}" />
+        <a href="{{ $isAllSitesPage ? route('jobs.index') : route('jobs.index', ['site' => $site->code]) }}" class="inline-flex items-center gap-2 text-sm font-semibold text-[#8b5e3c] hover:underline">
+          {{ $isAllSitesPage ? 'Lihat semua lowongan' : 'Lihat lowongan site ini' }}
           <svg class="h-4 w-4"><use href="#site-arrow"/></svg>
         </a>
       </div>
-      @if($showingFallbackJobs)
-        <p class="mt-2 text-sm text-slate-600">Site ini belum punya lowongan aktif, jadi ditampilkan lowongan terbaru dari site aktif lain.</p>
+      @if($isAllSitesPage)
+        <p class="mt-2 text-sm text-slate-600">Menampilkan lowongan aktif terbaru dari seluruh site aktif.</p>
       @endif
 
       @if($displayJobs->count())
@@ -196,7 +195,7 @@
                 @if($job->employment_type)
                   <span class="rounded-full bg-slate-50 px-2 py-1 ring-1 ring-inset ring-slate-200">{{ $employmentPretty[$job->employment_type] ?? ucfirst($job->employment_type) }}</span>
                 @endif
-                @if($showingFallbackJobs && $job->site)
+                @if($isAllSitesPage && $job->site)
                   <span class="rounded-full bg-[#fffaf5] px-2 py-1 text-[#8b5e3c] ring-1 ring-inset ring-[#ead8c5]">{{ $job->site->name }}</span>
                 @endif
                 <span class="rounded-full bg-slate-50 px-2 py-1 ring-1 ring-inset ring-slate-200">{{ (int) ($job->openings ?? 1) }} opening</span>
