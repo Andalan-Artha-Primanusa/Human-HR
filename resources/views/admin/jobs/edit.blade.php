@@ -440,7 +440,7 @@
         if (!rfr) return;
         if (codeEl) codeEl.value = rfr.code || '';
         if (titleEl && rfr.title) titleEl.value = rfr.title;
-        if (divisionEl) divisionEl.value = normalizeOptionValue(rfr.department);
+        if (divisionEl) divisionEl.value = rfr.department || '';
         if (divisionDisplay) divisionDisplay.value = rfr.department || '';
         if (levelEl) levelEl.value = normalizeOptionValue(rfr.level);
         if (levelDisplay) levelDisplay.value = rfr.level || '';
