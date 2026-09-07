@@ -337,15 +337,15 @@
 
           <div class="grid gap-3 mt-4">
             <label class="text-sm text-slate-600">Alamat KTP <span class="text-red-600">*</span></label>
-            <textarea required name="ktp_address" class="w-full px-3 py-2 border rounded-lg" rows="2" @class(['field-error' => $errors->has('ktp_address')])>{{ old('ktp_address', $profile->ktp_address) }}</textarea>
+            <textarea required name="ktp_address" class="w-full px-3 py-2 border rounded-lg" rows="2" @input="if(sameAsKtp) copyKtpToDomisili()" @class(['field-error' => $errors->has('ktp_address')])>{{ old('ktp_address', $profile->ktp_address) }}</textarea>
             @error('ktp_address')<p class="field-error-msg">{{ $message }}</p>@enderror
             <div class="grid gap-3 sm:grid-cols-6">
-              <input name="ktp_rt"  placeholder="RT"  value="{{ old('ktp_rt', $profile->ktp_rt) }}"  class="px-3 py-2 border rounded-lg">
-              <input name="ktp_rw"  placeholder="RW"  value="{{ old('ktp_rw', $profile->ktp_rw) }}"  class="px-3 py-2 border rounded-lg">
-              <input required name="ktp_village"  placeholder="Desa/Kelurahan" value="{{ old('ktp_village', $profile->ktp_village) }}" class="px-3 py-2 border rounded-lg">
-              <input required name="ktp_district" placeholder="Kecamatan" value="{{ old('ktp_district', $profile->ktp_district) }}" class="px-3 py-2 border rounded-lg">
+              <input name="ktp_rt"  placeholder="RT"  value="{{ old('ktp_rt', $profile->ktp_rt) }}"  class="px-3 py-2 border rounded-lg" @input="if(sameAsKtp) copyKtpToDomisili()">
+              <input name="ktp_rw"  placeholder="RW"  value="{{ old('ktp_rw', $profile->ktp_rw) }}"  class="px-3 py-2 border rounded-lg" @input="if(sameAsKtp) copyKtpToDomisili()">
+              <input required name="ktp_village"  placeholder="Desa/Kelurahan" value="{{ old('ktp_village', $profile->ktp_village) }}" class="px-3 py-2 border rounded-lg" @input="if(sameAsKtp) copyKtpToDomisili()">
+              <input required name="ktp_district" placeholder="Kecamatan" value="{{ old('ktp_district', $profile->ktp_district) }}" class="px-3 py-2 border rounded-lg" @input="if(sameAsKtp) copyKtpToDomisili()">
               <div>
-                <select required name="ktp_province" x-model="ktpProvince" @change="ktpCity = ''" class="px-3 py-2 border rounded-lg w-full">
+                <select required name="ktp_province" x-model="ktpProvince" @change="ktpCity = ''; if(sameAsKtp) copyKtpToDomisili()" class="px-3 py-2 border rounded-lg w-full">
                   <option value="">Provinsi *</option>
                   @foreach($provincesList as $p)
                     <option value="{{ $p }}" @selected(old('ktp_province', $profile->ktp_province) === $p)>{{ $p }}</option>
@@ -354,7 +354,7 @@
                 @error('ktp_province')<p class="field-error-msg">{{ $message }}</p>@enderror
               </div>
               <div>
-                <select required name="ktp_city" x-model="ktpCity" class="px-3 py-2 border rounded-lg w-full">
+                <select required name="ktp_city" x-model="ktpCity" @change="if(sameAsKtp) copyKtpToDomisili()" class="px-3 py-2 border rounded-lg w-full">
                   <option value="">Kab/Kota *</option>
                   <template x-for="c in (regions[ktpProvince] || [])" :key="c">
                     <option :value="c" :selected="c === ktpCity" x-text="c"></option>
@@ -364,11 +364,11 @@
               </div>
             </div>
             <div class="grid gap-3 sm:grid-cols-3">
-              <input required name="ktp_postal_code" placeholder="Kode Pos" value="{{ old('ktp_postal_code', $profile->ktp_postal_code) }}" class="px-3 py-2 border rounded-lg">
+              <input required name="ktp_postal_code" placeholder="Kode Pos" value="{{ old('ktp_postal_code', $profile->ktp_postal_code) }}" class="px-3 py-2 border rounded-lg" @input="if(sameAsKtp) copyKtpToDomisili()">
               @php $s = old('ktp_residence_status', $profile->ktp_residence_status); @endphp
-              <select name="ktp_residence_status" class="px-3 py-2 border rounded-lg">
+              <select name="ktp_residence_status" class="px-3 py-2 border rounded-lg" @change="if(sameAsKtp) copyKtpToDomisili()">
                 <option value="">Status Tempat Tinggal</option>
-                @foreach(['OWN' => 'Milik Sendiri', 'RENTAL' => 'Sewa', 'DORM' => 'Kost', 'FAMILY' => 'Keluarga', 'COMPANY' => 'Dinas', 'OTHER' => 'Lainnya'] as $k => $v)
+                @foreach(['OWN' => 'Milik Sendiri', 'RENT' => 'Sewa', 'DORM' => 'Kost', 'FAMILY' => 'Keluarga', 'COMPANY' => 'Dinas', 'OTHER' => 'Lainnya'] as $k => $v)
                       <option value="{{ $k }}" @selected($s === $k)>{{ $v }}</option>
                 @endforeach
               </select>
@@ -746,7 +746,7 @@
               <button type="button" x-show="step<3" @click.prevent="next()" class="flex-1 inline-flex items-center justify-center rounded-lg bg-[#a77d52] px-2 py-2 text-xs font-semibold text-white hover:opacity-95">
                 <span>Lanjut</span>
               </button>
-              <button type="submit" x-show="step===3" @click.prevent="if (validate(3)) confirmOpen=true" class="flex-1 inline-flex items-center justify-center rounded-lg bg-[#a77d52] px-2 py-2 text-xs font-semibold text-white hover:opacity-95">
+              <button type="button" x-show="step===3" @click.prevent="if (validate(3)) confirmOpen=true" class="flex-1 inline-flex items-center justify-center rounded-lg bg-[#a77d52] px-2 py-2 text-xs font-semibold text-white hover:opacity-95">
                 <span>Simpan</span>
               </button>
             </div>
@@ -762,7 +762,7 @@
               <span>Lanjut</span>
               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
             </button>
-            <button type="submit" x-show="step===3" @click.prevent="if (validate(3)) confirmOpen=true" class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-[#a77d52] px-3 py-2 text-sm font-semibold text-white hover:opacity-95">
+            <button type="button" x-show="step===3" @click.prevent="if (validate(3)) confirmOpen=true" class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-[#a77d52] px-3 py-2 text-sm font-semibold text-white hover:opacity-95">
               <span>Simpan & Selesai</span>
               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
             </button>
@@ -830,8 +830,28 @@
       ktpCity: @json(old('ktp_city', $profile->ktp_city)),
       domProvince: @json(old('domicile_province', $profile->domicile_province)),
       domCity: @json(old('domicile_city', $profile->domicile_city)),
+      domicile_address: @json(old('domicile_address', $profile->domicile_address)),
+      domicile_rt: @json(old('domicile_rt', $profile->domicile_rt)),
+      domicile_rw: @json(old('domicile_rw', $profile->domicile_rw)),
+      domicile_village: @json(old('domicile_village', $profile->domicile_village)),
+      domicile_district: @json(old('domicile_district', $profile->domicile_district)),
+      domicile_postal_code: @json(old('domicile_postal_code', $profile->domicile_postal_code)),
+      domicile_residence_status: @json(old('domicile_residence_status', $profile->domicile_residence_status)),
 
       init(){
+        this.$nextTick(() => {
+          const f = this.$el.closest('form');
+          if (!f) return;
+          const samePairs = [
+            ['domicile_address','ktp_address'], ['domicile_rt','ktp_rt'], ['domicile_rw','ktp_rw'],
+            ['domicile_village','ktp_village'], ['domicile_district','ktp_district'],
+            ['domicile_postal_code','ktp_postal_code'], ['domicile_residence_status','ktp_residence_status']
+          ];
+          const alreadySame = samePairs.every(([to, from]) => (f.elements.namedItem(to)?.value || '') === (f.elements.namedItem(from)?.value || ''))
+            && (this.domProvince || '') === (this.ktpProvince || '')
+            && (this.domCity || '') === (this.ktpCity || '');
+          this.sameAsKtp = alreadySame && !!(f.elements.namedItem('ktp_address')?.value || '').trim();
+        });
         this.$watch('sameAsKtp', v => { if(v) this.copyKtpToDomisili(); });
         this.$watch('ktpProvince', () => { if(this.sameAsKtp) this.copyKtpToDomisili(); });
         this.$watch('ktpCity', () => { if(this.sameAsKtp) this.copyKtpToDomisili(); });
@@ -848,11 +868,21 @@
         ];
         map.forEach(([to,from]) => {
           const el = f.elements.namedItem(to);
-          if(el && f.elements.namedItem(from)) el.value = f.elements[from].value;
+          const fromEl = f.elements.namedItem(from);
+          if(el && fromEl) {
+            const value = fromEl.value || '';
+            el.value = value;
+            this[to] = value;
+            el.dispatchEvent(new Event('input', { bubbles: true }));
+          }
         });
         const rs = f.elements['domicile_residence_status'];
         const ks = f.elements['ktp_residence_status'];
-        if(rs && ks) rs.value = ks.value;
+        if(rs && ks) {
+          rs.value = ks.value;
+          this.domicile_residence_status = ks.value || '';
+          rs.dispatchEvent(new Event('change', { bubbles: true }));
+        }
       }
     };
   }
@@ -922,6 +952,10 @@
         try {
           const raw = localStorage.getItem(this.DRAFT_KEY);
           if(!raw) return;
+          if (this.profileUpdatedAt) {
+            localStorage.removeItem(this.DRAFT_KEY);
+            return;
+          }
           const d = JSON.parse(raw);
           if (this.profileUpdatedAt && (!d.ts || d.ts <= this.profileUpdatedAt)) {
             localStorage.removeItem(this.DRAFT_KEY);

@@ -42,15 +42,19 @@
         $initials = mb_strtoupper(mb_substr($parts[0] ?? '', 0, 1) . mb_substr($parts[1] ?? '', 0, 1));
     }
 
-    // ===== Helper href: kalau belum verified -> arahkan ke notice =====
+    // ===== Helper href: route publik tetap bisa dibuka guest / belum verified =====
     $verifyNoticeUrl = Route::has('verification.notice') ? route('verification.notice') : url('/email/verify');
     $href = function (string $routeName, ...$params) use ($isVerified, $verifyNoticeUrl) {
         $params = $params[0] ?? [];
         if (!is_array($params)) {
             $params = [$params];
         }
-        if (!$isVerified)
+
+        $publicRoutes = ['jobs.index', 'jobs.show', 'sites.index', 'sites.show', 'welcome', 'search'];
+        if (!$isVerified && !in_array($routeName, $publicRoutes, true)) {
             return $verifyNoticeUrl;
+        }
+
         return Route::has($routeName) ? route($routeName, $params) : url('/');
     };
 

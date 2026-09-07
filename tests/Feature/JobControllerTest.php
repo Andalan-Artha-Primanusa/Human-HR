@@ -163,6 +163,14 @@ class JobControllerTest extends TestCase
         $response->assertViewHas('job');
     }
 
+    public function test_public_show_navbar_jobs_link_points_to_public_index_for_guest()
+    {
+        $response = $this->get(route('jobs.show', $this->job));
+
+        $response->assertStatus(200);
+        $response->assertSee('href="' . route('jobs.index') . '"', false);
+    }
+
     public function test_public_show_loads_site_and_company()
     {
         $response = $this->get(route('jobs.show', $this->job));
