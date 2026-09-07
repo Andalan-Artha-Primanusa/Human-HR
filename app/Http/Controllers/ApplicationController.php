@@ -256,6 +256,7 @@ class ApplicationController extends Controller
             'stage' => ['nullable', 'string', 'max:50'],
             'site'  => ['nullable', 'string', 'max:50'],
             'job'   => ['nullable', 'uuid'],
+            'job_status' => ['nullable', Rule::in(['open', 'not_open'])],
         ]);
 
         $q    = Str::limit(preg_replace('/[\x00-\x1F\x7F]/u', '', trim((string) ($filters['q'] ?? ''))) ?? '', 120, '');
@@ -263,6 +264,7 @@ class ApplicationController extends Controller
         $stage = $this->normalizeStage($filters['stage'] ?? '');
         $site  = (string) ($filters['site'] ?? '');
         $jobId = (string) ($filters['job'] ?? '');
+        $jobStatus = (string) ($filters['job_status'] ?? '');
 
         $sites = Site::query()
             ->orderBy('code')
@@ -305,6 +307,8 @@ class ApplicationController extends Controller
                 'applications as rejected_count' => fn($q) => $q->whereIn('overall_status', ['rejected', 'not_qualified']),
             ])
             ->when($site, fn($q) => $q->whereHas('site', fn($s) => $s->where('code', $site)))
+            ->when($jobStatus === 'open', fn($q) => $q->where('status', 'open'))
+            ->when($jobStatus === 'not_open', fn($q) => $q->where('status', '!=', 'open'))
             ->orderByDesc('applicants_count')
             ->orderByDesc('created_at')
             ->paginate(12, ['*'], 'jobs_page')
@@ -333,6 +337,8 @@ class ApplicationController extends Controller
             })
             ->when($stage, fn($q) => $q->where('current_stage', $stage))
             ->when($site,  fn($q) => $q->whereHas('job.site', fn($s) => $s->where('code', $site)))
+            ->when($jobStatus === 'open', fn($q) => $q->whereHas('job', fn($j) => $j->where('status', 'open')))
+            ->when($jobStatus === 'not_open', fn($q) => $q->whereHas('job', fn($j) => $j->where('status', '!=', 'open')))
             ->when($jobId !== '', fn($q) => $q->where('job_id', $jobId))
             ->orderByDesc('created_at')
             ->orderByDesc('id')

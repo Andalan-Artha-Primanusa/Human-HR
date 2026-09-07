@@ -110,7 +110,7 @@
       {{-- ===== FILTER / TOOLBAR ===== --}}
       <section class="overflow-hidden bg-white border rounded-2xl" style="border-color: {{ $BORD }}; border-radius: 1rem;">
         <div class="p-6 md:p-6 bg-white">
-          <form method="GET" class="grid grid-cols-1 gap-3 md:grid-cols-5">
+          <form method="GET" class="grid grid-cols-1 gap-3 md:grid-cols-6">
             {{-- q --}}
             <input name="q"
                    value="{{ e(request('q', '')) }}"
@@ -126,6 +126,15 @@
               @foreach($stageOptions as $k => $v)
                 <option value="{{ $k }}" @selected(request('stage') === $k)>{{ $v }}</option>
               @endforeach
+            </select>
+
+            {{-- job status --}}
+            <select name="job_status"
+                    class="w-full px-4 py-3 text-sm bg-white border shadow-sm rounded-xl border-slate-200 focus:outline-none focus:ring-2"
+                    style="--tw-ring-color: {{ $ACCENT }}">
+              <option value="">Semua Status Job</option>
+              <option value="open" @selected(request('job_status') === 'open')>Open</option>
+              <option value="not_open" @selected(request('job_status') === 'not_open')>Tidak Open</option>
             </select>
 
             {{-- site --}}
@@ -152,7 +161,7 @@
                 <span>Filter</span>
               </button>
 
-              @if(request()->hasAny(['q', 'stage', 'site']))
+              @if(request()->hasAny(['q', 'stage', 'site', 'job_status']))
                 <a href="{{ route('admin.applications.index') }}" class="abtn abtn-neutral w-full">
                   Reset
                 </a>
