@@ -255,18 +255,83 @@ class ApplicationController extends Controller
             'q'     => ['nullable', 'string', 'max:120'],
             'stage' => ['nullable', 'string', 'max:50'],
             'site'  => ['nullable', 'string', 'max:50'],
+            'job'   => ['nullable', 'uuid'],
         ]);
 
         $q    = Str::limit(preg_replace('/[\x00-\x1F\x7F]/u', '', trim((string) ($filters['q'] ?? ''))) ?? '', 120, '');
         $like = $q !== '' ? '%' . addcslashes($q, '\\%_') . '%' : null;
         $stage = $this->normalizeStage($filters['stage'] ?? '');
         $site  = (string) ($filters['site'] ?? '');
+        $jobId = (string) ($filters['job'] ?? '');
+
+        $sites = Site::query()
+            ->orderBy('code')
+            ->pluck('name', 'code');
+
+        $jobCards = Job::query()
+            ->select(['id', 'code', 'title', 'division', 'site_id', 'status', 'openings', 'created_at'])
+            ->with(['site:id,code,name'])
+            ->whereHas('applications', function ($q) use ($like, $stage, $site) {
+                $q->when($like !== null, function ($q) use ($like) {
+                    $q->where(function ($w) use ($like) {
+                        $w->whereHas('user', fn($u) => $u->where('name', 'like', $like)
+                            ->orWhere('email', 'like', $like))
+                          ->orWhereHas('job', fn($j) => $j->where('title', 'like', $like)
+                              ->orWhere('code', 'like', $like)
+                              ->orWhere('division', 'like', $like)
+                              ->orWhereHas('site', fn($s) => $s->where('code', 'like', $like)));
+                    });
+                })
+                ->when($stage, fn($q) => $q->where('current_stage', $stage))
+                ->when($site, fn($q) => $q->whereHas('job.site', fn($s) => $s->where('code', $site)));
+            })
+            ->withCount([
+                'applications as applicants_count' => function ($q) use ($like, $stage, $site) {
+                    $q->when($like !== null, function ($q) use ($like) {
+                        $q->where(function ($w) use ($like) {
+                            $w->whereHas('user', fn($u) => $u->where('name', 'like', $like)
+                                ->orWhere('email', 'like', $like))
+                              ->orWhereHas('job', fn($j) => $j->where('title', 'like', $like)
+                                  ->orWhere('code', 'like', $like)
+                                  ->orWhere('division', 'like', $like)
+                                  ->orWhereHas('site', fn($s) => $s->where('code', 'like', $like)));
+                        });
+                    })
+                    ->when($stage, fn($q) => $q->where('current_stage', $stage))
+                    ->when($site, fn($q) => $q->whereHas('job.site', fn($s) => $s->where('code', $site)));
+                },
+                'applications as active_count' => fn($q) => $q->where('overall_status', 'active'),
+                'applications as hired_count' => fn($q) => $q->where('overall_status', 'hired'),
+                'applications as rejected_count' => fn($q) => $q->whereIn('overall_status', ['rejected', 'not_qualified']),
+            ])
+            ->when($site, fn($q) => $q->whereHas('site', fn($s) => $s->where('code', $site)))
+            ->orderByDesc('applicants_count')
+            ->orderByDesc('created_at')
+            ->paginate(12, ['*'], 'jobs_page')
+            ->withQueryString();
+
+        $previewByJob = collect();
+        $jobIds = $jobCards->getCollection()->pluck('id')->filter()->values();
+        if ($jobIds->isNotEmpty()) {
+            $previewByJob = JobApplication::query()
+                ->whereIn('job_id', $jobIds)
+                ->with(['user:id,name,email', 'user.candidateProfile:id,user_id,full_name'])
+                ->latest()
+                ->get(['id', 'job_id', 'user_id', 'current_stage', 'overall_status', 'created_at'])
+                ->groupBy('job_id')
+                ->map(fn($rows) => $rows->take(3)->values());
+        }
+
+        $selectedJob = $jobId !== ''
+            ? Job::query()->with('site:id,code,name')->find($jobId)
+            : null;
 
         $apps = JobApplication::query()
             ->with([
-                'job:id,title,division,site_id',
+                'job:id,code,title,division,site_id,employment_type',
                 'job.site:id,code,name',
-                'user:id,name',
+                'user:id,name,email',
+                'user.candidateProfile:id,user_id,full_name,nik,email,phone',
                 'stages.actor:id,name',
                 'stages.user:id,name',
             ])
@@ -280,12 +345,13 @@ class ApplicationController extends Controller
             })
             ->when($stage, fn($q) => $q->where('current_stage', $stage))
             ->when($site,  fn($q) => $q->whereHas('job.site', fn($s) => $s->where('code', $site)))
+            ->when($jobId !== '', fn($q) => $q->where('job_id', $jobId))
             ->orderByDesc('created_at')
             ->orderByDesc('id')
             ->paginate(15)
             ->withQueryString();
 
-        return view('admin.applications.index', compact('apps'));
+        return view('admin.applications.index', compact('apps', 'jobCards', 'previewByJob', 'selectedJob', 'sites'));
     }
 
     /** Kanban board */

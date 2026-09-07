@@ -162,11 +162,121 @@
         </div>
       </section>
 
-      {{-- ===== TABEL ===== --}}
-      <section class="overflow-hidden bg-white border shadow-sm rounded-2xl border-slate-200" style="border-color: {{ $BORD }}">
-        <div class="overflow-x-auto">
-          @if($apps->count())
-            <table class="min-w-[960px] w-full text-sm">
+      @if(empty($selectedJob))
+        <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          @forelse($jobCards as $job)
+            <article class="flex flex-col bg-white border shadow-sm rounded-2xl border-slate-200">
+              <div class="p-5 border-b border-slate-100">
+                <div class="flex items-start justify-between gap-3">
+                  <div class="min-w-0">
+                    <div class="font-mono text-xs text-slate-500">{{ e($job->code) }}</div>
+                    <h2 class="mt-1 text-lg font-bold leading-snug text-slate-950">{{ e($job->title) }}</h2>
+                  </div>
+                  <span class="badge {{ strtolower((string) $job->status) === 'open' ? 'badge-green' : 'badge-slate' }}">
+                    {{ strtoupper(e($job->status)) }}
+                  </span>
+                </div>
+                <div class="flex flex-wrap gap-2 mt-4 text-xs text-slate-600">
+                  @if(filled($job->division))
+                    <span class="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 font-semibold">{{ e($job->division) }}</span>
+                  @endif
+                  @if($job->site)
+                    <span class="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1">{{ e($job->site->code) }} - {{ e($job->site->name) }}</span>
+                  @endif
+                  <span class="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1">Openings {{ (int) $job->openings }}</span>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-4 gap-2 p-5">
+                <div class="rounded-xl bg-[#f8f5f2] p-3">
+                  <div class="text-xs text-slate-500">Total</div>
+                  <div class="mt-1 text-xl font-bold text-slate-950">{{ (int) $job->applicants_count }}</div>
+                </div>
+                <div class="rounded-xl bg-blue-50 p-3">
+                  <div class="text-xs text-blue-700">Aktif</div>
+                  <div class="mt-1 text-xl font-bold text-blue-800">{{ (int) $job->active_count }}</div>
+                </div>
+                <div class="rounded-xl bg-emerald-50 p-3">
+                  <div class="text-xs text-emerald-700">Hired</div>
+                  <div class="mt-1 text-xl font-bold text-emerald-800">{{ (int) $job->hired_count }}</div>
+                </div>
+                <div class="rounded-xl bg-rose-50 p-3">
+                  <div class="text-xs text-rose-700">Reject</div>
+                  <div class="mt-1 text-xl font-bold text-rose-800">{{ (int) $job->rejected_count }}</div>
+                </div>
+              </div>
+
+              @php $previews = ($previewByJob ?? collect())->get($job->id, collect()); @endphp
+              @if($previews->count())
+                <div class="px-5 pb-4">
+                  <div class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Kandidat terbaru</div>
+                  <div class="space-y-2">
+                    @foreach($previews as $preview)
+                      @php
+                        $previewProfile = $preview->user?->candidateProfile;
+                        $previewName = $previewProfile?->full_name ?: ($preview->user?->name ?? 'Kandidat');
+                      @endphp
+                      <div class="flex items-center justify-between gap-3 rounded-xl border border-slate-100 bg-slate-50 px-3 py-2">
+                        <div class="min-w-0">
+                          <div class="truncate text-sm font-semibold text-slate-800">{{ e($previewName) }}</div>
+                          <div class="truncate text-xs text-slate-500">{{ e($PRETTY[$stageAlias[strtolower((string) $preview->current_stage)] ?? strtolower((string) $preview->current_stage)] ?? strtoupper(str_replace('_', ' ', (string) $preview->current_stage))) }}</div>
+                        </div>
+                        <span class="text-[11px] font-semibold text-slate-500">{{ optional($preview->created_at)->format('d M') }}</span>
+                      </div>
+                    @endforeach
+                  </div>
+                </div>
+              @endif
+
+              <div class="flex gap-2 p-5 pt-0 mt-auto">
+                <a class="abtn abtn-primary flex-1 justify-center" href="{{ route('admin.applications.index', array_merge(request()->except(['job', 'page', 'jobs_page']), ['job' => $job->id])) }}">
+                  <svg class="w-4 h-4"><use href="#i-user"/></svg>
+                  Lihat Kandidat
+                </a>
+                <a class="abtn abtn-secondary" target="_blank" href="{{ route('jobs.show', $job) }}">
+                  <svg class="w-4 h-4"><use href="#i-eye"/></svg>
+                  Job
+                </a>
+              </div>
+            </article>
+          @empty
+            <section class="p-10 text-center bg-white border border-dashed shadow-sm md:col-span-2 xl:col-span-3 rounded-2xl border-slate-300">
+              <div class="inline-flex items-center justify-center w-12 h-12 mb-3 border rounded-2xl border-slate-200 text-slate-400">
+                <svg class="w-6 h-6"><use href="#i-search"/></svg>
+              </div>
+              <div class="font-medium text-slate-700">Belum ada lowongan yang punya lamaran.</div>
+              <div class="mt-1 text-sm text-slate-500">Coba ubah filter atau cek Kanban Board.</div>
+            </section>
+          @endforelse
+        </section>
+
+        @if($jobCards->count())
+          <section class="p-4 bg-white border shadow-sm rounded-2xl" style="border-color: {{ $BORD }}">
+            {{ $jobCards->links() }}
+          </section>
+        @endif
+      @else
+        <section class="p-5 bg-white border shadow-sm rounded-2xl border-slate-200">
+          <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <a href="{{ route('admin.applications.index', request()->except(['job', 'page'])) }}" class="inline-flex items-center gap-1 text-sm font-semibold text-[#8b5e3c] hover:underline">
+                <svg class="w-4 h-4"><use href="#i-chevron-left"/></svg>
+                Kembali ke lowongan
+              </a>
+              <h2 class="mt-2 text-xl font-bold text-slate-950">{{ e($selectedJob->title) }}</h2>
+              <div class="mt-1 text-sm text-slate-500">{{ e($selectedJob->code) }} · {{ e($selectedJob->division) }} · {{ e($selectedJob->site?->code) }}</div>
+            </div>
+            <a class="abtn abtn-secondary" target="_blank" href="{{ route('jobs.show', $selectedJob) }}">
+              <svg class="w-4 h-4"><use href="#i-eye"/></svg>
+              Lihat Job
+            </a>
+          </div>
+        </section>
+
+        <section class="overflow-hidden bg-white border shadow-sm rounded-2xl border-slate-200" style="border-color: {{ $BORD }}">
+          <div class="overflow-x-auto">
+            @if($apps->count())
+              <table class="min-w-[960px] w-full text-sm">
               <thead class="text-white bg-[#a77d52]">
                 <tr>
                   <th class="px-4 py-3 font-semibold text-left">Kandidat</th>
@@ -196,20 +306,22 @@
                             default => 'badge-blue'
                         };
 
-                        $candidate = $app->candidate->name ?? ($app->user->name ?? ($app->name ?? '—'));
+                        $profile = $app->user?->candidateProfile;
+                        $candidate = $profile?->full_name ?: ($app->user->name ?? 'Kandidat');
+                        $candidateEmail = $profile?->email ?: ($app->user->email ?? null);
                       @endphp
 
                       <tr class="align-top transition hover:bg-[#f8f5f2]">
                         <td class="px-4 py-3">
                           <div class="font-medium text-black">
-                            @if(optional($app->candidate)->id && Route::has('admin.candidates.show'))
-                              <a href="{{ route('admin.candidates.show', $app->candidate) }}" target="_blank" class="hover:underline">{{ e($candidate) }}</a>
+                            @if($profile && Route::has('admin.candidates.show'))
+                              <a href="{{ route('admin.candidates.show', $profile) }}" target="_blank" class="hover:underline">{{ e($candidate) }}</a>
                             @else
                               {{ e($candidate) }}
                             @endif
                           </div>
-                          @if(!empty($app->candidate?->email))
-                            <div class="text-xs text-black">{{ e($app->candidate->email) }}</div>
+                          @if($candidateEmail)
+                            <div class="text-xs text-black">{{ e($candidateEmail) }}</div>
                           @endif
                         </td>
 
@@ -247,9 +359,9 @@
 
                         <td class="px-4 py-3">
                           <div class="flex flex-wrap justify-end gap-1.5">
-                            @if(optional($app->candidate)->id && Route::has('admin.candidates.show'))
+                            @if($profile && Route::has('admin.candidates.show'))
                               <a class="abtn abtn-sm abtn-secondary"
-                                 target="_blank" href="{{ route('admin.candidates.show', $app->candidate) }}">
+                                 target="_blank" href="{{ route('admin.candidates.show', $profile) }}">
                                 <svg class="w-4 h-4"><use href="#i-user"/></svg>
                                 Profil
                               </a>
@@ -281,27 +393,23 @@
                       </tr>
                 @endforeach
               </tbody>
-            </table>
+              </table>
 
-          @else
-            {{-- EMPTY STATE --}}
-            <div class="py-12 text-center">
-              <div class="inline-flex items-center justify-center w-12 h-12 mb-3 border border-dashed rounded-2xl border-slate-300 text-slate-400">
-                <svg class="w-6 h-6"><use href="#i-search"/></svg>
+            @else
+              <div class="py-12 text-center">
+                <div class="inline-flex items-center justify-center w-12 h-12 mb-3 border border-dashed rounded-2xl border-slate-300 text-slate-400">
+                  <svg class="w-6 h-6"><use href="#i-search"/></svg>
+                </div>
+                <div class="font-medium text-slate-700">Belum ada kandidat untuk filter ini.</div>
+                <div class="mt-1 text-sm text-slate-500">Coba ubah stage atau kembali ke daftar lowongan.</div>
               </div>
-              <div class="font-medium text-slate-700">Belum ada data aplikasi.</div>
-              <div class="mt-1 text-sm text-slate-500">Coba ubah filter atau cari lowongan.</div>
-<a href="{{ route('admin.jobs.index') }}" class="abtn abtn-primary mt-4">
-                <svg class="w-4 h-4"><use href="#i-search"/></svg>
-                Cari Lowongan
-              </a>
-            </div>
-          @endif
-        </div>
-      </section>
+            @endif
+          </div>
+        </section>
+      @endif
 
       {{-- ===== PAGINATION custom ringkas ===== --}}
-      @if($apps->count())
+      @if(!empty($selectedJob) && $apps->count())
         @php
             $perPage = max(1, (int) $apps->perPage());
             $current = (int) $apps->currentPage();
