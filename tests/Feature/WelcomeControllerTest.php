@@ -68,6 +68,27 @@ class WelcomeControllerTest extends TestCase
         }
     }
 
+    public function test_guest_does_not_see_jobs_from_inactive_sites()
+    {
+        $inactiveSite = Site::factory()->create(['is_active' => false]);
+
+        Job::create([
+            'title' => 'Hidden Inactive Site Job',
+            'slug' => 'hidden-inactive-site-job',
+            'code' => 'HISJ-01',
+            'description' => 'Test',
+            'status' => 'open',
+            'level' => 1,
+            'site_id' => $inactiveSite->id,
+        ]);
+
+        $response = $this->get(route('welcome'));
+
+        $response->assertStatus(200);
+        $jobs = $response->viewData('jobs');
+        $this->assertFalse($jobs->contains('title', 'Hidden Inactive Site Job'));
+    }
+
     public function test_guest_sees_sites_list()
     {
         Site::factory()->count(3)->create();
@@ -76,6 +97,32 @@ class WelcomeControllerTest extends TestCase
         $response->assertStatus(200);
 
         $this->assertNotEmpty($response->viewData('sitesSimple'));
+    }
+
+    public function test_guest_sees_only_active_sites_on_landing_page()
+    {
+        Site::factory()->create([
+            'code' => 'ACTIVE01',
+            'name' => 'Active Public Site',
+            'is_active' => true,
+        ]);
+        Site::factory()->create([
+            'code' => 'INACTIVE01',
+            'name' => 'Inactive Hidden Site',
+            'is_active' => false,
+            'latitude' => -6.2088,
+            'longitude' => 106.8456,
+        ]);
+
+        $response = $this->get(route('welcome'));
+
+        $response->assertStatus(200);
+        $sitesSimple = collect($response->viewData('sitesSimple'));
+        $sitesWithCoords = collect($response->viewData('sitesWithCoords'));
+
+        $this->assertTrue($sitesSimple->contains('name', 'Active Public Site'));
+        $this->assertFalse($sitesSimple->contains('name', 'Inactive Hidden Site'));
+        $this->assertFalse($sitesWithCoords->contains('name', 'Inactive Hidden Site'));
     }
 
     public function test_guest_sees_division_counts()

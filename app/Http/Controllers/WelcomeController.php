@@ -27,6 +27,7 @@ class WelcomeController extends Controller
         $jobsQuery = Job::query()
             ->select(['id', 'title', 'site_id', 'created_at', 'status'])
             ->with(['site:id,code,name,address,region'])
+            ->whereHas('site', fn($q) => $q->active())
             ->orderByDesc('created_at');
 
         // Tampilkan hanya yang "open" bila kolom status ada
@@ -75,7 +76,7 @@ class WelcomeController extends Controller
                         'job.site:id,code,name',
                         'stages' => fn($q) => $q->select(['id', 'application_id', 'stage_key', 'created_at'])->orderBy('created_at', 'asc'),
                     ])
-                    ->where('user_id', (int) $userId)
+                    ->where('user_id', $userId)
                     ->orderByDesc('created_at')
                     ->limit(6)
                     ->get();
@@ -91,6 +92,7 @@ class WelcomeController extends Controller
         // ===== Sites with coordinates for map (no cache, always fresh) =====
         $sitesWithCoords = Site::query()
             ->select(['id', 'code', 'name', 'latitude', 'longitude', 'address'])
+            ->active()
             ->whereNotNull('latitude')
             ->whereNotNull('longitude')
             ->get()
@@ -125,6 +127,7 @@ class WelcomeController extends Controller
     {
         return Site::query()
             ->select(['id', 'code', 'name'])
+            ->active()
             ->orderBy('name')
             ->get();
     }
@@ -192,7 +195,7 @@ class WelcomeController extends Controller
     {
         $counts = JobApplication::query()
             ->selectRaw('LOWER(COALESCE(overall_status, "submitted")) as k, COUNT(*) as total')
-            ->where('user_id', (int) $userId)
+            ->where('user_id', $userId)
             ->groupByRaw('LOWER(COALESCE(overall_status, "submitted"))')
             ->pluck('total', 'k');
 

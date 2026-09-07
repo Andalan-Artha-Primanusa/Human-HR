@@ -31,6 +31,20 @@ class SiteControllerTest extends TestCase
         $response->assertSee('Main Site');
     }
 
+    public function test_index_displays_inactive_sites_when_status_filter_is_empty()
+    {
+        Site::factory()->create([
+            'name' => 'Inactive Admin Site',
+            'is_active' => false,
+        ]);
+
+        $response = $this->actingAs($this->admin)->get(route('admin.sites.index'));
+
+        $response->assertStatus(200);
+        $response->assertSee('Inactive Admin Site');
+        $response->assertSee('INACTIVE');
+    }
+
     public function test_store_creates_site()
     {
         $this->actingAs($this->admin);
