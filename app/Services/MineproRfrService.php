@@ -368,7 +368,6 @@ class MineproRfrService
 
     public function approvedVacancies(string $startDate, ?string $endDate = null): array
     {
-        $endDate ??= $startDate;
         $url = $this->normalizeRfrUrl((string) config('services.minepro.rfr_url'));
         $apiKey = (string) config('services.minepro.api_key');
         $username = (string) config('services.minepro.basic_username');
@@ -390,6 +389,14 @@ class MineproRfrService
         }
 
         try {
+            $response = null;
+            $usedStartDate = $startDate;
+            $usedEndDate = $endDate;
+            $form = [
+                ['name' => 'StartDate', 'contents' => $startDate],
+                ['name' => 'EndDate', 'contents' => $endDate],
+            ];
+
             $response = Http::timeout((int) config('services.minepro.timeout', 15))
                 ->withBasicAuth($username, $password)
                 ->withHeaders([
@@ -397,27 +404,28 @@ class MineproRfrService
                     'Accept' => 'application/json',
                 ])
                 ->asMultipart()
-                ->post($url, [
-                    ['name' => 'StartDate', 'contents' => $startDate],
-                    ['name' => 'EndDate', 'contents' => $endDate],
-                ]);
+                ->post($url, $form);
 
             if (! $response->successful()) {
-                $this->lastVacancyMeta = [
-                    'ok' => false,
-                    'message' => 'Request MinePro RFR gagal.',
-                    'status' => $response->status(),
-                    'url' => $url,
-                    'start_date' => $startDate,
-                    'end_date' => $endDate,
-                    'raw_count' => 0,
-                    'count' => 0,
-                ];
-
                 Log::warning('MinePro RFR request failed.', [
                     'status' => $response->status(),
                     'body' => $response->body(),
+                    'start_date' => $startDate,
+                    'end_date' => $endDate,
                 ]);
+            }
+
+            if (! $response?->successful()) {
+                $this->lastVacancyMeta = [
+                    'ok' => false,
+                    'message' => 'Request MinePro RFR gagal.',
+                    'status' => $response?->status(),
+                    'url' => $url,
+                    'start_date' => $usedStartDate,
+                    'end_date' => $usedEndDate,
+                    'raw_count' => 0,
+                    'count' => 0,
+                ];
 
                 return [];
             }
@@ -457,8 +465,8 @@ class MineproRfrService
                 'message' => 'MinePro RFR berhasil dibaca.',
                 'status' => $response->status(),
                 'url' => $url,
-                'start_date' => $startDate,
-                'end_date' => $endDate,
+                'start_date' => $usedStartDate,
+                'end_date' => $usedEndDate,
                 'raw_count' => count($headerRows),
                 'count' => count($rows),
             ];

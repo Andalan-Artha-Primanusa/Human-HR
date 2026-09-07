@@ -94,6 +94,23 @@
 
       {{-- Tarik ulang data dari RFR MinePro --}}
       <div class="rounded-xl bg-white border px-4 py-3 text-sm" style="border-color: {{ $BORD }}">
+        <form method="GET" action="{{ route('admin.jobs.edit', $job) }}" class="mb-3 flex flex-wrap items-end gap-3">
+          <div>
+            <label class="label">StartDate RFR</label>
+            <input type="date" name="rfr_start_date" value="{{ $rfrStartDate ?? now()->startOfMonth()->format('Y-m-d') }}"
+                   class="input min-w-[180px]" style="--tw-ring-color: {{ $ACCENT }}">
+          </div>
+          <div>
+            <label class="label">EndDate RFR</label>
+            <input type="date" name="rfr_end_date" value="{{ $rfrEndDate ?? now()->endOfMonth()->format('Y-m-d') }}"
+                   min="{{ $rfrStartDate ?? now()->startOfMonth()->format('Y-m-d') }}"
+                   class="input min-w-[180px]" style="--tw-ring-color: {{ $ACCENT }}">
+          </div>
+          <button type="submit"
+                  class="inline-flex items-center rounded-lg bg-[#a77d52] px-4 py-2 text-sm font-semibold text-white hover:opacity-95">
+            Ambil RFR
+          </button>
+        </form>
         <div class="flex flex-wrap items-center gap-2">
           <div class="font-semibold text-[#5c3d1e]">Ambil ulang dari RFR MinePro</div>
           <select id="rfr_ref" class="input flex-1 min-w-[220px]" style="--tw-ring-color: {{ $ACCENT }}">
@@ -106,9 +123,9 @@
         <p class="mt-1 text-xs text-emerald-700" id="rfr_status"></p>
         <p class="mt-1 text-[11px] text-slate-400">
           @if(empty($rfrCompact))
-            Data RFR belum tersedia untuk bulan ini — field tetap bisa diedit manual.
+            Data RFR belum tersedia untuk periode ini. Ubah StartDate/EndDate lalu klik Ambil RFR.
           @else
-            {{ count($rfrCompact) }} RFR tersedia bulan ini. Tempel RFRRefID / Position_Ref lalu Terapkan untuk mengisi ulang field dari API.
+            {{ count($rfrCompact) }} RFR tersedia untuk periode ini. Pilih RFR untuk mengisi ulang field dari API.
           @endif
         </p>
       </div>

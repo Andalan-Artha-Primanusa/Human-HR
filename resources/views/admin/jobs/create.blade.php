@@ -82,6 +82,29 @@
         Kode lowongan (<code class="font-mono">code</code>) unik <strong>per company</strong>. Kamu boleh kosongkan Company bila job tidak terikat company tertentu.
       </div>
 
+      <form method="GET" action="{{ route('admin.jobs.create') }}"
+            class="rounded-xl bg-white text-[#7a5236] px-4 py-3 border text-sm flex flex-wrap items-end gap-3"
+            style="border-color: {{ $BORD }}">
+        <div>
+          <label class="label">StartDate RFR</label>
+          <input type="date" name="rfr_start_date" value="{{ $rfrStartDate ?? now()->startOfMonth()->format('Y-m-d') }}"
+                 class="input min-w-[180px]" style="--tw-ring-color: {{ $ACCENT }}">
+        </div>
+        <div>
+          <label class="label">EndDate RFR</label>
+          <input type="date" name="rfr_end_date" value="{{ $rfrEndDate ?? now()->endOfMonth()->format('Y-m-d') }}"
+                 min="{{ $rfrStartDate ?? now()->startOfMonth()->format('Y-m-d') }}"
+                 class="input min-w-[180px]" style="--tw-ring-color: {{ $ACCENT }}">
+        </div>
+        <button type="submit"
+                class="inline-flex items-center rounded-lg bg-[#a77d52] px-4 py-2 text-sm font-semibold text-white hover:opacity-95">
+          Ambil RFR
+        </button>
+        <div class="text-xs text-slate-500">
+          Pilih periode RFR MinePro dulu, lalu pilih RFR dari dropdown.
+        </div>
+      </form>
+
       {{-- Error summary --}}
       @if ($errors->any())
         <div class="px-4 py-3 border rounded-xl bg-rose-50 text-rose-700" style="border-color: #fecaca">
@@ -115,7 +138,7 @@
               </div>
               <p class="mt-1 text-xs text-emerald-700" id="rfr_status"></p>
               @if(empty($rfrVacancies))
-                <p class="mt-1 text-xs text-amber-700" id="rfr_hint_empty">Data RFR belum tersedia untuk rentang tanggal ini. Kamu tetap bisa isi Code manual.</p>
+                <p class="mt-1 text-xs text-amber-700" id="rfr_hint_empty">Data RFR belum tersedia untuk periode ini. Ubah StartDate/EndDate lalu klik Ambil RFR.</p>
               @else
                 <p class="mt-1 text-xs text-slate-500" id="rfr_hint">{{ count($rfrVacancies) }} RFR ditemukan dari API — form terisi otomatis dari RFR pertama. Tempel RFRRefID / Position_Ref untuk memakai RFR lain.</p>
               @endif

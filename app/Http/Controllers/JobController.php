@@ -217,14 +217,14 @@ class JobController extends Controller
         // (opsional) dropdown company
         $companies = Company::query()->select(['id', 'code', 'name'])->orderBy('code')->get();
 
-        $rfrStartDate = $request->query('rfr_start_date', '2020-01-01');
+        $rfrStartDate = $request->query('rfr_start_date', now()->startOfMonth()->format('Y-m-d'));
         $rfrStartDate = preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $rfrStartDate)
             ? (string) $rfrStartDate
-            : '2020-01-01';
-        $rfrEndDate = $request->query('rfr_end_date', '2030-12-31');
+            : now()->startOfMonth()->format('Y-m-d');
+        $rfrEndDate = $request->query('rfr_end_date', now()->endOfMonth()->format('Y-m-d'));
         $rfrEndDate = preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $rfrEndDate)
             ? (string) $rfrEndDate
-            : '2030-12-31';
+            : now()->endOfMonth()->format('Y-m-d');
         if ($rfrEndDate < $rfrStartDate) {
             $rfrEndDate = $rfrStartDate;
         }
@@ -307,8 +307,17 @@ class JobController extends Controller
 
         $companies = Company::query()->select(['id', 'code', 'name'])->orderBy('code')->get();
 
-        $rfrStartDate = '2020-01-01';
-        $rfrEndDate = '2030-12-31';
+        $rfrStartDate = request('rfr_start_date', now()->startOfMonth()->format('Y-m-d'));
+        $rfrStartDate = preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $rfrStartDate)
+            ? (string) $rfrStartDate
+            : now()->startOfMonth()->format('Y-m-d');
+        $rfrEndDate = request('rfr_end_date', now()->endOfMonth()->format('Y-m-d'));
+        $rfrEndDate = preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $rfrEndDate)
+            ? (string) $rfrEndDate
+            : now()->endOfMonth()->format('Y-m-d');
+        if ($rfrEndDate < $rfrStartDate) {
+            $rfrEndDate = $rfrStartDate;
+        }
         $rfrVacancies = $rfrService->approvedVacancies($rfrStartDate, $rfrEndDate);
         $rfrMeta = $rfrService->lastVacancyMeta();
 
