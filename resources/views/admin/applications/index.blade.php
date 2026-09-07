@@ -165,53 +165,53 @@
       @if(empty($selectedJob))
         <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           @forelse($jobCards as $job)
-            <article class="flex flex-col bg-white border shadow-sm rounded-2xl border-slate-200">
-              <div class="p-5 border-b border-slate-100">
+            <article class="flex flex-col bg-white border shadow-sm rounded-xl border-slate-200">
+              <div class="p-4 border-b border-slate-100">
                 <div class="flex items-start justify-between gap-3">
                   <div class="min-w-0">
                     <div class="font-mono text-xs text-slate-500">{{ e($job->code) }}</div>
-                    <h2 class="mt-1 text-lg font-bold leading-snug text-slate-950">{{ e($job->title) }}</h2>
+                    <h2 class="mt-1 text-base font-bold leading-snug text-slate-950">{{ e($job->title) }}</h2>
                   </div>
                   <span class="badge {{ strtolower((string) $job->status) === 'open' ? 'badge-green' : 'badge-slate' }}">
                     {{ strtoupper(e($job->status)) }}
                   </span>
                 </div>
-                <div class="flex flex-wrap gap-2 mt-4 text-xs text-slate-600">
+                <div class="flex flex-wrap gap-1.5 mt-3 text-xs text-slate-600">
                   @if(filled($job->division))
-                    <span class="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 font-semibold">{{ e($job->division) }}</span>
+                    <span class="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 font-semibold">{{ e($job->division) }}</span>
                   @endif
                   @if($job->site)
-                    <span class="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1">{{ e($job->site->code) }} - {{ e($job->site->name) }}</span>
+                    <span class="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5">{{ e($job->site->code) }} - {{ e($job->site->name) }}</span>
                   @endif
-                  <span class="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1">Openings {{ (int) $job->openings }}</span>
+                  <span class="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5">Openings {{ (int) $job->openings }}</span>
                 </div>
               </div>
 
-              <div class="grid grid-cols-4 gap-2 p-5">
-                <div class="rounded-xl bg-[#f8f5f2] p-3">
-                  <div class="text-xs text-slate-500">Total</div>
-                  <div class="mt-1 text-xl font-bold text-slate-950">{{ (int) $job->applicants_count }}</div>
+              <div class="grid grid-cols-4 gap-1.5 px-4 py-3">
+                <div class="rounded-lg bg-[#f8f5f2] px-2 py-2 text-center">
+                  <div class="text-[11px] leading-none text-slate-500">Total</div>
+                  <div class="mt-1 text-base font-bold text-slate-950">{{ (int) $job->applicants_count }}</div>
                 </div>
-                <div class="rounded-xl bg-blue-50 p-3">
-                  <div class="text-xs text-blue-700">Aktif</div>
-                  <div class="mt-1 text-xl font-bold text-blue-800">{{ (int) $job->active_count }}</div>
+                <div class="rounded-lg bg-blue-50 px-2 py-2 text-center">
+                  <div class="text-[11px] leading-none text-blue-700">Aktif</div>
+                  <div class="mt-1 text-base font-bold text-blue-800">{{ (int) $job->active_count }}</div>
                 </div>
-                <div class="rounded-xl bg-emerald-50 p-3">
-                  <div class="text-xs text-emerald-700">Hired</div>
-                  <div class="mt-1 text-xl font-bold text-emerald-800">{{ (int) $job->hired_count }}</div>
+                <div class="rounded-lg bg-emerald-50 px-2 py-2 text-center">
+                  <div class="text-[11px] leading-none text-emerald-700">Hired</div>
+                  <div class="mt-1 text-base font-bold text-emerald-800">{{ (int) $job->hired_count }}</div>
                 </div>
-                <div class="rounded-xl bg-rose-50 p-3">
-                  <div class="text-xs text-rose-700">Reject</div>
-                  <div class="mt-1 text-xl font-bold text-rose-800">{{ (int) $job->rejected_count }}</div>
+                <div class="rounded-lg bg-rose-50 px-2 py-2 text-center">
+                  <div class="text-[11px] leading-none text-rose-700">Reject</div>
+                  <div class="mt-1 text-base font-bold text-rose-800">{{ (int) $job->rejected_count }}</div>
                 </div>
               </div>
 
-              <div class="flex gap-2 p-5 pt-0 mt-auto">
-                <a class="abtn abtn-primary flex-1 justify-center" href="{{ route('admin.applications.index', array_merge(request()->except(['job', 'page', 'jobs_page']), ['job' => $job->id])) }}">
+              <div class="flex gap-2 px-4 pb-4 mt-auto">
+                <a class="abtn abtn-sm abtn-primary flex-1 justify-center" href="{{ route('admin.applications.index', array_merge(request()->except(['job', 'page', 'jobs_page']), ['job' => $job->id])) }}">
                   <svg class="w-4 h-4"><use href="#i-user"/></svg>
                   Lihat Kandidat
                 </a>
-                <a class="abtn abtn-secondary" target="_blank" href="{{ route('jobs.show', $job) }}">
+                <a class="abtn abtn-sm abtn-secondary" target="_blank" href="{{ route('jobs.show', $job) }}">
                   <svg class="w-4 h-4"><use href="#i-eye"/></svg>
                   Job
                 </a>
