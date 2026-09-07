@@ -206,28 +206,6 @@
                 </div>
               </div>
 
-              @php $previews = ($previewByJob ?? collect())->get($job->id, collect()); @endphp
-              @if($previews->count())
-                <div class="px-5 pb-4">
-                  <div class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Kandidat terbaru</div>
-                  <div class="space-y-2">
-                    @foreach($previews as $preview)
-                      @php
-                        $previewProfile = $preview->user?->candidateProfile;
-                        $previewName = $previewProfile?->full_name ?: ($preview->user?->name ?? 'Kandidat');
-                      @endphp
-                      <div class="flex items-center justify-between gap-3 rounded-xl border border-slate-100 bg-slate-50 px-3 py-2">
-                        <div class="min-w-0">
-                          <div class="truncate text-sm font-semibold text-slate-800">{{ e($previewName) }}</div>
-                          <div class="truncate text-xs text-slate-500">{{ e($PRETTY[$stageAlias[strtolower((string) $preview->current_stage)] ?? strtolower((string) $preview->current_stage)] ?? strtoupper(str_replace('_', ' ', (string) $preview->current_stage))) }}</div>
-                        </div>
-                        <span class="text-[11px] font-semibold text-slate-500">{{ optional($preview->created_at)->format('d M') }}</span>
-                      </div>
-                    @endforeach
-                  </div>
-                </div>
-              @endif
-
               <div class="flex gap-2 p-5 pt-0 mt-auto">
                 <a class="abtn abtn-primary flex-1 justify-center" href="{{ route('admin.applications.index', array_merge(request()->except(['job', 'page', 'jobs_page']), ['job' => $job->id])) }}">
                   <svg class="w-4 h-4"><use href="#i-user"/></svg>

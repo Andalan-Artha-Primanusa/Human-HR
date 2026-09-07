@@ -310,18 +310,6 @@ class ApplicationController extends Controller
             ->paginate(12, ['*'], 'jobs_page')
             ->withQueryString();
 
-        $previewByJob = collect();
-        $jobIds = $jobCards->getCollection()->pluck('id')->filter()->values();
-        if ($jobIds->isNotEmpty()) {
-            $previewByJob = JobApplication::query()
-                ->whereIn('job_id', $jobIds)
-                ->with(['user:id,name,email', 'user.candidateProfile:id,user_id,full_name'])
-                ->latest()
-                ->get(['id', 'job_id', 'user_id', 'current_stage', 'overall_status', 'created_at'])
-                ->groupBy('job_id')
-                ->map(fn($rows) => $rows->take(3)->values());
-        }
-
         $selectedJob = $jobId !== ''
             ? Job::query()->with('site:id,code,name')->find($jobId)
             : null;
@@ -351,7 +339,7 @@ class ApplicationController extends Controller
             ->paginate(15)
             ->withQueryString();
 
-        return view('admin.applications.index', compact('apps', 'jobCards', 'previewByJob', 'selectedJob', 'sites'));
+        return view('admin.applications.index', compact('apps', 'jobCards', 'selectedJob', 'sites'));
     }
 
     /** Kanban board */
