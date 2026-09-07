@@ -81,14 +81,6 @@ class SitePublicController extends Controller
                 ->limit(8),
         ]);
 
-        $otherSites = Site::query()
-            ->select(['id', 'code', 'name', 'region'])
-            ->active()
-            ->whereKeyNot($site->id)
-            ->orderBy('name')
-            ->limit(8)
-            ->get();
-
         if ($request->wantsJson()) {
             return response()->json([
                 'site' => $site->only(['id', 'code', 'name', 'region', 'timezone', 'address']),
@@ -103,6 +95,6 @@ class SitePublicController extends Controller
             ]);
         }
 
-        return view('sites.show', compact('site', 'otherSites'));
+        return view('sites.show', compact('site'));
     }
 }

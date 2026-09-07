@@ -26,7 +26,6 @@
         ? 'https://www.google.com/maps/search/?api=1&query=' . urlencode($lat . ',' . $lng)
         : 'https://www.google.com/maps/search/?api=1&query=' . urlencode($gmQuery ?: $site->code);
     $openJobs = $site->jobs ?? collect();
-    $otherSites = $otherSites ?? collect();
     $employmentPretty = [
         'fulltime' => 'Full-time',
         'contract' => 'Contract',
@@ -240,36 +239,6 @@
         </div>
       @endif
     </section>
-
-    @if($otherSites->count())
-      <section class="mt-6 rounded-2xl border bg-white p-5 shadow-sm sm:p-6" style="border-color: {{ $BORD }}">
-        <div class="flex flex-wrap items-center justify-between gap-3">
-          <x-section-title title="Site Lainnya" />
-          <a href="{{ route('sites.index') }}" class="inline-flex items-center gap-2 text-sm font-semibold text-[#8b5e3c] hover:underline">
-            Semua Site
-            <svg class="h-4 w-4"><use href="#site-arrow"/></svg>
-          </a>
-        </div>
-
-        <div class="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          @foreach($otherSites as $otherSite)
-            <a href="{{ route('sites.show', $otherSite) }}"
-               class="rounded-xl border bg-white p-4 transition hover:-translate-y-0.5 hover:border-[#a77d52] hover:shadow-md"
-               style="border-color: {{ $BORD }}">
-              <div class="flex items-start gap-3">
-                <span class="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#fffaf5] text-[#8b5e3c] ring-1 ring-inset ring-[#ead8c5]">
-                  <svg class="h-5 w-5"><use href="#site-pin"/></svg>
-                </span>
-                <span class="min-w-0">
-                  <span class="block truncate text-sm font-bold text-slate-950">{{ $otherSite->name }}</span>
-                  <span class="mt-1 block truncate text-xs text-slate-500">{{ $otherSite->code }}@if($otherSite->region) • {{ $otherSite->region }} @endif</span>
-                </span>
-              </div>
-            </a>
-          @endforeach
-        </div>
-      </section>
-    @endif
 
     <p class="mt-5 text-xs text-slate-500">
       Diperbarui terakhir {{ optional($site->updated_at)->format('d M Y H:i') ?? '-' }}

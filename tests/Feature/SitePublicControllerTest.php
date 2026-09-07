@@ -57,7 +57,7 @@ class SitePublicControllerTest extends TestCase
         $response->assertSee('Open Job');
     }
 
-    public function test_show_displays_other_active_sites()
+    public function test_show_links_to_all_sites_without_listing_other_sites()
     {
         $site = Site::factory()->create(['is_active' => true, 'name' => 'Current Site']);
         $otherActive = Site::factory()->create(['is_active' => true, 'name' => 'Other Active Site']);
@@ -66,8 +66,8 @@ class SitePublicControllerTest extends TestCase
         $response = $this->get(route('sites.show', $site));
 
         $response->assertStatus(200);
-        $response->assertSee('Site Lainnya');
-        $response->assertSee('Other Active Site');
+        $response->assertSee('Semua Site');
+        $response->assertDontSee('Other Active Site');
         $response->assertDontSee('Other Inactive Site');
         $response->assertSee('href="' . route('sites.index') . '"', false);
     }
