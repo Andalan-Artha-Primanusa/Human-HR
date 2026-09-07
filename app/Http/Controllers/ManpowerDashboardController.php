@@ -290,7 +290,7 @@ class ManpowerDashboardController extends Controller
                 return [
                     'id' => $job->id,
                     'title' => $job->title,
-                    'division' => Job::DIVISIONS[$job->division ?: ''] ?? strtoupper((string) ($job->division ?: '-')),
+                    'division' => (string) ($job->division ?: '-'),
                     'level_key' => $job->level ?: 'unknown',
                     'level_label' => Job::LEVEL_LABELS[$job->level ?: ''] ?? strtoupper((string) ($job->level ?: 'unknown')),
                     'openings' => (int) ($job->openings ?? 0),
@@ -340,7 +340,7 @@ class ManpowerDashboardController extends Controller
                     return [
                         'no' => $index + 1,
                         'site' => trim(($job->site?->code ? $job->site->code . ' - ' : '') . ($job->site?->name ?? '-')),
-                        'department' => Job::DIVISIONS[$job->division ?: ''] ?? strtoupper((string) ($job->division ?: '-')),
+                        'department' => (string) ($job->division ?: '-'),
                         'level' => Job::LEVEL_LABELS[$job->level ?: ''] ?? strtoupper((string) ($job->level ?: '-')),
                         'position' => $job->title,
                         'mpp' => $mpp,

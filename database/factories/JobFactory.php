@@ -19,7 +19,7 @@ class JobFactory extends Factory
         return [
             'title' => $this->faker->jobTitle,
             'code' => strtoupper($this->faker->unique()->bothify('??-###')),
-            'division' => $this->faker->randomElement(array_keys(\App\Models\Job::DIVISIONS)),
+            'division' => strtoupper($this->faker->lexify('???')),
             'description' => $this->faker->paragraph,
             'status' => 'open',
             'level' => $this->faker->randomElement(\App\Models\Job::LEVELS),

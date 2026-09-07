@@ -55,21 +55,6 @@ class Job extends Model
         'non_staff'       => 'Non Staff',
     ];
 
-    /** DIVISIONS (canonical slug => label) */
-    public const DIVISIONS = [
-        'engineering' => 'Engineering',
-        'hr' => 'Human Resources',
-        'it' => 'Information Technology',
-        'finance' => 'Finance & Accounting',
-        'marketing' => 'Marketing',
-        'sales' => 'Sales',
-        'operations' => 'Operations',
-        'admin' => 'Administration',
-        'scm' => 'SCM',
-        'she' => 'SHE',
-        'plant' => 'Plant',
-    ];
-
     protected $fillable = [
         'company_id',
         'code',
@@ -125,35 +110,18 @@ class Job extends Model
         return $key ? (self::LEVEL_LABELS[$key] ?? strtoupper($key)) : null;
     }
 
-    /* =====================
-     | Normalizer: DIVISION
-     |=====================*/
-    public static function normalizeDivision(?string $raw): ?string
-    {
-        if (!$raw)
-            return null;
-        $s = strtolower(trim($raw));
-        $s = str_replace([" ", "\xC2\xA0"], '_', $s);
-        $aliases = [
-            'human_resources' => 'hr',
-            'people' => 'hr',
-            'information_technology' => 'it',
-            'ops' => 'operations',
-        ];
-        $s = $aliases[$s] ?? $s;
-        return array_key_exists($s, self::DIVISIONS) ? $s : null;
-    }
-
     public function setDivisionAttribute($value): void
     {
-        $norm = self::normalizeDivision(is_string($value) ? $value : null);
-        $this->attributes['division'] = $norm ?: null;
+        $division = is_string($value)
+            ? preg_replace('/[\x00-\x1F\x7F]/u', '', trim($value))
+            : null;
+
+        $this->attributes['division'] = $division !== '' ? $division : null;
     }
 
     public function getDivisionLabelAttribute(): ?string
     {
-        $key = $this->attributes['division'] ?? null;
-        return $key ? (self::DIVISIONS[$key] ?? strtoupper($key)) : null;
+        return $this->attributes['division'] ?? null;
     }
 
     /* =====================
@@ -300,8 +268,8 @@ class Job extends Model
 
     public function scopeInDivision($q, ?string $division)
     {
-        $norm = self::normalizeDivision($division);
-        return $norm ? $q->where('division', $norm) : $q;
+        $division = is_string($division) ? trim($division) : '';
+        return $division !== '' ? $q->where('division', $division) : $q;
     }
 
     public function scopeSearch($q, ?string $term)

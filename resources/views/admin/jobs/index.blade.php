@@ -149,7 +149,7 @@
 
                         {{-- Division --}}
                         <td class="px-4 py-3">
-                          <span class="text-slate-800">{{ e($job->division ?: 'Belum tersedia') }}</span>
+                          <span class="text-slate-800">{{ e($job->division) }}</span>
                         </td>
 
                         {{-- Company --}}

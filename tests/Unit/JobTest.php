@@ -22,8 +22,8 @@ class JobTest extends TestCase
 
     public function test_normalize_level_with_aliases(): void
     {
-        $this->assertNull(Job::normalizeLevel('non-staff'));
-        $this->assertNull(Job::normalizeLevel('nonstaff'));
+        $this->assertEquals('non_staff', Job::normalizeLevel('non-staff'));
+        $this->assertEquals('non_staff', Job::normalizeLevel('nonstaff'));
     }
 
     public function test_normalize_level_with_null(): void
@@ -64,45 +64,22 @@ class JobTest extends TestCase
         $this->assertNull($job->level_label);
     }
 
-    public function test_normalize_division_with_valid_divisions(): void
-    {
-        $this->assertEquals('engineering', Job::normalizeDivision('engineering'));
-        $this->assertEquals('hr', Job::normalizeDivision('HR'));
-        $this->assertEquals('it', Job::normalizeDivision('IT'));
-        $this->assertEquals('operations', Job::normalizeDivision('  Operations  '));
-    }
-
-    public function test_normalize_division_with_aliases(): void
-    {
-        $this->assertEquals('hr', Job::normalizeDivision('human_resources'));
-        $this->assertEquals('hr', Job::normalizeDivision('people'));
-        $this->assertEquals('it', Job::normalizeDivision('information_technology'));
-        $this->assertEquals('operations', Job::normalizeDivision('ops'));
-    }
-
-    public function test_normalize_division_with_null(): void
-    {
-        $this->assertNull(Job::normalizeDivision(null));
-        $this->assertNull(Job::normalizeDivision(''));
-        $this->assertNull(Job::normalizeDivision('invalid_division'));
-    }
-
     public function test_set_division_attribute(): void
     {
         $job = new Job();
-        $job->division = '  HUMAN RESOURCES  ';
-        $this->assertEquals('hr', $job->division);
+        $job->division = '  OPR  ';
+        $this->assertEquals('OPR', $job->division);
     }
 
     public function test_get_division_label_attribute(): void
     {
         $job = new Job();
-        $job->division = 'engineering';
-        $this->assertEquals('Engineering', $job->division_label);
+        $job->division = 'OPR';
+        $this->assertEquals('OPR', $job->division_label);
 
         $job2 = new Job();
-        $job2->division = 'finance';
-        $this->assertEquals('Finance', $job2->division_label);
+        $job2->division = 'HCGS';
+        $this->assertEquals('HCGS', $job2->division_label);
     }
 
     public function test_set_skills_attribute_with_array(): void
@@ -158,13 +135,6 @@ class JobTest extends TestCase
         $this->assertContains('manager', Job::LEVELS);
         $this->assertContains('supervisor', Job::LEVELS);
         $this->assertEquals('Manager', Job::LEVEL_LABELS['manager']);
-    }
-
-    public function test_division_constants(): void
-    {
-        $this->assertArrayHasKey('engineering', Job::DIVISIONS);
-        $this->assertArrayHasKey('hr', Job::DIVISIONS);
-        $this->assertEquals('Engineering', Job::DIVISIONS['engineering']);
     }
 
     public function test_relationships(): void

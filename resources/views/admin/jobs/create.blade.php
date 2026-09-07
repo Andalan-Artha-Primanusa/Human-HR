@@ -7,7 +7,7 @@
     $ACCENT_DARK = '#8b5e3c'; // dark brown
     $BORD = '#e5e7eb'; // slate-200
 
-    // Opsi Level & Division dari Model (fallback)
+    // Opsi Level dari Model (fallback)
     $levels = \App\Models\Job::LEVEL_LABELS ?? [
         'bod' => 'BOD',
         'manager' => 'Manager',
@@ -16,17 +16,6 @@
         'staff' => 'Staff',
         'non_staff' => 'Non staff'
     ];
-    $divisions = \App\Models\Job::DIVISIONS ?? [
-        'engineering' => 'Engineering',
-        'hr' => 'Human Resources',
-        'it' => 'Information Technology',
-      'finance' => 'Finance & Accounting',
-        'marketing' => 'Marketing',
-        'sales' => 'Sales',
-        'operations' => 'Operations',
-        'admin' => 'Administration',
-    ];
-
     // Dataset RFR ringkas untuk lookup client-side (ISO string → readable)
     $rfrCompact = collect($rfrVacancies ?? [])->map(function ($rfr) {
         return [

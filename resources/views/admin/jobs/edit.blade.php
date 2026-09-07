@@ -15,17 +15,6 @@
         'staff' => 'Staff',
         'non_staff' => 'Non staff'
     ];
-    $divisions = \App\Models\Job::DIVISIONS ?? [
-        'engineering' => 'Engineering',
-        'hr' => 'Human Resources',
-        'it' => 'Information Technology',
-      'finance' => 'Finance & Accounting',
-        'marketing' => 'Marketing',
-        'sales' => 'Sales',
-        'operations' => 'Operations',
-        'admin' => 'Administration',
-    ];
-
     // Dataset RFR ringkas untuk lookup client-side
     $rfrCompact = collect($rfrVacancies ?? [])->map(function ($rfr) {
         return [
@@ -246,12 +235,11 @@
           <div>
             <label class="label">Status</label>
             @php $st = $val('status', $job->status ?? 'open'); @endphp
-            <select class="input hidden" name="status" style="--tw-ring-color: {{ $ACCENT }}">
+            <select class="input" name="status" style="--tw-ring-color: {{ $ACCENT }}">
               <option value="draft"  @selected($st === 'draft')>Draft</option>
               <option value="open"   @selected($st === 'open')>Open</option>
               <option value="closed" @selected($st === 'closed')>Closed</option>
             </select>
-            <input class="input bg-slate-50 cursor-not-allowed" value="{{ ucfirst($st) }}" readonly>
             @error('status')<p class="mt-1 text-xs text-rose-600">{{ $message }}</p>@enderror
           </div>
 
