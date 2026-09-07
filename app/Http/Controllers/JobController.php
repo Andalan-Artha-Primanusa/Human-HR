@@ -295,7 +295,7 @@ class JobController extends Controller
     /**
      * ADMIN EDIT FORM
      */
-    public function edit(Job $job)
+    public function edit(Job $job, MineproRfrService $rfrService)
     {
         $job->loadMissing('site:id,code,name', 'company:id,code,name');
 
@@ -307,7 +307,12 @@ class JobController extends Controller
 
         $companies = Company::query()->select(['id', 'code', 'name'])->orderBy('code')->get();
 
-        return view('admin.jobs.edit', compact('job', 'sites', 'companies'));
+        $rfrStartDate = now()->startOfMonth()->format('Y-m-d');
+        $rfrEndDate = now()->endOfMonth()->format('Y-m-d');
+        $rfrVacancies = $rfrService->approvedVacancies($rfrStartDate, $rfrEndDate);
+        $rfrMeta = $rfrService->lastVacancyMeta();
+
+        return view('admin.jobs.edit', compact('job', 'sites', 'companies', 'rfrVacancies', 'rfrStartDate', 'rfrEndDate', 'rfrMeta'));
     }
 
     /**

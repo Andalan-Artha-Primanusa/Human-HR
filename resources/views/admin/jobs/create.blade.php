@@ -26,6 +26,27 @@
         'operations' => 'Operations',
         'admin' => 'Administration',
     ];
+
+    // Dataset RFR ringkas untuk lookup client-side (ISO string → readable)
+    $rfrCompact = collect($rfrVacancies ?? [])->map(function ($rfr) {
+        return [
+            'code' => $rfr['code'] ?? null,
+            'position_ref' => $rfr['position_ref'] ?? null,
+            'title' => $rfr['title'] ?? null,
+            'department' => $rfr['department'] ?? null,
+            'level' => $rfr['level'] ?? $rfr['status_position'] ?? null,
+            'site_code' => $rfr['site_code'] ?? $rfr['work_location'] ?? null,
+            'company_code' => $rfr['company_code'] ?? null,
+            'description' => $rfr['description'] ?? null,
+            'facilities' => $rfr['facilities'] ?? null,
+            'work_experience' => $rfr['work_experience'] ?? null,
+            'education_level' => $rfr['education_level'] ?? null,
+            'discipline' => $rfr['discipline'] ?? null,
+            'program_study' => $rfr['program_study'] ?? null,
+            'candidate_type' => $rfr['candidate_type'] ?? null,
+            'qty_required' => (int) ($rfr['qty_required'] ?? 0),
+        ];
+    })->values()->all();
 @endphp
 
 @section('content')
@@ -105,57 +126,32 @@
           {{-- Code --}}
           <div class="grid gap-4 md:col-span-2 md:grid-cols-2">
             <div>
-              <label class="label">Pilih RFR MinePro</label>
-              <select class="input" id="rfr_select" style="--tw-ring-color: {{ $ACCENT }}">
-                <option value="">— Pilih RFR —</option>
-                @foreach(($rfrVacancies ?? []) as $rfr)
-                  @php
-                    $educationLabels = collect($rfr['educations'] ?? [])
-                        ->map(function ($edu) {
-                            return collect([
-                                $edu['education_level'] ?? null,
-                                $edu['discipline'] ?? null,
-                                $edu['program_study'] ?? null,
-                            ])->filter(fn($value) => filled($value) && trim((string) $value) !== '-')->implode(' / ');
-                        })
-                        ->filter(fn($value) => filled($value))
-                        ->values();
-                    $educationLabel = $educationLabels->implode('  |  ');
-                  @endphp
-                  <option value="{{ $rfr['code'] }}"
-                          data-title="{{ e($rfr['title']) }}"
-                          data-department="{{ e($rfr['department'] ?? '') }}"
-                          data-level="{{ e($rfr['level'] ?? $rfr['status_position'] ?? '') }}"
-                          data-location="{{ e($rfr['site_code'] ?? $rfr['work_location'] ?? '') }}"
-                          data-company-code="{{ e($rfr['company_code'] ?? '') }}"
-                          data-description="{{ e($rfr['description'] ?? '') }}"
-                          data-facilities="{{ e($rfr['facilities'] ?? '') }}"
-                          data-experience="{{ e($rfr['work_experience'] ?? '') }}"
-                          data-education="{{ e($rfr['education_level'] ?? '') }}"
-                          data-education-detail-id="{{ e($rfr['education_detail_id'] ?? '') }}"
-                          data-discipline="{{ e($rfr['discipline'] ?? '') }}"
-                          data-program-study="{{ e($rfr['program_study'] ?? '') }}"
-                          data-candidate-type="{{ e($rfr['candidate_type'] ?? '') }}"
-                          data-qty="{{ e($rfr['qty_required'] ?? '') }}">
-                    #{{ $rfr['api_row_no'] ?? $loop->iteration }} · {{ $rfr['code'] }} — {{ $rfr['title'] ?: 'Tanpa posisi' }}{{ !empty($rfr['project_id']) ? ' · '.$rfr['project_id'] : '' }}{{ $educationLabel ? ' · '.$educationLabel : '' }}
-                  </option>
-                @endforeach
-              </select>
+              <label class="label">RFR MinePro</label>
+              <div class="flex gap-2">
+                <input type="text" id="rfr_ref" class="input flex-1"
+                       placeholder="Tempel RFRRefID atau Position_Ref. Mis. 126 atau 0006/AAP-BGG/RFR/NS/09/2026"
+                       style="--tw-ring-color: {{ $ACCENT }}">
+                <button type="button" id="rfr_apply_btn"
+                        class="shrink-0 inline-flex items-center rounded-lg bg-[#a77d52] px-4 py-2 text-sm font-semibold text-white hover:opacity-95">
+                  Terapkan
+                </button>
+              </div>
+              <p class="mt-1 text-xs text-emerald-700" id="rfr_status"></p>
               @if(empty($rfrVacancies))
-                <p class="mt-1 text-xs text-amber-700">Data RFR belum tersedia. Kamu tetap bisa isi Code manual.</p>
+                <p class="mt-1 text-xs text-amber-700" id="rfr_hint_empty">Data RFR belum tersedia untuk rentang tanggal ini. Kamu tetap bisa isi Code manual.</p>
               @else
-                <p class="mt-1 text-xs text-slate-500">{{ count($rfrVacancies) }} RFR ditemukan dari API, tiap RFR menampilkan detail pendidikan/jurusannya.</p>
+                <p class="mt-1 text-xs text-slate-500" id="rfr_hint">{{ count($rfrVacancies) }} RFR ditemukan dari API — form terisi otomatis dari RFR pertama. Tempel RFRRefID / Position_Ref untuk memakai RFR lain.</p>
               @endif
               @if(!empty($rfrMeta))
                 <p class="mt-1 text-[11px] text-slate-400 break-all">
-                  MinePro: {{ $rfrMeta['url'] ?? '-' }} · StartDate {{ $rfrMeta['start_date'] ?? ($rfrStartDate ?? '-') }} · EndDate {{ $rfrMeta['end_date'] ?? ($rfrEndDate ?? '-') }} · raw {{ (int) ($rfrMeta['raw_count'] ?? 0) }} · dropdown {{ (int) ($rfrMeta['count'] ?? count($rfrVacancies ?? [])) }}{{ empty($rfrMeta['ok']) && !empty($rfrMeta['message']) ? ' · '.$rfrMeta['message'] : '' }}
+                  MinePro: {{ $rfrMeta['url'] ?? '-' }} · StartDate {{ $rfrMeta['start_date'] ?? ($rfrStartDate ?? '-') }} · EndDate {{ $rfrMeta['end_date'] ?? ($rfrEndDate ?? '-') }} · raw {{ (int) ($rfrMeta['raw_count'] ?? 0) }} · tersedia {{ (int) ($rfrMeta['count'] ?? count($rfrVacancies ?? [])) }}{{ empty($rfrMeta['ok']) && !empty($rfrMeta['message']) ? ' · '.$rfrMeta['message'] : '' }}
                 </p>
               @endif
             </div>
             <div>
             <label class="label">Code <span class="text-rose-600">*</span></label>
             <input class="input" name="code" id="code" value="{{ old('code') }}" required maxlength="50"
-               placeholder="Mis. MCH-OPR-01" style="--tw-ring-color: {{ $ACCENT }}" autofocus>
+               placeholder="Otomatis dari RFR (RFRRefID)" style="--tw-ring-color: {{ $ACCENT }}">
             @error('code')<p class="mt-1 text-xs text-rose-600">{{ $message }}</p>@enderror
             </div>
           </div>
@@ -333,7 +329,11 @@
         const siteCode = document.getElementById('site_code');
         const compSel = document.getElementById('company_id');
         const compCode = document.getElementById('company_code');
-        const rfrSelect = document.getElementById('rfr_select');
+        const rfrInput = document.getElementById('rfr_ref');
+        const rfrApplyBtn = document.getElementById('rfr_apply_btn');
+        const rfrStatus = document.getElementById('rfr_status');
+        const rfrList = @json($rfrCompact);
+        const oldCode = @json(old('code', null));
         const code = document.getElementById('code');
         const title = document.querySelector('[name="title"]');
         const division = document.querySelector('[name="division"]');
@@ -424,36 +424,34 @@
           }
         }
 
-        rfrSelect?.addEventListener('change', function () {
-          const opt = rfrSelect.options[rfrSelect.selectedIndex];
-          if (!opt || !opt.value) return;
-
-          if (code) code.value = opt.value;
-          if (title && opt.dataset.title) title.value = opt.dataset.title;
-          setSelectByNormalized(division, opt.dataset.department);
-          setSelectByNormalized(level, opt.dataset.level);
-          setSiteByCode(opt.dataset.location);
-          if (compCode && opt.dataset.companyCode) {
+        function applyRfr(rfr) {
+          if (!rfr) return;
+          if (code) code.value = rfr.code || '';
+          if (title && rfr.title) title.value = rfr.title;
+          setSelectByNormalized(division, rfr.department);
+          setSelectByNormalized(level, rfr.level);
+          setSiteByCode(rfr.site_code);
+          if (compCode && rfr.company_code) {
             if (compSel) compSel.value = '';
             compCode.removeAttribute('disabled');
-            compCode.value = opt.dataset.companyCode;
+            compCode.value = rfr.company_code;
             toggleCompanyInputs();
           }
-          setTrixDescription(opt.dataset.description);
+          setTrixDescription(rfr.description);
           if (initialOpenings && openingsDisplay) {
-            const qty = Math.max(0, parseInt(opt.dataset.qty || '0', 10) || 0);
+            const qty = Math.max(0, parseInt(rfr.qty_required || '0', 10) || 0);
             initialOpenings.value = qty;
             openingsDisplay.value = qty;
           }
 
           const keywordParts = [
-            opt.dataset.title,
-            opt.dataset.department,
-            opt.dataset.location,
-            opt.dataset.education,
-            opt.dataset.discipline,
-            opt.dataset.programStudy,
-            opt.dataset.candidateType,
+            rfr.title,
+            rfr.department,
+            rfr.site_code,
+            rfr.education_level,
+            rfr.discipline,
+            rfr.program_study,
+            rfr.candidate_type,
           ].filter(Boolean);
           if (kw && keywordParts.length) {
             kw.value = keywordParts.join(', ');
@@ -461,16 +459,57 @@
           }
 
           const skillParts = [
-            opt.dataset.experience ? `Pengalaman ${opt.dataset.experience}` : '',
-            opt.dataset.education ? `Pendidikan ${opt.dataset.education}` : '',
-            opt.dataset.discipline ? `Disiplin ${opt.dataset.discipline}` : '',
-            opt.dataset.programStudy ? `Program ${opt.dataset.programStudy}` : '',
-            opt.dataset.facilities ? `Fasilitas ${opt.dataset.facilities}` : '',
+            rfr.work_experience ? `Pengalaman ${rfr.work_experience}` : '',
+            rfr.education_level ? `Pendidikan ${rfr.education_level}` : '',
+            rfr.discipline ? `Disiplin ${rfr.discipline}` : '',
+            rfr.program_study ? `Program ${rfr.program_study}` : '',
+            rfr.facilities ? `Fasilitas ${rfr.facilities}` : '',
           ].filter(Boolean);
           if (skills && skillParts.length) {
             skills.value = skillParts.join(', ');
           }
+
+          if (rfrStatus) {
+            const ref = rfr.position_ref ? ` · Position_Ref #${rfr.position_ref}` : '';
+            rfrStatus.textContent = `Dipakai: ${rfr.code || '-'}${ref} — ${rfr.title || 'Tanpa posisi'}`;
+            rfrStatus.classList.add('text-emerald-700');
+            rfrStatus.classList.remove('text-rose-600');
+          }
+        }
+
+        function findRfr(query) {
+          const q = (query || '').toString().trim().toLowerCase();
+          if (!q) return null;
+          return rfrList.find((r) =>
+            (r.code || '').toLowerCase() === q
+            || String(r.position_ref ?? '').toLowerCase() === q
+            || (r.title || '').toLowerCase().includes(q)
+          ) || null;
+        }
+
+        function applyRfrFromInput() {
+          if (!rfrInput || !rfrInput.value.trim()) return;
+          const rfr = findRfr(rfrInput.value);
+          if (rfr) {
+            applyRfr(rfr);
+            rfrInput.value = rfr.code || '';
+          } else if (rfrStatus) {
+            rfrStatus.textContent = `Tidak ada RFR dengan kode/ref “${rfrInput.value.trim()}”. Cek rentang tanggal atau isi manual.`;
+            rfrStatus.classList.remove('text-emerald-700');
+            rfrStatus.classList.add('text-rose-600');
+          }
+        }
+
+        rfrApplyBtn?.addEventListener('click', applyRfrFromInput);
+        rfrInput?.addEventListener('keydown', function(e){
+          if (e.key === 'Enter') { e.preventDefault(); applyRfrFromInput(); }
         });
+        rfrInput?.addEventListener('blur', applyRfrFromInput);
+
+        // Auto-fill dari RFR pertama saat halaman baru (belum ada old())
+        if (rfrList.length && !oldCode) {
+          applyRfr(rfrList[0]);
+        }
 
         // Mutual exclusion company_id <-> company_code (Rule: prohibits)
         function toggleCompanyInputs(){

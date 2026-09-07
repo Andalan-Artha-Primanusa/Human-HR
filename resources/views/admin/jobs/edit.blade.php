@@ -26,6 +26,27 @@
         'admin' => 'Administration',
     ];
 
+    // Dataset RFR ringkas untuk lookup client-side
+    $rfrCompact = collect($rfrVacancies ?? [])->map(function ($rfr) {
+        return [
+            'code' => $rfr['code'] ?? null,
+            'position_ref' => $rfr['position_ref'] ?? null,
+            'title' => $rfr['title'] ?? null,
+            'department' => $rfr['department'] ?? null,
+            'level' => $rfr['level'] ?? $rfr['status_position'] ?? null,
+            'site_code' => $rfr['site_code'] ?? $rfr['work_location'] ?? null,
+            'company_code' => $rfr['company_code'] ?? null,
+            'description' => $rfr['description'] ?? null,
+            'facilities' => $rfr['facilities'] ?? null,
+            'work_experience' => $rfr['work_experience'] ?? null,
+            'education_level' => $rfr['education_level'] ?? null,
+            'discipline' => $rfr['discipline'] ?? null,
+            'program_study' => $rfr['program_study'] ?? null,
+            'candidate_type' => $rfr['candidate_type'] ?? null,
+            'qty_required' => (int) ($rfr['qty_required'] ?? 0),
+        ];
+    })->values()->all();
+
     // Helpers
     $val = fn($key, $fallback = null) => old($key, $fallback);
     $toStr = function ($v) {
@@ -68,6 +89,27 @@
       <div class="rounded-xl bg-white text-[#7a5236] px-4 py-3 border text-sm" style="border-color: {{ $BORD }}">
         Kode lowongan (<code class="font-mono">code</code>) unik <strong>per company</strong>. Mengubah Company dapat
         mempengaruhi keunikan kode.
+      </div>
+
+      {{-- Tarik ulang data dari RFR MinePro --}}
+      <div class="rounded-xl bg-white border px-4 py-3 text-sm" style="border-color: {{ $BORD }}">
+        <div class="flex flex-wrap items-center gap-2">
+          <div class="font-semibold text-[#5c3d1e]">Ambil ulang dari RFR MinePro</div>
+          <input type="text" id="rfr_ref" class="input flex-1 min-w-[220px]"
+                 placeholder="Tempel RFRRefID / Position_Ref. Mis. 126" style="--tw-ring-color: {{ $ACCENT }}">
+          <button type="button" id="rfr_apply_btn"
+                  class="inline-flex items-center rounded-lg bg-[#a77d52] px-4 py-2 text-sm font-semibold text-white hover:opacity-95">
+            Terapkan
+          </button>
+        </div>
+        <p class="mt-1 text-xs text-emerald-700" id="rfr_status"></p>
+        <p class="mt-1 text-[11px] text-slate-400">
+          @if(empty($rfrCompact))
+            Data RFR belum tersedia untuk bulan ini — field tetap bisa diedit manual.
+          @else
+            {{ count($rfrCompact) }} RFR tersedia bulan ini. Tempel RFRRefID / Position_Ref lalu Terapkan untuk mengisi ulang field dari API.
+          @endif
+        </p>
       </div>
 
       {{-- Error summary ditangani AJAX/modal global (KarirFeedback) --}}
@@ -319,6 +361,150 @@
         hidden.value = (typeof initialDesc === 'string') ? initialDesc : JSON.stringify(initialDesc);
       }catch(_){
         hidden.value = '';
+      }
+
+      // ==== Tarik ulang dari RFR MinePro ====
+      const rfrInput    = document.getElementById('rfr_ref');
+      const rfrApplyBtn = document.getElementById('rfr_apply_btn');
+      const rfrStatus   = document.getElementById('rfr_status');
+      const rfrList     = @json($rfrCompact);
+      const codeEl      = document.querySelector('[name="code"]');
+      const titleEl     = document.querySelector('[name="title"]');
+      const divisionEl  = document.querySelector('[name="division"]');
+      const levelEl     = document.querySelector('[name="level"]');
+      const descInput   = document.getElementById('desc_input');
+      const isFreshEdit = @json(old('code', null) === null);
+
+      function normalizeOptionValue(raw) {
+        return (raw || '')
+          .toString().trim().toLowerCase()
+          .replace(/&/g, 'and')
+          .replace(/[^a-z0-9]+/g, '_')
+          .replace(/^_+|_+$/g, '');
+      }
+
+      function setSelectByNormalized(select, raw) {
+        if (!select || !raw) return;
+        const target = normalizeOptionValue(raw);
+        const match = Array.from(select.options).find((opt) =>
+          normalizeOptionValue(opt.value) === target
+          || normalizeOptionValue(opt.textContent) === target
+          || normalizeOptionValue(opt.textContent).includes(target)
+        );
+        if (match) select.value = match.value;
+      }
+
+      function setSiteByCode(rawCode) {
+        if (!siteSel || !rawCode) return;
+        const target = rawCode.toString().trim().toLowerCase();
+        if (siteCode) siteCode.value = rawCode.toString().trim();
+        const match = Array.from(siteSel.options).find((opt) =>
+          (opt.dataset.code || '').toLowerCase() === target
+          || opt.textContent.toLowerCase().includes(target)
+        );
+        if (match) {
+          siteSel.value = match.value;
+          syncSiteCode();
+          siteSel.setAttribute('required', 'required');
+        } else {
+          const existing = siteSel.querySelector('option[data-api-site="1"]');
+          if (existing) existing.remove();
+          const apiOption = new Option(`${rawCode.toString().trim()} `, '');
+          apiOption.dataset.apiSite = '1';
+          siteSel.add(apiOption);
+          apiOption.selected = true;
+          siteSel.removeAttribute('required');
+        }
+      }
+
+      function setTrixDescription(text) {
+        if (!descInput || !text) return;
+        const html = text
+          .toString()
+          .split(/\n{2,}/)
+          .map((part) => part.trim())
+          .filter(Boolean)
+          .map((part) => `<p>${part.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>')}</p>`)
+          .join('');
+        descInput.value = html;
+        const editor = document.querySelector('trix-editor[input="desc_input"]');
+        if (editor?.editor) editor.editor.loadHTML(html);
+      }
+
+      function applyRfr(rfr) {
+        if (!rfr) return;
+        if (codeEl) codeEl.value = rfr.code || '';
+        if (titleEl && rfr.title) titleEl.value = rfr.title;
+        setSelectByNormalized(divisionEl, rfr.department);
+        setSelectByNormalized(levelEl, rfr.level);
+        setSiteByCode(rfr.site_code);
+        if (compCode && rfr.company_code) {
+          if (compSel) compSel.value = '';
+          compCode.removeAttribute('disabled');
+          compCode.value = rfr.company_code;
+          toggleCompanyInputs();
+        }
+        setTrixDescription(rfr.description);
+
+        const keywordParts = [
+          rfr.title, rfr.department, rfr.site_code,
+          rfr.education_level, rfr.discipline, rfr.program_study, rfr.candidate_type,
+        ].filter(Boolean);
+        if (kw && keywordParts.length) {
+          kw.value = keywordParts.join(', ');
+          kw.dispatchEvent(new Event('input'));
+        }
+
+        const skillParts = [
+          rfr.work_experience ? `Pengalaman ${rfr.work_experience}` : '',
+          rfr.education_level ? `Pendidikan ${rfr.education_level}` : '',
+          rfr.discipline ? `Disiplin ${rfr.discipline}` : '',
+          rfr.program_study ? `Program ${rfr.program_study}` : '',
+          rfr.facilities ? `Fasilitas ${rfr.facilities}` : '',
+        ].filter(Boolean);
+        if (skills && skillParts.length) skills.value = skillParts.join(', ');
+
+        if (rfrStatus) {
+          const ref = rfr.position_ref ? ` · Position_Ref #${rfr.position_ref}` : '';
+          rfrStatus.textContent = `Diterapkan: ${rfr.code || '-'}${ref} — ${rfr.title || 'Tanpa posisi'}`;
+          rfrStatus.classList.add('text-emerald-700');
+          rfrStatus.classList.remove('text-rose-600');
+        }
+      }
+
+      function findRfr(query) {
+        const q = (query || '').toString().trim().toLowerCase();
+        if (!q) return null;
+        return rfrList.find((r) =>
+          (r.code || '').toLowerCase() === q
+          || String(r.position_ref ?? '').toLowerCase() === q
+          || (r.title || '').toLowerCase().includes(q)
+        ) || null;
+      }
+
+      function applyRfrFromInput() {
+        if (!rfrInput || !rfrInput.value.trim()) return;
+        const rfr = findRfr(rfrInput.value);
+        if (rfr) {
+          applyRfr(rfr);
+          rfrInput.value = rfr.code || '';
+        } else if (rfrStatus) {
+          rfrStatus.textContent = `Tidak ada RFR dengan kode/ref “${rfrInput.value.trim()}” untuk bulan ini.`;
+          rfrStatus.classList.remove('text-emerald-700');
+          rfrStatus.classList.add('text-rose-600');
+        }
+      }
+
+      rfrApplyBtn?.addEventListener('click', applyRfrFromInput);
+      rfrInput?.addEventListener('keydown', function(e){
+        if (e.key === 'Enter') { e.preventDefault(); applyRfrFromInput(); }
+      });
+      rfrInput?.addEventListener('blur', applyRfrFromInput);
+
+      // Auto-terisi dari RFR saat edit halaman fresh (code job cocok dengan API)
+      if (isFreshEdit && rfrList.length && codeEl) {
+        const matched = findRfr(codeEl.value);
+        if (matched) applyRfr(matched);
       }
     })();
     </script>
