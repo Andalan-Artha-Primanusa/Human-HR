@@ -316,7 +316,7 @@
           <div class="page-header__copy">
             <p class="page-header__eyebrow">Detail Lowongan</p>
             <div class="flex flex-wrap items-center gap-2">
-              <h1 id="job-detail-title" class="page-header__title">{{ e($job->title) ?? '—' }}</h1>
+              <h1 id="job-detail-title" class="page-header__title">{{ e($job->title ?: 'Belum tersedia') }}</h1>
               @if(($job->status ?? '') === 'open')
                 <span class="rounded-full bg-white/20 px-2.5 py-0.5 text-[11px] font-semibold text-white ring-1 ring-inset ring-white/40">Buka</span>
               @else
@@ -325,9 +325,9 @@
             </div>
 
             <p class="page-header__desc">
-              <span class="inline-flex items-center gap-1"><svg class="w-3.5 h-3.5" aria-hidden="true"><use href="#i-brief"/></svg> {{ e($job->division ?: '—') }}</span>
+              <span class="inline-flex items-center gap-1"><svg class="w-3.5 h-3.5" aria-hidden="true"><use href="#i-brief"/></svg> {{ e($job->division ?: 'Belum tersedia') }}</span>
               <span class="mx-1.5 opacity-50">•</span>
-              <span class="inline-flex items-center gap-1"><svg class="w-3.5 h-3.5" aria-hidden="true"><use href="#i-pin"/></svg> {{ e($job->site?->code ? ($job->site->code . ' — ' . ($job->site->name ?? '')) : '—') }}</span>
+              <span class="inline-flex items-center gap-1"><svg class="w-3.5 h-3.5" aria-hidden="true"><use href="#i-pin"/></svg> {{ e($job->site?->code ? trim($job->site->code . ' - ' . ($job->site->name ?? ''), ' -') : 'Belum tersedia') }}</span>
               @if($closingAt)
                 <span class="mx-1.5 opacity-50">•</span>
                 <span class="inline-flex items-center gap-1"><svg class="w-3.5 h-3.5" aria-hidden="true"><use href="#i-clock"/></svg> Tutup: {{ e(Carbon::parse($closingAt)->timezone($TZ)->format('d M Y, H:i')) }} {{ $abbrTz($TZ) }}</span>
@@ -335,8 +335,8 @@
             </p>
 
             <div class="flex flex-wrap items-center gap-2 mt-3">
-              <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-semibold" style="background:rgba(255,255,255,.15);color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.3)">Diposting: {{ $formatTs($job->created_at) ?? '—' }}</span>
-              <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-semibold" style="background:rgba(255,255,255,.12);color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.25)">Diubah: {{ $formatTs($job->updated_at) ?? '—' }}</span>
+              <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-semibold" style="background:rgba(255,255,255,.15);color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.3)">Diposting: {{ $formatTs($job->created_at) ?? 'Belum tersedia' }}</span>
+              <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-semibold" style="background:rgba(255,255,255,.12);color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.25)">Diubah: {{ $formatTs($job->updated_at) ?? 'Belum tersedia' }}</span>
               @if(isset($job->applications_count))
                 <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-semibold" style="background:rgba(255,255,255,.15);color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.3)">Pelamar: {{ (int) $job->applications_count }}</span>
               @endif
@@ -421,7 +421,7 @@
                   Tipe
                 </div>
                 <div class="mt-1 inline-flex items-center rounded bg-[#a77d52] px-2 py-1 text-[11px] font-semibold text-white">
-                  {{ e($employmentPretty[$job->employment_type] ?? strtoupper($job->employment_type ?? '—')) }}
+                  {{ e($employmentPretty[$job->employment_type] ?? strtoupper($job->employment_type ?? 'Belum tersedia')) }}
                 </div>
               </div>
               <div class="px-4 py-4 border rounded-xl border-[#ead8c5] bg-[#fffaf5]">
@@ -438,7 +438,7 @@
                 </div>
                 <div class="inline-flex items-center gap-1 mt-1 text-slate-800">
                   <svg class="w-4 h-4 text-slate-500" aria-hidden="true"><use href="#i-pin"/></svg>
-                  {{ e($job->site?->name ?? $job->site?->code ?? '—') }}
+                  {{ e($job->site?->name ?? $job->site?->code ?? 'Belum tersedia') }}
                 </div>
               </div>
             </div>
@@ -478,23 +478,23 @@
             <dl class="grid grid-cols-1 gap-3 mt-5 text-sm sm:grid-cols-2">
               <div class="rounded-xl border border-[#eeddC9] bg-[#fdf7f0] p-3 sm:grid sm:grid-cols-3 sm:gap-2">
                 <dt class="text-xs font-semibold uppercase tracking-wide text-[#8b5e3c]">Kode Lowongan</dt>
-                <dd class="col-span-2 text-slate-800">{{ e($job->code ?? '—') }}</dd>
+                <dd class="col-span-2 text-slate-800">{{ e($job->code ?: 'Belum tersedia') }}</dd>
               </div>
 
               <div class="rounded-xl border border-[#eeddC9] bg-[#fdf7f0] p-3 sm:grid sm:grid-cols-3 sm:gap-2">
                 <dt class="text-xs font-semibold uppercase tracking-wide text-[#8b5e3c]">Perusahaan</dt>
                 <dd class="col-span-2 text-slate-800">
                   @if($job->company)
-                    {{ e(($job->company->code ?? '')) }}{{ $job->company->code ? ' — ' : '' }}{{ e(($job->company->name ?? '')) }}
+                    {{ e(($job->company->code ?? '')) }}{{ $job->company->code ? ' - ' : '' }}{{ e(($job->company->name ?? '')) }}
                   @else
-                    — 
+                    Belum tersedia
                   @endif
                 </dd>
               </div>
 
               <div class="rounded-xl border border-[#eeddC9] bg-[#fdf7f0] p-3 sm:grid sm:grid-cols-3 sm:gap-2">
                 <dt class="text-xs font-semibold uppercase tracking-wide text-[#8b5e3c]">Level</dt>
-                <dd class="col-span-2 text-slate-800">{{ e($levelLabels[strtolower((string) $job->level)] ?? (ucwords(str_replace('_', ' ', (string) $job->level)) ?: '—')) }}</dd>
+                <dd class="col-span-2 text-slate-800">{{ e($levelLabels[strtolower((string) $job->level)] ?? (ucwords(str_replace('_', ' ', (string) $job->level)) ?: 'Belum tersedia')) }}</dd>
               </div>
 
               <div class="rounded-xl border border-[#eeddC9] bg-[#fdf7f0] p-3 sm:grid sm:grid-cols-3 sm:gap-2">
@@ -511,9 +511,9 @@
                 <dt class="text-xs font-semibold uppercase tracking-wide text-[#8b5e3c]">Lokasi (Site)</dt>
                 <dd class="col-span-2 text-slate-800">
                   @if($job->site)
-                    {{ e($job->site->code ?? '—') }}{{ ($job->site->code && $job->site->name) ? ' — ' : '' }}{{ e($job->site->name ?? '') }}
+                    {{ e($job->site->code ?? 'Belum tersedia') }}{{ ($job->site->code && $job->site->name) ? ' - ' : '' }}{{ e($job->site->name ?? '') }}
                   @else
-                    — 
+                    Belum tersedia
                   @endif
                 </dd>
               </div>
@@ -521,7 +521,7 @@
               <div class="rounded-xl border border-[#eeddC9] bg-[#fdf7f0] p-3 sm:grid sm:grid-cols-3 sm:gap-2">
                 <dt class="text-xs font-semibold uppercase tracking-wide text-[#8b5e3c]">Tipe Pekerjaan</dt>
                 <dd class="col-span-2 text-slate-800">
-                  {{ e($employmentPretty[$job->employment_type] ?? strtoupper($job->employment_type ?? '—')) }}
+                  {{ e($employmentPretty[$job->employment_type] ?? strtoupper($job->employment_type ?? 'Belum tersedia')) }}
                 </dd>
               </div>
 
@@ -533,7 +533,7 @@
               <div class="rounded-xl border border-[#eeddC9] bg-[#fdf7f0] p-3 sm:grid sm:grid-cols-3 sm:gap-2">
                 <dt class="text-xs font-semibold uppercase tracking-wide text-[#8b5e3c]">Diposting</dt>
 <dd class="col-span-2 text-slate-800">
-                  {{ $formatTs($job->created_at) ?? '—' }}
+                  {{ $formatTs($job->created_at) ?? 'Belum tersedia' }}
                   @if($createdByName) · oleh <span class="font-medium">{{ e($createdByName) }}</span>@endif
                 </dd>
               </div>
@@ -541,7 +541,7 @@
               <div class="rounded-xl border border-[#eeddC9] bg-[#fdf7f0] p-3 sm:grid sm:grid-cols-3 sm:gap-2">
                 <dt class="text-xs font-semibold uppercase tracking-wide text-[#8b5e3c]">Diubah</dt>
                 <dd class="col-span-2 text-slate-800">
-                  {{ $formatTs($job->updated_at) ?? '—' }}
+                  {{ $formatTs($job->updated_at) ?? 'Belum tersedia' }}
                   @if($updatedByName) · oleh <span class="font-medium">{{ e($updatedByName) }}</span>@endif
                 </dd>
               </div>
@@ -553,7 +553,7 @@
                     {{ e(Carbon::parse($closingAt)->timezone($TZ)->format('d M Y, H:i')) }} {{ $abbrTz($TZ) }}
                     @if($countdownText) <span class="ml-2 rounded bg-amber-50 px-1.5 py-0.5 text-[11px] font-semibold text-amber-700 ring-1 ring-amber-200">{{ e($countdownText) }}</span>@endif
                   @else
-                    — 
+                    Belum tersedia
                   @endif
                 </dd>
               </div>
@@ -677,24 +677,26 @@
                     $canNext = filled($nextKey); @endphp
                       <div class="flex items-center gap-2">
                         <form method="POST" action="{{ route('admin.applications.move', $myApp) }}"
-                              onsubmit="return {{ $canPrev ? 'confirm' : '(function(){return false;})' }}('Kembalikan tahap ke: {{ $pretty[$prevKey] ?? '—' }} ?')">
+                              data-confirm-title="Kembalikan tahap?"
+                              data-confirm-message="Kandidat akan dikembalikan ke tahap {{ $pretty[$prevKey] ?? 'sebelumnya' }}.">
                           @csrf
                           <input type="hidden" name="to" value="{{ $canPrev ? e($prevKey) : '' }}">
                           <button type="submit" class="rounded-lg border border-slate-200 px-2.5 py-1.5 text-slate-900 hover:bg-slate-50 disabled:opacity-40"
                                   {{ $canPrev ? '' : 'disabled' }}
-                                  title="{{ $canPrev ? 'Kembali ke: ' . ($pretty[$prevKey] ?? '—') : 'Tidak bisa mundur' }}">
+                                  title="{{ $canPrev ? 'Kembali ke: ' . ($pretty[$prevKey] ?? 'tahap sebelumnya') : 'Tidak bisa mundur' }}">
                             <svg class="w-4 h-4" aria-hidden="true"><use href="#i-chevron-left"/></svg>
                           </button>
                         </form>
 
                         <form method="POST" action="{{ route('admin.applications.move', $myApp) }}"
-                              onsubmit="return {{ $canNext ? 'confirm' : '(function(){return false;})' }}('Lanjutkan tahap ke: {{ $pretty[$nextKey] ?? '—' }} ?')">
+                              data-confirm-title="Lanjutkan tahap?"
+                              data-confirm-message="Kandidat akan dilanjutkan ke tahap {{ $pretty[$nextKey] ?? 'berikutnya' }}.">
                           @csrf
                           <input type="hidden" name="to" value="{{ $canNext ? e($nextKey) : '' }}">
                           <button type="submit" class="rounded-lg border border-slate-200 px-2.5 py-1.5 text-white disabled:opacity-40"
                                   style="background: {{ $ACCENT }}"
                                   {{ $canNext ? '' : 'disabled' }}
-                                  title="{{ $canNext ? 'Lanjut ke: ' . ($pretty[$nextKey] ?? '—') : 'Sudah tahap terakhir' }}">
+                                  title="{{ $canNext ? 'Lanjut ke: ' . ($pretty[$nextKey] ?? 'tahap berikutnya') : 'Sudah tahap terakhir' }}">
                             <svg class="w-4 h-4" aria-hidden="true"><use href="#i-chevron-right"/></svg>
                           </button>
                         </form>
@@ -886,7 +888,7 @@
                       <div class="grid gap-2 mt-5 text-xs text-slate-600">
                         <div class="inline-flex items-center gap-2">
                           <svg class="w-4 h-4 text-slate-500" aria-hidden="true"><use href="#i-clock"/></svg>
-                          Diajukan: {{ $myApp?->created_at ? e($formatTs($myApp->created_at)) : '—' }}
+                          Diajukan: {{ $myApp?->created_at ? e($formatTs($myApp->created_at)) : 'Belum tersedia' }}
                         </div>
                         <div class="inline-flex items-center gap-2">
                           <svg class="w-4 h-4 text-slate-500" aria-hidden="true"><use href="#i-brief"/></svg>
@@ -967,8 +969,8 @@
                   <dl class="grid grid-cols-3 mt-3 text-sm gap-y-2">
                     <dt class="text-slate-500">Kode</dt><dd class="col-span-2 text-slate-800">{{ e($s->code) }}</dd>
                     <dt class="text-slate-500">Nama</dt><dd class="col-span-2 text-slate-800">{{ e($s->name) }}</dd>
-                    <dt class="text-slate-500">Region</dt><dd class="col-span-2 text-slate-800">{{ e($s->region ?: '—') }}</dd>
-                    <dt class="text-slate-500">Timezone</dt><dd class="col-span-2 text-slate-800">{{ e($tz ?: '—') }}</dd>
+                    @if($s->region)<dt class="text-slate-500">Region</dt><dd class="col-span-2 text-slate-800">{{ e($s->region) }}</dd>@endif
+                    @if($tz)<dt class="text-slate-500">Timezone</dt><dd class="col-span-2 text-slate-800">{{ e($tz) }}</dd>@endif
                     @if($addr)<dt class="text-slate-500">Alamat</dt><dd class="col-span-2 text-slate-800">{{ e($addr) }}</dd>@endif
                   </dl>
                   <div class="flex items-center gap-3 mt-3">
@@ -1003,13 +1005,13 @@
 
                         <dt class="text-slate-500">Pendidikan</dt>
                         <dd class="col-span-2 text-slate-800">
-                          {{ e($meProfile->last_education ?? '—') }}
+                          {{ e($meProfile->last_education ?? 'Belum tersedia') }}
                           @if($meProfile->education_major) · {{ e($meProfile->education_major) }} @endif
                         </dd>
 
                         <dt class="text-slate-500">Kontak</dt>
                         <dd class="col-span-2 text-slate-800">
-                          {{ e($meProfile->phone ?? '—') }} @if($meProfile->email) · {{ e($meProfile->email) }} @endif
+                          {{ e($meProfile->phone ?? 'Belum tersedia') }} @if($meProfile->email) · {{ e($meProfile->email) }} @endif
                         </dd>
                       </dl>
 
@@ -1075,7 +1077,7 @@
                         <li class="flex items-center justify-between gap-3">
                           <div class="min-w-0">
                             <a href="{{ route('jobs.show', $r) }}" class="font-medium truncate text-slate-900 hover:underline">{{ e($r->title) }}</a>
-                            <div class="text-xs text-slate-500">{{ e($r->division ?: '—') }} · {{ e($r->site?->code ?: '—') }}</div>
+                            <div class="text-xs text-slate-500">{{ e($r->division ?: 'Belum tersedia') }} · {{ e($r->site?->code ?: 'Belum tersedia') }}</div>
                           </div>
                           <a href="{{ route('jobs.show', $r) }}" class="text-sm text-[#8b5e3c] hover:underline shrink-0">Lihat</a>
                         </li>
