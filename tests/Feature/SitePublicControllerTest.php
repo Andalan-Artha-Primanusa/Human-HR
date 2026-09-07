@@ -57,6 +57,21 @@ class SitePublicControllerTest extends TestCase
         $response->assertSee('Open Job');
     }
 
+    public function test_show_displays_other_active_sites()
+    {
+        $site = Site::factory()->create(['is_active' => true, 'name' => 'Current Site']);
+        $otherActive = Site::factory()->create(['is_active' => true, 'name' => 'Other Active Site']);
+        $otherInactive = Site::factory()->create(['is_active' => false, 'name' => 'Other Inactive Site']);
+
+        $response = $this->get(route('sites.show', $site));
+
+        $response->assertStatus(200);
+        $response->assertSee('Site Lainnya');
+        $response->assertSee('Other Active Site');
+        $response->assertDontSee('Other Inactive Site');
+        $response->assertSee('href="' . route('sites.index') . '"', false);
+    }
+
     public function test_show_aborts_for_inactive_site()
     {
         $site = Site::factory()->create(['is_active' => false]);
