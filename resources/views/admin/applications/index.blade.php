@@ -196,20 +196,20 @@
                 </div>
               </div>
 
-              <div class="grid grid-cols-4 gap-1.5 px-4 py-3">
-                <div class="rounded-lg bg-[#f8f5f2] px-2 py-2 text-center">
+              <div class="px-4 py-3" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.375rem;">
+                <div class="rounded-lg bg-[#f8f5f2] px-2 py-2 text-center" style="min-width:0;">
                   <div class="text-[11px] leading-none text-slate-500">Total</div>
                   <div class="mt-1 text-base font-bold text-slate-950">{{ (int) $job->applicants_count }}</div>
                 </div>
-                <div class="rounded-lg bg-blue-50 px-2 py-2 text-center">
+                <div class="rounded-lg bg-blue-50 px-2 py-2 text-center" style="min-width:0;">
                   <div class="text-[11px] leading-none text-blue-700">Aktif</div>
                   <div class="mt-1 text-base font-bold text-blue-800">{{ (int) $job->active_count }}</div>
                 </div>
-                <div class="rounded-lg bg-emerald-50 px-2 py-2 text-center">
+                <div class="rounded-lg bg-emerald-50 px-2 py-2 text-center" style="min-width:0;">
                   <div class="text-[11px] leading-none text-emerald-700">Hired</div>
                   <div class="mt-1 text-base font-bold text-emerald-800">{{ (int) $job->hired_count }}</div>
                 </div>
-                <div class="rounded-lg bg-rose-50 px-2 py-2 text-center">
+                <div class="rounded-lg bg-rose-50 px-2 py-2 text-center" style="min-width:0;">
                   <div class="text-[11px] leading-none text-rose-700">Reject</div>
                   <div class="mt-1 text-base font-bold text-rose-800">{{ (int) $job->rejected_count }}</div>
                 </div>
