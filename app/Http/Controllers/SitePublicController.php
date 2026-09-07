@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Site;
+use App\Models\Job;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -81,6 +82,29 @@ class SitePublicController extends Controller
                 ->limit(8),
         ]);
 
+        $fallbackJobs = $site->jobs->isEmpty()
+            ? Job::query()
+                ->select([
+                    'id',
+                    'title',
+                    'code',
+                    'division',
+                    'level',
+                    'employment_type',
+                    'openings',
+                    'status',
+                    'site_id',
+                    'created_at',
+                    'closing_at',
+                ])
+                ->with('site:id,code,name')
+                ->where('status', 'open')
+                ->whereHas('site', fn($q) => $q->active())
+                ->latest('created_at')
+                ->limit(8)
+                ->get()
+            : collect();
+
         if ($request->wantsJson()) {
             return response()->json([
                 'site' => $site->only(['id', 'code', 'name', 'region', 'timezone', 'address']),
@@ -92,9 +116,17 @@ class SitePublicController extends Controller
                     'site_id' => $job->site_id,
                     'created_at' => optional($job->created_at)?->toISOString(),
                 ])->values(),
+                'fallback_jobs' => $fallbackJobs->map(fn($job) => [
+                    'id' => $job->id,
+                    'title' => $job->title,
+                    'status' => $job->status,
+                    'site_id' => $job->site_id,
+                    'site_name' => $job->site?->name,
+                    'created_at' => optional($job->created_at)?->toISOString(),
+                ])->values(),
             ]);
         }
 
-        return view('sites.show', compact('site'));
+        return view('sites.show', compact('site', 'fallbackJobs'));
     }
 }

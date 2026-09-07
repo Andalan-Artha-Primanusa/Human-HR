@@ -26,6 +26,9 @@
         ? 'https://www.google.com/maps/search/?api=1&query=' . urlencode($lat . ',' . $lng)
         : 'https://www.google.com/maps/search/?api=1&query=' . urlencode($gmQuery ?: $site->code);
     $openJobs = $site->jobs ?? collect();
+    $fallbackJobs = $fallbackJobs ?? collect();
+    $displayJobs = $openJobs->isNotEmpty() ? $openJobs : $fallbackJobs;
+    $showingFallbackJobs = $openJobs->isEmpty() && $fallbackJobs->isNotEmpty();
     $employmentPretty = [
         'fulltime' => 'Full-time',
         'contract' => 'Contract',
@@ -160,16 +163,19 @@
 
     <section class="mt-6 rounded-2xl border bg-white p-5 shadow-sm sm:p-6" style="border-color: {{ $BORD }}">
       <div class="flex flex-wrap items-center justify-between gap-3">
-        <x-section-title title="Posisi yang sedang dibuka" />
-        <a href="{{ route('jobs.index', ['site' => $site->code]) }}" class="inline-flex items-center gap-2 text-sm font-semibold text-[#8b5e3c] hover:underline">
-          Lihat lowongan site ini
+        <x-section-title title="{{ $showingFallbackJobs ? 'Lowongan terbaru' : 'Posisi yang sedang dibuka' }}" />
+        <a href="{{ $showingFallbackJobs ? route('jobs.index') : route('jobs.index', ['site' => $site->code]) }}" class="inline-flex items-center gap-2 text-sm font-semibold text-[#8b5e3c] hover:underline">
+          {{ $showingFallbackJobs ? 'Lihat semua lowongan' : 'Lihat lowongan site ini' }}
           <svg class="h-4 w-4"><use href="#site-arrow"/></svg>
         </a>
       </div>
+      @if($showingFallbackJobs)
+        <p class="mt-2 text-sm text-slate-600">Site ini belum punya lowongan aktif, jadi ditampilkan lowongan terbaru dari site aktif lain.</p>
+      @endif
 
-      @if($openJobs->count())
+      @if($displayJobs->count())
         <div class="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          @foreach($openJobs as $job)
+          @foreach($displayJobs as $job)
             <article class="flex min-h-[220px] flex-col rounded-xl border bg-white p-4 transition hover:-translate-y-0.5 hover:border-[#a77d52] hover:shadow-md"
                      style="border-color: {{ $BORD }}">
               <div class="flex items-start justify-between gap-3">
@@ -189,6 +195,9 @@
                 @endif
                 @if($job->employment_type)
                   <span class="rounded-full bg-slate-50 px-2 py-1 ring-1 ring-inset ring-slate-200">{{ $employmentPretty[$job->employment_type] ?? ucfirst($job->employment_type) }}</span>
+                @endif
+                @if($showingFallbackJobs && $job->site)
+                  <span class="rounded-full bg-[#fffaf5] px-2 py-1 text-[#8b5e3c] ring-1 ring-inset ring-[#ead8c5]">{{ $job->site->name }}</span>
                 @endif
                 <span class="rounded-full bg-slate-50 px-2 py-1 ring-1 ring-inset ring-slate-200">{{ (int) ($job->openings ?? 1) }} opening</span>
               </div>
