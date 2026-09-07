@@ -75,7 +75,7 @@ class CandidateProfileController extends Controller
             'nik' => [
                 'bail',
                 'required',
-                'digits:17',
+                'digits:16',
                 Rule::unique('candidate_profiles', 'nik')->ignore($currentProfile?->id),
             ],
             'email' => 'bail|required|email:rfc',
