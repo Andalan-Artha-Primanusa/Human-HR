@@ -167,8 +167,8 @@
     $schema[] = [
         "@context" => "https://schema.org",
         "@type" => "SiteNavigationElement",
-        "name" => ["Lowongan", "Masuk", "Daftar", "Lokasi Site"],
-        "url" => [url('/jobs'), url('/login'), url('/register'), url('/sites')]
+        "name" => ["Lowongan", "Masuk", "Daftar"],
+        "url" => [url('/jobs'), url('/login'), url('/register')]
     ];
 
     // 6. ItemList JobPosting
@@ -521,17 +521,27 @@
     }
 
     /* -- Card -- */
-    @media (min-width: 768px) {
-      .aj-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 1.25rem;
-      }
+    .aj-cardcar {
+      display: flex;
+      gap: 1rem;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      overscroll-behavior-x: contain;
+      -webkit-overflow-scrolling: touch;
+      padding: .25rem .25rem 1.2rem;
+      margin-inline: -.25rem;
+      scrollbar-width: thin;
+      scrollbar-color: #c9a07a #fff8f0;
     }
+    .aj-cardcar::-webkit-scrollbar { height: .55rem; }
+    .aj-cardcar::-webkit-scrollbar-track { background: #fff8f0; border-radius: 999px; }
+    .aj-cardcar::-webkit-scrollbar-thumb { background: #c9a07a; border-radius: 999px; }
     .aj-card {
       position: relative;
       display: flex;
       flex-direction: column;
+      flex: 0 0 min(380px, 84vw);
+      min-height: 310px;
       padding: 1.6rem;
       border-radius: 20px;
       border: 1px solid rgba(167,125,82,.16);
@@ -694,33 +704,23 @@
       font-weight: 700;
       color: #3b2209;
     }
-    .aj-benefit svg { width: 1.1rem; height: 1.1rem; color: #a77d52; }
+      .aj-benefit svg { width: 1.1rem; height: 1.1rem; color: #a77d52; }
+    .aj-dots {
+      display: flex;
+      justify-content: center;
+      gap: .5rem;
+      margin-top: .9rem;
+    }
 
     /* -- Mobile carousel -- */
     @media (max-width: 767.5px) {
       .aj-rich-timeline { display: none; }
-      .aj-cardcar {
-        display: flex;
-        gap: 1rem;
-        overflow-x: auto;
-        scroll-snap-type: x mandatory;
-        overscroll-behavior-x: contain;
-        -webkit-overflow-scrolling: touch;
-        padding: .25rem .25rem 1rem;
-        margin-inline: -.25rem;
-        scrollbar-width: none;
-      }
+      .aj-cardcar { scrollbar-width: none; }
       .aj-cardcar::-webkit-scrollbar { display: none; }
       .aj-cardcar .aj-card {
         flex: 0 0 auto;
         width: 84vw;
         scroll-snap-align: start;
-      }
-      .aj-dots {
-        display: flex;
-        justify-content: center;
-        gap: .5rem;
-        margin-top: .75rem;
       }
       .aj-tips { flex-direction: column; align-items: flex-start; }
     }
@@ -981,13 +981,6 @@
           </span>
           Lowongan Kerja
         </a>
-
-        <a href="/sites" class="mob-nav-item">
-          <span class="mob-icon">
-            <svg class="w-4 h-4"><use href="#i-map-pin"/></svg>
-          </span>
-          Lokasi Site
-        </a>
       </div>
 
       {{-- Divider --}}
@@ -1098,113 +1091,6 @@
       </div>
     </section>
 
-    {{-- ===== LOKASI SITE DENGAN PETA INTERAKTIF ===== --}}
-    @php
-        $sitesCol = ($sitesSimple instanceof \Illuminate\Support\Collection) ? $sitesSimple : collect($sitesSimple ?? []);
-        $sitesNorm = $sitesCol->filter(fn($s) => !empty($s['name']))
-            ->map(function ($s) {
-                $name = (string) ($s['name'] ?? '-');
-                $dot = preg_match('/^#([0-9a-f]{3}|[0-9a-f]{6})$/i', (string) ($s['dot'] ?? '')) ? $s['dot'] : '#a77d52';
-                $param = $s['code'] ?? $s['id'] ?? $name;
-                $id = (string) ($s['id'] ?? '');
-                return ['name' => $name, 'dot' => $dot, 'param' => $param, 'id' => $id];
-            })->values();
-    @endphp
-
-    <section class="home-section-soft border-b" style="border-color: #e8d5c4;" aria-labelledby="sites-heading">
-      <div class="px-6 py-10 mx-auto max-w-7xl lg:px-8">
-        <div class="mb-5 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
-          <div>
-            <span class="home-pill">Area Operasional</span>
-            <h2 id="sites-heading" class="mt-3 text-2xl font-black tracking-tight md:text-3xl" style="color:#1f2937">Lokasi Site</h2>
-            <p class="mt-1 text-sm text-slate-500">Lihat site aktif dan lowongan yang tersedia di masing-masing lokasi.</p>
-          </div>
-          <a href="{{ route('sites.index') }}" class="inline-flex items-center gap-2 text-sm font-extrabold text-[#a77d52] transition hover:opacity-70">
-            Semua site
-            <svg class="w-4 h-4" aria-hidden="true"><use href="#i-arrow-right"/></svg>
-          </a>
-        </div>
-
-        @if($sitesNorm->isNotEmpty())
-          <div class="grid gap-4 lg:grid-cols-3">
-            <div id="sites-map" class="home-card w-full overflow-hidden h-96 rounded-[1.5rem] lg:col-span-2"
-              role="region" aria-label="Peta lokasi site PT Andalan Artha Primanusa">
-            </div>
-
-            <div class="grid content-start gap-2 sm:grid-cols-2 lg:grid-cols-1">
-              @foreach($sitesNorm as $s)
-                <a href="{{ $s['id'] ? route('sites.show', $s['id']) : route('sites.index') }}"
-                  class="home-card flex items-center gap-3 px-4 py-3 rounded-2xl transition hover:-translate-y-0.5 hover:shadow-lg">
-                  <span class="inline-block w-3 h-3 rounded-full shrink-0" style="background: {{ $s['dot'] }}"></span>
-                  <span class="text-sm font-bold" style="color:#1f2937">{{ $s['name'] }}</span>
-                </a>
-              @endforeach
-            </div>
-          </div>
-        @else
-          <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
-            Lokasi site belum tersedia.
-          </div>
-        @endif
-      </div>
-    </section>
-
-    {{-- LEAFLET MAPS SCRIPT & STYLE --}}
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-    <script>
-      document.addEventListener('DOMContentLoaded', function () {
-        const sitesData = @json($sitesWithCoords ?? []);
-        const mapContainer = document.getElementById('sites-map');
-
-        if (!mapContainer || typeof L === 'undefined') return;
-
-        const sitesWithCoords = sitesData.filter(function (site) {
-          return Number.isFinite(Number(site.latitude)) && Number.isFinite(Number(site.longitude));
-        });
-
-        const avgLat = sitesWithCoords.length
-          ? sitesWithCoords.reduce((sum, s) => sum + Number(s.latitude), 0) / sitesWithCoords.length
-          : -2.5489;
-        const avgLng = sitesWithCoords.length
-          ? sitesWithCoords.reduce((sum, s) => sum + Number(s.longitude), 0) / sitesWithCoords.length
-          : 118.0149;
-
-        const map = L.map('sites-map').setView([avgLat, avgLng], sitesWithCoords.length ? 5 : 4);
-
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-          maxZoom: 19,
-        }).addTo(map);
-
-        const markers = [];
-        sitesWithCoords.forEach(function (site) {
-          const marker = L.circleMarker([site.latitude, site.longitude], {
-            radius: 10,
-            fillColor: site.dot || '#a77d52',
-            color: '#fff',
-            weight: 2,
-            opacity: 1,
-            fillOpacity: 0.85,
-          })
-          .bindPopup(
-            `<div style="font-size: 13px; font-weight: 700; color: #1f2937;">${site.name}</div>
-            <a href="{{ route('jobs.index') }}?site=${site.param}"
-              style="display: inline-block; margin-top: 8px; padding: 6px 10px; background: #a77d52; color: white; border-radius: 10px; text-decoration: none; font-size: 12px; font-weight: 700;">
-              Lihat Lowongan
-            </a>`
-          )
-          .addTo(map);
-          markers.push(marker);
-        });
-
-        if (markers.length > 0) {
-          const group = new L.featureGroup(markers);
-          map.fitBounds(group.getBounds(), { padding: [50, 50] });
-        }
-      });
-    </script>
-
     {{-- ===== APPLICATION JOURNEY ===== --}}
     <section class="px-6 bg-white py-14 lg:px-8" aria-labelledby="apply-flow-heading">
       <div class="aj-wrap">
@@ -1294,21 +1180,8 @@
           </p>
         </div>
 
-        {{-- ── Timeline desktop ── --}}
-        <div class="hidden md:block aj-rich-timeline" aria-hidden="true">
-          <div class="aj-timeline">
-            <div class="aj-timeline-line"></div>
-            @foreach($applySteps as $idx => $s)
-              <div class="aj-timeline-step {{ $idx === 0 ? 'is-active' : '' }}">
-                <span class="aj-timeline-dot">{{ $idx + 1 }}</span>
-                <span class="aj-timeline-label">{{ $s['title'] }}</span>
-              </div>
-            @endforeach
-          </div>
-        </div>
-
-        {{-- ── Cards desktop grid ── --}}
-        <div class="hidden md:grid aj-grid" aria-label="Langkah proses melamar">
+        {{-- ── Carousel ── --}}
+        <div id="aj-carousel" class="aj-cardcar mt-8" aria-label="Langkah proses melamar">
           @foreach($applySteps as $i => $step)
             <article class="aj-card">
               <div class="aj-card-top">
@@ -1333,34 +1206,7 @@
             </article>
           @endforeach
         </div>
-
-        {{-- ── Cards mobile carousel ── --}}
-        <div id="aj-carousel" class="md:hidden aj-cardcar" aria-label="Langkah proses melamar">
-          @foreach($applySteps as $i => $step)
-            <article class="aj-card">
-              <div class="aj-card-top">
-                <span class="aj-icon" style="--aj-delay: {{ $i * 0.12 }}s">
-                  <svg aria-hidden="true"><use href="#{{ $step['icon'] }}"/></svg>
-                </span>
-                <span class="aj-stepnum">{{ $i + 1 }}</span>
-              </div>
-              <h3 class="aj-title">{{ $step['title'] }}</h3>
-              <p class="aj-desc">{{ $step['desc'] }}</p>
-              <ul class="aj-points">
-                @foreach($step['items'] as $item)
-                  <li class="aj-point">{{ $item }}</li>
-                @endforeach
-              </ul>
-              @if(!empty($step['cta']))
-                <a href="{{ route('login') }}" class="aj-cta">
-                  Masuk &amp; Lamar
-                  <svg class="w-3.5 h-3.5" aria-hidden="true"><use href="#i-chevron-right"/></svg>
-                </a>
-              @endif
-            </article>
-          @endforeach
-        </div>
-        <div id="aj-dots" class="aj-dots md:hidden" aria-hidden="true"></div>
+        <div id="aj-dots" class="aj-dots" aria-hidden="true"></div>
 
         <div class="aj-tips">
           <div class="aj-tips-left">

@@ -279,11 +279,6 @@
                     </div>
                   </div>
                 </div>
-              @else
-                <div class="rounded-xl border border-[#ead8c5] bg-[#fffaf5] p-4">
-                  <p class="text-[11px] font-bold uppercase tracking-wide text-[#8b5e3c]">Belum diproses HR</p>
-                  <p class="mt-1 text-sm leading-relaxed text-slate-600">Lamaran sudah masuk. Status tahap akan muncul setelah HR memindahkan proses.</p>
-                </div>
               @endif
 
               <div class="mt-4 grid grid-cols-2 gap-3 text-sm">
