@@ -44,6 +44,10 @@ return [
         'timeout' => env('MINEPRO_TIMEOUT', 15),
         'process_start_date' => env('MINEPRO_PROCESS_START_DATE', '2020-01-01'),
         'process_end_date' => env('MINEPRO_PROCESS_END_DATE', '2030-12-31'),
+        'rfr_auto_sync_enabled' => env('MINEPRO_RFR_AUTO_SYNC_ENABLED', false),
+        'rfr_auto_sync_minutes' => env('MINEPRO_RFR_AUTO_SYNC_MINUTES', 10),
+        'rfr_sync_start_date' => env('MINEPRO_RFR_SYNC_START_DATE'),
+        'rfr_sync_end_date' => env('MINEPRO_RFR_SYNC_END_DATE'),
     ],
 
 ];
