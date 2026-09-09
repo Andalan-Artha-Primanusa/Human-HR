@@ -417,6 +417,23 @@
       transition: transform .18s ease, opacity .18s ease;
     }
     .home-primary-link:hover { opacity: .94; transform: translateY(-1px); }
+    .home-step-card {
+      border: 1px solid #eadccd;
+      background: #fff;
+      box-shadow: 0 14px 34px rgba(92,61,30,.06);
+    }
+    .home-step-number {
+      display: grid;
+      width: 2.5rem;
+      height: 2.5rem;
+      place-items: center;
+      border-radius: 1rem;
+      background: #a77d52;
+      color: #fff;
+      font-size: .875rem;
+      font-weight: 900;
+      box-shadow: 0 10px 20px rgba(167,125,82,.2);
+    }
   </style>
 </head>
 
@@ -766,6 +783,127 @@
                 return ['name' => $name, 'dot' => $dot, 'param' => $param, 'id' => $id];
             })->values();
     @endphp
+
+    <section class="home-section-soft border-b" style="border-color: #e8d5c4;"
+      aria-labelledby="sites-heading">
+      <div class="px-6 py-10 mx-auto max-w-7xl lg:px-8">
+        <div class="mb-5 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+          <div>
+            <span class="home-pill">Area Operasional</span>
+            <h2 id="sites-heading" class="mt-3 text-2xl font-black tracking-tight md:text-3xl" style="color: #1f2937">Lokasi Site</h2>
+            <p class="mt-1 text-sm text-slate-500">Lihat site aktif dan lowongan yang tersedia di masing-masing lokasi.</p>
+          </div>
+          <a href="{{ route('sites.index') }}" class="inline-flex items-center gap-2 text-sm font-extrabold text-[#a77d52] transition hover:opacity-70">
+            Semua site
+            <svg class="w-4 h-4" aria-hidden="true"><use href="#i-arrow-right"/></svg>
+          </a>
+        </div>
+
+        @if($sitesNorm->isNotEmpty())
+          <div class="grid gap-4 lg:grid-cols-3">
+            <div id="sites-map" class="home-card w-full overflow-hidden h-96 rounded-[1.5rem] lg:col-span-2"
+              role="region" aria-label="Peta lokasi site PT Andalan Artha Primanusa">
+            </div>
+
+            <div class="grid content-start gap-2 sm:grid-cols-2 lg:grid-cols-1">
+              @foreach($sitesNorm as $s)
+                <a href="{{ $s['id'] ? route('sites.show', $s['id']) : route('sites.index') }}"
+                  class="home-card flex items-center gap-3 px-4 py-3 rounded-2xl transition hover:-translate-y-0.5 hover:shadow-lg">
+                  <span class="inline-block w-3 h-3 rounded-full shrink-0" style="background: {{ $s['dot'] }}"></span>
+                  <span class="text-sm font-bold" style="color: #1f2937">{{ $s['name'] }}</span>
+                </a>
+              @endforeach
+            </div>
+          </div>
+        @else
+          <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+            Lokasi site belum tersedia.
+          </div>
+        @endif
+      </div>
+    </section>
+
+    {{-- LEAFLET MAPS SCRIPT & STYLE --}}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        const sitesData = @json($sitesWithCoords ?? []);
+        const mapContainer = document.getElementById('sites-map');
+
+        if (!mapContainer || typeof L === 'undefined') return;
+
+        const sitesWithCoords = sitesData.filter(function (site) {
+          return Number.isFinite(Number(site.latitude)) && Number.isFinite(Number(site.longitude));
+        });
+
+        const avgLat = sitesWithCoords.length
+          ? sitesWithCoords.reduce((sum, s) => sum + Number(s.latitude), 0) / sitesWithCoords.length
+          : -2.5489;
+        const avgLng = sitesWithCoords.length
+          ? sitesWithCoords.reduce((sum, s) => sum + Number(s.longitude), 0) / sitesWithCoords.length
+          : 118.0149;
+
+        const map = L.map('sites-map').setView([avgLat, avgLng], sitesWithCoords.length ? 5 : 4);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+          maxZoom: 19,
+        }).addTo(map);
+
+        const markers = [];
+        sitesWithCoords.forEach(function (site) {
+          const marker = L.circleMarker([site.latitude, site.longitude], {
+            radius: 10,
+            fillColor: site.dot || '#a77d52',
+            color: '#fff',
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.85,
+          })
+          .bindPopup(
+            `<div style="font-size: 13px; font-weight: 700; color: #1f2937;">${site.name}</div>
+            <a href="{{ route('jobs.index') }}?site=${site.param}"
+              style="display: inline-block; margin-top: 8px; padding: 6px 10px; background: #a77d52; color: white; border-radius: 10px; text-decoration: none; font-size: 12px; font-weight: 700;">
+              Lihat Lowongan
+            </a>`
+          )
+          .addTo(map);
+          markers.push(marker);
+        });
+
+        if (markers.length > 0) {
+          const group = new L.featureGroup(markers);
+          map.fitBounds(group.getBounds(), { padding: [50, 50] });
+        }
+      });
+    </script>
+
+    {{-- ===== CARA MELAMAR ===== --}}
+    <section class="px-6 py-10 bg-white lg:px-8" aria-labelledby="apply-flow-heading">
+      <div class="mx-auto max-w-7xl">
+        <div class="mb-5">
+          <span class="home-pill">Cara Melamar</span>
+          <h2 id="apply-flow-heading" class="mt-3 text-2xl font-black tracking-tight md:text-3xl" style="color:#1f2937">Prosesnya singkat dan jelas</h2>
+          <p class="mt-1 text-sm text-slate-500">Pelamar bisa lihat detail lowongan dulu. Login hanya diperlukan saat ingin mengirim lamaran.</p>
+        </div>
+
+        <div class="grid gap-4 md:grid-cols-4">
+          @foreach([
+            ['Cari Lowongan', 'Pilih posisi yang cocok dari daftar lowongan aktif.'],
+            ['Lihat Detail', 'Baca kebutuhan, lokasi, dan informasi posisi terlebih dahulu.'],
+            ['Login / Daftar', 'Masuk hanya saat kamu sudah siap mengirim lamaran.'],
+            ['Submit Biodata', 'Lengkapi data diri, lalu pantau status di Lamaran Saya.'],
+          ] as $i => [$title, $desc])
+            <div class="home-step-card rounded-2xl p-5">
+              <div class="home-step-number">{{ $i + 1 }}</div>
+              <h3 class="mt-4 text-base font-extrabold text-slate-950">{{ $title }}</h3>
+              <p class="mt-2 text-sm leading-relaxed text-slate-500">{{ $desc }}</p>
+            </div>
+          @endforeach
+        </div>
+      </div>
+    </section>
 
 
     {{-- ===== LOWONGAN TERBARU ===== --}}

@@ -105,19 +105,22 @@
 @push('head')
 <style>
   .jobs-shell {
-    background:
-      radial-gradient(circle at top left, rgba(167, 125, 82, .14), transparent 34rem),
-      linear-gradient(180deg, #fffaf5 0%, #ffffff 28rem);
-    border-radius: 0 0 32px 32px;
+    background: #ffffff;
+    border-radius: 0;
     margin-inline: -1rem;
     padding-inline: 1rem;
     padding-bottom: 1.25rem;
   }
-  .jobs-filter-card,
+  .jobs-filter-card {
+    border: 1px solid #c9a07a;
+    background:
+      linear-gradient(135deg, rgba(167,125,82,.14), rgba(255,250,245,.96) 45%, rgba(167,125,82,.1));
+    box-shadow: 0 18px 42px rgba(92, 61, 30, .09);
+  }
   .jobs-panel,
   .jobs-detail {
     border: 1px solid #eadccd;
-    background: rgba(255,255,255,.94);
+    background: #ffffff;
     box-shadow: 0 18px 45px rgba(92, 61, 30, .08);
   }
   .jobs-field {
@@ -137,6 +140,13 @@
     box-shadow: 0 0 0 4px rgba(167, 125, 82, .16);
   }
   .jobs-select { appearance: none; padding-right: 2.2rem; }
+  .jobs-search-input {
+    height: 3rem;
+    border-radius: 1rem;
+    padding-left: 3.25rem !important;
+    padding-right: 2.75rem !important;
+    font-size: .95rem;
+  }
   .jobs-chip {
     display: inline-flex;
     align-items: center;
@@ -265,7 +275,7 @@
             id="job-search" name="term" value="{{ e($qTerm) }}"
             placeholder="Cari posisi, kode lowongan, site, company…"
             autocomplete="off"
-            class="jobs-field h-12 rounded-2xl pl-12 pr-11 text-[15px]"/>
+            class="jobs-field jobs-search-input"/>
           @if($qTerm)
             <a href="{{ $rm('term') }}"
                class="absolute right-3 top-1/2 grid h-7 w-7 -translate-y-1/2 place-items-center rounded-full border border-slate-200 bg-white hover:bg-slate-100 transition"
