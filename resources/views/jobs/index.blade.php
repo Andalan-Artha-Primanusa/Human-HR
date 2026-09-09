@@ -409,23 +409,6 @@
                 <input type="hidden" name="{{ $keep }}" value="{{ e($keepParams[$keep]) }}">
               @endif
             @endforeach
-            <div class="relative">
-              {{-- <select name="sort"
-                class="h-9 appearance-none rounded-lg border border-slate-200 bg-white pl-3 pr-7
-                       text-sm text-slate-800 focus:outline-none focus:ring-2
-                       focus:ring-[#a77d52]/30 focus:border-[#c9a07a]">
-                <option value="latest" @selected($qSort === '' || $qSort === 'latest')>Terbaru</option>
-                <option value="oldest" @selected($qSort === 'oldest')>Terlama</option>
-                <option value="title"  @selected($qSort === 'title')>Judul (A–Z)</option>
-              </select> --}}
-              <svg class="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400">
-                <use href="#i-chevron"/>
-              </svg>
-            </div>
-              <button
-                class="px-3 text-xs jobs-primary-btn h-9">
-                OK
-              </button>
           </form>
         </div>
 
