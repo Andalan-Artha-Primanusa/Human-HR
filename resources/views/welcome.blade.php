@@ -719,8 +719,6 @@
       }
       .aj-tips { flex-direction: column; align-items: flex-start; }
     }
-    .aj-dots { display: none; }
-    .aj-dots.is-visible { display: flex; justify-content: center; gap: .5rem; margin-top: .75rem; }
     .aj-dot {
       width: .45rem;
       height: .45rem;
@@ -1651,8 +1649,6 @@
           return btn;
         });
 
-        if (dotsWrap.children.length > 0) dotsWrap.classList.add('is-visible');
-
         function syncDots() {
           let active = 0;
           const scrollLeft = stepsTrack.scrollLeft + stepsTrack.clientWidth / 2;
@@ -1664,9 +1660,11 @@
           });
         }
 
-        syncDots();
-        stepsTrack.addEventListener('scroll', syncDots, { passive: true });
-        window.addEventListener('resize', syncDots, { passive: true });
+        if (dotsWrap.children.length > 0) {
+          syncDots();
+          stepsTrack.addEventListener('scroll', syncDots, { passive: true });
+          window.addEventListener('resize', syncDots, { passive: true });
+        }
       }
     });
   </script>
