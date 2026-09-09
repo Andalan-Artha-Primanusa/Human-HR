@@ -530,17 +530,6 @@
       font-weight: 800;
       letter-spacing: .04em;
     }
-    .apply-card-arrow {
-      display: grid;
-      place-items: center;
-      flex-shrink: 0;
-      width: 1.5rem;
-      height: 1.5rem;
-      border-radius: 999px;
-      background: #fff8f0;
-      border: 1px solid rgba(167,125,82,.22);
-      color: #a77d52;
-    }
     .apply-point {
       position: relative;
       padding-left: 1.25rem;
@@ -558,19 +547,20 @@
     }
 
     /* ===== Cara Melamar: mobile carousel ===== */
-    .apply-carousel {
-      display: flex;
-      gap: .875rem;
-      overflow-x: auto;
-      scroll-snap-type: x mandatory;
-      -webkit-overflow-scrolling: touch;
-      padding-bottom: .75rem;
-      scrollbar-width: none;
-    }
-    .apply-carousel::-webkit-scrollbar {
-      display: none;
-    }
     @media (max-width: 767.5px) {
+      .apply-carousel {
+        display: flex;
+        gap: .875rem;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        overscroll-behavior-x: contain;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: .75rem;
+        scrollbar-width: none;
+      }
+      .apply-carousel::-webkit-scrollbar {
+        display: none;
+      }
       .apply-carousel > .apply-card {
         scroll-snap-align: start;
         flex: 0 0 auto;
@@ -1113,7 +1103,7 @@
 
         {{-- Step cards: mobile carousel + grid md and up --}}
         <div id="apply-steps"
-          class="apply-carousel mt-6 md:mt-10 md:snap-none md:overflow-visible md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 md:gap-5 xl:gap-4" aria-label="Langkah proses melamar">
+          class="apply-carousel mt-6 md:mt-10 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-5" aria-label="Langkah proses melamar">
           @foreach($applySteps as $i => $step)
             <article class="apply-card relative p-5">
               <div class="flex items-center justify-between gap-3">
@@ -1122,12 +1112,6 @@
                 </span>
                 <span class="apply-card-badge">{{ $i + 1 }}</span>
               </div>
-
-              @if($i > 0)
-                <span class="hidden xl:flex absolute -left-[1rem] top-5 z-10 apply-card-arrow" aria-hidden="true">
-                  <svg class="w-3.5 h-3.5"><use href="#i-chevron-right"/></svg>
-                </span>
-              @endif
 
               <h3 class="mt-4 text-[1.125rem] font-extrabold leading-snug" style="color:#1f2937">
                 {{ $step['title'] }}
