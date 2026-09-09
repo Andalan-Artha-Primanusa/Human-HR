@@ -335,23 +335,7 @@
                 default               => 'bg-[#a77d52]',
               };
 
-              $meta      = $deptMeta($job->division);
-              $skillsCol = $extractSkills($job);
-              $who       = $auditWho($job);
-              $createdAt = $job->created_at?->format('d M Y');
-              $year      = $job->created_at?->format('Y');
-              $isOpen    = strtolower((string) $job->status) === 'open';
-
-              $siteLabel = $job->site->name
-                        ?? $job->site_name
-                        ?? $job->getAttribute('site_name')
-                        ?? $job->site->code
-                        ?? $job->site_code
-                        ?? $job->getAttribute('site_code')
-                        ?? '—';
-
               $rail = $railColors[$idx % count($railColors)];
-              $mon  = strtoupper(Str::substr((string) ($job->division ?: $job->code ?: 'JD'), 0, 2));
 
               $prettyStage = [
                 'applied'         => 'Screening',
@@ -399,27 +383,22 @@
 
                 <div class="flex items-start gap-3 pl-1">
 
-                  {{-- Department avatar --}}
-                  <span class="grid h-10 w-10 shrink-0 place-items-center rounded-xl ring-1
-                               {{ $meta['bg'] }} {{ $meta['fg'] }} {{ $meta['ring'] }}">
-                    @if($meta['icon'] === 'i-briefcase')
-                      <span class="text-[11px] font-bold">{{ $mon }}</span>
-                    @else
-                      <svg class="h-[18px] w-[18px]"><use href="#{{ $meta['icon'] }}"/></svg>
-                    @endif
+                  {{-- Job number --}}
+                  <span class="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-slate-200 bg-slate-50 text-[11px] font-bold text-slate-700">
+                    {{ ($jobs->firstItem() ?? 1) + $idx }}
                   </span>
 
                   <div class="flex-1 min-w-0">
 
                     {{-- Title row --}}
-                    <div class="flex items-start justify-between gap-2">
-                      <p class="truncate text-[13px] font-semibold text-slate-900 leading-snug">
+                    <div class="flex items-start justify-between gap-3">
+                      <p class="min-w-0 flex-1 line-clamp-2 text-[13px] font-semibold text-slate-900 leading-snug">
                         {{ e($job->title) }}
                       </p>
                       <div class="shrink-0 flex items-center gap-1.5">
                         @if($job->code)
                           <span class="rounded border border-slate-200 bg-slate-50
-                                       px-1.5 py-0.5 text-[10px] font-medium text-slate-600">
+                                       px-1.5 py-0.5 text-[10px] font-medium text-slate-600 max-w-[150px] truncate">
                             {{ e($job->code) }}
                           </span>
                         @endif
@@ -427,59 +406,6 @@
                           {{ e($type) }}
                         </span>
                       </div>
-                    </div>
-
-                    {{-- Meta grid 2-col --}}
-                    <div class="mt-1.5 grid grid-cols-2 gap-x-4 gap-y-1 text-[11px] text-slate-500">
-                      <div class="flex items-center gap-1 truncate">
-                        <svg class="h-3.5 w-3.5 shrink-0 text-slate-400"><use href="#i-briefcase"/></svg>
-                        <span class="truncate">{{ e($job->company->name ?? '—') }}</span>
-                      </div>
-                      <div class="flex items-center gap-1 truncate">
-                        <svg class="h-3.5 w-3.5 shrink-0 text-slate-400"><use href="#i-map"/></svg>
-                        <span class="truncate">{{ e($siteLabel) }}</span>
-                      </div>
-                      <div class="flex items-center gap-1 truncate">
-                        <svg class="h-3.5 w-3.5 shrink-0 text-slate-400"><use href="#i-hr"/></svg>
-                        <span class="truncate">{{ e($job->division ?: '—') }}</span>
-                      </div>
-                      <div class="flex items-center gap-1 truncate">
-                        <svg class="h-3.5 w-3.5 shrink-0 text-slate-400"><use href="#i-clock"/></svg>
-                        <span class="truncate">{{ e($job->level ?: '—') }}</span>
-                      </div>
-                    </div>
-
-                    {{-- Status badge + skill chips --}}
-                    <div class="mt-2 flex flex-wrap items-center gap-1.5">
-                      @if($myApp)
-                        <span class="rounded-full border border-blue-200 bg-blue-50
-                                     px-2 py-0.5 text-[10px] font-semibold text-blue-700">
-                          @php $myStageKey = $stageAlias[strtolower((string) ($myApp->current_stage ?? 'screening'))] ?? strtolower((string) ($myApp->current_stage ?? 'screening')); @endphp
-                          DILAMAR: {{ strtoupper($prettyStage[$myStageKey] ?? $myStageKey) }}
-                        </span>
-                      @elseif($isOpen)
-                        <span class="rounded-full border border-emerald-200 bg-emerald-50
-                                     px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
-                          OPEN {{ $year }}
-                        </span>
-                      @else
-                        <span class="rounded-full border border-slate-200 bg-slate-100
-                                     px-2 py-0.5 text-[10px] font-semibold text-slate-600">
-                          {{ strtoupper($job->status ?? '—') }}
-                        </span>
-                      @endif
-
-                      @foreach($skillsCol->take(3) as $sk)
-                        <span class="rounded-full bg-[#f5ede3] px-2 py-0.5 text-[10px] text-[#7a5c36]">
-                          {{ e($sk) }}
-                        </span>
-                      @endforeach
-                    </div>
-
-                    {{-- Footer --}}
-                    <div class="mt-1.5 flex items-center justify-between text-[10.5px] text-slate-400">
-                      <span>{{ $who['creator'] ? 'by ' . e($who['creator']) : '' }}</span>
-                      <span>{{ $createdAt }}</span>
                     </div>
 
                   </div>

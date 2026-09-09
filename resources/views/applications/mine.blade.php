@@ -195,6 +195,8 @@
                     $job = $app->job;
                     $pct = $progressOf($app);
                     $siteLabel = $job?->site?->name ?? $job?->site?->code ?? '-';
+                    $currentStageKey = $stageAlias[strtolower((string) $app->current_stage)] ?? strtolower((string) $app->current_stage);
+                    $currentStageLabel = $pretty[$currentStageKey] ?? ($app->current_stage ? ucfirst(str_replace('_', ' ', (string) $app->current_stage)) : '-');
                 @endphp
 
                 <article class="overflow-hidden transition bg-white border shadow-sm rounded-2xl hover:-translate-y-0.5 hover:shadow-lg"
@@ -280,26 +282,22 @@
                 </div>
               </div>
 
-              {{-- STAGES --}}
-              <div class="mt-5 space-y-2">
-                @foreach($stageOrder as $key)
-                    @php $currentStageKey = $stageAlias[strtolower((string) $app->current_stage)] ?? strtolower((string) $app->current_stage); $isCurrentStage = $currentStageKey === $key; @endphp
-                    <div class="flex items-center gap-3 text-xs {{ $isCurrentStage ? 'font-bold text-[#8b5e3c]' : 'text-slate-500' }}">
-                      <span class="grid h-6 w-6 shrink-0 place-items-center rounded-full ring-1 ring-inset {{ $isCurrentStage ? 'bg-[#fffaf5] ring-[#ead8c5]' : 'bg-slate-50 ring-slate-200' }}">
-                        @if($isCurrentStage)
-                          <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
-                          </svg>
-                        @else
-                          <span class="h-1.5 w-1.5 rounded-full bg-slate-300"></span>
-                        @endif
-                      </span>
-                      <span class="truncate">{{ $pretty[$key] }}</span>
-                      @if($isCurrentStage)
-                        <span class="ml-auto rounded-full bg-[#fffaf5] px-2 py-0.5 text-[10px] font-bold text-[#8b5e3c] ring-1 ring-inset ring-[#ead8c5]">Aktif</span>
-                      @endif
-                    </div>
-                @endforeach
+              {{-- STATUS SEKARANG --}}
+              <div class="mt-5 rounded-xl border border-[#ead8c5] bg-[#fffaf5] p-4">
+                <p class="text-[11px] font-bold uppercase tracking-wide text-[#8b5e3c]">Status Sekarang</p>
+                <div class="mt-2 flex items-center justify-between gap-3">
+                  <div class="flex min-w-0 items-center gap-3">
+                    <span class="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white text-[#8b5e3c] ring-1 ring-inset ring-[#ead8c5]">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                      </svg>
+                    </span>
+                    <span class="truncate text-sm font-bold text-slate-950">{{ $currentStageLabel }}</span>
+                  </div>
+                  <span class="shrink-0 rounded-full bg-white px-2.5 py-1 text-[10px] font-bold text-[#8b5e3c] ring-1 ring-inset ring-[#ead8c5]">
+                    {{ $statusLabel($app->overall_status) }}
+                  </span>
+                </div>
               </div>
 
               {{-- FOOTER --}}
@@ -315,7 +313,6 @@
                     @endif
                       @php
                         $olStatus = $app->relationLoaded('offer') && $app->offer ? strtolower($app->offer->status) : null;
-                        $currentStageKey = $stageAlias[strtolower((string) $app->current_stage)] ?? strtolower((string) $app->current_stage);
                         $canAcceptOl = (in_array($currentStageKey, ['finish', 'offer'], true) || $olStatus === 'sent')
                           && strtolower((string) $app->overall_status) !== 'hired'
                           && strtolower((string) $app->overall_status) !== 'rejected';
