@@ -371,9 +371,7 @@
     .badge-new  { background: #f4ebe0; color: #a77d52; }
 
     .home-section-soft {
-      background:
-        radial-gradient(circle at top left, rgba(167,125,82,.12), transparent 30rem),
-        linear-gradient(180deg, #fffaf5 0%, #ffffff 78%);
+      background: #ffffff;
     }
     .home-card {
       border: 1px solid #eadccd;
@@ -393,9 +391,7 @@
       font-weight: 800;
     }
     .home-job-card {
-      border: 1px solid #eadccd;
-      background:
-        linear-gradient(180deg, #ffffff 0%, #fffaf5 100%);
+      background: #ffffff;
       box-shadow: 0 14px 34px rgba(92,61,30,.07);
       transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease;
     }
@@ -740,7 +736,7 @@
           fetchpriority="high"
           decoding="async">
         <div class="absolute inset-0 flex items-center"
-          style="background: linear-gradient(90deg, rgba(36,25,16,.82) 0%, rgba(36,25,16,.58) 42%, rgba(36,25,16,.12) 100%)">
+          style="background: rgba(36,25,16,.55)">
           <div class="w-full px-6 mx-auto max-w-7xl lg:px-8">
             <div class="max-w-2xl text-white">
               <span class="text-white home-pill border-white/20 bg-white/10">
@@ -966,14 +962,6 @@
                         <span class="home-pill">{{ $job->division }}</span>
                       </div>
                     @endif
-
-                    {{-- Deskripsi --}}
-                    @if(!empty($excerpt))
-                          <p class="flex-1 mt-4 text-sm leading-relaxed line-clamp-2" style="color: #6b4f3a">
-                            {{ $excerpt }}
-                          </p>
-                    @endif
-
                     {{-- CTA --}}
                       <div class="flex items-center justify-between gap-3 pt-4 mt-5 border-t"
                       style="border-color: rgba(167,125,82,.2)">
