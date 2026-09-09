@@ -526,10 +526,6 @@
       grid-template-columns: repeat(3, 1fr);
       gap: 1.25rem;
     }
-    @media (min-width: 1500px) {
-      .aj-grid { grid-template-columns: repeat(6, 1fr); gap: 1rem; }
-      .aj-grid .aj-card { padding: 1.35rem; }
-    }
     .aj-card {
       position: relative;
       display: flex;
@@ -713,7 +709,6 @@
         width: 84vw;
         scroll-snap-align: start;
       }
-      .aj-grid { display: block; }
       .aj-tips { flex-direction: column; align-items: flex-start; }
     }
     .aj-dots { display: none; }
