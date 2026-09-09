@@ -521,10 +521,12 @@
     }
 
     /* -- Card -- */
-    .aj-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1.25rem;
+    @media (min-width: 768px) {
+      .aj-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.25rem;
+      }
     }
     .aj-card {
       position: relative;
@@ -708,6 +710,12 @@
         flex: 0 0 auto;
         width: 84vw;
         scroll-snap-align: start;
+      }
+      .aj-dots {
+        display: flex;
+        justify-content: center;
+        gap: .5rem;
+        margin-top: .75rem;
       }
       .aj-tips { flex-direction: column; align-items: flex-start; }
     }
