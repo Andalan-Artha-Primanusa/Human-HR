@@ -481,25 +481,25 @@
                 </div>
                 <svg class="w-4 h-4 transition-transform text-slate-400 group-open:rotate-180"><use href="#i-chevron"/></svg>
               </summary>
-              <div class="absolute right-0 z-50 w-72 overflow-hidden rounded-2xl border border-slate-200 bg-white p-2 shadow-2xl shadow-slate-900/10 animate-in fade-in slide-in-from-top-2">
+              <div class="absolute right-0 z-50 p-2 overflow-hidden bg-white border shadow-2xl w-72 rounded-2xl border-slate-200 shadow-slate-900/10 animate-in fade-in slide-in-from-top-2">
                 <div class="mb-1 flex items-center gap-3 rounded-xl bg-[#f7efe7] px-3 py-3">
                   <div class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#8b5e3c] text-sm font-bold text-white">
                     {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                   </div>
                   <div class="min-w-0">
-                    <div class="truncate text-sm font-bold text-slate-950">{{ auth()->user()->name }}</div>
-                    <div class="truncate text-xs text-slate-500">{{ auth()->user()->email }}</div>
+                    <div class="text-sm font-bold truncate text-slate-950">{{ auth()->user()->name }}</div>
+                    <div class="text-xs truncate text-slate-500">{{ auth()->user()->email }}</div>
                   </div>
                 </div>
                 <a href="{{ route('profile.edit') }}" class="group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
                   <span class="grid h-9 w-9 place-items-center rounded-lg bg-slate-100 text-slate-500 transition group-hover:bg-[#f5ede4] group-hover:text-[#8b5e3c]">
-                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="7" r="4"/></svg>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="7" r="4"/></svg>
                   </span>
                   <span>Profil Saya</span>
                 </a>
                 <a href="{{ route('applications.mine') }}" class="group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
                   <span class="grid h-9 w-9 place-items-center rounded-lg bg-slate-100 text-slate-500 transition group-hover:bg-[#f5ede4] group-hover:text-[#8b5e3c]">
-                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M3 13h18"/></svg>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M3 13h18"/></svg>
                   </span>
                   <span>Lamaran Saya</span>
                 </a>
@@ -507,8 +507,8 @@
                 <form action="{{ route('logout') }}" method="POST">
                   @csrf
                   <button type="submit" class="group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-red-600 transition hover:bg-red-50">
-                    <span class="grid h-9 w-9 place-items-center rounded-lg bg-red-50 text-red-500 transition group-hover:bg-red-100">
-                      <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/><path d="M21 19V5a2 2 0 0 0-2-2h-5"/><path d="M14 21h5a2 2 0 0 0 2-2"/></svg>
+                    <span class="grid text-red-500 transition rounded-lg h-9 w-9 place-items-center bg-red-50 group-hover:bg-red-100">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/><path d="M21 19V5a2 2 0 0 0-2-2h-5"/><path d="M14 21h5a2 2 0 0 0 2-2"/></svg>
                     </span>
                     <span>Keluar</span>
                   </button>
@@ -726,13 +726,13 @@
           style="background: linear-gradient(90deg, rgba(36,25,16,.82) 0%, rgba(36,25,16,.58) 42%, rgba(36,25,16,.12) 100%)">
           <div class="w-full px-6 mx-auto max-w-7xl lg:px-8">
             <div class="max-w-2xl text-white">
-              <span class="home-pill border-white/20 bg-white/10 text-white">
+              <span class="text-white home-pill border-white/20 bg-white/10">
                 Portal Karier Andalan
               </span>
               <h1 id="hero-heading" class="mt-5 text-4xl font-black leading-tight tracking-tight md:text-6xl">
                 Temukan peluang karier terbaik bersama Andalan
               </h1>
-              <p class="mt-5 max-w-xl text-base leading-relaxed text-white/85 md:text-lg">
+              <p class="max-w-xl mt-5 text-base leading-relaxed text-white/85 md:text-lg">
                 Cari lowongan aktif, pilih site yang sesuai, lalu pantau proses lamaran langsung dari akun kamu.
               </p>
               <div class="flex flex-wrap gap-3 mt-7">
@@ -767,113 +767,9 @@
             })->values();
     @endphp
 
-    <section class="home-section-soft border-b" style="border-color: #e8d5c4;"
-      aria-labelledby="sites-heading">
-      <div class="px-6 py-10 mx-auto max-w-7xl lg:px-8">
-        <div class="mb-5 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
-          <div>
-            <span class="home-pill">Area Operasional</span>
-            <h2 id="sites-heading" class="mt-3 text-2xl font-black tracking-tight md:text-3xl" style="color: #1f2937">Lokasi Site</h2>
-            <p class="mt-1 text-sm text-slate-500">Lihat site aktif dan lowongan yang tersedia di masing-masing lokasi.</p>
-          </div>
-          <a href="{{ route('sites.index') }}" class="inline-flex items-center gap-2 text-sm font-extrabold text-[#a77d52] transition hover:opacity-70">
-            Semua site
-            <svg class="w-4 h-4" aria-hidden="true"><use href="#i-arrow-right"/></svg>
-          </a>
-        </div>
-
-        @if($sitesNorm->isNotEmpty())
-              <div class="grid gap-4 lg:grid-cols-3">
-                <div id="sites-map" class="home-card w-full overflow-hidden h-96 rounded-[1.5rem] lg:col-span-2"
-                  role="region" aria-label="Peta lokasi site PT Andalan Artha Primanusa">
-                </div>
-
-                {{-- Daftar site di samping peta --}}
-                <div class="grid content-start gap-2 sm:grid-cols-2 lg:grid-cols-1">
-                  @foreach($sitesNorm as $s)
-                    <a href="{{ $s['id'] ? route('sites.show', $s['id']) : route('sites.index') }}"
-                      class="home-card flex items-center gap-3 px-4 py-3 rounded-2xl transition hover:-translate-y-0.5 hover:shadow-lg">
-                      <span class="inline-block w-3 h-3 rounded-full shrink-0" style="background: {{ $s['dot'] }}"></span>
-                      <span class="text-sm font-medium" style="color: #1f2937">{{ $s['name'] }}</span>
-                    </a>
-                  @endforeach
-                </div>
-              </div>
-
-          @else
-            <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
-              Lokasi site belum tersedia.
-            </div>
-          @endif
-      </div>
-    </section>
-
-    {{-- LEAFLET MAPS SCRIPT & STYLE --}}
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-    <script>
-      document.addEventListener('DOMContentLoaded', function () {
-        const sitesData = @json($sitesWithCoords ?? []);
-        const mapContainer = document.getElementById('sites-map');
-
-        if (!mapContainer) return;
-
-        const sitesWithCoords = sitesData.filter(function (site) {
-          return Number.isFinite(Number(site.latitude)) && Number.isFinite(Number(site.longitude));
-        });
-
-        // Kalau koordinat belum tersedia, tetap tampilkan peta default Indonesia.
-        const avgLat = sitesWithCoords.length
-          ? sitesWithCoords.reduce((sum, s) => sum + Number(s.latitude), 0) / sitesWithCoords.length
-          : -2.5489;
-        const avgLng = sitesWithCoords.length
-          ? sitesWithCoords.reduce((sum, s) => sum + Number(s.longitude), 0) / sitesWithCoords.length
-          : 118.0149;
-
-        // Inisialisasi peta
-        const map = L.map('sites-map').setView([avgLat, avgLng], sitesWithCoords.length ? 5 : 4);
-
-        // Tambahkan tile layer (OpenStreetMap)
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-          maxZoom: 19,
-        }).addTo(map);
-
-        // Tambahkan marker untuk setiap site
-        const markers = [];
-        sitesWithCoords.forEach(function (site) {
-          const marker = L.circleMarker([site.latitude, site.longitude], {
-            radius: 10,
-            fillColor: site.dot || '#a77d52',
-            color: '#fff',
-            weight: 2,
-            opacity: 1,
-            fillOpacity: 0.8,
-          })
-          .bindPopup(
-            `<div style="font-size: 13px; font-weight: 500; color: #1f2937;">
-              ${site.name}
-            </div>
-            <p style="font-size: 12px; color: #6b7280; margin: 4px 0 0 0;">Lat: ${site.latitude}, Long: ${site.longitude}</p>
-            <a href="{{ route('jobs.index') }}?site=${site.param}"
-              style="display: inline-block; margin-top: 6px; padding: 4px 8px; background: #a77d52; color: white; border-radius: 4px; text-decoration: none; font-size: 11px; font-weight: 600;">
-              Lihat Lowongan
-            </a>`
-          )
-          .addTo(map);
-          markers.push(marker);
-        });
-
-        // Zoom otomatis ke semua marker
-        if (markers.length > 0) {
-          const group = new L.featureGroup(markers);
-          map.fitBounds(group.getBounds(), { padding: [50, 50] });
-        }
-      });
-    </script>
 
     {{-- ===== LOWONGAN TERBARU ===== --}}
-    <section class="home-section-soft px-6 py-12 lg:px-8" aria-labelledby="jobs-heading">
+    <section class="px-6 py-12 home-section-soft lg:px-8" aria-labelledby="jobs-heading">
       <div class="mx-auto max-w-7xl">
       <div class="home-card overflow-hidden rounded-[1.5rem]">
 
@@ -884,7 +780,7 @@
             <h2 id="jobs-heading" class="mt-3 text-2xl font-black tracking-tight md:text-3xl" style="color: #1f2937">Lowongan terbaru untuk kamu</h2>
             <p class="mt-1 text-sm text-slate-500">Pilih posisi yang tersedia dan lihat detail sebelum melamar.</p>
           </div>
-          <a href="{{ route('jobs.index') }}" class="home-primary-link px-5 py-3 text-sm">
+          <a href="{{ route('jobs.index') }}" class="px-5 py-3 text-sm home-primary-link">
             Lihat semua lowongan
             <svg class="w-4 h-4" aria-hidden="true"><use href="#i-arrow-right"/></svg>
           </a>
@@ -914,7 +810,7 @@
                     $isNew = $job->created_at && $job->created_at->diffInDays(now()) <= 7;
                 @endphp
 
-                <article class="home-job-card flex flex-col overflow-hidden rounded-2xl"
+                <article class="flex flex-col overflow-hidden home-job-card rounded-2xl"
                   itemscope itemtype="https://schema.org/JobPosting">
                   <meta itemprop="title" content="{{ $job->title }}">
                   <meta itemprop="datePosted" content="{{ optional($job->created_at)->toDateString() }}">
@@ -940,7 +836,7 @@
                         </div>
 
                         {{-- Lokasi - PERBAIKAN: tidak tampilkan region dua kali --}}
-                        <p class="text-xs mt-2 leading-relaxed" style="color: #6b4f3a">
+                        <p class="mt-2 text-xs leading-relaxed" style="color: #6b4f3a">
                           @if($siteName)
                             <svg class="w-3 h-3 inline-block mr-0.5 -mt-px" aria-hidden="true"><use href="#i-map-pin"/></svg>
                             <span class="font-medium">{{ $siteName }}</span>@if($showRegion)<span class="opacity-60">, {{ $siteRegion }}</span>@endif
