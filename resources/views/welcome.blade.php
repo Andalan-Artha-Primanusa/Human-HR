@@ -430,6 +430,182 @@
       font-weight: 900;
       box-shadow: 0 10px 20px rgba(167,125,82,.2);
     }
+
+    /* ===== Cara Melamar: process timeline ===== */
+    .apply-timeline {
+      position: relative;
+      display: flex;
+      align-items: flex-start;
+    }
+    .apply-timeline::before {
+      content: "";
+      position: absolute;
+      top: 1rem;
+      left: 2.75rem;
+      right: 2.75rem;
+      height: 2px;
+      background: rgba(167,125,82,.18);
+    }
+    .apply-timeline-item {
+      position: relative;
+      z-index: 1;
+      flex: 1 1 0;
+      min-width: 0;
+    }
+    .apply-timeline-dot {
+      display: grid;
+      margin-inline: auto;
+      width: 2.25rem;
+      height: 2.25rem;
+      place-items: center;
+      border-radius: 999px;
+      background: #ffffff;
+      border: 2px solid rgba(167,125,82,.35);
+      color: #7a5530;
+      font-size: .72rem;
+      font-weight: 900;
+      transition: border-color .2s ease, background .2s ease, color .2s ease;
+    }
+    .apply-timeline-item.is-active .apply-timeline-dot {
+      background: #a77d52;
+      border-color: #a77d52;
+      color: #ffffff;
+    }
+    .apply-timeline-label {
+      display: block;
+      margin-top: .5rem;
+      padding-inline: .25rem;
+      font-size: .68rem;
+      font-weight: 700;
+      line-height: 1.15;
+      text-align: center;
+      color: #6b4f3a;
+    }
+    .apply-timeline-label.is-active {
+      color: #3b2209;
+    }
+
+    /* ===== Cara Melamar: step cards ===== */
+    .apply-card {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      border: 1px solid rgba(167,125,82,.22);
+      background: #ffffff;
+      border-radius: 1.4rem;
+      box-shadow: 0 10px 28px rgba(92,61,30,.05);
+      transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+    }
+    .apply-card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(167,125,82,.55);
+      box-shadow: 0 22px 44px rgba(92,61,30,.12);
+    }
+    .apply-card-icon {
+      display: grid;
+      width: 3.25rem;
+      height: 3.25rem;
+      place-items: center;
+      border-radius: 1rem;
+      background: #f7efde;
+      color: #a77d52;
+      transition: transform .25s ease, background .25s ease, color .25s ease;
+    }
+    .apply-card:hover .apply-card-icon {
+      background: #a77d52;
+      color: #ffffff;
+      transform: scale(1.04);
+    }
+    .apply-card-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 1.75rem;
+      padding: .2rem .55rem;
+      border-radius: 999px;
+      background: #fff3e0;
+      border: 1px solid rgba(167,125,82,.25);
+      color: #7a5530;
+      font-size: .7rem;
+      font-weight: 800;
+      letter-spacing: .04em;
+    }
+    .apply-card-arrow {
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+      width: 1.5rem;
+      height: 1.5rem;
+      border-radius: 999px;
+      background: #fff8f0;
+      border: 1px solid rgba(167,125,82,.22);
+      color: #a77d52;
+    }
+    .apply-point {
+      position: relative;
+      padding-left: 1.25rem;
+      color: #5a4632;
+    }
+    .apply-point::before {
+      content: "";
+      position: absolute;
+      left: .1rem;
+      top: .5rem;
+      width: .4rem;
+      height: .4rem;
+      border-radius: 999px;
+      background: #a77d52;
+    }
+
+    /* ===== Cara Melamar: mobile carousel ===== */
+    .apply-carousel {
+      display: flex;
+      gap: .875rem;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: .75rem;
+      scrollbar-width: none;
+    }
+    .apply-carousel::-webkit-scrollbar {
+      display: none;
+    }
+    @media (max-width: 767.5px) {
+      .apply-carousel > .apply-card {
+        scroll-snap-align: start;
+        flex: 0 0 auto;
+        width: 82vw;
+        max-width: 21.5rem;
+      }
+    }
+    .apply-dots {
+      display: flex;
+      justify-content: center;
+      gap: .5rem;
+      margin-top: .5rem;
+    }
+    .apply-dot {
+      width: .4rem;
+      height: .4rem;
+      border-radius: 999px;
+      background: rgba(167,125,82,.3);
+      border: 0;
+      padding: 0;
+      cursor: pointer;
+      transition: width .25s ease, background .25s ease;
+    }
+    .apply-dot.is-active {
+      width: 1.25rem;
+      background: #a77d52;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .apply-card, .apply-card-icon, .apply-timeline-dot, .apply-dot {
+        transition: none;
+      }
+      .apply-card:hover { transform: none; }
+      .apply-card:hover .apply-card-icon { transform: none; }
+    }
   </style>
 </head>
 
@@ -455,6 +631,17 @@
     <symbol id="i-map-pin"     viewBox="0 0 24 24" fill="none" stroke="currentColor"><g stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0Z"/><circle cx="12" cy="10" r="3"/></g></symbol>
     <symbol id="i-clock"       viewBox="0 0 24 24" fill="none" stroke="currentColor"><g stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></g></symbol>
     <symbol id="i-arrow-up"    viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 5l-7 7m7-7 7 7M12 5v14" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-file-search" viewBox="0 0 24 24" fill="none" stroke="currentColor"><g stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><circle cx="16" cy="16" r="3"/><path d="m19 19-1.5-1.5"/></g></symbol>
+    <symbol id="i-log-in"      viewBox="0 0 24 24" fill="none" stroke="currentColor"><g stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/></g></symbol>
+    <symbol id="i-user-plus"   viewBox="0 0 24 24" fill="none" stroke="currentColor"><g stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6"/><path d="M22 11h-6"/></g></symbol>
+    <symbol id="i-clipboard-list" viewBox="0 0 24 24" fill="none" stroke="currentColor"><g stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M9 11h.01"/><path d="M13 11h.01"/><path d="M17 11h.01"/><path d="M9 15h6"/></g></symbol>
+    <symbol id="i-file-up"     viewBox="0 0 24 24" fill="none" stroke="currentColor"><g stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="m12 12v6"/><path d="m15 15-3-3-3 3"/></g></symbol>
+    <symbol id="i-list-checks" viewBox="0 0 24 24" fill="none" stroke="currentColor"><g stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/></g></symbol>
+    <symbol id="i-lightbulb"   viewBox="0 0 24 24" fill="none" stroke="currentColor"><g stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5.76.76 1.23 1.52 1.41 2.5"/></g></symbol>
+    <symbol id="i-shield-check" viewBox="0 0 24 24" fill="none" stroke="currentColor"><g stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></g></symbol>
+    <symbol id="i-users"       viewBox="0 0 24 24" fill="none" stroke="currentColor"><g stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></g></symbol>
+    <symbol id="i-check"       viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 6 9 17l-5-5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-chevron-right" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
   </svg>
 
   {{-- ============================================================
@@ -823,27 +1010,179 @@
     </script>
 
     {{-- ===== CARA MELAMAR ===== --}}
-    <section class="px-6 py-10 bg-white lg:px-8" aria-labelledby="apply-flow-heading">
+    <section class="px-6 py-12 bg-white lg:px-8" aria-labelledby="apply-flow-heading">
       <div class="mx-auto max-w-7xl">
-        <div class="mb-5">
-          <span class="home-pill">Cara Melamar</span>
-          <h2 id="apply-flow-heading" class="mt-3 text-2xl font-black tracking-tight md:text-3xl" style="color:#1f2937">Prosesnya singkat dan jelas</h2>
-          <p class="mt-1 text-sm text-slate-500">Pelamar bisa lihat detail lowongan dulu. Login hanya diperlukan saat ingin mengirim lamaran.</p>
+
+        @php
+          $applySteps = [
+            [
+              'icon'  => 'i-briefcase',
+              'title' => 'Cari Lowongan',
+              'desc'  => 'Temukan posisi yang sesuai dengan minat dan kualifikasi kamu.',
+              'items' => [
+                'Buka halaman utama atau menu "Lowongan Kerja"',
+                'Lihat posisi yang tersedia',
+                'Pilih lowongan dengan status open',
+              ],
+            ],
+            [
+              'icon'  => 'i-file-search',
+              'title' => 'Lihat Detail & Lamar',
+              'desc'  => 'Pelajari informasi lowongan sebelum mengirim lamaran.',
+              'items' => [
+                'Baca deskripsi pekerjaan',
+                'Lihat lokasi dan kualifikasi',
+                'Klik "Lamar" atau "Lamar Sekarang"',
+              ],
+            ],
+            [
+              'icon'  => 'i-log-in',
+              'title' => 'Login / Daftar',
+              'desc'  => 'Login hanya diperlukan saat kamu siap mengirim lamaran.',
+              'items' => [
+                'Jika belum login, masuk terlebih dahulu',
+                'Jika belum punya akun, daftar gratis',
+                'Akun registrasi otomatis menggunakan role pelamar',
+              ],
+            ],
+            [
+              'icon'  => 'i-clipboard-list',
+              'title' => 'Lengkapi Biodata',
+              'desc'  => 'Lengkapi profil sebagai data utama proses rekrutmen.',
+              'items' => [
+                'POH / tempat penempatan',
+                'Nama, gender, usia, tempat & tanggal lahir',
+                'NIK, email, nomor HP',
+                'Pendidikan, jurusan, alamat KTP & domisili',
+              ],
+            ],
+            [
+              'icon'  => 'i-file-up',
+              'title' => 'Upload CV & Submit',
+              'desc'  => 'Pastikan profil dan dokumen sudah lengkap sebelum dikirim.',
+              'items' => [
+                'Upload CV (wajib)',
+                'Semua field wajib harus lengkap',
+                'Submit biodata → lamaran otomatis dibuat',
+                'Tahap awal: Screening',
+              ],
+            ],
+            [
+              'icon'  => 'i-list-checks',
+              'title' => 'Pantau Status Lamaran',
+              'desc'  => 'Pantau perkembangan proses rekrutmen dari satu halaman.',
+              'items' => [
+                'Buka menu "Lamaran Saya"',
+                'Status diperbarui mengikuti proses rekrutmen',
+                'Screening → Psikotes → Interview → MCU → Offering',
+              ],
+            ],
+          ];
+
+          $timelineLabels = [
+            'Cari Lowongan', 'Lihat Detail', 'Login / Daftar',
+            'Lengkapi Biodata', 'Upload & Submit', 'Pantau Status',
+          ];
+        @endphp
+
+        {{-- Header --}}
+        <div class="max-w-3xl">
+          <span class="home-pill">
+            <svg class="w-4 h-4" aria-hidden="true"><use href="#i-clipboard-list"/></svg>
+            Cara Melamar
+          </span>
+          <h2 id="apply-flow-heading" class="mt-4 text-[2rem] font-black leading-tight tracking-tight md:text-[2.75rem] md:leading-[1.15]" style="color:#1f2937">
+            Proses melamar yang singkat, jelas, dan transparan
+          </h2>
+          <p class="mt-3 text-[15px] leading-relaxed md:text-lg" style="color:#6b4f3a; max-width: 44rem">
+            Pelamar dapat melihat lowongan terlebih dahulu, lalu login hanya saat siap melamar. Setelah biodata lengkap dan CV diunggah, lamaran otomatis masuk dan status dapat dipantau secara real-time.
+          </p>
         </div>
 
-        <div class="grid gap-4 md:grid-cols-4">
-          @foreach([
-            ['Cari Lowongan', 'Pilih posisi yang cocok dari daftar lowongan aktif.'],
-            ['Lihat Detail', 'Baca kebutuhan, lokasi, dan informasi posisi terlebih dahulu.'],
-            ['Login / Daftar', 'Masuk hanya saat kamu sudah siap mengirim lamaran.'],
-            ['Submit Biodata', 'Lengkapi data diri, lalu pantau status di Lamaran Saya.'],
-          ] as $i => [$title, $desc])
-            <div class="p-5 home-step-card rounded-2xl">
-              <div class="home-step-number">{{ $i + 1 }}</div>
-              <h3 class="mt-4 text-base font-extrabold text-slate-950">{{ $title }}</h3>
-              <p class="mt-2 text-sm leading-relaxed text-slate-500">{{ $desc }}</p>
-            </div>
+        {{-- Timeline (hidden on mobile) --}}
+        <div class="hidden md:block mt-12">
+          <ol class="apply-timeline" aria-label="Tahapan proses melamar">
+            @foreach($timelineLabels as $idx => $label)
+              <li class="apply-timeline-item">
+                <span class="apply-timeline-dot">{{ $idx + 1 }}</span>
+                <span class="apply-timeline-label">{{ $label }}</span>
+              </li>
+            @endforeach
+          </ol>
+        </div>
+
+        {{-- Step cards: mobile carousel + grid md and up --}}
+        <div id="apply-steps"
+          class="apply-carousel mt-6 md:mt-10 md:snap-none md:overflow-visible md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 md:gap-5 xl:gap-4" aria-label="Langkah proses melamar">
+          @foreach($applySteps as $i => $step)
+            <article class="apply-card relative p-5">
+              <div class="flex items-center justify-between gap-3">
+                <span class="apply-card-icon">
+                  <svg class="w-7 h-7" aria-hidden="true"><use href="#{{ $step['icon'] }}"/></svg>
+                </span>
+                <span class="apply-card-badge">{{ $i + 1 }}</span>
+              </div>
+
+              @if($i > 0)
+                <span class="hidden xl:flex absolute -left-[1rem] top-5 z-10 apply-card-arrow" aria-hidden="true">
+                  <svg class="w-3.5 h-3.5"><use href="#i-chevron-right"/></svg>
+                </span>
+              @endif
+
+              <h3 class="mt-4 text-[1.125rem] font-extrabold leading-snug" style="color:#1f2937">
+                {{ $step['title'] }}
+              </h3>
+              <p class="mt-1.5 text-[13px] leading-relaxed" style="color:#7a5530">
+                {{ $step['desc'] }}
+              </p>
+
+              <ul class="mt-3.5 space-y-1.5">
+                @foreach($step['items'] as $item)
+                  <li class="text-[12.5px] leading-snug">
+                    <span class="apply-point">{{ $item }}</span>
+                  </li>
+                @endforeach
+              </ul>
+
+              @if($i === 2)
+                <div class="pt-4 mt-auto">
+                  <a href="{{ route('login') }}" class="inline-flex items-center gap-2 px-4 py-2.5 text-[13px] font-bold text-white rounded-xl hover:opacity-90 transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#a77d52]" style="background:#a77d52">
+                    <svg class="w-4 h-4" aria-hidden="true"><use href="#i-log-in"/></svg>
+                    Masuk &amp; Lamar
+                  </a>
+                </div>
+              @endif
+            </article>
           @endforeach
+        </div>
+
+        {{-- Mobile dots --}}
+        <div class="md:hidden apply-dots" id="apply-dots" aria-label="Navigasi langkah"></div>
+
+        {{-- Bottom info bar --}}
+        <div class="mt-10 grid gap-6 md:mt-14 lg:grid-cols-[1fr_auto] lg:items-center" style="background:#fff8f0; border:1px solid rgba(167,125,82,.22); border-radius:1.5rem; padding:1.5rem;">
+          <div class="flex items-start gap-4">
+            <span class="grid w-11 h-11 shrink-0 place-items-center rounded-xl" style="background:#a77d52; color:#fff">
+              <svg class="w-5 h-5" aria-hidden="true"><use href="#i-lightbulb"/></svg>
+            </span>
+            <div>
+              <p class="text-[11px] font-extrabold uppercase tracking-widest" style="color:#a77d52">Tips untuk Pelamar</p>
+              <p class="mt-1.5 text-[15px] font-bold" style="color:#3b2209">Pastikan semua data dan dokumen sudah benar sebelum submit.</p>
+              <p class="mt-0.5 text-[13px]" style="color:#6b4f3a">Lamaran yang lengkap membantu proses verifikasi berjalan lebih cepat.</p>
+            </div>
+          </div>
+          <ul class="flex flex-wrap items-center gap-x-6 gap-y-3">
+            @foreach([
+              ['i-shield-check', 'Aman &amp; terpercaya'],
+              ['i-clock', 'Proses transparan'],
+              ['i-users', 'Kesempatan setara'],
+            ] as [$icon, $label])
+              <li class="flex items-center gap-2 text-[13px] font-bold" style="color:#3b2209">
+                <svg class="w-5 h-5 shrink-0" style="color:#a77d52" aria-hidden="true"><use href="#{{ $icon }}"/></svg>
+                {{ $label }}
+              </li>
+            @endforeach
+          </ul>
         </div>
       </div>
     </section>
@@ -1149,6 +1488,42 @@
           toTop.classList.remove('show');
         }
       });
+
+      // Cara Melamar: mobile carousel dots
+      const stepsTrack = document.getElementById('apply-steps');
+      const dotsWrap   = document.getElementById('apply-dots');
+      if (stepsTrack && dotsWrap && stepsTrack.children.length > 0) {
+        const cards = Array.prototype.slice.call(stepsTrack.children);
+        const dots  = cards.map(function (_, idx) {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'apply-dot';
+          btn.setAttribute('aria-label', 'Langkah ' + (idx + 1));
+          btn.addEventListener('click', function () {
+            const left = cards[idx].offsetLeft - stepsTrack.clientWidth / 2 + cards[idx].clientWidth / 2;
+            stepsTrack.scrollTo({ left: Math.max(left, 0), behavior: 'smooth' });
+          });
+          dotsWrap.appendChild(btn);
+          return btn;
+        });
+
+        function syncDots() {
+          let active = 0;
+          const scrollLeft = stepsTrack.scrollLeft + stepsTrack.clientWidth / 2;
+          cards.forEach(function (card, idx) {
+            if (scrollLeft >= card.offsetLeft) active = idx;
+          });
+          dots.forEach(function (dot, idx) {
+            dot.classList.toggle('is-active', idx === active);
+          });
+        }
+
+        if (!window.matchMedia || !window.matchMedia('(min-width: 768px)').matches) {
+          syncDots();
+        }
+        stepsTrack.addEventListener('scroll', syncDots, { passive: true });
+        window.addEventListener('resize', syncDots, { passive: true });
+      }
     });
   </script>
 </body>
