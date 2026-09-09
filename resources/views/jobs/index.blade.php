@@ -278,23 +278,23 @@
             class="jobs-field jobs-search-input"/>
           @if($qTerm)
             <a href="{{ $rm('term') }}"
-               class="absolute right-3 top-1/2 grid h-7 w-7 -translate-y-1/2 place-items-center rounded-full border border-slate-200 bg-white hover:bg-slate-100 transition"
+               class="absolute grid transition -translate-y-1/2 bg-white border rounded-full right-3 top-1/2 h-7 w-7 place-items-center border-slate-200 hover:bg-slate-100"
                aria-label="Hapus kata kunci">
               <svg class="h-3.5 w-3.5 text-slate-500"><use href="#i-x"/></svg>
             </a>
           @endif
         </div>
 
-        <div class="grid grid-cols-2 gap-2 sm:flex sm:justify-end">
-          <button type="submit" class="jobs-primary-btn h-12 px-5">
+        {{-- <div class="grid grid-cols-2 gap-2 sm:flex sm:justify-end">
+          <button type="submit" class="h-12 px-5 jobs-primary-btn">
             <svg class="w-4 h-4"><use href="#i-search"/></svg>
             Cari
           </button>
-          <button data-filter-toggle type="button" aria-expanded="false" aria-controls="filter-panel" class="jobs-soft-btn h-12 px-5">
+          <button data-filter-toggle type="button" aria-expanded="false" aria-controls="filter-panel" class="h-12 px-5 jobs-soft-btn">
             <svg class="w-4 h-4"><use href="#i-filter"/></svg>
             Filter
           </button>
-        </div>
+        </div> --}}
 
         @foreach(['division','site','company','type','sort'] as $keep)
           @if(!empty($keepParams[$keep]))
@@ -349,7 +349,7 @@
                   <option value="{{ $value }}" @selected($qType === $value)>{{ $label }}</option>
                 @endforeach
               </select>
-              <svg class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400">
+              <svg class="absolute w-4 h-4 -translate-y-1/2 pointer-events-none right-3 top-1/2 text-slate-400">
                 <use href="#i-chevron"/>
               </svg>
             </div>
@@ -359,8 +359,8 @@
           @if($qSort)<input type="hidden" name="sort" value="{{ e($qSort) }}">@endif
 
           <div class="flex items-end gap-2 sm:col-span-2 lg:col-span-1">
-            <button class="jobs-primary-btn h-11 flex-1 px-4">Terapkan</button>
-            <a href="{{ $resetUrl }}" class="jobs-soft-btn h-11 px-4">Reset</a>
+            <button class="flex-1 px-4 jobs-primary-btn h-11">Terapkan</button>
+            <a href="{{ $resetUrl }}" class="px-4 jobs-soft-btn h-11">Reset</a>
           </div>
 
         </form>
@@ -400,7 +400,7 @@
         <div class="flex items-center justify-between gap-3 border-b border-[#efe2d6] bg-[#fffaf5] px-4 py-3">
           <div class="min-w-0">
             <p class="text-[11px] font-semibold uppercase tracking-wide text-[#8c6843]">Hasil pencarian</p>
-            <p class="text-sm font-bold text-slate-900 leading-tight">{{ $total }} lowongan tersedia</p>
+            <p class="text-sm font-bold leading-tight text-slate-900">{{ $total }} lowongan tersedia</p>
           </div>
 
           <form method="GET" class="flex items-center gap-2" aria-label="Urutkan">
@@ -423,7 +423,7 @@
               </svg>
             </div>
               <button
-                class="jobs-primary-btn h-9 px-3 text-xs">
+                class="px-3 text-xs jobs-primary-btn h-9">
                 OK
               </button>
           </form>
@@ -587,8 +587,7 @@
               {{-- ── Header ── --}}
               <div class="flex flex-col gap-4 sm:flex-row sm:items-start">
 
-                <span class="grid h-12 w-12 shrink-0 place-items-center rounded-xl ring-1
-                             bg-white/15 text-white ring-white/25">
+                <span class="grid w-12 h-12 text-white shrink-0 place-items-center rounded-xl ring-1 bg-white/15 ring-white/25">
                   <svg class="w-5 h-5"><use href="#{{ $meta['icon'] }}"/></svg>
                 </span>
 
