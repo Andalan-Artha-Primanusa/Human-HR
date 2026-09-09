@@ -369,6 +369,54 @@
     }
     .badge-open { background: #f4ebe0; color: #7a5530; }
     .badge-new  { background: #f4ebe0; color: #a77d52; }
+
+    .home-section-soft {
+      background:
+        radial-gradient(circle at top left, rgba(167,125,82,.12), transparent 30rem),
+        linear-gradient(180deg, #fffaf5 0%, #ffffff 78%);
+    }
+    .home-card {
+      border: 1px solid #eadccd;
+      background: rgba(255,255,255,.94);
+      box-shadow: 0 20px 48px rgba(92,61,30,.08);
+    }
+    .home-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      border-radius: 999px;
+      border: 1px solid #eadccd;
+      background: #fff8f0;
+      color: #7a5530;
+      padding: .35rem .75rem;
+      font-size: .72rem;
+      font-weight: 800;
+    }
+    .home-job-card {
+      border: 1px solid #eadccd;
+      background:
+        linear-gradient(180deg, #ffffff 0%, #fffaf5 100%);
+      box-shadow: 0 14px 34px rgba(92,61,30,.07);
+      transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease;
+    }
+    .home-job-card:hover {
+      border-color: rgba(167,125,82,.45);
+      box-shadow: 0 22px 52px rgba(92,61,30,.13);
+      transform: translateY(-3px);
+    }
+    .home-primary-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: .45rem;
+      border-radius: 1rem;
+      background: #a77d52;
+      color: #fff;
+      font-weight: 800;
+      box-shadow: 0 12px 24px rgba(167,125,82,.24);
+      transition: transform .18s ease, opacity .18s ease;
+    }
+    .home-primary-link:hover { opacity: .94; transform: translateY(-1px); }
   </style>
 </head>
 
@@ -666,45 +714,40 @@
   <main id="maincontent">
 
     {{-- ===== HERO ===== --}}
-    <section aria-labelledby="hero-heading">
+    <section aria-labelledby="hero-heading" class="home-section-soft">
       <div class="relative overflow-hidden">
         <img src="{{ asset('assets/banner-abn.png') }}"
           alt="Bergabunglah bersama tim profesional PT Andalan Artha Primanusa"
-          class="w-full h-[440px] object-cover"
+          class="w-full h-[430px] md:h-[500px] object-cover"
           width="1440" height="440"
           fetchpriority="high"
           decoding="async">
-        <div class="absolute inset-0 flex items-start justify-end pt-8 md:pt-12"
-          style="background: linear-gradient(to right, transparent 15%, rgba(0,0,0,.65) 100%)">
-          <div class="max-w-2xl px-8 text-right text-white md:px-14">
-            <div class="mb-0 -mt-4 md:-mt-6">
-              <h1 id="hero-heading" class="text-3xl font-extrabold leading-tight md:text-5xl">
-                WELCOME TO<br>
-                <span class="text-2xl md:text-4xl" style="color: #a57c50">ANDALAN CARRER</span>
+        <div class="absolute inset-0 flex items-center"
+          style="background: linear-gradient(90deg, rgba(36,25,16,.82) 0%, rgba(36,25,16,.58) 42%, rgba(36,25,16,.12) 100%)">
+          <div class="w-full px-6 mx-auto max-w-7xl lg:px-8">
+            <div class="max-w-2xl text-white">
+              <span class="home-pill border-white/20 bg-white/10 text-white">
+                Portal Karier Andalan
+              </span>
+              <h1 id="hero-heading" class="mt-5 text-4xl font-black leading-tight tracking-tight md:text-6xl">
+                Temukan peluang karier terbaik bersama Andalan
               </h1>
-            </div>
-            <div class="mt-12 space-y-2">
-              <p class="text-sm leading-relaxed md:text-base opacity-90">
-                Bergabunglah bersama tim yang berkomitmen pada pertumbuhan, profesionalisme, dan keunggulan.
+              <p class="mt-5 max-w-xl text-base leading-relaxed text-white/85 md:text-lg">
+                Cari lowongan aktif, pilih site yang sesuai, lalu pantau proses lamaran langsung dari akun kamu.
               </p>
-              <p class="text-sm leading-relaxed opacity-75 md:text-base">
-                Temukan peluang karier yang sesuai dengan aspirasi Anda bersama PT Andalan Artha Primanusa.
-              </p>
-            </div>
-            <div class="flex flex-wrap justify-end gap-3 mt-6">
-              <a href="{{ route('jobs.index') }}"
-                class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm bg-white hover:bg-zinc-100 transition shadow"
-                style="color: #a77d52">
-                <svg class="w-4 h-4" aria-hidden="true"><use href="#i-briefcase"/></svg>
-                Lihat Lowongan
-              </a>
-              @guest
+              <div class="flex flex-wrap gap-3 mt-7">
+                <a href="{{ route('jobs.index') }}"
+                  class="inline-flex items-center gap-2 px-5 py-3 text-sm font-extrabold text-[#7a5530] transition bg-white shadow-lg rounded-2xl hover:-translate-y-0.5 hover:bg-[#fff8f0]">
+                  <svg class="w-4 h-4" aria-hidden="true"><use href="#i-briefcase"/></svg>
+                  Lihat Lowongan
+                </a>
+                @guest
                   <a href="{{ route('register') }}"
-                    class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm hover:opacity-90 transition shadow"
-                    style="background: #fff; color: #a77d52">
+                    class="inline-flex items-center gap-2 px-5 py-3 text-sm font-extrabold text-white transition border border-white/25 bg-white/10 rounded-2xl hover:-translate-y-0.5 hover:bg-white/20">
                     Daftar Sekarang
                   </a>
-              @endguest
+                @endguest
+              </div>
             </div>
           </div>
         </div>
@@ -724,23 +767,32 @@
             })->values();
     @endphp
 
-    <section class="border-b" style="border-color: #e8d5c4; background: #ffffff"
+    <section class="home-section-soft border-b" style="border-color: #e8d5c4;"
       aria-labelledby="sites-heading">
-      <div class="px-6 py-8 mx-auto max-w-7xl lg:px-8">
-        <h2 id="sites-heading" class="mb-4 text-base font-semibold" style="color: #1f2937">Lokasi Site</h2>
+      <div class="px-6 py-10 mx-auto max-w-7xl lg:px-8">
+        <div class="mb-5 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+          <div>
+            <span class="home-pill">Area Operasional</span>
+            <h2 id="sites-heading" class="mt-3 text-2xl font-black tracking-tight md:text-3xl" style="color: #1f2937">Lokasi Site</h2>
+            <p class="mt-1 text-sm text-slate-500">Lihat site aktif dan lowongan yang tersedia di masing-masing lokasi.</p>
+          </div>
+          <a href="{{ route('sites.index') }}" class="inline-flex items-center gap-2 text-sm font-extrabold text-[#a77d52] transition hover:opacity-70">
+            Semua site
+            <svg class="w-4 h-4" aria-hidden="true"><use href="#i-arrow-right"/></svg>
+          </a>
+        </div>
 
         @if($sitesNorm->isNotEmpty())
               <div class="grid gap-4 lg:grid-cols-3">
-                <div id="sites-map" class="w-full overflow-hidden border shadow-md h-96 rounded-2xl lg:col-span-2"
-                  style="border-color: #f4f0eb" role="region" aria-label="Peta lokasi site PT Andalan Artha Primanusa">
+                <div id="sites-map" class="home-card w-full overflow-hidden h-96 rounded-[1.5rem] lg:col-span-2"
+                  role="region" aria-label="Peta lokasi site PT Andalan Artha Primanusa">
                 </div>
 
                 {{-- Daftar site di samping peta --}}
                 <div class="grid content-start gap-2 sm:grid-cols-2 lg:grid-cols-1">
                   @foreach($sitesNorm as $s)
                     <a href="{{ $s['id'] ? route('sites.show', $s['id']) : route('sites.index') }}"
-                      class="flex items-center gap-3 px-4 py-3 rounded-2xl border transition hover:shadow-md"
-                      style="border-color: #f4f0eb; background: #fff">
+                      class="home-card flex items-center gap-3 px-4 py-3 rounded-2xl transition hover:-translate-y-0.5 hover:shadow-lg">
                       <span class="inline-block w-3 h-3 rounded-full shrink-0" style="background: {{ $s['dot'] }}"></span>
                       <span class="text-sm font-medium" style="color: #1f2937">{{ $s['name'] }}</span>
                     </a>
@@ -820,91 +872,20 @@
       });
     </script>
 
-    {{-- ===== TAHAPAN REKRUTMEN ===== --}}
-    <section class="py-12 bg-white" aria-labelledby="rekrutmen-heading">
-      <div class="px-6 mx-auto max-w-7xl lg:px-8">
-        <div class="overflow-hidden transition duration-300 border shadow-sm rounded-2xl hover:shadow-md"
-          style="border-color: #f4f0eb">
-          <div class="grid md:grid-cols-2">
-
-            {{-- Gambar --}}
-            <div class="relative">
-              <img src="{{ asset('assets/foto1.png') }}"
-                class="w-full h-full object-cover min-h-[320px]"
-                alt="Tim HR PT Andalan Artha Primanusa berkolaborasi dalam proses rekrutmen yang transparan"
-                width="640" height="480"
-                loading="lazy" decoding="async">
-              <div class="absolute bottom-0 w-full p-5 text-sm text-white"
-                style="background: linear-gradient(to top, rgba(0,0,0,.85), transparent)">
-                <p class="font-semibold">Lingkungan kerja kolaboratif &amp; profesional</p>
-                <p class="text-xs opacity-75 mt-0.5">Proses rekrutmen yang transparan &amp; adil</p>
-              </div>
-            </div>
-
-            {{-- Langkah-langkah --}}
-            <div class="p-6 space-y-5 md:p-10">
-              <div>
-                <h2 id="rekrutmen-heading" class="text-xl font-bold md:text-2xl" style="color:#1f2937">
-                  Tahapan Rekrutmen
-                </h2>
-                <p class="mt-1 text-sm" style="color:#6b7280">
-                  Proses seleksi kami dirancang transparan, cepat, dan profesional.
-                </p>
-              </div>
-
-              @php
-                $steps = [
-                    ['Screening', 'Tim HR meninjau kesesuaian CV & data diri.', '2-3 hari'],
-                    ['Psychological Test', 'Tes psikologi untuk mengukur potensi kandidat.', '1-2 hari'],
-                    ['HR Interview', 'Wawancara dengan tim HR.', '3-5 hari'],
-                    ['Post Test', 'Evaluasi lanjutan pasca wawancara HR.', '1-2 hari'],
-                    ['User Interview', 'Wawancara dengan user / bagian terkait.', '3-5 hari'],
-                    ['Offering Letter (OL)', 'Kandidat terpilih menerima penawaran kerja.', '1-2 hari'],
-                    ['Medical Check Up', 'Pemeriksaan kesehatan calon karyawan.', '1-2 hari'],
-                    ['Mobilisasi (Travel)', 'Persiapan & perjalanan ke lokasi kerja.', 'Menyesuaikan'],
-                    ['Skill Test', 'Tes keterampilan lapangan (jika relevan).', '1-2 hari'],
-                    ['Finish / Onboarding', 'Diterima & mulai orientasi perusahaan.', 'Hari pertama'],
-                ];
-              @endphp
-
-              <ol class="space-y-3" aria-label="Langkah-langkah rekrutmen PT Andalan">
-                @foreach($steps as $i => [$title, $desc, $time])
-                    <li class="flex gap-4 p-3 transition rounded-xl hover:bg-[#f9f3ee]">
-                      <div class="flex items-center justify-center text-xs font-bold text-white rounded-full shadow w-8 h-8 shrink-0 mt-0.5"
-                        style="background: #a77d52" aria-hidden="true">{{ $i + 1 }}</div>
-                      <div class="flex-1 min-w-0">
-                        <div class="flex flex-wrap items-center justify-between gap-2">
-                          <p class="text-sm font-semibold" style="color:#1f2937">{{ $title }}</p>
-                          <span class="text-xs shrink-0 whitespace-nowrap px-2 py-0.5 rounded-full"
-                            style="background: #f9f3ee; color: #a77d52">{{ $time }}</span>
-                        </div>
-                        <p class="mt-0.5 text-xs leading-relaxed" style="color:#6b7280">{{ $desc }}</p>
-                      </div>
-                    </li>
-                @endforeach
-              </ol>
-
-              <p class="pt-4 text-xs border-t" style="color:#9ca3af; border-color:#e5e7eb">
-                *Durasi dapat berbeda tergantung posisi &amp; jumlah pelamar.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
     {{-- ===== LOWONGAN TERBARU ===== --}}
-    <section class="px-6 py-10 mx-auto max-w-7xl lg:px-8" aria-labelledby="jobs-heading">
-      <div class="overflow-hidden border shadow-sm rounded-2xl"
-        style="border-color: #e8d5c4; background: #ffffff">
+    <section class="home-section-soft px-6 py-12 lg:px-8" aria-labelledby="jobs-heading">
+      <div class="mx-auto max-w-7xl">
+      <div class="home-card overflow-hidden rounded-[1.5rem]">
 
         {{-- Header --}}
-        <div class="flex items-center justify-between p-6 border-b" style="border-color: #f4f0eb">
-          <h2 id="jobs-heading" class="text-base font-bold" style="color: #1f2937">Lowongan Terbaru</h2>
-          <a href="{{ route('jobs.index') }}"
-            class="inline-flex items-center gap-1 text-sm font-semibold transition hover:opacity-70"
-            style="color: #a77d52">
-            Lihat semua
+        <div class="flex flex-col gap-4 p-6 border-b md:flex-row md:items-center md:justify-between" style="border-color: #f4f0eb">
+          <div>
+            <span class="home-pill">Lowongan Aktif</span>
+            <h2 id="jobs-heading" class="mt-3 text-2xl font-black tracking-tight md:text-3xl" style="color: #1f2937">Lowongan terbaru untuk kamu</h2>
+            <p class="mt-1 text-sm text-slate-500">Pilih posisi yang tersedia dan lihat detail sebelum melamar.</p>
+          </div>
+          <a href="{{ route('jobs.index') }}" class="home-primary-link px-5 py-3 text-sm">
+            Lihat semua lowongan
             <svg class="w-4 h-4" aria-hidden="true"><use href="#i-arrow-right"/></svg>
           </a>
         </div>
@@ -933,8 +914,7 @@
                     $isNew = $job->created_at && $job->created_at->diffInDays(now()) <= 7;
                 @endphp
 
-                <article class="flex flex-col overflow-hidden border rounded-2xl card-hover"
-                  style="border-color: #e8d5c4; background: #ffffff"
+                <article class="home-job-card flex flex-col overflow-hidden rounded-2xl"
                   itemscope itemtype="https://schema.org/JobPosting">
                   <meta itemprop="title" content="{{ $job->title }}">
                   <meta itemprop="datePosted" content="{{ optional($job->created_at)->toDateString() }}">
@@ -942,14 +922,14 @@
                   <div class="flex flex-col flex-1 p-5">
 
                     {{-- Header kartu --}}
-                    <div class="flex items-start gap-3">
-                      <div class="p-2.5 rounded-xl text-white shrink-0" style="background: #a77d52">
+                      <div class="flex items-start gap-3">
+                      <div class="p-2.5 rounded-2xl text-white shrink-0 shadow-sm" style="background: #a77d52">
                         <svg class="w-5 h-5" aria-hidden="true"><use href="#i-briefcase"/></svg>
                       </div>
                       <div class="flex-1 min-w-0">
                         <div class="flex items-start justify-between gap-2">
                           <a href="{{ route('jobs.show', $job) }}"
-                            class="block text-sm font-bold leading-snug transition hover:opacity-75"
+                            class="block text-base font-extrabold leading-snug transition hover:opacity-75"
                             style="color: #1f2937"
                             itemprop="url">
                             {{ $job->title }}
@@ -960,13 +940,14 @@
                         </div>
 
                         {{-- Lokasi - PERBAIKAN: tidak tampilkan region dua kali --}}
-                        <p class="text-[11px] mt-1 leading-relaxed" style="color: #6b4f3a">
+                        <p class="text-xs mt-2 leading-relaxed" style="color: #6b4f3a">
                           @if($siteName)
                             <svg class="w-3 h-3 inline-block mr-0.5 -mt-px" aria-hidden="true"><use href="#i-map-pin"/></svg>
                             <span class="font-medium">{{ $siteName }}</span>@if($showRegion)<span class="opacity-60">, {{ $siteRegion }}</span>@endif
                           @else
                             <span class="opacity-50">Lokasi belum tersedia</span>
                           @endif
+                          <span class="mx-1 text-[#d0b79e]">•</span>
                           <svg class="w-3 h-3 inline-block mr-0.5 -mt-px" aria-hidden="true"><use href="#i-clock"/></svg>
                           {{ optional($job->created_at)->diffForHumans() }}
                         </p>
@@ -975,16 +956,16 @@
 
                     {{-- Deskripsi --}}
                     @if(!empty($excerpt))
-                          <p class="flex-1 mt-3 text-xs leading-relaxed line-clamp-2" style="color: #6b4f3a">
+                          <p class="flex-1 mt-4 text-sm leading-relaxed line-clamp-2" style="color: #6b4f3a">
                             {{ $excerpt }}
                           </p>
                     @endif
 
                     {{-- CTA --}}
-                    <div class="flex items-center justify-between pt-4 mt-4 border-t"
+                      <div class="flex items-center justify-between gap-3 pt-4 mt-5 border-t"
                       style="border-color: rgba(167,125,82,.2)">
                       <a href="{{ route('jobs.show', $job) }}"
-                        class="inline-flex items-center gap-1 text-xs font-semibold transition hover:opacity-70"
+                        class="inline-flex items-center gap-1 text-sm font-bold transition hover:opacity-70"
                         style="color: #a77d52">
                         Lihat Detail
                         <svg class="w-3.5 h-3.5" aria-hidden="true"><use href="#i-arrow-right"/></svg>
@@ -1035,6 +1016,7 @@
 
           @endif
         </div>
+      </div>
       </div>
     </section>
 

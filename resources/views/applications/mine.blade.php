@@ -15,7 +15,7 @@
     // === STAGES ===
     $stageOrder = ['screening', 'psychological_test', 'hr_iv', 'post_test', 'user_iv', 'offer', 'mcu', 'mobilisasi', 'skill_test', 'finish'];
     $pretty = [
-        'applied' => 'Screening',
+        'applied' => 'Menunggu Review HR',
         'screening' => 'Screening',
         'psychotest' => 'Psychological Test',
         'psychological_test' => 'Psychological Test',
@@ -35,7 +35,6 @@
         'finish' => 'Finish',
     ];
     $stageAlias = [
-        'applied' => 'screening',
         'psychotest' => 'psychological_test',
         'user_trainer_iv' => 'user_iv',
         'ground_test' => 'skill_test',
@@ -54,7 +53,10 @@
     ];
 
     $progressOf = function ($app) use ($stageOrder, $stageAlias) {
-        $key = strtolower($app->current_stage ?? 'screening');
+        $key = strtolower((string) ($app->current_stage ?? ''));
+        if ($key === '' || $key === 'applied') {
+            return 0;
+        }
         $key = $stageAlias[$key] ?? $key;
         $idx = array_search($key, $stageOrder, true);
         if ($idx === false)
@@ -195,8 +197,14 @@
                     $job = $app->job;
                     $pct = $progressOf($app);
                     $siteLabel = $job?->site?->name ?? $job?->site?->code ?? '-';
-                    $currentStageKey = $stageAlias[strtolower((string) $app->current_stage)] ?? strtolower((string) $app->current_stage);
-                    $currentStageLabel = $pretty[$currentStageKey] ?? ($app->current_stage ? ucfirst(str_replace('_', ' ', (string) $app->current_stage)) : '-');
+                    $rawStage = strtolower(trim((string) $app->current_stage));
+                    $hasHrStageMovement = $rawStage !== '' && $rawStage !== 'applied';
+                    $currentStageKey = $hasHrStageMovement
+                        ? ($stageAlias[$rawStage] ?? $rawStage)
+                        : null;
+                    $currentStageLabel = $hasHrStageMovement
+                        ? ($pretty[$currentStageKey] ?? ucfirst(str_replace('_', ' ', (string) $app->current_stage)))
+                        : 'Menunggu review HR';
                 @endphp
 
                 <article class="overflow-hidden transition bg-white border shadow-sm rounded-2xl hover:-translate-y-0.5 hover:shadow-lg"
@@ -247,29 +255,36 @@
             <div class="p-5">
 
               {{-- PROGRESS --}}
-              <div class="rounded-xl border border-slate-200 bg-slate-50/70 p-4">
-                <div class="flex justify-between mb-1 text-xs"
-                     style="color: {{ $TEXT }}">
-                  <span class="flex items-center gap-1 font-bold">
-                    {{-- ICON STEP --}}
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 opacity-70"
-                         fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M9 5l7 7-7 7"/>
-                    </svg>
-                    {{ $pretty[$stageAlias[strtolower((string) $app->current_stage)] ?? $app->current_stage] ?? '-' }}
-                  </span>
+              @if($hasHrStageMovement)
+                <div class="rounded-xl border border-slate-200 bg-slate-50/70 p-4">
+                  <div class="flex justify-between mb-1 text-xs"
+                       style="color: {{ $TEXT }}">
+                    <span class="flex items-center gap-1 font-bold">
+                      {{-- ICON STEP --}}
+                      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 opacity-70"
+                           fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M9 5l7 7-7 7"/>
+                      </svg>
+                      {{ $currentStageLabel }}
+                    </span>
 
-                  <span class="font-semibold">{{ $pct }}%</span>
-                </div>
+                    <span class="font-semibold">{{ $pct }}%</span>
+                  </div>
 
-                {{-- BAR --}}
-                <div class="h-2.5 overflow-hidden bg-white rounded-full ring-1 ring-slate-200">
-                  <div class="h-full transition-all duration-500 rounded-full"
-                       style="width: {{ $pct }}%; background: {{ $PRIMARY }};">
+                  {{-- BAR --}}
+                  <div class="h-2.5 overflow-hidden bg-white rounded-full ring-1 ring-slate-200">
+                    <div class="h-full transition-all duration-500 rounded-full"
+                         style="width: {{ $pct }}%; background: {{ $PRIMARY }};">
+                    </div>
                   </div>
                 </div>
-              </div>
+              @else
+                <div class="rounded-xl border border-[#ead8c5] bg-[#fffaf5] p-4">
+                  <p class="text-[11px] font-bold uppercase tracking-wide text-[#8b5e3c]">Belum diproses HR</p>
+                  <p class="mt-1 text-sm text-slate-600">Lamaran sudah masuk. Status tahap akan muncul setelah HR memindahkan proses.</p>
+                </div>
+              @endif
 
               <div class="mt-4 grid grid-cols-2 gap-3 text-sm">
                 <div class="rounded-xl border border-slate-200 bg-white px-3 py-2.5">
@@ -313,7 +328,7 @@
                     @endif
                       @php
                         $olStatus = $app->relationLoaded('offer') && $app->offer ? strtolower($app->offer->status) : null;
-                        $canAcceptOl = (in_array($currentStageKey, ['finish', 'offer'], true) || $olStatus === 'sent')
+                        $canAcceptOl = (in_array((string) $currentStageKey, ['finish', 'offer'], true) || $olStatus === 'sent')
                           && strtolower((string) $app->overall_status) !== 'hired'
                           && strtolower((string) $app->overall_status) !== 'rejected';
                       @endphp

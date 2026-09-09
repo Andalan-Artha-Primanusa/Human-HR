@@ -11,17 +11,20 @@
     $qSite     = trim((string) request('site', ''));
     $qCompany  = trim((string) request('company', ''));
     $qTerm     = trim((string) request('term', ''));
+    $qType     = trim((string) request('type', ''));
     $qSort     = trim((string) request('sort', ''));
-    $hasAny    = $qDivision || $qSite || $qCompany || $qTerm || $qSort;
+    $hasAny    = $qDivision || $qSite || $qCompany || $qTerm || $qType || $qSort;
 
     $keepParams = array_filter(
-        request()->only(['division', 'site', 'company', 'term', 'sort']),
+        request()->only(['division', 'site', 'company', 'term', 'type', 'sort']),
         fn($v) => filled($v)
     );
 
     $rm       = fn(string $key) => route('jobs.index', collect($keepParams)->except($key)->all());
     $resetUrl = route('jobs.index');
     $total    = method_exists($jobs, 'total') ? (int) $jobs->total() : (int) $jobs->count();
+    $activeFilterCount = count(array_filter([$qDivision, $qSite, $qCompany, $qTerm, $qType]));
+    $typeOptions = ['fulltime' => 'Fulltime', 'contract' => 'Contract', 'intern' => 'Intern'];
 
     // ===== Dept meta =====
     $deptIcons = [
@@ -99,6 +102,89 @@
     };
 @endphp
 
+@push('head')
+<style>
+  .jobs-shell {
+    background:
+      radial-gradient(circle at top left, rgba(167, 125, 82, .14), transparent 34rem),
+      linear-gradient(180deg, #fffaf5 0%, #ffffff 28rem);
+    border-radius: 0 0 32px 32px;
+    margin-inline: -1rem;
+    padding-inline: 1rem;
+    padding-bottom: 1.25rem;
+  }
+  .jobs-filter-card,
+  .jobs-panel,
+  .jobs-detail {
+    border: 1px solid #eadccd;
+    background: rgba(255,255,255,.94);
+    box-shadow: 0 18px 45px rgba(92, 61, 30, .08);
+  }
+  .jobs-field {
+    height: 2.75rem;
+    width: 100%;
+    border-radius: .9rem;
+    border: 1px solid #dfc9b0;
+    background: #fff;
+    padding: 0 .9rem;
+    font-size: .875rem;
+    color: #1f2937;
+    outline: none;
+    transition: border-color .16s ease, box-shadow .16s ease, background .16s ease;
+  }
+  .jobs-field:focus {
+    border-color: #a77d52;
+    box-shadow: 0 0 0 4px rgba(167, 125, 82, .16);
+  }
+  .jobs-select { appearance: none; padding-right: 2.2rem; }
+  .jobs-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    border-radius: 999px;
+    border: 1px solid #dfc9b0;
+    background: #fffaf5;
+    padding: .35rem .7rem;
+    font-size: .72rem;
+    font-weight: 650;
+    color: #6f4d2f;
+  }
+  .jobs-soft-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .45rem;
+    border-radius: .9rem;
+    border: 1px solid #dfc9b0;
+    background: #fff8f0;
+    color: #6f4d2f;
+    font-weight: 700;
+    transition: transform .16s ease, box-shadow .16s ease, background .16s ease;
+  }
+  .jobs-soft-btn:hover {
+    background: #fdf0e4;
+    box-shadow: 0 10px 24px rgba(92, 61, 30, .11);
+    transform: translateY(-1px);
+  }
+  .jobs-primary-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .45rem;
+    border-radius: .9rem;
+    background: #a77d52;
+    color: white;
+    font-weight: 750;
+    box-shadow: 0 12px 24px rgba(167, 125, 82, .24);
+    transition: transform .16s ease, box-shadow .16s ease, opacity .16s ease;
+  }
+  .jobs-primary-btn:hover { opacity: .95; transform: translateY(-1px); }
+  @media (min-width: 768px) {
+    .jobs-shell { margin-inline: -1.5rem; padding-inline: 1.5rem; }
+  }
+</style>
+@endpush
+
 @section('content')
 
 @once
@@ -135,6 +221,7 @@
 </svg>
 @endonce
 
+<div class="jobs-shell">
 <div class="mx-auto w-full max-w-[1480px] px-4 md:px-6 lg:px-8">
 
   {{-- ================================================================
@@ -144,17 +231,17 @@
     <div class="page-header__inner">
       <div class="page-header__copy">
         <p class="page-header__eyebrow">Lowongan Kerja</p>
-        <h1 id="jobs-page-title" class="page-header__title">Pekerjaan yang direkomendasikan untuk kamu</h1>
-        <p class="page-header__desc">Berdasarkan profil dan lamaran kamu. Temukan posisi yang sesuai dan daftar sekarang.</p>
+        <h1 id="jobs-page-title" class="page-header__title">Cari lowongan yang paling cocok</h1>
+        <p class="page-header__desc">Gunakan pencarian dan filter cepat untuk menemukan posisi berdasarkan nama lowongan, site, company, divisi, atau tipe kerja.</p>
       </div>
 
       <div class="page-header__actions">
-        <button id="btn-filter" type="button" aria-expanded="false" aria-controls="filter-panel" class="ph-action">
+        <button data-filter-toggle type="button" aria-expanded="false" aria-controls="filter-panel" class="ph-action">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M7 12h10M10 18h4"/></svg>
           Filter
           @if($hasAny)
             <span class="flex h-5 w-5 items-center justify-center rounded-full bg-[#a77d52] text-[10px] font-bold text-white">
-              {{ count(array_filter([$qDivision, $qSite, $qCompany, $qTerm])) }}
+              {{ $activeFilterCount }}
             </span>
           @endif
         </button>
@@ -165,35 +252,41 @@
   {{-- ================================================================
        FILTER CARD (search + panel)
        ================================================================ --}}
-  <section class="overflow-hidden border rounded-2xl" style="border-color: #ede4dc; border-radius: 1rem;">
-    <div class="p-6 bg-white">
+  <section class="jobs-filter-card overflow-hidden rounded-[1.35rem]">
+    <div class="p-4 md:p-5">
 
-      <form method="GET" action="{{ route('jobs.index') }}" role="search" class="relative">
+      <form method="GET" action="{{ route('jobs.index') }}" role="search" class="grid gap-3 lg:grid-cols-[1fr_auto] lg:items-center">
         <label for="job-search" class="sr-only">Cari lowongan</label>
-        <svg class="absolute w-4 h-4 -translate-y-1/2 pointer-events-none left-3 top-1/2 text-slate-400">
-          <use href="#i-search"/>
-        </svg>
-        <input
-          id="job-search" name="term" value="{{ e($qTerm) }}"
-          placeholder="Cari judul, divisi, site, atau company…"
-          autocomplete="off"
-          class="w-full rounded-xl border-slate-200 bg-white px-10 py-3 pr-14 text-sm text-slate-800
-                 placeholder-slate-400 outline-none focus:ring-2 focus:ring-[#a77d52]/25 focus:border-[#a77d52]"/>
-
-        <div class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
+        <div class="relative">
+          <svg class="absolute w-5 h-5 -translate-y-1/2 pointer-events-none left-4 top-1/2 text-[#a77d52]">
+            <use href="#i-search"/>
+          </svg>
+          <input
+            id="job-search" name="term" value="{{ e($qTerm) }}"
+            placeholder="Cari posisi, kode lowongan, site, company…"
+            autocomplete="off"
+            class="jobs-field h-12 rounded-2xl pl-12 pr-11 text-[15px]"/>
           @if($qTerm)
             <a href="{{ $rm('term') }}"
-               class="rounded-lg border border-slate-200 bg-white p-1.5 hover:bg-slate-100 transition" aria-label="Hapus kata kunci">
+               class="absolute right-3 top-1/2 grid h-7 w-7 -translate-y-1/2 place-items-center rounded-full border border-slate-200 bg-white hover:bg-slate-100 transition"
+               aria-label="Hapus kata kunci">
               <svg class="h-3.5 w-3.5 text-slate-500"><use href="#i-x"/></svg>
             </a>
           @endif
-          <button type="submit" class="abtn abtn-primary inline-flex items-center gap-1.5 px-4">
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 sm:flex sm:justify-end">
+          <button type="submit" class="jobs-primary-btn h-12 px-5">
             <svg class="w-4 h-4"><use href="#i-search"/></svg>
             Cari
           </button>
+          <button data-filter-toggle type="button" aria-expanded="false" aria-controls="filter-panel" class="jobs-soft-btn h-12 px-5">
+            <svg class="w-4 h-4"><use href="#i-filter"/></svg>
+            Filter
+          </button>
         </div>
 
-        @foreach(['division','site','company','sort'] as $keep)
+        @foreach(['division','site','company','type','sort'] as $keep)
           @if(!empty($keepParams[$keep]))
             <input type="hidden" name="{{ $keep }}" value="{{ e($keepParams[$keep]) }}">
           @endif
@@ -201,59 +294,63 @@
       </form>
 
       @if($hasAny)
-        <div class="flex flex-wrap items-center gap-2 mt-4 pt-3 border-t border-[#ede4dc]">
-          <span class="text-[11px] font-semibold text-[#8c6843] uppercase tracking-wide">Filter aktif:</span>
-          @foreach(['division' => 'Divisi', 'site' => 'Site', 'company' => 'Company', 'term' => 'Kata kunci'] as $fk => $fl)
+        <div class="flex flex-wrap items-center gap-2 mt-4 pt-4 border-t border-[#ede4dc]">
+          <span class="text-[11px] font-semibold text-[#8c6843] uppercase tracking-wide">Aktif:</span>
+          @foreach(['division' => 'Divisi', 'site' => 'Site', 'company' => 'Company', 'type' => 'Tipe', 'term' => 'Kata kunci'] as $fk => $fl)
             @if(!empty($keepParams[$fk]))
               <a href="{{ $rm($fk) }}"
-                 class="inline-flex items-center gap-1 rounded-full border border-[#c9a07a] bg-[#fdf6ef]
-                        px-2.5 py-0.5 text-[11px] font-medium text-[#7a5c36]
-                        hover:bg-[#fdf0e4] transition">
-                {{ $fl }}: {{ e($keepParams[$fk]) }}
+                 class="jobs-chip hover:bg-[#fdf0e4] transition">
+                {{ $fl }}: {{ e($fk === 'type' ? ($typeOptions[$keepParams[$fk]] ?? $keepParams[$fk]) : $keepParams[$fk]) }}
                 <svg class="w-3 h-3 opacity-60"><use href="#i-x"/></svg>
               </a>
             @endif
           @endforeach
-          <a href="{{ $resetUrl }}" class="ml-auto text-[11px] text-[#a77d52] hover:underline">Reset semua</a>
+          <a href="{{ $resetUrl }}" class="ml-auto text-[12px] font-semibold text-[#a77d52] hover:underline">Reset semua</a>
         </div>
       @endif
 
-      <div id="filter-panel" class="hidden mt-4 pt-3 border-t border-[#ede4dc]">
-        <form method="GET" class="grid gap-3 sm:grid-cols-2 md:grid-cols-4 xl:grid-cols-5" aria-label="Filter Lowongan">
+      <div id="filter-panel" class="{{ $hasAny ? '' : 'hidden' }} mt-4 pt-4 border-t border-[#ede4dc]">
+        <form method="GET" class="grid gap-3 sm:grid-cols-2 lg:grid-cols-5" aria-label="Filter Lowongan">
 
           <div>
             <label class="mb-1 block text-[10px] font-semibold text-[#8c6843] uppercase tracking-wide">Divisi</label>
             <input name="division" value="{{ e($qDivision) }}" placeholder="Plant / SCM / HRGA"
-              class="w-full rounded-lg border border-[#dfc9b0] bg-white px-3 py-2 text-sm text-slate-800
-                     focus:outline-none focus:ring-2 focus:ring-[#a77d52]/30 focus:border-[#c9a07a]"/>
+              class="jobs-field"/>
           </div>
 
           <div>
             <label class="mb-1 block text-[10px] font-semibold text-[#8c6843] uppercase tracking-wide">Site</label>
             <input name="site" value="{{ e($qSite) }}" placeholder="DBK / POS / SBS"
-              class="w-full rounded-lg border border-[#dfc9b0] bg-white px-3 py-2 text-sm text-slate-800
-                     focus:outline-none focus:ring-2 focus:ring-[#a77d52]/30 focus:border-[#c9a07a]"/>
+              class="jobs-field"/>
           </div>
 
           <div>
             <label class="mb-1 block text-[10px] font-semibold text-[#8c6843] uppercase tracking-wide">Company</label>
             <input name="company" value="{{ e($qCompany) }}" placeholder="ANDALAN / AGR"
-              class="w-full rounded-lg border border-[#dfc9b0] bg-white px-3 py-2 text-sm text-slate-800
-                     focus:outline-none focus:ring-2 focus:ring-[#a77d52]/30 focus:border-[#c9a07a]"/>
+              class="jobs-field"/>
           </div>
 
           <div>
-            <label class="mb-1 block text-[10px] font-semibold text-[#8c6843] uppercase tracking-wide">Kata Kunci</label>
-            <input name="term" value="{{ e($qTerm) }}" placeholder="Judul / Deskripsi"
-              class="w-full rounded-lg border border-[#dfc9b0] bg-white px-3 py-2 text-sm text-slate-800
-                     focus:outline-none focus:ring-2 focus:ring-[#a77d52]/30 focus:border-[#c9a07a]"/>
+            <label class="mb-1 block text-[10px] font-semibold text-[#8c6843] uppercase tracking-wide">Tipe Kerja</label>
+            <div class="relative">
+              <select name="type" class="jobs-field jobs-select">
+                <option value="">Semua tipe</option>
+                @foreach($typeOptions as $value => $label)
+                  <option value="{{ $value }}" @selected($qType === $value)>{{ $label }}</option>
+                @endforeach
+              </select>
+              <svg class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400">
+                <use href="#i-chevron"/>
+              </svg>
+            </div>
           </div>
 
+          @if($qTerm)<input type="hidden" name="term" value="{{ e($qTerm) }}">@endif
           @if($qSort)<input type="hidden" name="sort" value="{{ e($qSort) }}">@endif
 
-          <div class="flex flex-wrap items-end gap-2 md:col-span-2 xl:col-span-1">
-            <button style="background:#a77d52" class="abtn w-full justify-center">Terapkan</button>
-            <a href="{{ $resetUrl }}" class="abtn abtn-neutral w-full">Reset</a>
+          <div class="flex items-end gap-2 sm:col-span-2 lg:col-span-1">
+            <button class="jobs-primary-btn h-11 flex-1 px-4">Terapkan</button>
+            <a href="{{ $resetUrl }}" class="jobs-soft-btn h-11 px-4">Reset</a>
           </div>
 
         </form>
@@ -282,22 +379,22 @@
           });
         }
       }"
-      class="grid gap-4 md:grid-cols-[minmax(340px,480px)_1fr]">
+      class="mt-5 grid gap-5 lg:grid-cols-[minmax(360px,520px)_1fr]">
 
       {{-- ==============================================================
            LEFT: JOB LIST
            ============================================================== --}}
-      <aside class="bg-white border shadow-sm rounded-2xl border-slate-200 md:sticky md:top-4 md:self-start">
+      <aside class="jobs-panel overflow-hidden rounded-[1.35rem] lg:sticky lg:top-4 lg:self-start">
 
         {{-- List header --}}
-        <div class="flex items-center justify-between gap-3 border-b border-slate-100 px-3 py-2.5">
+        <div class="flex items-center justify-between gap-3 border-b border-[#efe2d6] bg-[#fffaf5] px-4 py-3">
           <div class="min-w-0">
-            <p class="text-[11px] text-slate-500">Hasil pencarian</p>
-            <p class="text-[13px] font-semibold text-slate-900 leading-tight">{{ $total }} lowongan</p>
+            <p class="text-[11px] font-semibold uppercase tracking-wide text-[#8c6843]">Hasil pencarian</p>
+            <p class="text-sm font-bold text-slate-900 leading-tight">{{ $total }} lowongan tersedia</p>
           </div>
 
           <form method="GET" class="flex items-center gap-2" aria-label="Urutkan">
-            @foreach(['division','site','company','term'] as $keep)
+            @foreach(['division','site','company','term','type'] as $keep)
               @if(!empty($keepParams[$keep]))
                 <input type="hidden" name="{{ $keep }}" value="{{ e($keepParams[$keep]) }}">
               @endif
@@ -307,7 +404,7 @@
                 class="h-9 appearance-none rounded-lg border border-slate-200 bg-white pl-3 pr-7
                        text-sm text-slate-800 focus:outline-none focus:ring-2
                        focus:ring-[#a77d52]/30 focus:border-[#c9a07a]">
-                <option value="">Paling Relevan</option>
+                <option value="latest" @selected($qSort === '' || $qSort === 'latest')>Terbaru</option>
                 <option value="oldest" @selected($qSort === 'oldest')>Terlama</option>
                 <option value="title"  @selected($qSort === 'title')>Judul (A–Z)</option>
               </select>
@@ -315,15 +412,15 @@
                 <use href="#i-chevron"/>
               </svg>
             </div>
-            <button style="background:#a77d52"
-              class="px-3 text-xs font-semibold text-white transition rounded-lg h-9 hover:opacity-90">
-              OK
-            </button>
+              <button
+                class="jobs-primary-btn h-9 px-3 text-xs">
+                OK
+              </button>
           </form>
         </div>
 
         {{-- Job items --}}
-        <ul class="divide-y divide-slate-100 max-h-[78vh] overflow-y-auto">
+        <ul class="max-h-[78vh] space-y-2 overflow-y-auto p-2">
           @foreach($jobs as $idx => $job)
             @php
               $typeRaw  = $job->employment_type ?? '';
@@ -376,7 +473,7 @@
                 :class="open === '{{ $job->id }}'
                   ? 'bg-[#fdf6ef] ring-1 ring-inset ring-[#c9a07a]/40'
                   : 'bg-white hover:bg-slate-50'"
-                class="relative w-full px-3 py-3 text-left transition group">
+                class="relative w-full overflow-hidden rounded-2xl px-3.5 py-3.5 text-left transition group">
 
                 {{-- Coloured left rail --}}
                 <span class="absolute inset-y-0 left-0 w-[3px] rounded-r {{ $rail }}"></span>
@@ -384,21 +481,21 @@
                 <div class="flex items-start gap-3 pl-1">
 
                   {{-- Job number --}}
-                  <span class="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-slate-200 bg-slate-50 text-[11px] font-bold text-slate-700">
+                  <span class="grid h-11 w-11 shrink-0 place-items-center rounded-2xl border border-[#eadccd] bg-white text-[11px] font-bold text-[#6f4d2f] shadow-sm">
                     {{ ($jobs->firstItem() ?? 1) + $idx }}
                   </span>
 
                   <div class="flex-1 min-w-0">
 
                     {{-- Title row --}}
-                    <div class="flex items-start justify-between gap-3">
-                      <p class="min-w-0 flex-1 line-clamp-2 text-[13px] font-semibold text-slate-900 leading-snug">
+                    <div class="flex items-start justify-between gap-2">
+                      <p class="min-w-0 flex-1 line-clamp-2 text-[14px] font-bold text-slate-950 leading-snug">
                         {{ e($job->title) }}
                       </p>
-                      <div class="shrink-0 flex items-center gap-1.5">
+                      <div class="shrink-0 flex max-w-[46%] items-center gap-1.5">
                         @if($job->code)
                           <span class="rounded border border-slate-200 bg-slate-50
-                                       px-1.5 py-0.5 text-[10px] font-medium text-slate-600 max-w-[150px] truncate">
+                                       px-1.5 py-0.5 text-[10px] font-medium text-slate-600 max-w-[130px] truncate">
                             {{ e($job->code) }}
                           </span>
                         @endif
@@ -473,38 +570,38 @@
             x-show="open === '{{ $job->id }}'"
             x-cloak
             id="detail-{{ $job->id }}"
-            class="bg-white border shadow-sm rounded-2xl border-slate-200">
+            class="jobs-detail overflow-hidden rounded-[1.35rem]">
 
-            <div class="p-5 md:p-6">
+            <div class="bg-gradient-to-br from-[#a77d52] to-[#7b5637] px-5 py-5 text-white md:px-6">
 
               {{-- ── Header ── --}}
-              <div class="flex items-start gap-4">
+              <div class="flex flex-col gap-4 sm:flex-row sm:items-start">
 
                 <span class="grid h-12 w-12 shrink-0 place-items-center rounded-xl ring-1
-                             {{ $meta['bg'] }} {{ $meta['fg'] }} {{ $meta['ring'] }}">
+                             bg-white/15 text-white ring-white/25">
                   <svg class="w-5 h-5"><use href="#{{ $meta['icon'] }}"/></svg>
                 </span>
 
                 <div class="flex-1 min-w-0">
                   <div class="flex flex-wrap items-center gap-2">
-                    <h2 class="text-xl font-semibold leading-tight text-slate-900">{{ e($job->title) }}</h2>
-                    <span class="rounded px-2 py-0.5 text-[11px] font-semibold text-white {{ $badgeClr }}">
+                    <h2 class="text-2xl font-bold leading-tight">{{ e($job->title) }}</h2>
+                    <span class="rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-bold text-white ring-1 ring-white/30">
                       {{ e($type) }}
                     </span>
                     @if($isOpen)
-                      <span class="rounded-full border border-emerald-200 bg-emerald-50
-                                   px-2 py-0.5 text-[10.5px] font-semibold text-emerald-700 uppercase tracking-wide">
+                      <span class="rounded-full border border-white/30 bg-white/15
+                                   px-2.5 py-1 text-[10.5px] font-bold text-white uppercase tracking-wide">
                         OPEN
                       </span>
                     @else
-                      <span class="rounded-full border border-slate-200 bg-slate-100
-                                   px-2 py-0.5 text-[10.5px] font-semibold text-slate-600 uppercase tracking-wide">
+                      <span class="rounded-full border border-white/30 bg-white/15
+                                   px-2.5 py-1 text-[10.5px] font-bold text-white uppercase tracking-wide">
                         {{ strtoupper($job->status ?? '—') }}
                       </span>
                     @endif
                   </div>
                   @if($job->code || $job->division)
-                    <p class="mt-1 text-xs text-slate-500">
+                    <p class="mt-2 text-sm text-white/80">
                       @if($job->code)Kode: {{ e($job->code) }}@endif
                       @if($job->code && $job->division) &nbsp;·&nbsp; @endif
                       @if($job->division){{ e($job->division) }}@endif
@@ -513,27 +610,29 @@
                 </div>
 
                 <a href="{{ route('jobs.show', $job) }}?apply=1#apply"
-                   style="background:#a77d52"
-                   class="shrink-0 rounded-xl px-5 py-2.5 text-sm font-semibold text-white
-                          hover:opacity-90 transition focus:outline-none">
+                   class="shrink-0 rounded-2xl bg-white px-5 py-3 text-sm font-bold text-[#7b5637]
+                          shadow-lg shadow-black/10 transition hover:-translate-y-0.5 hover:bg-[#fff8f0] focus:outline-none">
                   Lamar →
                 </a>
 
               </div>
+            </div>
+
+            <div class="p-5 md:p-6">
 
               {{-- ── Meta bar ── --}}
-              <div class="grid grid-cols-3 gap-3 mt-4">
+              <div class="grid gap-3 sm:grid-cols-3">
                 @foreach([
                   ['i-map',       'Lokasi',     e($siteLabel)],
                   ['i-briefcase', 'Perusahaan', e($job->company->name ?? $job->company->code ?? '—')],
                   ['i-users',     'Kebutuhan',  ((int) $job->openings) . ' orang'],
                 ] as [$ico, $lbl, $val])
-                  <div class="flex items-center gap-2.5 rounded-xl border border-[#e8d5be]
-                               bg-[#fdf6ef] px-3 py-2.5">
+                  <div class="flex items-center gap-2.5 rounded-2xl border border-[#e8d5be]
+                               bg-[#fffaf5] px-3.5 py-3">
                     <svg class="h-4 w-4 shrink-0 text-[#a77d52]"><use href="#{{ $ico }}"/></svg>
                     <div class="min-w-0">
                       <p class="text-[10px] font-semibold text-[#8c6843] uppercase tracking-wide">{{ $lbl }}</p>
-                      <p class="truncate text-sm font-medium text-[#5c3d1e]">{{ $val }}</p>
+                      <p class="truncate text-sm font-bold text-[#5c3d1e]">{{ $val }}</p>
                     </div>
                   </div>
                 @endforeach
@@ -662,7 +761,7 @@
           : request()->fullUrlWithQuery(['page' => $p]);
     @endphp
 
-    <section class="px-4 py-3 mt-4 bg-white border shadow-sm rounded-2xl border-slate-200">
+    <section class="jobs-panel mt-5 rounded-[1.35rem] px-4 py-3">
       <div class="flex flex-col gap-3 text-sm md:flex-row md:items-center md:justify-between">
 
         <p class="text-slate-600">
@@ -739,7 +838,7 @@
     {{-- ================================================================
          EMPTY STATE
          ================================================================ --}}
-    <section class="p-12 text-center bg-white border shadow-sm rounded-2xl border-slate-200">
+    <section class="jobs-panel mt-5 rounded-[1.35rem] p-12 text-center">
       <div style="background:#fdf6ef;border:1px solid #e8d5be"
            class="grid mx-auto mb-4 rounded-full h-14 w-14 place-items-center">
         <svg class="h-6 w-6 text-[#a77d52]"><use href="#i-filter"/></svg>
@@ -765,12 +864,13 @@
   @endif
 
 </div>
+</div>
 
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   const pnl      = document.getElementById('filter-panel');
-  const btn      = document.getElementById('btn-filter');
+  const buttons  = document.querySelectorAll('[data-filter-toggle]');
   const btnEmpty = document.getElementById('btn-filter-empty');
 
   const togglePanel = (forceOpen) => {
@@ -779,10 +879,10 @@ document.addEventListener('DOMContentLoaded', () => {
       ? forceOpen
       : pnl.classList.contains('hidden');
     pnl.classList.toggle('hidden', !willOpen);
-    if (btn) btn.setAttribute('aria-expanded', String(willOpen));
+    buttons.forEach((button) => button.setAttribute('aria-expanded', String(willOpen)));
   };
 
-  btn      && btn.addEventListener('click', () => togglePanel());
+  buttons.forEach((button) => button.addEventListener('click', () => togglePanel()));
   btnEmpty && btnEmpty.addEventListener('click', () => togglePanel(true));
 });
 </script>
