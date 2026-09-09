@@ -94,6 +94,7 @@ class JobController extends Controller
 
         if (!$isAdminRoute) {
             $baseQuery->where('status', 'open');
+
             if (Auth::check()) {
                 $baseQuery->with(['applications' => function ($q) {
                     $q->where('user_id', Auth::id())->select('id', 'job_id', 'user_id', 'current_stage');

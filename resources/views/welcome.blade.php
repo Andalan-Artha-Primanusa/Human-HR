@@ -1092,7 +1092,7 @@
     </section>
 
     {{-- ===== APPLICATION JOURNEY ===== --}}
-    <section class="px-6 bg-white py-14 lg:px-8" aria-labelledby="apply-flow-heading">
+    <section class="px-6 pt-24 pb-16 bg-white md:pt-28 lg:px-8" aria-labelledby="apply-flow-heading">
       <div class="aj-wrap">
 
         @php

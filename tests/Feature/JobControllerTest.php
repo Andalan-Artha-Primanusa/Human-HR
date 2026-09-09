@@ -104,6 +104,30 @@ class JobControllerTest extends TestCase
         }
     }
 
+    public function test_public_index_shows_open_jobs_from_inactive_sites()
+    {
+        $inactiveSite = Site::factory()->create(['is_active' => false]);
+
+        Job::create([
+            'title' => 'Inactive Site Job',
+            'slug' => 'inactive-site-job',
+            'code' => 'ISJ-01',
+            'description' => 'Test',
+            'status' => 'open',
+            'level' => 1,
+            'employment_type' => 'fulltime',
+            'site_id' => $inactiveSite->id,
+            'company_id' => $this->company->id,
+        ]);
+
+        $response = $this->get(route('jobs.index'));
+
+        $response->assertStatus(200);
+        $jobs = $response->viewData('jobs');
+        $this->assertTrue($jobs->pluck('title')->contains('Software Engineer'));
+        $this->assertTrue($jobs->pluck('title')->contains('Inactive Site Job'));
+    }
+
     public function test_public_index_filter_by_type()
     {
         Job::create([
