@@ -1630,15 +1630,15 @@
         }
       });
 
-      // Cara Melamar: mobile carousel dots
-      const stepsTrack = document.getElementById('apply-steps');
-      const dotsWrap   = document.getElementById('apply-dots');
+      // Application Journey: mobile carousel dots
+      const stepsTrack = document.getElementById('aj-carousel');
+      const dotsWrap   = document.getElementById('aj-dots');
       if (stepsTrack && dotsWrap && stepsTrack.children.length > 0) {
         const cards = Array.prototype.slice.call(stepsTrack.children);
         const dots  = cards.map(function (_, idx) {
           const btn = document.createElement('button');
           btn.type = 'button';
-          btn.className = 'apply-dot';
+          btn.className = 'aj-dot';
           btn.setAttribute('aria-label', 'Langkah ' + (idx + 1));
           btn.addEventListener('click', function () {
             const left = cards[idx].offsetLeft - stepsTrack.clientWidth / 2 + cards[idx].clientWidth / 2;
@@ -1647,6 +1647,8 @@
           dotsWrap.appendChild(btn);
           return btn;
         });
+
+        if (dotsWrap.children.length > 0) dotsWrap.classList.add('is-visible');
 
         function syncDots() {
           let active = 0;
@@ -1659,9 +1661,7 @@
           });
         }
 
-        if (!window.matchMedia || !window.matchMedia('(min-width: 768px)').matches) {
-          syncDots();
-        }
+        syncDots();
         stepsTrack.addEventListener('scroll', syncDots, { passive: true });
         window.addEventListener('resize', syncDots, { passive: true });
       }
