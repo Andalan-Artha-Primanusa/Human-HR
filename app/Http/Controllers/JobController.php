@@ -8,11 +8,13 @@ use App\Models\Job;
 use App\Models\Site;
 use App\Models\Company;
 use App\Models\ManpowerRequirement;
+use App\Services\MineproRfrImportService;
 use App\Services\MineproRfrService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -33,6 +35,10 @@ class JobController extends Controller
     public function index(Request $request)
     {
         $isAdminRoute = $request->routeIs('admin.*');
+
+        if ($isAdminRoute) {
+            $this->syncMineproRfrAfterResponse();
+        }
 
         // 1) Validasi & normalisasi query params (whitelist)
         $data = $request->validate([
@@ -149,6 +155,32 @@ class JobController extends Controller
 
         $view = $isAdminRoute ? 'admin.jobs.index' : 'jobs.index';
         return view($view, compact('jobs'));
+    }
+
+    private function syncMineproRfrAfterResponse(): void
+    {
+        if (! (bool) config('services.minepro.rfr_auto_sync_enabled', false)) {
+            return;
+        }
+
+        try {
+            if (! Cache::add('minepro:rfr-sync:admin-jobs', true, now()->addMinute())) {
+                return;
+            }
+        } catch (\Throwable $e) {
+            Log::warning('MinePro RFR admin auto sync lock failed.', ['message' => $e->getMessage()]);
+        }
+
+        app()->terminating(function () {
+            try {
+                app(MineproRfrImportService::class)->import(
+                    config('services.minepro.rfr_sync_start_date') ?: now()->startOfMonth()->format('Y-m-d'),
+                    config('services.minepro.rfr_sync_end_date') ?: now()->endOfMonth()->format('Y-m-d'),
+                );
+            } catch (\Throwable $e) {
+                Log::warning('MinePro RFR admin auto sync failed.', ['message' => $e->getMessage()]);
+            }
+        });
     }
 
     /**

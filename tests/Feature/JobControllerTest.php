@@ -9,6 +9,7 @@ use App\Models\JobApplication;
 use App\Models\Site;
 use App\Models\User;
 use App\Services\MineproRfrService;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -264,6 +265,39 @@ class JobControllerTest extends TestCase
         $this->actingAs($this->hr);
         $response = $this->get(route('admin.jobs.index'));
         $response->assertStatus(200);
+    }
+
+    public function test_admin_index_auto_syncs_new_minepro_rfr_jobs()
+    {
+        Config::set('services.minepro.rfr_auto_sync_enabled', true);
+
+        $this->app->instance(MineproRfrService::class, new class extends MineproRfrService {
+            public function approvedVacancies(string $startDate, ?string $endDate = null): array
+            {
+                return [[
+                    'code' => 'AUTO-RFR-01',
+                    'title' => 'Auto Synced RFR Job',
+                    'qty_required' => 1,
+                    'department' => 'OPR',
+                    'site_code' => 'BGG',
+                    'company_code' => 'AAP',
+                    'description' => 'Created from admin jobs auto sync.',
+                ]];
+            }
+
+            public function lastVacancyMeta(): array
+            {
+                return ['ok' => true, 'count' => 1];
+            }
+        });
+
+        $response = $this->actingAs($this->hr)->get(route('admin.jobs.index'));
+
+        $response->assertStatus(200);
+        $this->assertDatabaseHas('job_listings', [
+            'code' => 'AUTO-RFR-01',
+            'title' => 'Auto Synced RFR Job',
+        ]);
     }
 
     public function test_admin_index_shows_all_statuses()
