@@ -1173,7 +1173,7 @@
         @endphp
 
         {{-- ── Header ── --}}
-        <div>
+        <div class="max-w-3xl mx-auto text-center">
           <span class="aj-badge">
             <svg class="w-4 h-4" aria-hidden="true"><use href="#i-clipboard-list"/></svg>
             Cara Melamar
@@ -1181,7 +1181,7 @@
           <h2 id="apply-flow-heading" class="mt-5 text-[2.1rem] font-extrabold leading-[1.12] tracking-tight md:text-[2.75rem] md:leading-[1.1]" style="color:#0f1b33">
             Proses melamar yang singkat,<br class="hidden sm:block"> jelas, dan transparan
           </h2>
-          <p class="mt-4 text-[15px] leading-relaxed md:text-lg" style="color:#6b4f3a; max-width:700px">
+          <p class="mx-auto mt-4 text-[15px] leading-relaxed md:text-lg" style="color:#6b4f3a; max-width:760px">
             Pelamar dapat melihat lowongan terlebih dahulu tanpa login.
             Login hanya diperlukan saat kamu siap mengirim lamaran.
             Setelah biodata dan CV lengkap, status lamaran dapat dipantau secara real-time.
@@ -1189,7 +1189,7 @@
         </div>
 
         {{-- ── Carousel ── --}}
-        <div id="aj-carousel" class="aj-cardcar mt-8" aria-label="Langkah proses melamar">
+        <div id="aj-carousel" class="aj-cardcar mt-10" aria-label="Langkah proses melamar">
           @foreach($applySteps as $i => $step)
             <article class="aj-card">
               <div class="aj-card-top">

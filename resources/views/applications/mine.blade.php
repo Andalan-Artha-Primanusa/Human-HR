@@ -191,7 +191,7 @@
       </div>
 
       {{-- GRID --}}
-      <section class="grid gap-5 mt-6 lg:grid-cols-2 xl:grid-cols-3">
+      <section class="grid items-start gap-5 mt-6 lg:grid-cols-2 xl:grid-cols-3">
         @foreach($apps as $app)
                 @php
                     $job = $app->job;
@@ -313,7 +313,7 @@
               @endif
 
               {{-- FOOTER --}}
-              <div class="mt-auto border-t pt-4 text-sm" style="border-color: {{ $BORD }}">
+              <div class="mt-auto pt-4 text-sm">
                 <div class="flex flex-col gap-3">
                   <div class="flex flex-wrap items-center gap-2">
                     @if($app->interviews && $app->interviews->count())
