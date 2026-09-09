@@ -770,59 +770,6 @@
         </div>
       </div>
     </section>
-
-    {{-- ===== LOKASI SITE DENGAN PETA INTERAKTIF ===== --}}
-    @php
-        $sitesCol = ($sitesSimple instanceof \Illuminate\Support\Collection) ? $sitesSimple : collect($sitesSimple ?? []);
-        $sitesNorm = $sitesCol->filter(fn($s) => !empty($s['name']))
-            ->map(function ($s) {
-                $name = (string) ($s['name'] ?? '-');
-                $dot = preg_match('/^#([0-9a-f]{3}|[0-9a-f]{6})$/i', (string) ($s['dot'] ?? '')) ? $s['dot'] : '#a77d52';
-                $param = $s['code'] ?? $s['id'] ?? $name;
-                $id = (string) ($s['id'] ?? '');
-                return ['name' => $name, 'dot' => $dot, 'param' => $param, 'id' => $id];
-            })->values();
-    @endphp
-
-    <section class="home-section-soft border-b" style="border-color: #e8d5c4;"
-      aria-labelledby="sites-heading">
-      <div class="px-6 py-10 mx-auto max-w-7xl lg:px-8">
-        <div class="mb-5 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
-          <div>
-            <span class="home-pill">Area Operasional</span>
-            <h2 id="sites-heading" class="mt-3 text-2xl font-black tracking-tight md:text-3xl" style="color: #1f2937">Lokasi Site</h2>
-            <p class="mt-1 text-sm text-slate-500">Lihat site aktif dan lowongan yang tersedia di masing-masing lokasi.</p>
-          </div>
-          <a href="{{ route('sites.index') }}" class="inline-flex items-center gap-2 text-sm font-extrabold text-[#a77d52] transition hover:opacity-70">
-            Semua site
-            <svg class="w-4 h-4" aria-hidden="true"><use href="#i-arrow-right"/></svg>
-          </a>
-        </div>
-
-        @if($sitesNorm->isNotEmpty())
-          <div class="grid gap-4 lg:grid-cols-3">
-            <div id="sites-map" class="home-card w-full overflow-hidden h-96 rounded-[1.5rem] lg:col-span-2"
-              role="region" aria-label="Peta lokasi site PT Andalan Artha Primanusa">
-            </div>
-
-            <div class="grid content-start gap-2 sm:grid-cols-2 lg:grid-cols-1">
-              @foreach($sitesNorm as $s)
-                <a href="{{ $s['id'] ? route('sites.show', $s['id']) : route('sites.index') }}"
-                  class="home-card flex items-center gap-3 px-4 py-3 rounded-2xl transition hover:-translate-y-0.5 hover:shadow-lg">
-                  <span class="inline-block w-3 h-3 rounded-full shrink-0" style="background: {{ $s['dot'] }}"></span>
-                  <span class="text-sm font-bold" style="color: #1f2937">{{ $s['name'] }}</span>
-                </a>
-              @endforeach
-            </div>
-          </div>
-        @else
-          <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
-            Lokasi site belum tersedia.
-          </div>
-        @endif
-      </div>
-    </section>
-
     {{-- LEAFLET MAPS SCRIPT & STYLE --}}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
@@ -895,7 +842,7 @@
             ['Login / Daftar', 'Masuk hanya saat kamu sudah siap mengirim lamaran.'],
             ['Submit Biodata', 'Lengkapi data diri, lalu pantau status di Lamaran Saya.'],
           ] as $i => [$title, $desc])
-            <div class="home-step-card rounded-2xl p-5">
+            <div class="p-5 home-step-card rounded-2xl">
               <div class="home-step-number">{{ $i + 1 }}</div>
               <h3 class="mt-4 text-base font-extrabold text-slate-950">{{ $title }}</h3>
               <p class="mt-2 text-sm leading-relaxed text-slate-500">{{ $desc }}</p>
