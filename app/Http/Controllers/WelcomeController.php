@@ -54,6 +54,10 @@ class WelcomeController extends Controller
             $jobsQuery->where('status', 'open');
         }
 
+        if (Schema::hasTable('sites') && Schema::hasColumn('sites', 'is_active')) {
+            $jobsQuery->whereHas('site', fn ($q) => $q->active());
+        }
+
         $jobs = $jobsQuery->paginate(9, ['*'], 'jobs_page')->withQueryString();
 
         // ===== Lokasi site (ikon + nama) – micro-cache 5 menit =====

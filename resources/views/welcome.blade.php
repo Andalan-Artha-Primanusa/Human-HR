@@ -560,7 +560,12 @@
       color: #a77d52;
       transition: background .25s ease, color .25s ease, transform .25s ease;
     }
-    .aj-icon svg { width: 1.5rem; height: 1.5rem; }
+    .aj-icon svg {
+      width: 1.6rem;
+      height: 1.6rem;
+      animation: ajFloat 3.2s ease-in-out infinite;
+      animation-delay: var(--aj-delay, 0s);
+    }
     .aj-card:hover .aj-icon {
       background: #a77d52;
       color: #fff;
@@ -731,10 +736,16 @@
     }
     .aj-dot.is-active { width: 1.4rem; background: #a77d52; }
 
+    @keyframes ajFloat {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+
     @media (prefers-reduced-motion: reduce) {
       .aj-card, .aj-icon, .aj-timeline-dot, .aj-dot, .aj-cta { transition: none; }
       .aj-card:hover { transform: none; }
       .aj-card:hover .aj-icon { transform: none; }
+      .aj-icon svg { animation: none; }
     }
   </style>
 </head>
@@ -1086,6 +1097,58 @@
         </div>
       </div>
     </section>
+
+    {{-- ===== LOKASI SITE DENGAN PETA INTERAKTIF ===== --}}
+    @php
+        $sitesCol = ($sitesSimple instanceof \Illuminate\Support\Collection) ? $sitesSimple : collect($sitesSimple ?? []);
+        $sitesNorm = $sitesCol->filter(fn($s) => !empty($s['name']))
+            ->map(function ($s) {
+                $name = (string) ($s['name'] ?? '-');
+                $dot = preg_match('/^#([0-9a-f]{3}|[0-9a-f]{6})$/i', (string) ($s['dot'] ?? '')) ? $s['dot'] : '#a77d52';
+                $param = $s['code'] ?? $s['id'] ?? $name;
+                $id = (string) ($s['id'] ?? '');
+                return ['name' => $name, 'dot' => $dot, 'param' => $param, 'id' => $id];
+            })->values();
+    @endphp
+
+    <section class="home-section-soft border-b" style="border-color: #e8d5c4;" aria-labelledby="sites-heading">
+      <div class="px-6 py-10 mx-auto max-w-7xl lg:px-8">
+        <div class="mb-5 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+          <div>
+            <span class="home-pill">Area Operasional</span>
+            <h2 id="sites-heading" class="mt-3 text-2xl font-black tracking-tight md:text-3xl" style="color:#1f2937">Lokasi Site</h2>
+            <p class="mt-1 text-sm text-slate-500">Lihat site aktif dan lowongan yang tersedia di masing-masing lokasi.</p>
+          </div>
+          <a href="{{ route('sites.index') }}" class="inline-flex items-center gap-2 text-sm font-extrabold text-[#a77d52] transition hover:opacity-70">
+            Semua site
+            <svg class="w-4 h-4" aria-hidden="true"><use href="#i-arrow-right"/></svg>
+          </a>
+        </div>
+
+        @if($sitesNorm->isNotEmpty())
+          <div class="grid gap-4 lg:grid-cols-3">
+            <div id="sites-map" class="home-card w-full overflow-hidden h-96 rounded-[1.5rem] lg:col-span-2"
+              role="region" aria-label="Peta lokasi site PT Andalan Artha Primanusa">
+            </div>
+
+            <div class="grid content-start gap-2 sm:grid-cols-2 lg:grid-cols-1">
+              @foreach($sitesNorm as $s)
+                <a href="{{ $s['id'] ? route('sites.show', $s['id']) : route('sites.index') }}"
+                  class="home-card flex items-center gap-3 px-4 py-3 rounded-2xl transition hover:-translate-y-0.5 hover:shadow-lg">
+                  <span class="inline-block w-3 h-3 rounded-full shrink-0" style="background: {{ $s['dot'] }}"></span>
+                  <span class="text-sm font-bold" style="color:#1f2937">{{ $s['name'] }}</span>
+                </a>
+              @endforeach
+            </div>
+          </div>
+        @else
+          <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+            Lokasi site belum tersedia.
+          </div>
+        @endif
+      </div>
+    </section>
+
     {{-- LEAFLET MAPS SCRIPT & STYLE --}}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
@@ -1143,7 +1206,7 @@
     </script>
 
     {{-- ===== APPLICATION JOURNEY ===== --}}
-    <section class="px-6 py-14 bg-white lg:px-8" aria-labelledby="apply-flow-heading">
+    <section class="px-6 bg-white py-14 lg:px-8" aria-labelledby="apply-flow-heading">
       <div class="aj-wrap">
 
         @php
@@ -1249,7 +1312,7 @@
           @foreach($applySteps as $i => $step)
             <article class="aj-card">
               <div class="aj-card-top">
-                <span class="aj-icon">
+                <span class="aj-icon" style="--aj-delay: {{ $i * 0.12 }}s">
                   <svg aria-hidden="true"><use href="#{{ $step['icon'] }}"/></svg>
                 </span>
                 <span class="aj-stepnum">{{ $i + 1 }}</span>
@@ -1276,7 +1339,7 @@
           @foreach($applySteps as $i => $step)
             <article class="aj-card">
               <div class="aj-card-top">
-                <span class="aj-icon">
+                <span class="aj-icon" style="--aj-delay: {{ $i * 0.12 }}s">
                   <svg aria-hidden="true"><use href="#{{ $step['icon'] }}"/></svg>
                 </span>
                 <span class="aj-stepnum">{{ $i + 1 }}</span>
@@ -1297,23 +1360,22 @@
             </article>
           @endforeach
         </div>
-        <div class="aj-dots md:hidden" id="aj-dots" aria-label="Navigasi langkah"></div>
+        <div id="aj-dots" class="aj-dots md:hidden" aria-hidden="true"></div>
 
-        {{-- ── Tips bar ── --}}
         <div class="aj-tips">
           <div class="aj-tips-left">
             <span class="aj-tips-icon">
               <svg aria-hidden="true"><use href="#i-lightbulb"/></svg>
             </span>
             <div>
-              <span class="aj-tips-kicker">Tips untuk Pelamar</span>
-              <p class="aj-tips-text">Pastikan data & dokumen sudah benar sebelum submit.</p>
+              <p class="aj-tips-kicker">Tips untuk pelamar</p>
+              <p class="aj-tips-text">Pastikan seluruh data dan dokumen sudah benar sebelum submit.</p>
             </div>
           </div>
           <div class="aj-benefits">
             <span class="aj-benefit">
               <svg aria-hidden="true"><use href="#i-shield-check"/></svg>
-              Aman & terpercaya
+              Aman &amp; terpercaya
             </span>
             <span class="aj-benefit">
               <svg aria-hidden="true"><use href="#i-clock"/></svg>
@@ -1325,7 +1387,6 @@
             </span>
           </div>
         </div>
-
       </div>
     </section>
 

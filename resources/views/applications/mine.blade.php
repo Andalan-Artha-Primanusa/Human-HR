@@ -191,7 +191,7 @@
       </div>
 
       {{-- GRID --}}
-      <section class="grid gap-5 mt-6 lg:grid-cols-2 xl:grid-cols-3">
+      <section class="grid items-stretch gap-5 mt-6 lg:grid-cols-2 xl:grid-cols-3">
         @foreach($apps as $app)
                 @php
                     $job = $app->job;
@@ -207,7 +207,7 @@
                         : 'Menunggu review HR';
                 @endphp
 
-                <article class="overflow-hidden transition bg-white border shadow-sm rounded-2xl hover:-translate-y-0.5 hover:shadow-lg"
+                <article class="flex min-h-[365px] flex-col overflow-hidden transition bg-white border shadow-sm rounded-2xl hover:-translate-y-0.5 hover:shadow-lg"
                          style="border-color: {{ $BORD }}">
 
                   <div class="p-5 bg-gradient-to-br from-[#fffaf5] via-white to-white border-b" style="border-color: {{ $BORD }}">
@@ -252,7 +252,7 @@
               </div>
                   </div>
 
-            <div class="p-5">
+            <div class="flex flex-1 flex-col p-5">
 
               {{-- PROGRESS --}}
               @if($hasHrStageMovement)
@@ -278,6 +278,11 @@
                          style="width: {{ $pct }}%; background: {{ $PRIMARY }};">
                     </div>
                   </div>
+                </div>
+              @else
+                <div class="rounded-xl border border-[#ead8c5] bg-[#fffaf5] p-4">
+                  <p class="text-[11px] font-bold uppercase tracking-wide text-[#8b5e3c]">Belum diproses HR</p>
+                  <p class="mt-1 text-sm leading-relaxed text-slate-600">Lamaran sudah masuk. Status tahap akan muncul setelah HR memindahkan proses.</p>
                 </div>
               @endif
 
@@ -313,7 +318,7 @@
               @endif
 
               {{-- FOOTER --}}
-              <div class="mt-5 border-t pt-4 text-sm" style="border-color: {{ $BORD }}">
+              <div class="mt-auto border-t pt-4 text-sm" style="border-color: {{ $BORD }}">
                 <div class="flex flex-col gap-3">
                   <div class="flex flex-wrap items-center gap-2">
                     @if($app->interviews && $app->interviews->count())
