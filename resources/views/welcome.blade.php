@@ -432,6 +432,10 @@
     }
 
     /* ===== Cara Melamar: APPLICATION JOURNEY ===== */
+    .aj-section {
+      padding-top: 7rem !important;
+      padding-bottom: 4rem !important;
+    }
     .aj-wrap {
       max-width: 1280px;
       margin-inline: auto;
@@ -714,6 +718,10 @@
 
     /* -- Mobile carousel -- */
     @media (max-width: 767.5px) {
+      .aj-section {
+        padding-top: 5.5rem !important;
+        padding-bottom: 3.25rem !important;
+      }
       .aj-rich-timeline { display: none; }
       .aj-cardcar { scrollbar-width: none; }
       .aj-cardcar::-webkit-scrollbar { display: none; }
@@ -1092,7 +1100,7 @@
     </section>
 
     {{-- ===== APPLICATION JOURNEY ===== --}}
-    <section class="px-6 pt-24 pb-16 bg-white md:pt-28 lg:px-8" aria-labelledby="apply-flow-heading">
+    <section class="px-6 bg-white aj-section lg:px-8" aria-labelledby="apply-flow-heading">
       <div class="aj-wrap">
 
         @php
