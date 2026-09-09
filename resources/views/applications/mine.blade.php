@@ -191,7 +191,7 @@
       </div>
 
       {{-- GRID --}}
-      <section class="grid items-stretch gap-5 mt-6 lg:grid-cols-2 xl:grid-cols-3">
+      <section class="grid gap-5 mt-6 lg:grid-cols-2 xl:grid-cols-3">
         @foreach($apps as $app)
                 @php
                     $job = $app->job;
@@ -207,7 +207,7 @@
                         : 'Menunggu review HR';
                 @endphp
 
-                <article class="flex min-h-[365px] flex-col overflow-hidden transition bg-white border shadow-sm rounded-2xl hover:-translate-y-0.5 hover:shadow-lg"
+                <article class="flex flex-col overflow-hidden transition bg-white border shadow-sm rounded-2xl hover:-translate-y-0.5 hover:shadow-lg"
                          style="border-color: {{ $BORD }}">
 
                   <div class="p-5 bg-gradient-to-br from-[#fffaf5] via-white to-white border-b" style="border-color: {{ $BORD }}">
