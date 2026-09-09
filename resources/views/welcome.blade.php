@@ -893,6 +893,17 @@
                     // Perbaikan bug: jangan tampilkan region dua kali jika sama dengan name
                     $showRegion = $siteRegion && $siteRegion !== $siteName;
                     $isNew = $job->created_at && $job->created_at->diffInDays(now()) <= 7;
+                    $typeRaw  = $job->employment_type ?? '';
+                    $typeSlug = \Illuminate\Support\Str::of((string) $typeRaw)->lower()->value();
+                    $type     = $typeSlug ? strtoupper($typeRaw) : null;
+                    $typeBadge = match ($typeSlug) {
+                      'contract', 'kontrak' => 'bg-amber-600',
+                      'intern', 'magang'    => 'bg-emerald-600',
+                      default               => '#a77d52',
+                    };
+                    $levelLabel = is_string($job->level ?? null)
+                      ? ucwords(str_replace('_', ' ', $job->level))
+                      : null;
                 @endphp
 
                 <article class="flex flex-col overflow-hidden home-job-card rounded-2xl"
@@ -915,10 +926,25 @@
                             itemprop="url">
                             {{ $job->title }}
                           </a>
-                          @if($isNew)
-                            <span class="badge badge-new shrink-0">Baru</span>
-                          @endif
+                          <div class="shrink-0 flex flex-col items-end gap-1.5">
+                            @if($type)
+                              <span class="rounded px-1.5 py-0.5 text-[10px] font-semibold text-white {{ is_string($typeBadge) ? $typeBadge : '' }}" @if(!is_string($typeBadge)) style="background: {{ $typeBadge }}" @endif>
+                                {{ $type }}
+                              </span>
+                            @endif
+                            @if($isNew)
+                              <span class="badge badge-new">Baru</span>
+                            @endif
+                          </div>
                         </div>
+
+                        @if($job->code || $levelLabel)
+                          <p class="mt-1 text-[11px] font-semibold tracking-wide" style="color: #8b5e3c">
+                            @if($job->code)<span class="font-mono">{{ $job->code }}</span>@endif
+                            @if($job->code && $levelLabel) <span class="opacity-40">·</span> @endif
+                            @if($levelLabel){{ $levelLabel }}@endif
+                          </p>
+                        @endif
 
                         {{-- Lokasi - PERBAIKAN: tidak tampilkan region dua kali --}}
                         <p class="mt-2 text-xs leading-relaxed" style="color: #6b4f3a">
@@ -934,6 +960,12 @@
                         </p>
                       </div>
                     </div>
+
+                    @if(!empty($job->division))
+                      <div class="mt-3 flex items-center gap-1.5">
+                        <span class="home-pill">{{ $job->division }}</span>
+                      </div>
+                    @endif
 
                     {{-- Deskripsi --}}
                     @if(!empty($excerpt))

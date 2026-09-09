@@ -25,10 +25,29 @@ class WelcomeController extends Controller
         // ===== Jobs terbaru (public only, kolom minimal) =====
 
         $jobsQuery = Job::query()
-            ->select(['id', 'title', 'site_id', 'created_at', 'status'])
-            ->with(['site:id,code,name,address,region'])
-            ->whereHas('site', fn($q) => $q->active())
-            ->orderByDesc('created_at');
+            ->select([
+                'id',
+                'code',
+                'title',
+                'division',
+                'level',
+                'employment_type',
+                'openings',
+                'site_id',
+                'company_id',
+                'status',
+                'description',
+                'keywords',
+                'skills',
+                'created_at',
+                'updated_at',
+            ])
+            ->with([
+                'site:id,code,name,address,region',
+                'company:id,code,name',
+            ])
+            ->orderByDesc('created_at')
+            ->orderByDesc('id');
 
         // Tampilkan hanya yang "open" bila kolom status ada
         if (Schema::hasTable('job_listings') && Schema::hasColumn('job_listings', 'status')) {
