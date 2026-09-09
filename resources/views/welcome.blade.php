@@ -1246,14 +1246,54 @@
         {{-- ── Cards desktop grid ── --}}
         <div class="hidden md:grid aj-grid" aria-label="Langkah proses melamar">
           @foreach($applySteps as $i => $step)
-            @include('partials._aj-card')
+            <article class="aj-card">
+              <div class="aj-card-top">
+                <span class="aj-icon">
+                  <svg aria-hidden="true"><use href="#{{ $step['icon'] }}"/></svg>
+                </span>
+                <span class="aj-stepnum">{{ $i + 1 }}</span>
+              </div>
+              <h3 class="aj-title">{{ $step['title'] }}</h3>
+              <p class="aj-desc">{{ $step['desc'] }}</p>
+              <ul class="aj-points">
+                @foreach($step['items'] as $item)
+                  <li class="aj-point">{{ $item }}</li>
+                @endforeach
+              </ul>
+              @if(!empty($step['cta']))
+                <a href="{{ route('login') }}" class="aj-cta">
+                  Masuk &amp; Lamar
+                  <svg class="w-3.5 h-3.5" aria-hidden="true"><use href="#i-chevron-right"/></svg>
+                </a>
+              @endif
+            </article>
           @endforeach
         </div>
 
         {{-- ── Cards mobile carousel ── --}}
         <div id="aj-carousel" class="md:hidden aj-cardcar" aria-label="Langkah proses melamar">
           @foreach($applySteps as $i => $step)
-            @include('partials._aj-card')
+            <article class="aj-card">
+              <div class="aj-card-top">
+                <span class="aj-icon">
+                  <svg aria-hidden="true"><use href="#{{ $step['icon'] }}"/></svg>
+                </span>
+                <span class="aj-stepnum">{{ $i + 1 }}</span>
+              </div>
+              <h3 class="aj-title">{{ $step['title'] }}</h3>
+              <p class="aj-desc">{{ $step['desc'] }}</p>
+              <ul class="aj-points">
+                @foreach($step['items'] as $item)
+                  <li class="aj-point">{{ $item }}</li>
+                @endforeach
+              </ul>
+              @if(!empty($step['cta']))
+                <a href="{{ route('login') }}" class="aj-cta">
+                  Masuk &amp; Lamar
+                  <svg class="w-3.5 h-3.5" aria-hidden="true"><use href="#i-chevron-right"/></svg>
+                </a>
+              @endif
+            </article>
           @endforeach
         </div>
         <div class="aj-dots md:hidden" id="aj-dots" aria-label="Navigasi langkah"></div>
