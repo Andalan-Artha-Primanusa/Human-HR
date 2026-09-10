@@ -115,7 +115,7 @@
       @forelse($docs as $d)
         <div class="flex items-center justify-between mb-1">
           <span class="text-sm truncate">{{ $d['name'] ?? 'Dokumen' }}</span>
-          <a target="_blank" href="{{ Storage::disk('public')->url($d['path'] ?? '') }}" class="ml-2 px-2 py-1 text-xs rounded bg-[#a77d52] text-white">Lihat</a>
+          <a target="_blank" href="{{ url('/files/storage/' . ltrim((string) ($d['path'] ?? ''), '/')) }}" class="ml-2 px-2 py-1 text-xs rounded bg-[#a77d52] text-white">Lihat</a>
         </div>
       @empty <div class="text-xs text-slate-400">Belum ada dokumen tersimpan.</div> @endforelse
     </div>
@@ -189,7 +189,7 @@
               <td class="py-1">{{ $t->institution }}</td>
               <td class="py-1">
                 @if($t->certificate_path)
-                  <a target="_blank" href="{{ Storage::disk('public')->url($t->certificate_path) }}" class="px-2 py-1 text-xs rounded bg-[#a77d52] text-white">Lihat</a>
+                  <a target="_blank" href="{{ url('/files/storage/' . ltrim((string) $t->certificate_path, '/')) }}" class="px-2 py-1 text-xs rounded bg-[#a77d52] text-white">Lihat</a>
                 @else
                   <span class="text-slate-400">-</span>
                 @endif

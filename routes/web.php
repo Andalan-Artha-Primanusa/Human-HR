@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\CompanyController;
 // === Public / Careers Controllers ===
@@ -66,6 +67,15 @@ Route::get('/csrf-token', function (Request $request) {
 
 Route::get('/jobs', [JobController::class, 'index'])->name('jobs.index');
 Route::get('/jobs/{job}', [JobController::class, 'show'])->name('jobs.show');
+
+Route::get('/files/storage/{path}', function (string $path) {
+    abort_if(str_contains($path, '..'), 404);
+    abort_unless(Storage::disk('public')->exists($path), 404);
+
+    return response()->file(Storage::disk('public')->path($path), [
+        'Content-Disposition' => 'inline; filename="' . basename($path) . '"',
+    ]);
+})->where('path', '.*')->name('public.storage.show');
 
 /*
 |--------------------------------------------------------------------------

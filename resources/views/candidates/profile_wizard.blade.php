@@ -479,7 +479,7 @@
                 <template x-if="it.certificate_path">
                   <div class="mt-1 text-xs text-slate-600">
                     Terunggah:
-                    <a class="underline text-brand-700" :href="`/storage/${it.certificate_path}`" target="_blank">Lihat sertifikat</a>
+                    <a class="underline text-brand-700" :href="`/files/storage/${it.certificate_path}`" target="_blank">Lihat sertifikat</a>
                   </div>
                 </template>
               </div>
@@ -712,7 +712,7 @@
               <label class="text-sm text-slate-600">CV (PDF, maks 4MB) <span class="text-red-600" x-show="!hasCv">*</span></label>
               <input :required="!hasCv" type="file" name="cv" accept="application/pdf" class="w-full px-3 py-2 mt-1 border rounded-lg">
               @if($profile->cv_path)
-                <div class="mt-1 text-xs text-slate-600">Terunggah: <a class="underline text-brand-700" href="{{ asset('storage/' . ltrim($profile->cv_path, '/')) }}" target="_blank">Lihat CV</a></div>
+                <div class="mt-1 text-xs text-slate-600">Terunggah: <a class="underline text-brand-700" href="{{ url('/files/storage/' . ltrim($profile->cv_path, '/')) }}" target="_blank">Lihat CV</a></div>
               @endif
             </div>
             <div>
@@ -721,7 +721,7 @@
               @if(is_array($profile->documents) && count($profile->documents))
                 <ul class="pl-5 mt-1 text-xs list-disc">
                   @foreach($profile->documents as $d)
-                    <li><a class="underline text-brand-700" href="{{ asset('storage/' . ltrim($d['path'], '/')) }}" target="_blank">{{ $d['name'] }}</a></li>
+                    <li><a class="underline text-brand-700" href="{{ url('/files/storage/' . ltrim($d['path'], '/')) }}" target="_blank">{{ $d['name'] }}</a></li>
                   @endforeach
                 </ul>
               @endif

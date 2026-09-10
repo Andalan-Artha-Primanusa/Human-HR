@@ -1023,7 +1023,7 @@
 
                       @if($meProfile->cv_path)
                         <div class="mt-3 text-sm">
-                          <a class="text-[#8b5e3c] hover:underline" href="{{ Storage::disk('public')->url($meProfile->cv_path) }}" target="_blank" rel="noopener">Lihat CV</a>
+                          <a class="text-[#8b5e3c] hover:underline" href="{{ url('/files/storage/' . ltrim((string) $meProfile->cv_path, '/')) }}" target="_blank" rel="noopener">Lihat CV</a>
                         </div>
                       @endif
 
