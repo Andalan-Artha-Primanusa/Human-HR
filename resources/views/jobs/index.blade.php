@@ -705,18 +705,6 @@
 
               </div>
 
-              {{-- ── Deskripsi (collapsible) ── --}}
-              @if($desc)
-                <div class="mt-5">
-                  <div class="mb-2 flex items-center gap-1.5 text-sm font-semibold text-slate-800">
-                    <svg class="w-4 h-4 text-slate-500"><use href="#i-calendar"/></svg>
-                    Deskripsi Pekerjaan
-                  </div>
-                  <div class="prose prose-sm prose-slate max-w-none prose-a:text-[#a77d52] prose-headings:text-slate-800">
-                    {!! $desc !!}
-                  </div>
-                </div>
-              @endif
 
             </div>
           </article>
