@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Str;
 
 class PublicApplicationController extends Controller
@@ -162,6 +163,7 @@ class PublicApplicationController extends Controller
 
         $data = $request->validate([
             'cv' => ['required', 'file', 'mimes:pdf', 'max:4096'],
+            'nik' => ['nullable', 'digits_between:16,17', Rule::unique('candidate_profiles', 'nik')->ignore(optional($user->candidateProfile)->id)],
             'apply' => ['nullable', 'boolean'],
             'email' => ['nullable', 'email'],
             'password' => ['nullable', 'string'],
@@ -199,7 +201,10 @@ class PublicApplicationController extends Controller
             ], 500);
         }
 
-        $profile->forceFill(['cv_path' => $path])->save();
+        $profile->forceFill([
+            'cv_path' => $path,
+            ...array_key_exists('nik', $data) ? ['nik' => $data['nik']] : [],
+        ])->save();
         $attachment = $profile->attachments()->updateOrCreate(
             ['label' => 'CV'],
             [
