@@ -344,6 +344,8 @@ class JobController extends Controller
 
         $companies = Company::query()->select(['id', 'code', 'name'])->orderBy('code')->get();
 
+        $shouldFetchRfr = request()->hasAny(['rfr_start_date', 'rfr_end_date']);
+
         $rfrStartDate = request('rfr_start_date', now()->startOfMonth()->format('Y-m-d'));
         $rfrStartDate = preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $rfrStartDate)
             ? (string) $rfrStartDate
@@ -355,8 +357,10 @@ class JobController extends Controller
         if ($rfrEndDate < $rfrStartDate) {
             $rfrEndDate = $rfrStartDate;
         }
-        $rfrVacancies = $rfrService->approvedVacancies($rfrStartDate, $rfrEndDate);
-        $rfrMeta = $rfrService->lastVacancyMeta();
+        $rfrVacancies = $shouldFetchRfr
+            ? $rfrService->approvedVacancies($rfrStartDate, $rfrEndDate)
+            : [];
+        $rfrMeta = $shouldFetchRfr ? $rfrService->lastVacancyMeta() : null;
 
         return view('admin.jobs.edit', compact('job', 'sites', 'companies', 'rfrVacancies', 'rfrStartDate', 'rfrEndDate', 'rfrMeta'));
     }
