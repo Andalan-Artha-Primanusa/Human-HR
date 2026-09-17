@@ -615,7 +615,9 @@ class CandidateProfileController extends Controller
         if ($path === '' || str_starts_with($path, '/') || str_starts_with($path, '\\')) {
             return false;
         }
-        return !str_contains($path, '..');
+        // Cegah directory traversal (e.g. "../" atau "..\")
+        // Tapi perbolehkan file yang namanya ada double dot (misal "file..pdf")
+        return !str_contains($path, '../') && !str_contains($path, '..\\');
     }
 
     /**
