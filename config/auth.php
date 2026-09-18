@@ -20,6 +20,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Email Verification
+    |--------------------------------------------------------------------------
+    |
+    | Sementara dinonaktifkan (false). Saat diaktifkan kembali (true),
+    | user baru tetap sudah terverifikasi otomatis saat daftar, dan user lama
+    | yang belum verifikasi akan kembali wajib verifikasi email.
+    |
+    */
+
+    'email_verification_enabled' => env('AUTH_EMAIL_VERIFICATION_ENABLED', false),
+
+    /*
+    |--------------------------------------------------------------------------
     | Authentication Guards
     |--------------------------------------------------------------------------
     |

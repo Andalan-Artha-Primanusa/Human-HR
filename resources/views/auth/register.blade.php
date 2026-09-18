@@ -301,7 +301,7 @@
           <p>Anda wajib mengisi data yang benar, lengkap, dan terbaru. Data yang tidak valid dapat memengaruhi proses seleksi atau menyebabkan akun dibatasi.</p>
 
           <h4 style="margin:1rem 0 .35rem; color:#3b2209;">2. Verifikasi Email</h4>
-          <p>Setelah registrasi, Anda wajib melakukan verifikasi email melalui link yang dikirim sistem sebelum mengakses fitur tertentu.</p>
+          <p>Gunakan alamat email aktif untuk keperluan komunikasi proses seleksi. Verifikasi email saat ini tidak wajib.</p>
 
           <h4 style="margin:1rem 0 .35rem; color:#3b2209;">3. Keamanan Akun</h4>
           <p>Anda bertanggung jawab menjaga kerahasiaan password dan aktivitas yang terjadi melalui akun Anda.</p>

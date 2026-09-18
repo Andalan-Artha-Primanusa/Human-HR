@@ -10,7 +10,7 @@ use App\Models\Concerns\HasUuidPrimaryKey;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class User extends Authenticatable implements MustVerifyEmail
+class User extends Authenticatable
 {
     use HasFactory, Notifiable, HasUuidPrimaryKey;
 
@@ -76,7 +76,20 @@ class User extends Authenticatable implements MustVerifyEmail
     */
     public function isVerified(): bool
     {
-        return !is_null($this->email_verified_at);
+        return $this->hasVerifiedEmail();
+    }
+
+    /**
+     * Verifikasi email sementara dinonaktifkan: semua akun dianggap terverifikasi
+     * selama config('auth.email_verification_enabled') bernilai false.
+     */
+    public function hasVerifiedEmail(): bool
+    {
+        if (! config('auth.email_verification_enabled', false)) {
+            return true;
+        }
+
+        return ! is_null($this->email_verified_at);
     }
 
     /*
@@ -126,6 +139,10 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function sendEmailVerificationNotification()
     {
+        if ($this->hasVerifiedEmail()) {
+            return;
+        }
+
         $cooldown = max(1, (int) config('auth.verification_resend_cooldown', 60));
         $cacheKey = sprintf(
             'email-verification:%s:%s',

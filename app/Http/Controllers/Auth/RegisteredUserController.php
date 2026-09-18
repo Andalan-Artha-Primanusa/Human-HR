@@ -42,6 +42,8 @@ class RegisteredUserController extends Controller
             'email' => (string) $request->string('email'),
             'password' => Hash::make((string) $request->string('password')),
             'role' => 'pelamar',
+            // Verifikasi email sementara nonaktif: tandai langsung terverifikasi
+            'email_verified_at' => now(),
         ]);
 
         event(new Registered($user));
@@ -50,6 +52,6 @@ class RegisteredUserController extends Controller
 
         return redirect()
             ->route('jobs.index')
-            ->with('verify_email_notice', 'Cek email kamu untuk verifikasi akun.');
+            ->with('status', 'Registrasi berhasil. Selamat datang!');
     }
 }
