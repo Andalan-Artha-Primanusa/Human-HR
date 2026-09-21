@@ -23,12 +23,13 @@ class PublicJobController extends Controller
         ]);
 
         $code = $filters['code_id'] ?? $filters['code'] ?? null;
+        $code = is_string($code) ? trim($code) : $code;
         $createdAt = $filters['created_at'] ?? $filters['create_at'] ?? null;
 
         $jobs = Job::query()
             ->with($this->relations())
             ->withCount('applications')
-            ->when($code, fn($query) => $query->where('code', $code))
+            ->when($code, fn($query) => $query->whereRaw('LOWER(TRIM(code)) = ?', [mb_strtolower($code)]))
             ->when($filters['status'] ?? null, fn($query, $status) => $query->where('status', $status))
             ->when($createdAt, fn($query, $date) => $query->whereDate('created_at', $date))
             ->when($filters['created_from'] ?? null, fn($query, $date) => $query->whereDate('created_at', '>=', $date))
