@@ -48,7 +48,10 @@ class PublicJobController extends Controller
                 'created_to' => $filters['created_to'] ?? null,
                 'code_id' => $code,
             ],
-            'count' => $jobs->count(),
+            // `count` is the total number of applications for the matching jobs.
+            // Keep `jobs_count` available for clients that need the number of jobs.
+            'count' => (int) $jobs->sum('applications_count'),
+            'jobs_count' => $jobs->count(),
             'data' => ApiDateFormatter::format($jobs->toArray()),
         ]);
     }
