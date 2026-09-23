@@ -577,7 +577,12 @@ class CandidateProfileController extends Controller
                 unset($extras['withdrawn'], $extras['withdrawn_at']);
             }
         } elseif ($action === 'continue') {
-            unset($extras['not_continued'], $extras['not_continued_at']);
+            unset(
+                $extras['not_continued'],
+                $extras['not_continued_at'],
+                $extras['withdrawn'],
+                $extras['withdrawn_at']
+            );
         } else {
             unset($extras['withdrawn'], $extras['withdrawn_at']);
             $extras['not_continued'] = true;
