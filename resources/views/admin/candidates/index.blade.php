@@ -149,9 +149,12 @@
                         $pohName = $p->poh?->name ?: ($p->user?->jobApplications?->first(fn($app) => $app->poh?->name)?->poh?->name);
                         $provinceName = $p->ktp_province ?: $p->domicile_province;
                         $applications = $p->user?->jobApplications ?? collect();
-                        $notContinued = $applications->contains(fn ($app) => in_array(strtolower((string) ($app->overall_status ?? '')), ['not_qualified', 'rejected'], true));
+                        $notContinued = $applications->contains(function ($app) {
+                            return in_array(strtolower((string) ($app->overall_status ?? '')), ['not_qualified', 'rejected'], true)
+                                || in_array(strtolower((string) ($app->current_stage ?? '')), ['not_qualified', 'rejected'], true);
+                        });
                       @endphp
-                      <tr class="transition {{ $notContinued ? 'bg-red-50 hover:bg-red-100' : 'hover:bg-[#f8f5f2]' }}">
+                      <tr class="transition {{ $notContinued ? 'bg-red-50 hover:bg-red-100' : 'hover:bg-[#f8f5f2]' }}" @if($notContinued) style="background-color:#fef2f2;" @endif>
                         <td class="px-4 py-3">
                           <div class="font-medium {{ $notContinued ? 'text-red-800' : 'text-slate-900' }}">{{ e($p->full_name) }}</div>
                           @if($notContinued)
