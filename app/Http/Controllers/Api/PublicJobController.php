@@ -26,6 +26,7 @@ class PublicJobController extends Controller
             'applied_to' => ['nullable', 'date_format:Y-m-d'],
             'code_id' => ['nullable', 'string', 'max:80'],
             'code' => ['nullable', 'string', 'max:80'],
+            'nik' => ['nullable', 'string', 'max:17'],
         ]);
 
         $code = $filters['code_id'] ?? $filters['code'] ?? null;
@@ -36,10 +37,18 @@ class PublicJobController extends Controller
         $appliedTo = $filters['created_to'] ?? $filters['create_to'] ?? $filters['applied_to'] ?? null;
         $jobCreatedFrom = $filters['job_created_from'] ?? null;
         $jobCreatedTo = $filters['job_created_to'] ?? null;
+        $nik = isset($filters['nik']) ? trim((string) $filters['nik']) : null;
         $applicationFilter = function ($query) use ($appliedFrom, $appliedTo) {
             $query->when($appliedFrom, fn ($q, $date) => $q->whereDate('created_at', '>=', $date))
                 ->when($appliedTo, fn ($q, $date) => $q->whereDate('created_at', '<=', $date));
         };
+        if ($nik !== null && $nik !== '') {
+            $applicationFilter = function ($query) use ($appliedFrom, $appliedTo, $nik) {
+                $query->when($appliedFrom, fn ($q, $date) => $q->whereDate('created_at', '>=', $date))
+                    ->when($appliedTo, fn ($q, $date) => $q->whereDate('created_at', '<=', $date))
+                    ->whereHas('user.candidateProfile', fn ($q) => $q->where('nik', $nik));
+            };
+        }
         $relations = $this->relations();
         if ($appliedFrom || $appliedTo) {
             $relations['applications'] = $applicationFilter;
@@ -53,7 +62,7 @@ class PublicJobController extends Controller
             ->when($createdAt, fn($query, $date) => $query->whereDate('created_at', $date))
             ->when($jobCreatedFrom, fn($query, $date) => $query->whereDate('created_at', '>=', $date))
             ->when($jobCreatedTo, fn($query, $date) => $query->whereDate('created_at', '<=', $date))
-            ->when($appliedFrom || $appliedTo, fn ($query) => $query->whereHas('applications', $applicationFilter))
+            ->when($appliedFrom || $appliedTo || ($nik !== null && $nik !== ''), fn ($query) => $query->whereHas('applications', $applicationFilter))
             ->latest('created_at')
             ->latest('id')
             ->get();
@@ -66,16 +75,9 @@ class PublicJobController extends Controller
                 'created_at' => $createdAt,
                 'created_from' => $appliedFrom,
                 'created_to' => $appliedTo,
-                'job_created_from' => $jobCreatedFrom,
-                'job_created_to' => $jobCreatedTo,
-                'applied_from' => $appliedFrom,
-                'applied_to' => $appliedTo,
                 'code_id' => $code,
             ],
-            // `count` is the total number of applications for the matching jobs.
-            // Keep `jobs_count` available for clients that need the number of jobs.
             'count' => (int) $jobs->sum('applications_count'),
-            'jobs_count' => $jobs->count(),
             'data' => ApiDateFormatter::format($jobs->toArray()),
         ]);
     }
