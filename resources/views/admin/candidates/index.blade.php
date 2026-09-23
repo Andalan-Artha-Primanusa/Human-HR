@@ -148,10 +148,15 @@
                         $nik = $p->nik;
                         $pohName = $p->poh?->name ?: ($p->user?->jobApplications?->first(fn($app) => $app->poh?->name)?->poh?->name);
                         $provinceName = $p->ktp_province ?: $p->domicile_province;
+                        $applications = $p->user?->jobApplications ?? collect();
+                        $notContinued = $applications->contains(fn ($app) => in_array(strtolower((string) ($app->overall_status ?? '')), ['not_qualified', 'rejected'], true));
                       @endphp
-                      <tr class="transition hover:bg-[#f8f5f2]">
+                      <tr class="transition {{ $notContinued ? 'bg-red-50 hover:bg-red-100' : 'hover:bg-[#f8f5f2]' }}">
                         <td class="px-4 py-3">
-                          <div class="font-medium text-slate-900">{{ e($p->full_name) }}</div>
+                          <div class="font-medium {{ $notContinued ? 'text-red-800' : 'text-slate-900' }}">{{ e($p->full_name) }}</div>
+                          @if($notContinued)
+                            <div class="mt-1 inline-flex rounded-full bg-red-100 px-2 py-0.5 text-[11px] font-semibold text-red-700 ring-1 ring-red-200">Tidak Dilanjutkan</div>
+                          @endif
                           @if(!$email || !$phone || !$nik)
                             <div class="mt-1 inline-flex rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-700 ring-1 ring-amber-200">Profil belum lengkap</div>
                           @endif
@@ -196,11 +201,21 @@
                           @endif
                         </td>
                         <td class="px-4 py-3 text-right">
-                          <a href="{{ route('admin.candidates.show', $p) }}"
-                            class="abtn abtn-sm abtn-secondary">
-                            <svg class="w-4 h-4"><use href="#i-eye"/></svg>
-                            Lihat
-                          </a>
+                          <div class="inline-flex flex-wrap justify-end gap-2">
+                            <a href="{{ route('admin.candidates.show', $p) }}" class="abtn abtn-sm abtn-secondary">
+                              <svg class="w-4 h-4"><use href="#i-eye"/></svg>
+                              Lihat
+                            </a>
+                            <form method="POST" action="{{ route('admin.candidates.not-continued', $p) }}" onsubmit="return confirm('Tandai kandidat ini sebagai Tidak Dilanjutkan?')">
+                              @csrf
+                              @if(filled($jobId ?? ''))
+                                <input type="hidden" name="job_id" value="{{ $jobId }}">
+                              @endif
+                              <button type="submit" class="abtn abtn-sm {{ $notContinued ? 'bg-red-700 text-white' : 'bg-red-600 text-white hover:bg-red-700' }}" {{ $notContinued ? 'disabled' : '' }}>
+                                Tidak Dilanjutkan
+                              </button>
+                            </form>
+                          </div>
                         </td>
                       </tr>
                   @endforeach

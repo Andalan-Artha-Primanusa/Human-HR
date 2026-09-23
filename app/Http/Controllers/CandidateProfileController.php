@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\CandidateProfile;
 use App\Models\Job;
+use App\Models\JobApplication;
 use App\Support\UploadPath;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -528,6 +529,29 @@ class CandidateProfileController extends Controller
             ->withQueryString();
 
         return view('admin.candidates.index', compact('profiles', 'q', 'jobs', 'jobId', 'pohs', 'pohId', 'provinces', 'province', 'ageRange'));
+    }
+
+    /** Mark a candidate's application(s) as not continued. */
+    public function markNotContinued(Request $request, CandidateProfile $profile)
+    {
+        $data = $request->validate([
+            'job_id' => ['nullable', 'uuid', 'exists:job_listings,id'],
+        ]);
+
+        abort_unless($profile->user_id, 404);
+
+        $applications = JobApplication::query()
+            ->where('user_id', $profile->user_id)
+            ->when($data['job_id'] ?? null, fn ($q, $jobId) => $q->where('job_id', $jobId));
+
+        $updated = $applications->update([
+            'current_stage' => 'not_qualified',
+            'overall_status' => 'not_qualified',
+        ]);
+
+        return redirect()->back()->with('success', $updated
+            ? 'Kandidat ditandai sebagai Tidak Dilanjutkan.'
+            : 'Tidak ada lamaran kandidat yang dapat diperbarui.');
     }
 
     /**
