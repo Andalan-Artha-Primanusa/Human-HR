@@ -149,16 +149,20 @@
                         $pohName = $p->poh?->name ?: ($p->user?->jobApplications?->first(fn($app) => $app->poh?->name)?->poh?->name);
                         $provinceName = $p->ktp_province ?: $p->domicile_province;
                         $applications = $p->user?->jobApplications ?? collect();
-                        $notContinued = $applications->contains(function ($app) {
+                        $notContinued = (bool) data_get($p->extras ?? [], 'not_continued', false) || $applications->contains(function ($app) {
                             return in_array(strtolower((string) ($app->overall_status ?? '')), ['not_qualified', 'rejected'], true)
                                 || in_array(strtolower((string) ($app->current_stage ?? '')), ['not_qualified', 'rejected'], true);
                         });
+                        $withdrawn = (bool) data_get($p->extras ?? [], 'withdrawn', false);
                       @endphp
-                      <tr class="transition {{ $notContinued ? 'bg-red-50 hover:bg-red-100' : 'hover:bg-[#f8f5f2]' }}" @if($notContinued) style="background-color:#fef2f2;" @endif>
+                      <tr class="transition {{ $withdrawn ? 'bg-amber-50 hover:bg-amber-100' : ($notContinued ? 'bg-red-50 hover:bg-red-100' : 'hover:bg-[#f8f5f2]') }}" @if($withdrawn) style="background-color:#fffbeb;" @elseif($notContinued) style="background-color:#fef2f2;" @endif>
                         <td class="px-4 py-3">
                           <div class="font-medium {{ $notContinued ? 'text-red-800' : 'text-slate-900' }}">{{ e($p->full_name) }}</div>
                           @if($notContinued)
                             <div class="mt-1 inline-flex rounded-full bg-red-100 px-2 py-0.5 text-[11px] font-semibold text-red-700 ring-1 ring-red-200">Tidak Dilanjutkan</div>
+                          @endif
+                          @if($withdrawn)
+                            <div class="mt-1 inline-flex rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-800 ring-1 ring-amber-200">Withdraw</div>
                           @endif
                           @if(!$email || !$phone || !$nik)
                             <div class="mt-1 inline-flex rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-700 ring-1 ring-amber-200">Profil belum lengkap</div>
@@ -212,13 +216,27 @@
                             <form method="POST"
                               action="{{ route('admin.candidates.not-continued', $p) }}"
                               data-confirm-title="Konfirmasi diperlukan"
-                              data-confirm-message="Tandai kandidat ini sebagai Tidak Dilanjutkan?">
+                              data-confirm-message="{{ $notContinued ? 'Kembalikan kandidat ini menjadi Lanjutkan?' : 'Tandai kandidat ini sebagai Tidak Dilanjutkan?' }}">
                               @csrf
+                              <input type="hidden" name="action" value="{{ $notContinued ? 'continue' : 'not_continued' }}">
                               @if(filled($jobId ?? ''))
                                 <input type="hidden" name="job_id" value="{{ $jobId }}">
                               @endif
-                              <button type="submit" class="abtn abtn-sm {{ $notContinued ? 'bg-red-700 text-white' : 'bg-red-600 text-white hover:bg-red-700' }}" {{ $notContinued ? 'disabled' : '' }}>
-                                Tidak Dilanjutkan
+                              <button type="submit" class="abtn abtn-sm {{ $notContinued ? 'bg-emerald-600 text-white hover:bg-emerald-700' : 'bg-red-600 text-white hover:bg-red-700' }}">
+                                {{ $notContinued ? 'Lanjutkan' : 'Tidak Dilanjutkan' }}
+                              </button>
+                            </form>
+                            <form method="POST"
+                              action="{{ route('admin.candidates.not-continued', $p) }}"
+                              data-confirm-title="Konfirmasi diperlukan"
+                              data-confirm-message="{{ $withdrawn ? 'Batalkan status Withdraw kandidat ini?' : 'Tandai kandidat ini sebagai Withdraw?' }}">
+                              @csrf
+                              <input type="hidden" name="action" value="{{ $withdrawn ? 'unwithdraw' : 'withdraw' }}">
+                              @if(filled($jobId ?? ''))
+                                <input type="hidden" name="job_id" value="{{ $jobId }}">
+                              @endif
+                              <button type="submit" class="abtn abtn-sm {{ $withdrawn ? 'bg-slate-600 text-white hover:bg-slate-700' : 'bg-amber-400 text-amber-950 hover:bg-amber-500' }}">
+                                {{ $withdrawn ? 'Batalkan Withdraw' : 'Withdraw' }}
                               </button>
                             </form>
                           </div>

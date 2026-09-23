@@ -482,7 +482,7 @@ class CandidateProfileController extends Controller
         $ageRange = trim((string) $request->query('age_range', ''));
 
         $profiles = CandidateProfile::query()
-            ->select(['candidate_profiles.id', 'candidate_profiles.user_id', 'candidate_profiles.poh_id', 'candidate_profiles.full_name', 'candidate_profiles.email', 'candidate_profiles.phone', 'candidate_profiles.nik', 'candidate_profiles.age', 'candidate_profiles.birthdate', 'candidate_profiles.ktp_province', 'candidate_profiles.domicile_province', 'candidate_profiles.updated_at'])
+            ->select(['candidate_profiles.id', 'candidate_profiles.user_id', 'candidate_profiles.poh_id', 'candidate_profiles.full_name', 'candidate_profiles.email', 'candidate_profiles.phone', 'candidate_profiles.nik', 'candidate_profiles.age', 'candidate_profiles.birthdate', 'candidate_profiles.ktp_province', 'candidate_profiles.domicile_province', 'candidate_profiles.extras', 'candidate_profiles.updated_at'])
             ->withCount(['trainings', 'employments', 'references'])
             ->with(['poh:id,name', 'user.jobApplications' => function ($q) use ($jobId) {
                 if ($jobId) $q->where('job_id', $jobId);
@@ -536,7 +536,10 @@ class CandidateProfileController extends Controller
     {
         $data = $request->validate([
             'job_id' => ['nullable', 'uuid', 'exists:job_listings,id'],
+            'action' => ['nullable', 'in:not_continued,continue,withdraw,unwithdraw'],
         ]);
+
+        $action = $data['action'] ?? 'not_continued';
 
         abort_unless($profile->user_id, 404);
 
@@ -544,14 +547,42 @@ class CandidateProfileController extends Controller
             ->where('user_id', $profile->user_id)
             ->when($data['job_id'] ?? null, fn ($q, $jobId) => $q->where('job_id', $jobId));
 
-        $updated = $applications->update([
-            'current_stage' => 'not_qualified',
-            'overall_status' => 'not_qualified',
-        ]);
+        $updated = 0;
+        if (in_array($action, ['continue', 'not_continued'], true)) {
+            $updated = $applications->update($action === 'continue'
+                ? [
+                    'current_stage' => 'screening',
+                    'overall_status' => 'active',
+                ]
+                : [
+                    'current_stage' => 'not_qualified',
+                    'overall_status' => 'not_qualified',
+                ]);
+        }
 
-        return redirect()->back()->with('success', $updated
-            ? 'Kandidat ditandai sebagai Tidak Dilanjutkan.'
-            : 'Tidak ada lamaran kandidat yang dapat diperbarui.');
+        // Keep the candidate row visibly marked even when there is no application yet.
+        $extras = is_array($profile->extras) ? $profile->extras : [];
+        if ($action === 'withdraw' || $action === 'unwithdraw') {
+            if ($action === 'withdraw') {
+                $extras['withdrawn'] = true;
+                $extras['withdrawn_at'] = now()->toISOString();
+            } else {
+                unset($extras['withdrawn'], $extras['withdrawn_at']);
+            }
+        } elseif ($action === 'continue') {
+            unset($extras['not_continued'], $extras['not_continued_at']);
+        } else {
+            $extras['not_continued'] = true;
+            $extras['not_continued_at'] = now()->toISOString();
+        }
+        $profile->forceFill(['extras' => $extras])->save();
+
+        return redirect()->back()->with('success', match ($action) {
+            'continue' => 'Kandidat dikembalikan menjadi Lanjutkan.',
+            'withdraw' => 'Kandidat ditandai sebagai Withdraw.',
+            'unwithdraw' => 'Status Withdraw kandidat dibatalkan.',
+            default => 'Kandidat ditandai sebagai Tidak Dilanjutkan.',
+        });
     }
 
     /**
