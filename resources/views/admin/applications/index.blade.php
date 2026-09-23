@@ -95,6 +95,18 @@
             'not_qualified' => 'finish',
             'rejected' => 'finish',
         ];
+        $stageOptions = [
+            'screening' => 'Screening',
+            'psychological_test' => 'Psychological Test',
+            'hr_iv' => 'HR Interview',
+            'post_test' => 'Post Test',
+            'user_iv' => 'User Interview',
+            'offer' => 'Offering Letter (OL)',
+            'mcu' => 'Medical Check Up',
+            'mobilisasi' => 'Mobilisasi (Travel)',
+            'skill_test' => 'Skill Test',
+            'finish' => 'Finish',
+        ];
     @endphp
 
     <div class="mx-auto w-full max-w-[1440px] px-4 sm:px-6 lg:px-8 py-6 space-y-6">
@@ -368,8 +380,8 @@
                               <select name="to"
                                       class="w-full px-2 py-1.5 text-xs bg-white border shadow-sm rounded-xl border-slate-200 focus:outline-none focus:ring-2"
                                       style="--tw-ring-color: {{ $ACCENT }}">
-                                @foreach(array_keys($PRETTY) as $opt)
-                                      <option value="{{ $opt }}" @selected($opt === $stageKey)>{{ $PRETTY[$opt] }}</option>
+                                @foreach($stageOptions as $opt => $label)
+                                      <option value="{{ $opt }}" @selected($opt === $stageKey)>{{ $label }}</option>
                                 @endforeach
                               </select>
                               <button class="abtn abtn-xs abtn-primary">
