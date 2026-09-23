@@ -558,12 +558,19 @@ class CandidateProfileController extends Controller
                     'current_stage' => 'not_qualified',
                     'overall_status' => 'not_qualified',
                 ]);
+        } elseif ($action === 'withdraw') {
+            // Withdraw is a separate state; clear any previous not-qualified state.
+            $updated = $applications->where('overall_status', 'not_qualified')->update([
+                'current_stage' => 'screening',
+                'overall_status' => 'active',
+            ]);
         }
 
         // Keep the candidate row visibly marked even when there is no application yet.
         $extras = is_array($profile->extras) ? $profile->extras : [];
         if ($action === 'withdraw' || $action === 'unwithdraw') {
             if ($action === 'withdraw') {
+                unset($extras['not_continued'], $extras['not_continued_at']);
                 $extras['withdrawn'] = true;
                 $extras['withdrawn_at'] = now()->toISOString();
             } else {
@@ -572,6 +579,7 @@ class CandidateProfileController extends Controller
         } elseif ($action === 'continue') {
             unset($extras['not_continued'], $extras['not_continued_at']);
         } else {
+            unset($extras['withdrawn'], $extras['withdrawn_at']);
             $extras['not_continued'] = true;
             $extras['not_continued_at'] = now()->toISOString();
         }
