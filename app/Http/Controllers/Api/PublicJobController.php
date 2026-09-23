@@ -18,6 +18,8 @@ class PublicJobController extends Controller
             'created_at' => ['nullable', 'date_format:Y-m-d'],
             'created_from' => ['nullable', 'date_format:Y-m-d'],
             'created_to' => ['nullable', 'date_format:Y-m-d'],
+            'job_created_from' => ['nullable', 'date_format:Y-m-d'],
+            'job_created_to' => ['nullable', 'date_format:Y-m-d'],
             'create_from' => ['nullable', 'date_format:Y-m-d'],
             'create_to' => ['nullable', 'date_format:Y-m-d'],
             'applied_from' => ['nullable', 'date_format:Y-m-d'],
@@ -29,8 +31,11 @@ class PublicJobController extends Controller
         $code = $filters['code_id'] ?? $filters['code'] ?? null;
         $code = is_string($code) ? trim($code) : $code;
         $createdAt = $filters['created_at'] ?? $filters['create_at'] ?? null;
-        $appliedFrom = $filters['create_from'] ?? $filters['applied_from'] ?? null;
-        $appliedTo = $filters['create_to'] ?? $filters['applied_to'] ?? null;
+        // `created_from/to` now refer to application.created_at.
+        $appliedFrom = $filters['created_from'] ?? $filters['create_from'] ?? $filters['applied_from'] ?? null;
+        $appliedTo = $filters['created_to'] ?? $filters['create_to'] ?? $filters['applied_to'] ?? null;
+        $jobCreatedFrom = $filters['job_created_from'] ?? null;
+        $jobCreatedTo = $filters['job_created_to'] ?? null;
         $applicationFilter = function ($query) use ($appliedFrom, $appliedTo) {
             $query->when($appliedFrom, fn ($q, $date) => $q->whereDate('created_at', '>=', $date))
                 ->when($appliedTo, fn ($q, $date) => $q->whereDate('created_at', '<=', $date));
@@ -46,8 +51,8 @@ class PublicJobController extends Controller
             ->when($code, fn($query) => $query->whereRaw('LOWER(TRIM(code)) = ?', [mb_strtolower($code)]))
             ->when($filters['status'] ?? null, fn($query, $status) => $query->where('status', $status))
             ->when($createdAt, fn($query, $date) => $query->whereDate('created_at', $date))
-            ->when($filters['created_from'] ?? null, fn($query, $date) => $query->whereDate('created_at', '>=', $date))
-            ->when($filters['created_to'] ?? null, fn($query, $date) => $query->whereDate('created_at', '<=', $date))
+            ->when($jobCreatedFrom, fn($query, $date) => $query->whereDate('created_at', '>=', $date))
+            ->when($jobCreatedTo, fn($query, $date) => $query->whereDate('created_at', '<=', $date))
             ->when($appliedFrom || $appliedTo, fn ($query) => $query->whereHas('applications', $applicationFilter))
             ->latest('created_at')
             ->latest('id')
@@ -59,8 +64,10 @@ class PublicJobController extends Controller
             'filters' => [
                 'status' => $filters['status'] ?? null,
                 'created_at' => $createdAt,
-                'created_from' => $filters['created_from'] ?? null,
-                'created_to' => $filters['created_to'] ?? null,
+                'created_from' => $appliedFrom,
+                'created_to' => $appliedTo,
+                'job_created_from' => $jobCreatedFrom,
+                'job_created_to' => $jobCreatedTo,
                 'applied_from' => $appliedFrom,
                 'applied_to' => $appliedTo,
                 'code_id' => $code,
