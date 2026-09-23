@@ -206,7 +206,10 @@
                               <svg class="w-4 h-4"><use href="#i-eye"/></svg>
                               Lihat
                             </a>
-                            <form method="POST" action="{{ route('admin.candidates.not-continued', $p) }}" onsubmit="return confirm('Tandai kandidat ini sebagai Tidak Dilanjutkan?')">
+                            <form method="POST"
+                              action="{{ route('admin.candidates.not-continued', $p) }}"
+                              data-confirm-title="Konfirmasi diperlukan"
+                              data-confirm-message="Tandai kandidat ini sebagai Tidak Dilanjutkan?">
                               @csrf
                               @if(filled($jobId ?? ''))
                                 <input type="hidden" name="job_id" value="{{ $jobId }}">
