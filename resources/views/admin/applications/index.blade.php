@@ -296,9 +296,11 @@
                         $profile = $app->user?->candidateProfile;
                         $candidate = $profile?->full_name ?: ($app->user->name ?? 'Kandidat');
                         $candidateEmail = $profile?->email ?: ($app->user->email ?? null);
+                        $withdrawn = (bool) data_get($profile?->extras ?? [], 'withdrawn', false);
+                        $notContinued = $overall === 'not_qualified';
                       @endphp
 
-                      <tr class="align-top transition hover:bg-[#f8f5f2]">
+                      <tr class="align-top transition {{ $withdrawn ? 'bg-amber-50' : ($notContinued ? 'bg-red-50' : 'hover:bg-[#f8f5f2]') }}" @if($withdrawn) style="background-color:#fffbeb;" @elseif($notContinued) style="background-color:#fef2f2;" @endif>
                         <td class="px-4 py-3">
                           <div class="font-medium text-black">
                             @if($profile && Route::has('admin.candidates.show'))
@@ -374,6 +376,16 @@
                                 <svg class="w-4 h-4"><use href="#i-arrow"/></svg>
                                 Pindah
                               </button>
+                            </form>
+                            <form action="{{ route('admin.applications.disposition', $app) }}" method="POST" data-confirm-title="Konfirmasi diperlukan" data-confirm-message="{{ $notContinued ? 'Kembalikan kandidat menjadi Lanjutkan?' : 'Tandai kandidat sebagai Tidak Dilanjutkan?' }}">
+                              @csrf
+                              <input type="hidden" name="action" value="{{ $notContinued ? 'continue' : 'not_continued' }}">
+                              <button class="abtn abtn-xs {{ $notContinued ? 'bg-emerald-600 text-white' : 'bg-red-600 text-white' }}">{{ $notContinued ? 'Lanjutkan' : 'Tidak Dilanjutkan' }}</button>
+                            </form>
+                            <form action="{{ route('admin.applications.disposition', $app) }}" method="POST" data-confirm-title="Konfirmasi diperlukan" data-confirm-message="{{ $withdrawn ? 'Batalkan Withdraw kandidat?' : 'Tandai kandidat sebagai Withdraw?' }}">
+                              @csrf
+                              <input type="hidden" name="action" value="{{ $withdrawn ? 'unwithdraw' : 'withdraw' }}">
+                              <button class="abtn abtn-xs {{ $withdrawn ? 'bg-slate-600 text-white' : 'bg-amber-400 text-amber-950' }}">{{ $withdrawn ? 'Batalkan Withdraw' : 'Withdraw' }}</button>
                             </form>
                           </div>
                         </td>

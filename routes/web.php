@@ -238,6 +238,8 @@ Route::prefix('admin')
         // Move via form POST (tombol blade)
         Route::post('applications/{application}/move', [ApplicationController::class, 'moveStage'])
             ->name('applications.move');
+        Route::post('applications/{application}/disposition', [ApplicationController::class, 'updateDisposition'])
+            ->name('applications.disposition');
 
         // Legacy GET -> redirect aman
         Route::get('applications/{application}/move', function () {

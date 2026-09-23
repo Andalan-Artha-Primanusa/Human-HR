@@ -323,7 +323,7 @@ class ApplicationController extends Controller
                 'job:id,code,title,division,site_id,employment_type',
                 'job.site:id,code,name',
                 'user:id,name,email',
-                'user.candidateProfile:id,user_id,full_name,nik,email,phone',
+                'user.candidateProfile:id,user_id,full_name,nik,email,phone,extras',
                 'stages.actor:id,name',
                 'stages.user:id,name',
             ])
@@ -593,6 +593,46 @@ class ApplicationController extends Controller
         $this->guardCompleteProfileBeforeStageMove($request, $application, $to);
         $attempt = $this->applyTransition($application, $to, $status, $note, $score);
         return $this->redirectAfterMove($request, $application, $to, $attempt);
+    }
+
+    /** Toggle candidate disposition from the applications list. */
+    public function updateDisposition(Request $request, JobApplication $application)
+    {
+        $this->authorize('update', $application);
+        $data = $request->validate(['action' => ['required', 'in:not_continued,continue,withdraw,unwithdraw']]);
+        $action = $data['action'];
+        $profile = $application->user?->candidateProfile;
+        $extras = is_array($profile?->extras) ? $profile->extras : [];
+
+        if ($action === 'not_continued') {
+            $application->update(['current_stage' => 'not_qualified', 'overall_status' => 'not_qualified']);
+            unset($extras['withdrawn'], $extras['withdrawn_at']);
+            $extras['not_continued'] = true;
+            $extras['not_continued_at'] = now()->toISOString();
+        } elseif ($action === 'continue') {
+            $application->update(['current_stage' => 'screening', 'overall_status' => 'active']);
+            unset($extras['not_continued'], $extras['not_continued_at'], $extras['withdrawn'], $extras['withdrawn_at']);
+        } elseif ($action === 'withdraw') {
+            if ($application->overall_status === 'not_qualified') {
+                $application->update(['current_stage' => 'screening', 'overall_status' => 'active']);
+            }
+            unset($extras['not_continued'], $extras['not_continued_at']);
+            $extras['withdrawn'] = true;
+            $extras['withdrawn_at'] = now()->toISOString();
+        } else {
+            unset($extras['withdrawn'], $extras['withdrawn_at']);
+        }
+
+        if ($profile) {
+            $profile->forceFill(['extras' => $extras])->save();
+        }
+
+        return back()->with('success', match ($action) {
+            'not_continued' => 'Kandidat ditandai sebagai Tidak Dilanjutkan.',
+            'continue' => 'Kandidat dikembalikan menjadi Lanjutkan.',
+            'withdraw' => 'Kandidat ditandai sebagai Withdraw.',
+            default => 'Status Withdraw kandidat dibatalkan.',
+        });
     }
 
     /**
