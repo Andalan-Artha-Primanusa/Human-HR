@@ -50,7 +50,7 @@ class PublicJobController extends Controller
             };
         }
         $relations = $this->relations();
-        if ($appliedFrom || $appliedTo) {
+        if ($appliedFrom || $appliedTo || ($nik !== null && $nik !== '')) {
             $relations['applications'] = $applicationFilter;
         }
 
