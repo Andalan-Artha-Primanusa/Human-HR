@@ -309,7 +309,7 @@
                         $candidate = $profile?->full_name ?: ($app->user->name ?? 'Kandidat');
                         $candidateEmail = $profile?->email ?: ($app->user->email ?? null);
                         $withdrawn = (bool) data_get($profile?->extras ?? [], 'withdrawn', false);
-                        $notContinued = $overall === 'not_qualified';
+                        $notContinued = $overall === 'not_qualified' || $stageKey === 'not_qualified';
                       @endphp
 
                       <tr class="align-top transition {{ $withdrawn ? 'bg-amber-50' : ($notContinued ? 'bg-red-50' : 'hover:bg-[#f8f5f2]') }}" @if($withdrawn) style="background-color:#fffbeb;" @elseif($notContinued) style="background-color:#fef2f2;" @endif>
