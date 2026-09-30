@@ -300,7 +300,7 @@
                         $overall = strtolower($app->overall_status ?? 'active');
                         $overallBadge = match ($overall) {
                             'hired' => 'badge-green',
-                            'not_qualified' => 'badge-rose',
+                            'not_qualified', 'rejected' => 'badge-rose',
                             'inactive' => 'badge-slate',
                             default => 'badge-blue'
                         };
@@ -310,7 +310,7 @@
                         $candidateEmail = $profile?->email ?: ($app->user->email ?? null);
                         $withdrawn = (bool) data_get($profile?->extras ?? [], 'withdrawn', false);
                         $notContinued = (bool) data_get($profile?->extras ?? [], 'not_continued', false)
-                            || $overall === 'not_qualified'
+                            || in_array($overall, ['not_qualified', 'rejected'], true)
                             || $stageKey === 'not_qualified';
                       @endphp
 

@@ -340,7 +340,7 @@ class ApplicationController extends Controller
             ->when($jobStatus === 'open', fn($q) => $q->whereHas('job', fn($j) => $j->where('status', 'open')))
             ->when($jobStatus === 'not_open', fn($q) => $q->whereHas('job', fn($j) => $j->where('status', '!=', 'open')))
             ->when($jobId !== '', fn($q) => $q->where('job_id', $jobId))
-            ->orderByRaw("CASE WHEN overall_status = 'not_qualified' OR current_stage = 'not_qualified' THEN 1 ELSE 0 END ASC")
+            ->orderByRaw("CASE WHEN overall_status IN ('not_qualified', 'rejected') OR current_stage IN ('not_qualified', 'rejected') THEN 1 ELSE 0 END ASC")
             ->orderByDesc('created_at')
             ->orderByDesc('id')
             ->paginate(15)
