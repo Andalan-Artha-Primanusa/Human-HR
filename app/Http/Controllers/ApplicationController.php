@@ -1136,6 +1136,10 @@ class ApplicationController extends Controller
         }
 
         $isOwner = $request->user() && (string) $request->user()->id === (string) $application->user_id;
+        $returnTo = (string) $request->input('return_to', '');
+        if (str_starts_with($returnTo, url('/admin/candidates/'))) {
+            return redirect()->to($returnTo)->with('ok', 'Stage dipindah ke ' . strtoupper($this->PRETTY[$to] ?? $to) . '.');
+        }
 
         switch ($to) {
             case 'psychological_test':

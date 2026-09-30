@@ -170,6 +170,50 @@
 
   {{-- MAIN CONTENT KIRI --}}
   <div class="flex flex-col flex-1 order-1 gap-4 lg:order-2">
+    @if($profileApplications->isNotEmpty())
+      <div class="p-4 bg-white border shadow-sm rounded-2xl">
+        <div class="mb-3 font-semibold">Proses Kanban</div>
+        <div class="space-y-3">
+          @php
+            $kanbanStages = [
+              'screening' => 'Screening',
+              'psychological_test' => 'Psychological Test',
+              'hr_iv' => 'HR Interview',
+              'post_test' => 'Post Test',
+              'user_iv' => 'User Interview',
+              'offer' => 'Offering Letter (OL)',
+              'mcu' => 'Medical Check Up',
+              'mobilisasi' => 'Mobilisasi (Travel)',
+              'skill_test' => 'Skill Test',
+              'finish' => 'Finish',
+            ];
+          @endphp
+          @foreach($profileApplications as $application)
+            @php
+              $currentStage = strtolower((string) ($application->current_stage ?: 'screening'));
+              $currentStage = ['applied' => 'screening', 'psychotest' => 'psychological_test', 'ground_test' => 'skill_test', 'hired' => 'finish', 'not_qualified' => 'finish'][$currentStage] ?? $currentStage;
+            @endphp
+            <div class="flex flex-col gap-2 p-3 border rounded-xl border-slate-200 sm:flex-row sm:items-center sm:justify-between">
+              <div class="min-w-0">
+                <div class="font-medium truncate">{{ $application->job?->title ?: 'Lowongan' }}</div>
+                <div class="text-xs text-slate-500">Status: {{ strtoupper(str_replace('_', ' ', (string) $application->overall_status)) }}</div>
+              </div>
+              <form action="{{ route('admin.applications.move', $application) }}" method="POST" class="flex items-center gap-2">
+                @csrf
+                <input type="hidden" name="return_to" value="{{ url()->full() }}">
+                <select name="to" class="px-3 py-2 text-sm bg-white border rounded-lg border-slate-300">
+                  @foreach($kanbanStages as $stage => $label)
+                    <option value="{{ $stage }}" @selected($stage === $currentStage)>{{ $label }}</option>
+                  @endforeach
+                </select>
+                <input type="hidden" name="status" value="pending">
+                <button type="submit" class="px-3 py-2 text-sm font-semibold text-white rounded-lg bg-[#a77d52] hover:brightness-105">Update</button>
+              </form>
+            </div>
+          @endforeach
+        </div>
+      </div>
+    @endif
     <div class="p-4 bg-white border shadow-sm rounded-2xl">
       <div class="mb-2 font-semibold">Data Pribadi</div>
       <div class="grid grid-cols-2 text-sm gap-x-4 gap-y-1">
