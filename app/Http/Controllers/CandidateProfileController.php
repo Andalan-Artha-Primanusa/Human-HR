@@ -592,7 +592,7 @@ class CandidateProfileController extends Controller
         $profile->forceFill(['extras' => $extras])->save();
 
         $returnTo = (string) ($data['return_to'] ?? '');
-        $redirect = str_starts_with($returnTo, url('/admin/candidates'))
+        $redirect = (str_starts_with($returnTo, url('/admin/candidates')) || str_starts_with($returnTo, url('/admin/applications')))
             ? redirect()->to($returnTo)
             : redirect()->back();
 

@@ -316,7 +316,7 @@
                         <td class="px-4 py-3">
                           <div class="font-medium text-black">
                             @if($profile && Route::has('admin.candidates.show'))
-                              <a href="{{ route('admin.candidates.show', $profile) }}" target="_blank" class="hover:underline">{{ e($candidate) }}</a>
+                              <a href="{{ route('admin.candidates.show', ['profile' => $profile, 'return_to' => url()->full()]) }}" target="_blank" class="hover:underline">{{ e($candidate) }}</a>
                             @else
                               {{ e($candidate) }}
                             @endif
@@ -362,7 +362,7 @@
                           <div class="flex flex-wrap justify-end gap-1.5">
                             @if($profile && Route::has('admin.candidates.show'))
                               <a class="abtn abtn-sm abtn-secondary"
-                                 target="_blank" href="{{ route('admin.candidates.show', $profile) }}">
+                                 target="_blank" href="{{ route('admin.candidates.show', ['profile' => $profile, 'return_to' => url()->full()]) }}">
                                 <svg class="w-4 h-4"><use href="#i-user"/></svg>
                                 Profil
                               </a>

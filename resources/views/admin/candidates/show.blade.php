@@ -101,7 +101,7 @@
               data-confirm-title="Konfirmasi diperlukan"
               data-confirm-message="{{ $notContinued ? 'Kembalikan kandidat menjadi Lanjutkan?' : 'Tandai kandidat sebagai Tidak Dilanjutkan?' }}">
           @csrf
-          <input type="hidden" name="return_to" value="{{ route('admin.candidates.index') }}">
+          <input type="hidden" name="return_to" value="{{ request('return_to', route('admin.candidates.index')) }}">
           <input type="hidden" name="action" value="{{ $notContinued ? 'continue' : 'not_continued' }}">
           <button type="submit" class="px-3 py-1 text-xs font-semibold rounded text-white {{ $notContinued ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-red-600 hover:bg-red-700' }}">
             {{ $notContinued ? 'Lanjutkan' : 'Tidak Dilanjutkan' }}
@@ -111,7 +111,7 @@
               data-confirm-title="Konfirmasi diperlukan"
               data-confirm-message="{{ $withdrawn ? 'Batalkan Withdraw kandidat?' : 'Tandai kandidat sebagai Withdraw?' }}">
           @csrf
-          <input type="hidden" name="return_to" value="{{ route('admin.candidates.index') }}">
+          <input type="hidden" name="return_to" value="{{ request('return_to', route('admin.candidates.index')) }}">
           <input type="hidden" name="action" value="{{ $withdrawn ? 'unwithdraw' : 'withdraw' }}">
           <button type="submit" class="px-3 py-1 text-xs font-semibold rounded {{ $withdrawn ? 'bg-slate-600 text-white hover:bg-slate-700' : 'bg-amber-400 text-amber-950 hover:bg-amber-500' }}">
             {{ $withdrawn ? 'Batalkan Withdraw' : 'Withdraw' }}
