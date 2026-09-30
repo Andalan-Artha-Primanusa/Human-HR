@@ -71,6 +71,10 @@
   });
 
   $profileEmail = $profile->email ?: $profile->user?->email;
+  $profileApplications = $profile->user?->jobApplications ?? collect();
+  $notContinued = (bool) data_get($profile->extras ?? [], 'not_continued', false)
+      || $profileApplications->contains(fn($app) => in_array(strtolower((string) ($app->overall_status ?? '')), ['not_qualified', 'rejected'], true));
+  $withdrawn = (bool) data_get($profile->extras ?? [], 'withdrawn', false);
 @endphp
 
 <div class="flex flex-col gap-6 lg:flex-row">
@@ -91,6 +95,28 @@
         @endif
         <a href="{{ route('admin.candidates.index') }}"
            class="inline-flex items-center px-3 py-1 text-xs bg-white border rounded text-slate-900 border-slate-200 hover:bg-slate-50">Kembali</a>
+      </div>
+      <div class="flex flex-wrap justify-center gap-2 mt-3">
+        <form method="POST" action="{{ route('admin.candidates.not-continued', $profile) }}"
+              data-confirm-title="Konfirmasi diperlukan"
+              data-confirm-message="{{ $notContinued ? 'Kembalikan kandidat menjadi Lanjutkan?' : 'Tandai kandidat sebagai Tidak Dilanjutkan?' }}">
+          @csrf
+          <input type="hidden" name="return_to" value="{{ route('admin.candidates.index') }}">
+          <input type="hidden" name="action" value="{{ $notContinued ? 'continue' : 'not_continued' }}">
+          <button type="submit" class="px-3 py-1 text-xs font-semibold rounded text-white {{ $notContinued ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-red-600 hover:bg-red-700' }}">
+            {{ $notContinued ? 'Lanjutkan' : 'Tidak Dilanjutkan' }}
+          </button>
+        </form>
+        <form method="POST" action="{{ route('admin.candidates.not-continued', $profile) }}"
+              data-confirm-title="Konfirmasi diperlukan"
+              data-confirm-message="{{ $withdrawn ? 'Batalkan Withdraw kandidat?' : 'Tandai kandidat sebagai Withdraw?' }}">
+          @csrf
+          <input type="hidden" name="return_to" value="{{ route('admin.candidates.index') }}">
+          <input type="hidden" name="action" value="{{ $withdrawn ? 'unwithdraw' : 'withdraw' }}">
+          <button type="submit" class="px-3 py-1 text-xs font-semibold rounded {{ $withdrawn ? 'bg-slate-600 text-white hover:bg-slate-700' : 'bg-amber-400 text-amber-950 hover:bg-amber-500' }}">
+            {{ $withdrawn ? 'Batalkan Withdraw' : 'Withdraw' }}
+          </button>
+        </form>
       </div>
     </div>
     <div class="p-4 bg-white border shadow-sm rounded-2xl">

@@ -537,6 +537,7 @@ class CandidateProfileController extends Controller
         $data = $request->validate([
             'job_id' => ['nullable', 'uuid', 'exists:job_listings,id'],
             'action' => ['nullable', 'in:not_continued,continue,withdraw,unwithdraw'],
+            'return_to' => ['nullable', 'string', 'max:500'],
         ]);
 
         $action = $data['action'] ?? 'not_continued';
@@ -590,7 +591,12 @@ class CandidateProfileController extends Controller
         }
         $profile->forceFill(['extras' => $extras])->save();
 
-        return redirect()->back()->with('success', match ($action) {
+        $returnTo = (string) ($data['return_to'] ?? '');
+        $redirect = str_starts_with($returnTo, url('/admin/candidates'))
+            ? redirect()->to($returnTo)
+            : redirect()->back();
+
+        return $redirect->with('success', match ($action) {
             'continue' => 'Kandidat dikembalikan menjadi Lanjutkan.',
             'withdraw' => 'Kandidat ditandai sebagai Withdraw.',
             'unwithdraw' => 'Status Withdraw kandidat dibatalkan.',
