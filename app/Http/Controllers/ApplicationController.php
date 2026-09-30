@@ -302,9 +302,21 @@ class ApplicationController extends Controller
                     ->when($stage, fn($q) => $q->where('current_stage', $stage))
                     ->when($site, fn($q) => $q->whereHas('job.site', fn($s) => $s->where('code', $site)));
                 },
-                'applications as active_count' => fn($q) => $q->where('overall_status', 'active'),
-                'applications as hired_count' => fn($q) => $q->where('overall_status', 'hired'),
-                'applications as rejected_count' => fn($q) => $q->whereIn('overall_status', ['rejected', 'not_qualified']),
+                'applications as active_count' => function ($q) use ($stage, $site) {
+                    $q->where('overall_status', 'active')
+                        ->when($stage, fn ($q) => $q->where('current_stage', $stage))
+                        ->when($site, fn ($q) => $q->whereHas('job.site', fn ($s) => $s->where('code', $site)));
+                },
+                'applications as hired_count' => function ($q) use ($stage, $site) {
+                    $q->where('overall_status', 'hired')
+                        ->when($stage, fn ($q) => $q->where('current_stage', $stage))
+                        ->when($site, fn ($q) => $q->whereHas('job.site', fn ($s) => $s->where('code', $site)));
+                },
+                'applications as rejected_count' => function ($q) use ($stage, $site) {
+                    $q->whereIn('overall_status', ['rejected', 'not_qualified'])
+                        ->when($stage, fn ($q) => $q->where('current_stage', $stage))
+                        ->when($site, fn ($q) => $q->whereHas('job.site', fn ($s) => $s->where('code', $site)));
+                },
             ])
             ->when($site, fn($q) => $q->whereHas('site', fn($s) => $s->where('code', $site)))
             ->when($jobStatus === 'open', fn($q) => $q->where('status', 'open'))
