@@ -236,7 +236,7 @@
                   <svg class="w-4 h-4"><use href="#i-eye"/></svg>
                   Job
                 </a>
-                @can('delete', App\Models\JobApplication::class)
+                @if(auth()->user()?->hasRole(['superadmin']))
                   <form method="POST" action="{{ route('admin.applications.destroy-job', $job) }}"
                         data-confirm-title="Hapus semua lamaran?"
                         data-confirm-message="Semua lamaran, data proses, attachment, CV lamaran, dan file offer pada lowongan ini akan dihapus permanen.">
@@ -244,7 +244,7 @@
                     @method('DELETE')
                     <button type="submit" class="abtn abtn-sm bg-slate-700 text-white hover:bg-slate-900">Hapus Semua</button>
                   </form>
-                @endcan
+                @endif
               </div>
             </article>
           @empty
