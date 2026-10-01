@@ -240,6 +240,8 @@ Route::prefix('admin')
             ->name('applications.move');
         Route::post('applications/{application}/disposition', [ApplicationController::class, 'updateDisposition'])
             ->name('applications.disposition');
+        Route::delete('applications/{application}', [ApplicationController::class, 'destroy'])
+            ->name('applications.destroy');
 
         // Legacy GET -> redirect aman
         Route::get('applications/{application}/move', function () {

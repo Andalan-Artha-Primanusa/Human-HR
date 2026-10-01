@@ -648,6 +648,49 @@ class ApplicationController extends Controller
         });
     }
 
+    /** Permanently remove an application and its application-owned files. */
+    public function destroy(Request $request, JobApplication $application)
+    {
+        $this->authorize('delete', $application);
+
+        $paths = $application->attachments()->pluck('path')->filter()->all();
+        $offer = $application->offer()->first();
+        if ($offer?->signed_path) {
+            $paths[] = $offer->signed_path;
+        }
+
+        $profile = $application->user?->candidateProfile;
+        $isLastApplication = $profile
+            && ! JobApplication::query()
+                ->where('user_id', $application->user_id)
+                ->where('id', '!=', $application->getKey())
+                ->exists();
+        if ($isLastApplication) {
+            if ($profile->cv_path) {
+                $paths[] = $profile->cv_path;
+            }
+            $paths = array_merge($paths, $profile->attachments()->pluck('path')->filter()->all());
+        }
+
+        DB::transaction(function () use ($application, $offer, $profile, $isLastApplication) {
+            $application->attachments()->delete();
+            $offer?->delete();
+            $application->delete();
+            if ($isLastApplication && $profile) {
+                $profile->attachments()->delete();
+                $profile->forceFill(['cv_path' => null])->save();
+            }
+        });
+
+        foreach (array_unique($paths) as $path) {
+            if (is_string($path) && $path !== '' && Storage::disk('public')->exists($path)) {
+                Storage::disk('public')->delete($path);
+            }
+        }
+
+        return back()->with('success', 'Lamaran dan file terkait berhasil dihapus.');
+    }
+
     /**
      * ================================================================
      * MOVE STAGE via AJAX (Kanban drag & drop, free move dropdown)

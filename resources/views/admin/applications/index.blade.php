@@ -401,6 +401,13 @@
                               <input type="hidden" name="action" value="{{ $withdrawn ? 'unwithdraw' : 'withdraw' }}">
                               <button class="abtn abtn-xs {{ $withdrawn ? 'bg-slate-600 text-white' : 'bg-amber-400 text-amber-950' }}">{{ $withdrawn ? 'Batalkan Withdraw' : 'Withdraw' }}</button>
                             </form>
+                            @can('delete', $app)
+                              <form action="{{ route('admin.applications.destroy', $app) }}" method="POST" data-confirm-title="Hapus lamaran?" data-confirm-message="Lamaran, data proses, dan file terkait akan dihapus permanen.">
+                                @csrf
+                                @method('DELETE')
+                                <button class="abtn abtn-xs bg-slate-700 text-white hover:bg-slate-900">Hapus</button>
+                              </form>
+                            @endcan
                           </div>
                         </td>
                       </tr>
