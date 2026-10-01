@@ -242,6 +242,8 @@ Route::prefix('admin')
             ->name('applications.disposition');
         Route::delete('applications/{application}', [ApplicationController::class, 'destroy'])
             ->name('applications.destroy');
+        Route::delete('applications/job/{job}', [ApplicationController::class, 'destroyForJob'])
+            ->name('applications.destroy-job');
 
         // Legacy GET -> redirect aman
         Route::get('applications/{application}/move', function () {

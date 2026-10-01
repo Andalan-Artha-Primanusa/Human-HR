@@ -691,6 +691,38 @@ class ApplicationController extends Controller
         return back()->with('success', 'Lamaran dan file terkait berhasil dihapus.');
     }
 
+    /** Permanently remove every application belonging to a job. */
+    public function destroyForJob(Request $request, Job $job)
+    {
+        abort_unless($request->user()?->hasRole(['superadmin']), 403);
+
+        $applications = JobApplication::query()
+            ->where('job_id', $job->id)
+            ->with(['attachments', 'offer'])
+            ->get();
+        $paths = [];
+
+        DB::transaction(function () use ($applications, &$paths) {
+            foreach ($applications as $application) {
+                foreach ($application->attachments as $attachment) {
+                    if ($attachment->path) $paths[] = $attachment->path;
+                }
+                if ($application->offer?->signed_path) $paths[] = $application->offer->signed_path;
+                $application->attachments()->delete();
+                $application->offer?->delete();
+                $application->delete();
+            }
+        });
+
+        foreach (array_unique($paths) as $path) {
+            if (is_string($path) && $path !== '' && Storage::disk('public')->exists($path)) {
+                Storage::disk('public')->delete($path);
+            }
+        }
+
+        return back()->with('success', $applications->count() . ' lamaran dan file terkait berhasil dihapus.');
+    }
+
     /**
      * ================================================================
      * MOVE STAGE via AJAX (Kanban drag & drop, free move dropdown)
