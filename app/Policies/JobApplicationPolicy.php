@@ -50,8 +50,7 @@ class JobApplicationPolicy
 
     public function delete(User $user, JobApplication $application): bool
     {
-        // Delete hanya Superadmin
-        return $user->hasRole(['superadmin']);
+        return $user->hasRole(['admin', 'hr', 'superadmin']);
     }
 
     public function giveFeedback(User $user, JobApplication $application): bool

@@ -121,7 +121,7 @@
 
       {{-- ===== FILTER / TOOLBAR ===== --}}
       <section class="overflow-hidden bg-white border rounded-2xl" style="border-color: {{ $BORD }}; border-radius: 1rem;">
-        <div class="p-6 md:p-6 bg-white">
+        <div class="p-6 bg-white md:p-6">
           <form method="GET" class="grid grid-cols-1 gap-3 md:grid-cols-6">
             {{-- q --}}
             <input name="q"
@@ -168,13 +168,13 @@
 
             {{-- actions --}}
             <div class="flex gap-2">
-              <button type="submit" class="abtn abtn-primary w-full" aria-label="Filter">
+              <button type="submit" class="w-full abtn abtn-primary" aria-label="Filter">
                 <svg class="w-4 h-4 text-white"><use href="#i-search"/></svg>
                 <span>Filter</span>
               </button>
 
               @if(request()->hasAny(['q', 'stage', 'site', 'job_status']))
-                <a href="{{ route('admin.applications.index') }}" class="abtn abtn-neutral w-full">
+                <a href="{{ route('admin.applications.index') }}" class="w-full abtn abtn-neutral">
                   Reset
                 </a>
               @endif
@@ -213,22 +213,22 @@
                   <div class="text-[11px] leading-none text-slate-500">Total</div>
                   <div class="mt-1 text-base font-bold text-slate-950">{{ (int) $job->applicants_count }}</div>
                 </div>
-                <div class="rounded-lg bg-blue-50 px-2 py-2 text-center" style="min-width:0;">
+                <div class="px-2 py-2 text-center rounded-lg bg-blue-50" style="min-width:0;">
                   <div class="text-[11px] leading-none text-blue-700">Aktif</div>
                   <div class="mt-1 text-base font-bold text-blue-800">{{ (int) $job->active_count }}</div>
                 </div>
-                <div class="rounded-lg bg-emerald-50 px-2 py-2 text-center" style="min-width:0;">
+                <div class="px-2 py-2 text-center rounded-lg bg-emerald-50" style="min-width:0;">
                   <div class="text-[11px] leading-none text-emerald-700">Hired</div>
                   <div class="mt-1 text-base font-bold text-emerald-800">{{ (int) $job->hired_count }}</div>
                 </div>
-                <div class="rounded-lg bg-rose-50 px-2 py-2 text-center" style="min-width:0;">
+                <div class="px-2 py-2 text-center rounded-lg bg-rose-50" style="min-width:0;">
                   <div class="text-[11px] leading-none text-rose-700">Reject</div>
                   <div class="mt-1 text-base font-bold text-rose-800">{{ (int) $job->rejected_count }}</div>
                 </div>
               </div>
 
               <div class="flex gap-2 px-4 pb-4 mt-auto">
-                <a class="abtn abtn-sm abtn-primary flex-1 justify-center" href="{{ route('admin.applications.index', array_merge(request()->except(['job', 'page', 'jobs_page']), ['job' => $job->id])) }}">
+                <a class="justify-center flex-1 abtn abtn-sm abtn-primary" href="{{ route('admin.applications.index', array_merge(request()->except(['job', 'page', 'jobs_page']), ['job' => $job->id])) }}">
                   <svg class="w-4 h-4"><use href="#i-user"/></svg>
                   Lihat Kandidat
                 </a>
@@ -236,13 +236,13 @@
                   <svg class="w-4 h-4"><use href="#i-eye"/></svg>
                   Job
                 </a>
-                @if(auth()->user()?->hasRole(['superadmin']))
+                @if(auth()->user()?->hasRole(['admin', 'hr', 'superadmin']))
                   <form method="POST" action="{{ route('admin.applications.destroy-job', $job) }}"
                         data-confirm-title="Hapus semua lamaran?"
                         data-confirm-message="Semua lamaran, data proses, attachment, CV lamaran, dan file offer pada lowongan ini akan dihapus permanen.">
                     @csrf
                     @method('DELETE')
-                    <button type="submit" class="abtn abtn-sm bg-slate-700 text-white hover:bg-slate-900">Hapus Semua</button>
+                    <button type="submit" class="text-white abtn abtn-sm bg-slate-700 hover:bg-slate-900">Hapus Semua</button>
                   </form>
                 @endif
               </div>
@@ -284,13 +284,14 @@
         <section class="overflow-hidden bg-white border shadow-sm rounded-2xl border-slate-200" style="border-color: {{ $BORD }}">
           <div class="overflow-x-auto">
             @if($apps->count())
-              <table class="min-w-[960px] w-full text-sm">
+              <table class="min-w-[1040px] w-full text-sm">
               <thead class="text-white bg-[#a77d52]">
                 <tr>
                   <th class="px-4 py-3 font-semibold text-left">Kandidat</th>
                   <th class="px-4 py-3 font-semibold text-left">Posisi</th>
                   <th class="w-40 px-4 py-3 font-semibold text-left">Divisi</th>
                   <th class="w-24 px-4 py-3 font-semibold text-left">Site</th>
+                  <th class="px-4 py-3 font-semibold text-left w-36">POH</th>
                   <th class="w-40 px-4 py-3 font-semibold text-center">Stage</th>
                   <th class="px-4 py-3 font-semibold text-center w-28">Overall</th>
                   <th class="px-4 py-3 font-semibold text-left w-28">Dibuat</th>
@@ -359,6 +360,17 @@
                           <span class="font-mono text-black">{{ e($app->job->site->code ?? $app->job->site_code ?? '—') }}</span>
                         </td>
 
+                        <td class="px-4 py-3">
+                          @if($app->poh)
+                            <div class="font-medium text-black">{{ e($app->poh->name) }}</div>
+                            @if(filled($app->poh->code))
+                              <div class="text-xs text-slate-500">{{ e($app->poh->code) }}</div>
+                            @endif
+                          @else
+                            <span class="text-slate-500">—</span>
+                          @endif
+                        </td>
+
                         <td class="px-4 py-3 text-center">
                           <span class="badge {{ $stageBadge }}">{{ $stageLabel }}</span>
                         </td>
@@ -414,7 +426,7 @@
                               <form action="{{ route('admin.applications.destroy', $app) }}" method="POST" data-confirm-title="Hapus lamaran?" data-confirm-message="Lamaran, data proses, dan file terkait akan dihapus permanen.">
                                 @csrf
                                 @method('DELETE')
-                                <button class="abtn abtn-xs bg-slate-700 text-white hover:bg-slate-900">Hapus</button>
+                                <button class="text-white abtn abtn-xs bg-slate-700 hover:bg-slate-900">Hapus</button>
                               </form>
                             @endcan
                           </div>

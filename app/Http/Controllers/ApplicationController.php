@@ -336,6 +336,7 @@ class ApplicationController extends Controller
                 'job.site:id,code,name',
                 'user:id,name,email',
                 'user.candidateProfile:id,user_id,full_name,nik,email,phone,extras',
+                'poh:id,name,code',
                 'stages.actor:id,name',
                 'stages.user:id,name',
             ])
@@ -694,7 +695,7 @@ class ApplicationController extends Controller
     /** Permanently remove every application belonging to a job. */
     public function destroyForJob(Request $request, Job $job)
     {
-        abort_unless($request->user()?->hasRole(['superadmin']), 403);
+        abort_unless($request->user()?->hasRole(['admin', 'hr', 'superadmin']), 403);
 
         $applications = JobApplication::query()
             ->where('job_id', $job->id)
