@@ -123,6 +123,10 @@
       <section class="overflow-hidden bg-white border rounded-2xl" style="border-color: {{ $BORD }}; border-radius: 1rem;">
         <div class="p-6 bg-white md:p-6">
           <form method="GET" class="grid grid-cols-1 gap-3 md:grid-cols-6">
+            @if($selectedJob)
+              <input type="hidden" name="job" value="{{ $selectedJob->id }}">
+            @endif
+
             {{-- q --}}
             <input name="q"
                    value="{{ e(request('q', '')) }}"
