@@ -122,10 +122,20 @@
       {{-- ===== FILTER / TOOLBAR ===== --}}
       <section class="overflow-hidden bg-white border rounded-2xl" style="border-color: {{ $BORD }}; border-radius: 1rem;">
         <div class="p-6 bg-white md:p-6">
-          <form method="GET" class="grid grid-cols-1 gap-3 md:grid-cols-6">
+          <form method="GET" class="grid grid-cols-1 gap-3 md:grid-cols-7">
             @if($selectedJob)
               <input type="hidden" name="job" value="{{ $selectedJob->id }}">
             @endif
+
+            {{-- POH --}}
+            <select name="poh"
+                    class="w-full px-4 py-3 text-sm bg-white border shadow-sm rounded-xl border-slate-200 focus:outline-none focus:ring-2"
+                    style="--tw-ring-color: {{ $ACCENT }}">
+              <option value="">Semua POH</option>
+              @foreach($pohs as $pohId => $pohName)
+                <option value="{{ $pohId }}" @selected(request('poh') === (string) $pohId)>{{ $pohName }}</option>
+              @endforeach
+            </select>
 
             {{-- q --}}
             <input name="q"
@@ -177,7 +187,7 @@
                 <span>Filter</span>
               </button>
 
-              @if(request()->hasAny(['q', 'stage', 'site', 'job_status']))
+              @if(request()->hasAny(['q', 'stage', 'site', 'poh', 'job_status']))
                 <a href="{{ route('admin.applications.index') }}" class="w-full abtn abtn-neutral">
                   Reset
                 </a>

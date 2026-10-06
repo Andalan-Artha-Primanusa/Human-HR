@@ -256,6 +256,7 @@ class ApplicationController extends Controller
             'stage' => ['nullable', 'string', 'max:50'],
             'site'  => ['nullable', 'string', 'max:50'],
             'job'   => ['nullable', 'uuid'],
+            'poh'   => ['nullable', 'uuid', 'exists:pohs,id'],
             'job_status' => ['nullable', Rule::in(['open', 'not_open'])],
         ]);
 
@@ -264,16 +265,20 @@ class ApplicationController extends Controller
         $stage = $this->normalizeStage($filters['stage'] ?? '');
         $site  = (string) ($filters['site'] ?? '');
         $jobId = (string) ($filters['job'] ?? '');
+        $pohId = (string) ($filters['poh'] ?? '');
         $jobStatus = (string) ($filters['job_status'] ?? '');
 
         $sites = Site::query()
             ->orderBy('code')
             ->pluck('name', 'code');
+        $pohs = Poh::query()
+            ->orderBy('name')
+            ->pluck('name', 'id');
 
         $jobCards = Job::query()
             ->select(['id', 'code', 'title', 'division', 'site_id', 'status', 'openings', 'created_at'])
             ->with(['site:id,code,name'])
-            ->whereHas('applications', function ($q) use ($like, $stage, $site) {
+            ->whereHas('applications', function ($q) use ($like, $stage, $site, $pohId) {
                 $q->when($like !== null, function ($q) use ($like) {
                     $q->where(function ($w) use ($like) {
                         $w->whereHas('user', fn($u) => $u->where('name', 'like', $like)
@@ -285,10 +290,11 @@ class ApplicationController extends Controller
                     });
                 })
                 ->when($stage, fn($q) => $q->where('current_stage', $stage))
-                ->when($site, fn($q) => $q->whereHas('job.site', fn($s) => $s->where('code', $site)));
+                ->when($site, fn($q) => $q->whereHas('job.site', fn($s) => $s->where('code', $site)))
+                ->when($pohId, fn($q) => $q->where('poh_id', $pohId));
             })
             ->withCount([
-                'applications as applicants_count' => function ($q) use ($like, $stage, $site) {
+                'applications as applicants_count' => function ($q) use ($like, $stage, $site, $pohId) {
                     $q->when($like !== null, function ($q) use ($like) {
                         $q->where(function ($w) use ($like) {
                             $w->whereHas('user', fn($u) => $u->where('name', 'like', $like)
@@ -300,22 +306,26 @@ class ApplicationController extends Controller
                         });
                     })
                     ->when($stage, fn($q) => $q->where('current_stage', $stage))
-                    ->when($site, fn($q) => $q->whereHas('job.site', fn($s) => $s->where('code', $site)));
+                    ->when($site, fn($q) => $q->whereHas('job.site', fn($s) => $s->where('code', $site)))
+                    ->when($pohId, fn($q) => $q->where('poh_id', $pohId));
                 },
-                'applications as active_count' => function ($q) use ($stage, $site) {
+                'applications as active_count' => function ($q) use ($stage, $site, $pohId) {
                     $q->where('overall_status', 'active')
                         ->when($stage, fn ($q) => $q->where('current_stage', $stage))
-                        ->when($site, fn ($q) => $q->whereHas('job.site', fn ($s) => $s->where('code', $site)));
+                        ->when($site, fn ($q) => $q->whereHas('job.site', fn ($s) => $s->where('code', $site)))
+                        ->when($pohId, fn($q) => $q->where('poh_id', $pohId));
                 },
-                'applications as hired_count' => function ($q) use ($stage, $site) {
+                'applications as hired_count' => function ($q) use ($stage, $site, $pohId) {
                     $q->where('overall_status', 'hired')
                         ->when($stage, fn ($q) => $q->where('current_stage', $stage))
-                        ->when($site, fn ($q) => $q->whereHas('job.site', fn ($s) => $s->where('code', $site)));
+                        ->when($site, fn ($q) => $q->whereHas('job.site', fn ($s) => $s->where('code', $site)))
+                        ->when($pohId, fn($q) => $q->where('poh_id', $pohId));
                 },
-                'applications as rejected_count' => function ($q) use ($stage, $site) {
+                'applications as rejected_count' => function ($q) use ($stage, $site, $pohId) {
                     $q->whereIn('overall_status', ['rejected', 'not_qualified'])
                         ->when($stage, fn ($q) => $q->where('current_stage', $stage))
-                        ->when($site, fn ($q) => $q->whereHas('job.site', fn ($s) => $s->where('code', $site)));
+                        ->when($site, fn($q) => $q->whereHas('job.site', fn($s) => $s->where('code', $site)))
+                        ->when($pohId, fn($q) => $q->where('poh_id', $pohId));
                 },
             ])
             ->when($site, fn($q) => $q->whereHas('site', fn($s) => $s->where('code', $site)))
@@ -350,6 +360,7 @@ class ApplicationController extends Controller
             })
             ->when($stage, fn($q) => $q->where('current_stage', $stage))
             ->when($site,  fn($q) => $q->whereHas('job.site', fn($s) => $s->where('code', $site)))
+            ->when($pohId, fn($q) => $q->where('poh_id', $pohId))
             ->when($jobStatus === 'open', fn($q) => $q->whereHas('job', fn($j) => $j->where('status', 'open')))
             ->when($jobStatus === 'not_open', fn($q) => $q->whereHas('job', fn($j) => $j->where('status', '!=', 'open')))
             ->when($jobId !== '', fn($q) => $q->where('job_id', $jobId))
@@ -359,7 +370,7 @@ class ApplicationController extends Controller
             ->paginate(15)
             ->withQueryString();
 
-        return view('admin.applications.index', compact('apps', 'jobCards', 'selectedJob', 'sites'));
+        return view('admin.applications.index', compact('apps', 'jobCards', 'selectedJob', 'sites', 'pohs'));
     }
 
     /** Kanban board */
