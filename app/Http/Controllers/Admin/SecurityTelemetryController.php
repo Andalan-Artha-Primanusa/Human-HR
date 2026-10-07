@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\ApiSecurityLog;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Illuminate\Support\Facades\Route;
 
 class SecurityTelemetryController extends Controller
 {
@@ -18,7 +19,7 @@ class SecurityTelemetryController extends Controller
             'avg_request_per_minute' => (clone $today)->count() ? round((clone $today)->count() / max(1, now()->diffInMinutes(today()) + 1), 2) : 0,
             'authentication_failures' => (clone $today)->where('authentication_status', 'failed')->count(),
             'high_frequency_requests' => (clone $today)->where('request_count_1m', '>=', 60)->count(),
-            'unique_api_endpoints' => (clone $today)->distinct('route_template')->count('route_template'),
+            'unique_api_endpoints' => $this->registeredApiEndpointCount(),
             'active_actors' => (clone $today)->whereNotNull('actor_hash')->distinct('actor_hash')->count('actor_hash'),
         ];
         return view('admin.security.api-activity', compact('logs', 'metrics'));
@@ -45,5 +46,14 @@ class SecurityTelemetryController extends Controller
         if ($request->filled('search')) $q->where(function ($x) use ($request) { $term = '%' . $request->input('search') . '%'; $x->where('route_template', 'like', $term)->orWhere('route_name', 'like', $term)->orWhere('request_id', 'like', $term); });
         foreach (['request_count_10s', 'request_count_1m', 'request_count_5m'] as $field) if ($request->filled('min_' . $field)) $q->where($field, '>=', (int) $request->input('min_' . $field));
         return $q;
+    }
+
+    private function registeredApiEndpointCount(): int
+    {
+        return collect(Route::getRoutes()->getRoutes())
+            ->filter(fn ($route) => str_starts_with(ltrim($route->uri(), '/'), 'api/'))
+            ->flatMap(fn ($route) => collect($route->methods())->reject(fn ($method) => in_array($method, ['HEAD', 'OPTIONS'], true))->map(fn ($method) => $method . ':' . $route->uri()))
+            ->unique()
+            ->count();
     }
 }
