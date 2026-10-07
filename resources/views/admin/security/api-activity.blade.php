@@ -9,7 +9,7 @@
     <a href="{{ route('admin.security.api-activity.export', request()->query()) }}" class="px-4 py-2 text-sm font-semibold text-white rounded-lg bg-[#a77d52]">Export CSV</a>
   </div>
   <div class="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
-    @foreach(['requests_today'=>'Requests Today','avg_request_per_minute'=>'Avg Request/Minute','authentication_failures'=>'Authentication Failures','high_frequency_requests'=>'High Frequency Requests','unique_api_endpoints'=>'Unique API Endpoints','active_actors'=>'Active Actors'] as $key => $label)
+    @foreach(['requests_today'=>'Requests Today','avg_request_per_minute'=>'Avg Request/Minute','authentication_failures'=>'Authentication Failures','high_frequency_requests'=>'High Frequency Requests','unique_api_endpoints'=>'Unique API/Web Endpoints','active_actors'=>'Active Actors'] as $key => $label)
       <div class="p-4 bg-white border rounded-xl border-slate-200"><div class="text-xs text-slate-500">{{ $label }}</div><div class="mt-1 text-2xl font-bold text-slate-900">{{ number_format($metrics[$key] ?? 0) }}</div></div>
     @endforeach
   </div>

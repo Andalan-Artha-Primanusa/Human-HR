@@ -68,7 +68,7 @@ class SecurityTelemetryController extends Controller
     private function registeredApiEndpointCount(): int
     {
         return collect(Route::getRoutes()->getRoutes())
-            ->filter(fn ($route) => str_starts_with(ltrim($route->uri(), '/'), 'api/'))
+            ->filter(fn ($route) => ! str_starts_with($route->uri(), '_ignition'))
             ->flatMap(fn ($route) => collect($route->methods())->reject(fn ($method) => in_array($method, ['HEAD', 'OPTIONS'], true))->map(fn ($method) => $method . ':' . $route->uri()))
             ->unique()
             ->count();
