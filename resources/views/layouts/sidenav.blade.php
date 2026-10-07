@@ -289,6 +289,13 @@
                     </a>
                 @endif
 
+                @if (Route::has('admin.security.api-activity'))
+                    <a href="{{ $href('admin.security.api-activity') }}" class="{{ $linkDesk }} {{ $activeMenu('admin.security.*') }}">
+                      <span class="{{ $iconWrap }}">{!! $menuIcon('audit') !!}</span>
+                      <span class="label text-white">API Security</span>
+                    </a>
+                @endif
+
               </div>
           @endif
       @endauth
@@ -402,6 +409,13 @@
                         <span class="{{ $iconWrap }}">{!! $menuIcon('audit') !!}</span>
                         <span>Audit Logs</span>
                       </a>
+                @endif
+
+                @if (Route::has('admin.security.api-activity'))
+                    <a href="{{ $href('admin.security.api-activity') }}" {!! $closeAttr !!} class="{{ $linkMobile }} {{ $activeMenu('admin.security.*') }}">
+                      <span class="{{ $iconWrap }}">{!! $menuIcon('audit') !!}</span>
+                      <span>API Security</span>
+                    </a>
                 @endif
 
               </div>

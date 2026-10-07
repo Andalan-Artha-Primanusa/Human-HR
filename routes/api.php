@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\PublicApplicationController;
 use App\Http\Controllers\Api\PublicJobController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\SecurityTelemetryController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [AuthController::class, 'login'])
@@ -22,6 +23,13 @@ Route::middleware(['api.token', 'verified'])->group(function () {
         Route::get('/users/{user}', [UserController::class, 'show'])
             ->middleware('throttle:60,1');
     });
+});
+
+Route::prefix('v1/security')->middleware(['api.token', 'verified', 'role:hr|superadmin|admin'])->group(function () {
+    Route::get('/api-logs', [SecurityTelemetryController::class, 'index']);
+    Route::get('/api-metrics', [SecurityTelemetryController::class, 'metrics']);
+    Route::get('/api-logs/export', [SecurityTelemetryController::class, 'export']);
+    Route::get('/api-logs/{apiLog}', [SecurityTelemetryController::class, 'show']);
 });
 
 Route::prefix('public')->middleware(['public.api.login', 'throttle:30,1'])->group(function () {

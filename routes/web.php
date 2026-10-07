@@ -19,6 +19,7 @@ use App\Http\Controllers\Admin\SiteController as AdminSiteController;
 use App\Http\Controllers\InterviewController as AdminInterviewController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\AuditLogController;
+use App\Http\Controllers\Admin\SecurityTelemetryController;
 
 // === Public Sites Controller
 use App\Http\Controllers\SitePublicController;
@@ -280,6 +281,11 @@ Route::prefix('admin')
         Route::get('audit-logs', [AuditLogController::class, 'index'])->name('audit_logs.index');
         Route::get('audit-logs/{log}', [AuditLogController::class, 'show'])->name('audit_logs.show');
         Route::get('audit-logs-export', [AuditLogController::class, 'export'])->name('audit_logs.export');
+
+        Route::middleware('role:hr|superadmin|admin')->group(function () {
+            Route::get('security/api-activity', [SecurityTelemetryController::class, 'index'])->name('security.api-activity');
+            Route::get('security/api-activity/export', [SecurityTelemetryController::class, 'export'])->name('security.api-activity.export');
+        });
     });
 
 /*
