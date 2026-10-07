@@ -12,6 +12,7 @@ return new class extends Migration {
             $table->string('request_id', 100)->index();
             $table->dateTime('occurred_at')->index();
             $table->string('actor_type', 30)->default('guest');
+            $table->string('traffic_type', 10)->default('api')->index();
             $table->uuid('user_id')->nullable()->index();
             $table->char('actor_hash', 64)->nullable()->index();
             $table->string('http_method', 10);

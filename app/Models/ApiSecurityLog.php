@@ -10,7 +10,7 @@ class ApiSecurityLog extends Model
     use HasUuidPrimaryKey;
 
     protected $fillable = [
-        'request_id', 'occurred_at', 'actor_type', 'user_id', 'actor_hash',
+        'request_id', 'occurred_at', 'actor_type', 'traffic_type', 'user_id', 'actor_hash',
         'http_method', 'route_name', 'route_template', 'status_code',
         'request_size', 'response_size', 'response_time_ms', 'authenticated',
         'authentication_status', 'authorization_result', 'request_count_10s',

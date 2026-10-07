@@ -27,8 +27,8 @@ class SecurityTelemetryController extends Controller
 
     public function metrics(Request $request)
     {
-        $today = ApiSecurityLog::whereBetween('occurred_at', [now()->startOfDay(), now()->endOfDay()]);
-        $recent = ApiSecurityLog::where('occurred_at', '>=', now()->subMinutes(1));
+        $today = ApiSecurityLog::where('traffic_type', 'api')->whereBetween('occurred_at', [now()->startOfDay(), now()->endOfDay()]);
+        $recent = ApiSecurityLog::where('traffic_type', 'api')->where('occurred_at', '>=', now()->subMinutes(1));
         return response()->json([
             'requests_today' => (clone $today)->count(),
             'avg_request_per_minute' => round((float) (clone $recent)->count(), 2),
@@ -53,7 +53,7 @@ class SecurityTelemetryController extends Controller
 
     private function filtered(Request $request)
     {
-        $q = ApiSecurityLog::query();
+        $q = ApiSecurityLog::query()->where('traffic_type', 'api');
         foreach (['http_method', 'route_name', 'authentication_status', 'user_role'] as $field) if ($request->filled($field)) $q->where($field, $request->input($field));
         if ($request->filled('status_code')) $q->where('status_code', $request->integer('status_code'));
         if ($request->filled('user_id')) $q->where('user_id', $request->input('user_id'));

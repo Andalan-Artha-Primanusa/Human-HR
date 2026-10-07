@@ -18,6 +18,7 @@ class ApiSecurityTelemetry
         $response = $next($request);
 
         try {
+            $trafficType = str_starts_with(ltrim($request->path(), '/'), 'api/') ? 'api' : 'web';
             $route = $request->route();
             $template = $route?->uri() ?: $this->fallbackTemplate($request->path());
             $routeName = $route?->getName();
@@ -34,6 +35,7 @@ class ApiSecurityTelemetry
                 'request_id' => (string) ($request->header('X-Request-ID') ?: Str::uuid()),
                 'occurred_at' => now(),
                 'actor_type' => $user ? 'user' : 'guest',
+                'traffic_type' => $trafficType,
                 'user_id' => $user?->getAuthIdentifier(),
                 'actor_hash' => $actorHash,
                 'http_method' => strtoupper($request->method()),
