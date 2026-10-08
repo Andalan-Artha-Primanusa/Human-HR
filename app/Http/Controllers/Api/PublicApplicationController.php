@@ -162,7 +162,7 @@ class PublicApplicationController extends Controller
         }
 
         $data = $request->validate([
-            'cv' => ['required', 'file', 'mimes:pdf', 'max:4096'],
+            'cv' => ['required', 'file', 'mimes:pdf', 'max:1024'],
             'nik' => ['nullable', 'digits_between:16,17', Rule::unique('candidate_profiles', 'nik')->ignore(optional($user->candidateProfile)->id)],
             'apply' => ['nullable', 'boolean'],
             'email' => ['nullable', 'email'],

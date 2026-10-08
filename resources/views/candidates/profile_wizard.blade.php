@@ -474,7 +474,7 @@
 
               <div>
                 <input type="hidden" :name="`trainings[${idx}][certificate_path]`" x-model="it.certificate_path">
-                <label class="text-xs text-slate-500">File Sertifikat (PDF, maks 4MB)</label>
+                <label class="text-xs text-slate-500">File Sertifikat (PDF, maks 1MB)</label>
                 <input type="file" accept="application/pdf" class="w-full px-3 py-2 mt-1 border rounded-lg" :name="`trainings[${idx}][certificate_file]`">
                 <template x-if="it.certificate_path">
                   <div class="mt-1 text-xs text-slate-600">
@@ -704,12 +704,12 @@
         <div class="p-5 bg-white shadow-sm card rounded-2xl">
           <h2 class="flex items-center gap-2 text-lg font-semibold">
             <svg class="w-5 h-5 text-brand-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 12v7m-6 0h12a2 2 0 002-2V7a2 2 0 00-2-2H6a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-            CV & Certificate (PDF, maks 4MB)
+            CV & Certificate (PDF, maks 1MB)
           </h2>
-          <p class="mt-1 text-sm text-slate-500">Berkas yang diunggah dibatasi maksimal 4MB per file</p>
+          <p class="mt-1 text-sm text-slate-500">Berkas yang diunggah dibatasi maksimal 1MB per file</p>
           <div class="grid gap-4 mt-3 sm:grid-cols-2">
             <div>
-              <label class="text-sm text-slate-600">CV (PDF, maks 4MB) <span class="text-red-600" x-show="!hasCv">*</span></label>
+              <label class="text-sm text-slate-600">CV (PDF, maks 1MB) <span class="text-red-600" x-show="!hasCv">*</span></label>
               <input :required="!hasCv" type="file" name="cv" accept="application/pdf" class="w-full px-3 py-2 mt-1 border rounded-lg">
               @if($profile->cv_path)
                 <div class="mt-1 text-xs text-slate-600">Terunggah: <a class="underline text-brand-700" href="{{ url('/files/storage/' . ltrim($profile->cv_path, '/')) }}" target="_blank">Lihat CV</a></div>

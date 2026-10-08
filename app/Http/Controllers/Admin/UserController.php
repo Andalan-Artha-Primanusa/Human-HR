@@ -260,7 +260,7 @@ class UserController extends Controller
     public function import(Request $request)
     {
         $request->validate([
-            'file' => ['required', 'file', 'mimes:csv,txt', 'max:10240'],
+            'file' => ['required', 'file', 'mimes:csv,txt', 'max:1024'],
         ]);
 
         $file = $request->file('file');

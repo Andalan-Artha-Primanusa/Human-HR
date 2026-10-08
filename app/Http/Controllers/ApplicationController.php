@@ -1331,7 +1331,7 @@ class ApplicationController extends Controller
                 'gross' => 'required|numeric|min:0',
                 'allowance' => 'required|numeric|min:0',
                 'email_body' => 'required|string',
-                'ol_file' => 'nullable|file|mimes:pdf|max:5120',
+                'ol_file' => 'nullable|file|mimes:pdf|max:1024',
                 'doc_no'          => 'nullable|string',
                 'grade_level'     => 'nullable|string',
                 'poh'             => 'nullable|string',
@@ -1470,7 +1470,7 @@ class ApplicationController extends Controller
 
         try {
             $data = $request->validate([
-                'mcu_file' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
+                'mcu_file' => 'required|file|mimes:pdf,jpg,jpeg,png|max:1024',
                 'email_body' => 'nullable|string',
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -1583,7 +1583,7 @@ class ApplicationController extends Controller
     {
         $this->authorize('update', $application);
         $data = $request->validate([
-            'ticket' => 'nullable|file|mimes:pdf,jpg,jpeg,png,doc,docx|max:5120',
+            'ticket' => 'nullable|file|mimes:pdf,jpg,jpeg,png,doc,docx|max:1024',
             'notes' => 'nullable|string',
             'email_body' => 'nullable|string',
             'send_email' => 'nullable'
@@ -1626,7 +1626,7 @@ class ApplicationController extends Controller
     {
         $this->authorize('update', $application);
         $data = $request->validate([
-            'lap' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png,xls,xlsx|max:10240',
+            'lap' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png,xls,xlsx|max:1024',
             'result' => 'nullable|string|in:lolos,tidak_lolos',
             'notes' => 'nullable|string',
         ]);

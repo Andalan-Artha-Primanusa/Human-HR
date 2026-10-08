@@ -970,7 +970,7 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
           <div style="margin-bottom: 15px;">
             <label class="fm-label">Pilih File Undangan MCU</label>
             <input type="file" name="mcu_file" id="send-mcu-file" class="fm-ctrl" accept=".pdf,.doc,.docx" required style="padding: 15px; cursor: pointer;">
-            <div style="font-size: 0.75rem; color: #666; margin-top: 8px;">Format: PDF, DOC, DOCX | Ukuran maks: 10MB</div>
+            <div style="font-size: 0.75rem; color: #666; margin-top: 8px;">Format: PDF, DOC, DOCX | Ukuran maks: 1MB</div>
           </div>
         </div>
         <div style="background: #fffbeb; border-left: 4px solid #fbbf24; padding: 12px; border-radius: 4px; margin-bottom: 15px;">

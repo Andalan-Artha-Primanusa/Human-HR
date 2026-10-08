@@ -121,10 +121,10 @@ class CandidateProfileController extends Controller
             // === Tambahan ===
             'status_pernikahan' => ['nullable', Rule::in(['single', 'married', 'divorced', 'widowed'])],
             'source_channel' => ['nullable', Rule::in(['website', 'job_fair', 'referral', 'social_media', 'other'])],
-            // File (4MB, PDF only)
-            'cv' => 'nullable|file|mimes:pdf|max:4096',
+            // File (1MB, PDF only)
+            'cv' => 'nullable|file|mimes:pdf|max:1024',
             'documents' => "nullable|array|max:{$maxDocuments}",
-            'documents.*' => 'nullable|file|max:5120|mimetypes:application/pdf,image/jpeg,image/png,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'documents.*' => 'nullable|file|max:1024|mimetypes:application/pdf,image/jpeg,image/png,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document',
             // Repeater
             'trainings' => "bail|nullable|array|max:{$maxTrainings}",
             'trainings.*.title' => 'required|string|max:190',
@@ -133,7 +133,7 @@ class CandidateProfileController extends Controller
             'trainings.*.period_end' => 'nullable|date',
             'trainings.*.certificate_name' => 'nullable|string|max:190',
             'trainings.*.certificate_path' => 'nullable|string|max:255',
-            'trainings.*.certificate_file' => 'nullable|file|mimes:pdf|max:4096',
+            'trainings.*.certificate_file' => 'nullable|file|mimes:pdf|max:1024',
             'trainings.*.cert_valid_from' => 'nullable|date',
             'trainings.*.cert_valid_to' => 'nullable|date',
             'trainings.*.cert_no_expiry' => 'nullable',
