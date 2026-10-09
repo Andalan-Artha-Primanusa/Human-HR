@@ -519,6 +519,10 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
                       · {{ $a->minepro_current_process['result'] }}
                     @endif
                   </div>
+                @else
+                  <div class="mt-2 rounded-lg border border-sky-200 bg-sky-50 px-2 py-1 text-[11px] text-sky-800">
+                    Karir Andalan
+                  </div>
                 @endif
 
                 <div id="detail-{{ $a->id }}" class="hidden kn-subcard">

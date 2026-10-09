@@ -440,7 +440,7 @@ class ApplicationController extends Controller
 
         $matchedApps = $apps->filter(fn($app) => count($app->minepro_processes ?? []) > 0);
         $mineproMatchedApplications = $matchedApps->count();
-        $apps = $matchedApps
+        $mineproCards = $matchedApps
             ->flatMap(function ($app) {
                 return collect($app->minepro_processes ?? [])
                     ->filter(fn($process) => filled($process['stage'] ?? null))
@@ -456,8 +456,8 @@ class ApplicationController extends Controller
                         // Ini hanya mengatur pengelompokan tampilan Kanban dan tidak
                         // mengubah data atau proses integrasi Minepro.
                         $localStage = $this->normalizeStage($app->current_stage ?? null);
-                        $stage = ($localStage === 'user_iv' && $integrationStage === 'hr_iv')
-                            ? 'user_iv'
+                        $stage = in_array($localStage, ['hr_iv', 'user_iv'], true)
+                            ? $localStage
                             : $integrationStage;
 
                         $processApp = clone $app;
@@ -470,10 +470,28 @@ class ApplicationController extends Controller
                     ->filter();
             })
             ->values();
-        $mineproMatchedProcessRows = $apps->count();
-        $mineproMatchedStageCounts = $apps
+        $mineproMatchedProcessRows = $mineproCards->count();
+        $mineproMatchedStageCounts = $mineproCards
             ->countBy('minepro_stage')
             ->all();
+
+        // Sertakan lamaran yang berasal langsung dari Karir Andalan meskipun
+        // belum memiliki pasangan proses di Minepro.
+        $directKarirCards = $apps
+            ->filter(fn($app) => ! collect($app->minepro_processes ?? [])
+                ->contains(fn($process) => $this->normalizeStage($process['stage'] ?? null) !== null))
+            ->map(function ($app) {
+                $localStage = $this->normalizeStage($app->current_stage ?? null) ?: 'screening';
+                $app->setAttribute('minepro_current_process', null);
+                $app->setAttribute('minepro_stage', $localStage);
+                $app->setAttribute('minepro_integrated_stage', null);
+                $app->setAttribute('board_source', 'karir');
+                return $app;
+            })
+            ->values();
+
+        $mineproCards->each(fn($app) => $app->setAttribute('board_source', 'minepro'));
+        $apps = $mineproCards->concat($directKarirCards)->values();
         $apps = $apps
             ->when($onlyStages !== [], fn($items) => $items->filter(fn($app) => in_array($app->minepro_stage, $onlyStages, true)))
             ->values();
