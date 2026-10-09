@@ -92,6 +92,10 @@
         @if($hasCv)
           <a target="_blank" href="{{ route('admin.candidates.cv',$profile) }}"
              class="inline-flex items-center justify-center gap-2 px-3 py-1 text-xs font-semibold text-white rounded bg-[#b28a57] hover:brightness-105">Lihat CV</a>
+        @else
+          <span class="inline-flex items-center justify-center gap-2 px-3 py-1 text-xs font-semibold text-slate-500 rounded bg-slate-100" title="File CV belum tersedia">
+            CV belum tersedia
+          </span>
         @endif
         <a href="{{ route('admin.candidates.index') }}"
            class="inline-flex items-center px-3 py-1 text-xs bg-white border rounded text-slate-900 border-slate-200 hover:bg-slate-50">Kembali</a>

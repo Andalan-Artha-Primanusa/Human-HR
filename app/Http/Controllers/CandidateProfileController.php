@@ -626,7 +626,7 @@ class CandidateProfileController extends Controller
      */
     public function adminCv(CandidateProfile $profile)
     {
-        $cvPath = $this->resolveCandidateCvPath($profile);
+        $cvPath = $this->normalizeStoredPath($this->resolveCandidateCvPath($profile));
 
         if (!$cvPath) {
             abort(404, 'CV tidak tersedia.');
@@ -692,6 +692,27 @@ class CandidateProfileController extends Controller
         // Cegah directory traversal (e.g. "../" atau "..\")
         // Tapi perbolehkan file yang namanya ada double dot (misal "file..pdf")
         return !str_contains($path, '../') && !str_contains($path, '..\\');
+    }
+
+    /**
+     * Upload lama tersimpan dalam beberapa bentuk (storage/..., public/...,
+     * atau URL /storage/...). Ubah semuanya menjadi path relatif disk public.
+     */
+    private function normalizeStoredPath(?string $path): ?string
+    {
+        if (!$path) {
+            return null;
+        }
+
+        $path = trim(str_replace('\\', '/', $path));
+        if (filter_var($path, FILTER_VALIDATE_URL)) {
+            $path = (string) (parse_url($path, PHP_URL_PATH) ?? '');
+        }
+
+        $path = ltrim($path, '/');
+        $path = preg_replace('#^(?:storage/app/public|storage|public)/#i', '', $path) ?: $path;
+
+        return $path !== '' ? $path : null;
     }
 
     /**
