@@ -19,6 +19,7 @@
     <input type="date" name="date_from" value="{{ request('date_from') }}" class="rounded-lg border-slate-300">
     <input type="date" name="date_to" value="{{ request('date_to') }}" class="rounded-lg border-slate-300">
     <select name="traffic_type" class="rounded-lg border-slate-300"><option value="">Web + API</option><option value="web" @selected(request('traffic_type')==='web')>Web</option><option value="api" @selected(request('traffic_type')==='api')>API</option></select>
+    <select name="http_method" class="rounded-lg border-slate-300"><option value="">Semua Method</option>@foreach(['GET','POST','PUT','PATCH','DELETE'] as $method)<option value="{{ $method }}" @selected(request('http_method')===$method)>{{ $method }}</option>@endforeach</select>
     <select name="authentication_status" class="rounded-lg border-slate-300"><option value="">Semua autentikasi</option>@foreach(['success','failed','anonymous'] as $s)<option value="{{ $s }}" @selected(request('authentication_status')===$s)>{{ ucfirst($s) }}</option>@endforeach</select>
     <button class="px-4 py-2 font-semibold text-white rounded-lg bg-[#b28a57] md:col-span-4">Terapkan Filter</button>
   </form>
