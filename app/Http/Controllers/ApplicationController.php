@@ -1247,7 +1247,10 @@ class ApplicationController extends Controller
 
         $isOwner = $request->user() && (string) $request->user()->id === (string) $application->user_id;
         $returnTo = (string) $request->input('return_to', '');
-        if (str_starts_with($returnTo, url('/admin/candidates/'))) {
+        // Form detail kandidat juga dapat meminta kembali ke daftar Applications.
+        // Batasi tetap ke URL internal admin agar tidak menjadi open redirect.
+        $adminPrefix = rtrim(url('/admin/'), '/') . '/';
+        if ($returnTo !== '' && str_starts_with($returnTo, $adminPrefix)) {
             return redirect()->to($returnTo)->with('ok', 'Stage dipindah ke ' . strtoupper($this->PRETTY[$to] ?? $to) . '.');
         }
 

@@ -198,7 +198,7 @@
                 <div class="font-medium truncate">{{ $application->job?->title ?: 'Lowongan' }}</div>
                 <div class="text-xs text-slate-500">Status: {{ strtoupper(str_replace('_', ' ', (string) $application->overall_status)) }}</div>
               </div>
-              <form action="{{ route('admin.applications.move', $application) }}" method="POST" class="flex items-center gap-2">
+              <form id="candidate-stage-form-{{ $application->id }}" action="{{ route('admin.applications.move', $application) }}" method="POST" class="flex items-center gap-2">
                 @csrf
                 <input type="hidden" name="return_to" value="{{ url()->full() }}">
                 <select name="to" class="px-3 py-2 text-sm bg-white border rounded-lg border-slate-300">
@@ -209,6 +209,19 @@
                 <input type="hidden" name="status" value="pending">
                 <button type="submit" class="px-3 py-2 text-sm font-semibold text-white rounded-lg bg-[#b28a57] hover:brightness-105">Update</button>
               </form>
+              @if($currentStage === 'hr_iv')
+                <div class="w-full p-3 mt-2 text-sm border rounded-lg border-amber-200 bg-amber-50 sm:ml-auto sm:max-w-xl">
+                  <div class="mb-2 font-semibold text-amber-900">Feedback HR diperlukan untuk melanjutkan</div>
+                  <div class="grid gap-2 sm:grid-cols-[minmax(0,1fr)_180px]">
+                    <textarea name="feedback_hr" form="candidate-stage-form-{{ $application->id }}" rows="2" class="w-full px-3 py-2 text-sm bg-white border rounded-lg border-amber-200" placeholder="Tulis feedback HR"></textarea>
+                    <select name="approve_hr" form="candidate-stage-form-{{ $application->id }}" class="px-3 py-2 text-sm bg-white border rounded-lg border-amber-200">
+                      <option value="">Persetujuan HR</option>
+                      <option value="yes">Setuju</option>
+                      <option value="no">Tidak setuju</option>
+                    </select>
+                  </div>
+                </div>
+              @endif
             </div>
           @endforeach
         </div>
