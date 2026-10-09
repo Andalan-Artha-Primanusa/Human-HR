@@ -65,6 +65,7 @@
                   <th class="w-56 px-4 py-3 text-left">Tanggal</th>
                   <th class="px-4 py-3 text-left w-60">Kandidat</th>
                   <th class="px-4 py-3 text-left">Posisi</th>
+                  <th class="w-44 px-4 py-3 text-left">Tahap Lamaran</th>
                   <th class="w-32 px-4 py-3 text-center">Mode</th>
                   <th class="px-4 py-3 text-left w-[22rem]">Lokasi / Link</th>
                   <th class="px-4 py-3 text-left w-52">PIC / Email</th>
@@ -80,6 +81,20 @@
                         $siteCode = $iv->application?->job?->site?->code ?? null;
                         $picName = auth()->user()->name ?? '—';
                         $picEmail = auth()->user()->email ?? '—';
+
+                        $stageLabels = [
+                            'hr_iv' => 'HR Interview',
+                            'user_iv' => 'User Interview',
+                        ];
+                        $currentStage = strtolower((string) ($iv->application?->current_stage ?? ''));
+                        $stageHistory = $iv->application?->stages
+                            ? $iv->application->stages->pluck('stage_key')->map(fn ($stage) => strtolower((string) $stage))->filter()->unique()->values()
+                            : collect();
+                        $displayStage = $stageLabels[$currentStage] ?? ($currentStage !== '' ? ucwords(str_replace('_', ' ', $currentStage)) : '—');
+                        $previousInterviewStage = $stageHistory
+                            ->filter(fn ($stage) => $stage !== $currentStage && isset($stageLabels[$stage]))
+                            ->map(fn ($stage) => $stageLabels[$stage])
+                            ->last();
 
                         $mode = strtolower($iv->mode ?? 'online');
                         $badge = $mode === 'onsite' ? 'badge-amber' : 'badge-blue';
@@ -99,6 +114,14 @@
                           <div class="text-slate-900">{{ e($jobTitle) }}</div>
                           @if($siteCode)
                             <div class="text-xs text-slate-500">Site: {{ e($siteCode) }}</div>
+                          @endif
+                        </td>
+                        <td class="px-4 py-3">
+                          <span class="inline-flex items-center px-2.5 py-1 text-xs font-semibold rounded-full {{ $currentStage === 'user_iv' ? 'bg-amber-100 text-amber-800' : ($currentStage === 'hr_iv' ? 'bg-sky-100 text-sky-800' : 'bg-slate-100 text-slate-700') }}">
+                            {{ e($displayStage) }}
+                          </span>
+                          @if($previousInterviewStage)
+                            <div class="mt-1 text-[11px] text-slate-500">Sebelumnya: {{ e($previousInterviewStage) }}</div>
                           @endif
                         </td>
                         <td class="px-4 py-3 text-center">

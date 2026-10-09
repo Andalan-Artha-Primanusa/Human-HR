@@ -46,6 +46,11 @@ class InterviewController extends Controller
                 'application.user:id,name,email',
                 'application.job:id,title,division,site_id',
                 'application.job.site:id,code,name',
+                // Riwayat tahap ikut dimuat supaya interview yang dibuat saat HR
+                // tetap terlihat setelah lamaran dipindahkan ke User Interview.
+                'application.stages' => fn ($stages) => $stages
+                    ->select(['id', 'application_id', 'stage_key', 'created_at'])
+                    ->orderBy('created_at'),
             ])
             ->when($like !== null, function ($qq) use ($like) {
                 $qq->where(function ($w) use ($like) {
