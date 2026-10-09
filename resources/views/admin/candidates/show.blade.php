@@ -143,9 +143,9 @@
     <div class="p-4 bg-white border shadow-sm rounded-2xl">
       <div class="mb-2 font-semibold">Dokumen</div>
       @forelse($docs as $d)
-        <div class="flex items-center justify-between mb-1">
-          <span class="text-sm truncate">{{ $d['name'] ?? 'Dokumen' }}</span>
-          <a target="_blank" href="{{ url('/files/storage/' . ltrim((string) ($d['path'] ?? ''), '/')) }}" class="ml-2 px-2 py-1 text-xs rounded bg-[#b28a57] text-white">Lihat</a>
+        <div class="flex items-center justify-between gap-2 mb-1">
+          <span class="min-w-0 flex-1 text-sm truncate">{{ $d['name'] ?? 'Dokumen' }}</span>
+          <a target="_blank" href="{{ url('/files/storage/' . ltrim((string) ($d['path'] ?? ''), '/')) }}" class="inline-flex shrink-0 items-center px-2 py-1 text-xs rounded bg-[#b28a57] text-white">Lihat</a>
         </div>
       @empty <div class="text-xs text-slate-400">Belum ada dokumen tersimpan.</div> @endforelse
     </div>
