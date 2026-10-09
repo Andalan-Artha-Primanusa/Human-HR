@@ -445,14 +445,25 @@ class ApplicationController extends Controller
                 return collect($app->minepro_processes ?? [])
                     ->filter(fn($process) => filled($process['stage'] ?? null))
                     ->map(function ($process) use ($app) {
-                        $stage = $this->normalizeStage($process['stage'] ?? null);
-                        if (! $stage) {
+                        $integrationStage = $this->normalizeStage($process['stage'] ?? null);
+                        if (! $integrationStage) {
                             return null;
                         }
+
+                        // Tetap gunakan data Minepro sebagai sumber proses. Namun,
+                        // bila HR sudah memindahkan lamaran secara lokal ke User
+                        // Interview, tampilkan kartu di kolom User Interview juga.
+                        // Ini hanya mengatur pengelompokan tampilan Kanban dan tidak
+                        // mengubah data atau proses integrasi Minepro.
+                        $localStage = $this->normalizeStage($app->current_stage ?? null);
+                        $stage = ($localStage === 'user_iv' && $integrationStage === 'hr_iv')
+                            ? 'user_iv'
+                            : $integrationStage;
 
                         $processApp = clone $app;
                         $processApp->setAttribute('minepro_current_process', $process);
                         $processApp->setAttribute('minepro_stage', $stage);
+                        $processApp->setAttribute('minepro_integrated_stage', $integrationStage);
 
                         return $processApp;
                     })
