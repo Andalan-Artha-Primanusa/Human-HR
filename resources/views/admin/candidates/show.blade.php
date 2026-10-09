@@ -91,7 +91,7 @@
       <div class="flex gap-2 mt-3">
         @if($hasCv)
           <a target="_blank" href="{{ route('admin.candidates.cv',$profile) }}"
-             class="inline-flex items-center justify-center gap-2 px-3 py-1 text-xs font-semibold text-white rounded bg-[#b28a57] hover:brightness-105">Lihat CV</a>
+             class="inline-flex items-center justify-center gap-2 px-3 py-1 text-xs font-semibold text-white rounded hover:brightness-105" style="background-color:#b28a57;color:#fff">Lihat CV</a>
         @else
           <span class="inline-flex items-center justify-center gap-2 px-3 py-1 text-xs font-semibold text-slate-500 rounded bg-slate-100" title="File CV belum tersedia">
             CV belum tersedia
@@ -145,7 +145,7 @@
       @forelse($docs as $d)
         <div class="flex items-center justify-between gap-2 mb-1">
           <span class="min-w-0 flex-1 text-sm truncate">{{ $d['name'] ?? 'Dokumen' }}</span>
-          <a target="_blank" href="{{ url('/files/storage/' . ltrim((string) ($d['path'] ?? ''), '/')) }}" class="inline-flex shrink-0 items-center px-2 py-1 text-xs rounded bg-[#b28a57] text-white">Lihat</a>
+          <a target="_blank" href="{{ url('/files/storage/' . ltrim((string) ($d['path'] ?? ''), '/')) }}" class="inline-flex shrink-0 items-center px-2 py-1 text-xs rounded" style="background-color:#b28a57;color:#fff">Lihat</a>
         </div>
       @empty <div class="text-xs text-slate-400">Belum ada dokumen tersimpan.</div> @endforelse
     </div>
@@ -276,7 +276,7 @@
               <td class="py-1">{{ $t->institution }}</td>
               <td class="py-1">
                 @if($t->certificate_path)
-                  <a target="_blank" href="{{ url('/files/storage/' . ltrim((string) $t->certificate_path, '/')) }}" class="px-2 py-1 text-xs rounded bg-[#b28a57] text-white">Lihat</a>
+                  <a target="_blank" href="{{ url('/files/storage/' . ltrim((string) $t->certificate_path, '/')) }}" class="px-2 py-1 text-xs rounded" style="background-color:#b28a57;color:#fff">Lihat</a>
                 @else
                   <span class="text-slate-400">-</span>
                 @endif
