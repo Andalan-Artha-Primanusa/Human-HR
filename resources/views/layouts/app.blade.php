@@ -88,7 +88,7 @@
       role="dialog" aria-modal="true" aria-label="Menu">
       {{-- Drawer header --}}
       <div class="flex items-center justify-between px-4 py-3" style="border-bottom:1.5px solid rgba(255,255,255,0.15);">
-        <img src="{{ asset('assets/logo-brand.png') }}" alt="Logo" class="w-auto h-8">
+        <img src="{{ asset('assets/logofix.png') }}" alt="Logo" class="w-auto h-8" style="filter:brightness(0) invert(1);">
         <button id="drawerCloseBtn"
           class="flex items-center justify-center w-8 h-8 text-white transition rounded-lg"
           style="background:rgba(255,255,255,0.12);"

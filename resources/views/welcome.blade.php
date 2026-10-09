@@ -812,7 +812,7 @@
             <svg class="w-6 h-6"><use href="#i-menu"/></svg>
           </button>
           <a href="{{ route('welcome') }}" class="flex items-center group">
-            <img src="{{ asset('assets/logo-brand.png') }}" alt="Logo" class="object-contain w-auto h-10 transition-transform duration-300 md:h-12 group-hover:scale-105">
+            <img src="{{ asset('assets/logofix.png') }}" alt="Logo" class="object-contain w-auto h-10 transition-transform duration-300 md:h-12 group-hover:scale-105">
           </a>
         </div>
 
@@ -958,7 +958,7 @@
 
       {{-- Sheet Header --}}
       <div class="flex items-center justify-between px-5 py-3 border-b" style="border-color: rgba(167,125,82,0.15)">
-        <img src="{{ asset('assets/logo-brand.png') }}" alt="Logo PT Andalan" class="w-auto h-8">
+        <img src="{{ asset('assets/logofix.png') }}" alt="Logo PT Andalan" class="w-auto h-8">
         <button id="btn-menu-close"
           class="w-9 h-9 rounded-xl flex items-center justify-center text-[#b28a57] transition hover:bg-[#b28a57]/10"
           aria-label="Tutup menu">
