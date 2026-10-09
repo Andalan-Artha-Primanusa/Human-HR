@@ -3,8 +3,8 @@
 @section('title', 'Admin · Edit MCU Template • karir-andalan')
 
 @php
-    $ACCENT = '#a77d52';
-    $ACCENT_DARK = '#8b5e3c';
+    $ACCENT = '#b28a57';
+    $ACCENT_DARK = '#946d3f';
     $BORD = '#e5e7eb';
     $GREEN_FOOTER = '#8b9f6f';
 @endphp
@@ -44,7 +44,7 @@
                 <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
                     <div class="md:col-span-3">
                         <label class="block mb-2 text-sm font-semibold text-slate-700">Nama Template (Untuk Admin)</label>
-                        <input type="text" name="name" value="{{ old('name', $mcuTemplate->name) }}" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#a77d52] focus:border-[#a77d52] transition font-medium" placeholder="Contoh: Template Jakarta Pre-Employment" required>
+                        <input type="text" name="name" value="{{ old('name', $mcuTemplate->name) }}" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#b28a57] focus:border-[#b28a57] transition font-medium" placeholder="Contoh: Template Jakarta Pre-Employment" required>
                     </div>
                 </div>
             </div>
@@ -59,11 +59,11 @@
                 <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                     <div>
                         <label class="block mb-2 text-sm font-semibold text-slate-700">Nama Perusahaan (Logo)</label>
-                        <input type="text" name="company_name" value="{{ old('company_name', $mcuTemplate->company_name) }}" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#a77d52] focus:border-[#a77d52] transition" placeholder="ANDALAN">
+                        <input type="text" name="company_name" value="{{ old('company_name', $mcuTemplate->company_name) }}" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#b28a57] focus:border-[#b28a57] transition" placeholder="ANDALAN">
                     </div>
                     <div>
                         <label class="block mb-2 text-sm font-semibold text-slate-700">Kota Penerbitan</label>
-                        <input type="text" name="city" value="{{ old('city', $mcuTemplate->city) }}" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#a77d52] focus:border-[#a77d52] transition" placeholder="Jakarta">
+                        <input type="text" name="city" value="{{ old('city', $mcuTemplate->city) }}" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#b28a57] focus:border-[#b28a57] transition" placeholder="Jakarta">
                     </div>
                 </div>
                 <div class="p-4 border border-red-200 rounded-lg bg-red-50">
@@ -82,16 +82,16 @@
                 <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                     <div>
                         <label class="block mb-2 text-sm font-semibold text-slate-700">Nama Vendor Penerima</label>
-                        <input type="text" name="vendor_name" value="{{ old('vendor_name', $mcuTemplate->vendor_name) }}" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#a77d52] focus:border-[#a77d52] transition" placeholder="Nama Klinik / RS">
+                        <input type="text" name="vendor_name" value="{{ old('vendor_name', $mcuTemplate->vendor_name) }}" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#b28a57] focus:border-[#b28a57] transition" placeholder="Nama Klinik / RS">
                     </div>
                     <div>
                         <label class="block mb-2 text-sm font-semibold text-slate-700">Subject / Hal</label>
-                        <input type="text" name="subject" value="{{ old('subject', $mcuTemplate->subject) }}" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#a77d52] focus:border-[#a77d52] transition" placeholder="Medical Check Up – Pre Employee">
+                        <input type="text" name="subject" value="{{ old('subject', $mcuTemplate->subject) }}" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#b28a57] focus:border-[#b28a57] transition" placeholder="Medical Check Up – Pre Employee">
                     </div>
                 </div>
                 <div>
                     <label class="block mb-2 text-sm font-semibold text-slate-700">Alamat Vendor Penerima</label>
-                    <textarea name="vendor_address" rows="2" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#a77d52] focus:border-[#a77d52] transition" placeholder="Alamat lengkap vendor mcu">{{ old('vendor_address', $mcuTemplate->vendor_address) }}</textarea>
+                    <textarea name="vendor_address" rows="2" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#b28a57] focus:border-[#b28a57] transition" placeholder="Alamat lengkap vendor mcu">{{ old('vendor_address', $mcuTemplate->vendor_address) }}</textarea>
                 </div>
             </div>
         </div>
@@ -105,30 +105,30 @@
                 <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                     <div>
                         <label class="block mb-2 text-sm font-semibold text-slate-700">Text "For" (e.g. Pre-Employment)</label>
-                        <input type="text" name="for_text" value="{{ old('for_text', $mcuTemplate->for_text) }}" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#a77d52] focus:border-[#a77d52] transition" placeholder="Pre-Employment">
+                        <input type="text" name="for_text" value="{{ old('for_text', $mcuTemplate->for_text) }}" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#b28a57] focus:border-[#b28a57] transition" placeholder="Pre-Employment">
                     </div>
                     <div>
                         <label class="block mb-2 text-sm font-semibold text-slate-700">Nama BU (PT. ...)</label>
-                        <input type="text" name="bu_name" value="{{ old('bu_name', $mcuTemplate->bu_name) }}" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#a77d52] focus:border-[#a77d52] transition" placeholder="PT. Andalan Artha Primanusa">
+                        <input type="text" name="bu_name" value="{{ old('bu_name', $mcuTemplate->bu_name) }}" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#b28a57] focus:border-[#b28a57] transition" placeholder="PT. Andalan Artha Primanusa">
                     </div>
                 </div>
                 <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                     <div>
                         <label class="block mb-2 text-sm font-semibold text-slate-700">Matrix MCU PT ...</label>
-                        <input type="text" name="matrix_owner" value="{{ old('matrix_owner', $mcuTemplate->matrix_owner) }}" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#a77d52] focus:border-[#a77d52] transition" placeholder="Andalan Artha Primanusa">
+                        <input type="text" name="matrix_owner" value="{{ old('matrix_owner', $mcuTemplate->matrix_owner) }}" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#b28a57] focus:border-[#b28a57] transition" placeholder="Andalan Artha Primanusa">
                     </div>
                     <div>
                         <label class="block mb-2 text-sm font-semibold text-slate-700">Package MCU</label>
-                        <input type="text" name="package" value="{{ old('package', $mcuTemplate->package) }}" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#a77d52] focus:border-[#a77d52] transition" placeholder="Paket Standard">
+                        <input type="text" name="package" value="{{ old('package', $mcuTemplate->package) }}" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#b28a57] focus:border-[#b28a57] transition" placeholder="Paket Standard">
                     </div>
                 </div>
                 <div>
                     <label class="block mb-2 text-sm font-semibold text-slate-700">Catatan (Bullet Points)</label>
-                    <textarea name="notes" rows="4" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#a77d52] focus:border-[#a77d52] transition font-mono text-sm" placeholder="1. Bagi kandidat berusia > 40 tahun, diwajibkan menjalani pemeriksaan treadmill.&#10;2. Mohon cocokan KTP asli dengan identitas kandidat yang akan diperiksa.">{{ old('notes', $mcuTemplate->notes) }}</textarea>
+                    <textarea name="notes" rows="4" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#b28a57] focus:border-[#b28a57] transition font-mono text-sm" placeholder="1. Bagi kandidat berusia > 40 tahun, diwajibkan menjalani pemeriksaan treadmill.&#10;2. Mohon cocokan KTP asli dengan identitas kandidat yang akan diperiksa.">{{ old('notes', $mcuTemplate->notes) }}</textarea>
                 </div>
                 <div>
                     <label class="block mb-2 text-sm font-semibold text-slate-700">Email Penerima Hasil MCU (Per Baris)</label>
-                    <textarea name="result_emails" rows="4" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#a77d52] focus:border-[#a77d52] transition font-mono text-sm" placeholder="email1@pt-aap.com&#10;email2@pt-aap.com&#10;email3@pt-aap.com">{{ old('result_emails', $mcuTemplate->result_emails) }}</textarea>
+                    <textarea name="result_emails" rows="4" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#b28a57] focus:border-[#b28a57] transition font-mono text-sm" placeholder="email1@pt-aap.com&#10;email2@pt-aap.com&#10;email3@pt-aap.com">{{ old('result_emails', $mcuTemplate->result_emails) }}</textarea>
                 </div>
             </div>
         </div>
@@ -142,11 +142,11 @@
                 <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                     <div>
                         <label class="block mb-2 text-sm font-semibold text-slate-700">Nama Penanda Tangan</label>
-                        <input type="text" name="signer_name" value="{{ old('signer_name', $mcuTemplate->signer_name) }}" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#a77d52] focus:border-[#a77d52] transition" placeholder="Roy Hansen C. Saragih">
+                        <input type="text" name="signer_name" value="{{ old('signer_name', $mcuTemplate->signer_name) }}" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#b28a57] focus:border-[#b28a57] transition" placeholder="Roy Hansen C. Saragih">
                     </div>
                     <div>
                         <label class="block mb-2 text-sm font-semibold text-slate-700">Jabatan Penanda Tangan</label>
-                        <input type="text" name="signer_title" value="{{ old('signer_title', $mcuTemplate->signer_title) }}" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#a77d52] focus:border-[#a77d52] transition" placeholder="General Manager">
+                        <input type="text" name="signer_title" value="{{ old('signer_title', $mcuTemplate->signer_title) }}" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#b28a57] focus:border-[#b28a57] transition" placeholder="General Manager">
                     </div>
                 </div>
             </div>
@@ -160,20 +160,20 @@
             <div class="p-6 space-y-6">
                 <div>
                     <label class="block mb-2 text-sm font-semibold text-slate-700">Nama Perusahaan Footer</label>
-                    <input type="text" name="footer_company_name" value="{{ old('footer_company_name', $mcuTemplate->footer_company_name) }}" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#a77d52] focus:border-[#a77d52] transition" placeholder="PT. Andalan Artha Primanusa">
+                    <input type="text" name="footer_company_name" value="{{ old('footer_company_name', $mcuTemplate->footer_company_name) }}" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#b28a57] focus:border-[#b28a57] transition" placeholder="PT. Andalan Artha Primanusa">
                 </div>
                 <div>
                     <label class="block mb-2 text-sm font-semibold text-slate-700">Alamat Perusahaan Footer</label>
-                    <textarea name="footer_address" rows="2" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#a77d52] focus:border-[#a77d52] transition" placeholder="Jl. Plaju No.11 Kebon Melati, Tanah Abang Jakarta Pusat 10230 DKI Jakarta – Indonesia">{{ old('footer_address', $mcuTemplate->footer_address) }}</textarea>
+                    <textarea name="footer_address" rows="2" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#b28a57] focus:border-[#b28a57] transition" placeholder="Jl. Plaju No.11 Kebon Melati, Tanah Abang Jakarta Pusat 10230 DKI Jakarta – Indonesia">{{ old('footer_address', $mcuTemplate->footer_address) }}</textarea>
                 </div>
                 <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                     <div>
                         <label class="block mb-2 text-sm font-semibold text-slate-700">Email Footer</label>
-                        <input type="email" name="footer_email" value="{{ old('footer_email', $mcuTemplate->footer_email) }}" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#a77d52] focus:border-[#a77d52] transition" placeholder="corporatesecretary@andalan-nusantara.com">
+                        <input type="email" name="footer_email" value="{{ old('footer_email', $mcuTemplate->footer_email) }}" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#b28a57] focus:border-[#b28a57] transition" placeholder="corporatesecretary@andalan-nusantara.com">
                     </div>
                     <div>
                         <label class="block mb-2 text-sm font-semibold text-slate-700">Website Footer</label>
-                        <input type="text" name="footer_website" value="{{ old('footer_website', $mcuTemplate->footer_website) }}" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#a77d52] focus:border-[#a77d52] transition" placeholder="www.andalan-nusantara.com">
+                        <input type="text" name="footer_website" value="{{ old('footer_website', $mcuTemplate->footer_website) }}" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#b28a57] focus:border-[#b28a57] transition" placeholder="www.andalan-nusantara.com">
                     </div>
                 </div>
             </div>
@@ -183,7 +183,7 @@
         <div class="p-6 bg-white border shadow-sm border-slate-200 rounded-2xl">
             <label class="inline-flex items-center gap-3 cursor-pointer">
                 <input type="checkbox" name="is_active" value="1" {{ $mcuTemplate->is_active ? 'checked' : '' }} class="sr-only peer">
-                <div class="relative w-12 h-7 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#a77d52]/20 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[3px] after:start-[3px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                <div class="relative w-12 h-7 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#b28a57]/20 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[3px] after:start-[3px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
                 <div>
                     <span class="text-sm font-semibold text-slate-700">Set sebagai template aktif</span>
                     <p class="text-xs text-slate-500 mt-0.5">Template aktif akan digunakan sebagai default ketika mengirim MCU</p>
@@ -205,3 +205,4 @@
     </form>
 </div>
 @endsection
+

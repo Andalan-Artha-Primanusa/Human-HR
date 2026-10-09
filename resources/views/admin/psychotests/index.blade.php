@@ -2,10 +2,10 @@
 @extends('layouts.app', ['title' => 'Admin · Psychotests'])
 
 @php
-    $ACCENT = '#a77d52';
-    $ACCENT_DARK = '#8b5e3c';
+    $ACCENT = '#b28a57';
+    $ACCENT_DARK = '#946d3f';
     $BORD = '#e5e7eb'; // slate-200
-    $DARK = '#a77d52'; // gelap untuk tombol
+    $DARK = '#b28a57'; // gelap untuk tombol
 @endphp
 
 @section('content')
@@ -72,7 +72,7 @@
         <div class="overflow-x-auto">
           @if(($attempts->count() ?? 0) > 0)
             <table class="min-w-full text-sm">
-              <thead class="text-white bg-[#a77d52]">
+              <thead class="text-white bg-[#b28a57]">
                 <tr>
                   <th class="w-48 px-4 py-3 text-left">Tanggal</th>
                   <th class="w-56 px-4 py-3 text-left">Kandidat</th>
@@ -263,3 +263,4 @@
       @endif
     </div>
 @endsection
+

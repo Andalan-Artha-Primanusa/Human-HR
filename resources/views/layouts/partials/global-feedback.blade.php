@@ -28,8 +28,8 @@
     to { transform: rotate(360deg); }
   }
   #globalFeedbackModal {
-    --gf-brown: #a77d52;
-    --gf-brown-dark: #8b5e3c;
+    --gf-brown: #b28a57;
+    --gf-brown-dark: #946d3f;
     --gf-fade: rgba(15,23,42,.42);
   }
   #globalFeedbackModal .gf-icon { display: grid; place-items: center; width: 3rem; height: 3rem; border-radius: 9999px; }
@@ -72,7 +72,7 @@
 
       <div id="globalFeedbackActions" class="mt-6 flex justify-end gap-2">
         <button type="button" id="globalFeedbackCancel" class="hidden rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Batal</button>
-        <button type="button" id="globalFeedbackOk" class="rounded-lg bg-[#8b5e3c] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#744d31]">Oke</button>
+        <button type="button" id="globalFeedbackOk" class="rounded-lg bg-[#946d3f] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#744d31]">Oke</button>
       </div>
     </div>
   </div>
@@ -418,3 +418,4 @@
     }
   })();
 </script>
+

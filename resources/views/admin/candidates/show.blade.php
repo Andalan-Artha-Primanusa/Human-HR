@@ -2,8 +2,8 @@
 
 @section('content')
 @php
-  $ACCENT = '#a77d52';
-  $ACCENT_DARK = '#8b5e3c';
+  $ACCENT = '#b28a57';
+  $ACCENT_DARK = '#946d3f';
   $BORD = '#e5e7eb';
 
   // Format tanggal
@@ -81,7 +81,7 @@
   {{-- SIDEBAR KANAN --}}
   <aside class="flex flex-col order-2 w-full gap-4 lg:w-1/3 lg:order-1">
     <div class="flex flex-col items-center p-4 bg-white border shadow-sm rounded-2xl">
-      <div class="w-16 h-16 rounded-full bg-[#a77d52] flex items-center justify-center text-white text-2xl font-bold mb-2">
+      <div class="w-16 h-16 rounded-full bg-[#b28a57] flex items-center justify-center text-white text-2xl font-bold mb-2">
         {{ Str::substr($profile->full_name, 0, 1) }}
       </div>
       <div class="text-center">
@@ -91,7 +91,7 @@
       <div class="flex gap-2 mt-3">
         @if($hasCv)
           <a target="_blank" href="{{ route('admin.candidates.cv',$profile) }}"
-             class="inline-flex items-center justify-center gap-2 px-3 py-1 text-xs font-semibold text-white rounded bg-[#a77d52] hover:brightness-105">Lihat CV</a>
+             class="inline-flex items-center justify-center gap-2 px-3 py-1 text-xs font-semibold text-white rounded bg-[#b28a57] hover:brightness-105">Lihat CV</a>
         @endif
         <a href="{{ route('admin.candidates.index') }}"
            class="inline-flex items-center px-3 py-1 text-xs bg-white border rounded text-slate-900 border-slate-200 hover:bg-slate-50">Kembali</a>
@@ -141,7 +141,7 @@
       @forelse($docs as $d)
         <div class="flex items-center justify-between mb-1">
           <span class="text-sm truncate">{{ $d['name'] ?? 'Dokumen' }}</span>
-          <a target="_blank" href="{{ url('/files/storage/' . ltrim((string) ($d['path'] ?? ''), '/')) }}" class="ml-2 px-2 py-1 text-xs rounded bg-[#a77d52] text-white">Lihat</a>
+          <a target="_blank" href="{{ url('/files/storage/' . ltrim((string) ($d['path'] ?? ''), '/')) }}" class="ml-2 px-2 py-1 text-xs rounded bg-[#b28a57] text-white">Lihat</a>
         </div>
       @empty <div class="text-xs text-slate-400">Belum ada dokumen tersimpan.</div> @endforelse
     </div>
@@ -151,7 +151,7 @@
       <div class="flex justify-between mb-1 text-xs"><span>Diubah</span><span>{{ $fmtDate($profile->updated_at) }}</span></div>
       <div class="mt-2">
         <div class="w-full h-3 mb-2 rounded-full bg-slate-100">
-          <div class="bg-[#a77d52] h-3 rounded-full" style="width: 80%"></div>
+          <div class="bg-[#b28a57] h-3 rounded-full" style="width: 80%"></div>
         </div>
         <div class="text-xs text-center">Kelengkapan Profil<br><span class="font-semibold">80% Lengkap</span></div>
       </div>
@@ -207,7 +207,7 @@
                   @endforeach
                 </select>
                 <input type="hidden" name="status" value="pending">
-                <button type="submit" class="px-3 py-2 text-sm font-semibold text-white rounded-lg bg-[#a77d52] hover:brightness-105">Update</button>
+                <button type="submit" class="px-3 py-2 text-sm font-semibold text-white rounded-lg bg-[#b28a57] hover:brightness-105">Update</button>
               </form>
             </div>
           @endforeach
@@ -259,7 +259,7 @@
               <td class="py-1">{{ $t->institution }}</td>
               <td class="py-1">
                 @if($t->certificate_path)
-                  <a target="_blank" href="{{ url('/files/storage/' . ltrim((string) $t->certificate_path, '/')) }}" class="px-2 py-1 text-xs rounded bg-[#a77d52] text-white">Lihat</a>
+                  <a target="_blank" href="{{ url('/files/storage/' . ltrim((string) $t->certificate_path, '/')) }}" class="px-2 py-1 text-xs rounded bg-[#b28a57] text-white">Lihat</a>
                 @else
                   <span class="text-slate-400">-</span>
                 @endif
@@ -345,3 +345,4 @@
   </div>
 </div>
 @endsection
+

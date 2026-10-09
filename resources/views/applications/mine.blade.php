@@ -5,8 +5,8 @@
 
 @php
     // === THEME ===
-    $PRIMARY = '#a77d52';
-    $PRIMARY_DARK = '#8b5e3c';
+    $PRIMARY = '#b28a57';
+    $PRIMARY_DARK = '#946d3f';
     $SOFT = '#f5efe8';
     $CARD = '#fffaf5';
     $TEXT = '#6b4f3a';
@@ -69,7 +69,7 @@
         return match (strtolower((string) $overall)) {
         'hired' => 'bg-emerald-50 text-emerald-700 ring-emerald-200',
         'rejected' => 'bg-rose-50 text-rose-700 ring-rose-200',
-        'active' => 'bg-[#fffaf5] text-[#8b5e3c] ring-[#ead8c5]',
+        'active' => 'bg-[#fffaf5] text-[#946d3f] ring-[#ead8c5]',
         default => 'bg-slate-50 text-slate-700 ring-slate-200',
         };
     };
@@ -295,17 +295,17 @@
               {{-- STATUS SEKARANG (sembunyikan jika belum ada pergerakan HR) --}}
               @if($hasHrStageMovement)
               <div class="mt-5 rounded-xl border border-[#ead8c5] bg-[#fffaf5] p-4">
-                <p class="text-[11px] font-bold uppercase tracking-wide text-[#8b5e3c]">Status Sekarang</p>
+                <p class="text-[11px] font-bold uppercase tracking-wide text-[#946d3f]">Status Sekarang</p>
                 <div class="mt-2 flex items-center justify-between gap-3">
                   <div class="flex min-w-0 items-center gap-3">
-                    <span class="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white text-[#8b5e3c] ring-1 ring-inset ring-[#ead8c5]">
+                    <span class="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white text-[#946d3f] ring-1 ring-inset ring-[#ead8c5]">
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
                       </svg>
                     </span>
                     <span class="truncate text-sm font-bold text-slate-950">{{ $currentStageLabel }}</span>
                   </div>
-                  <span class="shrink-0 rounded-full bg-white px-2.5 py-1 text-[10px] font-bold text-[#8b5e3c] ring-1 ring-inset ring-[#ead8c5]">
+                  <span class="shrink-0 rounded-full bg-white px-2.5 py-1 text-[10px] font-bold text-[#946d3f] ring-1 ring-inset ring-[#ead8c5]">
                     {{ $statusLabel($app->overall_status) }}
                   </span>
                 </div>
@@ -318,7 +318,7 @@
                   <div class="flex flex-wrap items-center gap-2">
                     @if($app->interviews && $app->interviews->count())
                       <a href="{{ route('me.interviews.show', $app->interviews->first()) }}"
-                         class="inline-flex items-center gap-1 rounded-lg border border-[#a77d52] px-3 py-2 text-xs font-semibold text-[#a77d52] transition hover:bg-[#a77d52] hover:text-white"
+                         class="inline-flex items-center gap-1 rounded-lg border border-[#b28a57] px-3 py-2 text-xs font-semibold text-[#b28a57] transition hover:bg-[#b28a57] hover:text-white"
                          title="Lihat Jadwal Interview">
                         Interview
                       </a>
@@ -388,7 +388,7 @@
           <div class="mt-6 overflow-hidden border bg-white text-center shadow-sm rounded-2xl"
                style="border-color: {{ $BORD }}">
             <div class="p-8" style="background: {{ $CARD }};">
-            <div class="mx-auto grid h-14 w-14 place-items-center rounded-full bg-white text-[#a77d52] ring-1 ring-[#ead8c5]">
+            <div class="mx-auto grid h-14 w-14 place-items-center rounded-full bg-white text-[#b28a57] ring-1 ring-[#ead8c5]">
               <svg class="h-7 w-7" aria-hidden="true"><use href="#i-brief"/></svg>
             </div>
             <p class="mt-4 text-lg font-semibold" style="color: {{ $TEXT }}">Belum ada lamaran yang tersimpan</p>
@@ -511,3 +511,4 @@
     </script>
 
 @endsection
+

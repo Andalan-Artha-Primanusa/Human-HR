@@ -3,7 +3,7 @@
 
 @php
     $BORD = '#e5e7eb';
-    $PRIMARY = '#a77d52';
+    $PRIMARY = '#b28a57';
 
     $before = is_array($log->before) ? $log->before : [];
     $after  = is_array($log->after) ? $log->after : [];
@@ -24,7 +24,7 @@
         <section class="overflow-hidden bg-white border rounded-2xl" style="border-color: {{ $BORD }}; border-radius: 1rem;">
             <div class="px-6 py-4 border-b border-slate-100 bg-slate-50">
                 <div class="flex items-center gap-2 text-sm font-semibold text-slate-800">
-                    <svg class="w-4 h-4 text-[#a77d52]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                    <svg class="w-4 h-4 text-[#b28a57]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
                     Informasi Umum
                 </div>
             </div>
@@ -36,7 +36,7 @@
                 <div class="bg-white p-5">
                     <div class="text-xs font-medium uppercase tracking-wide text-slate-400">Event</div>
                     <div class="mt-1">
-                        <span class="inline-flex rounded-full bg-[#fffaf5] px-3 py-1 text-sm font-semibold text-[#8b5e3c] ring-1 ring-inset ring-[#ead8c5]">{{ $log->event }}</span>
+                        <span class="inline-flex rounded-full bg-[#fffaf5] px-3 py-1 text-sm font-semibold text-[#946d3f] ring-1 ring-inset ring-[#ead8c5]">{{ $log->event }}</span>
                     </div>
                 </div>
                 <div class="bg-white p-5">
@@ -61,7 +61,7 @@
         <section class="overflow-hidden bg-white border rounded-2xl" style="border-color: {{ $BORD }}; border-radius: 1rem;">
             <div class="px-6 py-4 border-b border-slate-100 bg-slate-50">
                 <div class="flex items-center gap-2 text-sm font-semibold text-slate-800">
-                    <svg class="w-4 h-4 text-[#a77d52]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+                    <svg class="w-4 h-4 text-[#b28a57]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
                     Perubahan Data
                 </div>
             </div>

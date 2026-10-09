@@ -159,7 +159,7 @@
                     <div class="text-xs text-slate-500">{{ $q->code ?? 'JOB' }}</div>
                   </div>
                   <a href="{{ route('admin.manpower.edit', $q->id) }}"
-                     class="inline-flex items-center gap-1.5 rounded-lg bg-[#a77d52] px-3 py-1.5 text-white text-xs hover:bg-[#a77d52] active:bg-blue-800">
+                     class="inline-flex items-center gap-1.5 rounded-lg bg-[#b28a57] px-3 py-1.5 text-white text-xs hover:bg-[#b28a57] active:bg-blue-800">
                     Atur Manpower
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" d="m9 5 7 7-7 7"/>
@@ -261,3 +261,4 @@
         })();
       </script>
 @endsection
+

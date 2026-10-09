@@ -2,8 +2,8 @@
 @extends('layouts.app', ['title' => $record->name])
 
 @php
-    $ACCENT = '#a77d52'; // brown
-    $ACCENT_DARK = '#8b5e3c'; // dark brown
+    $ACCENT = '#b28a57'; // brown
+    $ACCENT_DARK = '#946d3f'; // dark brown
     $BORD = '#e5e7eb'; // slate-200
 @endphp
 
@@ -72,7 +72,7 @@
               @php $web = $record->website; @endphp
               <div class="text-slate-800">
                 @if($web)
-                      <a href="{{ $web }}" target="_blank" rel="noopener" class="text-[#8b5e3c] hover:underline">{{ e($web) }}</a>
+                      <a href="{{ $web }}" target="_blank" rel="noopener" class="text-[#946d3f] hover:underline">{{ e($web) }}</a>
                 @else
                       —
                 @endif
@@ -94,3 +94,4 @@
       </section>
     </div>
 @endsection
+

@@ -6,7 +6,7 @@
       <div class="relative rounded-2xl border border-slate-200 bg-white shadow-sm/50 mb-6 overflow-hidden">
         <div class="h-2">
           <div class="h-full w-full flex">
-            <div class="h-full bg-[#a77d52]" style="width:90%"></div>
+            <div class="h-full bg-[#b28a57]" style="width:90%"></div>
             <div class="h-full bg-red-500"  style="width:10%"></div>
           </div>
         </div>
@@ -263,3 +263,4 @@
         })();
       </script>
 @endsection
+

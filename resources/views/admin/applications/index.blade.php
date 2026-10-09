@@ -2,8 +2,8 @@
 @extends('layouts.app', ['title' => 'Applications'])
 
 @php
-    $ACCENT = '#a77d52';
-    $ACCENT_DARK = '#8b5e3c';
+    $ACCENT = '#b28a57';
+    $ACCENT_DARK = '#946d3f';
     $BORD = '#e5e7eb'; // slate-200
 @endphp
 
@@ -281,7 +281,7 @@
         <section class="p-5 bg-white border shadow-sm rounded-2xl border-slate-200">
           <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <a href="{{ route('admin.applications.index', request()->except(['job', 'page'])) }}" class="inline-flex items-center gap-1 text-sm font-semibold text-[#8b5e3c] hover:underline">
+              <a href="{{ route('admin.applications.index', request()->except(['job', 'page'])) }}" class="inline-flex items-center gap-1 text-sm font-semibold text-[#946d3f] hover:underline">
                 <svg class="w-4 h-4"><use href="#i-chevron-left"/></svg>
                 Kembali ke lowongan
               </a>
@@ -299,7 +299,7 @@
           <div class="overflow-x-auto">
             @if($apps->count())
               <table class="min-w-[1040px] w-full text-sm">
-              <thead class="text-white bg-[#a77d52]">
+              <thead class="text-white bg-[#b28a57]">
                 <tr>
                   <th class="px-4 py-3 font-semibold text-left">Kandidat</th>
                   <th class="px-4 py-3 font-semibold text-left">Posisi</th>
@@ -554,3 +554,4 @@
       @endif
     </div>
 @endsection
+

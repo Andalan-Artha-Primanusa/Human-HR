@@ -53,7 +53,7 @@
       </div>
       <h2 id="verifyEmailModalTitle" class="text-lg font-semibold text-center text-slate-900">Cek email kamu</h2>
       <p class="mt-2 text-sm leading-6 text-center text-slate-600">{{ session('verify_email_notice') }}</p>
-      <button type="button" id="verifyEmailModalClose" class="mt-5 w-full rounded-lg bg-[#a77d52] px-4 py-2.5 text-sm font-semibold text-white hover:opacity-90">
+      <button type="button" id="verifyEmailModalClose" class="mt-5 w-full rounded-lg bg-[#b28a57] px-4 py-2.5 text-sm font-semibold text-white hover:opacity-90">
         Oke
       </button>
     </div>
@@ -67,7 +67,7 @@
     id="desktopSidebar"
     data-cloak
     class="hidden transition-all duration-200 md:flex md:flex-col md:w-64"
-    style="background:#263241;">
+    style="background:#243858;">
     <div class="flex-1 overflow-y-auto">
       @include('layouts.sidenav', [
         'variant' => 'desktop',
@@ -84,11 +84,11 @@
       id="mobileDrawer"
       data-cloak
       class="drawer-panel transition-base fixed inset-y-0 left-0 z-50 w-72 max-w-[80vw] shadow-xl flex flex-col"
-      style="background:#263241;"
+      style="background:#243858;"
       role="dialog" aria-modal="true" aria-label="Menu">
       {{-- Drawer header --}}
       <div class="flex items-center justify-between px-4 py-3" style="border-bottom:1.5px solid rgba(255,255,255,0.15);">
-        <img src="{{ asset('assets/logofix.png') }}" alt="Logo" class="w-auto h-8" style="filter:brightness(0) invert(1);">
+        <img src="{{ asset('assets/logo-brand.png') }}" alt="Logo" class="w-auto h-8">
         <button id="drawerCloseBtn"
           class="flex items-center justify-center w-8 h-8 text-white transition rounded-lg"
           style="background:rgba(255,255,255,0.12);"
@@ -293,3 +293,4 @@
 </script>
 </body>
 </html>
+

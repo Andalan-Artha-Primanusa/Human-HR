@@ -44,14 +44,14 @@
           <div class="mt-6 space-y-3">
             <form method="POST" action="{{ route('verification.send') }}">
               @csrf
-              <button type="submit" class="w-full bg-[#a77d52] text-white py-3 rounded-lg font-semibold hover:opacity-90 transition">
+              <button type="submit" class="w-full bg-[#b28a57] text-white py-3 rounded-lg font-semibold hover:opacity-90 transition">
                 Kirim Ulang Link Verifikasi
               </button>
             </form>
 
             <form method="POST" action="{{ route('logout') }}">
               @csrf
-              <button type="submit" class="w-full rounded-lg border border-[#a77d52]/40 bg-white/60 py-3 font-semibold text-gray-800 hover:bg-white/80 transition">
+              <button type="submit" class="w-full rounded-lg border border-[#b28a57]/40 bg-white/60 py-3 font-semibold text-gray-800 hover:bg-white/80 transition">
                 Keluar
               </button>
             </form>
@@ -62,3 +62,4 @@
   </div>
 </body>
 </html>
+

@@ -15,7 +15,7 @@
         extend: {
           fontFamily: { sans: ['Poppins', 'ui-sans-serif', 'system-ui'] },
           colors: {
-            brand: { 50:'#faf5ef',100:'#f3e8db',200:'#e7d3bd',300:'#d9bc9d',400:'#c79d75',500:'#b4865d',600:'#a77d52',700:'#8b5e3c',800:'#754e34',900:'#5f412d' }
+            brand: { 50:'#faf5ef',100:'#f3e8db',200:'#e7d3bd',300:'#d9bc9d',400:'#c79d75',500:'#b4865d',600:'#b28a57',700:'#946d3f',800:'#754e34',900:'#5f412d' }
           }
         }
       }
@@ -33,7 +33,7 @@
     }
     main input:focus, main select:focus, main textarea:focus{
       outline:none;
-      border-color:#a77d52!important;
+      border-color:#b28a57!important;
       box-shadow:0 0 0 3px rgba(167,125,82,.18);
     }
     main input.field-error, main select.field-error, main textarea.field-error{
@@ -743,10 +743,10 @@
               <button type="button" @click.prevent="prev()" :disabled="step===1" class="inline-flex items-center justify-center flex-1 px-2 py-2 text-xs font-medium border rounded-lg border-brand-200 text-brand-800 hover:bg-brand-50 disabled:opacity-50">
                 <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
               </button>
-              <button type="button" x-show="step<3" @click.prevent="next()" class="flex-1 inline-flex items-center justify-center rounded-lg bg-[#a77d52] px-2 py-2 text-xs font-semibold text-white hover:opacity-95">
+              <button type="button" x-show="step<3" @click.prevent="next()" class="flex-1 inline-flex items-center justify-center rounded-lg bg-[#b28a57] px-2 py-2 text-xs font-semibold text-white hover:opacity-95">
                 <span>Lanjut</span>
               </button>
-              <button type="button" x-show="step===3" @click.prevent="if (validate(3)) confirmOpen=true" class="flex-1 inline-flex items-center justify-center rounded-lg bg-[#a77d52] px-2 py-2 text-xs font-semibold text-white hover:opacity-95">
+              <button type="button" x-show="step===3" @click.prevent="if (validate(3)) confirmOpen=true" class="flex-1 inline-flex items-center justify-center rounded-lg bg-[#b28a57] px-2 py-2 text-xs font-semibold text-white hover:opacity-95">
                 <span>Simpan</span>
               </button>
             </div>
@@ -758,11 +758,11 @@
               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
               <span>Prev</span>
             </button>
-            <button type="button" x-show="step<3" @click.prevent="next()" class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-[#a77d52] px-3 py-2 text-sm font-semibold text-white hover:opacity-95">
+            <button type="button" x-show="step<3" @click.prevent="next()" class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-[#b28a57] px-3 py-2 text-sm font-semibold text-white hover:opacity-95">
               <span>Lanjut</span>
               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
             </button>
-            <button type="button" x-show="step===3" @click.prevent="if (validate(3)) confirmOpen=true" class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-[#a77d52] px-3 py-2 text-sm font-semibold text-white hover:opacity-95">
+            <button type="button" x-show="step===3" @click.prevent="if (validate(3)) confirmOpen=true" class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-[#b28a57] px-3 py-2 text-sm font-semibold text-white hover:opacity-95">
               <span>Simpan & Selesai</span>
               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
             </button>
@@ -777,7 +777,7 @@
           <p class="mt-1 text-sm text-slate-600">Pastikan semua data sudah benar. Kamu tetap bisa mengubahnya lagi nanti.</p>
           <div class="flex items-center justify-end gap-2 mt-4">
             <button type="button" class="px-4 py-2 text-sm border rounded-xl border-brand-200 text-brand-800 hover:bg-brand-50" @click="confirmOpen=false">Batal</button>
-            <button type="button" class="rounded-xl bg-[#a77d52] px-4 py-2 text-sm font-semibold text-white hover:opacity-95" @click="submitFinal()" :disabled="submitting" x-text="submitting ? 'Menyimpan...' : 'Ya, Simpan'">Ya, Simpan</button>
+            <button type="button" class="rounded-xl bg-[#b28a57] px-4 py-2 text-sm font-semibold text-white hover:opacity-95" @click="submitFinal()" :disabled="submitting" x-text="submitting ? 'Menyimpan...' : 'Ya, Simpan'">Ya, Simpan</button>
           </div>
         </div>
       </div>
@@ -802,7 +802,7 @@
       <ul class="pl-5 mb-4 text-sm text-left list-disc text-slate-700">
         <template x-for="(e,i) in errors" :key="i"><li x-text="e"></li></template>
       </ul>
-      <button @click="errors=[]" class="mt-2 inline-flex items-center rounded-lg bg-[#a77d52] px-4 py-2 text-sm font-semibold text-white">Tutup</button>
+      <button @click="errors=[]" class="mt-2 inline-flex items-center rounded-lg bg-[#b28a57] px-4 py-2 text-sm font-semibold text-white">Tutup</button>
     </div>
   </div>
 </template>
@@ -1105,3 +1105,4 @@
 @include('layouts.partials.global-feedback')
 </body>
 </html>
+

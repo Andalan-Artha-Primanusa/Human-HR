@@ -3,8 +3,8 @@
 
 @php
     // THEME (solid)
-    $ACCENT = '#a77d52'; // brown
-    $ACCENT_DARK = '#8b5e3c'; // dark brown
+    $ACCENT = '#b28a57'; // brown
+    $ACCENT_DARK = '#946d3f'; // dark brown
     $BORD = '#e5e7eb'; // slate-200
 @endphp
 
@@ -107,7 +107,7 @@
         <div class="p-0 overflow-x-auto">
           @if($jobs->count())
             <table class="min-w-[980px] w-full text-sm">
-              <thead class="text-white bg-[#a77d52]">
+              <thead class="text-white bg-[#b28a57]">
                 <tr>
                   <th class="px-4 py-3 text-left w-28">Code</th>
                   <th class="px-4 py-3 text-left">Title</th>
@@ -319,3 +319,4 @@
       </section>
     </div>
 @endsection
+

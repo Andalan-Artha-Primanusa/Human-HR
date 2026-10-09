@@ -3,8 +3,8 @@
 @section('title', $site->name . ' - Site Karir Andalan')
 
 @php
-    $PRIMARY = '#a77d52';
-    $PRIMARY_DARK = '#8b5e3c';
+    $PRIMARY = '#b28a57';
+    $PRIMARY_DARK = '#946d3f';
     $BORD = '#eadfd4';
     $tz = $site->timezone ?: data_get($site->meta, 'timezone');
     $addr = $site->address ?: data_get($site->meta, 'address');
@@ -112,9 +112,9 @@
 
           @if($addr)
             <div class="mt-4 flex gap-3 rounded-xl border bg-[#fffaf5] p-4" style="border-color: {{ $BORD }}">
-              <svg class="mt-0.5 h-5 w-5 shrink-0 text-[#a77d52]"><use href="#site-pin"/></svg>
+              <svg class="mt-0.5 h-5 w-5 shrink-0 text-[#b28a57]"><use href="#site-pin"/></svg>
               <div>
-                <p class="text-xs font-semibold uppercase tracking-wide text-[#8b5e3c]">Alamat</p>
+                <p class="text-xs font-semibold uppercase tracking-wide text-[#946d3f]">Alamat</p>
                 <p class="mt-1 leading-relaxed text-slate-800">{{ $addr }}</p>
               </div>
             </div>
@@ -163,7 +163,7 @@
     <section class="mt-6 rounded-2xl border bg-white p-5 shadow-sm sm:p-6" style="border-color: {{ $BORD }}">
       <div class="flex flex-wrap items-center justify-between gap-3">
         <x-section-title title="{{ $isAllSitesPage ? 'Lowongan terbaru semua site' : 'Posisi yang sedang dibuka' }}" />
-        <a href="{{ $isAllSitesPage ? route('jobs.index') : route('jobs.index', ['site' => $site->code]) }}" class="inline-flex items-center gap-2 text-sm font-semibold text-[#8b5e3c] hover:underline">
+        <a href="{{ $isAllSitesPage ? route('jobs.index') : route('jobs.index', ['site' => $site->code]) }}" class="inline-flex items-center gap-2 text-sm font-semibold text-[#946d3f] hover:underline">
           {{ $isAllSitesPage ? 'Lihat semua lowongan' : 'Lihat lowongan site ini' }}
           <svg class="h-4 w-4"><use href="#site-arrow"/></svg>
         </a>
@@ -175,16 +175,16 @@
       @if($displayJobs->count())
         <div class="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           @foreach($displayJobs as $job)
-            <article class="flex min-h-[220px] flex-col rounded-xl border bg-white p-4 transition hover:-translate-y-0.5 hover:border-[#a77d52] hover:shadow-md"
+            <article class="flex min-h-[220px] flex-col rounded-xl border bg-white p-4 transition hover:-translate-y-0.5 hover:border-[#b28a57] hover:shadow-md"
                      style="border-color: {{ $BORD }}">
               <div class="flex items-start justify-between gap-3">
-                <div class="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#fffaf5] text-[#8b5e3c] ring-1 ring-inset ring-[#ead8c5]">
+                <div class="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#fffaf5] text-[#946d3f] ring-1 ring-inset ring-[#ead8c5]">
                   <svg class="h-5 w-5"><use href="#site-briefcase"/></svg>
                 </div>
                 <span class="rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-bold text-emerald-700 ring-1 ring-inset ring-emerald-200">OPEN</span>
               </div>
 
-              <a href="{{ route('jobs.show', $job) }}" class="mt-4 line-clamp-2 text-base font-bold leading-snug text-slate-950 hover:text-[#8b5e3c]">
+              <a href="{{ route('jobs.show', $job) }}" class="mt-4 line-clamp-2 text-base font-bold leading-snug text-slate-950 hover:text-[#946d3f]">
                 {{ $job->title }}
               </a>
 
@@ -196,7 +196,7 @@
                   <span class="rounded-full bg-slate-50 px-2 py-1 ring-1 ring-inset ring-slate-200">{{ $employmentPretty[$job->employment_type] ?? ucfirst($job->employment_type) }}</span>
                 @endif
                 @if($isAllSitesPage && $job->site)
-                  <span class="rounded-full bg-[#fffaf5] px-2 py-1 text-[#8b5e3c] ring-1 ring-inset ring-[#ead8c5]">{{ $job->site->name }}</span>
+                  <span class="rounded-full bg-[#fffaf5] px-2 py-1 text-[#946d3f] ring-1 ring-inset ring-[#ead8c5]">{{ $job->site->name }}</span>
                 @endif
                 <span class="rounded-full bg-slate-50 px-2 py-1 ring-1 ring-inset ring-slate-200">{{ (int) ($job->openings ?? 1) }} opening</span>
               </div>
@@ -232,14 +232,14 @@
                   <svg class="h-3.5 w-3.5"><use href="#site-clock"/></svg>
                   {{ optional($job->created_at)->format('d M Y') ?? '-' }}
                 </span>
-                <a href="{{ route('jobs.show', $job) }}" class="font-bold text-[#8b5e3c] hover:underline">Detail</a>
+                <a href="{{ route('jobs.show', $job) }}" class="font-bold text-[#946d3f] hover:underline">Detail</a>
               </div>
             </article>
           @endforeach
         </div>
       @else
         <div class="mt-5 rounded-xl border bg-[#fffaf5] p-8 text-center" style="border-color: {{ $BORD }}">
-          <div class="mx-auto grid h-12 w-12 place-items-center rounded-xl bg-white text-[#8b5e3c] ring-1 ring-inset ring-[#ead8c5]">
+          <div class="mx-auto grid h-12 w-12 place-items-center rounded-xl bg-white text-[#946d3f] ring-1 ring-inset ring-[#ead8c5]">
             <svg class="h-6 w-6"><use href="#site-briefcase"/></svg>
           </div>
           <p class="mt-4 font-bold text-slate-950">Belum ada lowongan aktif</p>
@@ -253,3 +253,4 @@
     </p>
   </div>
 @endsection
+

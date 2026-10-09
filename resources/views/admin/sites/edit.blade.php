@@ -4,8 +4,8 @@
 @section('title', 'Admin · Sites · Edit • karir-andalan')
 
 @php
-    $ACCENT = '#a77d52'; // brown
-    $ACCENT_DARK = '#8b5e3c'; // dark brown
+    $ACCENT = '#b28a57'; // brown
+    $ACCENT_DARK = '#946d3f'; // dark brown
     $BORD = '#e5e7eb'; // slate-200
 @endphp
 
@@ -236,3 +236,4 @@
       </script>
     @endpush
 @endsection
+

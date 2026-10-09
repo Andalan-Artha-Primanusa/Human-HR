@@ -2,8 +2,8 @@
 @extends('layouts.app', ['title' => 'Users'])
 
 @php
-    $ACCENT = '#a77d52';
-    $ACCENT_DARK = '#8b5e3c';
+    $ACCENT = '#b28a57';
+    $ACCENT_DARK = '#946d3f';
     $BORD = '#e5e7eb';
 @endphp
 
@@ -103,7 +103,7 @@
         <div class="overflow-x-auto">
           @if(($users->count() ?? 0) > 0)
               <table class="min-w-full text-sm">
-                <thead class="text-white bg-[#a77d52]">
+                <thead class="text-white bg-[#b28a57]">
                   <tr>
                     <th class="px-4 py-3 text-left">Nama</th>
                     <th class="px-4 py-3 text-left">Email</th>
@@ -130,7 +130,7 @@
 
                         <td class="px-4 py-3">
                           <span class="px-2 py-1 text-sm rounded"
-                                style="background:#f5efe8; color:#8b5e3c">
+                                style="background:#f5efe8; color:#946d3f">
                             {{ $user->role ?? '-' }}
                           </span>
                         </td>
@@ -287,3 +287,4 @@
 
     </div>
 @endsection
+

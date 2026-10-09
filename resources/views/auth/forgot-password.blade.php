@@ -36,7 +36,7 @@
     }
     .auth-input::placeholder { color: #c4a882; }
     .auth-input:focus {
-      border-color: #a77d52;
+      border-color: #b28a57;
       box-shadow: 0 0 0 3px rgba(167,125,82,.15);
     }
     .auth-label {
@@ -50,7 +50,7 @@
     .auth-btn {
       width: 100%;
       padding: .8rem;
-      background: #a77d52;
+      background: #b28a57;
       color: #fff;
       border: none;
       border-radius: .625rem;
@@ -95,7 +95,7 @@
       {{-- Background foto --}}
       <img src="{{ asset('assets/hr1.jpg') }}" alt="" aria-hidden="true"
         style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center;">
-      {{-- Overlay #a77d52 --}}
+      {{-- Overlay #b28a57 --}}
       <div style="position:absolute; inset:0; background:rgba(167,125,82,0.82);"></div>
       <div style="position:absolute; top:-80px; right:-80px; width:320px; height:320px; border-radius:50%; background:rgba(255,255,255,.08);"></div>
       <div style="position:absolute; bottom:-60px; left:-60px; width:240px; height:240px; border-radius:50%; background:rgba(255,255,255,.06);"></div>
@@ -139,7 +139,7 @@
         {{-- Heading --}}
         <div style="margin-bottom:1.5rem;">
           <h2 style="font-size:1.4rem; font-weight:800; color:#3b2209; margin:0 0 .3rem;">Lupa Password?</h2>
-          <p style="font-size:.82rem; color:#a77d52; margin:0;">Masukkan email untuk menerima tautan reset</p>
+          <p style="font-size:.82rem; color:#b28a57; margin:0;">Masukkan email untuk menerima tautan reset</p>
         </div>
 
         {{-- Success --}}
@@ -186,7 +186,7 @@
         <p style="text-align:center; margin-top:1.25rem; font-size:.82rem; color:#9c7a52;">
           Ingat password Anda?
           <a href="{{ route('login') }}"
-            style="color:#a77d52; font-weight:700; text-decoration:none;"
+            style="color:#b28a57; font-weight:700; text-decoration:none;"
             onmouseover="this.style.textDecoration='underline'"
             onmouseout="this.style.textDecoration='none'">
             Masuk sekarang
@@ -196,7 +196,7 @@
         <p style="text-align:center; margin-top:1rem; font-size:.82rem; color:#9c7a52;">
           Belum punya akun?
           <a href="{{ route('register') }}"
-            style="color:#a77d52; font-weight:700; text-decoration:none;"
+            style="color:#b28a57; font-weight:700; text-decoration:none;"
             onmouseover="this.style.textDecoration='underline'"
             onmouseout="this.style.textDecoration='none'">
             Daftar gratis
@@ -214,3 +214,4 @@
 
 </body>
 </html>
+

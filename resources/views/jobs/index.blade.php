@@ -58,7 +58,7 @@
     };
 
     $railColors = [
-        'border-[#a77d52]', 'border-sky-400', 'border-indigo-400',
+        'border-[#b28a57]', 'border-sky-400', 'border-indigo-400',
         'border-emerald-400', 'border-amber-400',
     ];
 
@@ -136,7 +136,7 @@
     transition: border-color .16s ease, box-shadow .16s ease, background .16s ease;
   }
   .jobs-field:focus {
-    border-color: #a77d52;
+    border-color: #b28a57;
     box-shadow: 0 0 0 4px rgba(167, 125, 82, .16);
   }
   .jobs-select { appearance: none; padding-right: 2.2rem; }
@@ -182,7 +182,7 @@
     justify-content: center;
     gap: .45rem;
     border-radius: .9rem;
-    background: #a77d52;
+    background: #b28a57;
     color: white;
     font-weight: 750;
     box-shadow: 0 12px 24px rgba(167, 125, 82, .24);
@@ -250,7 +250,7 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M7 12h10M10 18h4"/></svg>
           Filter
           @if($hasAny)
-            <span class="flex h-5 w-5 items-center justify-center rounded-full bg-[#a77d52] text-[10px] font-bold text-white">
+            <span class="flex h-5 w-5 items-center justify-center rounded-full bg-[#b28a57] text-[10px] font-bold text-white">
               {{ $activeFilterCount }}
             </span>
           @endif
@@ -268,7 +268,7 @@
       <form method="GET" action="{{ route('jobs.index') }}" role="search" class="grid gap-3 lg:grid-cols-[1fr_auto] lg:items-center">
         <label for="job-search" class="sr-only">Cari lowongan</label>
         <div class="relative">
-          <svg class="absolute w-5 h-5 -translate-y-1/2 pointer-events-none left-4 top-1/2 text-[#a77d52]">
+          <svg class="absolute w-5 h-5 -translate-y-1/2 pointer-events-none left-4 top-1/2 text-[#b28a57]">
             <use href="#i-search"/>
           </svg>
           <input
@@ -315,7 +315,7 @@
               </a>
             @endif
           @endforeach
-          <a href="{{ $resetUrl }}" class="ml-auto text-[12px] font-semibold text-[#a77d52] hover:underline">Reset semua</a>
+          <a href="{{ $resetUrl }}" class="ml-auto text-[12px] font-semibold text-[#b28a57] hover:underline">Reset semua</a>
         </div>
       @endif
 
@@ -422,7 +422,7 @@
               $badgeClr = match ($typeSlug) {
                 'contract', 'kontrak' => 'bg-amber-600',
                 'intern', 'magang'    => 'bg-emerald-600',
-                default               => 'bg-[#a77d52]',
+                default               => 'bg-[#b28a57]',
               };
 
               $rail = $railColors[$idx % count($railColors)];
@@ -501,7 +501,7 @@
                   </div>
 
                   <svg class="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-300
-                              group-hover:text-[#a77d52] group-hover:translate-x-0.5 transition">
+                              group-hover:text-[#b28a57] group-hover:translate-x-0.5 transition">
                     <use href="#i-chevron-right"/>
                   </svg>
 
@@ -525,7 +525,7 @@
             $badgeClr = match ($typeSlug) {
               'contract', 'kontrak' => 'bg-amber-600',
               'intern', 'magang'    => 'bg-emerald-600',
-              default               => 'bg-[#a77d52]',
+              default               => 'bg-[#b28a57]',
             };
 
             $meta   = $deptMeta($job->division);
@@ -565,7 +565,7 @@
             id="detail-{{ $job->id }}"
             class="jobs-detail overflow-hidden rounded-[1.35rem]">
 
-            <div class="bg-gradient-to-br from-[#a77d52] to-[#7b5637] px-5 py-5 text-white md:px-6">
+            <div class="bg-gradient-to-br from-[#b28a57] to-[#7b5637] px-5 py-5 text-white md:px-6">
 
               {{-- ── Header ── --}}
               <div class="flex flex-col gap-4 sm:flex-row sm:items-start">
@@ -621,7 +621,7 @@
                 ] as [$ico, $lbl, $val])
                   <div class="flex items-center gap-2.5 rounded-2xl border border-[#e8d5be]
                                bg-[#fffaf5] px-3.5 py-3">
-                    <svg class="h-4 w-4 shrink-0 text-[#a77d52]"><use href="#{{ $ico }}"/></svg>
+                    <svg class="h-4 w-4 shrink-0 text-[#b28a57]"><use href="#{{ $ico }}"/></svg>
                     <div class="min-w-0">
                       <p class="text-[10px] font-semibold text-[#8c6843] uppercase tracking-wide">{{ $lbl }}</p>
                       <p class="truncate text-sm font-bold text-[#5c3d1e]">{{ $val }}</p>
@@ -777,7 +777,7 @@
                   @php $isCur = (int) $p === $current; @endphp
                   <li class="border-l border-slate-200">
                     @if($isCur)
-                      <span style="background:#a77d52"
+                      <span style="background:#b28a57"
                             class="grid text-sm font-semibold text-white place-items-center w-9 h-9">
                         {{ $p }}
                       </span>
@@ -821,7 +821,7 @@
     <section class="jobs-panel mt-5 rounded-[1.35rem] p-12 text-center">
       <div style="background:#fdf6ef;border:1px solid #e8d5be"
            class="grid mx-auto mb-4 rounded-full h-14 w-14 place-items-center">
-        <svg class="h-6 w-6 text-[#a77d52]"><use href="#i-filter"/></svg>
+        <svg class="h-6 w-6 text-[#b28a57]"><use href="#i-filter"/></svg>
       </div>
       <h3 class="text-lg font-semibold text-slate-900">Belum ada hasil</h3>
       <p class="mt-1 text-sm text-slate-500">
@@ -829,7 +829,7 @@
       </p>
       <div class="flex items-center justify-center gap-3 mt-5">
         <a href="{{ $resetUrl }}"
-           style="background:#a77d52"
+           style="background:#b28a57"
            class="rounded-xl px-5 py-2.5 text-sm font-semibold text-white hover:opacity-90 transition">
           Reset Filter
         </a>
@@ -869,3 +869,4 @@ document.addEventListener('DOMContentLoaded', () => {
 @endpush
 
 @endsection
+

@@ -2,8 +2,8 @@
 @extends('layouts.app', ['title' => 'Admin · Offers'])
 
 @php
-    $ACCENT = '#a77d52'; // brown
-    $ACCENT_DARK = '#8b5e3c'; // dark brown
+    $ACCENT = '#b28a57'; // brown
+    $ACCENT_DARK = '#946d3f'; // dark brown
     $BORD = '#e5e7eb'; // slate-200
 @endphp
 
@@ -94,7 +94,7 @@
           @if(($offers->count() ?? 0) > 0)
                 <table class="min-w-full text-sm">
                   {{-- HEADER --}}
-                  <thead class="text-white bg-[#a77d52]">
+                  <thead class="text-white bg-[#b28a57]">
                   <tr>
                     <th class="px-4 py-3 text-left">Kandidat</th>
                     <th class="px-4 py-3 text-left">Posisi</th>
@@ -124,7 +124,7 @@
                         $badge = match ($offer->status) {
                             'accepted' => 'bg-green-50 text-green-700',
                             'rejected' => 'bg-rose-50 text-rose-700',
-                            'sent' => 'bg-blue-50 text-[#a77d52]',
+                            'sent' => 'bg-blue-50 text-[#b28a57]',
                             default => 'bg-amber-50 text-amber-700',
                         };
                     @endphp
@@ -155,7 +155,7 @@
                       </td>
 
                       {{-- GROSS --}}
-                      <td class="px-4 py-3 text-center font-semibold text-[#a77d52]">
+                      <td class="px-4 py-3 text-center font-semibold text-[#b28a57]">
                         Rp {{ $gross }}
                       </td>
 
@@ -328,7 +328,7 @@
     </div>
 
     {{-- MODAL: EDIT OFFER --}}
-    <div id="modal-edit-offer" class="fixed inset-0 z-50 flex items-center justify-center hidden p-4 bg-[#a77d52]/50 backdrop-blur-sm">
+    <div id="modal-edit-offer" class="fixed inset-0 z-50 flex items-center justify-center hidden p-4 bg-[#b28a57]/50 backdrop-blur-sm">
         <div class="w-full max-w-lg overflow-hidden bg-white shadow-2xl rounded-2xl animate-in fade-in zoom-in duration-200">
             <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/50">
                 <div>
@@ -562,3 +562,4 @@
         });
     </script>
 @endsection
+

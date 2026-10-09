@@ -14,7 +14,7 @@
         <h1 class="text-xl font-semibold">Akses tidak tersedia</h1>
         <p class="mt-2 text-sm leading-6 text-slate-600">Akun kamu belum memiliki izin untuk membuka halaman atau menjalankan aksi ini.</p>
         <div class="flex flex-wrap justify-center gap-2 mt-6">
-          <button type="button" onclick="history.back()" class="px-4 py-2 text-sm font-semibold text-white rounded-lg bg-[#a77d52] hover:opacity-95">Kembali</button>
+          <button type="button" onclick="history.back()" class="px-4 py-2 text-sm font-semibold text-white rounded-lg bg-[#b28a57] hover:opacity-95">Kembali</button>
           <a href="{{ route('dashboard') }}" class="px-4 py-2 text-sm font-semibold bg-white border rounded-lg border-slate-200 text-slate-700 hover:bg-slate-50">Dashboard</a>
         </div>
       </div>
@@ -22,3 +22,4 @@
   </main>
 </body>
 </html>
+

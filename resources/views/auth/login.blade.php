@@ -47,7 +47,7 @@
     }
     .auth-input::placeholder { color: #c4a882; }
     .auth-input:focus {
-      border-color: #a77d52;
+      border-color: #b28a57;
       box-shadow: 0 0 0 3px rgba(167,125,82,.15);
     }
 
@@ -63,7 +63,7 @@
     .auth-btn {
       width: 100%;
       padding: .85rem;
-      background: #a77d52;
+      background: #b28a57;
       color: #fff;
       border: none;
       border-radius: .625rem;
@@ -88,7 +88,7 @@
       {{-- Background foto --}}
       <img src="{{ asset('assets/hr1.jpg') }}" alt="" aria-hidden="true"
         style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center;">
-      {{-- Overlay #a77d52 --}}
+      {{-- Overlay #b28a57 --}}
       <div style="position:absolute; inset:0; background:rgba(167,125,82,0.82);"></div>
       {{-- Decorative circles --}}
       <div style="position:absolute; top:-80px; right:-80px; width:320px; height:320px; border-radius:50%; background:rgba(255,255,255,.08);"></div>
@@ -133,7 +133,7 @@
             <img src="{{ asset('assets/logologin.png') }}" alt="Logo" style="height:88px; object-fit:contain; display:block; margin:0 auto;">
           </div>
           <h2 style="font-size:1.5rem; font-weight:800; color:#3b2209; margin:0 0 .35rem;">Masuk ke Akun</h2>
-          <p style="font-size:.85rem; color:#a77d52; margin:0;">Silakan isi email dan password Anda</p>
+          <p style="font-size:.85rem; color:#b28a57; margin:0;">Silakan isi email dan password Anda</p>
         </div>
 
         {{-- Error --}}
@@ -163,7 +163,7 @@
               <input id="login_password" type="password" name="password" class="auth-input"
                 placeholder="••••••••" autocomplete="current-password" style="padding-right:3.5rem;">
               <button type="button" id="togglePassword" aria-label="Tampilkan password"
-                style="position:absolute; right:8px; top:50%; transform:translateY(-50%); background:transparent; border:none; cursor:pointer; padding:.25rem; color:#a77d52;">
+                style="position:absolute; right:8px; top:50%; transform:translateY(-50%); background:transparent; border:none; cursor:pointer; padding:.25rem; color:#b28a57;">
                 <svg id="eyeIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" xmlns="http://www.w3.org/2000/svg">
                   <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/>
                   <circle cx="12" cy="12" r="3"/>
@@ -175,12 +175,12 @@
           <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem; font-size:.82rem;">
             <label style="display:flex; align-items:center; gap:.5rem; color:#5c3d1e; cursor:pointer;">
               <input type="checkbox" name="remember"
-                style="width:15px; height:15px; accent-color:#a77d52; cursor:pointer;">
+                style="width:15px; height:15px; accent-color:#b28a57; cursor:pointer;">
               Ingat saya
             </label>
             @if (Route::has('password.request'))
               <a href="{{ route('password.request') }}"
-                style="color:#a77d52; text-decoration:none; font-weight:600;"
+                style="color:#b28a57; text-decoration:none; font-weight:600;"
                 onmouseover="this.style.textDecoration='underline'"
                 onmouseout="this.style.textDecoration='none'">
                 Lupa password?
@@ -196,7 +196,7 @@
           <p style="text-align:center; margin-top:1.5rem; font-size:.85rem; color:#9c7a52;">
             Belum punya akun?
             <a href="{{ route('register') }}"
-              style="color:#a77d52; font-weight:700; text-decoration:none;"
+              style="color:#b28a57; font-weight:700; text-decoration:none;"
               onmouseover="this.style.textDecoration='underline'"
               onmouseout="this.style.textDecoration='none'">
               Daftar Gratis
@@ -234,3 +234,4 @@
 
 </body>
 </html>
+

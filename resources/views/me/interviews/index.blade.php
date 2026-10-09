@@ -50,7 +50,7 @@
       @if($interviews->isEmpty())
         <div class="mt-6 overflow-hidden bg-white border rounded-2xl text-center shadow-sm" style="border-color:#e7ded6">
           <div class="p-8" style="background:#fffaf5">
-            <div class="mx-auto grid h-14 w-14 place-items-center rounded-full bg-white text-[#a77d52] ring-1 ring-[#ead8c5]">
+            <div class="mx-auto grid h-14 w-14 place-items-center rounded-full bg-white text-[#b28a57] ring-1 ring-[#ead8c5]">
               <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10m-11 8h12a2 2 0 002-2V7a2 2 0 00-2-2H6a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
             </div>
             <p class="mt-4 text-lg font-semibold" style="color:#6b4f3a">Belum ada jadwal interview</p>
@@ -81,14 +81,14 @@
 
             <article class="overflow-hidden bg-white border shadow-sm rounded-2xl hover:-translate-y-0.5 hover:shadow-md transition" style="border-color:#e7ded6">
               {{-- STRIP --}}
-              <div class="h-1.5 rounded-t-2xl" style="background:#a77d52"></div>
+              <div class="h-1.5 rounded-t-2xl" style="background:#b28a57"></div>
 
               <div class="p-5">
 
                 {{-- HEADER KARTU --}}
                 <div class="flex items-start justify-between gap-3">
                   <div class="flex min-w-0 items-start gap-3">
-                    <div class="grid h-11 w-11 shrink-0 place-items-center rounded-xl" style="background:#a77d5220;color:#a77d52">
+                    <div class="grid h-11 w-11 shrink-0 place-items-center rounded-xl" style="background:#b28a5720;color:#b28a57">
                       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10m-11 8h12a2 2 0 002-2V7a2 2 0 00-2-2H6a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
                     </div>
                     <div class="min-w-0">

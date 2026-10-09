@@ -6,7 +6,7 @@
     $variant = $variant ?? 'desktop'; // 'desktop' | 'mobile'
     $closeOnClick = $closeOnClick ?? false;     // untuk mobile drawer
     $offerQuickId = $offerQuickId ?? null;
-    $logoUrl = $logoUrl ?? asset('assets/logofix.png');
+    $logoUrl = $logoUrl ?? asset('assets/logo-brand.png');
     $appName = config('app.name', 'Careers Portal');
 
     $closeAttr = $closeOnClick ? ' @click="open=false"' : '';
@@ -98,7 +98,7 @@
 {{-- ====== SIDEBAR STYLES ====== --}}
 <style>
   /* ===== SHELL ===== */
-  .sidenav-shell { width:100%; background:#263241; border-radius:1rem; overflow:hidden; }
+  .sidenav-shell { width:100%; background:#243858; border-radius:1rem; overflow:hidden; }
   nav.sidenav-shell { color:#fff !important; }
 
   /* ===== LOGO ===== */
@@ -139,7 +139,7 @@
   a.account-card:hover { background:rgba(255,255,255,0.1) !important; }
   a.account-card .account-info div, a.account-card .account-info span { color:#fff !important; }
   a.account-card .account-info .text-xs { color:rgba(255,255,255,0.65) !important; }
-  a.account-card div.rounded-full { background:#d7b98e !important; color:#263241 !important; }
+  a.account-card div.rounded-full { background:#d7b98e !important; color:#243858 !important; }
   a.account-card .inline-flex.rounded-full { background:rgba(215,185,142,0.16) !important; color:#f8ead6 !important; }
 
   /* ===== LOGOUT ===== */

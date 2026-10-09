@@ -11,9 +11,9 @@
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;">
         <tr><td align="center" style="padding:0 0 18px;"><a href="{{ config('app.url') }}" style="color:#3b2414;text-decoration:none;font-size:20px;font-weight:800;letter-spacing:.18em;">ANDALAN HR</a></td></tr>
         <tr><td style="background:#fff;border:1px solid #eadfd4;border-radius:18px;overflow:hidden;box-shadow:0 16px 45px rgba(59,36,20,.08);">
-          <div style="height:6px;background:#a77d52;"></div>
+          <div style="height:6px;background:#b28a57;"></div>
           <div style="padding:34px 38px;">
-            <div style="display:inline-block;background:#fffaf5;color:#8b5e3c;border:1px solid #eadfd4;border-radius:999px;padding:6px 12px;font-size:12px;font-weight:800;">Mobilisasi</div>
+            <div style="display:inline-block;background:#fffaf5;color:#946d3f;border:1px solid #eadfd4;border-radius:999px;padding:6px 12px;font-size:12px;font-weight:800;">Mobilisasi</div>
             <h1 style="margin:18px 0 10px;color:#0f172a;font-size:24px;line-height:1.25;">Halo, {{ $candidateName }}</h1>
             <p style="margin:0 0 18px;color:#475569;font-size:15px;line-height:1.65;">Berikut informasi mobilisasi kamu. Jika ada lampiran tiket atau dokumen, silakan unduh dan baca instruksinya dengan teliti.</p>
             <div style="background:#fffaf5;border:1px solid #eadfd4;border-radius:14px;padding:18px 20px;color:#334155;font-size:15px;line-height:1.7;white-space:pre-wrap;">{{ $bodyContent }}</div>
@@ -26,3 +26,4 @@
   </table>
 </body>
 </html>
+

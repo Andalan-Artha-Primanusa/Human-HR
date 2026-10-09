@@ -3,8 +3,8 @@
 
 @php
     // THEME
-    $ACCENT = '#a77d52'; // brown
-    $ACCENT_DARK = '#8b5e3c'; // dark brown
+    $ACCENT = '#b28a57'; // brown
+    $ACCENT_DARK = '#946d3f'; // dark brown
     $BORD = '#e5e7eb'; // slate-200
 
     // Opsi Level dari Model (fallback)
@@ -46,7 +46,7 @@
         border-color: #ede4dc !important;
         background:#fff;
       }
-      #jobCreateForm .input:focus { border-color: #a77d52 !important; box-shadow: 0 0 0 3px rgba(167,125,82,.18) !important; }
+      #jobCreateForm .input:focus { border-color: #b28a57 !important; box-shadow: 0 0 0 3px rgba(167,125,82,.18) !important; }
       #jobCreateForm select.input { background:#fff; }
     </style>
     <div class="mx-auto w-full max-w-[1200px] space-y-6">
@@ -86,7 +86,7 @@
                  class="input min-w-[180px]" style="--tw-ring-color: {{ $ACCENT }}">
         </div>
         <button type="submit"
-                class="inline-flex items-center rounded-lg bg-[#a77d52] px-4 py-2 text-sm font-semibold text-white hover:opacity-95">
+                class="inline-flex items-center rounded-lg bg-[#b28a57] px-4 py-2 text-sm font-semibold text-white hover:opacity-95">
           Ambil RFR
         </button>
         <div class="text-xs text-slate-500">
@@ -516,3 +516,4 @@
       })();
     </script>
 @endsection
+

@@ -53,7 +53,7 @@
             @if (Route::has('verification.send'))
               <form method="POST" action="{{ route('verification.send') }}" class="m-0" data-email-verification-form data-skip-global-feedback="1">
                 @csrf
-                <button type="submit" class="inline-flex h-11 min-w-[190px] items-center justify-center gap-2 rounded-xl bg-[#a77d52] px-6 text-sm font-bold text-white shadow-sm transition duration-200 hover:bg-[#906844] focus:outline-none focus-visible:ring-4 focus-visible:ring-[#a77d52]/25 disabled:cursor-not-allowed disabled:opacity-75 sm:h-[46px]">
+                <button type="submit" class="inline-flex h-11 min-w-[190px] items-center justify-center gap-2 rounded-xl bg-[#b28a57] px-6 text-sm font-bold text-white shadow-sm transition duration-200 hover:bg-[#906844] focus:outline-none focus-visible:ring-4 focus-visible:ring-[#b28a57]/25 disabled:cursor-not-allowed disabled:opacity-75 sm:h-[46px]">
                   <svg data-send-icon xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <path d="m22 2-7 20-4-9-9-4Z"/>
                     <path d="M22 2 11 13"/>
@@ -74,3 +74,4 @@
     </div>
   @endif
 @endauth
+

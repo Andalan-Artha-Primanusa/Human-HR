@@ -2,8 +2,8 @@
 @extends('layouts.app', ['title' => 'Edit Company'])
 
 @php
-    $ACCENT = '#a77d52'; // brown
-    $ACCENT_DARK = '#8b5e3c'; // dark brown
+    $ACCENT = '#b28a57'; // brown
+    $ACCENT_DARK = '#946d3f'; // dark brown
     $BORD = '#e5e7eb'; // slate-200
 @endphp
 
@@ -149,7 +149,7 @@
           {{-- Actions --}}
           <div class="flex items-center gap-3 pt-2">
             <button type="submit"
-                    class="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-lg bg-[#a77d52] hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-offset-2"
+                    class="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-lg bg-[#b28a57] hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-offset-2"
                     style="--tw-ring-color: {{ $ACCENT }}">
               Save
             </button>
@@ -163,3 +163,4 @@
       </section>
     </div>
 @endsection
+

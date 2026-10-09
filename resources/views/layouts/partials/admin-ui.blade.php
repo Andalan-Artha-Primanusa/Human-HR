@@ -1,15 +1,16 @@
 {{-- resources/views/layouts/partials/admin-ui.blade.php --}}
-{{-- Global CSS untuk standarisasi semua halaman admin (#a77d52 + white) --}}
+{{-- Global CSS untuk standarisasi semua halaman admin (#b28a57 + white) --}}
 <style>
   /* ============================================================
      ADMIN GLOBAL UI — Human.Careers
-     Palet: #a77d52 (accent) · #5c3d1e (dark) · #fff (white)
+     Palet: #b28a57 (accent) · #5c3d1e (dark) · #fff (white)
   ============================================================ */
 
   /* ===== 0. DESIGN TOKENS (shared header system) ===== */
   :root {
-    --primary-brown: #a77d52;
-    --primary-brown-dark: #8b5e3c;
+    --primary-brown: #b28a57;
+    --primary-brown-dark: #946d3f;
+    --brand-blue: #2f4f8f;
     --surface: #ffffff;
     --border: #ede4dc;
     --text-primary: #5c3d1e;
@@ -109,12 +110,12 @@
   .page-header__actions .ph-action--brand,
   .page-header a.ph-action--brand,
   .page-header__actions button.ph-action--brand {
-    background-color: #a77d52 !important;
+    background-color: #b28a57 !important;
     color: #fff !important;
     box-shadow: 0 3px 10px rgba(48,31,15,.28);
   }
   .page-header__actions .ph-action--brand:hover,
-  .page-header a.ph-action--brand:hover { background-color: #8b5e3c !important; box-shadow: 0 4px 12px rgba(48,31,15,.32); }
+  .page-header a.ph-action--brand:hover { background-color: #946d3f !important; box-shadow: 0 4px 12px rgba(48,31,15,.32); }
   .page-header__actions button.ph-action--brand:disabled { opacity: .6; cursor: not-allowed; }
   /* Meta info kanan (mis. Last Updated) */
   .page-header__meta { text-align: right; color: rgba(255,255,255,.92) !important; }
@@ -164,7 +165,7 @@
     width: .5rem;
     height: .5rem;
     border-radius: 9999px;
-    background-color: #a77d52;
+    background-color: #b28a57;
     flex-shrink: 0;
   }
   @media (max-width: 767px) {
@@ -172,13 +173,13 @@
   }
 
   /* ===== 1. FILTER / SEARCH BUTTON ===== */
-  /* Ganti semua tombol hitam/biru filter → #a77d52 */
+  /* Ganti semua tombol hitam/biru filter → #b28a57 */
   button[style*="background-color:#0f172a"],
   button[style*="background:#0f172a"],
   a[style*="background-color:#0f172a"],
   .btn-filter, .filter-btn {
-    background-color: #a77d52 !important;
-    border-color: #a77d52 !important;
+    background-color: #b28a57 !important;
+    border-color: #b28a57 !important;
     color: #fff !important;
   }
   button[style*="background-color:#0f172a"]:hover,
@@ -187,7 +188,7 @@
   /* Input & select focus ring */
   input:focus, select:focus, textarea:focus {
     outline: none !important;
-    border-color: #a77d52 !important;
+    border-color: #b28a57 !important;
     box-shadow: 0 0 0 3px rgba(167,125,82,.15) !important;
   }
 
@@ -217,11 +218,11 @@
   /* ===== 1c. WARNA SEMANTIK AKSI — bukan coklat semua ===== */
   /* Coklat = CTA utama (Create/Save/Submit) */
   .abtn-primary {
-    background-color: #a77d52 !important; color: #fff !important;
+    background-color: #b28a57 !important; color: #fff !important;
     border: none !important;
     box-shadow: 0 2px 8px rgba(167,125,82,.3) !important;
   }
-  .abtn-primary:hover { background-color: #8b5e3c !important; }
+  .abtn-primary:hover { background-color: #946d3f !important; }
   /* Merah = destruktif (Delete/Reject) */
   .abtn-danger {
     background-color: #dc2626 !important; color: #fff !important;
@@ -242,8 +243,8 @@
   .abtn-warning:hover { background-color: #b45309 !important; }
   /* Outline coklat = aksi sekunder bertema (View/Edit/Detail) */
   .abtn-secondary {
-    background-color: #fff !important; color: #a77d52 !important;
-    border: 1px solid #a77d52 !important; border-radius: .625rem !important;
+    background-color: #fff !important; color: #b28a57 !important;
+    border: 1px solid #b28a57 !important; border-radius: .625rem !important;
   }
   .abtn-secondary:hover { background-color: #fdf7f0 !important; }
   /* Outline abu = aksi sekunder netral (Cancel/Back/Reset/Export) */
@@ -259,7 +260,7 @@
   a.btn-create,
   [data-action="create"],
   button[type="submit"].btn-save {
-    background-color: #a77d52 !important;
+    background-color: #b28a57 !important;
     color: #fff !important;
     border: none !important;
     border-radius: .625rem !important;
@@ -288,8 +289,8 @@
   button.btn-edit, a.btn-edit,
   button.btn-view, a.btn-view {
     background-color: #fff !important;
-    color: #a77d52 !important;
-    border: 1.5px solid #a77d52 !important;
+    color: #b28a57 !important;
+    border: 1.5px solid #b28a57 !important;
     border-radius: .625rem !important;
     font-weight: 600 !important;
     transition: background .2s !important;
@@ -297,9 +298,9 @@
   .btn-secondary:hover, button.btn-edit:hover, a.btn-edit:hover { background-color: #fdf7f0 !important; }
 
   /* ===== 5. HEADER SECTION (hero bar) ===== */
-  /* Pastikan header section pakai #a77d52 */
-  section > div > div.bg-\[#a77d52\],
-  .admin-hero-bar { background-color: #a77d52 !important; }
+  /* Pastikan header section pakai #b28a57 */
+  section > div > div.bg-\[#b28a57\],
+  .admin-hero-bar { background-color: #b28a57 !important; }
 
   /* "New ..." button di dalam hero bar */
   section div[class*="absolute"] a[class*="bg-white"] {
@@ -312,7 +313,7 @@
   section div[class*="absolute"] a[class*="bg-white"]:hover { background-color: #fdf7f0 !important; }
 
   /* ===== 6. BADGE STATUS ===== */
-  /* Active → hijau tetap, tapi inactive/unknown → #a77d52/5 */
+  /* Active → hijau tetap, tapi inactive/unknown → #b28a57/5 */
   .badge-inactive { background-color: rgba(167,125,82,.1) !important; color: #5c3d1e !important; }
 
   /* ===== 7. TABEL STANDAR ===== */
@@ -334,7 +335,7 @@
 
   /* ===== 9. PAGINATION ===== */
   nav[aria-label="Pagination"] li span[class*="bg-slate-100"] {
-    background-color: #a77d52 !important;
+    background-color: #b28a57 !important;
     color: #fff !important;
     font-weight: 700 !important;
   }
@@ -396,11 +397,12 @@
   .form-input:focus,
   input[type="text"]:focus, input[type="email"]:focus,
   select:focus, textarea:focus {
-    border-color: #a77d52 !important;
+    border-color: #b28a57 !important;
     box-shadow: 0 0 0 3px rgba(167,125,82,.15) !important;
   }
 
   /* ===== 13. LINK AKSI (Edit / Delete inline) ===== */
-  a[href*="/edit"]:not([class*="btn"]):not([class*="side-link"]) { color: #a77d52 !important; }
+  a[href*="/edit"]:not([class*="btn"]):not([class*="side-link"]) { color: #b28a57 !important; }
   a[href*="/edit"]:hover { text-decoration: underline !important; }
 </style>
+

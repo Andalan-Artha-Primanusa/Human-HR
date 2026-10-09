@@ -13,7 +13,7 @@
   <meta name="author" content="PT Andalan Artha Primanusa">
   <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
   <meta name="googlebot" content="index, follow">
-  <meta name="theme-color" content="#a77d52">
+  <meta name="theme-color" content="#b28a57">
   <link rel="canonical" href="{{ url()->current() }}">
 
   {{-- ===== OPEN GRAPH ===== --}}
@@ -300,7 +300,7 @@
 
     /* Aksesibilitas focus */
     *:focus-visible {
-      outline: 3px solid #a77d52;
+      outline: 3px solid #b28a57;
       outline-offset: 3px;
       border-radius: 4px;
     }
@@ -368,7 +368,7 @@
       border-radius: 999px;
     }
     .badge-open { background: #f4ebe0; color: #7a5530; }
-    .badge-new  { background: #f4ebe0; color: #a77d52; }
+    .badge-new  { background: #f4ebe0; color: #b28a57; }
 
     .home-section-soft {
       background: #ffffff;
@@ -406,7 +406,7 @@
       justify-content: center;
       gap: .45rem;
       border-radius: 1rem;
-      background: #a77d52;
+      background: #b28a57;
       color: #fff;
       font-weight: 800;
       box-shadow: 0 12px 24px rgba(167,125,82,.24);
@@ -424,7 +424,7 @@
       height: 2.5rem;
       place-items: center;
       border-radius: 1rem;
-      background: #a77d52;
+      background: #b28a57;
       color: #fff;
       font-size: .875rem;
       font-weight: 900;
@@ -495,8 +495,8 @@
       box-shadow: 0 4px 10px rgba(92,61,30,.06);
     }
     .aj-timeline-step.is-active .aj-timeline-dot {
-      background: #a77d52;
-      border-color: #a77d52;
+      background: #b28a57;
+      border-color: #b28a57;
       color: #ffffff;
     }
     .aj-timeline-label {
@@ -571,7 +571,7 @@
       place-items: center;
       border-radius: 14px;
       background: #f7efde;
-      color: #a77d52;
+      color: #b28a57;
       transition: background .25s ease, color .25s ease, transform .25s ease;
     }
     .aj-icon svg {
@@ -581,7 +581,7 @@
       animation-delay: var(--aj-delay, 0s);
     }
     .aj-card:hover .aj-icon {
-      background: #a77d52;
+      background: #b28a57;
       color: #fff;
       transform: scale(1.04);
     }
@@ -634,7 +634,7 @@
       width: .42rem;
       height: .42rem;
       border-radius: 999px;
-      background: #a77d52;
+      background: #b28a57;
     }
     .aj-cta {
       display: inline-flex;
@@ -648,7 +648,7 @@
       color: #7a5530;
       transition: color .2s ease, gap .2s ease;
     }
-    .aj-cta:hover { color: #a77d52; gap: .7rem; }
+    .aj-cta:hover { color: #b28a57; gap: .7rem; }
 
     /* -- Tips bar -- */
     .aj-tips {
@@ -676,7 +676,7 @@
       flex-shrink: 0;
       place-items: center;
       border-radius: 12px;
-      background: #a77d52;
+      background: #b28a57;
       color: #fff;
     }
     .aj-tips-icon svg { width: 1.4rem; height: 1.4rem; }
@@ -685,7 +685,7 @@
       font-weight: 800;
       letter-spacing: .08em;
       text-transform: uppercase;
-      color: #a77d52;
+      color: #b28a57;
     }
     .aj-tips-text {
       margin-top: .15rem;
@@ -708,7 +708,7 @@
       font-weight: 700;
       color: #3b2209;
     }
-      .aj-benefit svg { width: 1.1rem; height: 1.1rem; color: #a77d52; }
+      .aj-benefit svg { width: 1.1rem; height: 1.1rem; color: #b28a57; }
     .aj-dots {
       display: flex;
       justify-content: center;
@@ -742,7 +742,7 @@
       cursor: pointer;
       transition: width .25s ease, background .25s ease;
     }
-    .aj-dot.is-active { width: 1.4rem; background: #a77d52; }
+    .aj-dot.is-active { width: 1.4rem; background: #b28a57; }
 
     @keyframes ajFloat {
       0%, 100% { transform: translateY(0); }
@@ -762,7 +762,7 @@
 
   {{-- Skip nav untuk screen reader --}}
   <a href="#maincontent"
-    class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:bg-[#a77d52] focus:text-white focus:rounded-lg focus:px-4 focus:py-2 focus:shadow-lg focus:text-sm focus:font-semibold">
+    class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:bg-[#b28a57] focus:text-white focus:rounded-lg focus:px-4 focus:py-2 focus:shadow-lg focus:text-sm focus:font-semibold">
     Lewati ke konten utama
   </a>
 
@@ -812,13 +812,13 @@
             <svg class="w-6 h-6"><use href="#i-menu"/></svg>
           </button>
           <a href="{{ route('welcome') }}" class="flex items-center group">
-            <img src="{{ asset('assets/logofix.png') }}" alt="Logo" class="object-contain w-auto h-10 transition-transform duration-300 md:h-12 group-hover:scale-105">
+            <img src="{{ asset('assets/logo-brand.png') }}" alt="Logo" class="object-contain w-auto h-10 transition-transform duration-300 md:h-12 group-hover:scale-105">
           </a>
         </div>
 
         {{-- Desktop Nav --}}
         <nav class="items-center hidden gap-1 md:flex">
-          <a href="{{ route('jobs.index') }}" class="px-4 py-2 text-sm font-semibold text-slate-600 hover:text-[#a77d52] transition-colors rounded-xl hover:bg-slate-50">Lowongan</a>
+          <a href="{{ route('jobs.index') }}" class="px-4 py-2 text-sm font-semibold text-slate-600 hover:text-[#b28a57] transition-colors rounded-xl hover:bg-slate-50">Lowongan</a>
           
           @auth
             <div class="w-px h-6 mx-2 bg-slate-200"></div>
@@ -828,14 +828,14 @@
                   <div class="text-xs font-bold leading-none text-slate-900">{{ auth()->user()->name }}</div>
                   <div class="text-[10px] text-slate-500 mt-0.5 capitalize">{{ auth()->user()->role ?? 'Pelamar' }}</div>
                 </div>
-                <div class="w-9 h-9 rounded-xl bg-[#a77d52] flex items-center justify-center text-white font-bold shadow-sm">
+                <div class="w-9 h-9 rounded-xl bg-[#b28a57] flex items-center justify-center text-white font-bold shadow-sm">
                   {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                 </div>
                 <svg class="w-4 h-4 transition-transform text-slate-400 group-open:rotate-180"><use href="#i-chevron"/></svg>
               </summary>
               <div class="absolute right-0 z-50 p-2 overflow-hidden bg-white border shadow-2xl w-72 rounded-2xl border-slate-200 shadow-slate-900/10 animate-in fade-in slide-in-from-top-2">
                 <div class="mb-1 flex items-center gap-3 rounded-xl bg-[#f7efe7] px-3 py-3">
-                  <div class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#8b5e3c] text-sm font-bold text-white">
+                  <div class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#946d3f] text-sm font-bold text-white">
                     {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                   </div>
                   <div class="min-w-0">
@@ -844,13 +844,13 @@
                   </div>
                 </div>
                 <a href="{{ route('profile.edit') }}" class="group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
-                  <span class="grid h-9 w-9 place-items-center rounded-lg bg-slate-100 text-slate-500 transition group-hover:bg-[#f5ede4] group-hover:text-[#8b5e3c]">
+                  <span class="grid h-9 w-9 place-items-center rounded-lg bg-slate-100 text-slate-500 transition group-hover:bg-[#f5ede4] group-hover:text-[#946d3f]">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="7" r="4"/></svg>
                   </span>
                   <span>Profil Saya</span>
                 </a>
                 <a href="{{ route('applications.mine') }}" class="group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
-                  <span class="grid h-9 w-9 place-items-center rounded-lg bg-slate-100 text-slate-500 transition group-hover:bg-[#f5ede4] group-hover:text-[#8b5e3c]">
+                  <span class="grid h-9 w-9 place-items-center rounded-lg bg-slate-100 text-slate-500 transition group-hover:bg-[#f5ede4] group-hover:text-[#946d3f]">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M3 13h18"/></svg>
                   </span>
                   <span>Lamaran Saya</span>
@@ -868,8 +868,8 @@
               </div>
             </details>
           @else
-            <a href="{{ route('login') }}" class="px-4 py-2 text-sm font-semibold text-slate-600 hover:text-[#a77d52] transition-colors rounded-xl hover:bg-slate-50">Masuk</a>
-            <a href="{{ route('register') }}" class="ml-2 px-5 py-2.5 text-sm font-bold text-white bg-[#a77d52] rounded-2xl shadow-md hover:shadow-lg hover:brightness-110 transition-all">Daftar Gratis</a>
+            <a href="{{ route('login') }}" class="px-4 py-2 text-sm font-semibold text-slate-600 hover:text-[#b28a57] transition-colors rounded-xl hover:bg-slate-50">Masuk</a>
+            <a href="{{ route('register') }}" class="ml-2 px-5 py-2.5 text-sm font-bold text-white bg-[#b28a57] rounded-2xl shadow-md hover:shadow-lg hover:brightness-110 transition-all">Daftar Gratis</a>
           @endauth
         </nav>
       </div>
@@ -924,7 +924,7 @@
     .mob-nav-item:hover {
       background: #fff8f2;
       border-color: rgba(167,125,82,0.25);
-      color: #a77d52;
+      color: #b28a57;
     }
     .mob-nav-item .mob-icon {
       width: 2.25rem;
@@ -935,12 +935,12 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #a77d52;
+      color: #b28a57;
       flex-shrink: 0;
       transition: background 0.18s;
     }
     .mob-nav-item:hover .mob-icon {
-      background: #a77d52;
+      background: #b28a57;
       color: #fff;
     }
   </style>
@@ -958,9 +958,9 @@
 
       {{-- Sheet Header --}}
       <div class="flex items-center justify-between px-5 py-3 border-b" style="border-color: rgba(167,125,82,0.15)">
-        <img src="{{ asset('assets/logofix.png') }}" alt="Logo PT Andalan" class="w-auto h-8">
+        <img src="{{ asset('assets/logo-brand.png') }}" alt="Logo PT Andalan" class="w-auto h-8">
         <button id="btn-menu-close"
-          class="w-9 h-9 rounded-xl flex items-center justify-center text-[#a77d52] transition hover:bg-[#a77d52]/10"
+          class="w-9 h-9 rounded-xl flex items-center justify-center text-[#b28a57] transition hover:bg-[#b28a57]/10"
           aria-label="Tutup menu">
           <svg class="w-5 h-5"><path d="M6 18L18 6M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
@@ -969,13 +969,13 @@
       {{-- Search --}}
       <div class="px-5 pt-4 pb-2">
         <form action="{{ route('jobs.index') }}" method="GET" class="relative">
-          <div class="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#a77d52]">
+          <div class="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#b28a57]">
             <svg class="w-4 h-4"><use href="#i-search"/></svg>
           </div>
           <input type="search" name="q" placeholder="Cari posisi atau lokasi..."
             class="w-full py-3 pl-10 pr-4 text-sm transition outline-none rounded-xl"
             style="background:#fff8f2; border:1.5px solid rgba(167,125,82,0.25); color:#3b2209;"
-            onfocus="this.style.borderColor='#a77d52'" onblur="this.style.borderColor='rgba(167,125,82,0.25)'">
+            onfocus="this.style.borderColor='#b28a57'" onblur="this.style.borderColor='rgba(167,125,82,0.25)'">
         </form>
       </div>
 
@@ -1000,12 +1000,12 @@
           <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 px-2 pb-1">Akun Saya</p>
           <div class="flex items-center gap-3 px-3 py-3 rounded-xl" style="background:#fff8f2;">
             <div class="flex items-center justify-center flex-shrink-0 w-10 h-10 text-sm font-bold text-white rounded-xl"
-              style="background:#a77d52">
+              style="background:#b28a57">
               {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
             </div>
             <div>
               <div class="text-sm font-bold" style="color:#3b2209">{{ auth()->user()->name }}</div>
-              <div class="text-xs capitalize" style="color:#a77d52">{{ auth()->user()->role ?? 'Pelamar' }}</div>
+              <div class="text-xs capitalize" style="color:#b28a57">{{ auth()->user()->role ?? 'Pelamar' }}</div>
             </div>
           </div>
           <a href="{{ route('profile.edit') }}" class="mob-nav-item">
@@ -1036,14 +1036,14 @@
         <div class="grid grid-cols-2 gap-3 px-4 pt-4 pb-6">
           <a href="{{ route('login') }}"
             class="flex items-center justify-center gap-2 py-3.5 rounded-xl text-sm font-bold transition"
-            style="border:2px solid #a77d52; color:#a77d52; background:#fff"
+            style="border:2px solid #b28a57; color:#b28a57; background:#fff"
             onmouseover="this.style.background='#fff8f2'" onmouseout="this.style.background='#fff'">
             <svg class="w-4 h-4"><use href="#i-user"/></svg>
             Masuk
           </a>
           <a href="{{ route('register') }}"
             class="flex items-center justify-center gap-2 py-3.5 rounded-xl text-sm font-bold text-white transition shadow-md"
-            style="background:#a77d52"
+            style="background:#b28a57"
             onmouseover="this.style.filter='brightness(1.1)'" onmouseout="this.style.filter='none'">
             <svg class="w-4 h-4"><use href="#i-apply"/></svg>
             Daftar Gratis
@@ -1291,7 +1291,7 @@
                     $typeBadge = match ($typeSlug) {
                       'contract', 'kontrak' => 'bg-amber-600',
                       'intern', 'magang'    => 'bg-emerald-600',
-                      default               => '#a77d52',
+                      default               => '#b28a57',
                     };
                     $levelLabel = is_string($job->level ?? null)
                       ? ucwords(str_replace('_', ' ', $job->level))
@@ -1307,7 +1307,7 @@
 
                     {{-- Header kartu --}}
                       <div class="flex items-start gap-3">
-                      <div class="p-2.5 rounded-2xl text-white shrink-0 shadow-sm" style="background: #a77d52">
+                      <div class="p-2.5 rounded-2xl text-white shrink-0 shadow-sm" style="background: #b28a57">
                         <svg class="w-5 h-5" aria-hidden="true"><use href="#i-briefcase"/></svg>
                       </div>
                       <div class="flex-1 min-w-0">
@@ -1331,7 +1331,7 @@
                         </div>
 
                         @if($job->code || $levelLabel)
-                          <p class="mt-1 text-[11px] font-semibold tracking-wide" style="color: #8b5e3c">
+                          <p class="mt-1 text-[11px] font-semibold tracking-wide" style="color: #946d3f">
                             @if($job->code)<span class="font-mono">{{ $job->code }}</span>@endif
                             @if($job->code && $levelLabel) <span class="opacity-40">·</span> @endif
                             @if($levelLabel){{ $levelLabel }}@endif
@@ -1363,7 +1363,7 @@
                       style="border-color: rgba(167,125,82,.2)">
                       <a href="{{ route('jobs.show', $job) }}"
                         class="inline-flex items-center gap-1 text-sm font-bold transition hover:opacity-70"
-                        style="color: #a77d52">
+                        style="color: #b28a57">
                         Lihat Detail
                         <svg class="w-3.5 h-3.5" aria-hidden="true"><use href="#i-arrow-right"/></svg>
                       </a>
@@ -1372,7 +1372,7 @@
                         @if(! auth()->user()->hasVerifiedEmail())
                           <a href="{{ route('verification.notice') }}"
                             class="inline-flex items-center gap-1.5 text-xs font-bold px-3.5 py-2 rounded-xl text-white hover:opacity-90 transition shadow-sm"
-                            style="background: #8b5e3c">
+                            style="background: #946d3f">
                             <svg class="w-3.5 h-3.5" aria-hidden="true"><use href="#i-user"/></svg>
                             Verifikasi Email
                           </a>
@@ -1381,7 +1381,7 @@
                           @csrf
                           <button type="submit"
                             class="inline-flex items-center gap-1.5 text-xs font-bold px-3.5 py-2 rounded-xl text-white hover:opacity-90 active:scale-95 transition shadow-sm"
-                            style="background: #a77d52"
+                            style="background: #b28a57"
                             data-confirm-title="Kirim lamaran?"
                             data-confirm-message="Profil kandidat akan dicek dulu sebelum lamaran dikirim.">
                             <svg class="w-3.5 h-3.5" aria-hidden="true"><use href="#i-apply"/></svg>
@@ -1392,7 +1392,7 @@
                       @else
                         <a href="{{ route('login') }}?intended={{ urlencode(route('jobs.show', $job)) }}"
                           class="inline-flex items-center gap-1.5 text-xs font-bold px-3.5 py-2 rounded-xl text-white hover:opacity-90 transition shadow-sm"
-                          style="background: #a77d52">
+                          style="background: #b28a57">
                           <svg class="w-3.5 h-3.5" aria-hidden="true"><use href="#i-user"/></svg>
                           Masuk &amp; Lamar
                         </a>
@@ -1531,7 +1531,7 @@
     </div>
   </footer>
 
-  <a href="#maincontent" id="toTop" class="p-3 text-white rounded-full shadow-lg" style="background:#a77d52" aria-label="Kembali ke atas">
+  <a href="#maincontent" id="toTop" class="p-3 text-white rounded-full shadow-lg" style="background:#b28a57" aria-label="Kembali ke atas">
     <svg class="w-5 h-5"><use href="#i-arrow-up"/></svg>
   </a>
 
@@ -1585,3 +1585,4 @@
   </script>
 </body>
 </html>
+

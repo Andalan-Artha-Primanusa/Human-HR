@@ -30,8 +30,8 @@ class SecurityTelemetryController extends Controller
         $rows = $this->filtered($request)->latest('occurred_at')->limit(50000)->cursor();
         return response()->streamDownload(function () use ($rows) {
             $out = fopen('php://output', 'w');
-            fputcsv($out, ['occurred_at','traffic_type','actor_type','user_id','http_method','route_name','route_template','status_code','request_size','response_size','response_time_ms','authenticated','authentication_status','authorization_result','request_count_10s','request_count_1m','request_count_5m','same_endpoint_count_1m','unique_endpoint_count_1m','failed_auth_count_5m','user_role','user_agent_category','binary_label','attack_type','scenario_id']);
-            foreach ($rows as $row) fputcsv($out, $row->only(['occurred_at','traffic_type','actor_type','user_id','http_method','route_name','route_template','status_code','request_size','response_size','response_time_ms','authenticated','authentication_status','authorization_result','request_count_10s','request_count_1m','request_count_5m','same_endpoint_count_1m','unique_endpoint_count_1m','failed_auth_count_5m','user_role','user_agent_category','binary_label','attack_type','scenario_id']));
+            fputcsv($out, ['occurred_at','traffic_type','actor_type','user_id','ip_hash','http_method','route_name','route_template','status_code','request_size','response_size','response_time_ms','authenticated','authentication_status','authorization_result','request_count_10s','request_count_1m','request_count_5m','same_endpoint_count_1m','unique_endpoint_count_1m','failed_auth_count_5m','user_role','user_agent_category','binary_label','attack_type','scenario_id']);
+            foreach ($rows as $row) fputcsv($out, $row->only(['occurred_at','traffic_type','actor_type','user_id','ip_hash','http_method','route_name','route_template','status_code','request_size','response_size','response_time_ms','authenticated','authentication_status','authorization_result','request_count_10s','request_count_1m','request_count_5m','same_endpoint_count_1m','unique_endpoint_count_1m','failed_auth_count_5m','user_role','user_agent_category','binary_label','attack_type','scenario_id']));
             fclose($out);
         }, 'api-security-telemetry-' . now()->format('Ymd-His') . '.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
     }
@@ -39,7 +39,8 @@ class SecurityTelemetryController extends Controller
     private function filtered(Request $request)
     {
         $q = ApiSecurityLog::query();
-        foreach (['http_method', 'route_name', 'authentication_status', 'user_role'] as $field) if ($request->filled($field)) $q->where($field, $request->input($field));
+        foreach (['traffic_type', 'http_method', 'route_name', 'authentication_status', 'user_role'] as $field) if ($request->filled($field)) $q->where($field, $request->input($field));
+        if ($request->filled('ip_hash')) $q->where('ip_hash', 'like', '%' . $request->input('ip_hash') . '%');
         if ($request->filled('status_code')) $q->where('status_code', $request->integer('status_code'));
         if ($request->filled('date_from')) $q->whereDate('occurred_at', '>=', $request->input('date_from'));
         if ($request->filled('date_to')) $q->whereDate('occurred_at', '<=', $request->input('date_to'));
@@ -57,3 +58,5 @@ class SecurityTelemetryController extends Controller
             ->count();
     }
 }
+
+

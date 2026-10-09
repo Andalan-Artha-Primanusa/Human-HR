@@ -1,8 +1,8 @@
 @extends('layouts.app', ['title' => 'Tambah POH'])
 
 @php
-    $ACCENT = '#a77d52';
-    $ACCENT_DARK = '#8b5e3c';
+    $ACCENT = '#b28a57';
+    $ACCENT_DARK = '#946d3f';
     $BORD = '#e5e7eb';
 @endphp
 
@@ -81,3 +81,4 @@
     </section>
 </div>
 @endsection
+

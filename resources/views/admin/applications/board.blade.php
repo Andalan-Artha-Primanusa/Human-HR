@@ -17,8 +17,8 @@
 /* ===== BASE ===== */
 :root {
   --br-dark: #6b3f1f;
-  --br-mid: #8b5e3c;
-  --br-light: #a77d52;
+  --br-mid: #946d3f;
+  --br-light: #b28a57;
   --br-pale: #c9a882;
   --br-bg: #f7f3ef;
   --br-surface: #f0ebe4;
@@ -125,7 +125,7 @@
 .kn-col-body::-webkit-scrollbar { width: 8px; }
 .kn-col-body::-webkit-scrollbar-track { background: #f7f3ef; border-radius: 999px; }
 .kn-col-body::-webkit-scrollbar-thumb { background: #c9a882; border-radius: 999px; }
-.kn-col-body::-webkit-scrollbar-thumb:hover { background: #a77d52; }
+.kn-col-body::-webkit-scrollbar-thumb:hover { background: #b28a57; }
 
 /* ===== CARD ===== */
 .kn-card {
@@ -145,7 +145,7 @@
 .kn-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(107,63,31,.13);
-  border-color: #a77d52;
+  border-color: #b28a57;
 }
 .kn-card:active { cursor: grabbing; }
 .kn-card.dragging { opacity: .45; transform: scale(.97); }
@@ -167,7 +167,7 @@
 .kn-subcard.hidden { display: none; }
 .kn-subcard-head {
   display: flex; align-items: center; justify-content: space-between; gap: .5rem;
-  font-size: .68rem; font-weight: 800; color: #a77d52; text-transform: uppercase; letter-spacing: .35px;
+  font-size: .68rem; font-weight: 800; color: #b28a57; text-transform: uppercase; letter-spacing: .35px;
 }
 .kn-subcard-grid {
   display: grid; grid-template-columns: 1fr 1fr; gap: .45rem .7rem; margin-top: .55rem;
@@ -224,8 +224,8 @@
 .fb-panel-toggle:hover { opacity: .85; }
 .fb-panel { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: 0; padding-top: .6rem; padding-bottom: .4rem; border-top: 1px solid #f0e9df; }
 .fb-panel.hidden { display: none; }
-.btn-detail-toggle { background: #fff; border-color: #a77d52; color: #7a4f2a; }
-.btn-detail-toggle:hover { background: #f7f0e8; border-color: #a77d52; }
+.btn-detail-toggle { background: #fff; border-color: #b28a57; color: #7a4f2a; }
+.btn-detail-toggle:hover { background: #f7f0e8; border-color: #b28a57; }
 
 /* ===== BUTTONS ===== */
 .btn-xs {
@@ -245,11 +245,11 @@
   .kn-col { width: 400px; flex-basis: 400px; }
   .kn-card { max-height: none; padding: 1.3rem; overflow-y: visible; }
 }
-.btn-outline  { background: #fff; border-color: #a77d52; color: #7a4f2a; }
-.btn-outline:hover { background: #f7f0e8; border-color: #a77d52; }
-.btn-primary  { background: #a77d52; border-color: transparent; color: #fff; }
+.btn-outline  { background: #fff; border-color: #b28a57; color: #7a4f2a; }
+.btn-outline:hover { background: #f7f0e8; border-color: #b28a57; }
+.btn-primary  { background: #b28a57; border-color: transparent; color: #fff; }
 .btn-primary:hover { opacity: .9; }
-.btn-sched    { background: linear-gradient(135deg,#8b5e3c,#6b3f1f); border-color: transparent; color: #fff; }
+.btn-sched    { background: linear-gradient(135deg,#946d3f,#6b3f1f); border-color: transparent; color: #fff; }
 .btn-sched:hover { opacity: .9; }
 .btn-move     { background: linear-gradient(135deg,#1a6b35,#0f4d26); border-color: transparent; color: #fff; }
 .btn-move:hover { opacity: .9; }
@@ -303,7 +303,7 @@
 textarea.fm-ctrl { resize: vertical; min-height: 80px; }
 
 .kn-modal-section {
-  font-size: .65rem; font-weight: 800; color: #a77d52;
+  font-size: .65rem; font-weight: 800; color: #b28a57;
   padding: 1.2rem 0 .4rem; margin-bottom: .8rem;
   border-bottom: 1px solid #f0e8df;
   text-transform: uppercase; letter-spacing: .8px;
@@ -556,7 +556,7 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
                   </div>
 
                   <div class="mt-3 overflow-hidden border rounded-lg border-[#eadbcb] bg-white" style="font-size: 0.7rem;">
-                    <div class="px-2 py-1.5 font-bold uppercase text-[#a77d52] bg-[#faf6f1] border-b border-[#eadbcb]">
+                    <div class="px-2 py-1.5 font-bold uppercase text-[#b28a57] bg-[#faf6f1] border-b border-[#eadbcb]">
                       OL Status
                     </div>
                     <div class="px-2 py-2">
@@ -1047,7 +1047,7 @@ textarea.fm-ctrl { resize: vertical; min-height: 80px; }
           <div id="gt-lap-existing" style="font-size:0.65rem; color:#888; margin-top:4px;">
             <div style="margin-top: 4px;">
               <span id="gt-lap-filename"></span>
-              <a id="gt-lap-view-btn" href="#" target="_blank" style="margin-left: 8px; color: #a77d52; text-decoration: underline; font-weight: 500; display: none;">
+              <a id="gt-lap-view-btn" href="#" target="_blank" style="margin-left: 8px; color: #b28a57; text-decoration: underline; font-weight: 500; display: none;">
                 📄 Buka File
               </a>
             </div>
@@ -1188,7 +1188,7 @@ function openFbModal(btn) {
     html += `
       <div style="margin-bottom:16px; padding:12px; background:#f8fafc; border-radius:8px; border-left:4px solid ${color}">
         <div style="font-weight:bold; font-size:0.75rem; color:#64748b; text-transform:uppercase; margin-bottom:4px;">${title}</div>
-        <div style="font-size:0.875rem; color:#a77d52; white-space:pre-wrap;">${feedbackText}</div>
+        <div style="font-size:0.875rem; color:#b28a57; white-space:pre-wrap;">${feedbackText}</div>
         ${approveStatus ? `<div style="margin-top:8px; font-size:0.75rem; font-weight:bold; color:${approveStatus === 'yes' ? '#10b981' : '#ef4444'}">${approveStatus === 'yes' ? '✓ SETUJU' : '✕ TIDAK SETUJU'}</div>` : ''}
       </div>
     `;
@@ -1718,3 +1718,4 @@ function openHistoryModal(appId, name) {
 </script>
 
 @endsection
+

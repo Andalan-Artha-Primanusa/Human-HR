@@ -2,10 +2,10 @@
 @extends('layouts.app', ['title' => 'Admin · Interviews'])
 
 @php
-    $ACCENT = '#a77d52';
-    $ACCENT_DARK = '#8b5e3c';
+    $ACCENT = '#b28a57';
+    $ACCENT_DARK = '#946d3f';
     $BORD = '#e5e7eb'; // slate-200
-    $DARK = '#a77d52'; // slate-900-like, untuk tombol gelap
+    $DARK = '#b28a57'; // slate-900-like, untuk tombol gelap
 @endphp
 
 @section('content')
@@ -60,7 +60,7 @@
         <div class="overflow-x-auto">
           @if(($interviews->count() ?? 0) > 0)
             <table class="min-w-[960px] w-full text-sm">
-              <thead class="text-white bg-[#a77d52]">
+              <thead class="text-white bg-[#b28a57]">
                 <tr>
                   <th class="w-56 px-4 py-3 text-left">Tanggal</th>
                   <th class="px-4 py-3 text-left w-60">Kandidat</th>
@@ -109,7 +109,7 @@
                             {{ $iv->location ?? '—' }}
                           @else
                             @if($iv->meeting_link)
-                                  <a class="text-[#a77d52] hover:underline" href="{{ $iv->meeting_link }}" target="_blank" rel="noopener">
+                                  <a class="text-[#b28a57] hover:underline" href="{{ $iv->meeting_link }}" target="_blank" rel="noopener">
                                     Join link
                                   </a>
                             @else
@@ -241,3 +241,4 @@
       @endif
     </div>
 @endsection
+

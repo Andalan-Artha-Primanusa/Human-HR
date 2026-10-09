@@ -6,8 +6,8 @@
     use Illuminate\Support\Facades\Storage;
     use Illuminate\Support\Str;
 
-    $ACCENT = '#a77d52';
-    $ACCENT_DARK = '#8b5e3c';
+    $ACCENT = '#b28a57';
+    $ACCENT_DARK = '#946d3f';
     $BORD = '#e5e7eb';
     $profile = $candidateProfile ?? $user->candidateProfile;
     $displayName = $profile?->full_name ?: $user->name;
@@ -155,19 +155,19 @@
     <div class="rounded-2xl border border-[#ede4dc] bg-white p-5 shadow-sm">
       <div class="flex items-center justify-between">
         <div class="text-xs font-semibold uppercase tracking-wide text-slate-500">Kelengkapan</div>
-        <span class="grid h-9 w-9 place-items-center rounded-xl bg-[#fdf7f0] text-[#a77d52]">
+        <span class="grid h-9 w-9 place-items-center rounded-xl bg-[#fdf7f0] text-[#b28a57]">
           <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg>
         </span>
       </div>
       <div class="mt-2 text-3xl font-bold text-[#5c3d1e]">{{ $profileCompleteness }}%</div>
       <div class="mt-3 h-2.5 overflow-hidden rounded-full bg-[#f0e7dc]">
-        <div class="h-2.5 rounded-full bg-[#a77d52]" style="width: {{ $profileCompleteness }}%"></div>
+        <div class="h-2.5 rounded-full bg-[#b28a57]" style="width: {{ $profileCompleteness }}%"></div>
       </div>
     </div>
     <div class="rounded-2xl border border-[#ede4dc] bg-white p-5 shadow-sm">
       <div class="flex items-center justify-between">
         <div class="text-xs font-semibold uppercase tracking-wide text-slate-500">Lamaran</div>
-        <span class="grid h-9 w-9 place-items-center rounded-xl bg-[#fdf7f0] text-[#a77d52]">
+        <span class="grid h-9 w-9 place-items-center rounded-xl bg-[#fdf7f0] text-[#b28a57]">
           <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 7h18v10a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V7Z"/><path d="M8 7V6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v1"/></svg>
         </span>
       </div>
@@ -177,7 +177,7 @@
     <div class="rounded-2xl border border-[#ede4dc] bg-white p-5 shadow-sm">
       <div class="flex items-center justify-between">
         <div class="text-xs font-semibold uppercase tracking-wide text-slate-500">Pelatihan</div>
-        <span class="grid h-9 w-9 place-items-center rounded-xl bg-[#fdf7f0] text-[#a77d52]">
+        <span class="grid h-9 w-9 place-items-center rounded-xl bg-[#fdf7f0] text-[#b28a57]">
           <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m12 3 10 5-10 5L2 8Z"/><path d="M6 10v5c0 1 3 3 6 3s6-2 6-3v-5"/></svg>
         </span>
       </div>
@@ -187,7 +187,7 @@
     <div class="rounded-2xl border border-[#ede4dc] bg-white p-5 shadow-sm">
       <div class="flex items-center justify-between">
         <div class="text-xs font-semibold uppercase tracking-wide text-slate-500">Pengalaman</div>
-        <span class="grid h-9 w-9 place-items-center rounded-xl bg-[#fdf7f0] text-[#a77d52]">
+        <span class="grid h-9 w-9 place-items-center rounded-xl bg-[#fdf7f0] text-[#b28a57]">
           <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 21h18M5 21V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v14M9 9h6M9 13h6M9 17h4"/></svg>
         </span>
       </div>
@@ -251,7 +251,7 @@
             @forelse($documents as $document)
               <a target="_blank" href="{{ Storage::disk('public')->url($document['path']) }}" class="flex items-center justify-between gap-3 rounded-xl border border-slate-200 px-3 py-2 text-sm hover:bg-slate-50">
                 <span class="min-w-0 truncate font-medium text-slate-800">{{ $document['name'] }}</span>
-                <span class="shrink-0 text-xs font-semibold text-[#8b5e3c]">Lihat</span>
+                <span class="shrink-0 text-xs font-semibold text-[#946d3f]">Lihat</span>
               </a>
             @empty
               <div class="rounded-xl bg-slate-50 p-3 text-sm text-slate-500">Belum ada dokumen tersimpan.</div>
@@ -339,7 +339,7 @@
                     <div class="font-semibold text-slate-950">{{ $application->job?->title ?: 'Lowongan' }}</div>
                     <div class="mt-1 text-sm text-slate-500">{{ $application->job?->code ?: '-' }} · {{ $application->job?->site?->name ?: 'Site belum diisi' }}</div>
                   </div>
-                  <span class="rounded-full bg-[#fff4e4] px-3 py-1 text-xs font-semibold capitalize text-[#8b5e3c]">{{ str_replace('_', ' ', $application->current_stage ?: $application->overall_status ?: 'active') }}</span>
+                  <span class="rounded-full bg-[#fff4e4] px-3 py-1 text-xs font-semibold capitalize text-[#946d3f]">{{ str_replace('_', ' ', $application->current_stage ?: $application->overall_status ?: 'active') }}</span>
                 </div>
                 <div class="mt-3 text-xs text-slate-500">Diajukan: {{ $fmtDateTime($application->created_at) }}</div>
               </div>
@@ -422,3 +422,4 @@
   </section>
 </div>
 @endsection
+

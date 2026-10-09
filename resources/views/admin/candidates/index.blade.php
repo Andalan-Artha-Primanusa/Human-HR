@@ -3,8 +3,8 @@
 
 @php
     // THEME (solid)
-    $ACCENT = '#a77d52'; // brown
-    $ACCENT_DARK = '#8b5e3c'; // dark brown
+    $ACCENT = '#b28a57'; // brown
+    $ACCENT_DARK = '#946d3f'; // dark brown
     $BORD = '#e5e7eb'; // slate-200
     $fmtBirthdate = function ($date) {
         if (!$date) return null;
@@ -127,7 +127,7 @@
         @if($profiles->count())
             <div class="overflow-x-auto">
               <table class="min-w-full text-sm">
-                <thead class="text-white bg-[#a77d52]">
+                <thead class="text-white bg-[#b28a57]">
                   <tr>
                     <th class="px-4 py-3 text-left">Nama</th>
                     <th class="px-4 py-3 text-left">Email</th>
@@ -402,3 +402,4 @@
       });
     </script>
 @endsection
+

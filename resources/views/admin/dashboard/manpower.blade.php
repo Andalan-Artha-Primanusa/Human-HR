@@ -1,7 +1,7 @@
 @extends('layouts.app', ['title' => 'Admin · Manpower Dashboard'])
 
 @php
-    $primary = '#a77d52';
+    $primary = '#b28a57';
     $secondary = '#8b9f6f';
     $accent = '#2f6f6d';
     $danger = '#b45309';
@@ -45,7 +45,7 @@
         <p class="mt-1 text-xs text-slate-500">Pilih site dan periode untuk melihat manpower, progress stage, interview, dan grafik khusus data tersebut.</p>
       </div>
       <div class="flex flex-col gap-2 lg:flex-row lg:items-center">
-        <select name="site_id" class="min-w-[260px] rounded-xl border-slate-200 text-sm focus:border-[#a77d52] focus:ring-[#a77d52]">
+        <select name="site_id" class="min-w-[260px] rounded-xl border-slate-200 text-sm focus:border-[#b28a57] focus:ring-[#b28a57]">
           <option value="">Semua Site</option>
           @foreach($sites as $site)
             <option value="{{ $site->id }}" @selected($selectedSiteId === $site->id)>
@@ -53,14 +53,14 @@
             </option>
           @endforeach
         </select>
-        <input type="date" name="start_date" value="{{ $periodStart }}" class="rounded-xl border-slate-200 text-sm focus:border-[#a77d52] focus:ring-[#a77d52]">
-        <input type="date" name="end_date" value="{{ $periodEnd }}" class="rounded-xl border-slate-200 text-sm focus:border-[#a77d52] focus:ring-[#a77d52]">
-        <button class="rounded-xl bg-[#a77d52] px-4 py-2 text-sm font-semibold text-white hover:opacity-95">Terapkan</button>
+        <input type="date" name="start_date" value="{{ $periodStart }}" class="rounded-xl border-slate-200 text-sm focus:border-[#b28a57] focus:ring-[#b28a57]">
+        <input type="date" name="end_date" value="{{ $periodEnd }}" class="rounded-xl border-slate-200 text-sm focus:border-[#b28a57] focus:ring-[#b28a57]">
+        <button class="rounded-xl bg-[#b28a57] px-4 py-2 text-sm font-semibold text-white hover:opacity-95">Terapkan</button>
         <a href="{{ route('dashboard') }}" class="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Reset</a>
       </div>
     </form>
     <div class="mt-3 flex flex-wrap gap-2">
-      <span class="inline-flex rounded-full bg-[#f8f5f1] px-3 py-1 text-xs font-semibold text-[#8b5e3c] ring-1 ring-inset ring-[#ead8c5]">
+      <span class="inline-flex rounded-full bg-[#f8f5f1] px-3 py-1 text-xs font-semibold text-[#946d3f] ring-1 ring-inset ring-[#ead8c5]">
         Tampilan: {{ $selectedSite ? (($selectedSite->code ?? '') . ' - ' . ($selectedSite->name ?? '')) : 'Semua Site' }}
       </span>
       <span class="inline-flex rounded-full bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-600 ring-1 ring-inset ring-slate-200">
@@ -89,7 +89,7 @@
           <p class="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">{{ $card['label'] }}</p>
           <span class="text-lg">{{ $card['icon'] }}</span>
         </div>
-        <p class="mt-2 text-xl font-bold text-[#a77d52]">{{ $card['value'] }}</p>
+        <p class="mt-2 text-xl font-bold text-[#b28a57]">{{ $card['value'] }}</p>
         <p class="mt-1 text-[11px] text-slate-500">{{ $card['hint'] }}</p>
       </div>
     @endforeach
@@ -119,7 +119,7 @@
       <div class="flex items-end justify-between gap-4 mt-3">
         <div>
           <div class="text-sm text-slate-500">Stage</div>
-          <div class="text-base font-bold text-[#a77d52]">{{ $failedStageName ?? '-' }}</div>
+          <div class="text-base font-bold text-[#b28a57]">{{ $failedStageName ?? '-' }}</div>
         </div>
         <div class="text-right">
           <div class="text-sm text-slate-500">Total Gagal</div>
@@ -233,7 +233,7 @@
         @forelse($olRejectionReasons as $item)
           <div class="flex items-start justify-between gap-4 p-3 rounded-xl bg-slate-50">
             <div class="text-sm text-slate-700 leading-snug">{{ $item['reason'] }}</div>
-            <div class="shrink-0 text-sm font-bold text-[#a77d52]">{{ $item['total'] }}</div>
+            <div class="shrink-0 text-sm font-bold text-[#b28a57]">{{ $item['total'] }}</div>
           </div>
         @empty
           <div class="p-4 text-sm text-slate-500 rounded-xl bg-slate-50">Belum ada OL yang ditolak.</div>
@@ -331,8 +331,8 @@
       </div>
       <div class="grid grid-cols-3 gap-2 text-center">
         <div class="rounded-xl bg-[#f8f5f1] px-4 py-2">
-          <div class="text-[10px] uppercase tracking-[0.18em] text-[#8b5e3c]">Total</div>
-          <div class="text-lg font-bold text-[#8b5e3c]">{{ (int) ($interviewTotals['total'] ?? 0) }}</div>
+          <div class="text-[10px] uppercase tracking-[0.18em] text-[#946d3f]">Total</div>
+          <div class="text-lg font-bold text-[#946d3f]">{{ (int) ($interviewTotals['total'] ?? 0) }}</div>
         </div>
         <div class="px-4 py-2 rounded-xl bg-sky-50">
           <div class="text-[10px] uppercase tracking-[0.18em] text-sky-700">Online</div>
@@ -395,7 +395,7 @@
         <h2 class="text-sm font-semibold text-slate-900">MPP Fulfillment & Stage Progress</h2>
         <p class="text-[11px] text-slate-500">Format monitoring MPP: MPP dari openings job, QTY dari hired, DEV = QTY - MPP, UPDATE DEV = Total Progress + DEV.</p>
       </div>
-      <span class="text-[11px] font-semibold text-[#8b5e3c]">{{ $mppRows->count() }} posisi</span>
+      <span class="text-[11px] font-semibold text-[#946d3f]">{{ $mppRows->count() }} posisi</span>
     </div>
 
     <div class="overflow-x-auto border rounded-2xl border-slate-200">
@@ -452,7 +452,7 @@
               <td class="px-3 py-2 text-right">{{ $row['fu_mcu'] }}</td>
               <td class="px-3 py-2 text-right">{{ $row['waiting_inbound'] }}</td>
               <td class="px-3 py-2 text-right">{{ $row['travel'] }}</td>
-              <td class="px-3 py-2 font-semibold text-right text-[#8b5e3c]">{{ $row['total_progress'] }}</td>
+              <td class="px-3 py-2 font-semibold text-right text-[#946d3f]">{{ $row['total_progress'] }}</td>
               <td class="px-3 py-2 text-right font-semibold {{ $row['update_dev'] < 0 ? 'text-red-700' : 'text-slate-800' }}">{{ $row['update_dev'] }}</td>
             </tr>
           @empty
@@ -477,7 +477,7 @@
             <td class="px-3 py-3 text-right">{{ (int) ($mppTotals['fu_mcu'] ?? 0) }}</td>
             <td class="px-3 py-3 text-right">{{ (int) ($mppTotals['waiting_inbound'] ?? 0) }}</td>
             <td class="px-3 py-3 text-right">{{ (int) ($mppTotals['travel'] ?? 0) }}</td>
-            <td class="px-3 py-3 text-right text-[#8b5e3c]">{{ (int) ($mppTotals['total_progress'] ?? 0) }}</td>
+            <td class="px-3 py-3 text-right text-[#946d3f]">{{ (int) ($mppTotals['total_progress'] ?? 0) }}</td>
             <td class="px-3 py-3 text-right">{{ (int) ($mppTotals['update_dev'] ?? 0) }}</td>
           </tr>
         </tfoot>
@@ -489,7 +489,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-const primary = '#a77d52';
+const primary = '#b28a57';
 const secondary = '#8b9f6f';
 const accent = '#2f6f6d';
 const danger = '#b45309';
@@ -671,3 +671,4 @@ new Chart(document.getElementById('trendChart'), {
 </script>
 
 @endsection
+

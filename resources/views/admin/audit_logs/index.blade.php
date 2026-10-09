@@ -2,8 +2,8 @@
 @extends('layouts.app', ['title' => 'Admin · Audit Logs'])
 
 @php
-    $PRIMARY = '#a77d52';
-    $SECOND = '#8b5e3c';
+    $PRIMARY = '#b28a57';
+    $SECOND = '#946d3f';
     $BORD = '#e5e7eb';
 @endphp
 
@@ -99,7 +99,7 @@
       <section class="bg-white border shadow-sm rounded-2xl" style="border-color: {{ $BORD }}">
         <div class="overflow-x-auto">
           <table class="min-w-full text-sm">
-            <thead class="text-white bg-[#a77d52]">
+            <thead class="text-white bg-[#b28a57]">
               <tr>
                 <th class="px-4 py-3 text-left">Time</th>
                 <th class="px-4 py-3 text-left">Event</th>
