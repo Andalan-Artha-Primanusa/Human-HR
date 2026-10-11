@@ -4,10 +4,9 @@
 
 @section('content')
 <div class="max-w-7xl px-4 py-6 mx-auto space-y-5">
-  <div class="flex flex-wrap items-center justify-between gap-3">
-    <div><h1 class="text-2xl font-bold text-slate-900">API Activity Monitoring</h1><p class="mt-1 text-sm text-slate-500">Telemetry perilaku request API dan autentikasi.</p></div>
-    <a href="{{ route('admin.security.api-activity.export', request()->query()) }}" class="px-4 py-2 text-sm font-semibold text-white rounded-lg bg-[#b28a57]">Export CSV</a>
-  </div>
+  <x-admin.page-header title="API Activity Monitoring" description="Telemetry perilaku request API dan autentikasi.">
+    <a href="{{ route('admin.security.api-activity.export', request()->query()) }}" class="ph-action ph-action--brand">Export CSV</a>
+  </x-admin.page-header>
   <div class="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
     @foreach(['requests_today'=>'Requests Today','avg_request_per_minute'=>'Avg Request/Minute','authentication_failures'=>'Authentication Failures','high_frequency_requests'=>'High Frequency Requests','unique_api_endpoints'=>'Unique API/Web Endpoints','active_actors'=>'Active Actors'] as $key => $label)
       <div class="p-4 bg-white border rounded-xl border-slate-200"><div class="text-xs text-slate-500">{{ $label }}</div><div class="mt-1 text-2xl font-bold text-slate-900">{{ number_format($metrics[$key] ?? 0) }}</div></div>

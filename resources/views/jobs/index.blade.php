@@ -602,8 +602,9 @@
                 </div>
 
                 <a href="{{ route('jobs.show', $job) }}?apply=1#apply"
-                   class="shrink-0 rounded-2xl bg-white px-5 py-3 text-sm font-bold text-[#7b5637]
-                          shadow-lg shadow-black/10 transition hover:-translate-y-0.5 hover:bg-[#fff8f0] focus:outline-none">
+                   class="shrink-0 rounded-2xl px-5 py-3 text-sm font-bold text-white
+                          shadow-lg shadow-black/10 transition hover:-translate-y-0.5 focus:outline-none"
+                   style="background-color:#b28a57;color:#fff">
                   Lamar →
                 </a>
 
