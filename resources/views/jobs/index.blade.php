@@ -565,35 +565,33 @@
             id="detail-{{ $job->id }}"
             class="jobs-detail overflow-hidden rounded-[1.35rem]">
 
-            <div class="bg-gradient-to-br from-[#b28a57] to-[#7b5637] px-5 py-5 text-white md:px-6">
+            <div class="px-5 py-5 md:px-6" style="background:#fff;color:#111827">
 
               {{-- ── Header ── --}}
               <div class="flex flex-col gap-4 sm:flex-row sm:items-start">
 
-                <span class="grid w-12 h-12 text-white shrink-0 place-items-center rounded-xl ring-1 bg-white/15 ring-white/25">
+                <span class="grid w-12 h-12 shrink-0 place-items-center rounded-xl ring-1" style="background:#f3e8db;color:#946d3f;border-color:#d9bc9d">
                   <svg class="w-5 h-5"><use href="#{{ $meta['icon'] }}"/></svg>
                 </span>
 
                 <div class="flex-1 min-w-0">
                   <div class="flex flex-wrap items-center gap-2">
-                    <h2 class="text-2xl font-bold leading-tight">{{ e($job->title) }}</h2>
-                    <span class="rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-bold text-white ring-1 ring-white/30">
+                    <h2 class="text-2xl font-bold leading-tight text-slate-900" style="color:#111827">{{ e($job->title) }}</h2>
+                    <span class="rounded-full px-2.5 py-1 text-[11px] font-bold ring-1" style="background:#f3e8db;color:#5c3d1e;border-color:#d9bc9d">
                       {{ e($type) }}
                     </span>
                     @if($isOpen)
-                      <span class="rounded-full border border-white/30 bg-white/15
-                                   px-2.5 py-1 text-[10.5px] font-bold text-white uppercase tracking-wide">
+                      <span class="rounded-full border px-2.5 py-1 text-[10.5px] font-bold uppercase tracking-wide" style="background:#dcfce7;color:#166534;border-color:#86efac">
                         OPEN
                       </span>
                     @else
-                      <span class="rounded-full border border-white/30 bg-white/15
-                                   px-2.5 py-1 text-[10.5px] font-bold text-white uppercase tracking-wide">
+                      <span class="rounded-full border px-2.5 py-1 text-[10.5px] font-bold uppercase tracking-wide" style="background:#fef2f2;color:#991b1b;border-color:#fecaca">
                         {{ strtoupper($job->status ?? '—') }}
                       </span>
                     @endif
                   </div>
                   @if($job->code || $job->division)
-                    <p class="mt-2 text-sm text-white/80">
+                    <p class="mt-2 text-sm" style="color:#5c3d1e">
                       @if($job->code)Kode: {{ e($job->code) }}@endif
                       @if($job->code && $job->division) &nbsp;·&nbsp; @endif
                       @if($job->division){{ e($job->division) }}@endif

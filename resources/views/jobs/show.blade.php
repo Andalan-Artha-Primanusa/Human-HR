@@ -379,13 +379,13 @@
 
             @auth
               @if(!$emailVerifiedForApplication)
-                    <button type="button" class="ph-action ph-action--brand" data-focus-email-verification-popup>
+                    <button type="button" class="ph-action ph-action--brand" style="background-color:#b28a57;color:#fff" data-focus-email-verification-popup>
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                       Verifikasi Email Dulu
                     </button>
               @elseif(($job->status ?? 'draft') === 'open' && !$myApp)
                     <form method="POST" action="{{ route('applications.store', $job) }}" id="applyForm" class="inline">@csrf
-                      <button type="submit" class="ph-action ph-action--brand">
+                      <button type="submit" class="ph-action ph-action--brand" style="background-color:#b28a57;color:#fff">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
                         Lamar Sekarang
                       </button>
@@ -405,7 +405,7 @@
                     <button type="button" disabled class="ph-action" aria-disabled="true">Tutup</button>
               @endif
             @else
-              <a href="{{ $loginApplyUrl }}" class="ph-action ph-action--brand">
+              <a href="{{ $loginApplyUrl }}" class="ph-action ph-action--brand" style="background-color:#b28a57;color:#fff">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/></svg>
                 Login untuk Melamar
               </a>
