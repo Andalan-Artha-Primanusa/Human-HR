@@ -120,7 +120,7 @@
   /* ===== ACTIVE — maroon gelap (#5c3d1e) ===== */
   .side-link.is-active,
   .side-link.font-bold {
-    background:rgba(167,125,82,0.2) !important;
+    background:#b28a57 !important;
     color:#fff !important;
     font-weight:700 !important;
     border-left-color:#d7b98e !important;

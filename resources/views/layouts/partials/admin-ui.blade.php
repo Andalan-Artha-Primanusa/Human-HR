@@ -150,11 +150,11 @@
     gap: .55rem;
     font-size: 1.05rem;
     font-weight: 700;
-    color: #5c3d1e !important;
+    color: #fff !important;
     padding: .35rem .9rem;
     border-radius: .75rem;
-    background-color: #fdf7f0;
-    border: 1px solid #f0e7dc;
+    background-color: #b28a57 !important;
+    border: 1px solid #b28a57 !important;
     letter-spacing: -.01em;
     white-space: nowrap;
     overflow: hidden;
@@ -165,7 +165,7 @@
     width: .5rem;
     height: .5rem;
     border-radius: 9999px;
-    background-color: #b28a57;
+    background-color: #fff;
     flex-shrink: 0;
   }
   @media (max-width: 767px) {

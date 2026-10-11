@@ -44,6 +44,20 @@
   #globalFeedbackModal.gf-success .gf-badge { background: #dcfce7; color: #047857; }
   #globalFeedbackModal .gf-badge.spin .gf-glyph { animation: gfSpin 6s linear infinite; }
   #globalFeedbackModal .gf-glyph { width: 1.45rem; height: 1.45rem; }
+  /* Tombol modal harus selalu terlihat meskipun kelas utilitas belum masuk
+     ke bundle CSS lama. */
+  #globalFeedbackModal #globalFeedbackOk {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    min-width: 5.5rem;
+    background: #b28a57 !important;
+    color: #fff !important;
+    border: 0 !important;
+    border-radius: .5rem;
+  }
+  #globalFeedbackModal #globalFeedbackOk:hover { background: #946d3f !important; }
+  #globalFeedbackModal #globalFeedbackCancel { color: #5c3d1e !important; }
 </style>
 
 <div id="globalFeedbackModal"
