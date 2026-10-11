@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -69,8 +70,7 @@ class JobController extends Controller
             : null;
 
         // 2) Query dasar (kolom minimal + eager load ketat)
-        $baseQuery = Job::query()
-            ->select([
+        $jobColumns = [
                 'id',
                 'code',
                 'title',
@@ -83,10 +83,18 @@ class JobController extends Controller
                 'status',
                 'description',
                 'keywords',
-                'skills', // <-- tambahkan ini
                 'created_at',
                 'updated_at'
-            ])
+            ];
+        // Beberapa database lama belum memiliki kolom skills. Halaman daftar
+        // Jobs tidak membutuhkan kolom ini, jadi jangan biarkan satu kolom
+        // opsional membuat seluruh halaman menjadi 500.
+        if (Schema::hasColumn('job_listings', 'skills')) {
+            $jobColumns[] = 'skills';
+        }
+
+        $baseQuery = Job::query()
+            ->select($jobColumns)
             ->with([
                 'site:id,code,name,address,region',
                 'company:id,code,name',
