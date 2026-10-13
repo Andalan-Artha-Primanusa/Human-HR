@@ -412,9 +412,40 @@
           </form>
         </div>
 
-        {{-- Job items --}}
-        <ul class="max-h-[78vh] space-y-2 overflow-y-auto p-2">
-          @foreach($jobs as $idx => $job)
+        {{-- Job items, grouped by site --}}
+        @php
+          $jobsBySite = $jobs->getCollection()->groupBy(function ($job) {
+              $siteCode = trim((string) ($job->site?->code ?? $job->site_code ?? ''));
+              $siteName = trim((string) ($job->site?->name ?? $job->site_name ?? ''));
+              return $siteCode !== '' ? $siteCode : ($siteName !== '' ? $siteName : 'Tanpa Site');
+          });
+          $displayIdx = 0;
+        @endphp
+        <ul class="max-h-[78vh] space-y-3 overflow-y-auto p-2">
+          @foreach($jobsBySite as $siteKey => $siteJobs)
+            @php
+              $siteCode = trim((string) ($siteJobs->first()->site?->code ?? $siteJobs->first()->site_code ?? ''));
+              $siteName = trim((string) ($siteJobs->first()->site?->name ?? $siteJobs->first()->site_name ?? ''));
+              $siteRegion = trim((string) ($siteJobs->first()->site?->region ?? ''));
+              $siteHeading = $siteRegion !== '' ? $siteRegion : ($siteName !== '' ? $siteName : 'Tanpa Site');
+              $siteSubheading = $siteCode !== '' && $siteName !== ''
+                  ? $siteCode . ' — ' . $siteName
+                  : ($siteCode !== '' ? $siteCode : $siteName);
+            @endphp
+            <li class="sticky top-0 z-10 rounded-xl border border-[#d9bc9d] bg-[#b28a57] px-3.5 py-3 shadow-sm">
+              <div class="flex items-center justify-between gap-3">
+                <div class="min-w-0">
+                  <p class="text-[10px] font-semibold uppercase tracking-[.14em] text-white/80">Kota / Site</p>
+                  <p class="truncate text-sm font-bold text-white">{{ e($siteHeading) }}</p>
+                  @if($siteSubheading !== '')
+                    <p class="truncate text-[10px] text-white/85">{{ e($siteSubheading) }}</p>
+                  @endif
+                </div>
+                <span class="shrink-0 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-bold text-[#5c3d1e]">{{ $siteJobs->count() }} job</span>
+              </div>
+            </li>
+            @foreach($siteJobs as $job)
+              @php $idx = $displayIdx++; @endphp
             @php
               $typeRaw  = $job->employment_type ?? '';
               $type     = strtoupper($typeRaw ?: '-');
@@ -508,6 +539,7 @@
                 </div>
               </button>
             </li>
+            @endforeach
           @endforeach
         </ul>
 
