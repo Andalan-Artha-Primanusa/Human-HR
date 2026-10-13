@@ -277,7 +277,20 @@
 @endphp
 
 @section('content')
-    <div class="mx-auto w-full max-w-[1400px] px-4 sm:px-6 lg:px-8 py-6">
+    <style>
+      .job-detail-page { --jd-gold:#b58b56; --jd-ink:#172033; --jd-muted:#64748b; }
+      .job-detail-page .job-detail-hero { border:1px solid #e2e8f0; border-radius:18px; background:#fffdf9 !important; color:var(--jd-ink) !important; box-shadow:0 10px 28px rgba(23,32,51,.06); }
+      .job-detail-page .job-detail-hero .page-header__title { color:var(--jd-ink) !important; }
+      .job-detail-page .job-detail-hero .page-header__eyebrow { color:#98703d !important; }
+      .job-detail-page .job-detail-hero .page-header__desc { color:var(--jd-muted) !important; }
+      .job-detail-page .job-detail-hero .page-header__actions .ph-action { border-color:#dfc9b0; color:#6f4d2f; background:#fff; }
+      .job-detail-page .job-detail-hero .page-header__actions .ph-action--brand { background:var(--jd-gold) !important; color:#fff !important; border-color:var(--jd-gold); }
+      .job-detail-page .job-summary-card { transition:transform .18s ease, box-shadow .18s ease; }
+      .job-detail-page .job-summary-card:hover { transform:translateY(-2px); box-shadow:0 10px 24px rgba(23,32,51,.08); }
+      @media (min-width:1024px) { .job-detail-page .job-detail-hero { min-height:190px; } }
+      @media (max-width:767px) { .job-detail-page .page-header__actions { width:100%; justify-content:flex-start; } .job-detail-page .page-header__actions .ph-action { flex:1; } }
+    </style>
+    <div class="job-detail-page mx-auto w-full max-w-[1600px] bg-[#f8fafc] px-4 py-6 sm:px-6 lg:px-8">
 
       {{-- BREADCRUMB --}}
       <nav class="mb-4" aria-label="Breadcrumb">
@@ -307,6 +320,7 @@
 
           <div class="absolute flex gap-2 right-2 top-2">
             <a href="{{ url()->previous() }}" class="inline-flex items-center gap-1 px-2 py-1 text-xs bg-white border rounded-md border-slate-200 text-slate-600 hover:bg-slate-50">← Kembali</a>
+            <a href="{{ route('jobs.index') }}" class="inline-flex items-center gap-1 px-2 py-1 text-xs bg-white border rounded-md border-slate-200 text-slate-600 hover:bg-slate-50">Lihat Semua Lowongan</a>
             <button type="button"
                     onclick="navigator.clipboard?.writeText('{{ e(request()->fullUrl()) }}'); this.innerText='Tautan Disalin'; setTimeout(()=>this.innerText='Salin Tautan',1500)"
                     class="inline-flex items-center gap-1 px-2 py-1 text-xs bg-white border rounded-md border-slate-200 text-slate-600 hover:bg-slate-50">
@@ -317,7 +331,7 @@
       </nav>
 
 {{-- HEADER (shared solid-brown page-header) --}}
-      <section class="page-header" aria-labelledby="job-detail-title">
+      <section class="page-header job-detail-hero" aria-labelledby="job-detail-title">
         <div class="page-header__inner">
           <div class="page-header__copy">
             <p class="page-header__eyebrow">Detail Lowongan</p>
@@ -415,13 +429,13 @@
       </section>
 
       {{-- GRID UTAMA --}}
-      <div class="mt-6 space-y-6">
+      <div class="mt-6 grid items-start gap-6 lg:grid-cols-[minmax(0,1.65fr)_minmax(320px,.9fr)]">
         {{-- LEFT --}}
         <div class="space-y-6">
           {{-- Ringkasan --}}
           <div class="p-5 bg-white border shadow-sm rounded-2xl border-[#ead8c5] md:p-6">
             <div class="grid gap-4 sm:grid-cols-3">
-              <div class="px-4 py-4 border rounded-xl border-[#ead8c5] bg-[#fffaf5]">
+              <div class="job-summary-card px-4 py-4 border rounded-xl border-[#ead8c5] bg-[#fffaf5]">
                 <div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-[#946d3f]">
                   <svg class="w-4 h-4" aria-hidden="true"><use href="#i-brief"/></svg>
                   Tipe
@@ -430,14 +444,14 @@
                   {{ e($employmentPretty[$job->employment_type] ?? strtoupper($job->employment_type ?? 'Belum tersedia')) }}
                 </div>
               </div>
-              <div class="px-4 py-4 border rounded-xl border-[#ead8c5] bg-[#fffaf5]">
+              <div class="job-summary-card px-4 py-4 border rounded-xl border-[#ead8c5] bg-[#fffaf5]">
                 <div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-[#946d3f]">
                   <svg class="w-4 h-4" aria-hidden="true"><use href="#i-user"/></svg>
                   Openings
                 </div>
                 <div class="mt-1 text-xl font-semibold text-slate-900">{{ (int) ($job->openings ?? 1) }}</div>
               </div>
-              <div class="px-4 py-4 border rounded-xl border-[#ead8c5] bg-[#fffaf5]">
+              <div class="job-summary-card px-4 py-4 border rounded-xl border-[#ead8c5] bg-[#fffaf5]">
                 <div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-[#946d3f]">
                   <svg class="w-4 h-4" aria-hidden="true"><use href="#i-pin"/></svg>
                   Lokasi
