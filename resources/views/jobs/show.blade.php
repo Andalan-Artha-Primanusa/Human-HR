@@ -287,7 +287,9 @@
       .job-detail-page .job-detail-hero .page-header__actions .ph-action--brand { background:var(--jd-gold) !important; color:#fff !important; border-color:var(--jd-gold); }
       .job-detail-page .job-summary-card { transition:transform .18s ease, box-shadow .18s ease; }
       .job-detail-page .job-summary-card:hover { transform:translateY(-2px); box-shadow:0 10px 24px rgba(23,32,51,.08); }
+      .job-detail-page .job-main-layout { display:grid !important; grid-template-columns:minmax(0,1.65fr) minmax(320px,.9fr); gap:1.5rem; align-items:start; }
       @media (min-width:1024px) { .job-detail-page .job-detail-hero { min-height:190px; } }
+      @media (max-width:1023px) { .job-detail-page .job-main-layout { grid-template-columns:1fr; } }
       @media (max-width:767px) { .job-detail-page .page-header__actions { width:100%; justify-content:flex-start; } .job-detail-page .page-header__actions .ph-action { flex:1; } }
     </style>
     <div class="job-detail-page mx-auto w-full max-w-[1600px] bg-[#f8fafc] px-4 py-6 sm:px-6 lg:px-8">
@@ -429,7 +431,7 @@
       </section>
 
       {{-- GRID UTAMA --}}
-      <div class="mt-6 grid items-start gap-6 lg:grid-cols-[minmax(0,1.65fr)_minmax(320px,.9fr)]">
+      <div class="job-main-layout mt-6">
         {{-- LEFT --}}
         <div class="space-y-6">
           {{-- Ringkasan --}}
