@@ -12,11 +12,12 @@
     $qCompany  = trim((string) request('company', ''));
     $qTerm     = trim((string) request('term', ''));
     $qType     = trim((string) request('type', ''));
+    $qLevelGroup = trim((string) request('level_group', ''));
     $qSort     = trim((string) request('sort', ''));
     $hasAny    = $qDivision || $qSite || $qCompany || $qTerm || $qType || $qSort;
 
     $keepParams = array_filter(
-        request()->only(['division', 'site', 'company', 'term', 'type', 'sort']),
+        request()->only(['division', 'site', 'company', 'term', 'type', 'sort', 'level_group']),
         fn($v) => filled($v)
     );
 
@@ -146,9 +147,15 @@
   .site-card__count { border-radius:999px; background:#faf5ed; padding:.4rem .65rem; color:#98703d; font-size:.7rem; font-weight:800; }
   .site-card__cta { color:#98703d; font-size:.78rem; font-weight:800; }
   .site-skeleton { min-height:270px; border-radius:16px; background:linear-gradient(90deg,#f1f5f9 25%,#e8edf3 50%,#f1f5f9 75%); background-size:200% 100%; animation:site-shimmer 1.5s infinite; }
+  .level-card-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1rem; max-width:760px; margin:1.75rem auto 0; }
+  .level-card { display:flex; min-height:170px; flex-direction:column; justify-content:space-between; border:1px solid #d9bc9d; border-radius:16px; background:#fffaf2; padding:1.5rem; box-shadow:0 8px 22px rgba(152,112,61,.09); transition:transform .2s ease,box-shadow .2s ease; }
+  .level-card:hover { transform:translateY(-3px); box-shadow:0 14px 30px rgba(152,112,61,.16); }
+  .level-card__icon { display:grid; height:42px; width:42px; place-items:center; border-radius:12px; background:#b58b56; color:#fff; font-weight:800; }
+  .level-card__title { margin-top:1rem; color:#172033; font-size:1.25rem; font-weight:800; }
+  .level-card__meta { display:flex; align-items:center; justify-content:space-between; gap:.5rem; color:#98703d; font-size:.78rem; font-weight:700; }
   @keyframes site-shimmer { to { background-position:-200% 0; } }
   @media (max-width: 1023px) { .job-grid,.site-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
-  @media (max-width: 639px) { .career-hero { align-items:flex-start; flex-direction:column; padding:1.5rem; } .career-hero__media { width:100%; height:125px; } .career-count { align-items:flex-start; } .job-grid,.site-grid { grid-template-columns:1fr; } .job-card { min-height:250px; } }
+  @media (max-width: 639px) { .career-hero { align-items:flex-start; flex-direction:column; padding:1.5rem; } .career-hero__media { width:100%; height:125px; } .career-count { align-items:flex-start; } .job-grid,.site-grid,.level-card-grid { grid-template-columns:1fr; } .job-card { min-height:250px; } }
   .jobs-shell {
     background: #ffffff;
     border-radius: 0;
@@ -461,7 +468,11 @@
         <p class="career-eyebrow">LOWONGAN DI SITE TERPILIH</p>
         <h2 class="text-2xl font-extrabold tracking-tight text-[#172033]">Daftar posisi tersedia</h2>
       </div>
-      <a href="{{ route('jobs.index', collect($keepParams)->except('site')->all()) }}" class="jobs-soft-btn px-4 py-2.5 text-sm">← Semua site</a>
+      @if($qLevelGroup)
+        <a href="{{ route('jobs.index', collect($keepParams)->except('level_group')->all()) }}" class="jobs-soft-btn px-4 py-2.5 text-sm">← Semua level</a>
+      @else
+        <a href="{{ route('jobs.index', collect($keepParams)->except('site')->all()) }}" class="jobs-soft-btn px-4 py-2.5 text-sm">← Semua site</a>
+      @endif
     </div>
     @php
       $staffLevels = [
@@ -476,7 +487,20 @@
           return in_array($level, $staffLevels, true) ? 'staff' : 'non_staff';
       });
     @endphp
-    @foreach(['staff' => 'Staff', 'non_staff' => 'Non Staff'] as $levelKey => $levelLabel)
+    @if(!$qLevelGroup)
+      <div class="level-card-grid" aria-label="Pilih level pekerjaan">
+        @foreach(['staff' => 'Staff', 'non_staff' => 'Non Staff'] as $levelKey => $levelLabel)
+          @if(($levelGroups[$levelKey] ?? collect())->isNotEmpty())
+            <a class="level-card" href="{{ route('jobs.index', array_merge($keepParams, ['level_group' => $levelKey])) }}">
+              <span class="level-card__icon">{{ $levelKey === 'staff' ? 'S' : 'NS' }}</span>
+              <span class="level-card__title">{{ $levelLabel }}</span>
+              <span class="level-card__meta"><span>{{ $levelGroups[$levelKey]->count() }} lowongan</span><span>Lihat →</span></span>
+            </a>
+          @endif
+        @endforeach
+      </div>
+    @else
+    @foreach([$qLevelGroup => $qLevelGroup === 'staff' ? 'Staff' : 'Non Staff'] as $levelKey => $levelLabel)
       @if(($levelGroups[$levelKey] ?? collect())->isNotEmpty())
         <div class="mt-6 flex items-center gap-3">
           <span class="grid h-9 w-9 place-items-center rounded-xl bg-[#b58b56] text-sm font-extrabold text-white">{{ $levelKey === 'staff' ? 'S' : 'NS' }}</span>
@@ -524,6 +548,7 @@
         </section>
       @endif
     @endforeach
+    @endif
     @if(method_exists($jobs, 'hasPages') && $jobs->hasPages())
       <div class="mx-auto mt-6 max-w-[1360px]">{{ $jobs->onEachSide(1)->links() }}</div>
     @endif
