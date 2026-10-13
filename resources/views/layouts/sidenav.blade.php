@@ -74,6 +74,7 @@
         $paths = [
             'login' => '<path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="m10 17 5-5-5-5"/><path d="M15 12H3"/>',
             'jobs' => '<rect x="3" y="7" width="18" height="13" rx="2.5"/><path d="M8 7V5.5A2.5 2.5 0 0 1 10.5 3h3A2.5 2.5 0 0 1 16 5.5V7"/><path d="M3 13h18"/>',
+            'site' => '<path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11Z"/><circle cx="12" cy="10" r="2.5"/>',
             'applications' => '<path d="M8 4h8l2 2v14H6V6l2-2Z"/><path d="M9 12h6"/><path d="M9 16h6"/><path d="M9 8h4"/>',
             'interviews' => '<rect x="3" y="4" width="18" height="17" rx="2.5"/><path d="M8 2v4"/><path d="M16 2v4"/><path d="M3 9h18"/><path d="M8 14h4"/><path d="M8 17h7"/>',
             'kanban' => '<rect x="3" y="4" width="5" height="16" rx="1.5"/><rect x="10" y="4" width="5" height="10" rx="1.5"/><rect x="17" y="4" width="4" height="13" rx="1.5"/>',
@@ -251,6 +252,13 @@
                   <span class="label text-white">Jobs</span>
                 </a>
 
+                @if (Route::has('admin.sites.index'))
+                    <a href="{{ $href('admin.sites.index') }}" class="{{ $linkDesk }} {{ $activeMenu('admin.sites.*') }}">
+                      <span class="{{ $iconWrap }}">{!! $menuIcon('site') !!}</span>
+                      <span class="label text-white">Master Data Site</span>
+                    </a>
+                @endif
+
                 @if (Route::has('admin.candidates.index'))
                     <a href="{{ $href('admin.candidates.index') }}" class="{{ $linkDesk }} {{ $activeMenu('admin.candidates.*') }}">
                       <span class="{{ $iconWrap }}">{!! $menuIcon('candidates') !!}</span>
@@ -372,6 +380,13 @@
                   <span class="{{ $iconWrap }}">{!! $menuIcon('jobs') !!}</span>
                   <span>Jobs</span>
                 </a>
+
+                @if (Route::has('admin.sites.index'))
+                    <a href="{{ $href('admin.sites.index') }}" {!! $closeAttr !!} class="{{ $linkMobile }} {{ $activeMenu('admin.sites.*') }}">
+                      <span class="{{ $iconWrap }}">{!! $menuIcon('site') !!}</span>
+                      <span>Master Data Site</span>
+                    </a>
+                @endif
 
                 @if (Route::has('admin.candidates.index'))
                       <a href="{{ $href('admin.candidates.index') }}" {!! $closeAttr !!} class="{{ $linkMobile }} {{ $activeMenu('admin.candidates.*') }}">

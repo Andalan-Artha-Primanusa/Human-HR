@@ -116,10 +116,10 @@
   .career-count strong { color:#98703d; font-size:1.85rem; line-height:1; }
   .career-count span { margin-top:.35rem; font-size:.8rem; }
   .job-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1rem; max-width:1360px; margin:1.5rem auto 0; }
-  .job-card { display:flex; min-height:285px; flex-direction:column; border:1px solid #e5e7eb; border-radius:16px; background:#fff; padding:1.5rem; transition:transform .2s ease, box-shadow .2s ease, border-color .2s ease; }
-  .job-card:hover { transform:translateY(-3px); border-color:#d9bc9d; box-shadow:0 14px 30px rgba(23,32,51,.09); }
+  .job-card { display:flex; min-height:285px; flex-direction:column; border:1px solid #d9bc9d; border-radius:16px; background:#fffaf2; padding:1.5rem; transition:transform .2s ease, box-shadow .2s ease, border-color .2s ease; }
+  .job-card:hover { transform:translateY(-3px); border-color:#b58b56; box-shadow:0 14px 30px rgba(152,112,61,.16); }
   .job-card__top { display:flex; align-items:flex-start; justify-content:space-between; gap:.75rem; }
-  .job-card__icon { display:grid; height:44px; width:44px; flex:none; place-items:center; border-radius:12px; background:#faf5ed; color:#98703d; }
+  .job-card__icon { display:grid; height:44px; width:44px; flex:none; place-items:center; border-radius:12px; background:#b58b56; color:#fff; }
   .job-card__badge { border-radius:999px; background:#faf5ed; padding:.35rem .6rem; color:#98703d; font-size:.65rem; font-weight:800; text-transform:uppercase; letter-spacing:.04em; }
   .job-card h2 { margin:1.25rem 0 .45rem; color:#172033; font-size:1.1rem; line-height:1.3; font-weight:800; }
   .job-card__dept { color:#64748b; font-size:.82rem; font-weight:600; }
@@ -132,7 +132,7 @@
   .job-card__link svg { transition:transform .2s ease; }
   .job-card:hover .job-card__link svg { transform:translateX(3px); }
   .site-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1.25rem; max-width:1440px; margin:1.5rem auto 0; }
-  .site-card { position:relative; display:flex; min-height:270px; flex-direction:column; overflow:hidden; border:1px solid #e5e7eb; border-radius:16px; background:#fff; box-shadow:0 8px 24px rgba(23,32,51,.06); transition:transform .2s ease,box-shadow .2s ease; }
+  .site-card { position:relative; display:flex; min-height:270px; flex-direction:column; overflow:hidden; border:1px solid #d9bc9d; border-radius:16px; background:#fffaf2; box-shadow:0 8px 24px rgba(152,112,61,.10); transition:transform .2s ease,box-shadow .2s ease; }
   .site-card:hover { transform:translateY(-3px); box-shadow:0 16px 32px rgba(23,32,51,.11); }
   .site-card__image { position:relative; height:130px; overflow:hidden; }
   .site-card__image img { width:100%; height:100%; object-fit:cover; transition:transform .35s ease; }
