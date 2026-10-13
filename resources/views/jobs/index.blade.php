@@ -463,8 +463,31 @@
       </div>
       <a href="{{ route('jobs.index', collect($keepParams)->except('site')->all()) }}" class="jobs-soft-btn px-4 py-2.5 text-sm">← Semua site</a>
     </div>
-    <section class="job-grid" aria-label="Daftar lowongan kerja">
-      @foreach($jobs as $job)
+    @php
+      $staffLevels = [
+        'foreman', 'supervisor', 'superintendent', 'manager', 'analyst',
+        'specialist', 'expert', 'lead of', 'section head', 'dept head',
+        'project manager', 'pjo', 'staff',
+      ];
+      $levelGroups = $jobs->getCollection()->groupBy(function ($job) use ($staffLevels) {
+          $level = strtolower(trim((string) ($job->level ?? '')));
+          $level = str_replace(['_', '-'], ' ', $level);
+          $level = preg_replace('/\s+/', ' ', $level) ?: '';
+          return in_array($level, $staffLevels, true) ? 'staff' : 'non_staff';
+      });
+    @endphp
+    @foreach(['staff' => 'Staff', 'non_staff' => 'Non Staff'] as $levelKey => $levelLabel)
+      @if(($levelGroups[$levelKey] ?? collect())->isNotEmpty())
+        <div class="mt-6 flex items-center gap-3">
+          <span class="grid h-9 w-9 place-items-center rounded-xl bg-[#b58b56] text-sm font-extrabold text-white">{{ $levelKey === 'staff' ? 'S' : 'NS' }}</span>
+          <div>
+            <p class="career-eyebrow !mb-0">LEVEL PEKERJAAN</p>
+            <h3 class="text-xl font-extrabold tracking-tight text-[#172033]">{{ $levelLabel }}</h3>
+          </div>
+          <span class="ml-auto rounded-full bg-[#faf5ed] px-3 py-1 text-xs font-bold text-[#98703d]">{{ $levelGroups[$levelKey]->count() }} job</span>
+        </div>
+        <section class="job-grid" aria-label="Lowongan {{ $levelLabel }}">
+      @foreach($levelGroups[$levelKey] as $job)
         @php
           $typeRaw = (string) ($job->employment_type ?? '');
           $typeLabel = match (strtolower($typeRaw)) {
@@ -498,7 +521,9 @@
           </div>
         </article>
       @endforeach
-    </section>
+        </section>
+      @endif
+    @endforeach
     @if(method_exists($jobs, 'hasPages') && $jobs->hasPages())
       <div class="mx-auto mt-6 max-w-[1360px]">{{ $jobs->onEachSide(1)->links() }}</div>
     @endif
