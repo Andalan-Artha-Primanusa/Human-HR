@@ -104,6 +104,51 @@
 
 @push('head')
 <style>
+  [x-cloak] { display: none !important; }
+  .career-hero { display:flex; align-items:flex-end; justify-content:space-between; gap:1.5rem; max-width:1360px; margin:0 auto 1.25rem; padding:2rem 2.25rem; background:#fffdf9; border:1px solid #e5e7eb; border-radius:20px; }
+  .career-hero__media { position:relative; width:260px; height:150px; overflow:hidden; border-radius:16px; }
+  .career-hero__media img { width:100%; height:100%; object-fit:cover; }
+  .career-hero__media::after { content:""; position:absolute; inset:0; background:linear-gradient(90deg,rgba(255,255,255,.1),rgba(23,32,51,.08)); }
+  .career-eyebrow { margin:0 0 .5rem; color:#98703d; font-size:.72rem; font-weight:800; letter-spacing:.16em; }
+  .career-title { margin:0; color:#172033; font-size:clamp(1.85rem,3vw,2.75rem); line-height:1.08; font-weight:800; letter-spacing:-.03em; }
+  .career-desc { margin:.7rem 0 0; max-width:620px; color:#64748b; font-size:.98rem; }
+  .career-count { display:flex; flex-direction:column; align-items:flex-end; color:#64748b; white-space:nowrap; }
+  .career-count strong { color:#98703d; font-size:1.85rem; line-height:1; }
+  .career-count span { margin-top:.35rem; font-size:.8rem; }
+  .job-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1rem; max-width:1360px; margin:1.5rem auto 0; }
+  .job-card { display:flex; min-height:285px; flex-direction:column; border:1px solid #e5e7eb; border-radius:16px; background:#fff; padding:1.5rem; transition:transform .2s ease, box-shadow .2s ease, border-color .2s ease; }
+  .job-card:hover { transform:translateY(-3px); border-color:#d9bc9d; box-shadow:0 14px 30px rgba(23,32,51,.09); }
+  .job-card__top { display:flex; align-items:flex-start; justify-content:space-between; gap:.75rem; }
+  .job-card__icon { display:grid; height:44px; width:44px; flex:none; place-items:center; border-radius:12px; background:#faf5ed; color:#98703d; }
+  .job-card__badge { border-radius:999px; background:#faf5ed; padding:.35rem .6rem; color:#98703d; font-size:.65rem; font-weight:800; text-transform:uppercase; letter-spacing:.04em; }
+  .job-card h2 { margin:1.25rem 0 .45rem; color:#172033; font-size:1.1rem; line-height:1.3; font-weight:800; }
+  .job-card__dept { color:#64748b; font-size:.82rem; font-weight:600; }
+  .job-card__meta { display:flex; flex-wrap:wrap; gap:.5rem 1rem; margin-top:1.2rem; color:#64748b; font-size:.78rem; }
+  .job-card__meta span { display:inline-flex; align-items:center; gap:.35rem; }
+  .job-card__meta svg { color:#b58b56; }
+  .job-card__footer { display:flex; align-items:center; justify-content:space-between; gap:.75rem; margin-top:auto; padding-top:1.25rem; }
+  .job-card__date { color:#94a3b8; font-size:.72rem; }
+  .job-card__link { display:inline-flex; align-items:center; gap:.35rem; color:#98703d; font-size:.8rem; font-weight:800; }
+  .job-card__link svg { transition:transform .2s ease; }
+  .job-card:hover .job-card__link svg { transform:translateX(3px); }
+  .site-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1.25rem; max-width:1440px; margin:1.5rem auto 0; }
+  .site-card { position:relative; display:flex; min-height:270px; flex-direction:column; overflow:hidden; border:1px solid #e5e7eb; border-radius:16px; background:#fff; box-shadow:0 8px 24px rgba(23,32,51,.06); transition:transform .2s ease,box-shadow .2s ease; }
+  .site-card:hover { transform:translateY(-3px); box-shadow:0 16px 32px rgba(23,32,51,.11); }
+  .site-card__image { position:relative; height:130px; overflow:hidden; }
+  .site-card__image img { width:100%; height:100%; object-fit:cover; transition:transform .35s ease; }
+  .site-card:hover .site-card__image img { transform:scale(1.04); }
+  .site-card__image::after { content:""; position:absolute; inset:0; background:linear-gradient(0deg,rgba(23,32,51,.55),transparent 70%); }
+  .site-card__body { display:flex; flex:1; flex-direction:column; padding:1.15rem 1.25rem; }
+  .site-card__location { display:flex; align-items:center; gap:.45rem; color:#98703d; font-size:.72rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; }
+  .site-card__name { margin:.4rem 0 .3rem; color:#172033; font-size:1.15rem; font-weight:800; }
+  .site-card__address { display:-webkit-box; overflow:hidden; color:#64748b; font-size:.78rem; line-height:1.45; -webkit-box-orient:vertical; -webkit-line-clamp:2; }
+  .site-card__footer { display:flex; align-items:center; justify-content:space-between; gap:.75rem; margin-top:auto; padding-top:1rem; }
+  .site-card__count { border-radius:999px; background:#faf5ed; padding:.4rem .65rem; color:#98703d; font-size:.7rem; font-weight:800; }
+  .site-card__cta { color:#98703d; font-size:.78rem; font-weight:800; }
+  .site-skeleton { min-height:270px; border-radius:16px; background:linear-gradient(90deg,#f1f5f9 25%,#e8edf3 50%,#f1f5f9 75%); background-size:200% 100%; animation:site-shimmer 1.5s infinite; }
+  @keyframes site-shimmer { to { background-position:-200% 0; } }
+  @media (max-width: 1023px) { .job-grid,.site-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+  @media (max-width: 639px) { .career-hero { align-items:flex-start; flex-direction:column; padding:1.5rem; } .career-hero__media { width:100%; height:125px; } .career-count { align-items:flex-start; } .job-grid,.site-grid { grid-template-columns:1fr; } .job-card { min-height:250px; } }
   .jobs-shell {
     background: #ffffff;
     border-radius: 0;
@@ -113,9 +158,8 @@
   }
   .jobs-filter-card {
     border: 1px solid #c9a07a;
-    background:
-      linear-gradient(135deg, rgba(167,125,82,.14), rgba(255,250,245,.96) 45%, rgba(167,125,82,.1));
-    box-shadow: 0 18px 42px rgba(92, 61, 30, .09);
+    background: #ffffff;
+    box-shadow: 0 8px 24px rgba(23, 32, 51, .05);
   }
   .jobs-panel,
   .jobs-detail {
@@ -192,6 +236,7 @@
   @media (min-width: 768px) {
     .jobs-shell { margin-inline: -1.5rem; padding-inline: 1.5rem; }
   }
+  .jobs-shell { max-width:1360px; margin-inline:auto; padding-inline:0; }
 </style>
 @endpush
 
@@ -237,26 +282,16 @@
   {{-- ================================================================
        HEADER (shared page-header) + SEARCH + FILTER
        ================================================================ --}}
-  <section class="page-header" aria-labelledby="jobs-page-title">
-    <div class="page-header__inner">
-      <div class="page-header__copy">
-        <p class="page-header__eyebrow">Lowongan Kerja</p>
-        <h1 id="jobs-page-title" class="page-header__title">Cari lowongan yang paling cocok</h1>
-        <p class="page-header__desc">Gunakan pencarian dan filter cepat untuk menemukan posisi berdasarkan nama lowongan, site, company, divisi, atau tipe kerja.</p>
-      </div>
-
-      <div class="page-header__actions">
-        <button data-filter-toggle type="button" aria-expanded="false" aria-controls="filter-panel" class="ph-action">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M7 12h10M10 18h4"/></svg>
-          Filter
-          @if($hasAny)
-            <span class="flex h-5 w-5 items-center justify-center rounded-full bg-[#b28a57] text-[10px] font-bold text-white">
-              {{ $activeFilterCount }}
-            </span>
-          @endif
-        </button>
-      </div>
+  <section class="career-hero" aria-labelledby="jobs-page-title">
+    <div>
+      <p class="career-eyebrow">CAREER OPPORTUNITIES</p>
+      <h1 id="jobs-page-title" class="career-title">Temukan Karier Terbaikmu</h1>
+      <p class="career-desc">Jelajahi peluang kerja terbaik dan temukan posisi yang sesuai dengan keahlianmu.</p>
     </div>
+    <div class="career-hero__media" aria-hidden="true">
+      <img src="{{ asset('assets/banner-abn.png') }}" alt="" loading="eager">
+    </div>
+    <div class="career-count"><strong>{{ $total }}</strong><span>lowongan tersedia</span></div>
   </section>
 
   {{-- ================================================================
@@ -285,14 +320,10 @@
           @endif
         </div>
 
-        <div class="grid grid-cols-2 gap-2 sm:flex sm:justify-end">
+        <div class="grid grid-cols-1 gap-2 sm:flex sm:justify-end">
           <button type="submit" class="h-12 px-5 jobs-primary-btn">
             <svg class="w-4 h-4"><use href="#i-search"/></svg>
             Cari
-          </button>
-          <button data-filter-toggle type="button" aria-expanded="false" aria-controls="filter-panel" class="h-12 px-5 jobs-soft-btn">
-            <svg class="w-4 h-4"><use href="#i-filter"/></svg>
-            Filter
           </button>
         </div>
 
@@ -319,7 +350,7 @@
         </div>
       @endif
 
-      <div id="filter-panel" class="{{ $hasAny ? '' : 'hidden' }} mt-4 pt-4 border-t border-[#ede4dc]">
+      <div id="filter-panel" class="mt-4 pt-4 border-t border-[#ede4dc]">
         <form method="GET" class="grid gap-3 sm:grid-cols-2 lg:grid-cols-5" aria-label="Filter Lowongan">
 
           <div>
@@ -330,8 +361,17 @@
 
           <div>
             <label class="mb-1 block text-[10px] font-semibold text-[#8c6843] uppercase tracking-wide">Site</label>
-            <input name="site" value="{{ e($qSite) }}" placeholder="DBK / POS / SBS"
-              class="jobs-field"/>
+            <div class="relative">
+              <select name="site" class="jobs-field jobs-select">
+                <option value="">Semua site</option>
+                @foreach(($sites ?? collect()) as $siteOption)
+                  <option value="{{ e($siteOption->code) }}" @selected($qSite === (string) $siteOption->code)>
+                    {{ e($siteOption->code . ($siteOption->name ? ' — ' . $siteOption->name : '')) }}
+                  </option>
+                @endforeach
+              </select>
+              <svg class="absolute w-4 h-4 -translate-y-1/2 pointer-events-none right-3 top-1/2 text-slate-400"><use href="#i-chevron"/></svg>
+            </div>
           </div>
 
           <div>
@@ -370,556 +410,106 @@
   </section>
 
   {{-- ================================================================
-       MAIN BODY
+       PREMIUM JOB GRID
        ================================================================ --}}
   @if(!$qSite)
-    {{-- Site cards first; jobs are shown after choosing a site. --}}
-    <section class="mt-5">
-      <div class="mb-3 flex items-end justify-between gap-3">
+    <section class="mt-6" aria-labelledby="site-list-title">
+      <div class="mb-4 flex items-end justify-between gap-3">
         <div>
-          <p class="text-[11px] font-semibold uppercase tracking-wide text-[#8c6843]">Pilih lokasi</p>
-          <h2 class="text-xl font-bold text-slate-900">Lowongan berdasarkan site</h2>
+          <p class="career-eyebrow">EXPLORE BY LOCATION</p>
+          <h2 id="site-list-title" class="text-2xl font-extrabold tracking-tight text-[#172033]">Pilih lokasi kerja</h2>
         </div>
-        <span class="text-sm text-slate-500">{{ $sites->count() }} site tersedia</span>
+        <span class="text-sm text-[#64748B]">{{ $sites->where('jobs_count', '>', 0)->count() }} lokasi</span>
       </div>
-      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        @forelse($sites as $site)
-          <a href="{{ route('jobs.index', array_merge($keepParams, ['site' => $site->code])) }}"
-             class="group overflow-hidden rounded-2xl border border-[#e8d5be] bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg">
-            <div class="px-5 py-4" style="background:#b28a57;color:#fff">
-              <p class="text-[10px] font-semibold uppercase tracking-[.14em]" style="color:rgba(255,255,255,.8)">Lokasi / Site</p>
-              <div class="mt-1 flex items-center justify-between gap-3">
-                <h3 class="truncate text-lg font-bold" style="color:#fff">{{ e($site->region ?: $site->name ?: 'Tanpa Site') }}</h3>
-                <span class="rounded-full px-2.5 py-1 text-[10px] font-bold" style="background:rgba(255,255,255,.92);color:#5c3d1e">{{ $site->jobs_count }} job</span>
+      @if($sites->where('jobs_count', '>', 0)->count())
+        <div class="site-grid">
+          @foreach($sites->where('jobs_count', '>', 0) as $site)
+            @php
+              $siteCode = trim((string) ($site->code ?? ''));
+              $siteName = trim((string) ($site->name ?? ''));
+              $siteRegion = trim((string) ($site?->region ?? ''));
+              $siteLabel = $siteRegion !== '' ? $siteRegion : ($siteName !== '' ? $siteName : 'Lokasi kerja');
+              $siteAddress = trim((string) ($site?->address ?? ''));
+              $siteUrl = route('jobs.index', array_merge($keepParams, ['site' => $siteCode]));
+            @endphp
+            <a href="{{ $siteUrl }}" class="site-card">
+              <div class="site-card__image">
+                <img src="{{ asset('assets/banner-abn.png') }}" alt="{{ e($siteLabel) }}" loading="lazy">
               </div>
-              <p class="mt-1 truncate text-xs" style="color:rgba(255,255,255,.88)">
-                {{ e($site->code) }}{{ $site->name ? ' — '.e($site->name) : '' }}
-              </p>
-            </div>
-            <div class="flex items-center justify-between px-5 py-3 text-sm text-[#6f4d2f]">
-              <span>{{ e($site->address ?: 'Lihat lowongan di site ini') }}</span>
-              <span class="font-bold transition group-hover:translate-x-1">Lihat →</span>
-            </div>
-          </a>
-        @empty
-          <div class="jobs-panel col-span-full rounded-2xl p-8 text-center text-sm text-slate-500">Belum ada site dengan lowongan aktif.</div>
-        @endforelse
-      </div>
-    </section>
-
-  @elseif($jobs->count())
-    @php $firstId = optional($jobs->first())->id; @endphp
-
-    <section
-      x-data="{
-        open: @js($firstId),
-        select(id) {
-          this.open = id;
-          const el = document.getElementById('detail-' + id);
-          if (!el) return;
-          const pr = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-          window.scrollTo({
-            top: el.getBoundingClientRect().top + window.scrollY - 80,
-            behavior: pr ? 'auto' : 'smooth'
-          });
-        }
-      }"
-      class="mt-5 grid gap-5 lg:grid-cols-[minmax(360px,520px)_1fr]">
-
-      {{-- ==============================================================
-           LEFT: JOB LIST
-           ============================================================== --}}
-      <aside class="jobs-panel overflow-hidden rounded-[1.35rem] lg:sticky lg:top-4 lg:self-start">
-
-        {{-- List header --}}
-        <div class="flex items-center justify-between gap-3 border-b border-[#efe2d6] bg-[#fffaf5] px-4 py-3">
-          <div class="min-w-0">
-            <p class="text-[11px] font-semibold uppercase tracking-wide text-[#8c6843]">Hasil pencarian</p>
-            <p class="text-sm font-bold leading-tight text-slate-900">{{ $total }} lowongan tersedia</p>
-          </div>
-
-          @if($qSite)
-            <a href="{{ route('jobs.index', collect($keepParams)->except('site')->all()) }}"
-               class="shrink-0 rounded-xl border border-[#d9bc9d] px-3 py-2 text-xs font-semibold text-[#6f4d2f] hover:bg-[#fdf6ef]">
-              ← Semua site
+              <div class="site-card__body">
+                <div class="site-card__location"><svg class="h-4 w-4"><use href="#i-map"/></svg> Lokasi site</div>
+                <h3 class="site-card__name">{{ e($siteLabel) }}</h3>
+                <p class="site-card__address">{{ e($siteAddress !== '' ? $siteAddress : ($siteCode !== '' ? $siteCode : 'Lihat lowongan yang tersedia di lokasi ini')) }}</p>
+                <div class="site-card__footer">
+                  <span class="site-card__count">{{ (int) ($site->jobs_count ?? 0) }} lowongan</span>
+                  <span class="site-card__cta">Lihat lowongan di site ini →</span>
+                </div>
+              </div>
             </a>
-          @endif
-
-          <form method="GET" class="flex items-center gap-2" aria-label="Urutkan">
-            @foreach(['division','site','company','term','type'] as $keep)
-              @if(!empty($keepParams[$keep]))
-                <input type="hidden" name="{{ $keep }}" value="{{ e($keepParams[$keep]) }}">
-              @endif
-            @endforeach
-          </form>
-        </div>
-
-        {{-- Job items, grouped by site --}}
-        @php
-          $jobsBySite = $jobs->getCollection()->groupBy(function ($job) {
-              $siteCode = trim((string) ($job->site?->code ?? $job->site_code ?? ''));
-              $siteName = trim((string) ($job->site?->name ?? $job->site_name ?? ''));
-              return $siteCode !== '' ? $siteCode : ($siteName !== '' ? $siteName : 'Tanpa Site');
-          });
-          $displayIdx = 0;
-        @endphp
-        <ul class="max-h-[78vh] space-y-3 overflow-y-auto p-2">
-          @foreach($jobsBySite as $siteKey => $siteJobs)
-            @php
-              $siteCode = trim((string) ($siteJobs->first()->site?->code ?? $siteJobs->first()->site_code ?? ''));
-              $siteName = trim((string) ($siteJobs->first()->site?->name ?? $siteJobs->first()->site_name ?? ''));
-              $siteRegion = trim((string) ($siteJobs->first()->site?->region ?? ''));
-              $siteHeading = $siteRegion !== '' ? $siteRegion : ($siteName !== '' ? $siteName : 'Tanpa Site');
-              $siteSubheading = $siteCode !== '' && $siteName !== ''
-                  ? $siteCode . ' — ' . $siteName
-                  : ($siteCode !== '' ? $siteCode : $siteName);
-            @endphp
-            <li class="overflow-hidden rounded-2xl border border-[#d9bc9d] bg-white shadow-sm">
-              <div class="px-3.5 py-3" style="background:#b28a57;color:#fff">
-                <div class="flex items-center justify-between gap-3">
-                  <div class="min-w-0">
-                    <p class="text-[10px] font-semibold uppercase tracking-[.14em]" style="color:rgba(255,255,255,.8)">Kota / Site</p>
-                    <p class="truncate text-sm font-bold" style="color:#fff">{{ e($siteHeading) }}</p>
-                    @if($siteSubheading !== '')
-                      <p class="truncate text-[10px]" style="color:rgba(255,255,255,.85)">{{ e($siteSubheading) }}</p>
-                    @endif
-                  </div>
-                  <span class="shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold" style="background:rgba(255,255,255,.92);color:#5c3d1e">{{ $siteJobs->count() }} job</span>
-                </div>
-              </div>
-              <div class="space-y-2 p-2">
-            @foreach($siteJobs as $job)
-              @php $idx = $displayIdx++; @endphp
-            @php
-              $typeRaw  = $job->employment_type ?? '';
-              $type     = strtoupper($typeRaw ?: '-');
-              $typeSlug = Str::of($typeRaw)->lower()->value();
-              $badgeClr = match ($typeSlug) {
-                'contract', 'kontrak' => 'bg-amber-600',
-                'intern', 'magang'    => 'bg-emerald-600',
-                default               => 'bg-[#b28a57]',
-              };
-
-              $rail = $railColors[$idx % count($railColors)];
-
-              $prettyStage = [
-                'applied'         => 'Screening',
-                'screening'       => 'Screening',
-                'psychotest'      => 'Psychological Test',
-                'psychological_test' => 'Psychological Test',
-                'hr_iv'           => 'HR Interview',
-                'post_test'       => 'Post Test',
-                'user_iv'         => 'User Interview',
-                'user_trainer_iv' => 'User Interview',
-                'offer'           => 'Offering Letter (OL)',
-                'mcu'             => 'Medical Check Up',
-                'mobilisasi'      => 'Mobilisasi (Travel)',
-                'ground_test'     => 'Skill Test',
-                'skill_test'      => 'Skill Test',
-                'hired'           => 'Finish',
-                'onsite'          => 'Finish',
-                'not_qualified'   => 'Finish',
-                'rejected'        => 'Finish',
-                'finish'          => 'Finish',
-              ];
-              $stageAlias = [
-                'applied' => 'screening',
-                'psychotest' => 'psychological_test',
-                'user_trainer_iv' => 'user_iv',
-                'ground_test' => 'skill_test',
-                'onsite' => 'finish',
-                'hired' => 'finish',
-                'not_qualified' => 'finish',
-                'rejected' => 'finish',
-              ];
-              $myApp = Auth::check() ? ($job->applications->first() ?? null) : null;
-            @endphp
-
-            <li>
-              <button type="button"
-                @click="select('{{ $job->id }}')"
-                :class="open === '{{ $job->id }}'
-                  ? 'bg-[#fdf6ef] ring-1 ring-inset ring-[#c9a07a]/40'
-                  : 'bg-white hover:bg-slate-50'"
-                class="relative w-full overflow-hidden rounded-2xl px-3.5 py-3.5 text-left transition group">
-
-                {{-- Coloured left rail --}}
-                <span class="absolute inset-y-0 left-0 w-[3px] rounded-r {{ $rail }}"></span>
-
-                <div class="flex items-start gap-3 pl-1">
-
-                  {{-- Job number --}}
-                  <span class="grid h-11 w-11 shrink-0 place-items-center rounded-2xl border border-[#eadccd] bg-white text-[11px] font-bold text-[#6f4d2f] shadow-sm">
-                    {{ ($jobs->firstItem() ?? 1) + $idx }}
-                  </span>
-
-                  <div class="flex-1 min-w-0">
-
-                    {{-- Title row --}}
-                    <div class="flex items-start justify-between gap-2">
-                      <p class="min-w-0 flex-1 line-clamp-2 text-[14px] font-bold text-slate-950 leading-snug">
-                        {{ e($job->title) }}
-                      </p>
-                      <div class="shrink-0 flex max-w-[46%] items-center gap-1.5">
-                        @if($job->code)
-                          <span class="rounded border border-slate-200 bg-slate-50
-                                       px-1.5 py-0.5 text-[10px] font-medium text-slate-600 max-w-[130px] truncate">
-                            {{ e($job->code) }}
-                          </span>
-                        @endif
-                        <span class="rounded px-1.5 py-0.5 text-[10px] font-semibold text-white {{ $badgeClr }}">
-                          {{ e($type) }}
-                        </span>
-                      </div>
-                    </div>
-
-                  </div>
-
-                  <svg class="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-300
-                              group-hover:text-[#b28a57] group-hover:translate-x-0.5 transition">
-                    <use href="#i-chevron-right"/>
-                  </svg>
-
-                </div>
-              </button>
-            </li>
-            @endforeach
-              </div>
-            </li>
           @endforeach
-        </ul>
-
-      </aside>
-
-      {{-- ==============================================================
-           RIGHT: JOB DETAIL
-           ============================================================== --}}
-      <div class="space-y-4">
-        @foreach($jobs as $idx => $job)
-          @php
-            $typeRaw  = $job->employment_type ?? '';
-            $type     = strtoupper($typeRaw ?: '-');
-            $typeSlug = Str::of($typeRaw)->lower()->value();
-            $badgeClr = match ($typeSlug) {
-              'contract', 'kontrak' => 'bg-amber-600',
-              'intern', 'magang'    => 'bg-emerald-600',
-              default               => 'bg-[#b28a57]',
-            };
-
-            $meta   = $deptMeta($job->division);
-            $skills = $extractSkills($job);
-            $who    = $auditWho($job);
-            $isOpen = strtolower((string) $job->status) === 'open';
-
-            $siteLabel = $job->site->name
-                      ?? $job->site_name
-                      ?? $job->getAttribute('site_name')
-                      ?? $job->site->code
-                      ?? $job->site_code
-                      ?? $job->getAttribute('site_code')
-                      ?? '—';
-
-            $kwRaw = $job->getAttribute('keywords');
-            if (is_array($kwRaw)) {
-                $kwList = $kwRaw;
-            } else {
-                $kwStr = trim((string) $kwRaw);
-                if ($kwStr === '') {
-                    $kwList = [];
-                } else {
-                    $dec    = json_decode($kwStr, true);
-                    $kwList = is_array($dec)
-                        ? $dec
-                        : array_filter(array_map('trim', preg_split('/\s*[,;|]\s*/', $kwStr) ?: []));
-                }
-            }
-
-            $desc = $job->getAttributes()['description'] ?? null;
-          @endphp
-
-          <article
-            x-show="open === '{{ $job->id }}'"
-            x-cloak
-            id="detail-{{ $job->id }}"
-            class="jobs-detail overflow-hidden rounded-[1.35rem]">
-
-            <div class="px-5 py-5 md:px-6" style="background:#fff;color:#111827">
-
-              {{-- ── Header ── --}}
-              <div class="flex flex-col gap-4 sm:flex-row sm:items-start">
-
-                <span class="grid w-12 h-12 shrink-0 place-items-center rounded-xl ring-1" style="background:#f3e8db;color:#946d3f;border-color:#d9bc9d">
-                  <svg class="w-5 h-5"><use href="#{{ $meta['icon'] }}"/></svg>
-                </span>
-
-                <div class="flex-1 min-w-0">
-                  <div class="flex flex-wrap items-center gap-2">
-                    <h2 class="text-2xl font-bold leading-tight text-slate-900" style="color:#111827">{{ e($job->title) }}</h2>
-                    <span class="rounded-full px-2.5 py-1 text-[11px] font-bold ring-1" style="background:#f3e8db;color:#5c3d1e;border-color:#d9bc9d">
-                      {{ e($type) }}
-                    </span>
-                    @if($isOpen)
-                      <span class="rounded-full border px-2.5 py-1 text-[10.5px] font-bold uppercase tracking-wide" style="background:#dcfce7;color:#166534;border-color:#86efac">
-                        OPEN
-                      </span>
-                    @else
-                      <span class="rounded-full border px-2.5 py-1 text-[10.5px] font-bold uppercase tracking-wide" style="background:#fef2f2;color:#991b1b;border-color:#fecaca">
-                        {{ strtoupper($job->status ?? '—') }}
-                      </span>
-                    @endif
-                  </div>
-                  @if($job->code || $job->division)
-                    <p class="mt-2 text-sm" style="color:#5c3d1e">
-                      @if($job->code)Kode: {{ e($job->code) }}@endif
-                      @if($job->code && $job->division) &nbsp;·&nbsp; @endif
-                      @if($job->division){{ e($job->division) }}@endif
-                    </p>
-                  @endif
-                </div>
-
-                <a href="{{ route('jobs.show', $job) }}?apply=1#apply"
-                   class="shrink-0 rounded-2xl px-5 py-3 text-sm font-bold text-white
-                          shadow-lg shadow-black/10 transition hover:-translate-y-0.5 focus:outline-none"
-                   style="background-color:#b28a57;color:#fff">
-                  Lamar →
-                </a>
-
-              </div>
-            </div>
-
-            <div class="p-5 md:p-6">
-
-              {{-- ── Meta bar ── --}}
-              <div class="grid gap-3 sm:grid-cols-3">
-                @foreach([
-                  ['i-map',       'Lokasi',     e($siteLabel)],
-                  ['i-briefcase', 'Perusahaan', e($job->company->name ?? $job->company->code ?? '—')],
-                  ['i-users',     'Kebutuhan',  ((int) $job->openings) . ' orang'],
-                ] as [$ico, $lbl, $val])
-                  <div class="flex items-center gap-2.5 rounded-2xl border border-[#e8d5be]
-                               bg-[#fffaf5] px-3.5 py-3">
-                    <svg class="h-4 w-4 shrink-0 text-[#b28a57]"><use href="#{{ $ico }}"/></svg>
-                    <div class="min-w-0">
-                      <p class="text-[10px] font-semibold text-[#8c6843] uppercase tracking-wide">{{ $lbl }}</p>
-                      <p class="truncate text-sm font-bold text-[#5c3d1e]">{{ $val }}</p>
-                    </div>
-                  </div>
-                @endforeach
-              </div>
-
-              {{-- ── Skills ── --}}
-              @if($skills->isNotEmpty())
-                <div class="mt-5">
-                  <div class="mb-2 flex items-center gap-1.5 text-sm font-semibold text-slate-800">
-                    <svg class="w-4 h-4 text-slate-500"><use href="#i-chip"/></svg>
-                    Skills Utama
-                  </div>
-                  <div class="flex flex-wrap gap-1.5">
-                    @foreach($skills as $sk)
-                      <span class="rounded-full border px-2.5 py-1 text-[11px] shadow-sm
-                                   {{ $loop->iteration % 2 === 1
-                                     ? 'border-blue-200 bg-blue-50 text-blue-700'
-                                     : 'border-rose-200 bg-rose-50 text-rose-700' }}">
-                        {{ e($sk) }}
-                      </span>
-                    @endforeach
-                  </div>
-                </div>
-              @endif
-
-              {{-- ── Keywords ── --}}
-              @if(!empty($kwList))
-                <div class="mt-3">
-                  <p class="mb-2 text-sm font-semibold text-slate-800">Keywords</p>
-                  <div class="flex flex-wrap gap-1.5">
-                    @foreach($kwList as $kw)
-                      <span class="rounded-full border border-emerald-200 bg-emerald-50
-                                   px-2.5 py-1 text-[11px] font-medium text-emerald-700">
-                        {{ e($kw) }}
-                      </span>
-                    @endforeach
-                  </div>
-                </div>
-              @endif
-
-              {{-- ── Detail tables ── --}}
-              <div class="grid gap-3 mt-5 md:grid-cols-2">
-
-                <dl class="overflow-hidden text-sm border divide-y divide-slate-100 rounded-xl border-slate-200">
-                  @foreach([
-                    ['Kode',  e($job->code ?? '—')],
-                    ['Divisi',e($job->division ?? '—')],
-                    ['Level', e($job->level ?? '—')],
-                    ['Tipe',  e($job->employment_type ?? '—')],
-                  ] as [$dk, $dv])
-                    <div class="flex items-center justify-between gap-4 px-3 py-2.5">
-                      <dt class="text-[11px] uppercase tracking-wide text-slate-500 shrink-0">{{ $dk }}</dt>
-                      <dd class="font-medium truncate text-slate-800">{{ $dv }}</dd>
-                    </div>
-                  @endforeach
-                </dl>
-
-                <dl class="overflow-hidden text-sm border divide-y divide-slate-100 rounded-xl border-slate-200">
-                  <div class="flex items-start justify-between gap-4 px-3 py-2.5">
-                    <dt class="text-[11px] uppercase tracking-wide text-slate-500 shrink-0 mt-0.5">Dibuat</dt>
-                    <dd class="min-w-0 text-right">
-                      <p class="font-medium truncate text-slate-800">{{ e($who['creator'] ?? ($job->created_by ?? '—')) }}</p>
-                      <p class="text-[11px] text-slate-500">{{ optional($job->created_at)->format('Y-m-d H:i') }}</p>
-                    </dd>
-                  </div>
-                  <div class="flex items-start justify-between gap-4 px-3 py-2.5">
-                    <dt class="text-[11px] uppercase tracking-wide text-slate-500 shrink-0 mt-0.5">Diubah</dt>
-                    <dd class="min-w-0 text-right">
-                      <p class="font-medium truncate text-slate-800">{{ e($who['updater'] ?? ($job->updated_by ?? '—')) }}</p>
-                      <p class="text-[11px] text-slate-500">{{ optional($job->updated_at)->format('Y-m-d H:i') }}</p>
-                    </dd>
-                  </div>
-                  <div class="flex items-center justify-between gap-4 px-3 py-2.5">
-                    <dt class="text-[11px] uppercase tracking-wide text-slate-500 shrink-0">Kebutuhan</dt>
-                    <dd class="font-medium text-slate-800">{{ (int) $job->openings }} orang</dd>
-                  </div>
-                </dl>
-
-              </div>
-
-
-            </div>
-          </article>
-        @endforeach
-      </div>
-
+        </div>
+      @else
+        <section class="jobs-panel rounded-2xl p-12 text-center">
+          <h3 class="text-lg font-semibold text-slate-900">Belum ada lokasi dengan lowongan aktif</h3>
+          <p class="mt-1 text-sm text-slate-500">Coba ubah kata kunci atau reset filter.</p>
+        </section>
+      @endif
     </section>
-
-    {{-- ================================================================
-         PAGINATION
-         ================================================================ --}}
-    @php
-      $perPage = method_exists($jobs, 'perPage')     ? (int) $jobs->perPage()     : max(1, (int) $jobs->count());
-      $current = method_exists($jobs, 'currentPage') ? (int) $jobs->currentPage() : 1;
-      $last    = method_exists($jobs, 'lastPage')    ? (int) $jobs->lastPage()    : 1;
-      $total   = method_exists($jobs, 'total')       ? (int) $jobs->total()       : (int) $jobs->count();
-      $from    = ($current - 1) * $perPage + 1;
-      $to      = min($current * $perPage, $total);
-
-      if ($last <= 7) {
-          $pages = range(1, $last);
-      } else {
-          $pages = [1];
-          $left  = max(2, $current - 1);
-          $right = min($last - 1, $current + 1);
-          if ($left > 2)        $pages[] = '...';
-          for ($i = $left; $i <= $right; $i++) $pages[] = $i;
-          if ($right < $last-1) $pages[] = '...';
-          $pages[] = $last;
-      }
-
-      $pageUrl = fn(int $p) => method_exists($jobs, 'url')
-          ? $jobs->url($p)
-          : request()->fullUrlWithQuery(['page' => $p]);
-    @endphp
-
-    <section class="jobs-panel mt-5 rounded-[1.35rem] px-4 py-3">
-      <div class="flex flex-col gap-3 text-sm md:flex-row md:items-center md:justify-between">
-
-        <p class="text-slate-600">
-          Menampilkan
-          <span class="font-semibold text-slate-900">{{ $from }}–{{ $to }}</span>
-          dari
-          <span class="font-semibold text-slate-900">{{ $total }}</span> lowongan
-        </p>
-
-        @if($last > 1)
-          <nav aria-label="Pagination">
-            <ul class="inline-flex items-stretch overflow-hidden bg-white border select-none rounded-xl border-slate-200">
-
-              {{-- Prev --}}
-              <li>
-                @if($current > 1)
-                  <a href="{{ $pageUrl($current - 1) }}" aria-label="Sebelumnya"
-                     class="grid place-items-center w-9 h-9 hover:bg-[#fdf6ef] transition focus:outline-none">
-                    <svg class="w-4 h-4 text-slate-600"><use href="#i-chevron-left"/></svg>
-                  </a>
-                @else
-                  <span class="grid cursor-not-allowed place-items-center w-9 h-9 opacity-30" aria-hidden="true">
-                    <svg class="w-4 h-4 text-slate-600"><use href="#i-chevron-left"/></svg>
-                  </span>
-                @endif
-              </li>
-
-              {{-- Page numbers --}}
-              @foreach($pages as $p)
-                @if($p === '...')
-                  <li class="grid border-l place-items-center w-9 h-9 border-slate-200 text-slate-400">…</li>
-                @else
-                  @php $isCur = (int) $p === $current; @endphp
-                  <li class="border-l border-slate-200">
-                    @if($isCur)
-                      <span style="background:#b28a57"
-                            class="grid text-sm font-semibold text-white place-items-center w-9 h-9">
-                        {{ $p }}
-                      </span>
-                    @else
-                      <a href="{{ $pageUrl((int) $p) }}" aria-label="Halaman {{ $p }}"
-                         class="grid place-items-center w-9 h-9 text-sm text-slate-700
-                                hover:bg-[#fdf6ef] transition focus:outline-none">
-                        {{ $p }}
-                      </a>
-                    @endif
-                  </li>
-                @endif
-              @endforeach
-
-              {{-- Next --}}
-              <li class="border-l border-slate-200">
-                @if($current < $last)
-                  <a href="{{ $pageUrl($current + 1) }}" aria-label="Berikutnya"
-                     class="grid place-items-center w-9 h-9 hover:bg-[#fdf6ef] transition focus:outline-none">
-                    <svg class="w-4 h-4 text-slate-600"><use href="#i-chevron-right"/></svg>
-                  </a>
-                @else
-                  <span class="grid cursor-not-allowed place-items-center w-9 h-9 opacity-30" aria-hidden="true">
-                    <svg class="w-4 h-4 text-slate-600"><use href="#i-chevron-right"/></svg>
-                  </span>
-                @endif
-              </li>
-
-            </ul>
-          </nav>
-        @endif
-
+  @elseif($jobs->count())
+    <div class="mt-6 flex items-center justify-between gap-3">
+      <div>
+        <p class="career-eyebrow">LOWONGAN DI SITE TERPILIH</p>
+        <h2 class="text-2xl font-extrabold tracking-tight text-[#172033]">Daftar posisi tersedia</h2>
       </div>
+      <a href="{{ route('jobs.index', collect($keepParams)->except('site')->all()) }}" class="jobs-soft-btn px-4 py-2.5 text-sm">← Semua site</a>
+    </div>
+    <section class="job-grid" aria-label="Daftar lowongan kerja">
+      @foreach($jobs as $job)
+        @php
+          $typeRaw = (string) ($job->employment_type ?? '');
+          $typeLabel = match (strtolower($typeRaw)) {
+            'fulltime' => 'Fulltime',
+            'contract' => 'Contract',
+            'intern' => 'Intern',
+            default => ($typeRaw !== '' ? ucfirst($typeRaw) : 'Fulltime'),
+          };
+          $siteLabel = $job->site?->name
+              ?? $job->site_name
+              ?? $job->site?->code
+              ?? $job->site_code
+              ?? 'Lokasi belum ditentukan';
+          $isOpen = strtolower((string) $job->status) === 'open';
+          $meta = $deptMeta($job->division);
+        @endphp
+        <article class="job-card">
+          <div class="job-card__top">
+            <span class="job-card__icon"><svg class="h-5 w-5"><use href="#{{ $meta['icon'] }}"/></svg></span>
+            <span class="job-card__badge" style="{{ $isOpen ? 'background:#ecfdf5;color:#047857' : 'background:#fef2f2;color:#b91c1c' }}">{{ $isOpen ? 'Aktif' : strtoupper((string) ($job->status ?: 'Ditutup')) }}</span>
+          </div>
+          <h2>{{ e($job->title) }}</h2>
+          <p class="job-card__dept">{{ e($job->division ?: 'General') }}</p>
+          <div class="job-card__meta">
+            <span><svg class="h-4 w-4"><use href="#i-map"/></svg>{{ e($siteLabel) }}</span>
+            <span><svg class="h-4 w-4"><use href="#i-briefcase"/></svg>{{ e($typeLabel) }}</span>
+          </div>
+          <div class="job-card__footer">
+            <span class="job-card__date">{{ $job->created_at ? $job->created_at->format('d M Y') : 'Baru diposting' }}</span>
+            <a class="job-card__link" href="{{ route('jobs.show', $job) }}">Lihat Detail <svg class="h-4 w-4"><use href="#i-chevron-right"/></svg></a>
+          </div>
+        </article>
+      @endforeach
     </section>
-
+    @if(method_exists($jobs, 'hasPages') && $jobs->hasPages())
+      <div class="mx-auto mt-6 max-w-[1360px]">{{ $jobs->onEachSide(1)->links() }}</div>
+    @endif
   @else
-
-    {{-- ================================================================
-         EMPTY STATE
-         ================================================================ --}}
-    <section class="jobs-panel mt-5 rounded-[1.35rem] p-12 text-center">
-      <div style="background:#fdf6ef;border:1px solid #e8d5be"
-           class="grid mx-auto mb-4 rounded-full h-14 w-14 place-items-center">
-        <svg class="h-6 w-6 text-[#b28a57]"><use href="#i-filter"/></svg>
-      </div>
-      <h3 class="text-lg font-semibold text-slate-900">Belum ada hasil</h3>
-      <p class="mt-1 text-sm text-slate-500">
-        Coba ubah filter atau reset untuk melihat semua lowongan.
-      </p>
-      <div class="flex items-center justify-center gap-3 mt-5">
-        <a href="{{ $resetUrl }}"
-           style="background:#b28a57"
-           class="rounded-xl px-5 py-2.5 text-sm font-semibold text-white hover:opacity-90 transition">
-          Reset Filter
-        </a>
-        <button id="btn-filter-empty"
-          class="rounded-xl border border-[#dfc9b0] bg-[#fdf6ef] px-5 py-2.5
-                 text-sm font-medium text-[#7a5c36] hover:bg-[#faecdb] transition">
-          Buka Filter
-        </button>
-      </div>
+    <section class="jobs-panel mx-auto mt-6 max-w-[1360px] rounded-2xl p-12 text-center">
+      <div style="background:#faf5ed;border:1px solid #e8d5be" class="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-full"><svg class="h-6 w-6 text-[#b28a57]"><use href="#i-filter"/></svg></div>
+      <h3 class="text-lg font-semibold text-slate-900">Belum ada lowongan</h3>
+      <p class="mt-1 text-sm text-slate-500">Coba ubah kata kunci atau filter pencarian.</p>
+      <a href="{{ $resetUrl }}" class="mt-5 inline-flex rounded-xl px-5 py-2.5 text-sm font-semibold text-white" style="background:#b58b56">Reset Filter</a>
     </section>
-
   @endif
-
 </div>
 </div>
 
@@ -941,6 +531,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
   buttons.forEach((button) => button.addEventListener('click', () => togglePanel()));
   btnEmpty && btnEmpty.addEventListener('click', () => togglePanel(true));
+
+  // Fallback selector untuk halaman yang tidak memuat Alpine.js.
+  document.querySelectorAll('[x-data]').forEach((root) => {
+    const details = Array.from(root.querySelectorAll('[id^="detail-"]'));
+    const showDetail = (id) => {
+      details.forEach((detail) => {
+        const active = detail.id === `detail-${id}`;
+        detail.style.display = active ? '' : 'none';
+        detail.removeAttribute('x-cloak');
+      });
+    };
+
+    if (details.length) showDetail(details[0].id.replace(/^detail-/, ''));
+
+    root.querySelectorAll('button').forEach((button) => {
+      const expression = button.getAttribute('@click') || '';
+      const match = expression.match(/select\(['"]([^'"]+)['"]\)/);
+      if (!match) return;
+      button.addEventListener('click', () => showDetail(match[1]));
+    });
+  });
 });
 </script>
 @endpush
