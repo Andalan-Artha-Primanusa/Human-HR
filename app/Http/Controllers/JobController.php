@@ -163,6 +163,22 @@ class JobController extends Controller
         }
 
         $view = $isAdminRoute ? 'admin.jobs.index' : 'jobs.index';
+
+        if (!$isAdminRoute) {
+            $sites = Site::query()
+                ->select(['id', 'code', 'name', 'region', 'address'])
+                ->where(function ($q) {
+                    $q->where('is_active', true)->orWhereNull('is_active');
+                })
+                ->whereHas('jobs', fn ($q) => $q->where('status', 'open'))
+                ->withCount(['jobs' => fn ($q) => $q->where('status', 'open')])
+                ->orderBy('region')
+                ->orderBy('name')
+                ->get();
+
+            return view($view, compact('jobs', 'sites'));
+        }
+
         return view($view, compact('jobs'));
     }
 

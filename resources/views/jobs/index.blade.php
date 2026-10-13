@@ -372,7 +372,42 @@
   {{-- ================================================================
        MAIN BODY
        ================================================================ --}}
-  @if($jobs->count())
+  @if(!$qSite)
+    {{-- Site cards first; jobs are shown after choosing a site. --}}
+    <section class="mt-5">
+      <div class="mb-3 flex items-end justify-between gap-3">
+        <div>
+          <p class="text-[11px] font-semibold uppercase tracking-wide text-[#8c6843]">Pilih lokasi</p>
+          <h2 class="text-xl font-bold text-slate-900">Lowongan berdasarkan site</h2>
+        </div>
+        <span class="text-sm text-slate-500">{{ $sites->count() }} site tersedia</span>
+      </div>
+      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        @forelse($sites as $site)
+          <a href="{{ route('jobs.index', array_merge($keepParams, ['site' => $site->code])) }}"
+             class="group overflow-hidden rounded-2xl border border-[#e8d5be] bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg">
+            <div class="px-5 py-4" style="background:#b28a57;color:#fff">
+              <p class="text-[10px] font-semibold uppercase tracking-[.14em]" style="color:rgba(255,255,255,.8)">Lokasi / Site</p>
+              <div class="mt-1 flex items-center justify-between gap-3">
+                <h3 class="truncate text-lg font-bold" style="color:#fff">{{ e($site->region ?: $site->name ?: 'Tanpa Site') }}</h3>
+                <span class="rounded-full px-2.5 py-1 text-[10px] font-bold" style="background:rgba(255,255,255,.92);color:#5c3d1e">{{ $site->jobs_count }} job</span>
+              </div>
+              <p class="mt-1 truncate text-xs" style="color:rgba(255,255,255,.88)">
+                {{ e($site->code) }}{{ $site->name ? ' — '.e($site->name) : '' }}
+              </p>
+            </div>
+            <div class="flex items-center justify-between px-5 py-3 text-sm text-[#6f4d2f]">
+              <span>{{ e($site->address ?: 'Lihat lowongan di site ini') }}</span>
+              <span class="font-bold transition group-hover:translate-x-1">Lihat →</span>
+            </div>
+          </a>
+        @empty
+          <div class="jobs-panel col-span-full rounded-2xl p-8 text-center text-sm text-slate-500">Belum ada site dengan lowongan aktif.</div>
+        @endforelse
+      </div>
+    </section>
+
+  @elseif($jobs->count())
     @php $firstId = optional($jobs->first())->id; @endphp
 
     <section
@@ -403,6 +438,13 @@
             <p class="text-sm font-bold leading-tight text-slate-900">{{ $total }} lowongan tersedia</p>
           </div>
 
+          @if($qSite)
+            <a href="{{ route('jobs.index', collect($keepParams)->except('site')->all()) }}"
+               class="shrink-0 rounded-xl border border-[#d9bc9d] px-3 py-2 text-xs font-semibold text-[#6f4d2f] hover:bg-[#fdf6ef]">
+              ← Semua site
+            </a>
+          @endif
+
           <form method="GET" class="flex items-center gap-2" aria-label="Urutkan">
             @foreach(['division','site','company','term','type'] as $keep)
               @if(!empty($keepParams[$keep]))
@@ -432,18 +474,20 @@
                   ? $siteCode . ' — ' . $siteName
                   : ($siteCode !== '' ? $siteCode : $siteName);
             @endphp
-            <li class="sticky top-0 z-10 rounded-xl border border-[#d9bc9d] bg-[#b28a57] px-3.5 py-3 shadow-sm">
-              <div class="flex items-center justify-between gap-3">
-                <div class="min-w-0">
-                  <p class="text-[10px] font-semibold uppercase tracking-[.14em] text-white/80">Kota / Site</p>
-                  <p class="truncate text-sm font-bold text-white">{{ e($siteHeading) }}</p>
-                  @if($siteSubheading !== '')
-                    <p class="truncate text-[10px] text-white/85">{{ e($siteSubheading) }}</p>
-                  @endif
+            <li class="overflow-hidden rounded-2xl border border-[#d9bc9d] bg-white shadow-sm">
+              <div class="px-3.5 py-3" style="background:#b28a57;color:#fff">
+                <div class="flex items-center justify-between gap-3">
+                  <div class="min-w-0">
+                    <p class="text-[10px] font-semibold uppercase tracking-[.14em]" style="color:rgba(255,255,255,.8)">Kota / Site</p>
+                    <p class="truncate text-sm font-bold" style="color:#fff">{{ e($siteHeading) }}</p>
+                    @if($siteSubheading !== '')
+                      <p class="truncate text-[10px]" style="color:rgba(255,255,255,.85)">{{ e($siteSubheading) }}</p>
+                    @endif
+                  </div>
+                  <span class="shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold" style="background:rgba(255,255,255,.92);color:#5c3d1e">{{ $siteJobs->count() }} job</span>
                 </div>
-                <span class="shrink-0 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-bold text-[#5c3d1e]">{{ $siteJobs->count() }} job</span>
               </div>
-            </li>
+              <div class="space-y-2 p-2">
             @foreach($siteJobs as $job)
               @php $idx = $displayIdx++; @endphp
             @php
@@ -540,6 +584,8 @@
               </button>
             </li>
             @endforeach
+              </div>
+            </li>
           @endforeach
         </ul>
 
