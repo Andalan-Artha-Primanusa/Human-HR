@@ -818,7 +818,7 @@
 
         {{-- Desktop Nav --}}
         <nav class="items-center hidden gap-1 md:flex">
-          <a href="{{ route('jobs.index') }}" class="px-4 py-2 text-sm font-semibold text-slate-600 hover:text-[#b28a57] transition-colors rounded-xl hover:bg-slate-50">Lowongan</a>
+          <a href="{{ route('jobs.index') }}" class="px-4 py-2 text-sm font-semibold transition-colors rounded-xl hover:bg-slate-50" style="color:#946d3f">Lowongan</a>
           
           @auth
             <div class="w-px h-6 mx-2 bg-slate-200"></div>
@@ -868,8 +868,8 @@
               </div>
             </details>
           @else
-            <a href="{{ route('login') }}" class="px-4 py-2 text-sm font-semibold text-slate-600 hover:text-[#b28a57] transition-colors rounded-xl hover:bg-slate-50">Masuk</a>
-            <a href="{{ route('register') }}" class="ml-2 px-5 py-2.5 text-sm font-bold text-white bg-[#b28a57] rounded-2xl shadow-md hover:shadow-lg hover:brightness-110 transition-all">Daftar Gratis</a>
+            <a href="{{ route('login') }}" class="px-4 py-2 text-sm font-semibold transition-colors rounded-xl hover:bg-slate-50" style="color:#946d3f">Masuk</a>
+            <a href="{{ route('register') }}" class="ml-2 px-5 py-2.5 text-sm font-bold rounded-2xl shadow-md hover:shadow-lg hover:brightness-110 transition-all" style="background-color:#b28a57;color:#fff">Daftar Gratis</a>
           @endauth
         </nav>
       </div>
