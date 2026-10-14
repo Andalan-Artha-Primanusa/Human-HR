@@ -676,6 +676,7 @@
         {{-- RIGHT: Progres / Site / Profil Kandidat --}}
         <aside id="apply" class="space-y-6 scroll-mt-24">
           {{-- Progres Lamaran --}}
+          @if($myApp || $hasMineproProgress)
           <div class="overflow-hidden border shadow-sm rounded-2xl border-[#ead8c5]"
            style="background:#ffffff;">
             <div class="h-1.5" style="background: {{ $ACCENT }};"></div>
@@ -977,6 +978,7 @@
               @endguest
             </div>
           </div>
+          @endif
 
 {{-- Tentang Site --}}
           <div class="p-5 bg-white border shadow-sm rounded-2xl border-slate-200 md:p-6">
