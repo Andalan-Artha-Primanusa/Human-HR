@@ -83,6 +83,8 @@
     $mineproProcesses = collect(data_get($mineproProgress ?? [], 'processes', []));
     $mineproCurrentProcess = data_get($mineproProgress ?? [], 'current_process');
     $hasMineproProgress = filled($mineproCurrentProcess);
+    // Sementara card progres disembunyikan dari halaman detail lowongan.
+    $showApplicationProgress = false;
     $mineproStage = strtolower((string) data_get($mineproProgress ?? [], 'current_stage', ''));
     $stageAlias = [
         'applied' => 'screening',
@@ -676,7 +678,7 @@
         {{-- RIGHT: Progres / Site / Profil Kandidat --}}
         <aside id="apply" class="space-y-6 scroll-mt-24">
           {{-- Progres Lamaran --}}
-          @if($myApp || $hasMineproProgress)
+          @if($showApplicationProgress && ($myApp || $hasMineproProgress))
           <div class="overflow-hidden border shadow-sm rounded-2xl border-[#ead8c5]"
            style="background:#ffffff;">
             <div class="h-1.5" style="background: {{ $ACCENT }};"></div>
