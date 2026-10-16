@@ -105,7 +105,7 @@
                 <th class="px-4 py-3 text-left">Nama</th>
                 <th class="px-4 py-3 text-left">Kode</th>
                 <th class="px-4 py-3 text-left">Region</th>
-                <th class="px-4 py-3 text-left">TZ</th>
+                <th class="px-4 py-3 text-left">Provinsi</th>
                 <th class="hidden px-4 py-3 text-left md:table-cell">Alamat</th>
                 <th class="px-4 py-3 text-left">Status</th>
                 <th class="px-4 py-3 text-left">Dibuat</th>

@@ -34,7 +34,7 @@
                 <th class="px-4 py-3 text-left">Nama</th>
                 <th class="px-4 py-3 text-left">Kode</th>
                 <th class="px-4 py-3 text-left">Region</th>
-                <th class="px-4 py-3 text-left">TZ</th>
+                <th class="px-4 py-3 text-left">Provinsi</th>
                 <th class="px-4 py-3 text-left hidden md:table-cell">Alamat</th>
                 <th class="px-4 py-3 text-left">Dibuat</th>
                 <th class="px-4 py-3 text-right">Aksi</th>

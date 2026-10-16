@@ -453,7 +453,7 @@
                     <p class="mt-0.5 truncate text-[#172033]">{{ e($siteRegion !== '' ? $siteRegion : '—') }}</p>
                   </div>
                   <div>
-                    <p class="font-semibold uppercase tracking-wide text-[#98703d]">TZ</p>
+                    <p class="font-semibold uppercase tracking-wide text-[#98703d]">Provinsi</p>
                     <p class="mt-0.5 truncate text-[#172033]">{{ e($site->timezone ?: '—') }}</p>
                   </div>
                 </div>
