@@ -101,7 +101,10 @@ class JobController extends Controller
             ]);
 
         if (!$isAdminRoute) {
-            $baseQuery->where('status', 'open');
+            // Halaman publik hanya boleh menampilkan lowongan yang benar-benar aktif.
+            // TRIM/LOWER juga menjaga data lama dengan spasi atau kapitalisasi berbeda
+            // agar status selain open tidak ikut terbaca sebagai lowongan aktif.
+            $baseQuery->whereRaw("LOWER(TRIM(status)) = 'open'");
 
             if (Auth::check()) {
                 $baseQuery->with(['applications' => function ($q) {
@@ -143,7 +146,9 @@ class JobController extends Controller
 
         // 4) Micro-cache untuk publik (hanya untuk guest)
         if (!$isAdminRoute && !Auth::check()) {
-            $cacheKey = 'jobs.public.' . md5(json_encode([
+            // Naikkan versi key agar hasil lama yang masih menyimpan lowongan nonaktif
+            // tidak dipakai lagi setelah aturan status diperketat.
+            $cacheKey = 'jobs.public.v2.' . md5(json_encode([
                 'division' => $division,
                 'site' => $siteCode,
                 'company' => $companyCode,
@@ -169,8 +174,8 @@ class JobController extends Controller
         if (!$isAdminRoute) {
             $sites = Site::query()
                 ->select(['id', 'code', 'name', 'region', 'timezone', 'address'])
-                ->whereHas('jobs', fn ($q) => $q->where('status', 'open'))
-                ->withCount(['jobs' => fn ($q) => $q->where('status', 'open')])
+                ->whereHas('jobs', fn ($q) => $q->whereRaw("LOWER(TRIM(status)) = 'open'"))
+                ->withCount(['jobs' => fn ($q) => $q->whereRaw("LOWER(TRIM(status)) = 'open'")])
                 ->orderBy('region')
                 ->orderBy('name')
                 ->get();
