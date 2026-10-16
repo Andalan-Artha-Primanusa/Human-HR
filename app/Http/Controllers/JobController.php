@@ -155,9 +155,11 @@ class JobController extends Controller
                 'per_page' => $perPage,
             ]));
 
-            $jobs = Cache::remember($cacheKey, 30, function () use ($baseQuery, $perPage) {
-                return $baseQuery->paginate($perPage)->withQueryString();
+            $jobs = Cache::remember($cacheKey, 30, function () use ($baseQuery) {
+                return $baseQuery->get();
             });
+        } elseif (!$isAdminRoute) {
+            $jobs = $baseQuery->get();
         } else {
             $jobs = $baseQuery->paginate($perPage)->withQueryString();
         }
@@ -167,9 +169,6 @@ class JobController extends Controller
         if (!$isAdminRoute) {
             $sites = Site::query()
                 ->select(['id', 'code', 'name', 'region', 'address'])
-                ->where(function ($q) {
-                    $q->where('is_active', true)->orWhereNull('is_active');
-                })
                 ->whereHas('jobs', fn ($q) => $q->where('status', 'open'))
                 ->withCount(['jobs' => fn ($q) => $q->where('status', 'open')])
                 ->orderBy('region')

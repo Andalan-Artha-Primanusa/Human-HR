@@ -435,7 +435,7 @@
               $siteCode = trim((string) ($site->code ?? ''));
               $siteName = trim((string) ($site->name ?? ''));
               $siteRegion = trim((string) ($site?->region ?? ''));
-              $siteLabel = $siteRegion !== '' ? $siteRegion : ($siteName !== '' ? $siteName : 'Lokasi kerja');
+              $siteLabel = $siteName !== '' ? $siteName : ($siteRegion !== '' ? $siteRegion : 'Lokasi kerja');
               $siteAddress = trim((string) ($site?->address ?? ''));
               $siteUrl = route('jobs.index', array_merge($keepParams, ['site' => $siteCode]));
             @endphp
@@ -480,7 +480,8 @@
         'specialist', 'expert', 'lead of', 'section head', 'dept head',
         'project manager', 'pjo', 'staff',
       ];
-      $levelGroups = $jobs->getCollection()->groupBy(function ($job) use ($staffLevels) {
+      $jobCollection = method_exists($jobs, 'getCollection') ? $jobs->getCollection() : collect($jobs);
+      $levelGroups = $jobCollection->groupBy(function ($job) use ($staffLevels) {
           $level = strtolower(trim((string) ($job->level ?? '')));
           $level = str_replace(['_', '-'], ' ', $level);
           $level = preg_replace('/\s+/', ' ', $level) ?: '';
@@ -548,9 +549,6 @@
         </section>
       @endif
     @endforeach
-    @endif
-    @if(method_exists($jobs, 'hasPages') && $jobs->hasPages())
-      <div class="mx-auto mt-6 max-w-[1360px]">{{ $jobs->onEachSide(1)->links() }}</div>
     @endif
   @else
     <section class="jobs-panel mx-auto mt-6 max-w-[1360px] rounded-2xl p-12 text-center">
