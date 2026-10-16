@@ -447,6 +447,16 @@
                 <div class="site-card__location"><svg class="h-4 w-4"><use href="#i-map"/></svg> Lokasi site</div>
                 <h3 class="site-card__name">{{ e($siteLabel) }}</h3>
                 <p class="site-card__address">{{ e($siteAddress !== '' ? $siteAddress : ($siteCode !== '' ? $siteCode : 'Lihat lowongan yang tersedia di lokasi ini')) }}</p>
+                <div class="mt-3 grid grid-cols-2 gap-2 border-t border-[#ead8c5] pt-3 text-[11px]">
+                  <div>
+                    <p class="font-semibold uppercase tracking-wide text-[#98703d]">Region</p>
+                    <p class="mt-0.5 truncate text-[#172033]">{{ e($siteRegion !== '' ? $siteRegion : '—') }}</p>
+                  </div>
+                  <div>
+                    <p class="font-semibold uppercase tracking-wide text-[#98703d]">TZ</p>
+                    <p class="mt-0.5 truncate text-[#172033]">{{ e($site->timezone ?: '—') }}</p>
+                  </div>
+                </div>
                 <div class="site-card__footer">
                   <span class="site-card__count">{{ (int) ($site->jobs_count ?? 0) }} lowongan</span>
                   <span class="site-card__cta">Lihat lowongan di site ini →</span>

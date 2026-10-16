@@ -168,7 +168,7 @@ class JobController extends Controller
 
         if (!$isAdminRoute) {
             $sites = Site::query()
-                ->select(['id', 'code', 'name', 'region', 'address'])
+                ->select(['id', 'code', 'name', 'region', 'timezone', 'address'])
                 ->whereHas('jobs', fn ($q) => $q->where('status', 'open'))
                 ->withCount(['jobs' => fn ($q) => $q->where('status', 'open')])
                 ->orderBy('region')
