@@ -586,7 +586,7 @@
             <span class="job-card__icon"><svg class="h-5 w-5"><use href="#{{ $meta['icon'] }}"/></svg></span>
             <span class="job-card__badge" style="{{ $isOpen ? 'background:#ecfdf5;color:#047857' : 'background:#fef2f2;color:#b91c1c' }}">{{ $isOpen ? 'Aktif' : strtoupper((string) ($job->status ?: 'Ditutup')) }}</span>
           </div>
-          <h2>{{ e(html_entity_decode(html_entity_decode((string) $job->title, ENT_QUOTES | ENT_HTML5, 'UTF-8'), ENT_QUOTES | ENT_HTML5, 'UTF-8')) }}</h2>
+          <h2>{{ e(\App\Models\Job::decodeHtmlEntities($job->getRawOriginal('title'))) }}</h2>
           <p class="job-card__dept">{{ e($job->division ?: 'General') }}</p>
           <div class="job-card__meta">
             <span><svg class="h-4 w-4"><use href="#i-map"/></svg>{{ e($siteLabel) }}</span>
