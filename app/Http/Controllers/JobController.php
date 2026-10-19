@@ -48,6 +48,7 @@ class JobController extends Controller
             'company' => ['nullable', 'string', 'max:50', 'prohibits:company_id'], // company code
             'company_id' => ['nullable', 'uuid', 'exists:companies,id', 'prohibits:company'],
             'type' => ['nullable', Rule::in(['intern', 'contract', 'fulltime'])], // enum DB
+            'level_group' => ['nullable', Rule::in(['staff', 'non_staff'])],
             'term' => ['nullable', 'string', 'max:200'],
             'sort' => ['nullable', Rule::in(['latest', 'oldest', 'title'])],
             'page' => ['nullable', 'integer', 'min:1'],
@@ -68,6 +69,7 @@ class JobController extends Controller
         $term = isset($data['term'])
             ? Str::limit(preg_replace('/[\x00-\x1F\x7F]/u', '', trim((string) $data['term'])) ?? '', 200, '')
             : null;
+        $levelGroup = $data['level_group'] ?? null;
 
         // 2) Query dasar (kolom minimal + eager load ketat)
         $jobColumns = [
@@ -150,12 +152,13 @@ class JobController extends Controller
         if (!$isAdminRoute && !Auth::check()) {
             // Naikkan versi key agar hasil lama yang masih menyimpan lowongan nonaktif
             // tidak dipakai lagi setelah aturan status diperketat.
-            $cacheKey = 'jobs.public.v3.' . md5(json_encode([
+            $cacheKey = 'jobs.public.v4.' . md5(json_encode([
                 'division' => $division,
                 'site' => $siteCode,
                 'company' => $companyCode,
                 'company_id' => $data['company_id'] ?? null,
                 'type' => $data['type'] ?? null,
+                'level_group' => $levelGroup,
                 'term' => $term,
                 'sort' => $sort,
                 'page' => $data['page'] ?? 1,
