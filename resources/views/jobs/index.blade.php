@@ -492,12 +492,33 @@
       ];
       $jobCollection = method_exists($jobs, 'getCollection') ? $jobs->getCollection() : collect($jobs);
       $levelGroups = $jobCollection->groupBy(function ($job) use ($staffLevels) {
+          $title = strtolower(trim((string) ($job->title ?? '')));
+          $title = preg_replace('/\s+/', ' ', str_replace(['_', '-'], ' ', $title)) ?: '';
+
+          // Data lama kadang menyimpan semua posisi sebagai "staff".
+          // Posisi operasional/admin harus tetap masuk Non Staff berdasarkan judulnya.
+          $operationalTitle = preg_match('/^(admin|assistant|mechanic|operator|driver|welder|tyreman|bulldozer|motor grader|excavator|dump truck|heavy equipment|helper)\b/i', $title);
+          if ($operationalTitle) {
+              return 'non_staff';
+          }
+
           $normalized = \App\Models\Job::normalizeLevel($job->level ?? null);
-          return in_array($normalized, [
+          $hierarchyLevel = [
               'foreman', 'supervisor', 'superintendent', 'manager', 'analyst',
               'specialist', 'expert', 'lead_of', 'section_head', 'dept_head',
-              'project_manager', 'pjo', 'staff',
-          ], true) ? 'staff' : 'non_staff';
+              'project_manager', 'pjo',
+          ];
+
+          // Level "staff" hanya dianggap Staff bila judulnya memang menyebut staff.
+          // Ini mencegah data lama seperti ADMIN/MECHANIC/ENGINEER yang salah level
+          // ikut masuk ke kartu Staff.
+          if (in_array($normalized, $hierarchyLevel, true)) {
+              return 'staff';
+          }
+
+          return $normalized === 'staff' && preg_match('/\bstaff\b/i', $title)
+              ? 'staff'
+              : 'non_staff';
       });
     @endphp
     @if(!$qLevelGroup)
