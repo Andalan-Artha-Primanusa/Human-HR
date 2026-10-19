@@ -89,6 +89,12 @@ class Job extends Model
         return self::decodeHtmlEntities($value);
     }
 
+    /** Always persist a plain text title so entities are not encoded again. */
+    public function setTitleAttribute($value): void
+    {
+        $this->attributes['title'] = self::decodeHtmlEntities($value);
+    }
+
     /** Decode legacy HTML entities, including values encoded more than once. */
     public static function decodeHtmlEntities($value): ?string
     {

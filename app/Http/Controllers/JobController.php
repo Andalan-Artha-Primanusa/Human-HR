@@ -75,7 +75,8 @@ class JobController extends Controller
         $jobColumns = [
                 'id',
                 'code',
-                'title',
+                // Normalize legacy HTML-encoded titles in the query itself.
+                DB::raw("REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(title, '&amp;amp;', '&'), '&AMP;amp;', '&'), '&amp;', '&'), '&AMP;', '&'), '&#38;', '&') AS title"),
                 'division',
                 'level',
                 'employment_type',
