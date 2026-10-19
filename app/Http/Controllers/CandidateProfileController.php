@@ -463,7 +463,7 @@ class CandidateProfileController extends Controller
         // Ambil daftar posisi (job) untuk filter
         $jobs = \App\Models\Job::orderBy('title')->pluck('title', 'id');
         $pohs = \App\Models\Poh::orderBy('name')->pluck('name', 'id');
-        $provinces = CandidateProfile::query()
+        $provinces = CandidateProfile::withoutGlobalScopes()
             ->select('ktp_province')
             ->whereNotNull('ktp_province')
             ->where('ktp_province', '<>', '')
@@ -481,7 +481,9 @@ class CandidateProfileController extends Controller
         $province = trim((string) $request->query('province', ''));
         $ageRange = trim((string) $request->query('age_range', ''));
 
-        $profiles = CandidateProfile::query()
+        // Daftar kandidat bersifat lintas akun internal. Jangan terapkan scope
+        // pemilik akun atau scope lain yang dapat membuat HR melihat hasil kosong.
+        $profiles = CandidateProfile::withoutGlobalScopes()
             ->select(['candidate_profiles.id', 'candidate_profiles.user_id', 'candidate_profiles.poh_id', 'candidate_profiles.full_name', 'candidate_profiles.email', 'candidate_profiles.phone', 'candidate_profiles.nik', 'candidate_profiles.age', 'candidate_profiles.birthdate', 'candidate_profiles.ktp_province', 'candidate_profiles.domicile_province', 'candidate_profiles.extras', 'candidate_profiles.updated_at'])
             ->withCount(['trainings', 'employments', 'references'])
             ->with(['poh:id,name', 'user.jobApplications' => function ($q) use ($jobId) {

@@ -35,6 +35,9 @@
         }
     }
 
+    // Kandidat dapat dilihat oleh role operasional yang juga diizinkan route admin/candidates.
+    $canViewCandidates = $u && in_array(($u->role ?? ''), ['hr', 'admin', 'superadmin', 'trainer', 'karyawan'], true);
+
     // ===== Initials untuk avatar fallback =====
     $initials = '';
     if ($u && ($u->name ?? null)) {
@@ -259,7 +262,7 @@
                     </a>
                 @endif
 
-                @if (Route::has('admin.candidates.index'))
+                @if ($canViewCandidates && Route::has('admin.candidates.index'))
                     <a href="{{ $href('admin.candidates.index') }}" class="{{ $linkDesk }} {{ $activeMenu('admin.candidates.*') }}">
                       <span class="{{ $iconWrap }}">{!! $menuIcon('candidates') !!}</span>
                       <span class="label text-white">Candidates</span>
@@ -388,7 +391,7 @@
                     </a>
                 @endif
 
-                @if (Route::has('admin.candidates.index'))
+                @if ($canViewCandidates && Route::has('admin.candidates.index'))
                       <a href="{{ $href('admin.candidates.index') }}" {!! $closeAttr !!} class="{{ $linkMobile }} {{ $activeMenu('admin.candidates.*') }}">
                         <span class="{{ $iconWrap }}">{!! $menuIcon('candidates') !!}</span>
                         <span>Candidates</span>
