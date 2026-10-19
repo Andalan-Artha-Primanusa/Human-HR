@@ -122,7 +122,7 @@
   .job-card__top { display:flex; align-items:flex-start; justify-content:space-between; gap:.75rem; }
   .job-card__icon { display:grid; height:44px; width:44px; flex:none; place-items:center; border-radius:12px; background:#b58b56; color:#fff; }
   .job-card__badge { border-radius:999px; background:#faf5ed; padding:.35rem .6rem; color:#98703d; font-size:.65rem; font-weight:800; text-transform:uppercase; letter-spacing:.04em; }
-  .job-card h2 { margin:1.25rem 0 .45rem; color:#172033; font-size:1.1rem; line-height:1.3; font-weight:800; }
+  .job-card h2 { margin:1.25rem 0 .45rem; color:#172033; font-size:1.1rem; line-height:1.3; font-weight:800; text-transform:uppercase; }
   .job-card__dept { color:#64748b; font-size:.82rem; font-weight:600; }
   .job-card__meta { display:flex; flex-wrap:wrap; gap:.5rem 1rem; margin-top:1.2rem; color:#64748b; font-size:.78rem; }
   .job-card__meta span { display:inline-flex; align-items:center; gap:.35rem; }
@@ -520,6 +520,25 @@
               ? 'staff'
               : 'non_staff';
       });
+
+      // Urutan jenjang Staff dibuat konsisten, lalu posisi diurutkan berdasarkan judul.
+      $staffOrder = array_flip([
+          'foreman', 'supervisor', 'superintendent', 'manager', 'analyst',
+          'specialist', 'expert', 'lead_of', 'section_head', 'dept_head',
+          'project_manager', 'pjo', 'staff',
+      ]);
+      $levelGroups = $levelGroups->map(function ($group, $groupKey) use ($staffOrder) {
+          return $group->sortBy(function ($job) use ($groupKey, $staffOrder) {
+              $title = strtolower(trim((string) ($job->title ?? '')));
+              if ($groupKey !== 'staff') {
+                  return '999-' . $title;
+              }
+
+              $level = \App\Models\Job::normalizeLevel($job->level ?? null);
+              $rank = $staffOrder[$level] ?? 999;
+              return str_pad((string) $rank, 3, '0', STR_PAD_LEFT) . '-' . $title;
+          })->values();
+      });
     @endphp
     @if(!$qLevelGroup)
       <div class="level-card-grid" aria-label="Pilih level pekerjaan">
@@ -567,7 +586,7 @@
             <span class="job-card__icon"><svg class="h-5 w-5"><use href="#{{ $meta['icon'] }}"/></svg></span>
             <span class="job-card__badge" style="{{ $isOpen ? 'background:#ecfdf5;color:#047857' : 'background:#fef2f2;color:#b91c1c' }}">{{ $isOpen ? 'Aktif' : strtoupper((string) ($job->status ?: 'Ditutup')) }}</span>
           </div>
-          <h2>{{ e($job->title) }}</h2>
+          <h2>{{ e(html_entity_decode((string) $job->title, ENT_QUOTES | ENT_HTML5, 'UTF-8')) }}</h2>
           <p class="job-card__dept">{{ e($job->division ?: 'General') }}</p>
           <div class="job-card__meta">
             <span><svg class="h-4 w-4"><use href="#i-map"/></svg>{{ e($siteLabel) }}</span>
