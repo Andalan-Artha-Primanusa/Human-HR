@@ -186,23 +186,6 @@ class CandidateProfile extends Model
             }
         }
 
-        if (! $this->hasCvForApplication()) {
-            $missing[] = 'CV';
-        }
-
-        if ($this->relationCount('trainings') < 1) {
-            $missing[] = 'Minimal 1 pelatihan';
-        }
-
-        $isFreshGraduate = (bool) data_get($this->extras ?? [], 'is_fresh_graduate', false);
-        if (! $isFreshGraduate && $this->relationCount('employments') < 1) {
-            $missing[] = 'Minimal 1 riwayat pekerjaan';
-        }
-
-        if ($this->relationCount('references') < 1) {
-            $missing[] = 'Minimal 1 referensi';
-        }
-
         return array_values(array_unique($missing));
     }
 

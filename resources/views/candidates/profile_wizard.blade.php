@@ -442,7 +442,7 @@
           <p class="mt-1 text-xs text-slate-500">Opsional — silakan lewati jika tidak ada.</p>
           <template x-for="(it,idx) in items" :key="idx">
             <div class="grid gap-3 p-3 mt-4 border rounded-xl">
-              <input class="px-3 py-2 border rounded-lg" :name="`trainings[${idx}][title]`" x-model="it.title" placeholder="Nama Training/Sertifikasi *" required>
+              <input class="px-3 py-2 border rounded-lg" :name="`trainings[${idx}][title]`" x-model="it.title" placeholder="Nama Training/Sertifikasi (opsional)">
 
               <input class="px-3 py-2 border rounded-lg" :name="`trainings[${idx}][institution]`" x-model="it.institution" placeholder="Institusi/Penyelenggara">
 
@@ -519,16 +519,16 @@
               <div class="flex justify-end mt-3">
                 <button type="button" class="rounded-xl border border-brand-200 px-3 py-1.5 text-sm text-brand-800 hover:bg-brand-50" @click="items.push({company:'',position_start:'',position_end:'',period_start:'',period_end:'',reason_for_leaving:'',job_description:''})">+ Tambah</button>
               </div>
-              <p class="mt-1 text-xs text-slate-500">Minimal 1 riwayat pekerjaan diisi.</p>
+              <p class="mt-1 text-xs text-slate-500">Opsional — silakan lewati jika tidak ada.</p>
               <template x-for="(it,idx) in items" :key="idx">
                 <div class="grid gap-3 p-3 mt-4 border rounded-xl">
-                  <input class="px-3 py-2 border rounded-lg" :name="`employments[${idx}][company]`" x-model="it.company" placeholder="Nama Perusahaan *" required>
+                  <input class="px-3 py-2 border rounded-lg" :name="`employments[${idx}][company]`" x-model="it.company" placeholder="Nama Perusahaan">
                   <div class="grid gap-3 sm:grid-cols-2">
-                    <input class="px-3 py-2 border rounded-lg" :name="`employments[${idx}][position_start]`" x-model="it.position_start" placeholder="Jabatan Awal *" required>
+                    <input class="px-3 py-2 border rounded-lg" :name="`employments[${idx}][position_start]`" x-model="it.position_start" placeholder="Jabatan Awal">
                     <input class="px-3 py-2 border rounded-lg" :name="`employments[${idx}][position_end]`"   x-model="it.position_end"   placeholder="Jabatan Akhir">
                   </div>
                   <div class="grid gap-3 sm:grid-cols-2">
-                    <input type="date" class="px-3 py-2 border rounded-lg" :name="`employments[${idx}][period_start]`" x-model="it.period_start" required>
+                    <input type="date" class="px-3 py-2 border rounded-lg" :name="`employments[${idx}][period_start]`" x-model="it.period_start">
                     <input type="date" class="px-3 py-2 border rounded-lg" :name="`employments[${idx}][period_end]`"   x-model="it.period_end">
                   </div>
                   <input class="px-3 py-2 border rounded-lg" :name="`employments[${idx}][reason_for_leaving]`" x-model="it.reason_for_leaving" placeholder="Alasan Berhenti">
@@ -678,23 +678,23 @@
               Referensi (bukan keluarga, 1 orang saja)
             </h2>
           </div>
-          <p class="mt-1 text-xs text-slate-500">Isi minimal 1 referensi.</p>
+          <p class="mt-1 text-xs text-slate-500">Opsional — silakan lewati jika tidak ada.</p>
           <template x-for="(it,idx) in items.slice(0,1)" :key="idx">
             <div class="grid gap-3 p-3 mt-4 border rounded-xl sm:grid-cols-2">
               <div>
-                <input class="px-3 py-2 border rounded-lg" :name="`references[${idx}][name]`" x-model="it.name" placeholder="Nama *" required>
+                <input class="px-3 py-2 border rounded-lg" :name="`references[${idx}][name]`" x-model="it.name" placeholder="Nama (opsional)">
                 @error('references.0.name')<p class="field-error-msg">{{ $message }}</p>@enderror
               </div>
               <div>
-                <input class="px-3 py-2 border rounded-lg" :name="`references[${idx}][job_title]`" x-model="it.job_title" placeholder="Jabatan *" required>
+                <input class="px-3 py-2 border rounded-lg" :name="`references[${idx}][job_title]`" x-model="it.job_title" placeholder="Jabatan">
                 @error('references.0.job_title')<p class="field-error-msg">{{ $message }}</p>@enderror
               </div>
               <div>
-                <input class="px-3 py-2 border rounded-lg" :name="`references[${idx}][company]`" x-model="it.company" placeholder="Perusahaan *" required>
+                <input class="px-3 py-2 border rounded-lg" :name="`references[${idx}][company]`" x-model="it.company" placeholder="Perusahaan">
                 @error('references.0.company')<p class="field-error-msg">{{ $message }}</p>@enderror
               </div>
               <div>
-                <input class="px-3 py-2 border rounded-lg" :name="`references[${idx}][contact]`" x-model="it.contact" placeholder="Kontak (HP/Email) *" required>
+                <input class="px-3 py-2 border rounded-lg" :name="`references[${idx}][contact]`" x-model="it.contact" placeholder="Kontak (HP/Email)">
                 @error('references.0.contact')<p class="field-error-msg">{{ $message }}</p>@enderror
               </div>
             </div>
@@ -709,8 +709,8 @@
           <p class="mt-1 text-sm text-slate-500">Berkas yang diunggah dibatasi maksimal 1MB per file</p>
           <div class="grid gap-4 mt-3 sm:grid-cols-2">
             <div>
-              <label class="text-sm text-slate-600">CV (PDF, maks 1MB) <span class="text-red-600" x-show="!hasCv">*</span></label>
-              <input :required="!hasCv" type="file" name="cv" accept="application/pdf" class="w-full px-3 py-2 mt-1 border rounded-lg">
+              <label class="text-sm text-slate-600">CV (PDF, maks 1MB) <span class="text-slate-400">(opsional)</span></label>
+              <input type="file" name="cv" accept="application/pdf" class="w-full px-3 py-2 mt-1 border rounded-lg">
               @if($profile->cv_path)
                 <div class="mt-1 text-xs text-slate-600">Terunggah: <a class="underline text-brand-700" href="{{ url('/files/storage/' . ltrim($profile->cv_path, '/')) }}" target="_blank">Lihat CV</a></div>
               @endif
@@ -1085,16 +1085,13 @@
           const E = Alpine.store('form').employments || [];
           const f = this.$refs.form;
           const isFreshGrad = !!f.querySelector('input[name="is_fresh_graduate"]:checked');
-          if(!isFreshGrad && E.length<1) errs.push('Minimal 1 riwayat pekerjaan');
           T.forEach((r,i)=>{ if(r.title?.trim() || r.institution?.trim() || r.period_start?.trim()){ if(!r.title?.trim()) errs.push(`Pelatihan #${i+1}: Nama`); if(!r.institution?.trim()) errs.push(`Pelatihan #${i+1}: Institusi`); if(!r.period_start?.trim()) errs.push(`Pelatihan #${i+1}: Tanggal Mulai`); } });
-          if(!isFreshGrad) E.forEach((r,i)=>{ if(!r.company?.trim()) errs.push(`Pekerjaan #${i+1}: Perusahaan`); if(!r.position_start?.trim()) errs.push(`Pekerjaan #${i+1}: Jabatan Awal`); if(!r.period_start?.trim()) errs.push(`Pekerjaan #${i+1}: Tanggal Mulai`); });
+          if(!isFreshGrad) E.forEach((r,i)=>{ if(r.company?.trim() || r.position_start?.trim() || r.period_start?.trim()){ if(!r.company?.trim()) errs.push(`Pekerjaan #${i+1}: Perusahaan`); if(!r.position_start?.trim()) errs.push(`Pekerjaan #${i+1}: Jabatan Awal`); if(!r.period_start?.trim()) errs.push(`Pekerjaan #${i+1}: Tanggal Mulai`); } });
           this.step2Errors = errs;
         }
         if(s===3){
           const R = Alpine.store('form').references || [];
-          if(R.length<1) errs.push('Minimal 1 referensi');
-          R.slice(0,1).forEach((r,i)=>{ if(!r.name?.trim()) errs.push(`Referensi #${i+1}: Nama`); if(!r.job_title?.trim()) errs.push(`Referensi #${i+1}: Jabatan`); if(!r.company?.trim()) errs.push(`Referensi #${i+1}: Perusahaan`); if(!r.contact?.trim()) errs.push(`Referensi #${i+1}: Kontak`); });
-          if(!this.hasCv){ const f=this.$refs.form; if(!f.cv?.files?.length){ errs.push('CV'); } }
+          R.slice(0,1).forEach((r,i)=>{ if(r.name?.trim() || r.job_title?.trim() || r.company?.trim() || r.contact?.trim()){ if(!r.name?.trim()) errs.push(`Referensi #${i+1}: Nama`); if(!r.job_title?.trim()) errs.push(`Referensi #${i+1}: Jabatan`); if(!r.company?.trim()) errs.push(`Referensi #${i+1}: Perusahaan`); if(!r.contact?.trim()) errs.push(`Referensi #${i+1}: Kontak`); } });
           this.step3Errors = errs;
         }
         return errs.length===0;
