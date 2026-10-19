@@ -492,10 +492,12 @@
       ];
       $jobCollection = method_exists($jobs, 'getCollection') ? $jobs->getCollection() : collect($jobs);
       $levelGroups = $jobCollection->groupBy(function ($job) use ($staffLevels) {
-          $level = strtolower(trim((string) ($job->level ?? '')));
-          $level = str_replace(['_', '-'], ' ', $level);
-          $level = preg_replace('/\s+/', ' ', $level) ?: '';
-          return in_array($level, $staffLevels, true) ? 'staff' : 'non_staff';
+          $normalized = \App\Models\Job::normalizeLevel($job->level ?? null);
+          return in_array($normalized, [
+              'foreman', 'supervisor', 'superintendent', 'manager', 'analyst',
+              'specialist', 'expert', 'lead_of', 'section_head', 'dept_head',
+              'project_manager', 'pjo', 'staff',
+          ], true) ? 'staff' : 'non_staff';
       });
     @endphp
     @if(!$qLevelGroup)

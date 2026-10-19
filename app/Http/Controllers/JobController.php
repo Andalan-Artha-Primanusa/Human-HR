@@ -177,7 +177,6 @@ class JobController extends Controller
             $sites = Site::query()
                 ->select(['id', 'code', 'name', 'region', 'timezone', 'address'])
                 ->where('is_active', true)
-                ->whereHas('jobs', fn ($q) => $q->whereRaw("LOWER(TRIM(status)) = 'open'"))
                 ->withCount(['jobs' => fn ($q) => $q->whereRaw("LOWER(TRIM(status)) = 'open'")])
                 ->orderBy('region')
                 ->orderBy('name')

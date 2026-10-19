@@ -88,11 +88,16 @@ class Job extends Model
         if (!$raw)
             return null;
         $s = strtolower(trim($raw));
-        $s = str_replace([" ", "\xC2\xA0"], '_', $s);
+        $s = preg_replace('/[\s\x{00A0}\-_]+/u', '_', $s) ?: '';
         $aliases = [
             'board_of_directors' => 'bod',
             'non-staff' => 'non_staff',
             'nonstaff' => 'non_staff',
+            'department_head' => 'dept_head',
+            'depthead' => 'dept_head',
+            'sectionhead' => 'section_head',
+            'projectmanager' => 'project_manager',
+            'leadof' => 'lead_of',
         ];
         $s = $aliases[$s] ?? $s;
         return in_array($s, self::LEVELS, true) ? $s : null;
