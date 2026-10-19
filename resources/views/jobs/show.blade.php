@@ -1,7 +1,7 @@
 {{-- resources/views/jobs/show.blade.php --}}
-@extends('layouts.app', ['title' => e($job->title)])
+@extends('layouts.app', ['title' => e(html_entity_decode(html_entity_decode((string) $job->title, ENT_QUOTES | ENT_HTML5, 'UTF-8'), ENT_QUOTES | ENT_HTML5, 'UTF-8'))])
 
-@section('title', e($job->title ?: 'Detail Lowongan') . ' • karir-andalan')
+@section('title', e(html_entity_decode(html_entity_decode((string) ($job->title ?: 'Detail Lowongan'), ENT_QUOTES | ENT_HTML5, 'UTF-8'), ENT_QUOTES | ENT_HTML5, 'UTF-8')) . ' • karir-andalan')
 
 @php
     use Illuminate\Support\Carbon;
@@ -316,7 +316,7 @@
             <li class="flex items-center min-w-0 gap-2" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem" aria-current="page">
               <div class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-slate-50 ring-1 ring-slate-200">
                 <svg class="w-4 h-4 text-slate-500" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 12m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" stroke="currentColor" stroke-width="1.5"/><path d="M12 8v4l3 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-                <span class="font-semibold truncate text-slate-900" itemprop="name">{{ e($job->title) }}</span>
+                <span class="font-semibold truncate text-slate-900" itemprop="name">{{ e(html_entity_decode(html_entity_decode((string) $job->title, ENT_QUOTES | ENT_HTML5, 'UTF-8'), ENT_QUOTES | ENT_HTML5, 'UTF-8')) }}</span>
               </div>
               <meta itemprop="item" content="{{ request()->fullUrl() }}"/><meta itemprop="position" content="3"/>
             </li>
@@ -340,7 +340,7 @@
           <div class="page-header__copy">
             <p class="page-header__eyebrow">Detail Lowongan</p>
             <div class="flex flex-wrap items-center gap-2">
-              <h1 id="job-detail-title" class="page-header__title">{{ e($job->title ?: 'Belum tersedia') }}</h1>
+              <h1 id="job-detail-title" class="page-header__title">{{ e(html_entity_decode(html_entity_decode((string) ($job->title ?: 'Belum tersedia'), ENT_QUOTES | ENT_HTML5, 'UTF-8'), ENT_QUOTES | ENT_HTML5, 'UTF-8')) }}</h1>
               @if(($job->status ?? '') === 'open')
                 <span class="rounded-full bg-white/20 px-2.5 py-0.5 text-[11px] font-semibold text-white ring-1 ring-inset ring-white/40">Buka</span>
               @else

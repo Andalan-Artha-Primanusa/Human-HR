@@ -80,6 +80,28 @@ class Job extends Model
         // HAPUS cast keywords => array (biar kita kontrol via accessor+mutator)
     ];
 
+    /**
+     * Judul lama kadang tersimpan sudah HTML-encoded lebih dari sekali.
+     * Decode saat dibaca agar seluruh halaman selalu menampilkan judul normal.
+     */
+    public function getTitleAttribute($value): ?string
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        $decoded = (string) $value;
+        for ($i = 0; $i < 4; $i++) {
+            $next = html_entity_decode($decoded, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+            if ($next === $decoded) {
+                break;
+            }
+            $decoded = $next;
+        }
+
+        return $decoded;
+    }
+
     /* =====================
      | Normalizer: LEVEL
      |=====================*/
