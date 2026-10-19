@@ -426,11 +426,11 @@
           <p class="career-eyebrow">EXPLORE BY LOCATION</p>
           <h2 id="site-list-title" class="text-2xl font-extrabold tracking-tight text-[#172033]">Pilih lokasi kerja</h2>
         </div>
-        <span class="text-sm text-[#64748B]">{{ $sites->where('jobs_count', '>', 0)->count() }} lokasi</span>
+        <span class="text-sm text-[#64748B]">{{ $sites->count() }} lokasi</span>
       </div>
-      @if($sites->where('jobs_count', '>', 0)->count())
+      @if($sites->count())
         <div class="site-grid">
-          @foreach($sites->where('jobs_count', '>', 0) as $site)
+          @foreach($sites as $site)
             @php
               $siteCode = trim((string) ($site->code ?? ''));
               $siteName = trim((string) ($site->name ?? ''));
