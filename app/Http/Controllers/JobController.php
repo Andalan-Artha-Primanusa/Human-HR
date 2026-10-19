@@ -221,6 +221,9 @@ class JobController extends Controller
     {
         $this->authorize('view', $job);
 
+        // Normalize legacy encoded titles before the detail view and breadcrumb render.
+        $job->setAttribute('title', Job::decodeHtmlEntities($job->getRawOriginal('title')));
+
         $job->loadMissing([
             'site:id,code,name,region,timezone,address',
             'company:id,code,name',

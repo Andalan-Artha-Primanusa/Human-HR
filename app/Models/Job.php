@@ -86,12 +86,18 @@ class Job extends Model
      */
     public function getTitleAttribute($value): ?string
     {
+        return self::decodeHtmlEntities($value);
+    }
+
+    /** Decode legacy HTML entities, including values encoded more than once. */
+    public static function decodeHtmlEntities($value): ?string
+    {
         if ($value === null) {
             return null;
         }
 
         $decoded = (string) $value;
-        for ($i = 0; $i < 4; $i++) {
+        for ($i = 0; $i < 10; $i++) {
             $next = html_entity_decode($decoded, ENT_QUOTES | ENT_HTML5, 'UTF-8');
             if ($next === $decoded) {
                 break;
