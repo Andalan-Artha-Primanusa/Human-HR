@@ -128,7 +128,7 @@
                         {{-- Title + meta --}}
                         <td class="px-4 py-3">
                           <div class="font-medium text-slate-900">
-                            <a href="{{ route('admin.jobs.edit', $job) }}" class="hover:underline">{{ e($job->title) }}</a>
+                            <a href="{{ route('admin.jobs.edit', $job) }}" class="hover:underline">{{ \App\Models\Job::decodeHtmlEntities($job->getRawOriginal('title')) }}</a>
                           </div>
                           <div class="mt-0.5 flex flex-wrap gap-1 text-xs text-slate-500">
                             @if($job->employment_type)
