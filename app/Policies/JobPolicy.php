@@ -10,7 +10,7 @@ class JobPolicy
     /** helper kecil */
     private function isAdmin(?User $user): bool
     {
-        return $user && in_array($user->role, ['hr', 'superadmin'], true);
+        return $user && in_array($user->role, ['hr', 'superadmin', 'admin'], true);
     }
 
     private function isSuperAdmin(?User $user): bool
@@ -51,13 +51,13 @@ class JobPolicy
 
     public function delete(User $user, Job $job): bool
     {
-        return $this->isSuperAdmin($user);
+        return $this->isAdmin($user);
     }
 
     // (opsional) restore/forceDelete kalau dipakai:
     public function restore(User $user, Job $job): bool
     {
-        return $this->isSuperAdmin($user);
+        return $this->isAdmin($user);
     }
 
     public function forceDelete(User $user, Job $job): bool

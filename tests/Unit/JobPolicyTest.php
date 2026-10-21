@@ -132,7 +132,7 @@ class JobPolicyTest extends TestCase
         $this->assertFalse($policy->update($user, $job));
     }
 
-    public function test_delete_allows_only_superadmin(): void
+    public function test_delete_allows_superadmin_and_hr(): void
     {
         $policy = new JobPolicy();
         $superadmin = new User();
@@ -140,14 +140,18 @@ class JobPolicyTest extends TestCase
 
         $hr = new User();
         $hr->role = 'hr';
+
+        $pelamar = new User();
+        $pelamar->role = 'pelamar';
 
         $job = new Job();
 
         $this->assertTrue($policy->delete($superadmin, $job));
-        $this->assertFalse($policy->delete($hr, $job));
+        $this->assertTrue($policy->delete($hr, $job));
+        $this->assertFalse($policy->delete($pelamar, $job));
     }
 
-    public function test_restore_allows_only_superadmin(): void
+    public function test_restore_allows_superadmin_and_hr(): void
     {
         $policy = new JobPolicy();
         $superadmin = new User();
@@ -156,10 +160,14 @@ class JobPolicyTest extends TestCase
         $hr = new User();
         $hr->role = 'hr';
 
+        $pelamar = new User();
+        $pelamar->role = 'pelamar';
+
         $job = new Job();
 
         $this->assertTrue($policy->restore($superadmin, $job));
-        $this->assertFalse($policy->restore($hr, $job));
+        $this->assertTrue($policy->restore($hr, $job));
+        $this->assertFalse($policy->restore($pelamar, $job));
     }
 
     public function test_force_delete_allows_only_superadmin(): void

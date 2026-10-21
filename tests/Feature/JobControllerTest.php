@@ -489,9 +489,19 @@ class JobControllerTest extends TestCase
         $response->assertJsonStructure(['message', 'job', 'redirect']);
     }
 
-    public function test_admin_destroy_is_forbidden_for_hr()
+    public function test_admin_destroy_is_allowed_for_hr()
     {
         $this->actingAs($this->hr);
+
+        $response = $this->delete(route('admin.jobs.destroy', $this->job));
+
+        $response->assertRedirect(route('admin.jobs.index'));
+        $this->assertDatabaseMissing('job_listings', ['id' => $this->job->id]);
+    }
+
+    public function test_admin_destroy_is_forbidden_for_pelamar()
+    {
+        $this->actingAs($this->pelamar);
 
         $response = $this->delete(route('admin.jobs.destroy', $this->job));
 
