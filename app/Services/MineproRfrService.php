@@ -433,7 +433,20 @@ class MineproRfrService
             [$headerRows, $educationByRfr] = $this->parseVacancyResponse($response->json('results', []));
 
             $rows = collect($headerRows)
-                ->filter(fn($row) => is_array($row) && ! empty($row['RFRRefID']) && ! empty($row['Position_Description']))
+                ->filter(function ($row) {
+                    if (! is_array($row)) {
+                        return false;
+                    }
+
+                    $code = $row['RFRRefID'] ?? $row['RFRRefId'] ?? $row['RFR_REF_ID'] ?? null;
+                    $title = $row['Position_Description']
+                        ?? $row['PositionDescription']
+                        ?? $row['PositionDesc']
+                        ?? $row['position_description']
+                        ?? null;
+
+                    return filled($code) && filled($title);
+                })
                 ->map(function (array $row) use ($educationByRfr) {
                     $normalized = $this->normalizeRfr($row);
 
@@ -493,6 +506,12 @@ class MineproRfrService
 
     private function normalizeRfr(array $row): array
     {
+        $rfrCode = $row['RFRRefID'] ?? $row['RFRRefId'] ?? $row['RFR_REF_ID'] ?? '';
+        $positionDescription = $row['Position_Description']
+            ?? $row['PositionDescription']
+            ?? $row['PositionDesc']
+            ?? $row['position_description']
+            ?? '';
         $descriptionParts = array_filter([
             $row['BriefJobSpecs'] ?? null,
             $row['ExpRequirement'] ?? null,
@@ -504,9 +523,9 @@ class MineproRfrService
         [$companyCode, $siteCode] = $this->splitWorkLocation($workLocation);
 
         return [
-            'code' => trim((string) ($row['RFRRefID'] ?? '')),
+            'code' => trim((string) $rfrCode),
             'position_ref' => $row['Position_Ref'] ?? null,
-            'title' => trim((string) ($row['Position_Description'] ?? '')),
+            'title' => trim((string) $positionDescription),
             'qty_required' => (int) ((float) ($row['QtyRequired'] ?? 0)),
             'sex_required' => $row['SexRequired'] ?? null,
             'commencing_date' => $row['CommencingDate'] ?? null,
@@ -516,7 +535,7 @@ class MineproRfrService
             'facilities' => $row['Fasilitas'] ?? null,
             'work_experience' => $row['WorkExperience'] ?? null,
             'status_position' => $row['StatusPosition'] ?? null,
-            'level' => $this->inferLevel($row['Position_Description'] ?? null, $row['StatusPosition'] ?? null),
+            'level' => $this->inferLevel($positionDescription, $row['StatusPosition'] ?? null),
             'candidate_type' => $row['TypeKandidat'] ?? null,
             'work_location' => $workLocation,
             'company_code' => $companyCode,

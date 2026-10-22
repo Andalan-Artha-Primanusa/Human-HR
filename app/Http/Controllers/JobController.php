@@ -381,7 +381,9 @@ class JobController extends Controller
 
         $companies = Company::query()->select(['id', 'code', 'name'])->orderBy('code')->get();
 
-        $shouldFetchRfr = request()->hasAny(['rfr_start_date', 'rfr_end_date']);
+        // Load the default current-month RFR list on the edit page as well;
+        // the date form can still be used to refresh a different range.
+        $shouldFetchRfr = true;
 
         $rfrStartDate = request('rfr_start_date', now()->startOfMonth()->format('Y-m-d'));
         $rfrStartDate = preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $rfrStartDate)
