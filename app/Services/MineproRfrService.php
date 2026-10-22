@@ -293,6 +293,22 @@ class MineproRfrService
         return Arr::flatten($results, 1);
     }
 
+    private function isRfrHeaderRow(mixed $row): bool
+    {
+        if (! is_array($row)) {
+            return false;
+        }
+
+        $code = $row['RFRRefID'] ?? $row['RFRRefId'] ?? $row['RFR_REF_ID'] ?? null;
+        $title = $row['Position_Description']
+            ?? $row['PositionDescription']
+            ?? $row['PositionDesc']
+            ?? $row['position_description']
+            ?? null;
+
+        return filled($code) && filled($title);
+    }
+
     /**
      * Parse hasil API RFR yang bisa berbentuk:
      *  - dua bagian: [ [baris RFR...], [baris pendidikan...] ]  (format MinePro saat ini)
@@ -308,7 +324,7 @@ class MineproRfrService
         }
 
         // Single row asosiatif
-        if (isset($results['RFRRefID']) && isset($results['Position_Description'])) {
+        if ($this->isRfrHeaderRow($results)) {
             return [[$results], []];
         }
 
@@ -321,7 +337,7 @@ class MineproRfrService
 
             if (is_array($headers) && is_array($educationRows)) {
                 $headersAreRfr = collect($headers)
-                    ->contains(fn($row) => is_array($row) && ! empty($row['Position_Description']));
+                    ->contains(fn($row) => $this->isRfrHeaderRow($row));
                 $educationAreRows = collect($educationRows)
                     ->contains(fn($row) => is_array($row) && ! empty($row['RFRRefID']));
 
@@ -335,7 +351,7 @@ class MineproRfrService
         }
 
         // Flat list baris RFR (format lama)
-        if (is_array($first) && isset($first['RFRRefID'])) {
+        if (is_array($first) && $this->isRfrHeaderRow($first)) {
             return [$results, []];
         }
 
