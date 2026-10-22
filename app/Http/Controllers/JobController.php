@@ -287,7 +287,9 @@ class JobController extends Controller
         // (opsional) dropdown company
         $companies = Company::query()->select(['id', 'code', 'name'])->orderBy('code')->get();
 
-        $shouldFetchRfr = $request->hasAny(['rfr_start_date', 'rfr_end_date']);
+        // Load RFR MinePro by default on the create form; date filters remain
+        // available for narrowing or refreshing the result set.
+        $shouldFetchRfr = true;
 
         $rfrStartDate = $request->query('rfr_start_date', now()->startOfMonth()->format('Y-m-d'));
         $rfrStartDate = preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $rfrStartDate)
