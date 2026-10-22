@@ -107,7 +107,7 @@ class JobController extends Controller
             // Halaman publik hanya boleh menampilkan lowongan yang benar-benar aktif.
             // TRIM/LOWER juga menjaga data lama dengan spasi atau kapitalisasi berbeda
             // agar status selain open tidak ikut terbaca sebagai lowongan aktif.
-            $baseQuery->whereRaw("LOWER(TRIM(status)) = 'open'");
+            $baseQuery->whereIn(DB::raw('LOWER(TRIM(status))'), ['open', 'active', 'aktif']);
             // Lowongan dari site yang dinonaktifkan juga tidak boleh muncul di portal publik.
             $baseQuery->whereHas('site', fn ($q) => $q->where('is_active', true));
 
@@ -153,7 +153,7 @@ class JobController extends Controller
         if (!$isAdminRoute && !Auth::check()) {
             // Naikkan versi key agar hasil lama yang masih menyimpan lowongan nonaktif
             // tidak dipakai lagi setelah aturan status diperketat.
-            $cacheKey = 'jobs.public.v4.' . md5(json_encode([
+            $cacheKey = 'jobs.public.v5.' . md5(json_encode([
                 'division' => $division,
                 'site' => $siteCode,
                 'company' => $companyCode,
@@ -181,7 +181,7 @@ class JobController extends Controller
             $sites = Site::query()
                 ->select(['id', 'code', 'name', 'region', 'timezone', 'address'])
                 ->where('is_active', true)
-                ->withCount(['jobs' => fn ($q) => $q->whereRaw("LOWER(TRIM(status)) = 'open'")])
+                ->withCount(['jobs' => fn ($q) => $q->whereIn(DB::raw('LOWER(TRIM(status))'), ['open', 'active', 'aktif'])])
                 ->orderBy('region')
                 ->orderBy('name')
                 ->get();

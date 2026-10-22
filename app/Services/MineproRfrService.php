@@ -411,6 +411,10 @@ class MineproRfrService
             $form = [
                 ['name' => 'StartDate', 'contents' => $startDate],
                 ['name' => 'EndDate', 'contents' => $endDate],
+                // MinePro may paginate the RFR response by default. Request a
+                // large first page so valid vacancies are not silently omitted.
+                ['name' => 'Page', 'contents' => '1'],
+                ['name' => 'PageSize', 'contents' => '1000'],
             ];
 
             $response = Http::timeout((int) config('services.minepro.timeout', 15))
