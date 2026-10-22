@@ -509,6 +509,17 @@
               'project_manager', 'pjo',
           ];
 
+          // RFR imports can carry a stale/blank level. Use the position title
+          // as the authoritative fallback for hierarchy roles so DEPT HEAD,
+          // SECTION HEAD, LEAD OF, and PROJECT MANAGER remain in Staff.
+          $titleStaffRole = preg_match(
+              '/\b(dept\.?\s*head|department\s+head|section\s+head|lead\s+of|project\s+manager|superintendent|supervisor|foreman|manager|analyst|specialist|expert|pjo)\b/i',
+              $title
+          );
+          if ($titleStaffRole) {
+              return 'staff';
+          }
+
           // Level "staff" hanya dianggap Staff bila judulnya memang menyebut staff.
           // Ini mencegah data lama seperti ADMIN/MECHANIC/ENGINEER yang salah level
           // ikut masuk ke kartu Staff.
