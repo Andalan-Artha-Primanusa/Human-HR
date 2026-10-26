@@ -8,6 +8,7 @@ use App\Models\JobApplication;
 use App\Support\UploadPath;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
@@ -531,6 +532,23 @@ class CandidateProfileController extends Controller
             ->withQueryString();
 
         return view('admin.candidates.index', compact('profiles', 'q', 'jobs', 'jobId', 'pohs', 'pohId', 'provinces', 'province', 'ageRange'));
+    }
+
+    /** Reset password akun kandidat oleh admin/HR tanpa email. */
+    public function resetCandidatePassword(CandidateProfile $profile)
+    {
+        abort_unless(auth()->user()?->hasRole(['superadmin', 'admin', 'hr']), 403);
+
+        $profile->loadMissing('user:id,email');
+        $user = $profile->user;
+        abort_unless($user, 404, 'Akun kandidat tidak ditemukan.');
+        abort_if(auth()->id() === $user->id, 422, 'Akun sendiri tidak dapat direset dari menu kandidat.');
+
+        $temporaryPassword = Str::random(12);
+        $user->password = Hash::make($temporaryPassword);
+        $user->save();
+
+        return back()->with('ok', "Password sementara untuk {$user->email}: {$temporaryPassword}. Simpan atau berikan ke kandidat sekarang.");
     }
 
     /** Mark a candidate's application(s) as not continued. */

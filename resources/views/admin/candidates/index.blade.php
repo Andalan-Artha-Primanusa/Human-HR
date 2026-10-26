@@ -213,6 +213,14 @@
                               <svg class="w-4 h-4"><use href="#i-eye"/></svg>
                               Lihat
                             </a>
+                            @if($p->user)
+                              <form method="POST" action="{{ route('admin.candidates.reset-password', $p) }}"
+                                data-confirm-title="Reset password kandidat?"
+                                data-confirm-message="Password sementara akan dibuat dan ditampilkan setelah reset.">
+                                @csrf
+                                <button type="submit" class="abtn abtn-sm abtn-secondary">Reset Password</button>
+                              </form>
+                            @endif
                             <form method="POST"
                               action="{{ route('admin.candidates.not-continued', $p) }}"
                               data-confirm-title="Konfirmasi diperlukan"

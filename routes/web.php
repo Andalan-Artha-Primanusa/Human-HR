@@ -269,6 +269,7 @@ Route::prefix('admin')
 
         // ================= Candidates (read-only admin) =================
         Route::get('candidates', [CandidateProfileController::class, 'adminIndex'])->name('candidates.index');
+        Route::post('candidates/{profile}/reset-password', [CandidateProfileController::class, 'resetCandidatePassword'])->name('candidates.reset-password');
         Route::post('candidates/{profile}/not-continued', [CandidateProfileController::class, 'markNotContinued'])->name('candidates.not-continued');
         Route::get('candidates/{profile}', [CandidateProfileController::class, 'adminShow'])->name('candidates.show');
         Route::get('candidates/{profile}/cv', [CandidateProfileController::class, 'adminCv'])->name('candidates.cv');
