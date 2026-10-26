@@ -242,6 +242,25 @@ class UserController extends Controller
         return redirect()->route('admin.users.index')->with('ok', 'User updated.');
     }
 
+    /** Reset password tanpa email; password sementara ditampilkan sekali kepada admin. */
+    public function resetPassword(User $user)
+    {
+        $this->ensureCanMutateUser($user);
+
+        if (Auth::id() === $user->id) {
+            return back()->with('warn', 'Gunakan menu ubah password untuk akun sendiri.');
+        }
+
+        $temporaryPassword = Str::random(12);
+        $user->password = Hash::make($temporaryPassword);
+        $user->save();
+
+        return back()->with(
+            'ok',
+            "Password sementara untuk {$user->email}: {$temporaryPassword}. Simpan atau berikan ke user sekarang."
+        );
+    }
+
     public function destroy(User $user)
     {
         $this->ensureCanMutateUser($user);

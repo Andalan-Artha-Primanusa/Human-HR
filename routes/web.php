@@ -275,6 +275,7 @@ Route::prefix('admin')
 
         // ================= Users & Audit Logs =================
         Route::resource('users', UserController::class)->except(['show']);
+        Route::post('users/{user}/reset-password', [UserController::class, 'resetPassword'])->name('users.reset-password');
         Route::get('users-export', [UserController::class, 'export'])->name('users.export');
         Route::post('users-import', [UserController::class, 'import'])->name('users.import');
 

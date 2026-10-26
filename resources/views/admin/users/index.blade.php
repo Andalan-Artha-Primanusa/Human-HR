@@ -156,6 +156,17 @@
                               </a>
                             @endif
 
+                            @if(Route::has('admin.users.reset-password') && Auth::id() !== $user->id)
+                              <form action="{{ route('admin.users.reset-password', $user) }}" method="POST"
+                                    data-confirm-title="Reset password user ini?"
+                                    data-confirm-message="Password sementara akan dibuat dan ditampilkan setelah reset.">
+                                @csrf
+                                <button class="abtn-icon" aria-label="Reset password" title="Reset password">
+                                  <svg class="w-4 h-4"><use href="#i-key"/></svg>
+                                </button>
+                              </form>
+                            @endif
+
                             @if(Route::has('admin.users.destroy'))
                               <form action="{{ route('admin.users.destroy', $user) }}" method="POST"
                                     data-confirm-title="Hapus user ini?"
